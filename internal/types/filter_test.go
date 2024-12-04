@@ -8,7 +8,7 @@ import (
 var ageField = Field{Name: "age", CanBeFiltered: true, CanBeAggregated: true, DefaultOp: "default"}
 var salaryField = Field{Name: "salary", CanBeFiltered: true, CanBeAggregated: true, DefaultOp: "default"}
 var cityField = Field{Name: "city", CanBeFiltered: true, CanBeAggregated: true, DefaultOp: "default"}
-var hobbiesField = Field{Name: "hobbies", CanBeFiltered: true, CanBeAggregated: false, CustomOp: "array_contains"}
+var hobbiesField = Field{Name: "hobbies", CanBeFiltered: true, CanBeAggregated: false, CustomOp: "array_contains", Type: ArrayType}
 
 var allFields = []Field{
 	ageField,
@@ -381,8 +381,95 @@ func Test_ToSQL_Return_Expected_Sql_Filter_When_Complex_Filter(t *testing.T) {
 
 	sqlQuery, params := node.ToSQL()
 
-	expectedSQL := `(age IN (?, ?) OR (age IN (?, ?) AND salary >= ?) OR hobbies IN (?, ?) OR NOT (city NOT IN (?, ?)))`
+	expectedSQL := `(age IN (?, ?) OR (age IN (?, ?) AND salary >= ?) OR arrays_overlap(hobbies, [?, ?]) OR NOT (city NOT IN (?, ?)))`
 	expectedParams := []interface{}{30, 40, 10, 20, 50000, "soccer", "hiking", "New York", "Los Angeles"}
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Array_Contains_Sql_Filter_When_Array_Field_And_In_Single_Element(t *testing.T) {
+	t.Parallel()
+	node := ComparisonNode{Operator: "in", Value: []interface{}{"Soccer"}, Field: hobbiesField}
+
+	sqlQuery, params := node.ToSQL()
+
+	expectedSQL := `array_contains(hobbies, ?)`
+	expectedParams := []interface{}{"Soccer"}
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Array_Contains_Sql_Filter_When_Array_Field_And_In_Single_Value(t *testing.T) {
+	t.Parallel()
+	node := ComparisonNode{Operator: "in", Value: "Soccer", Field: hobbiesField}
+
+	sqlQuery, params := node.ToSQL()
+
+	expectedSQL := `array_contains(hobbies, ?)`
+	expectedParams := []interface{}{"Soccer"}
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Array_Contains_Sql_Filter_When_Array_Field_And_In_Multiple_Value(t *testing.T) {
+	t.Parallel()
+	expectedParams := []interface{}{"Beats", "Bear", "Battle Star Galactica"}
+	node := ComparisonNode{Operator: "in", Value: expectedParams, Field: hobbiesField}
+	sqlQuery, params := node.ToSQL()
+
+	expectedSQL := `arrays_overlap(hobbies, [?, ?, ?])`
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Not_Array_Contains_Sql_Filter_When_Array_Field_And_Not_In_Single_Value(t *testing.T) {
+	t.Parallel()
+	node := ComparisonNode{Operator: "not-in", Value: "Soccer", Field: hobbiesField}
+
+	sqlQuery, params := node.ToSQL()
+
+	expectedParams := []interface{}{"Soccer"}
+	expectedSQL := `NOT(array_contains(hobbies, ?))`
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Not_Array_Contains_Sql_Filter_When_Array_Field_And_Not_In_Multiple_Value(t *testing.T) {
+	t.Parallel()
+	expectedParams := []interface{}{"Beats", "Bear", "Battle Star Galactica"}
+	node := ComparisonNode{Operator: "not-in", Value: expectedParams, Field: hobbiesField}
+	sqlQuery, params := node.ToSQL()
+
+	expectedSQL := `NOT(arrays_overlap(hobbies, [?, ?, ?]))`
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Single_Operator(t *testing.T) {
+	t.Parallel()
+	node := ComparisonNode{Operator: "<", Value: "Soccer", Field: hobbiesField}
+	sqlQuery, params := node.ToSQL()
+
+	expectedSQL := `any_match(x -> x < ?, hobbies)`
+	expectedParams := []interface{}{"Soccer"}
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Between_Operator(t *testing.T) {
+	t.Parallel()
+	expectedParams := []interface{}{"Soccer", "Hockey"}
+	node := ComparisonNode{Operator: "between", Value: expectedParams, Field: hobbiesField}
+	sqlQuery, params := node.ToSQL()
+
+	expectedSQL := `any_match(x -> x BETWEEN ? AND ?, hobbies)`
 
 	assert.Equal(t, expectedSQL, sqlQuery)
 	assert.Equal(t, expectedParams, params)

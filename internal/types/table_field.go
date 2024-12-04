@@ -9,6 +9,11 @@ type Table struct {
 	Name  string // Name of the table
 	Alias string // Alias of the table to use in query
 }
+
+const (
+	ArrayType = "array"
+)
+
 type Field struct {
 	Name            string // Name of the field, correspond to column name
 	Alias           string // Alias of the field to use in query
@@ -19,6 +24,7 @@ type Field struct {
 	CustomOp        string // Custom operation, e.g., "array_contains"
 	DefaultOp       string // Default operation to use if no custom one exists
 	Table           Table  // Table to which the field belongs
+	Type            string // Type of the field
 }
 
 // GetAlias returns the alias of the field if it is set, otherwise returns the name
@@ -28,6 +34,10 @@ func (f *Field) GetAlias() string {
 	} else {
 		return f.Name
 	}
+}
+
+func (f *Field) IsArray() bool {
+	return f.Type == ArrayType
 }
 
 // findByAlias returns the field with the given name from the list of fields

@@ -91,19 +91,37 @@ func (n *ComparisonNode) ToSQL() (string, []interface{}) {
 		placeholder := placeholders(valueLength)
 		operator := "IN"
 		if valueLength == 1 {
+			if n.Field.IsArray() {
+				return fmt.Sprintf("array_contains(%s, %s)", field, placeholder), params
+			}
 			return fmt.Sprintf("%s = %s", field, placeholder), params
+		}
+		if n.Field.IsArray() {
+			return fmt.Sprintf("arrays_overlap(%s, [%s])", field, placeholder), params
 		}
 		return fmt.Sprintf("%s %s (%s)", field, operator, placeholder), params
 	case "not-in":
 		placeholder := placeholders(valueLength)
 		operator := "NOT IN"
 		if valueLength == 1 {
+			if n.Field.IsArray() {
+				return fmt.Sprintf("NOT(array_contains(%s, %s))", field, placeholder), params
+			}
 			return fmt.Sprintf("%s <> %s", field, placeholder), params
+		}
+		if n.Field.IsArray() {
+			return fmt.Sprintf("NOT(arrays_overlap(%s, [%s]))", field, placeholder), params
 		}
 		return fmt.Sprintf("%s %s (%s)", field, operator, placeholder), params
 	case "<=", ">=", "<", ">":
+		if n.Field.IsArray() {
+			return fmt.Sprintf("any_match(x -> x %s ?, %s)", n.Operator, field), params
+		}
 		return fmt.Sprintf("%s %s ?", field, n.Operator), params
 	case "between":
+		if n.Field.IsArray() {
+			return fmt.Sprintf("any_match(x -> x BETWEEN ? AND ?, %s)", field), params
+		}
 		return fmt.Sprintf("%s BETWEEN ? AND ?", field), params
 	case "all":
 		return "", nil //TODO: implement
