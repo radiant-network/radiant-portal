@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  starrocks:
+    image: starrocks/allin1-ubuntu
+    container_name: starrocks_radiant
+    ports:
+      - "9030:9030"
+      - "8030:8030"
+      - "8040:8040"
+    healthcheck:
+      test: >
+        curl -sf http://localhost:8030/api/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  init:
+    image: starrocks/allin1-ubuntu
+    depends_on:
+       starrocks:
+         condition: service_healthy
+    volumes:
+      - ./scripts/init-sql:/docker-entrypoint-initdb.d
+    entrypoint: >
+      /bin/bash -c "
+      mysql -hstarrocks -P9030 -uroot < /docker-entrypoint-initdb.d/init.sql;"

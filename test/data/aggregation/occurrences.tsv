@@ -1,0 +1,6 @@
+seq_id	part	locus_id	quality	filter	zygosity	ad_ratio	has_alt
+1	1	1000	100	PASS	HOM	1.0	1
+1	1	1001	100	PASS	HET	1.0	1
+1	1	1002	100	PASS	HET	1.0	1
+2	1	1000	100	PASS	HOM	1.0	1
+1	1	2000	100	LowQuality	HET	1.0	1
