@@ -8,6 +8,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## MakeFile
 
+Install all dependencies
+```bash
+make install
+```
+
 Run build make command with tests
 ```bash
 make all

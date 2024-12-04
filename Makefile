@@ -3,6 +3,12 @@
 # Build the application
 all: build test
 
+install:
+	@echo "Installing dependencies..."
+
+
+	@go mod tidy
+
 build:
 	@echo "Building..."
 	
