@@ -1,6 +1,6 @@
-# go-poc
+# Radiant API
 
-Prototype for an API on Starrocks
+API for Radiant Data Platform
 
 ## Getting Started
 
