@@ -34,3 +34,11 @@ var HgvsgField = Field{
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
+
+var ClinvarField = Field{
+	Name:          "clinvar_interpretation",
+	CanBeSelected: true,
+	CanBeFiltered: false,
+	CanBeSorted:   false,
+	Table:         VariantTable,
+}

@@ -153,7 +153,11 @@ func createTableAndPopulateData(db *sql.DB, folderName string, file os.DirEntry)
 		// Convert to interface{} for stmt.Exec
 		args := make([]interface{}, len(values))
 		for i, v := range values {
+			//if strings.HasPrefix(v, "[") {
+			args[i] = fmt.Sprintf("array(%v)", v)
+			//} else {
 			args[i] = v // Database driver will handle type conversion
+			//}
 		}
 
 		// Execute the prepared statement
