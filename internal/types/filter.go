@@ -166,7 +166,7 @@ func sqonToFilter(sqon *SQON, fields []Field, excludedFields []Field) (FilterNod
 		if sqon.Value == nil {
 			return nil, nil, fmt.Errorf("value must be defined: %s", sqon.Field)
 		}
-		meta := findByName(fields, sqon.Field)
+		meta := findByAlias(fields, sqon.Field)
 
 		if meta == nil || !meta.CanBeFiltered {
 			return nil, nil, fmt.Errorf("unauthorized or unknown field: %s", sqon.Field)

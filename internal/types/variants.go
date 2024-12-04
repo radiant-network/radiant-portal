@@ -37,6 +37,7 @@ var HgvsgField = Field{
 
 var ClinvarField = Field{
 	Name:          "clinvar_interpretation",
+	Alias:         "clinvar",
 	CanBeSelected: true,
 	CanBeFiltered: false,
 	CanBeSorted:   false,

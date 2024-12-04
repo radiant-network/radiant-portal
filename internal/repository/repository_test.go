@@ -84,7 +84,7 @@ func Test_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t *testing.T) 
 func Test_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := New(db)
-		selectedFields := []string{"clinvar_interpretation"}
+		selectedFields := []string{"clinvar"}
 
 		query, err := types.NewListQuery(selectedFields, nil, types.OccurrencesFields, nil, nil)
 		assert.NoError(t, err)
@@ -92,7 +92,7 @@ func Test_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 
-			assert.Equal(t, utils.JsonArray[string]{"Benign", "Pathogenic"}, occurrences[0].ClinvarInterpretation)
+			assert.Equal(t, utils.JsonArray[string]{"Benign", "Pathogenic"}, occurrences[0].Clinvar)
 
 		}
 	})

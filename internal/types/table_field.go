@@ -30,13 +30,13 @@ func (f *Field) GetAlias() string {
 	}
 }
 
-// findByName returns the field with the given name from the list of fields
-func findByName(fields []Field, name string) *Field {
+// findByAlias returns the field with the given name from the list of fields
+func findByAlias(fields []Field, alias string) *Field {
 	if fields == nil {
 		return nil
 	}
 	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
-		return field.Name == name
+		return field.GetAlias() == alias
 	})
 
 }
@@ -45,7 +45,7 @@ func findByName(fields []Field, name string) *Field {
 func findSelectedFields(fields []Field, selected []string) []Field {
 	var selectedFields []Field
 	for _, s := range selected {
-		field := findByName(fields, s)
+		field := findByAlias(fields, s)
 		if field != nil && field.CanBeSelected {
 			selectedFields = append(selectedFields, *field)
 		}
@@ -54,7 +54,7 @@ func findSelectedFields(fields []Field, selected []string) []Field {
 }
 
 func findAggregatedField(fields []Field, aggregated string) (Field, error) {
-	fieldByName := findByName(fields, aggregated)
+	fieldByName := findByAlias(fields, aggregated)
 
 	if fieldByName != nil && fieldByName.CanBeAggregated {
 		return *fieldByName, nil
@@ -67,7 +67,7 @@ func findAggregatedField(fields []Field, aggregated string) (Field, error) {
 func findSortedFields(fields []Field, sorted []SortBody) []SortField {
 	var sortedFields []SortField
 	for _, sort := range sorted {
-		field := findByName(fields, sort.Field)
+		field := findByAlias(fields, sort.Field)
 		if field != nil && field.CanBeSorted && (sort.Order == "asc" || sort.Order == "desc") {
 			sortedFields = append(sortedFields, SortField{Field: *field, Order: sort.Order})
 		}
