@@ -7,8 +7,13 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 	"log"
+	"os"
+	"strings"
 )
+
+var corsAllowedOrigins = strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
 
 func main() {
 
@@ -23,8 +28,9 @@ func main() {
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
+
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // TODO Add this list from env vars
+		AllowOrigins:     corsAllowedOrigins, // TODO Add this list from env vars
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true, // Enable cookies/auth
