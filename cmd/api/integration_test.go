@@ -121,6 +121,28 @@ func Test_Aggregation(t *testing.T) {
 	testAggregation(t, "aggregation", body, expected)
 }
 
+func Test_Filter_On_Consequence_Column(t *testing.T) {
+	body := `{
+			"selected_fields":[
+				"seq_id","locus_id","filter","zygosity","pf","af","hgvsg","ad_ratio","variant_class"
+			],
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op": "in",
+						"field": "impact_score",
+						"value": "3"
+					}            
+		
+				]
+			},
+			"size": 10
+		}`
+	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "hgvsg":"hgvsg1", "locus_id":1000, "pf":0.99, "seq_id":1, "variant_class":"class1", "zygosity":"HET"}]`
+	testList(t, "multiple", body, expected)
+}
+
 func TestMain(m *testing.M) {
 	testutils.SetupContainer()
 	code := m.Run()

@@ -82,4 +82,8 @@ var OccurrencesFields = []Field{
 	HgvsgField,
 	ChromosomeField,
 	ClinvarField,
+	ConsequenceIdField,
+	SymbolField,
+	ImpactScoreField,
+	SiftPredField,
 }

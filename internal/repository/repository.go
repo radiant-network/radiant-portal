@@ -117,12 +117,18 @@ func prepareQuery(seqId int, userQuery types.Query, r *MySQLRepository) (*gorm.D
 		if userQuery.HasFieldFromTable(types.VariantTable) {
 			tx = tx.Joins("JOIN variants v ON v.locus_id=o.locus_id")
 		}
-
-		if userQuery.Filters() != nil {
+		if userQuery.HasFieldFromTable(types.ConsequenceFilterTable) {
 			filters, params := userQuery.Filters().ToSQL()
-			tx.Where(filters, params...)
-
+			//cf := r.db.Table("consequences_filter")
+			joinClause := "LEFT SEMI JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part and (?)"
+			tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
+		} else {
+			if userQuery.Filters() != nil {
+				filters, params := userQuery.Filters().ToSQL()
+				tx.Where(filters, params...)
+			}
 		}
+
 	}
 	return tx, part, nil
 }
