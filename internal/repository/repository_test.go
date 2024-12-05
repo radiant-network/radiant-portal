@@ -181,6 +181,31 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 		}
 	})
 }
+func Test_GetOccurrences_Return_List_Occurrences_Matching_ArrayWhen_All(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		sqon := &types.SQON{
+			Field: "clinvar",
+			Value: []interface{}{"Pathogenic", "Likely_Pathogenic"},
+			Op:    "all",
+		}
+		sort := []types.SortBody{
+			{Field: "locus_id", Order: "asc"},
+		}
+		selectedFields := []string{"locus_id", "clinvar"}
+
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+
+			assert.Equal(t, utils.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
+			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+
+		}
+	})
+}
 func Test_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
