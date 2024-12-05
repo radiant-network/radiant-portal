@@ -451,7 +451,7 @@ func Test_ToSQL_Return_Not_Array_Contains_Sql_Filter_When_Array_Field_And_Not_In
 	assert.Equal(t, expectedParams, params)
 }
 
-func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Single_Operator(t *testing.T) {
+func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Array_Field_And_Single_Operator(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "<", Value: "Soccer", Field: hobbiesField}
 	sqlQuery, params := node.ToSQL()
@@ -463,13 +463,37 @@ func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Single_Operator(t *testing.T) {
 	assert.Equal(t, expectedParams, params)
 }
 
-func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Between_Operator(t *testing.T) {
+func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Array_Field_And_Between_Operator(t *testing.T) {
 	t.Parallel()
 	expectedParams := []interface{}{"Soccer", "Hockey"}
 	node := ComparisonNode{Operator: "between", Value: expectedParams, Field: hobbiesField}
 	sqlQuery, params := node.ToSQL()
 
 	expectedSQL := `any_match(x -> x BETWEEN ? AND ?, hobbies)`
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Array_Contains_Sql_Filter_When_Array_Field_And_All_Operator_Single_value(t *testing.T) {
+	t.Parallel()
+	node := ComparisonNode{Operator: "all", Value: "Soccer", Field: hobbiesField}
+	sqlQuery, params := node.ToSQL()
+
+	expectedSQL := `array_contains(hobbies, ?)`
+	expectedParams := []interface{}{"Soccer"}
+
+	assert.Equal(t, expectedSQL, sqlQuery)
+	assert.Equal(t, expectedParams, params)
+}
+
+func Test_ToSQL_Return_Array_Contains_All_Sql_Filter_When_Array_Field_And_All_Operator(t *testing.T) {
+	t.Parallel()
+	expectedParams := []interface{}{"Beats", "Bear", "Battle Star Galactica"}
+	node := ComparisonNode{Operator: "all", Value: expectedParams, Field: hobbiesField}
+	sqlQuery, params := node.ToSQL()
+
+	expectedSQL := `array_contains_all(hobbies, [?, ?, ?])`
 
 	assert.Equal(t, expectedSQL, sqlQuery)
 	assert.Equal(t, expectedParams, params)

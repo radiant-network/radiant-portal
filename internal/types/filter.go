@@ -124,7 +124,14 @@ func (n *ComparisonNode) ToSQL() (string, []interface{}) {
 		}
 		return fmt.Sprintf("%s BETWEEN ? AND ?", field), params
 	case "all":
-		return "", nil //TODO: implement
+		if !n.Field.IsArray() {
+			return "", nil //Not supported
+		}
+		if valueLength == 1 {
+			return fmt.Sprintf("array_contains(%s, ?)", field), params
+		}
+		placeholder := placeholders(valueLength)
+		return fmt.Sprintf("array_contains_all(%s, [%s])", field, placeholder), params
 	default:
 		return "", nil //should not happen
 	}
