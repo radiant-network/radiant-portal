@@ -1,3 +1,6 @@
 locus_id	pf	af	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	clinvar_interpretation	mane_select	canonical
-1000	0.99	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	["Benign", "Pathogenic"]	true	true
+1000	0.99	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	["Likely_Pathogenic", "Pathogenic"]	true	true
+1001	0.99	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	["Pathogenic"]	true	true
+1002	0.99	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	["Benign"]	true	true
+1003	0.99	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	null	true	true
 2000	0.99	0.01	0.001	hgvsg2	code1	class1	impact1	symbol1	["Pathogenic"]	true	true

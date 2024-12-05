@@ -39,7 +39,8 @@ var ClinvarField = Field{
 	Name:          "clinvar_interpretation",
 	Alias:         "clinvar",
 	CanBeSelected: true,
-	CanBeFiltered: false,
+	CanBeFiltered: true,
 	CanBeSorted:   false,
+	Type:          ArrayType,
 	Table:         VariantTable,
 }

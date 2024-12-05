@@ -45,6 +45,7 @@ var LocusIdField = Field{
 	Name:          "locus_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Table:         OccurrenceTable,
 }
 var ZygosityField = Field{
