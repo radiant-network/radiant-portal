@@ -181,7 +181,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 		}
 	})
 }
-func Test_GetOccurrences_Return_List_Occurrences_Matching_ArrayWhen_All(t *testing.T) {
+func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := New(db)
 		sqon := &types.SQON{

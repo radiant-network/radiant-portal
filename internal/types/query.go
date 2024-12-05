@@ -17,6 +17,13 @@ type ListQuery interface {
 	SortedFields() []SortField
 	HasFieldFromTable(table Table) bool
 }
+type listQuery struct {
+	filters        FilterNode //Root node of the filter tree
+	filteredFields []Field    //Fields used in the filters
+	selectedFields []Field    //Fields used for selection
+	pagination     *Pagination
+	sortedFields   []SortField
+}
 
 func (l *listQuery) HasFieldFromTable(table Table) bool {
 	return sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
@@ -25,14 +32,6 @@ func (l *listQuery) HasFieldFromTable(table Table) bool {
 		return field.Table == table
 	})
 
-}
-
-type listQuery struct {
-	filters        FilterNode //Root node of the filter tree
-	filteredFields []Field    //Fields used in the filters
-	selectedFields []Field    //Fields used for selection
-	pagination     *Pagination
-	sortedFields   []SortField
 }
 
 func (l *listQuery) Filters() FilterNode {
@@ -93,6 +92,19 @@ type aggQuery struct {
 	aggregateField Field      //Fields used for selection
 }
 
+func (l *aggQuery) HasFieldFromTable(table Table) bool {
+	return l.aggregateField.Table == table || sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return field.Table == table
+	})
+}
+func (l *aggQuery) Filters() FilterNode {
+	return l.filters
+}
+
+func (l *aggQuery) GetAggregateField() Field {
+	return l.aggregateField
+}
+
 func NewAggregationQuery(aggregation string, sqon *SQON, fields []Field) (AggQuery, error) {
 	// Define allowed aggregated cols
 	aggregate, err := findAggregatedField(fields, aggregation)
@@ -109,23 +121,11 @@ func NewAggregationQuery(aggregation string, sqon *SQON, fields []Field) (AggQue
 	}
 }
 
-func (l *aggQuery) HasFieldFromTable(table Table) bool {
-	return l.aggregateField.Table == table || sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
-		return field.Table == table
-	})
-}
-func (l *aggQuery) Filters() FilterNode {
-	return l.filters
-}
-
-func (l *aggQuery) GetAggregateField() Field {
-	return l.aggregateField
-}
-
 type CountQuery interface {
 	Filters() FilterNode
 	HasFieldFromTable(table Table) bool
 }
+
 type countQuery struct {
 	filters        FilterNode //Root node of the filter tree
 	filteredFields []Field    //Fields used in the filters
