@@ -42,3 +42,5 @@ bin/
 
 #config
 .env
+
+test.http

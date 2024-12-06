@@ -8,12 +8,21 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
+	ginglog "github.com/szuecs/gin-glog"
+	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 var corsAllowedOrigins = strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
+
+var keycloakConfig = ginkeycloak.BuilderConfig{
+	Service: os.Getenv("KEYCLOAK_CLIENT"),
+	Url:     os.Getenv("KEYCLOAK_HOST"),
+	Realm:   os.Getenv("KEYCLOAK_REALM"),
+}
 
 func main() {
 
@@ -29,17 +38,28 @@ func main() {
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
+	r.Use(ginglog.Logger(3 * time.Second))
+	r.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
+
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     corsAllowedOrigins, // TODO Add this list from env vars
+		AllowOrigins:     corsAllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true, // Enable cookies/auth
 	}))
 
-	r.GET("/status", server.StatusHandler(repo))
-	r.POST("/occurrences/:seq_id/count", server.OccurrencesCountHandler(repo))
-	r.POST("/occurrences/:seq_id/list", server.OccurrencesListHandler(repo))
-	r.POST("/occurrences/:seq_id/aggregate", server.OccurrencesAggregateHandler(repo))
+	occurrencesGroup := r.Group("/occurrences")
 
-	r.Run(":8080")
+	role := os.Getenv("KEYCLOAK_CLIENT_ROLE")
+
+	occurrencesGroup.Use(ginkeycloak.NewAccessBuilder(keycloakConfig).
+		RestrictButForRole(role).
+		Build())
+
+	r.GET("/status", server.StatusHandler(repo))
+	occurrencesGroup.POST("/:seq_id/count", server.OccurrencesCountHandler(repo))
+	occurrencesGroup.POST("/:seq_id/list", server.OccurrencesListHandler(repo))
+	occurrencesGroup.POST("/:seq_id/aggregate", server.OccurrencesAggregateHandler(repo))
+
+	r.Run(":8090")
 }
