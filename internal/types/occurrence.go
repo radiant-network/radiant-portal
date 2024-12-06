@@ -6,7 +6,7 @@ type Occurrence struct {
 	SeqId               int                     `json:"seq_id,omitempty"`
 	Chromosome          string                  `json:"chromosome,omitempty"`
 	LocusId             int64                   `json:"locus_id,omitempty"`
-	Quality             int                     `json:"quality,omitempty"`
+	Quality             float32                 `json:"quality,omitempty"`
 	Filter              string                  `json:"filter,omitempty"`
 	Zygosity            string                  `json:"zygosity,omitempty"`
 	Pf                  float64                 `json:"pf,omitempty"`
@@ -55,6 +55,12 @@ var ZygosityField = Field{
 	CanBeAggregated: true,
 	Table:           OccurrenceTable,
 }
+var QualityField = Field{
+	Name:          "quality",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	Table:         OccurrenceTable,
+}
 var AdRatioField = Field{
 	Name:          "ad_ratio",
 	CanBeSelected: true,
@@ -75,6 +81,7 @@ var OccurrencesFields = []Field{
 	LocusIdField,
 	FilterField,
 	ZygosityField,
+	QualityField,
 	AdRatioField,
 	PfField,
 	AfField,

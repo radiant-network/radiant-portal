@@ -248,6 +248,140 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 		}
 	})
 }
+func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
+
+		repo := New(db)
+
+		sqon := &types.SQON{
+			Field: "impact_score",
+			Value: 2,
+			Op:    ">",
+		}
+		sortedBody := []types.SortBody{
+			{
+				Field: "locus_id",
+				Order: "asc",
+			},
+		}
+
+		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, nil, sortedBody)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 5) {
+			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, 1008, occurrences[len(occurrences)-1].LocusId)
+		}
+	})
+}
+func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_ScoreAnd_Quality(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
+
+		repo := New(db)
+
+		sqon := &types.SQON{
+			Op: "and",
+			Content: []types.SQON{
+				{Field: "impact_score", Value: 2, Op: ">"},
+				{Field: "quality", Value: 50, Op: ">"},
+			},
+		}
+		sortedBody := []types.SortBody{
+			{
+				Field: "locus_id",
+				Order: "asc",
+			},
+		}
+
+		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, nil, sortedBody)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+		}
+	})
+}
+
+func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		query, err := types.NewAggregationQuery("zygosity", nil, types.OccurrencesFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, aggregate, 2) {
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "HOM", aggregate[0].Bucket)
+			assert.EqualValues(t, 3, aggregate[1].Count)
+			assert.Equal(t, "HET", aggregate[1].Bucket)
+		}
+	})
+}
+
+func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_With_Filter(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		sqon := &types.SQON{
+			Op: "and",
+			Content: []types.SQON{
+				{Field: "filter", Value: "PASS", Op: "in"},
+			},
+		}
+		query, err := types.NewAggregationQuery("zygosity", sqon, types.OccurrencesFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, aggregate, 2) {
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "HOM", aggregate[0].Bucket)
+			assert.EqualValues(t, 2, aggregate[1].Count)
+			assert.Equal(t, "HET", aggregate[1].Bucket)
+		}
+	})
+}
+
+func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_With_Filter_But_Ignore_Self_Filter(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		sqon := &types.SQON{
+			Op: "and",
+			Content: []types.SQON{
+				{Field: "filter", Value: "PASS", Op: "in"},
+				{Field: "zygosity", Value: "HOM", Op: "in"},
+			},
+		}
+		query, err := types.NewAggregationQuery("zygosity", sqon, types.OccurrencesFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, aggregate, 2) {
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "HOM", aggregate[0].Bucket)
+			assert.EqualValues(t, 2, aggregate[1].Count)
+			assert.Equal(t, "HET", aggregate[1].Bucket)
+		}
+	})
+}
+
+func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Clinvar(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		query, err := types.NewAggregationQuery("clinvar", nil, types.OccurrencesFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, aggregate, 3) {
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "Benign", aggregate[0].Bucket)
+			assert.EqualValues(t, 1, aggregate[1].Count)
+			assert.Equal(t, "Likely_Pathogenic", aggregate[1].Bucket)
+			assert.EqualValues(t, 2, aggregate[2].Count)
+			assert.Equal(t, "Pathogenic", aggregate[2].Bucket)
+		}
+	})
+}
 
 func TestMain(m *testing.M) {
 	testutils.SetupContainer()

@@ -164,8 +164,20 @@ func (r *MySQLRepository) AggregateOccurrences(seqId int, userQuery types.AggQue
 		return aggregation, fmt.Errorf("error during query preparation %w", err)
 	}
 	aggCol := userQuery.GetAggregateField()
-	sel := fmt.Sprintf("%s.%s as bucket, count(1) as count", aggCol.Table.Alias, aggCol.Name)
-	err = tx.Select(sel).Group("bucket").Order("count asc").Find(&aggregation).Error
+	var sel string
+	if aggCol.IsArray() {
+		//Example :  select unnest  as bucket, count(distinct o.locus_id) as c from occurrences o
+		//join variants v on v.locus_id=o.locus_id
+		//join unnest(v.clinvar_interpretation) as unnest  on true where o.seq_id=4586 and o.part=11 and o.has_alt
+		//group by bucket order by 2;
+		unnestJoin := fmt.Sprintf("join unnest(%s.%s) as unnest on true", aggCol.Table.Alias, aggCol.Name)
+		tx = tx.Joins(unnestJoin)
+		sel = "unnest as bucket, count(distinct o.locus_id) as count"
+	} else {
+		sel = fmt.Sprintf("%s.%s as bucket, count(1) as count", aggCol.Table.Alias, aggCol.Name)
+	}
+
+	err = tx.Select(sel).Group("bucket").Order("count asc, bucket asc").Find(&aggregation).Error
 	if err != nil {
 		return aggregation, fmt.Errorf("error query aggragation: %w", err)
 	}

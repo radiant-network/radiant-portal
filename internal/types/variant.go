@@ -36,11 +36,12 @@ var HgvsgField = Field{
 }
 
 var ClinvarField = Field{
-	Name:          "clinvar_interpretation",
-	Alias:         "clinvar",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   false,
-	Type:          ArrayType,
-	Table:         VariantTable,
+	Name:            "clinvar_interpretation",
+	Alias:           "clinvar",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     false,
+	CanBeAggregated: true,
+	Type:            ArrayType,
+	Table:           VariantTable,
 }
