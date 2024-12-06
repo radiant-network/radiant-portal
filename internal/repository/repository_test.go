@@ -383,6 +383,50 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Clinvar(t *
 	})
 }
 
+func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		query, err := types.NewAggregationQuery("impact_score", nil, types.OccurrencesFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(1, query)
+		assert.NoError(t, err)
+
+		if assert.Len(t, aggregate, 3) {
+			assert.Equal(t, "4", aggregate[0].Bucket)
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "3", aggregate[1].Bucket)
+			assert.EqualValues(t, 5, aggregate[1].Count)
+			assert.Equal(t, "1", aggregate[2].Bucket)
+			assert.EqualValues(t, 7, aggregate[2].Count)
+		}
+	})
+}
+func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score_Combined_With_Filter(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		sqon := &types.SQON{
+			Op: "and",
+			Content: []types.SQON{
+				{Field: "filter", Value: "PASS", Op: "in"},
+				{Field: "impact_score", Value: 2, Op: ">"},
+			},
+		}
+		query, err := types.NewAggregationQuery("impact_score", sqon, types.OccurrencesFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(1, query)
+		assert.NoError(t, err)
+
+		if assert.Len(t, aggregate, 3) {
+			assert.Equal(t, "4", aggregate[0].Bucket)
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "3", aggregate[1].Bucket)
+			assert.EqualValues(t, 4, aggregate[1].Count)
+			assert.Equal(t, "1", aggregate[2].Bucket)
+			assert.EqualValues(t, 7, aggregate[2].Count)
+		}
+	})
+}
+
 func TestMain(m *testing.M) {
 	testutils.SetupContainer()
 	code := m.Run()

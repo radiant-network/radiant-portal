@@ -44,10 +44,58 @@ const (
 	MaxLimit = 200
 )
 
+func addLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
+	if userQuery.Pagination() != nil {
+		var l int
+		if userQuery.Pagination().Limit < MaxLimit {
+			l = userQuery.Pagination().Limit
+		} else {
+			l = MaxLimit
+		}
+		tx = tx.Limit(l).Offset(userQuery.Pagination().Offset)
+	} else {
+		tx = tx.Limit(MinLimit)
+	}
+	addSort(tx, userQuery)
+}
+
+func addSort(tx *gorm.DB, userQuery types.ListQuery) {
+	for _, sort := range userQuery.SortedFields() {
+		s := fmt.Sprintf("%s.%s %s", sort.Field.Table.Alias, sort.Field.GetAlias(), sort.Order)
+		tx = tx.Order(s)
+	}
+}
+func addWhere(userQuery types.Query, tx *gorm.DB) {
+	if userQuery.Filters() != nil {
+		filters, params := userQuery.Filters().ToSQL()
+		tx.Where(filters, params...)
+	}
+}
+
+func addImplicitOccurrencesFilters(seqId int, r *MySQLRepository, part int) *gorm.DB {
+	tx := r.db.Table("occurrences o").Where("o.seq_id = ? and o.part=? and has_alt", seqId, part)
+	return tx
+}
+func joinWithVariants(userQuery types.Query, tx *gorm.DB) *gorm.DB {
+	if userQuery.HasFieldFromTable(types.VariantTable) {
+		tx = tx.Joins("JOIN variants v ON v.locus_id=o.locus_id")
+	}
+	return tx
+}
+func (r *MySQLRepository) GetPart(seqId int) (int, error) { //TODO cache
+	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
+	var part int
+	err := tx.Scan(&part).Error
+	if err != nil {
+		return part, fmt.Errorf("error fetching part: %w", err)
+	}
+	return part, err
+}
+
 func (r *MySQLRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]Occurrence, error) {
 	var occurrences []Occurrence
 
-	tx, part, err := prepareQuery(seqId, userQuery, r)
+	tx, part, err := prepareListOrCountQuery(seqId, userQuery, r)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -85,48 +133,23 @@ func (r *MySQLRepository) GetOccurrences(seqId int, userQuery types.ListQuery) (
 
 }
 
-func addLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
-	if userQuery.Pagination() != nil {
-		var l int
-		if userQuery.Pagination().Limit < MaxLimit {
-			l = userQuery.Pagination().Limit
-		} else {
-			l = MaxLimit
-		}
-		tx = tx.Limit(l).Offset(userQuery.Pagination().Offset)
-	} else {
-		tx = tx.Limit(MinLimit)
-	}
-	addSort(tx, userQuery)
-}
-
-func addSort(tx *gorm.DB, userQuery types.ListQuery) {
-	for _, sort := range userQuery.SortedFields() {
-		s := fmt.Sprintf("%s.%s %s", sort.Field.Table.Alias, sort.Field.GetAlias(), sort.Order)
-		tx = tx.Order(s)
-	}
-}
-
-func prepareQuery(seqId int, userQuery types.Query, r *MySQLRepository) (*gorm.DB, int, error) {
+func prepareListOrCountQuery(seqId int, userQuery types.Query, r *MySQLRepository) (*gorm.DB, int, error) {
 	part, err := r.GetPart(seqId)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
 	}
-	tx := r.db.Table("occurrences o").Where("o.seq_id = ? and part=? and has_alt", seqId, part)
+	tx := addImplicitOccurrencesFilters(seqId, r, part)
 	if userQuery != nil {
-		if userQuery.HasFieldFromTable(types.VariantTable) {
-			tx = tx.Joins("JOIN variants v ON v.locus_id=o.locus_id")
-		}
+		tx = joinWithVariants(userQuery, tx)
 		if userQuery.HasFieldFromTable(types.ConsequenceFilterTable) {
-			filters, params := userQuery.Filters().ToSQL()
-			//cf := r.db.Table("consequences_filter")
-			joinClause := "LEFT SEMI JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part and (?)"
-			tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
-		} else {
 			if userQuery.Filters() != nil {
 				filters, params := userQuery.Filters().ToSQL()
-				tx.Where(filters, params...)
+				joinClause := "LEFT SEMI JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part and (?)"
+				tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
 			}
+
+		} else {
+			addWhere(userQuery, tx)
 		}
 
 	}
@@ -134,7 +157,7 @@ func prepareQuery(seqId int, userQuery types.Query, r *MySQLRepository) (*gorm.D
 }
 
 func (r *MySQLRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
-	tx, _, err := prepareQuery(seqId, userQuery, r)
+	tx, _, err := prepareListOrCountQuery(seqId, userQuery, r)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -147,18 +170,26 @@ func (r *MySQLRepository) CountOccurrences(seqId int, userQuery types.CountQuery
 
 }
 
-func (r *MySQLRepository) GetPart(seqId int) (int, error) { //TODO cache
-	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
-	var part int
-	err := tx.Scan(&part).Error
+func prepareAggQuery(seqId int, userQuery types.AggQuery, r *MySQLRepository) (*gorm.DB, int, error) {
+	part, err := r.GetPart(seqId)
 	if err != nil {
-		return part, fmt.Errorf("error fetching part: %w", err)
+		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
 	}
-	return part, err
+	tx := addImplicitOccurrencesFilters(seqId, r, part)
+	if userQuery != nil {
+		tx = joinWithVariants(userQuery, tx)
+		if userQuery.HasFieldFromTable(types.ConsequenceFilterTable) {
+			joinClause := "JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
+			tx = tx.Joins(joinClause)
+		}
+		addWhere(userQuery, tx)
+
+	}
+	return tx, part, nil
 }
 
 func (r *MySQLRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	tx, _, err := prepareQuery(seqId, userQuery, r)
+	tx, _, err := prepareAggQuery(seqId, userQuery, r)
 	var aggregation []Aggregation
 	if err != nil {
 		return aggregation, fmt.Errorf("error during query preparation %w", err)
@@ -173,6 +204,8 @@ func (r *MySQLRepository) AggregateOccurrences(seqId int, userQuery types.AggQue
 		unnestJoin := fmt.Sprintf("join unnest(%s.%s) as unnest on true", aggCol.Table.Alias, aggCol.Name)
 		tx = tx.Joins(unnestJoin)
 		sel = "unnest as bucket, count(distinct o.locus_id) as count"
+	} else if aggCol.Table == types.ConsequenceFilterTable {
+		sel = fmt.Sprintf("%s.%s as bucket, count(distinct o.locus_id) as count", aggCol.Table.Alias, aggCol.Name)
 	} else {
 		sel = fmt.Sprintf("%s.%s as bucket, count(1) as count", aggCol.Table.Alias, aggCol.Name)
 	}

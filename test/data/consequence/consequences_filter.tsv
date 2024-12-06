@@ -3,6 +3,7 @@ part	locus_id	consequence_id	symbol	impact_score	sift_pred
 1	1000	20	BRAF	1	T
 1	1000	10	TP53	4	D
 1	1001	10	BRAF	1	T
+1	1001	10	TP53	1	T
 1	1002	10	BRAF	3	D
 1	1003	10	BRAF	1	T
 1	1004	10	BRAF	3	D

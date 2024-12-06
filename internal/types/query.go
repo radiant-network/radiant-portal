@@ -93,9 +93,9 @@ type aggQuery struct {
 }
 
 func (l *aggQuery) HasFieldFromTable(table Table) bool {
-	return l.aggregateField.Table == table || sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
+	return l.aggregateField.Table == table || (l.filteredFields != nil && sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
 		return field.Table == table
-	})
+	}))
 }
 func (l *aggQuery) Filters() FilterNode {
 	return l.filters
