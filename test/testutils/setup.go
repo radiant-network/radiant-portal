@@ -70,6 +70,10 @@ func initDb(folderName string) (*gorm.DB, string, error) {
 
 	dsn := fmt.Sprintf("root:@tcp(%s:%s)/?interpolateParams=true", host, port.Port())
 	gormDb, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
+	if err != nil {
+		log.Fatal("failed to open connection to tb", err)
+		return nil, "", nil
+	}
 	var db *sql.DB
 	db, err = gormDb.DB()
 	if err != nil {
