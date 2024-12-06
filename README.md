@@ -1,5 +1,9 @@
 # Radiant API
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/Ferlab-Ste-Justine/radiant-api)](https://goreportcard.com/report/github.com/Ferlab-Ste-Justine/radiant-api)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+
+
 API for Radiant Data Platform
 
 ## Getting Started
