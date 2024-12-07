@@ -1,12 +1,14 @@
 package main
 
 import (
+	"flag"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/database"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/server"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/glog"
 	_ "github.com/joho/godotenv/autoload"
 	ginglog "github.com/szuecs/gin-glog"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
@@ -24,8 +26,16 @@ var keycloakConfig = ginkeycloak.BuilderConfig{
 	Realm:   os.Getenv("KEYCLOAK_REALM"),
 }
 
-func main() {
+func init() {
+	err := flag.Set("logtostderr", "true")
+	if err != nil {
+		log.Fatalf("Failed to set logtostderr flag: %v", err)
+	} // Log to standard error
+}
 
+func main() {
+	flag.Parse()
+	defer glog.Flush()
 	// Initialize database connection
 	db, err := database.New()
 	if err != nil {
