@@ -284,7 +284,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 			Op: "and",
 			Content: []types.SQON{
 				{Field: "impact_score", Value: 2, Op: ">"},
-				{Field: "quality", Value: 50, Op: ">"},
+				{Field: "gq", Value: 50, Op: ">"},
 			},
 		}
 		sortedBody := []types.SortBody{

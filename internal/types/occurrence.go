@@ -55,8 +55,8 @@ var ZygosityField = Field{
 	CanBeAggregated: true,
 	Table:           OccurrenceTable,
 }
-var QualityField = Field{
-	Name:          "quality",
+var GenotypeQualityField = Field{
+	Name:          "gq",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	Table:         OccurrenceTable,
@@ -81,7 +81,7 @@ var OccurrencesFields = []Field{
 	LocusIdField,
 	FilterField,
 	ZygosityField,
-	QualityField,
+	GenotypeQualityField,
 	AdRatioField,
 	PfField,
 	AfField,

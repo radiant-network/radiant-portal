@@ -13,7 +13,6 @@ CREATE TABLE `occurrences`
     `start`                           bigint NULL COMMENT "",
     `zygosity`                        varchar(5) NULL COMMENT "",
     `has_alt`                         boolean NULL COMMENT "",
-    `quality`                         decimal(10, 3) NULL COMMENT "",
     `variant_class`                   varchar(50) NULL COMMENT "",
     `filter`                          varchar(100) NULL COMMENT "",
     `info_ac`                         int NULL COMMENT "",

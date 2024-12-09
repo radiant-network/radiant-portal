@@ -44,3 +44,4 @@ bin/
 .env
 
 test.http
+/http-client.private.env.json
