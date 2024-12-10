@@ -209,10 +209,16 @@ func (r *MySQLRepository) AggregateOccurrences(seqId int, userQuery types.AggQue
 	} else {
 		sel = fmt.Sprintf("%s.%s as bucket, count(1) as count", aggCol.Table.Alias, aggCol.Name)
 	}
-
-	err = tx.Select(sel).
+	tx = tx.Select(sel).
 		Where(fmt.Sprintf("%s.%s is not null", aggCol.Table.Alias, aggCol.Name)). //We don't want to count null values
-		Group("bucket").Order("count asc, bucket asc").
+		Group("bucket")
+	if aggCol.Name == "consequence_id" {
+		dict := r.db.Table("consequence_dict cd")
+		tx = dict.Joins("JOIN (?) as agg on agg.bucket = consequence_id", tx).
+			Select("cd.consequence as bucket , agg.count as count")
+
+	}
+	err = tx.Order("count asc, bucket asc").
 		Find(&aggregation).Error
 	if err != nil {
 		return aggregation, fmt.Errorf("error query aggragation: %w", err)
