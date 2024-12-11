@@ -21,3 +21,4 @@ jobs:
           password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
           image: ferlabcrsj/radiant-api
           tag_format: "{semver}"
+          dockerfile: ./backend/Dockerfile
