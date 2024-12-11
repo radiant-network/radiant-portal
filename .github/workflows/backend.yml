@@ -1,7 +1,7 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Test and build
+name: Test and build backend
 
 on:
   push:
@@ -22,12 +22,16 @@ jobs:
 
       - name: Install dependencies
         run: go mod download
+        working-directory: ./backend
 
       - name: Ensure dependencies are up-to-date
         run: go mod tidy
+        working-directory: ./backend
 
       - name: Build
         run: go build -v ./...
+        working-directory: ./backend
 
       - name: Test
         run: go test -v ./...
+        working-directory: ./backend
