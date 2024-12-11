@@ -2,7 +2,6 @@ package repository
 
 import (
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/utils"
 	"github.com/Ferlab-Ste-Justine/radiant-api/test/testutils"
 	"github.com/Goldziher/go-utils/sliceutils"
 	_ "github.com/go-sql-driver/mysql"
@@ -94,7 +93,7 @@ func Test_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 4) {
 
-			assert.Equal(t, utils.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
+			assert.Equal(t, types.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
 
 		}
 	})
@@ -113,7 +112,7 @@ func Test_CountOccurrences_Return_Count_That_Match_Filters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
 
 		repo := New(db)
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Field: "filter",
 			Value: "PASS",
 			Op:    "in",
@@ -132,7 +131,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
 
 		repo := New(db)
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Field: "filter",
 			Value: "PASS",
 			Op:    "in",
@@ -157,7 +156,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := New(db)
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Field: "clinvar",
 			Value: []string{"Pathogenic"},
 			Op:    "in",
@@ -173,9 +172,9 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 2) {
 
-			assert.Equal(t, utils.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
+			assert.Equal(t, types.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
 			assert.EqualValues(t, 1000, occurrences[0].LocusId)
-			assert.Equal(t, utils.JsonArray[string]{"Pathogenic"}, occurrences[1].Clinvar)
+			assert.Equal(t, types.JsonArray[string]{"Pathogenic"}, occurrences[1].Clinvar)
 			assert.EqualValues(t, 1001, occurrences[1].LocusId)
 
 		}
@@ -184,7 +183,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := New(db)
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Field: "clinvar",
 			Value: []interface{}{"Pathogenic", "Likely_Pathogenic"},
 			Op:    "all",
@@ -200,7 +199,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *test
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 
-			assert.Equal(t, utils.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
+			assert.Equal(t, types.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
 			assert.EqualValues(t, 1000, occurrences[0].LocusId)
 
 		}
@@ -253,7 +252,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 
 		repo := New(db)
 
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Field: "impact_score",
 			Value: 2,
 			Op:    ">",
@@ -280,9 +279,9 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 
 		repo := New(db)
 
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Op: "and",
-			Content: []types.SQON{
+			Content: []types.Sqon{
 				{Field: "impact_score", Value: 2, Op: ">"},
 				{Field: "gq", Value: 50, Op: ">"},
 			},
@@ -323,9 +322,9 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity(t 
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_With_Filter(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
 		repo := New(db)
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Op: "and",
-			Content: []types.SQON{
+			Content: []types.Sqon{
 				{Field: "filter", Value: "PASS", Op: "in"},
 			},
 		}
@@ -345,9 +344,9 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_With_Filter_But_Ignore_Self_Filter(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
 		repo := New(db)
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Op: "and",
-			Content: []types.SQON{
+			Content: []types.Sqon{
 				{Field: "filter", Value: "PASS", Op: "in"},
 				{Field: "zygosity", Value: "HOM", Op: "in"},
 			},
@@ -404,9 +403,9 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Scor
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score_Combined_With_Filter(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
 		repo := New(db)
-		sqon := &types.SQON{
+		sqon := &types.Sqon{
 			Op: "and",
-			Content: []types.SQON{
+			Content: []types.Sqon{
 				{Field: "filter", Value: "PASS", Op: "in"},
 				{Field: "impact_score", Value: 2, Op: ">"},
 			},

@@ -8,6 +8,13 @@ import (
 	"strconv"
 )
 
+// StatusHandler handles the status endpoint
+// @Summary Get API status
+// @Description Returns the current status of the API
+// @Tags status
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /status [get]
 func StatusHandler(repo repository.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		status := repo.CheckDatabaseConnection()
@@ -17,6 +24,19 @@ func StatusHandler(repo repository.Repository) gin.HandlerFunc {
 	}
 }
 
+// OccurrencesListHandler handles list of occurrences
+// @Summary List occurrences
+// @Id listOccurrences
+// @Description List occurrences for a given sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param seq_id path string true "Sequence ID"
+// @Param			message	body		types.ListBody	true	"List Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.Occurrence
+// @Failure 400 {object} map[string]string
+// @Router /occurrences/{seq_id}/list [post]
 func OccurrencesListHandler(repo repository.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -38,7 +58,7 @@ func OccurrencesListHandler(repo repository.Repository) gin.HandlerFunc {
 		} else {
 			p = types.Pagination{Limit: 10, Offset: 0}
 		}
-		query, err := types.NewListQuery(body.SelectedFields, body.SQON, types.OccurrencesFields, &p, body.Sort)
+		query, err := types.NewListQuery(body.SelectedFields, body.Sqon, types.OccurrencesFields, &p, body.Sort)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -58,6 +78,19 @@ func OccurrencesListHandler(repo repository.Repository) gin.HandlerFunc {
 	}
 }
 
+// OccurrencesCountHandler handles counting occurrences
+// @Summary Count occurrences
+// @Id countOccurrences
+// @Description Counts occurrences for a given sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param seq_id path string true "Sequence ID"
+// @Param			message	body		types.CountBody	true	"Count Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.Count
+// @Failure 400 {object} map[string]string
+// @Router /occurrences/{seq_id}/count [post]
 func OccurrencesCountHandler(repo repository.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -71,7 +104,7 @@ func OccurrencesCountHandler(repo repository.Repository) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		query, err := types.NewCountQuery(body.SQON, types.OccurrencesFields)
+		query, err := types.NewCountQuery(body.Sqon, types.OccurrencesFields)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -86,10 +119,24 @@ func OccurrencesCountHandler(repo repository.Repository) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"count": count})
+		countResponse := types.Count{count}
+		c.JSON(http.StatusOK, countResponse)
 	}
 }
 
+// OccurrencesAggregateHandler handles aggregation of occurrences
+// @Summary Aggregate occurrences
+// @Id aggregateOccurrences
+// @Description Aggregate occurrences for a given sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param seq_id path string true "Sequence ID"
+// @Param			message	body		types.AggregationBody	true	"Aggregation Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.Aggregation
+// @Failure 400 {object} map[string]string
+// @Router /occurrences/{seq_id}/aggregate [post]
 func OccurrencesAggregateHandler(repo repository.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -104,7 +151,7 @@ func OccurrencesAggregateHandler(repo repository.Repository) gin.HandlerFunc {
 			return
 		}
 
-		query, err := types.NewAggregationQuery(body.Field, body.SQON, types.OccurrencesFields)
+		query, err := types.NewAggregationQuery(body.Field, body.Sqon, types.OccurrencesFields)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

@@ -56,6 +56,11 @@ Run the test suite:
 make test
 ```
 
+Generate OpenAPI v3.1 documentation:
+```bash
+make doc
+```
+
 Clean up binary from the last build:
 ```bash
 make clean

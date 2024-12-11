@@ -141,7 +141,7 @@ func placeholders(count int) string {
 	return strings.TrimSuffix(strings.Repeat("?, ", count), ", ")
 }
 
-func sqonToFilter(sqon *SQON, fields []Field, excludedFields []Field) (FilterNode, []Field, error) {
+func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNode, []Field, error) {
 	if sqon.Field != "" && sqon.Content != nil {
 		return nil, nil, fmt.Errorf("a sqon cannot have both content and field defined: %s", sqon.Field)
 	}

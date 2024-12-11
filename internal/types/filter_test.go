@@ -20,9 +20,9 @@ var allFields = []Field{
 func Test_SqonToFilter_Return_Expected_Filters(t *testing.T) {
 	t.Parallel()
 
-	sqon := SQON{
+	sqon := Sqon{
 		Op: "and",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 			{Op: ">", Field: "salary", Value: 50000},
 		},
@@ -56,9 +56,9 @@ func Test_SqonToFilter_Return_Expected_Filters(t *testing.T) {
 
 func Test_SqonToFilter_Return_Error_When_Op_Is_Invalid(t *testing.T) {
 	t.Parallel()
-	invalidSQON := SQON{
+	invalidSQON := Sqon{
 		Op: "invalid_op",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 		},
 	}
@@ -70,9 +70,9 @@ func Test_SqonToFilter_Return_Error_When_Op_Is_Invalid(t *testing.T) {
 
 func Test_SqonToFilter_Return_Error_When_Field_Is_Invalid(t *testing.T) {
 	t.Parallel()
-	invalidFieldSQON := SQON{
+	invalidFieldSQON := Sqon{
 		Op: "and",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "my_field", Value: []interface{}{30, 40}},
 		},
 	}
@@ -85,7 +85,7 @@ func Test_SqonToFilter_Return_Error_When_Field_Is_Invalid(t *testing.T) {
 
 func Test_SqonToFilter_Return_Expected_Filter_With_Only_One_Field(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op:    "in",
 		Field: "age",
 		Value: []interface{}{30, 40},
@@ -99,7 +99,7 @@ func Test_SqonToFilter_Return_Expected_Filter_With_Only_One_Field(t *testing.T) 
 
 func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_A_Single_Value(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op:    "between",
 		Field: "age",
 		Value: 30,
@@ -111,7 +111,7 @@ func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_A_Single_Value(t *tes
 }
 func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_An_Array_With_One_Element(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op:    "between",
 		Field: "age",
 		Value: []interface{}{30},
@@ -123,7 +123,7 @@ func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_An_Array_With_One_Ele
 }
 func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_An_Array_With_More_Than_Two_Elements(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op:    "between",
 		Field: "age",
 		Value: []interface{}{30, 40, 50},
@@ -136,7 +136,7 @@ func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_An_Array_With_More_Th
 
 func Test_SqonToFilter_Return_Error_When_Single_Operator_Is_An_Array(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op:    ">=",
 		Field: "age",
 		Value: []interface{}{30, 40, 50},
@@ -149,10 +149,10 @@ func Test_SqonToFilter_Return_Error_When_Single_Operator_Is_An_Array(t *testing.
 
 func Test_SqonToFilter_Return_Error_When_Both_Content_And_Field_Defined(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op:    "and",
 		Field: "age",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 		},
 	}
@@ -164,7 +164,7 @@ func Test_SqonToFilter_Return_Error_When_Both_Content_And_Field_Defined(t *testi
 
 func Test_SqonToFilter_Return_Error_When_Value_IsEmpty_With_In_Operator(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op:    "in",
 		Field: "age",
 	}
@@ -176,9 +176,9 @@ func Test_SqonToFilter_Return_Error_When_Value_IsEmpty_With_In_Operator(t *testi
 
 func Test_SqonToFilter_Return_Error_When_Not_Operator_Has_More_Than_One_Content(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op: "not",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 			{Op: "in", Field: "salary", Value: []interface{}{30, 40}},
 		},
@@ -191,13 +191,13 @@ func Test_SqonToFilter_Return_Error_When_Not_Operator_Has_More_Than_One_Content(
 
 func Test_SqonToFilter_Return_Expected_Filters_When_Sqon_Is_Complex(t *testing.T) {
 	t.Parallel()
-	sqon := &SQON{
+	sqon := &Sqon{
 		Op: "or",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 			{
 				Op: "and",
-				Content: []SQON{
+				Content: []Sqon{
 					{Op: "in", Field: "age", Value: []interface{}{10, 20}},
 					{Op: ">=", Field: "salary", Value: 50000},
 				},
@@ -205,7 +205,7 @@ func Test_SqonToFilter_Return_Expected_Filters_When_Sqon_Is_Complex(t *testing.T
 			{Op: "in", Field: "hobbies", Value: []interface{}{"soccer", "hiking"}},
 			{
 				Op: "not",
-				Content: []SQON{
+				Content: []Sqon{
 					{Op: "not-in", Field: "city", Value: []interface{}{"New York", "Los Angeles"}},
 				},
 			},
@@ -264,9 +264,9 @@ func Test_SqonToFilter_Return_Expected_Filters_When_Sqon_Is_Complex(t *testing.T
 
 func Test_SqonToFilter_Return_Direct_Child_When_Or_Operator_With_Single_Child(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op: "or",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 		},
 	}
@@ -284,9 +284,9 @@ func Test_SqonToFilter_Return_Direct_Child_When_Or_Operator_With_Single_Child(t 
 
 func Test_SqonToFilter_Return_Direct_Child_When_And_Operator_With_Single_Child(t *testing.T) {
 	t.Parallel()
-	sqon := SQON{
+	sqon := Sqon{
 		Op: "and",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 		},
 	}

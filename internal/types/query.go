@@ -60,7 +60,7 @@ type Pagination struct {
 	Offset int //Offset the results
 }
 
-func NewListQuery(selected []string, sqon *SQON, fields []Field, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
+func NewListQuery(selected []string, sqon *Sqon, fields []Field, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
 
 	// Define allowed selectedCols
 	selectedFields := findSelectedFields(fields, selected)
@@ -105,7 +105,7 @@ func (l *aggQuery) GetAggregateField() Field {
 	return l.aggregateField
 }
 
-func NewAggregationQuery(aggregation string, sqon *SQON, fields []Field) (AggQuery, error) {
+func NewAggregationQuery(aggregation string, sqon *Sqon, fields []Field) (AggQuery, error) {
 	// Define allowed aggregated cols
 	aggregate, err := findAggregatedField(fields, aggregation)
 	if err != nil {
@@ -141,7 +141,7 @@ func (l *countQuery) HasFieldFromTable(table Table) bool {
 	})
 }
 
-func NewCountQuery(sqon *SQON, fields []Field) (CountQuery, error) {
+func NewCountQuery(sqon *Sqon, fields []Field) (CountQuery, error) {
 
 	if sqon != nil {
 		root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)

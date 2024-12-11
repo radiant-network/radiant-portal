@@ -33,6 +33,14 @@ func init() {
 	} // Log to standard error
 }
 
+// @version 1.0
+// @title Radiant API
+// @description This is the API for Radiant data platform.
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @securitydefinitions.bearerauth
+// @BasePath /
 func main() {
 	flag.Parse()
 	defer glog.Flush()
@@ -70,6 +78,5 @@ func main() {
 	occurrencesGroup.POST("/:seq_id/count", server.OccurrencesCountHandler(repo))
 	occurrencesGroup.POST("/:seq_id/list", server.OccurrencesListHandler(repo))
 	occurrencesGroup.POST("/:seq_id/aggregate", server.OccurrencesAggregateHandler(repo))
-
 	r.Run(":8090")
 }

@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func parse(jsonData string) (*SQON, error) {
-	var sqon SQON
+func parse(jsonData string) (*Sqon, error) {
+	var sqon Sqon
 	return &sqon, json.Unmarshal([]byte(jsonData), &sqon)
 }
 func Test_Unmarshall_SQON_Return_Expected_Struct(t *testing.T) {

@@ -8,9 +8,9 @@ import (
 func Test_NewAggregationQuery_Return_Error_When_Aggregate_Field_Is_Unknown(t *testing.T) {
 	t.Parallel()
 
-	sqon := SQON{
+	sqon := Sqon{
 		Op: "and",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 			{Op: ">", Field: "salary", Value: 50000},
 		},
@@ -27,9 +27,9 @@ func Test_NewAggregationQuery_Return_Error_When_Aggregate_Field_Is_Unknown(t *te
 func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Or(t *testing.T) {
 	t.Parallel()
 
-	sqon := SQON{
+	sqon := Sqon{
 		Op: "or",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 			{Op: ">", Field: "salary", Value: 50000},
 		},
@@ -57,9 +57,9 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Or(t *testing.
 func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Not(t *testing.T) {
 	t.Parallel()
 
-	sqon := SQON{
+	sqon := Sqon{
 		Op: "not",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 		},
 	}
@@ -77,9 +77,9 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Not(t *testing
 func Test_NewAggregationQuery_Return_Empty_Filter_If_Empty_Or(t *testing.T) {
 	t.Parallel()
 
-	sqon := SQON{
+	sqon := Sqon{
 		Op: "or",
-		Content: []SQON{
+		Content: []Sqon{
 			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
 		},
 	}
