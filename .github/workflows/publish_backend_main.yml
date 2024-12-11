@@ -2,7 +2,7 @@ name: Publish Image Using Sha and Timestamp
 
 on:
   workflow_run:
-    workflows: [ "Test and build" ]
+    workflows: [ "Test and build backend" ]
     types:
       - completed
 
