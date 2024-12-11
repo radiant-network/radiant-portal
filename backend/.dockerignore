@@ -39,12 +39,5 @@ go.sum
 # binary
 bin/
 
-
-#config
+# config
 .env
-
-test.http
-/http-client.private.env.json
-openapitools.json
-
-**/api/git_push.sh
