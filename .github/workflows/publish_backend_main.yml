@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set backend directory
+        run: cd ./backend
       - name: Push the image on the registry
         uses: Ferlab-Ste-Justine/action-push-image@v2
         with:
