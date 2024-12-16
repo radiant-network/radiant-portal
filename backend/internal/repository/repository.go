@@ -67,7 +67,7 @@ func addSort(tx *gorm.DB, userQuery types.ListQuery) {
 }
 func addWhere(userQuery types.Query, tx *gorm.DB) {
 	if userQuery.Filters() != nil {
-		filters, params := userQuery.Filters().ToSQL()
+		filters, params := userQuery.Filters().ToSQL(nil)
 		tx.Where(filters, params...)
 	}
 }
@@ -77,7 +77,7 @@ func addImplicitOccurrencesFilters(seqId int, r *MySQLRepository, part int) *gor
 	return tx
 }
 func joinWithVariants(userQuery types.Query, tx *gorm.DB) *gorm.DB {
-	if userQuery.HasFieldFromTable(types.VariantTable) {
+	if userQuery.HasFieldFromTables(types.VariantTable) {
 		tx = tx.Joins("JOIN variants v ON v.locus_id=o.locus_id")
 	}
 	return tx
@@ -107,7 +107,7 @@ func (r *MySQLRepository) GetOccurrences(seqId int, userQuery types.ListQuery) (
 		columns = []string{"o.locus_id"}
 	}
 	addLimitAndSort(tx, userQuery)
-	if userQuery.HasFieldFromTable(types.VariantTable) {
+	if userQuery.HasFieldFromTables(types.VariantTable) {
 		// we build a TOP-N query like :
 		// SELECT o.locus_id, o.quality, o.ad_ratio, ...., v.variant_class, v.hgvsg... FROM occurrences o, variants v
 		// WHERE o.locus_id in (
@@ -141,9 +141,58 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *MySQLRepositor
 	tx := addImplicitOccurrencesFilters(seqId, r, part)
 	if userQuery != nil {
 		tx = joinWithVariants(userQuery, tx)
-		if userQuery.HasFieldFromTable(types.ConsequenceFilterTable) {
-			if userQuery.Filters() != nil {
-				filters, params := userQuery.Filters().ToSQL()
+
+		if userQuery.Filters() != nil && (userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...)) {
+			if userQuery.HasFieldFromTables(types.GenePanelsTables...) {
+				// In this case we need to build a subquery that join the consequences_filter table with the gene panels tables
+				// This subquery will join the consequences_filter table with the gene panels tables on symbol column and will be used to filter the occurrences
+
+				// Example of the generated query:
+				// SELECT o.locus_id as locus_id, ... FROM occurrences o
+				// LEFT SEMI JOIN (
+				//		SELECT cf.locus_id,cf.part,om.panel as omim_gene_panel,hpo.panel as hpo_gene_panel,cf.impact_score as impact_score
+				//		FROM consequences_filter cf
+				//		LEFT JOIN omim_gene_panel om ON om.symbol=cf.symbol
+				//		LEFT JOIN hpo_gene_panel hpo ON hpo.symbol=cf.symbol
+				//		WHERE part = 1
+				//	) cf ON cf.locus_id=o.locus_id
+				//		AND cf.part = o.part
+				//		AND ((cf.impact_score > 2 AND cf.omim_gene_panel IN ('panel1', 'panel2') AND cf.hpo_gene_panel = 'hpo_panel1'))
+				//	WHERE o.seq_id = 1 and o.part=1 and has_alt
+				//	ORDER BY o.locus_id asc LIMIT 10
+
+				selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
+				selectedPanelsTables := sliceutils.Unique(sliceutils.Map(selectedPanelsField, func(field types.Field, index int, slice []types.Field) types.Table {
+					return field.Table
+				}))
+
+				consequenceFilterTable := r.db.Table("consequences_filter cf").Where("part = ?", part)
+
+				// overrideTableAliases will be used to override the table aliases when generating the filter. The sub-query will contain the columns with their aliases.
+				// For instance panel column from omim_gene_panel will be aliased as omim_gene_panel in the subquery.
+				// And in order to filter the occurrences we need to use the same alias.
+				// We also need to use the table alias that corresponds to the table in the subquery.
+				overrideTableAliases := map[string]string{"cf": "cf"}
+				for _, panelsTable := range selectedPanelsTables {
+					consequenceFilterTable = consequenceFilterTable.
+						Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
+					overrideTableAliases[panelsTable.Alias] = "cf"
+				}
+
+				selectedConsequencesFields := userQuery.GetFieldsFromTables(types.ConsequenceFilterTable)
+				allSelectedFields := append(selectedPanelsField, selectedConsequencesFields...)
+				selectedCols := []string{"cf.locus_id", "cf.part"}
+				for _, field := range allSelectedFields {
+					selectedCols = append(selectedCols, fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias()))
+				}
+				consequenceFilterTable = consequenceFilterTable.Select(selectedCols)
+
+				sqlFilters, params := userQuery.Filters().ToSQL(overrideTableAliases)
+				joinClause := "LEFT SEMI JOIN (?) cf ON cf.locus_id=o.locus_id AND cf.part = o.part AND (?)"
+				tx = tx.Joins(joinClause, consequenceFilterTable, gorm.Expr(sqlFilters, params...))
+
+			} else {
+				filters, params := userQuery.Filters().ToSQL(nil)
 				joinClause := "LEFT SEMI JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part and (?)"
 				tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
 			}
@@ -178,7 +227,7 @@ func prepareAggQuery(seqId int, userQuery types.AggQuery, r *MySQLRepository) (*
 	tx := addImplicitOccurrencesFilters(seqId, r, part)
 	if userQuery != nil {
 		tx = joinWithVariants(userQuery, tx)
-		if userQuery.HasFieldFromTable(types.ConsequenceFilterTable) {
+		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) {
 			joinClause := "JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
 			tx = tx.Joins(joinClause)
 		}

@@ -93,4 +93,6 @@ var OccurrencesFields = []Field{
 	SymbolField,
 	ImpactScoreField,
 	SiftPredField,
+	OmimGenePanelField,
+	HpoGenePanelField,
 }

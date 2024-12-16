@@ -3,11 +3,13 @@ package types
 import (
 	"fmt"
 	"github.com/Goldziher/go-utils/sliceutils"
+	"slices"
 )
 
 type Query interface {
 	Filters() FilterNode
-	HasFieldFromTable(table Table) bool
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
 }
 
 type ListQuery interface {
@@ -15,7 +17,8 @@ type ListQuery interface {
 	Filters() FilterNode
 	Pagination() *Pagination
 	SortedFields() []SortField
-	HasFieldFromTable(table Table) bool
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
 }
 type listQuery struct {
 	filters        FilterNode //Root node of the filter tree
@@ -25,13 +28,23 @@ type listQuery struct {
 	sortedFields   []SortField
 }
 
-func (l *listQuery) HasFieldFromTable(table Table) bool {
+func (l *listQuery) HasFieldFromTables(tables ...Table) bool {
 	return sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
-		return field.Table == table
+		return slices.Contains(tables, field.Table)
 	}) || sliceutils.Some(l.selectedFields, func(field Field, index int, slice []Field) bool {
-		return field.Table == table
+		return slices.Contains(tables, field.Table)
 	})
 
+}
+
+func (l *listQuery) GetFieldsFromTables(tables ...Table) []Field {
+	filtered := sliceutils.Filter(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+	selected := sliceutils.Filter(l.selectedFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+	return sliceutils.Unique(sliceutils.Merge(filtered, selected))
 }
 
 func (l *listQuery) Filters() FilterNode {
@@ -83,7 +96,8 @@ func NewListQuery(selected []string, sqon *Sqon, fields []Field, pagination *Pag
 type AggQuery interface {
 	Filters() FilterNode
 	GetAggregateField() Field
-	HasFieldFromTable(table Table) bool
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
 }
 
 type aggQuery struct {
@@ -92,11 +106,23 @@ type aggQuery struct {
 	aggregateField Field      //Fields used for selection
 }
 
-func (l *aggQuery) HasFieldFromTable(table Table) bool {
-	return l.aggregateField.Table == table || (l.filteredFields != nil && sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
-		return field.Table == table
+func (l *aggQuery) HasFieldFromTables(tables ...Table) bool {
+	return slices.Contains(tables, l.aggregateField.Table) || (l.filteredFields != nil && sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
 	}))
 }
+
+func (l *aggQuery) GetFieldsFromTables(tables ...Table) []Field {
+	filtered := sliceutils.Filter(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+
+	if slices.Contains(tables, l.aggregateField.Table) {
+		return sliceutils.Unique(append(filtered, l.aggregateField))
+	}
+	return sliceutils.Unique(filtered)
+}
+
 func (l *aggQuery) Filters() FilterNode {
 	return l.filters
 }
@@ -123,7 +149,8 @@ func NewAggregationQuery(aggregation string, sqon *Sqon, fields []Field) (AggQue
 
 type CountQuery interface {
 	Filters() FilterNode
-	HasFieldFromTable(table Table) bool
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
 }
 
 type countQuery struct {
@@ -135,10 +162,17 @@ func (l *countQuery) Filters() FilterNode {
 	return l.filters
 }
 
-func (l *countQuery) HasFieldFromTable(table Table) bool {
+func (l *countQuery) HasFieldFromTables(tables ...Table) bool {
 	return sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
-		return field.Table == table
+		return slices.Contains(tables, field.Table)
 	})
+}
+func (l *countQuery) GetFieldsFromTables(tables ...Table) []Field {
+	filtered := sliceutils.Filter(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+
+	return sliceutils.Unique(filtered)
 }
 
 func NewCountQuery(sqon *Sqon, fields []Field) (CountQuery, error) {

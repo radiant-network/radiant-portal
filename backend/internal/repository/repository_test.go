@@ -426,6 +426,122 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Scor
 	})
 }
 
+func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		sqon := &types.Sqon{
+			Field: "omim_gene_panel",
+			Value: []interface{}{"panel1", "panel2"},
+			Op:    "in",
+		}
+		sort := []types.SortBody{
+			{Field: "locus_id", Order: "asc"},
+		}
+		selectedFields := []string{"locus_id"}
+
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 3) {
+			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, 1001, occurrences[1].LocusId)
+			assert.EqualValues(t, 1002, occurrences[2].LocusId)
+
+		}
+	})
+}
+
+func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_Score(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		sqon := &types.Sqon{
+			Op: "and",
+			Content: []types.Sqon{
+				{Field: "impact_score", Value: 2, Op: ">"},
+				{
+					Field: "omim_gene_panel",
+					Value: []interface{}{"panel1", "panel2"},
+					Op:    "in",
+				},
+			}}
+		sort := []types.SortBody{
+			{Field: "locus_id", Order: "asc"},
+		}
+		selectedFields := []string{"locus_id"}
+
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 2) {
+			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, 1002, occurrences[1].LocusId)
+
+		}
+	})
+}
+func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_And_Impact_Score(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		sqon := &types.Sqon{
+			Op: "and",
+			Content: []types.Sqon{
+				{Field: "impact_score", Value: 2, Op: ">"},
+				{
+					Field: "omim_gene_panel",
+					Value: []interface{}{"panel1", "panel2"},
+					Op:    "in",
+				},
+				{
+					Field: "hpo_gene_panel",
+					Value: []interface{}{"hpo_panel1"},
+					Op:    "in",
+				},
+			}}
+		sort := []types.SortBody{
+			{Field: "locus_id", Order: "asc"},
+		}
+		selectedFields := []string{"locus_id"}
+
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+
+		}
+	})
+}
+
+func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_panel_And_Impact_Score(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		sqon := &types.Sqon{
+			Op: "and",
+			Content: []types.Sqon{
+				{Field: "impact_score", Value: 2, Op: ">"},
+				{
+					Field: "omim_gene_panel",
+					Value: []interface{}{"panel1", "panel2"},
+					Op:    "in",
+				},
+				{
+					Field: "hpo_gene_panel",
+					Value: []interface{}{"hpo_panel1"},
+					Op:    "in",
+				},
+			}}
+
+		query, err := types.NewCountQuery(sqon, types.OccurrencesFields)
+		assert.NoError(t, err)
+		c, err := repo.CountOccurrences(1, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, c)
+	})
+}
+
 func TestMain(m *testing.M) {
 	testutils.SetupContainer()
 	code := m.Run()

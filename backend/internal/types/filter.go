@@ -8,10 +8,10 @@ import (
 )
 
 type FilterNode interface {
-	ToSQL() (string, []interface{})
+	ToSQL(overrideTableAliases map[string]string) (string, []interface{})
 }
 type FilterNodeWithChildren interface {
-	ToSQL() (string, []interface{})
+	ToSQL(overrideTableAliases map[string]string) (string, []interface{})
 	GetChildren() []FilterNode
 }
 
@@ -41,20 +41,20 @@ type ComparisonNode struct {
 	Field    Field
 }
 
-func (n *AndNode) ToSQL() (string, []interface{}) {
-	return childrenToSQL(n, "AND")
+func (n *AndNode) ToSQL(overrideTableAliases map[string]string) (string, []interface{}) {
+	return childrenToSQL(n, "AND", overrideTableAliases)
 }
 
-func (n *OrNode) ToSQL() (string, []interface{}) {
-	return childrenToSQL(n, "OR")
+func (n *OrNode) ToSQL(overrideTableAliases map[string]string) (string, []interface{}) {
+	return childrenToSQL(n, "OR", overrideTableAliases)
 }
 
-func childrenToSQL(n FilterNodeWithChildren, op string) (string, []interface{}) {
+func childrenToSQL(n FilterNodeWithChildren, op string, overrideTableAliases map[string]string) (string, []interface{}) {
 	children := n.GetChildren()
 	parts := make([]string, len(children))
 	var newParams []interface{}
 	for i, child := range children {
-		part, params := child.ToSQL()
+		part, params := child.ToSQL(overrideTableAliases)
 		newParams = append(newParams, params...)
 		parts[i] = part
 	}
@@ -62,19 +62,23 @@ func childrenToSQL(n FilterNodeWithChildren, op string) (string, []interface{}) 
 	return fmt.Sprintf("(%s)", join), newParams
 }
 
-func (n *NotNode) ToSQL() (string, []interface{}) {
-	part, params := n.Child.ToSQL()
+func (n *NotNode) ToSQL(overrideTableAliases map[string]string) (string, []interface{}) {
+	part, params := n.Child.ToSQL(overrideTableAliases)
 	return fmt.Sprintf("NOT (%s)", part), params
 }
 
-func (n *ComparisonNode) ToSQL() (string, []interface{}) {
+func (n *ComparisonNode) ToSQL(overrideTableAliases map[string]string) (string, []interface{}) {
 	var (
 		field  string
 		params []interface{}
 	)
 
 	if n.Field.Table.Alias != "" {
-		field = fmt.Sprintf("%s.%s", n.Field.Table.Alias, n.Field.Name)
+		if overrideTableAliases != nil && overrideTableAliases[n.Field.Table.Alias] != "" {
+			field = fmt.Sprintf("%s.%s", overrideTableAliases[n.Field.Table.Alias], n.Field.GetAlias())
+		} else {
+			field = fmt.Sprintf("%s.%s", n.Field.Table.Alias, n.Field.Name)
+		}
 	} else {
 		field = n.Field.Name
 	}

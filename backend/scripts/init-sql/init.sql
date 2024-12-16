@@ -81,3 +81,9 @@ CREATE TABLE `variants`
     `locus_full`             varchar(2000) NULL,
     `dna_change`             varchar(2000)
 ) ENGINE = OLAP
+
+create table omim_gene_panel
+(
+    symbol varchar(20)  NOT NULL,
+    panel  varchar(200) NOT NULL
+);
