@@ -542,6 +542,27 @@ func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_pane
 	})
 }
 
+func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := New(db)
+		query, err := types.NewAggregationQuery("omim_gene_panel", nil, types.OccurrencesFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, aggregate, 4) {
+			assert.EqualValues(t, 2, aggregate[0].Count)
+			assert.Equal(t, "panel2", aggregate[0].Bucket)
+			assert.EqualValues(t, 2, aggregate[1].Count)
+			assert.Equal(t, "panel3", aggregate[1].Bucket)
+			assert.EqualValues(t, 3, aggregate[2].Count)
+			assert.Equal(t, "panel1", aggregate[2].Bucket)
+			assert.EqualValues(t, 10, aggregate[3].Count)
+			assert.Equal(t, "panel4", aggregate[3].Bucket)
+
+		}
+	})
+}
+
 func TestMain(m *testing.M) {
 	testutils.SetupContainer()
 	code := m.Run()

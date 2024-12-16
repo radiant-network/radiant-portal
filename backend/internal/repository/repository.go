@@ -6,6 +6,7 @@ import (
 	"github.com/Goldziher/go-utils/sliceutils"
 	"gorm.io/gorm"
 	"log"
+	"slices"
 )
 
 type Occurrence = types.Occurrence
@@ -162,9 +163,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *MySQLRepositor
 				//	ORDER BY o.locus_id asc LIMIT 10
 
 				selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
-				selectedPanelsTables := sliceutils.Unique(sliceutils.Map(selectedPanelsField, func(field types.Field, index int, slice []types.Field) types.Table {
-					return field.Table
-				}))
+				selectedPanelsTables := getDistinctTablesFromFields(selectedPanelsField)
 
 				consequenceFilterTable := r.db.Table("consequences_filter cf").Where("part = ?", part)
 
@@ -205,6 +204,13 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *MySQLRepositor
 	return tx, part, nil
 }
 
+func getDistinctTablesFromFields(selectedPanelsField []types.Field) []types.Table {
+	selectedPanelsTables := sliceutils.Unique(sliceutils.Map(selectedPanelsField, func(field types.Field, index int, slice []types.Field) types.Table {
+		return field.Table
+	}))
+	return selectedPanelsTables
+}
+
 func (r *MySQLRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
 	tx, _, err := prepareListOrCountQuery(seqId, userQuery, r)
 	if err != nil {
@@ -227,9 +233,14 @@ func prepareAggQuery(seqId int, userQuery types.AggQuery, r *MySQLRepository) (*
 	tx := addImplicitOccurrencesFilters(seqId, r, part)
 	if userQuery != nil {
 		tx = joinWithVariants(userQuery, tx)
-		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) {
-			joinClause := "JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
+		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
+			joinClause := "LEFT JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
 			tx = tx.Joins(joinClause)
+			selectedPanelsTables := getDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
+			for _, panelsTable := range selectedPanelsTables {
+				tx = tx.
+					Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
+			}
 		}
 		addWhere(userQuery, tx)
 
@@ -253,7 +264,7 @@ func (r *MySQLRepository) AggregateOccurrences(seqId int, userQuery types.AggQue
 		unnestJoin := fmt.Sprintf("join unnest(%s.%s) as unnest on true", aggCol.Table.Alias, aggCol.Name)
 		tx = tx.Joins(unnestJoin)
 		sel = "unnest as bucket, count(distinct o.locus_id) as count"
-	} else if aggCol.Table == types.ConsequenceFilterTable {
+	} else if aggCol.Table == types.ConsequenceFilterTable || slices.Contains(types.GenePanelsTables, aggCol.Table) {
 		sel = fmt.Sprintf("%s.%s as bucket, count(distinct o.locus_id) as count", aggCol.Table.Alias, aggCol.Name)
 	} else {
 		sel = fmt.Sprintf("%s.%s as bucket, count(1) as count", aggCol.Table.Alias, aggCol.Name)

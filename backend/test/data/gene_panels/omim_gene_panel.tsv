@@ -1,5 +1,6 @@
 symbol	panel
 BRAF	panel1
-BRAF	panel2
 TP53	panel1
+BRAF	panel2
 TP53	panel3
+TML1	panel4
