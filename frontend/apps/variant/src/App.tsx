@@ -31,40 +31,61 @@ function App({ api }: AppProps) {
   console.log(api);
   return (
     <div className="flex flex-1">
-      <aside className="w-1/4 bg-gray-200 p-4">
+      <aside className="w-1/4 p-4">
         <ul>
-          <li><a href="#" className="block py-2 hover:bg-gray-300 px-3">Dashboard</a></li>
-          <li><a href="#" className="block py-2 hover:bg-gray-300 px-3">Settings</a></li>
-          <li><a href="#" className="block py-2 hover:bg-gray-300 px-3">Profile</a></li>
+          <li>
+            <Accordion type="single" collapsible>
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Aggregation 1</AccordionTrigger>
+                <AccordionContent>
+                  <input type="checkbox" id="aggre1" name="aggre1" value="Aggre1" />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+          </li>
+          <li>
+            <Accordion type="single" collapsible>
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Aggregation 2</AccordionTrigger>
+                <AccordionContent>
+                  <input type="checkbox" id="aggre1" name="aggre1" value="Aggre1" />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+          </li>
+          <li>
+            <Accordion type="single" collapsible>
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Aggregation 3</AccordionTrigger>
+                <AccordionContent>
+                  <input type="checkbox" id="aggre1" name="aggre1" value="Aggre1" />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+          </li>
         </ul>
       </aside>
 
-      <main className="flex-1 p-4 bg-white h-full">
-        <h1 className="text-2xl font-bold">Welcome to the Content Section</h1>
-        <p className="mt-4 text-gray-700">This is where the main content will go.</p>
-        <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger>Is it accessible?</AccordionTrigger>
-            <AccordionContent>
-              Yes. It adheres to the WAI-ARIA design pattern.
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+      <main className="flex-1 p-4 h-full">
+        <h1 className="text-2xl font-bold">Variant</h1>
         <Table>
-          <TableCaption>A list of your recent invoices.</TableCaption>
+          <TableCaption>Variant Data</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Variant</TableHead>
               <TableHead>dna Change</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Location</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {variantsData.variants.map((data) => (
-              <TableRow key={data.node.assembly_version}>
-                <TableCell className="font-medium">{data.node.assembly_version}</TableCell>
-                <TableCell>{data.node.dna_change}</TableCell>
-                <TableCell className="text-right">{data.node.chromosome}</TableCell>
+              <TableRow key={data.ensembl_gene_id}>
+                <TableCell className="font-medium">{data.symbol}</TableCell>
+                <TableCell>{data.name}</TableCell>
+                <TableCell className="text-right">{data.location}</TableCell>
               </TableRow>
             ))}
           </TableBody>
