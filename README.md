@@ -7,71 +7,9 @@ Radiant Data Platform
 
 # Backend
 
-## Getting Started
+[Backend Documentation](./backend/README.md)
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-## MakeFile
-
-Install all dependencies
-```bash
-make install
-```
-
-Run build make command with tests
-```bash
-make all
-```
-
-Build the application
-```bash
-make build
-```
-
-Run the application
-```bash
-make run
-```
-Create DB container
-```bash
-make docker-run
-```
-
-Shutdown DB Container
-```bash
-make docker-down
-```
-
-DB Integrations Test:
-```bash
-make itest
-```
-
-Live reload the application:
-```bash
-make watch
-```
-
-Run the test suite:
-```bash
-make test
-```
-
-Generate OpenAPI v3.1 documentation:
-```bash
-make doc
-```
-
-Clean up binary from the last build:
-```bash
-make clean
-```
 # Frontend
 
-## Generate the CLI
-    
-    ```bash 
+[Frontend Documentation](./frontend/README.md)
 
-    openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axios -o ./frontend/api
-
-    ```
