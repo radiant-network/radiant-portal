@@ -5,7 +5,7 @@
   "scripts": {
     "build": "NODE_ENV=production react-router build",
     "dev": "react-router --port 3000 dev",
-    "start": "NODE_ENV=production react-router-serve ./build/server/index.js",
+    "start": "PORT=80 NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {

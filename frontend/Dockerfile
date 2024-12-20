@@ -18,11 +18,9 @@ WORKDIR /workspace/portals/radiant
 COPY ./portals/radiant /workspace/portals/radiant/
 COPY ./apps /workspace/apps
 COPY ./components /workspace/components
-# COPY --from=root-dependencies-env /workspace/node_modules /workspace/node_modules
 
 FROM node:20-alpine AS workspace-dependencies-env
 WORKDIR /workspace
-#COPY ./portals/radiant/package.json /workspace/portals/radiant/
 COPY ./package.json ./package-lock.json /workspace/
 COPY --from=build-deps /workspace/ /workspace/
 RUN npm install 
@@ -37,10 +35,8 @@ RUN npm i
 RUN npm run build
 
 # Stage 4: Final production image
-# FROM node:20-alpine
-# WORKDIR /workspace/portals/radiant
-# COPY ./portals/radiant/package.json /workspace/portals/radiant/
-# COPY --from=production-dependencies-env /workspace/portals/radiant/node_modules /workspace/portals/radiant/node_modules
-# COPY --from=build-env /workspace/portals/radiant/build /workspace/portals/radiant/build
-# CMD ["npm", "run", "start"]
+FROM node:20-alpine
+WORKDIR /workspace/portals/radiant
+COPY --from=workspace-dependencies-env /workspace/ /workspace/
+CMD ["npm", "run", "start"]
 # 
