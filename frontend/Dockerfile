@@ -36,7 +36,6 @@ RUN npm run build
 
 # Stage 4: Final production image
 FROM node:20-alpine
+COPY --from=build-env /workspace /workspace
 WORKDIR /workspace/portals/radiant
-COPY --from=workspace-dependencies-env /workspace/ /workspace/
 CMD ["npm", "run", "start"]
-# 
