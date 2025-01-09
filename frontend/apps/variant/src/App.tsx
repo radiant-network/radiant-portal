@@ -1,33 +1,24 @@
-// import React from 'react'
-import * as React from 'react';
-
-//import { useState } from 'react'
-import './App.css'
+import "./App.css";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "components/base/ui/accordion"
-
+} from "components/base/ui/accordion";
+import { Table } from "components/base/ui/table/table";
+import { variants } from "./include_variant_mock";
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "components/base/ui/table"
-import { variantsData } from './variant_data'
+  columns,
+  userSettings,
+  defaultSettings,
+} from "./include_variant_table";
+import { IVariantEntity } from "@/variant_type";
 
 export interface AppProps {
-  api: string,
+  api: string;
 }
 
 function App({ api }: AppProps) {
-  //const [count, setCount] = useState(0)
   console.log(api);
   return (
     <div className="flex flex-1">
@@ -38,69 +29,68 @@ function App({ api }: AppProps) {
               <AccordionItem value="item-1">
                 <AccordionTrigger>Aggregation 1</AccordionTrigger>
                 <AccordionContent>
-                  <input type="checkbox" id="aggre1" name="aggre1" value="Aggre1" />
+                  <input
+                    type="checkbox"
+                    id="aggre1"
+                    name="aggre1"
+                    value="Aggre1"
+                  />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-
           </li>
           <li>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
                 <AccordionTrigger>Aggregation 2</AccordionTrigger>
                 <AccordionContent>
-                  <input type="checkbox" id="aggre1" name="aggre1" value="Aggre1" />
+                  <input
+                    type="checkbox"
+                    id="aggre1"
+                    name="aggre1"
+                    value="Aggre1"
+                  />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-
           </li>
           <li>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
                 <AccordionTrigger>Aggregation 3</AccordionTrigger>
                 <AccordionContent>
-                  <input type="checkbox" id="aggre1" name="aggre1" value="Aggre1" />
+                  <input
+                    type="checkbox"
+                    id="aggre1"
+                    name="aggre1"
+                    value="Aggre1"
+                  />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-
           </li>
         </ul>
       </aside>
 
       <main className="flex-1 p-4 h-full">
         <h1 className="text-2xl font-bold">Variant</h1>
-        <Table>
-          <TableCaption>Variant Data</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Variant</TableHead>
-              <TableHead>dna Change</TableHead>
-              <TableHead className="text-right">Location</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {variantsData.variants.map((data) => (
-              <TableRow key={data.ensembl_gene_id}>
-                <TableCell className="font-medium">{data.symbol}</TableCell>
-                <TableCell>{data.name}</TableCell>
-                <TableCell className="text-right">{data.location}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={3}>Can be pagination</TableCell>
-              <TableCell className="text-right">1 / 1</TableCell>
-            </TableRow>
-          </TableFooter>
-        </Table>
-
+        <Table
+          columns={columns}
+          defaultColumnSettings={defaultSettings}
+          data={variants.data}
+          total={variants.total}
+          columnSettings={userSettings}
+          subComponent={(data: IVariantEntity) => {
+            return (
+              <pre style={{ fontSize: "10px" }}>
+                <code>{JSON.stringify(data, null, 2)}</code>
+              </pre>
+            );
+          }}
+        />
       </main>
-    </div >
-  )
+    </div>
+  );
 }
 
-export default App
-
+export default App;

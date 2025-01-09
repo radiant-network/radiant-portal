@@ -1,4 +1,12 @@
 {
   "private": true,
-  "workspaces": ["api/*", "apps/*", "components/*", "portals/*"]
+  "workspaces": [
+    "api/*",
+    "apps/*",
+    "components/*",
+    "portals/*"
+  ],
+  "devDependencies": {
+    "@ferlab/eslint-config": "^2.0.0"
+  }
 }
