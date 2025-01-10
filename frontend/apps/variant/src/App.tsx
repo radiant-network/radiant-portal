@@ -1,4 +1,6 @@
 import "./App.css";
+import styles from "./App.module.css";
+
 import {
   Accordion,
   AccordionContent,
@@ -21,8 +23,8 @@ export interface AppProps {
 function App({ api }: AppProps) {
   console.log(api);
   return (
-    <div className="flex flex-1">
-      <aside className="w-1/4 p-4">
+    <div className={styles.appLayout}>
+      <aside >
         <ul>
           <li>
             <Accordion type="single" collapsible>

@@ -1,0 +1,7 @@
+.appLayout {
+  @apply flex flex-1;
+
+  aside {
+    @apply w-1/4 p-4;
+  }
+}
