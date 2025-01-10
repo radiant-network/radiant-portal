@@ -22,3 +22,13 @@ jobs:
           tag_format: "{semver}"
           location: ./backend
           dockerfile: ./backend/Dockerfile
+
+      - name: Push frontend image on the registry
+        uses: Ferlab-Ste-Justine/action-push-image@v2
+        with:
+          username: ${{ secrets.FERLAB_DOCKER_HUB_USER }}
+          password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
+          image: ferlabcrsj/radiant-portal
+          tag_format: "{semver}"
+          location: ./frontend
+          dockerfile: ./frontend/Dockerfile
