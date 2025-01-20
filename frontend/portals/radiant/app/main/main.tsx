@@ -1,16 +1,9 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "components/base/ui/accordion"
 import Variant from "variant/App";
 
-export function Main() {
+export default function Main() {
   return (
     <main className="flex p-4">
-      <Variant api="test"/>
+      <Variant api="test" />
     </main>
   );
 }
-
