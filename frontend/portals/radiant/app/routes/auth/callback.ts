@@ -1,6 +1,11 @@
-import { authenticator, AuthStrategyMame } from "~/utils/auth.server";
+import { login, requireAuth } from "~/utils/auth.server";
 import type { Route } from "./+types/callback";
+import { redirect } from "react-router";
 
 export async function loader({ request }: Route.LoaderArgs) {
-  await authenticator.authenticate(AuthStrategyMame, request);
+  if (await requireAuth(request)) {
+    return await login(request);
+  } else {
+    return redirect("/");
+  }
 }
