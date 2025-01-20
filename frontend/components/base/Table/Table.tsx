@@ -181,7 +181,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps<any>>(
     });
 
     return (
-      <div className="p-2 block min-w-full w-full overflow-x-auto overflow-y-auto">
+      <div className="block min-w-full w-full overflow-x-auto overflow-y-auto">
         <div className="w-full flex text-left justify-between">
           <TableIndexResult
             pageIndex={table.getState().pagination.pageIndex + 1}

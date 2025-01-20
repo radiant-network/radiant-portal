@@ -1,12 +1,22 @@
 import "./App.css";
 import styles from "./App.module.css";
 import { ListBody, Occurrence, SortBodyOrderEnum, SqonOpEnum } from "@/api/api";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "components/base/ui/accordion";
 import { Table } from "@/components/base/Table/Table";
-import { columns, defaultSettings, userSettings, } from "./include_variant_table";
+import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
+import {
+  columns,
+  defaultSettings,
+  userSettings,
+} from "./include_variant_table";
 import { IVariantEntity } from "@/variant_type";
 import useSWR from "swr";
 import { occurrencesApi } from "@/utils/api";
-import SidenavFilters from "./components/layouts/SidenavFilters";
 
 type OccurrenceInput = {
   seqId: string;
@@ -14,7 +24,9 @@ type OccurrenceInput = {
 };
 
 const fetcher = (input: OccurrenceInput) =>
-  occurrencesApi.listOccurrences(input.seqId, input.listBody).then((response) => response.data);
+  occurrencesApi
+    .listOccurrences(input.seqId, input.listBody)
+    .then((response) => response.data);
 
 function App() {
   const { data } = useSWR<Occurrence[], any, OccurrenceInput>(
@@ -42,7 +54,7 @@ function App() {
     fetcher,
     {
       revalidateOnFocus: false,
-    },
+    }
   );
   const occurrences = data || [];
 

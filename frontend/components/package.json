@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/lodash": "^4.17.14",
     "tailwindcss": "^3.4.16"
   },
   "dependencies": {
@@ -31,9 +32,11 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@tanstack/react-table": "^8.20.6",
     "clsx": "^2.1.1",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.468.0",
+    "query-string": "^9.1.1",
     "tailwind-merge": "^2.5.5",
-    "tailwind-variants": "^0.3.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.0.5"
   }
 }
