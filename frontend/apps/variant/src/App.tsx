@@ -1,6 +1,6 @@
 import "./App.css";
 import styles from "./App.module.css";
-
+import { Occurrence } from "../../../api";
 import {
   Accordion,
   AccordionContent,
@@ -8,7 +8,6 @@ import {
   AccordionTrigger,
 } from "components/base/ui/accordion";
 import { Table } from "components/base/ui/table/table";
-import { variants } from "./include_variant_mock";
 import {
   columns,
   userSettings,
@@ -17,14 +16,13 @@ import {
 import { IVariantEntity } from "@/variant_type";
 
 export interface AppProps {
-  api: string;
+  data: Occurrence[];
 }
 
-function App({ api }: AppProps) {
-  console.log(api);
+function App({ data = [] }: AppProps) {
   return (
     <div className={styles.appLayout}>
-      <aside >
+      <aside>
         <ul>
           <li>
             <Accordion type="single" collapsible>
@@ -79,8 +77,8 @@ function App({ api }: AppProps) {
         <Table
           columns={columns}
           defaultColumnSettings={defaultSettings}
-          data={variants.data}
-          total={variants.total}
+          data={data}
+          total={data.length}
           columnSettings={userSettings}
           subComponent={(data: IVariantEntity) => {
             return (
