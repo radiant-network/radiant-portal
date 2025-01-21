@@ -11,8 +11,9 @@ import {
   getTableRowSelectionHeader,
 } from "@/components/base/ui/table/tableRowSelection";
 import { getTableRowExpandCell } from "@/components/base/ui/table/tableRowExpand";
+import { Occurrence } from "../../../api";
 
-const columnHelper = createColumnHelper<IVariantEntity>();
+const columnHelper = createColumnHelper<Occurrence>();
 
 const columns = [
   {
@@ -41,37 +42,7 @@ const columns = [
     header: "Type",
     size: 300,
   }),
-  columnHelper.accessor((row) => row.rsnumber, {
-    id: "rsnumber",
-    cell: (info) =>
-      info.getValue() ? (
-        <ExternalLinkCell
-          url={"https://www.ncbi.nlm.nih.gov/snp/${info.getValue()}"}
-        />
-      ) : (
-        "-"
-      ),
-    header: "dbSNP",
-  }),
-  columnHelper.accessor((row) => row.genes, {
-    id: "genes",
-    cell: (info) => (
-      <>
-        {info.getValue().hits.edges.map((gene) => (
-          <GeneCell
-            key={gene.node.omim_gene_id}
-            url={`https://www.omim.org/entry/${gene.node.omim_gene_id}`}
-            name={gene.node.symbol}
-            onClick={() => {
-              console.log("gene clicked"); //TODO: to remove
-            }}
-          />
-        ))}
-      </>
-    ),
-    header: "Gene",
-  }),
-] as TableColumnDef<IVariantEntity, any>[];
+] as TableColumnDef<Occurrence, any>[];
 
 const userSettings = createColumnSettings([
   {

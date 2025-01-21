@@ -7,18 +7,33 @@ import {
   type IAuthUserWithToken,
 } from "./auth.types";
 
-export let sessionStorage = createCookieSessionStorage({
-  cookie: {
-    name: "_session",
-    sameSite: "lax",
-    path: "/",
-    httpOnly: true,
-    secrets: [process.env.SESSION_SECRET!],
-    secure: process.env.NODE_ENV === "production", // enable this in prod only
-  },
-});
+const createSessionStorage = (cookieName: string) => {
+  return createCookieSessionStorage({
+    cookie: {
+      name: cookieName,
+      sameSite: "lax",
+      path: "/",
+      httpOnly: true,
+      secrets: [process.env.SESSION_SECRET!],
+      secure: process.env.NODE_ENV === "production",
+    },
+  });
+};
 
-export const getKeycloakOauth2Url = (endpoint: string) =>
+const userSessionStorage = createSessionStorage("session.user");
+const accessTokenSessionStorage = createSessionStorage("session.token");
+const refreshTokenSessionStorage = createSessionStorage("session.r.token");
+
+const getUserSessionStorage = async (request: Request) =>
+  await userSessionStorage.getSession(request.headers.get("cookie"));
+
+const getAccessTokenSessionStorage = async (request: Request) =>
+  await accessTokenSessionStorage.getSession(request.headers.get("cookie"));
+
+const getRefreshTokenSessionStorage = async (request: Request) =>
+  await refreshTokenSessionStorage.getSession(request.headers.get("cookie"));
+
+const getKeycloakOauth2Url = (endpoint: string) =>
   `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/${endpoint}`;
 
 export const authenticateRequest = async (
@@ -27,41 +42,64 @@ export const authenticateRequest = async (
   await authenticator.authenticate(AuthStrategyName, request);
 
 export const getSessionUser = async (request: Request): Promise<IAuthUser> => {
-  const session = await sessionStorage.getSession(
-    request.headers.get("cookie")
-  );
-  const user = session.get("user");
-
+  const userSession = await getUserSessionStorage(request);
+  const user = userSession.get("user");
   return user;
 };
 
-export const login = async (request: Request): Promise<Response> => {
-  const { refresh_token, ...user } = await authenticateRequest(request);
+export const getSessionAccessToken = async (
+  request: Request
+): Promise<string> => {
+  const accessTokenSession = await getAccessTokenSessionStorage(request);
+  return accessTokenSession.get("token");
+};
 
-  const session = await sessionStorage.getSession(
-    request.headers.get("cookie")
+export const getSessionRefreshToken = async (
+  request: Request
+): Promise<string> => {
+  const refreshTokenSession = await getRefreshTokenSessionStorage(request);
+  return refreshTokenSession.get("token");
+};
+
+export const login = async (request: Request): Promise<Response> => {
+  const { refresh_token, access_token, ...user } = await authenticateRequest(
+    request
   );
 
-  session.set("user", user);
-  session.set("r_token", refresh_token);
+  const userSession = await getUserSessionStorage(request);
+  userSession.set("user", user);
+
+  const accessTokenSession = await getAccessTokenSessionStorage(request);
+  accessTokenSession.set("token", access_token);
+
+  const refreshTokenSession = await getRefreshTokenSessionStorage(request);
+  refreshTokenSession.set("token", refresh_token);
 
   return redirect("/", {
-    headers: {
-      "Set-Cookie": await sessionStorage.commitSession(session),
-      "Cache-Control": "no-store",
-    },
+    headers: [
+      ["Set-Cookie", await userSessionStorage.commitSession(userSession)],
+      [
+        "Set-Cookie",
+        await accessTokenSessionStorage.commitSession(accessTokenSession),
+      ],
+      [
+        "Set-Cookie",
+        await refreshTokenSessionStorage.commitSession(refreshTokenSession),
+      ],
+      ["Cache-Control", "no-store"],
+    ],
   });
 };
 
 export const logout = async (request: Request) => {
-  const session = await sessionStorage.getSession(
-    request.headers.get("cookie")
-  );
+  const userSession = await getUserSessionStorage(request);
+  const accessTokenSession = await getAccessTokenSessionStorage(request);
+  const refreshTokenSession = await getRefreshTokenSessionStorage(request);
 
   await fetch(getKeycloakOauth2Url("logout"), {
     method: "POST",
     body: new URLSearchParams({
-      refresh_token: session.get("r_token"),
+      refresh_token: refreshTokenSession.get("token"),
       client_id: process.env.KEYCLOAK_CLIENT!,
       client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
     }).toString(),
@@ -71,10 +109,17 @@ export const logout = async (request: Request) => {
   });
 
   return redirect("/", {
-    headers: {
-      "Set-Cookie": await sessionStorage.destroySession(session),
-      "Cache-Control": "no-store",
-    },
+    headers: [
+      ["Set-Cookie", await userSessionStorage.destroySession(userSession)],
+      [
+        "Set-Cookie",
+        await accessTokenSessionStorage.destroySession(accessTokenSession),
+      ],
+      [
+        "Set-Cookie",
+        await refreshTokenSessionStorage.destroySession(refreshTokenSession),
+      ],
+    ],
   });
 };
 
@@ -82,7 +127,7 @@ export const requireAuth = async (request: Request): Promise<boolean> => {
   return !(await getSessionUser(request));
 };
 
-export const authenticator = new Authenticator<IAuthUserWithToken>();
+const authenticator = new Authenticator<IAuthUserWithToken>();
 
 authenticator.use(
   new OAuth2Strategy(
@@ -111,6 +156,7 @@ authenticator.use(
       return {
         ...userInfo,
         refresh_token: tokens.refreshToken(),
+        access_token: tokens.accessToken(),
       };
     }
   ),
