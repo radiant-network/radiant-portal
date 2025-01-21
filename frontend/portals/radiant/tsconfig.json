@@ -20,7 +20,8 @@
       "@/lib/*": ["../../components/lib/*"],
       "@/hooks/*": ["../../components/hooks/*"],
       "variant/*": ["../../apps/variant/src/*"],
-      "~/*": ["./app/*"]
+      "~/*": ["./app/*"],
+      "react": ["./node_modules/@types/react"]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
@@ -30,4 +31,3 @@
     "strict": true
   }
 }
-
