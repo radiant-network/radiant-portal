@@ -7,7 +7,6 @@ import {
 } from "../../../../api";
 import type { Route } from "../routes/+types/home";
 import { useLoaderData } from "react-router";
-import type { AxiosError } from "axios";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -18,7 +17,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   try {
     const response = await occurenceApi.listOccurrences("5011", {
-      selected_fields: ["hgvsg", "clinvar", "chromosome", "ad_ratio", "pf"],
+      selected_fields: ["hgvsg", "variant_class"],
       limit: limit,
       offset: page * limit,
       sort: [
@@ -47,13 +46,14 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 const Home = () => {
-  const data = useLoaderData<Occurrence[]>();
-
-  console.log(data);
+  const data = useLoaderData<{
+    occurrences: Occurrence[];
+    error: string | null;
+  }>();
 
   return (
     <main className="flex p-4">
-      <Variant api="test" />
+      <Variant data={data.occurrences} />
     </main>
   );
 };
