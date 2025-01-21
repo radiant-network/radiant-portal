@@ -12,4 +12,5 @@ export interface IAuthUser {
 
 export interface IAuthUserWithToken extends IAuthUser {
   refresh_token: string;
+  access_token: string;
 }
