@@ -34,7 +34,7 @@ func StatusHandler(repo repository.Repository) gin.HandlerFunc {
 // @Param			message	body		types.ListBody	true	"List Body"
 // @Accept json
 // @Produce json
-// @Success 200 {object} types.Occurrence
+// @Success 200 {array} types.Occurrence
 // @Failure 400 {object} map[string]string
 // @Router /occurrences/{seq_id}/list [post]
 func OccurrencesListHandler(repo repository.Repository) gin.HandlerFunc {

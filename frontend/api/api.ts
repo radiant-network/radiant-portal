@@ -505,7 +505,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Occurrence>> {
+        async listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Occurrence>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listOccurrences(seqId, listBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -551,7 +551,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): AxiosPromise<Occurrence> {
+        listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Occurrence>> {
             return localVarFp.listOccurrences(seqId, listBody, options).then((request) => request(axios, basePath));
         },
     };

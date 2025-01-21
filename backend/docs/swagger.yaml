@@ -249,7 +249,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Occurrence'
+                items:
+                  $ref: '#/components/schemas/Occurrence'
+                type: array
           description: OK
         "400":
           content:
