@@ -7,9 +7,9 @@ import {
   TExtendedMapping,
   TFilterGroupDefaults,
   VisualType,
-} from "../../composite/Filters/types";
+} from "@/composite/Filters/types";
 
-import { isRangeAgg } from "./Range";
+import { isRangeAgg } from "./range";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const getQueryParams = (search: string | null = null) =>

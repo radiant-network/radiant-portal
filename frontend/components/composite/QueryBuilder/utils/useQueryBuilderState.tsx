@@ -1,23 +1,20 @@
 import { useEffect, useState } from "react";
 import isEmpty from "lodash/isEmpty";
 import { v4 } from "uuid";
-
 import {
   BooleanOperators,
   RangeOperators,
   TermOperators,
-} from "../../../utils/sqon/operators";
+} from "@/utils/sqon/operators";
 import {
   IRemoteComponent,
   IValueFilter,
   IValueQuery,
   TSqonGroupOp,
   TSyntheticSqonContentValue,
-} from "../../../utils/sqon/types";
-import {
   ISyntheticSqon,
   MERGE_VALUES_STRATEGIES,
-} from "../../../utils/sqon/types";
+} from "@/utils/sqon/types";
 import {
   createInlineFilters,
   deepMergeFieldInActiveQuery,
@@ -25,8 +22,8 @@ import {
   getUpdatedActiveQuery,
   getUpdatedActiveQueryByFilterGroup,
   removeFieldFromActiveQuery,
-} from "../../../utils/sqon/utils";
-import { IFilter, IFilterGroup } from "../../Filters/types";
+} from "@/utils/sqon/utils";
+import { IFilter, IFilterGroup } from "@/composite/Filters/types";
 import { IQueryBuilderState } from "../types";
 
 export const QB_UPDATE_EVENT_KEY = "QBCacheUpdate";

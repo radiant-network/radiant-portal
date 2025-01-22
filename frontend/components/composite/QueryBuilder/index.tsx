@@ -28,9 +28,9 @@ import {
   removeSqonAtIndex,
 } from "../../utils/sqon/utils";
 import { BooleanOperators } from "../../utils/sqon/operators";
+import { cn } from "@/lib/utils";
 
 import styles from "./index.module.css";
-import { cn } from "@/lib/utils";
 
 const removeIgnoreFieldFromQueryList = (
   sqon: ISyntheticSqon[],

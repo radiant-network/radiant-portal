@@ -3,7 +3,6 @@ import merge from "lodash/merge";
 import isUndefined from "lodash/isUndefined";
 import cloneDeep from "lodash/cloneDeep";
 import isEmpty from "lodash/isEmpty";
-import uniq from "lodash/uniq";
 import { v4 } from "uuid";
 import {
   IFilter,
@@ -13,11 +12,9 @@ import {
   IFilterRange,
   IFilterText,
   VisualType,
-} from "../../composite/Filters/types";
-import { getActiveQuery } from "../../composite/QueryBuilder/utils/useQueryBuilderState";
-import { IExtendedMappingResults } from "../../graphql/types";
-import { ArrangerValues } from "../arranger/formatting";
-import { getSelectedFiltersForRange } from "../filters/Range";
+} from "@/composite/Filters/types";
+import { getActiveQuery } from "@/composite/QueryBuilder/utils/useQueryBuilderState";
+import { getSelectedFiltersForRange } from "@/utils/filters/range";
 
 import {
   BooleanOperators,
@@ -182,7 +179,7 @@ export const resolveSyntheticSqon = (
     | ISyntheticSqon
     | Record<string, never>
     | TSyntheticSqonContentValue,
-  extendedMapping?: IExtendedMappingResults
+  extendedMapping?: any // TODO ??? IExtendedMappingResults
 ): ISqonGroupFilter => {
   const getNewContent = (
     syntheticSqon:
@@ -595,13 +592,13 @@ export const generateValueFilter = ({
     content: { field, index, overrideValuesName, value },
     op: operator,
   };
-  const noDataFilterContent = {
-    content: { field, index, value: [ArrangerValues.missing] },
-    op: RangeOperators.in,
-  };
+  //const noDataFilterContent = {
+  //  content: { field, index, value: [ArrangerValues.missing] },
+  //  op: RangeOperators.in,
+  //};
 
   const noDataFilter = {
-    content: [basicFilter, noDataFilterContent],
+    content: [basicFilter], // TODO ????, noDataFilterContent],
     op: BooleanOperators.or,
     skipBooleanOperatorCheck: true,
   };
@@ -815,10 +812,10 @@ const tsqonFromRangeFilter = (
   index?: string
 ): TSqonContentValue | null => {
   const { noDataSelected } = selectedRange.data;
-  const noDataFilterContent = {
-    content: { field, index, value: [ArrangerValues.missing] },
-    op: RangeOperators.in,
-  };
+  //const noDataFilterContent = {
+  //  content: { field, index, value: [ArrangerValues.missing] },
+  //  op: RangeOperators.in,
+  //};
 
   const createContentValue = (
     value: TFilterValue,
@@ -831,7 +828,7 @@ const tsqonFromRangeFilter = (
 
     if (noDataSelected) {
       return {
-        content: [baseFilter, noDataFilterContent],
+        content: [baseFilter], //TODO ???, noDataFilterContent],
         op: BooleanOperators.or,
         skipBooleanOperatorCheck: true,
       };
@@ -841,7 +838,7 @@ const tsqonFromRangeFilter = (
   };
 
   if (!hasSelectedRangeForOperator(selectedRange)) {
-    return noDataSelected ? noDataFilterContent : null;
+    return null; // TODO ??? noDataSelected ? noDataFilterContent : null;
   }
 
   switch (selectedRange.data.operator) {
@@ -915,42 +912,12 @@ export const createInlineFilters = (
     ? TermOperators.in
     : filters[0].data.operator || TermOperators.in;
   if (arrayFilters.length > 0) {
-    if (arrayFilters.includes(ArrangerValues.missing)) {
-      const filterValues = arrayFilters.filter(
-        (item) => item !== ArrangerValues.missing
-      );
-      const op =
-        filterValues.length === 1 && operator === TermOperators.all
-          ? TermOperators.in
-          : operator;
-      const noDataFilterContent = {
-        content: { field, index, value: [ArrangerValues.missing] },
-        op,
-      };
-      return [
-        {
-          content: [
-            {
-              content: { field, index, value: filterValues },
-              op,
-            },
-            noDataFilterContent,
-          ],
-          op:
-            operator === TermOperators.in
-              ? BooleanOperators.or
-              : BooleanOperators.and,
-          skipBooleanOperatorCheck: true,
-        },
-      ];
-    } else {
-      return [
-        {
-          content: { field, index, value: arrayFilters },
-          op: operator,
-        },
-      ];
-    }
+    return [
+      {
+        content: { field, index, value: arrayFilters },
+        op: operator,
+      },
+    ];
   } else {
     return [];
   }
@@ -1062,9 +1029,14 @@ export const isFilterSelected = (
  */
 export const findNestedSqonFields = (
   sqonsList: ISyntheticSqon[],
-  extendedMapping?: IExtendedMappingResults
+  extendedMapping?: any //IExtendedMappingResults
 ): string[] => {
-  if (!extendedMapping) {
+  // TODO check how to handle nested fields since no more graphql
+
+  return [];
+
+  /**
+   * if (!extendedMapping) {
     return [];
   }
 
@@ -1103,4 +1075,5 @@ export const findNestedSqonFields = (
   });
 
   return uniq(pivots);
+   */
 };

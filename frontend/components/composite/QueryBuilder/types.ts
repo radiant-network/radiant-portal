@@ -5,7 +5,7 @@ import {
   ISqonGroupFilter,
   ISyntheticSqon,
   IValueFilter,
-} from "./sqon/types";
+} from "@/utils/sqon/types";
 // import { IQueriesSidebarDictionary } from "../CustomPill/QueriesSidebar/types";
 // import { ISidebarMenuItem } from "../SidebarMenu";
 
