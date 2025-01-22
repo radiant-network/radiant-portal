@@ -3,6 +3,7 @@ import autoprefixer from "autoprefixer";
 import tailwindcss from "tailwindcss";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import path from "path";
 
 export default defineConfig({
   css: {
@@ -10,5 +11,14 @@ export default defineConfig({
       plugins: [tailwindcss, autoprefixer],
     },
   },
-  plugins: [reactRouter(), tsconfigPaths()]
+  resolve: {
+    alias: {
+      "@assets": path.resolve(
+        __dirname,
+        `../../themes/${process.env.THEME}/assets`
+      ),
+      "@styles": path.resolve(__dirname, `../../themes/${process.env.THEME}`),
+    },
+  },
+  plugins: [reactRouter(), tsconfigPaths()],
 });
