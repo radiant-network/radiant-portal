@@ -1,12 +1,8 @@
 import Variant from "variant/App";
 import { getOccurrencesApi } from "~/utils/api.server";
-import {
-  SortBodyOrderEnum,
-  SqonOpEnum,
-  type Occurrence,
-} from "../../../../api";
 import type { Route } from "../routes/+types/home";
 import { useLoaderData } from "react-router";
+import { SortBodyOrderEnum, SqonOpEnum, type Occurrence } from "@/api/api";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);

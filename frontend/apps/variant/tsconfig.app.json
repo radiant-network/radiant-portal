@@ -14,7 +14,7 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-   "isolatedModules": true,
+    "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": false,
     "jsx": "react-jsx",
@@ -26,6 +26,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
+      "@/api/*": ["../../api/*"],
       "@/components/*": ["../../components/*"],
       "@/base/ui/*": ["../../components/base/ui/*"],
       "@/lib/*": ["../../components/lib/*"],
@@ -36,4 +37,3 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-

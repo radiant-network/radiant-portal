@@ -1,5 +1,6 @@
-import { Configuration, OccurrencesApi } from "../../../../api";
+import { OccurrencesApi } from "@/api/api";
 import { getSessionAccessToken } from "./auth.server";
+import { Configuration } from "@/api/configuration";
 
 export const getApiConfig = async (
   request: Request

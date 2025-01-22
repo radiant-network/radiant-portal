@@ -15,6 +15,7 @@
     "rootDirs": [".", "./.react-router/types"],
     "baseUrl": ".",
     "paths": {
+      "@/api/*": ["../../api/*"],
       "@/components/*": ["../../components/*"],
       "@/base/ui/*": ["../../components/base/ui/*"],
       "@/lib/*": ["../../components/lib/*"],
