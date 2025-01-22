@@ -1,7 +1,4 @@
-import { createColumnHelper, HeaderContext } from "@tanstack/react-table";
-import { IVariantEntity } from "./variant_type";
-import ExternalLinkCell from "@/components/base/ui/table/cells/externalLinkCell";
-import GeneCell from "@/components/base/ui/table/cells/geneCell";
+import { createColumnHelper } from "@tanstack/react-table";
 import {
   TableColumnDef,
   createColumnSettings,
@@ -11,7 +8,7 @@ import {
   getTableRowSelectionHeader,
 } from "@/components/base/ui/table/tableRowSelection";
 import { getTableRowExpandCell } from "@/components/base/ui/table/tableRowExpand";
-import { Occurrence } from "../../../api";
+import { Occurrence } from "@/api/api";
 
 const columnHelper = createColumnHelper<Occurrence>();
 
@@ -61,14 +58,6 @@ const userSettings = createColumnSettings([
     id: "variant_class",
     visible: true,
   },
-  {
-    id: "rsnumber",
-    visible: true,
-  },
-  {
-    id: "genes",
-    visible: false,
-  },
 ]);
 
 const defaultSettings = createColumnSettings([
@@ -90,14 +79,6 @@ const defaultSettings = createColumnSettings([
   {
     id: "variant_class",
     visible: true,
-  },
-  {
-    id: "rsnumber",
-    visible: true,
-  },
-  {
-    id: "genes",
-    visible: false,
   },
 ]);
 

@@ -1,6 +1,6 @@
 import "./App.css";
 import styles from "./App.module.css";
-import { Occurrence } from "../../../api";
+import { Occurrence } from "@/api/api";
 import {
   Accordion,
   AccordionContent,
