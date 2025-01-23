@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "build": "NODE_ENV=production react-router build",
-    "dev": "react-router --port 3000 dev",
+    "build:kf": "THEME=kf NODE_ENV=production react-router build",
+    "build:radiant": "THEME=radiant NODE_ENV=production react-router build",
+    "dev": "THEME=radiant react-router --port 3000 dev",
+    "dev:kf": "THEME=kf react-router --port 3000 dev",
+    "dev:radiant": "THEME=radiant react-router --port 3000 dev",
     "start": "PORT=80 NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
   },
