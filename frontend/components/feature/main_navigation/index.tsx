@@ -1,3 +1,6 @@
+import logo from "@assets/logo/header.svg";
+import logoDark from "@assets/logo/header-dark.svg";
+
 interface IProps {
   languages?: string[];
   userName: string;
@@ -8,6 +11,14 @@ export function MainNav({ languages = [], userName, onLogout }: IProps) {
   return (
     <header className="h-15 bg-gray-800 text-white flex items-center justify-between px-4">
       <div className="flex space-x-3 items-center">
+        <img src={logo} alt="Logo" className="h-8 w-auto dark:hidden" />
+        <img
+          src={logoDark}
+          alt="Logo"
+          className="h-8 w-auto hidden dark:block"
+        />
+
+        {/* <img src={logo} alt="Logo" className="h-8 w-auto" /> */}
         <div className="text-lg font-bold">My App</div>
         <nav>
           <a href="#" className="px-4 py-2 hover:bg-gray-700">
