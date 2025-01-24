@@ -16,20 +16,15 @@ services:
       retries: 5
   postgres:
     image: postgres
-    restart: always
+    container_name: postgres_radiant
+    volumes:
+      - ./scripts/init-sql/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
-    # or set shared memory limit when deploy via swarm stack
-    #volumes:
-    #  - type: tmpfs
-    #    target: /dev/shm
-    #    tmpfs:
-    #      size: 134217728 # 128*2^20 bytes = 128Mb
     environment:
       POSTGRES_PASSWORD: radiant
       POSTGRES_USER: radiant
       POSTGRES_DB: radiant
-
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak

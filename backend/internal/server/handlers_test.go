@@ -2,10 +2,11 @@ package server
 
 import (
 	"bytes"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -45,17 +46,22 @@ func (m *MockRepository) AggregateOccurrences(int, types.AggQuery) ([]types.Aggr
 		nil
 }
 
+func (m *MockRepository) FindInterpretationGermline(sequencingId string, locus string, transcriptId string) (*types.InterpretationGerminal, error) {
+	return &types.InterpretationGerminal{SequencingID: "SR00001", Locus: "locus1", TranscriptID: "transcript1"}, nil
+}
+
 func Test_StatusHandler(t *testing.T) {
-	repo := &MockRepository{}
+	repoStarrocks := &MockRepository{}
+	repoPostgres := &MockRepository{}
 	router := gin.Default()
-	router.GET("/status", StatusHandler(repo))
+	router.GET("/status", StatusHandler(repoStarrocks, repoPostgres))
 
 	req, _ := http.NewRequest("GET", "/status", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"status":"up"}`, w.Body.String())
+	assert.JSONEq(t, `{"status": {"starrocks": "up", "postgres": "up"}}`, w.Body.String())
 }
 
 func Test_OccurrencesListHandler(t *testing.T) {

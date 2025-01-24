@@ -1,11 +1,12 @@
 package server
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 // StatusHandler handles the status endpoint
@@ -15,11 +16,13 @@ import (
 // @Produce json
 // @Success 200 {object} map[string]string
 // @Router /status [get]
-func StatusHandler(repo repository.Repository) gin.HandlerFunc {
+func StatusHandler(repoStarrocks repository.StarrocksDAO, repoPostgres repository.PostgresDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		status := repo.CheckDatabaseConnection()
 		c.JSON(http.StatusOK, gin.H{
-			"status": status,
+			"status": gin.H{
+				"starrocks": repoStarrocks.CheckDatabaseConnection(),
+				"postgres":  repoPostgres.CheckDatabaseConnection(),
+			},
 		})
 	}
 }
@@ -37,7 +40,7 @@ func StatusHandler(repo repository.Repository) gin.HandlerFunc {
 // @Success 200 {array} types.Occurrence
 // @Failure 400 {object} map[string]string
 // @Router /occurrences/{seq_id}/list [post]
-func OccurrencesListHandler(repo repository.Repository) gin.HandlerFunc {
+func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBody
@@ -91,7 +94,7 @@ func OccurrencesListHandler(repo repository.Repository) gin.HandlerFunc {
 // @Success 200 {object} types.Count
 // @Failure 400 {object} map[string]string
 // @Router /occurrences/{seq_id}/count [post]
-func OccurrencesCountHandler(repo repository.Repository) gin.HandlerFunc {
+func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBody
@@ -137,7 +140,7 @@ func OccurrencesCountHandler(repo repository.Repository) gin.HandlerFunc {
 // @Success 200 {object} types.Aggregation
 // @Failure 400 {object} map[string]string
 // @Router /occurrences/{seq_id}/aggregate [post]
-func OccurrencesAggregateHandler(repo repository.Repository) gin.HandlerFunc {
+func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.AggregationBody
@@ -167,5 +170,19 @@ func OccurrencesAggregateHandler(repo repository.Repository) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, aggregation)
+	}
+}
+
+func GetInterpretationGermline(repo repository.PostgresDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sequencingId := c.Param("sequencing_id")
+		locus := c.Param("locus")
+		transcriptId := c.Param("transcript_id")
+		interpretation, err := repo.FindInterpretationGermline(sequencingId, locus, transcriptId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		c.JSON(http.StatusOK, interpretation)
 	}
 }

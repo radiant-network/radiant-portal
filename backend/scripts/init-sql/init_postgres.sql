@@ -8,7 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TABLE interpretation_germinal
 (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    sequencing_id            INTEGER NOT NULL,
+    sequencing_id            VARCHAR NOT NULL,
     locus                    VARCHAR NOT NULL,
     transcript_id            VARCHAR(100),
     condition                VARCHAR(500),
@@ -22,7 +22,8 @@ CREATE TABLE interpretation_germinal
     created_at               TIMESTAMPTZ      DEFAULT NOW(),
     modified_by              VARCHAR,
     modified_by_name         VARCHAR,
-    modified_at              TIMESTAMPTZ      DEFAULT NOW()
+    modified_at              TIMESTAMPTZ      DEFAULT NOW(),
+    CONSTRAINT UC_Interpretation_germinal UNIQUE (sequencing_id, locus, transcript_id)
 );
 
 CREATE OR REPLACE FUNCTION tp_history_func() RETURNS TRIGGER AS

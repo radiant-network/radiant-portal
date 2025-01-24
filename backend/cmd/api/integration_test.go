@@ -3,21 +3,22 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/server"
 	"github.com/Ferlab-Ste-Justine/radiant-api/test/testutils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"testing"
 )
 
 func testList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.New(db)
+		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/:seq_id/list", server.OccurrencesListHandler(repo))
 
@@ -31,7 +32,7 @@ func testList(t *testing.T, data string, body string, expected string) {
 }
 func testCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.New(db)
+		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/:seq_id/count", server.OccurrencesCountHandler(repo))
 
@@ -45,7 +46,7 @@ func testCount(t *testing.T, data string, body string, expected int) {
 }
 func testAggregation(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.New(db)
+		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/:seq_id/aggregate", server.OccurrencesAggregateHandler(repo))
 
