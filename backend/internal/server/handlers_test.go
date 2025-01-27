@@ -46,18 +46,6 @@ func (m *MockRepository) AggregateOccurrences(int, types.AggQuery) ([]types.Aggr
 		nil
 }
 
-func (m *MockRepository) FindInterpretationGermline(sequencingId string, locus string, transcriptId string) (*types.InterpretationGerminal, error) {
-	return &types.InterpretationGerminal{SequencingID: "SR00001", LocusID: "locus1", TranscriptID: "transcript1"}, nil
-}
-
-func (m *MockRepository) CreateInterpretationGermline(interpretation *types.InterpretationGerminal) error {
-	return nil
-}
-
-func (m *MockRepository) UpdateInterpretationGermline(interpretation *types.InterpretationGerminal) error {
-	return nil
-}
-
 func Test_StatusHandler(t *testing.T) {
 	repoStarrocks := &MockRepository{}
 	repoPostgres := &MockRepository{}

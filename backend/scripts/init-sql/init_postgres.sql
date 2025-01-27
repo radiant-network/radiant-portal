@@ -20,9 +20,9 @@ CREATE TABLE interpretation_germinal
     created_by               TEXT,
     created_by_name          TEXT,
     created_at               TIMESTAMPTZ      DEFAULT NOW(),
-    modified_by              TEXT,
-    modified_by_name         TEXT,
-    modified_at              TIMESTAMPTZ      DEFAULT NOW(),
+    updated_by               TEXT,
+    updated_by_name          TEXT,
+    updated_at               TIMESTAMPTZ      DEFAULT NOW(),
     CONSTRAINT UC_Interpretation_germinal UNIQUE (sequencing_id, locus_id, transcript_id)
 );
 
@@ -92,9 +92,9 @@ CREATE TABLE IF NOT EXISTS interpretation_germinal_history
     created_by               TEXT,
     created_by_name          TEXT,
     created_at               TIMESTAMPTZ      DEFAULT NOW(),
-    modified_by              TEXT,
-    modified_by_name         TEXT,
-    modified_at              TIMESTAMPTZ      DEFAULT NOW()
+    updated_by              TEXT,
+    updated_by_name         TEXT,
+    updated_at              TIMESTAMPTZ      DEFAULT NOW()
     );
 
 

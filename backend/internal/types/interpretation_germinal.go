@@ -6,9 +6,9 @@ import (
 
 type InterpretationGerminal struct {
 	ID               		string				    `json:"id,omitempty"`
-	SequencingID        	string         			`json:"sequencing_id,omitempty"`
-	LocusID               	string             		`json:"locus_id,omitempty"`
-	TranscriptID     		string             		`json:"transcript_id,omitempty"`
+	SequencingId        	string         			`json:"sequencing_id,omitempty"`
+	LocusId               	string             		`json:"locus_id,omitempty"`
+	TranscriptId     		string             		`json:"transcript_id,omitempty"`
 	Condition				string					`json:"condition,omitempty"`
 	Classification      	string             		`json:"classification,omitempty"`
     ClassificationCriterias []string            	`json:"classification_criterias,omitempty"`
@@ -18,9 +18,9 @@ type InterpretationGerminal struct {
 	CreatedBy               string              	`json:"-"`
     CreatedByName          	string        			`json:"-"`      	
     CreatedAt               time.Time     			`json:"-"`      	
-    ModifiedBy              string      			`json:"-"`      	
-    ModifiedByName         	string       			`json:"-"`       	
-    ModifiedAt              time.Time    			`json:"-"`
+    UpdatedBy              	string      			`json:"-"`      	
+    UpdatedByName         	string       			`json:"-"`       	
+    UpdatedAt              	time.Time    			`json:"-"`
 	
 } // @name InterpretationGerminal
 
@@ -35,10 +35,10 @@ var InterpretationGerminalTable = Table{
 }
 
 type InterpretationGerminalDAO struct {
-	ID 						string `gorm:"primaryKey"`
-	SequencingID        	string         			
-	LocusID               	string             		
-	TranscriptID     		string             		
+	ID 						string `gorm:"primary_key; unique; type:uuid; default:gen_random_uuid()"`
+	SequencingId        	string         			
+	LocusId               	string             		
+	TranscriptId     		string             		
 	Condition				string					
 	Classification      	string             		
     ClassificationCriterias string            	
@@ -48,7 +48,7 @@ type InterpretationGerminalDAO struct {
     CreatedBy               string              	
     CreatedByName          	string              	
     CreatedAt               time.Time           	
-    ModifiedBy              string              	
-    ModifiedByName         	string              	
-    ModifiedAt              time.Time        		
+    UpdatedBy              	string              	
+    UpdatedByName         	string              	
+    UpdatedAt              	time.Time        		
 }

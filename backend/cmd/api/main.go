@@ -91,7 +91,7 @@ func main() {
 		RestrictButForRole(role).
 		Build())
 	interpretationsGermlineGroup := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres))
-	interpretationsGermlineGroup.POST("", server.PostInterpretationGermline(repoPostgres))
+	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres.Interpretations))
+	interpretationsGermlineGroup.POST("", server.PostInterpretationGermline(repoPostgres.Interpretations))
 	r.Run(":8090")
 }

@@ -3,12 +3,10 @@ package server
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // StatusHandler handles the status endpoint
@@ -176,16 +174,16 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 }
 
 func extractInterpretationGermlineParams(c *gin.Context) (string, string, string) {
-	sequencingID := c.Param("sequencing_id")
-	locusID := c.Param("locus_id")
-	transcriptID := c.Param("transcript_id")
-	return sequencingID, locusID, transcriptID
+	sequencingId := c.Param("sequencing_id")
+	locusId := c.Param("locus_id")
+	transcriptId := c.Param("transcript_id")
+	return sequencingId, locusId, transcriptId
 }
 
-func GetInterpretationGermline(repo repository.PostgresDAO) gin.HandlerFunc {
+func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sequencingID, locusID, transcriptID := extractInterpretationGermlineParams(c)
-		interpretation, err := repo.FindInterpretationGermline(sequencingID, locusID, transcriptID)
+		sequencingId, locusId, transcriptId := extractInterpretationGermlineParams(c)
+		interpretation, err := repo.First(sequencingId, locusId, transcriptId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
@@ -198,43 +196,29 @@ func GetInterpretationGermline(repo repository.PostgresDAO) gin.HandlerFunc {
 	}
 }
 
-func PostInterpretationGermline(repo repository.PostgresDAO) gin.HandlerFunc {
+func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sequencingID, locusID, transcriptID := extractInterpretationGermlineParams(c)
+		sequencingId, locusId, transcriptId := extractInterpretationGermlineParams(c)
 
 		interpretation := &types.InterpretationGerminal{}
 		err := c.BindJSON(interpretation)
 
-		interpretation.SequencingID = sequencingID
-		interpretation.LocusID = locusID
-		interpretation.TranscriptID = transcriptID
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+
+		interpretation.SequencingId = sequencingId
+		interpretation.LocusId = locusId
+		interpretation.TranscriptId = transcriptId
+
+		err = repo.CreateOrUpdate(interpretation)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
 
-		existing, err := repo.FindInterpretationGermline(sequencingID, locusID, transcriptID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-			return
-		}
-
-		if existing != nil {
-			interpretation.ID = existing.ID
-			interpretation.CreatedAt = existing.CreatedAt
-			interpretation.ModifiedAt = time.Now()
-			err = repo.UpdateInterpretationGermline(interpretation)
-		} else {
-			interpretation.ID = uuid.New().String()
-			interpretation.CreatedAt = time.Now()
-			err = repo.CreateInterpretationGermline(interpretation)
-		}
-		
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-			return
-		}
 		c.JSON(http.StatusOK, interpretation)
 	}
 }
