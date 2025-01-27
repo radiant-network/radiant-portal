@@ -25,9 +25,16 @@ services:
       POSTGRES_PASSWORD: radiant
       POSTGRES_USER: radiant
       POSTGRES_DB: radiant
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
+    volumes:
+      - ./scripts/init-keycloak:/opt/keycloak/data/import
     environment:
         KC_HOSTNAME: localhost
         KC_HOSTNAME_PORT: 8080
@@ -38,7 +45,7 @@ services:
         KC_HEALTH_ENABLED: true
         KEYCLOAK_ADMIN: admin
         KEYCLOAK_ADMIN_PASSWORD: admin
-    command: start-dev
+    command: ["start-dev", "--import-realm"]
     ports:
       - "8080:8080"
 

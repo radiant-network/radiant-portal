@@ -1,24 +1,54 @@
 package types
 
+import (
+	"time"
+)
+
 type InterpretationGerminal struct {
-	ID               	int               	`json:"id,omitempty"`
-	SequencingID        string         		`json:"sequencing_id,omitempty"`
-	Locus               string             	`json:"locus,omitempty"`
-	TranscriptID     	string             	`json:"transcript_id,omitempty"`
+	ID               		string				    `json:"id,omitempty"`
+	SequencingID        	string         			`json:"sequencing_id,omitempty"`
+	LocusID               	string             		`json:"locus_id,omitempty"`
+	TranscriptID     		string             		`json:"transcript_id,omitempty"`
+	Condition				string					`json:"condition,omitempty"`
+	Classification      	string             		`json:"classification,omitempty"`
+    ClassificationCriterias []string            	`json:"classification_criterias,omitempty"`
+    TransmissionModes       []string            	`json:"transmission_modes,omitempty"`
+    Interpretation          string              	`json:"interpretation,omitempty"`
+    Pubmed	                []InterpretationPubmed	`json:"pubmed,omitempty"`
+	CreatedBy               string              	`json:"-"`
+    CreatedByName          	string        			`json:"-"`      	
+    CreatedAt               time.Time     			`json:"-"`      	
+    ModifiedBy              string      			`json:"-"`      	
+    ModifiedByName         	string       			`json:"-"`       	
+    ModifiedAt              time.Time    			`json:"-"`
 	
 } // @name InterpretationGerminal
 
+type InterpretationPubmed struct {
+	CitationID			  string              `json:"citation_id,omitempty"`
+	Citation			  string              `json:"citation,omitempty"`
+	
+} // @name InterpretationPubmed
+
 var InterpretationGerminalTable = Table{
 	Name:  "interpretation_germinal",
-	Alias: "ig",
 }
 
-var SequencingIdField = Field{
-	Name:            "sequencing_id",
-	CanBeSelected:   true,
-	CanBeFiltered:   true,
-	CanBeSorted:     false,
-	CanBeAggregated: true,
-	//Type:            ArrayType,
-	Table:           InterpretationGerminalTable,
+type InterpretationGerminalDAO struct {
+	ID 						string `gorm:"primaryKey"`
+	SequencingID        	string         			
+	LocusID               	string             		
+	TranscriptID     		string             		
+	Condition				string					
+	Classification      	string             		
+    ClassificationCriterias string            	
+    TransmissionModes       string            	
+    Interpretation          string              	
+    Pubmed	                string	
+    CreatedBy               string              	
+    CreatedByName          	string              	
+    CreatedAt               time.Time           	
+    ModifiedBy              string              	
+    ModifiedByName         	string              	
+    ModifiedAt              time.Time        		
 }

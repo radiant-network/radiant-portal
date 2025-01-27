@@ -90,7 +90,8 @@ func main() {
 	interpretationsGroup.Use(ginkeycloak.NewAccessBuilder(keycloakConfig).
 		RestrictButForRole(role).
 		Build())
-	interpretationsGermlineGroup := interpretationsGroup.Group("/germline")
-	interpretationsGermlineGroup.GET("/:sequencing_id/:locus/:transcript_id", server.GetInterpretationGermline(repoPostgres))
+	interpretationsGermlineGroup := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres))
+	interpretationsGermlineGroup.POST("", server.PostInterpretationGermline(repoPostgres))
 	r.Run(":8090")
 }

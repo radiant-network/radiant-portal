@@ -7,23 +7,23 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE interpretation_germinal
 (
-    id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    sequencing_id            VARCHAR NOT NULL,
-    locus                    VARCHAR NOT NULL,
-    transcript_id            VARCHAR(100),
-    condition                VARCHAR(500),
-    classification           VARCHAR(500),
-    classification_criterias VARCHAR(3)[],
-    transmission_modes       VARCHAR(3)[],
+    id                       UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    sequencing_id            TEXT NOT NULL,
+    locus_id                 TEXT NOT NULL,
+    transcript_id            TEXT NOT NULL,
+    condition                TEXT,
+    classification           TEXT,
+    classification_criterias TEXT,
+    transmission_modes       TEXT,
     interpretation           TEXT,
-    pubmed                   INTEGER[],
-    created_by               VARCHAR,
-    created_by_name          VARCHAR,
+    pubmed                   TEXT,
+    created_by               TEXT,
+    created_by_name          TEXT,
     created_at               TIMESTAMPTZ      DEFAULT NOW(),
-    modified_by              VARCHAR,
-    modified_by_name         VARCHAR,
+    modified_by              TEXT,
+    modified_by_name         TEXT,
     modified_at              TIMESTAMPTZ      DEFAULT NOW(),
-    CONSTRAINT UC_Interpretation_germinal UNIQUE (sequencing_id, locus, transcript_id)
+    CONSTRAINT UC_Interpretation_germinal UNIQUE (sequencing_id, locus_id, transcript_id)
 );
 
 CREATE OR REPLACE FUNCTION tp_history_func() RETURNS TRIGGER AS
@@ -80,21 +80,21 @@ CREATE TABLE IF NOT EXISTS interpretation_germinal_history
     history_deleted_by       VARCHAR,
     history_op               VARCHAR     NOT NULL,
     id                       UUID,
-    sequencing_id            INTEGER     NOT NULL,
-    locus                    VARCHAR     NOT NULL,
-    transcript_id            VARCHAR(100),
-    condition                VARCHAR(500),
-    classification           VARCHAR(500),
-    classification_criterias VARCHAR(3)[],
-    transmission_modes       VARCHAR(3)[],
+    sequencing_id            TEXT NOT NULL,
+    locus_id                 TEXT NOT NULL,
+    transcript_id            TEXT NOT NULL,
+    condition                TEXT,
+    classification           TEXT,
+    classification_criterias TEXT,
+    transmission_modes       TEXT,
     interpretation           TEXT,
-    pubmed                   INTEGER[],
-    created_by               VARCHAR,
-    created_by_name          VARCHAR,
-    created_at               TIMESTAMPTZ          DEFAULT NOW(),
-    modified_by              VARCHAR,
-    modified_by_name         VARCHAR,
-    modified_at              TIMESTAMPTZ          DEFAULT NOW()
+    pubmed                   TEXT,
+    created_by               TEXT,
+    created_by_name          TEXT,
+    created_at               TIMESTAMPTZ      DEFAULT NOW(),
+    modified_by              TEXT,
+    modified_by_name         TEXT,
+    modified_at              TIMESTAMPTZ      DEFAULT NOW()
     );
 
 
