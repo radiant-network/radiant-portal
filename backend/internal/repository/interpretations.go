@@ -27,28 +27,23 @@ func NewInterpretationsRepository(db *gorm.DB, pubmedClient * client.PubmedClien
 	return &InterpretationsRepository{db: db, pubmedClient: pubmedClient}
 }
 
-func (r *InterpretationsRepository) mapToInterpretationGerminal(dao *types.InterpretationGerminalDAO) *types.InterpretationGerminal {
-	interpretation := &types.InterpretationGerminal{
-		InterpretationCommon: types.InterpretationCommon{
-			ID:                dao.ID,
-			SequencingId:      dao.SequencingId,
-			LocusId:		   dao.LocusId,
-			TranscriptId:	   dao.TranscriptId,
-			Interpretation: html.UnescapeString(dao.Interpretation),
-			Pubmed: make([]types.InterpretationPubmed, 0),
-			CreatedBy: dao.CreatedBy,
-			CreatedByName: dao.CreatedByName,
-			CreatedAt: dao.CreatedAt,
-			UpdatedBy: dao.UpdatedBy,
-			UpdatedByName: dao.UpdatedByName,
-			UpdatedAt: dao.UpdatedAt,
-		},
-		Condition:		   dao.Condition,
-		Classification:    dao.Classification,
-		ClassificationCriterias: strings.Split(dao.ClassificationCriterias, ","),
-		TransmissionModes: strings.Split(dao.TransmissionModes, ","),
-		
-	}	
+// mappers, could be moved to a separate file
+func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.InterpretationCommonDAO) *types.InterpretationCommon {
+	pubmeds := strings.Split(dao.Pubmed, ",");
+	interpretation:= &types.InterpretationCommon{
+		ID:                dao.ID,
+		SequencingId:      dao.SequencingId,
+		LocusId:		   dao.LocusId,
+		TranscriptId:	   dao.TranscriptId,
+		Interpretation: html.UnescapeString(dao.Interpretation),
+		Pubmed: make([]types.InterpretationPubmed, len(pubmeds)),
+		CreatedBy: dao.CreatedBy,
+		CreatedByName: dao.CreatedByName,
+		CreatedAt: dao.CreatedAt,
+		UpdatedBy: dao.UpdatedBy,
+		UpdatedByName: dao.UpdatedByName,
+		UpdatedAt: dao.UpdatedAt,
+	};
 	sliceutils.ForEach(strings.Split(dao.Pubmed, ","), func(pubmed string, i int, slice []string) {
 		citation, _ := r.pubmedClient.GetCitationById(pubmed);
 		interpretationPubmed := types.InterpretationPubmed{
@@ -60,26 +55,63 @@ func (r *InterpretationsRepository) mapToInterpretationGerminal(dao *types.Inter
 	return interpretation
 }
 
+func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation *types.InterpretationCommon) *types.InterpretationCommonDAO {
+	return &types.InterpretationCommonDAO{
+		ID:                interpretation.ID,
+		SequencingId:      interpretation.SequencingId,
+		LocusId:		   interpretation.LocusId,		
+		TranscriptId:	   interpretation.TranscriptId,
+		Interpretation: html.EscapeString(interpretation.Interpretation),
+		Pubmed: strings.Join(sliceutils.Map(interpretation.Pubmed, func(pubmed types.InterpretationPubmed, i int, slice []types.InterpretationPubmed) string { return interpretation.Pubmed[i].CitationID }), ","),
+		CreatedBy: interpretation.CreatedBy,
+		CreatedByName: interpretation.CreatedByName,
+		CreatedAt: interpretation.CreatedAt,
+		UpdatedBy: interpretation.UpdatedBy,
+		UpdatedByName: interpretation.UpdatedByName,
+		UpdatedAt: interpretation.UpdatedAt,
+	};
+}
+
+func (r *InterpretationsRepository) mapToInterpretationGerminal(dao *types.InterpretationGerminalDAO) *types.InterpretationGerminal {
+	interpretation := &types.InterpretationGerminal{
+		InterpretationCommon: *r.mapToInterpretationCommon(&dao.InterpretationCommonDAO),
+		Condition:		   dao.Condition,
+		Classification:    dao.Classification,
+		ClassificationCriterias: strings.Split(dao.ClassificationCriterias, ","),
+		TransmissionModes: strings.Split(dao.TransmissionModes, ","),
+	}	
+	return interpretation
+}
+
 func (r *InterpretationsRepository) mapToInterpretationGerminalDAO(interpretation *types.InterpretationGerminal) *types.InterpretationGerminalDAO {
 	return &types.InterpretationGerminalDAO{
-		InterpretationCommonDAO: types.InterpretationCommonDAO{
-			ID:                interpretation.ID,
-			SequencingId:      interpretation.SequencingId,
-			LocusId:		   interpretation.LocusId,		
-			TranscriptId:	   interpretation.TranscriptId,
-			Interpretation: html.EscapeString(interpretation.Interpretation),
-			Pubmed: strings.Join(sliceutils.Map(interpretation.Pubmed, func(pubmed types.InterpretationPubmed, i int, slice []types.InterpretationPubmed) string { return interpretation.Pubmed[i].CitationID }), ","),
-			CreatedBy: interpretation.CreatedBy,
-			CreatedByName: interpretation.CreatedByName,
-			CreatedAt: interpretation.CreatedAt,
-			UpdatedBy: interpretation.UpdatedBy,
-			UpdatedByName: interpretation.UpdatedByName,
-			UpdatedAt: interpretation.UpdatedAt,
-		},
+		InterpretationCommonDAO: *r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon),
 		Condition:		   interpretation.Condition,
 		Classification:    interpretation.Classification,
 		ClassificationCriterias: strings.Join(interpretation.ClassificationCriterias, ","),
 		TransmissionModes: strings.Join(interpretation.TransmissionModes, ","),
+	}	
+}
+
+func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.InterpretationSomaticDAO) *types.InterpretationSomatic {
+	interpretation := &types.InterpretationSomatic{
+		InterpretationCommon: *r.mapToInterpretationCommon(&dao.InterpretationCommonDAO),
+		TumoralType:	   dao.TumoralType,
+		Oncogenicity:      dao.Oncogenicity,
+		OncogenicityClassificationCriterias: strings.Split(dao.OncogenicityClassificationCriterias, ","),
+		ClinicalUtility: dao.ClinicalUtility,
+
+	}	
+	return interpretation
+}
+
+func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation *types.InterpretationSomatic) *types.InterpretationSomaticDAO {
+	return &types.InterpretationSomaticDAO{
+		InterpretationCommonDAO: *r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon),
+		TumoralType:	   interpretation.TumoralType,
+		Oncogenicity:      interpretation.Oncogenicity,
+		OncogenicityClassificationCriterias: strings.Join(interpretation.OncogenicityClassificationCriterias, ","),
+		ClinicalUtility: interpretation.ClinicalUtility,
 	}	
 }
 
@@ -121,62 +153,6 @@ func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 	}
 	*interpretation = *r.mapToInterpretationGerminal(&res)
 	return nil
-}
-
-func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.InterpretationSomaticDAO) *types.InterpretationSomatic {
-	interpretation := &types.InterpretationSomatic{
-		InterpretationCommon: types.InterpretationCommon{
-			ID:                dao.ID,
-			SequencingId:      dao.SequencingId,
-			LocusId:		   dao.LocusId,		
-			TranscriptId:	   dao.TranscriptId,
-			Interpretation: html.UnescapeString(dao.Interpretation),
-			Pubmed: make([]types.InterpretationPubmed, 0),
-			CreatedBy: dao.CreatedBy,
-			CreatedByName: dao.CreatedByName,
-			CreatedAt: dao.CreatedAt,
-			UpdatedBy: dao.UpdatedBy,
-			UpdatedByName: dao.UpdatedByName,
-			UpdatedAt: dao.UpdatedAt,
-		},
-		TumoralType:	   dao.TumoralType,
-		Oncogenicity:      dao.Oncogenicity,
-		OncogenicityClassificationCriterias: strings.Split(dao.OncogenicityClassificationCriterias, ","),
-		ClinicalUtility: dao.ClinicalUtility,
-
-	}	
-	sliceutils.ForEach(strings.Split(dao.Pubmed, ","), func(pubmed string, i int, slice []string) {
-		citation, _ := r.pubmedClient.GetCitationById(pubmed);
-		interpretationPubmed := types.InterpretationPubmed{
-			CitationID: pubmed,
-			Citation: citation.Nlm.Format,
-		}
-		interpretation.Pubmed = append(interpretation.Pubmed, interpretationPubmed)
-	});
-	return interpretation
-}
-
-func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation *types.InterpretationSomatic) *types.InterpretationSomaticDAO {
-	return &types.InterpretationSomaticDAO{
-		InterpretationCommonDAO: types.InterpretationCommonDAO{
-			ID:                interpretation.ID,
-			SequencingId:      interpretation.SequencingId,
-			LocusId:		   interpretation.LocusId,		
-			TranscriptId:	   interpretation.TranscriptId,
-			Interpretation: html.EscapeString(interpretation.Interpretation),
-			Pubmed: strings.Join(sliceutils.Map(interpretation.Pubmed, func(pubmed types.InterpretationPubmed, i int, slice []types.InterpretationPubmed) string { return interpretation.Pubmed[i].CitationID }), ","),
-			CreatedBy: interpretation.CreatedBy,
-			CreatedByName: interpretation.CreatedByName,
-			CreatedAt: interpretation.CreatedAt,
-			UpdatedBy: interpretation.UpdatedBy,
-			UpdatedByName: interpretation.UpdatedByName,
-			UpdatedAt: interpretation.UpdatedAt,
-		},
-		TumoralType:	   interpretation.TumoralType,
-		Oncogenicity:      interpretation.Oncogenicity,
-		OncogenicityClassificationCriterias: strings.Join(interpretation.OncogenicityClassificationCriterias, ","),
-		ClinicalUtility: interpretation.ClinicalUtility,
-	}	
 }
 
 func (r *InterpretationsRepository) FirstSomatic(sequencingId string, locus string, transcriptId string) (*types.InterpretationSomatic, error) {
