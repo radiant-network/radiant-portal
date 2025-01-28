@@ -157,7 +157,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps<any>>(
       enableColumnResizing: true,
       columnResizeMode: "onChange",
       columnResizeDirection: "ltr",
-      data,
+      data: data,
       getCoreRowModel: getCoreRowModel(),
       getPaginationRowModel: getPaginationRowModel(),
       onPaginationChange: setPagination,
