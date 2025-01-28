@@ -5,12 +5,16 @@ import {
   QueryBuilderInstance,
   QueryBuilderProps,
 } from "./query-builder";
+import { v4 } from "uuid";
 
 export const useQueryBuilder = (
   props: QueryBuilderProps
 ): QueryBuilderInstance => {
   const defaultProps: CoreQueryBuilderProps = {
-    state: {},
+    state: {
+      activeQueryId: v4(),
+      queries: [],
+    },
     onStateChange: () => {},
     ...props,
   };

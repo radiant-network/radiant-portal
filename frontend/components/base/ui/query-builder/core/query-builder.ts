@@ -4,6 +4,13 @@ import { createSavedFilter, SavedFilterInstance } from "./saved-filter";
 import { createQuery, QueryInstance } from "./query";
 import { PartialKeys } from "../../../../lib/utils";
 import { v4 } from "uuid";
+import isEmpty from "lodash/isEmpty";
+import cloneDeep from "lodash/cloneDeep";
+import {
+  cleanUpQueries,
+  deleteQueryAndSetNext,
+  getDefaultSyntheticSqon,
+} from "./utils/sqon";
 
 export type QueryBuilderState = {
   /**
@@ -31,7 +38,7 @@ export type CoreQueryBuilderProps = {
   /**
    * State of the QueryBuilder. Use this to control the QueryBuilder
    */
-  state: Partial<QueryBuilderState>;
+  state: QueryBuilderState;
 
   /**
    * Initial state of the QueryBuilder
@@ -51,15 +58,7 @@ export type CoreQueryBuilderProps = {
    * @param query ISyntheticSqon
    * @returns void
    */
-  onQueryAdd?(query: ISyntheticSqon): void;
-
-  /**
-   * Callback when a new query is deleted
-   *
-   * @param queryId: string
-   * @returns void
-   */
-  onQueryDelete?(id: string): void;
+  onQueryCreate?(query: ISyntheticSqon): void;
 
   /**
    * Callback when a new query is updated
@@ -68,6 +67,14 @@ export type CoreQueryBuilderProps = {
    * @returns void
    */
   onQueryUpdate?(query: ISyntheticSqon): void;
+
+  /**
+   * Callback when a new query is deleted
+   *
+   * @param queryId: string
+   * @returns void
+   */
+  onQueryDelete?(id: string): void;
 
   /**
    * Callback when a SavedFilter is created
@@ -195,7 +202,7 @@ export type QueryBuilderInstance = {
    *
    * @param query ISyntheticSqon
    */
-  addQuery(query: ISyntheticSqon): void;
+  createQuery(query: ISyntheticSqon): void;
 
   /**
    * Call this function to delete a Query
@@ -249,6 +256,19 @@ export type QueryBuilderInstance = {
    * Call this function to get the active Query
    */
   getActiveQuery(): QueryInstance | null;
+
+  /**
+   * Call this function to set the Queries list
+   *
+   * @param activeQueryId string
+   * @param newQueries ISyntheticSqon[]
+   */
+  setQueries(activeQueryId: string, newQueries: ISyntheticSqon[]): void;
+
+  /**
+   * Call this function to reset the Queries
+   */
+  resetQueries(activeQueryId: string): void;
 
   /**
    * Call this function to check if the QueryBuilder has queries
@@ -339,7 +359,7 @@ export const createQueryBuilder = (
         queryBuilder.coreProps.state.queries.length > 0
       ) {
         return queryBuilder.coreProps.state.queries.map((query) =>
-          createQuery(query)
+          createQuery(queryBuilder, query)
         );
       }
 
@@ -360,27 +380,60 @@ export const createQueryBuilder = (
     getQueryIndexById: (id: string) => {
       return queryBuilder.getQueries().findIndex((query) => query.id === id);
     },
-    addQuery: (query: Omit<ISyntheticSqon, "id">) => {
+    createQuery: (query: Omit<ISyntheticSqon, "id">) => {
       const newQuery: ISyntheticSqon = {
         ...query,
         id: v4(),
       };
 
-      queryBuilder.setState({
-        activeQueryId: newQuery.id,
-        queries: [...queryBuilder.getRawQueries(), newQuery],
-      });
+      queryBuilder.setQueries(newQuery.id, [
+        ...queryBuilder.getRawQueries(),
+        newQuery,
+      ]);
+      queryBuilder.coreProps.onQueryCreate?.(newQuery);
     },
-    deleteQuery: (id: string) => {},
-    updateQuery: (id: string, data: Omit<ISyntheticSqon, "id">) => {},
+    updateQuery: (id: string, updatedQuery: Omit<ISyntheticSqon, "id">) => {
+      if (!id) return;
+
+      if (isEmpty(updatedQuery.content)) {
+        deleteQueryAndSetNext(id, queryBuilder);
+      } else {
+        const currentQueryIndex = queryBuilder.getQueryIndexById(id);
+        const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
+        const newQuery: ISyntheticSqon = {
+          ...updatedQuery,
+          id,
+          content: updatedQuery.content,
+          op: updatedQuery.op,
+        };
+        updatedQueries[currentQueryIndex] = newQuery;
+
+        queryBuilder.setQueries(
+          queryBuilder.coreProps.state.activeQueryId,
+          cleanUpQueries(updatedQueries)
+        );
+        queryBuilder.coreProps.onQueryUpdate?.(newQuery);
+      }
+    },
     duplicateQuery: (id: string) => {
       const query = queryBuilder.getQueryById(id);
 
-      console.log("duplicateQuery", query);
-
       if (query) {
-        queryBuilder.addQuery(query.syntheticSqon);
+        queryBuilder.createQuery(query.syntheticSqon);
       }
+    },
+    deleteQuery: (id: string) => {},
+    setQueries: (activeQueryId: string, newQueries: ISyntheticSqon[]) => {
+      queryBuilder.setState({
+        activeQueryId,
+        queries: newQueries,
+      });
+    },
+    resetQueries: (activeQueryId: string) => {
+      queryBuilder.setState({
+        activeQueryId,
+        queries: [getDefaultSyntheticSqon()],
+      });
     },
     hasQueries: () => {
       return queryBuilder.getQueries().length > 0;
