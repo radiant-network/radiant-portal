@@ -33,6 +33,9 @@ func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
 }
 
 func (r *StarrocksRepository) CheckDatabaseConnection() string {
+	if r == nil || r.db == nil {
+		return "down"
+	}
 	sqlDb, err := r.db.DB()
 	if err != nil {
 		log.Fatal("failed to get database object:", err)
