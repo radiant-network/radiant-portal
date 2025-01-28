@@ -181,6 +181,25 @@ func extractInterpretationParams(c *gin.Context) (string, string, string) {
 	return sequencingId, locusId, transcriptId
 }
 
+func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.InterpretationCommon) {
+	sequencingId, locusId, transcriptId := extractInterpretationParams(c)
+
+	interpretation.SequencingId = sequencingId
+	interpretation.LocusId = locusId
+	interpretation.TranscriptId = transcriptId
+
+	contextDecodedJWT, exist := c.Get("decodedJWT")
+	if exist {
+		decodedJWT := contextDecodedJWT.(*DecodedJWT)
+		
+		interpretation.CreatedBy = decodedJWT.Subject
+		interpretation.CreatedByName = decodedJWT.Name
+
+		interpretation.UpdatedBy = decodedJWT.Subject
+		interpretation.UpdatedByName = decodedJWT.Name
+	}
+}
+
 func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
@@ -199,7 +218,6 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 
 func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 
 		interpretation := &types.InterpretationGerminal{}
 		err := c.BindJSON(interpretation)
@@ -209,9 +227,7 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 			return
 		}
 
-		interpretation.SequencingId = sequencingId
-		interpretation.LocusId = locusId
-		interpretation.TranscriptId = transcriptId
+		fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon)
 
 		err = repo.CreateOrUpdateGermline(interpretation)
 
@@ -242,8 +258,6 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFun
 
 func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
-
 		interpretation := &types.InterpretationSomatic{}
 		err := c.BindJSON(interpretation)
 
@@ -252,9 +266,7 @@ func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFu
 			return
 		}
 
-		interpretation.SequencingId = sequencingId
-		interpretation.LocusId = locusId
-		interpretation.TranscriptId = transcriptId
+		fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon)
 
 		err = repo.CreateOrUpdateSomatic(interpretation)
 

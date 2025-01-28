@@ -49,7 +49,7 @@ func main() {
 	// Initialize database connection
 	dbStarrocks, err := database.NewStarrocksDB()
 	if err != nil {
-		log.Fatalf("Failed to initialize starrocks database: %v", err)
+		log.Printf("Failed to initialize starrocks database: %v", err)
 	}
 
 	dbPostgres, err := database.NewPostgresDB()
@@ -67,6 +67,7 @@ func main() {
 
 	r.Use(ginglog.Logger(3 * time.Second))
 	r.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
+	r.Use(server.ExtractJWTInformation())
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     corsAllowedOrigins,

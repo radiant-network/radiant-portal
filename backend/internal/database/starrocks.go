@@ -21,6 +21,9 @@ var (
 )
 
 func NewStarrocksDB() (*gorm.DB, error) {
+	if dbHost == "" {
+		return nil, fmt.Errorf("DB_HOST is not set")
+	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?interpolateParams=true",
 		dbUserName, dbPassword, dbHost, dbPort, dbName)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})

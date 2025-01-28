@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
-	"github.com/golang/glog"
 ) 
 
 type PubmedClient struct {
@@ -48,7 +48,7 @@ func (client * PubmedClient) GetCitationById(id string) (*types.PubmedCitation, 
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		glog.Errorf("Error while fetching citation from pubmed: ", res.StatusCode, string(data))
+		log.Printf("Error while fetching citation from pubmed: ", res.StatusCode, string(data))
 		return nil, nil
 	}
 	citation = &types.PubmedCitation{}
