@@ -36,7 +36,7 @@ func ExtractJWTInformation() gin.HandlerFunc {
 
 		decoded, err := jwt.DecodeSegment(tokenParts[1])
 		if err != nil {
-			log.Printf("Error decoding token: %v", err)
+			log.Print("Error decoding token: ", err)
 			c.Next()
 			return
 		}
@@ -44,7 +44,7 @@ func ExtractJWTInformation() gin.HandlerFunc {
 		decodedJWT := &DecodedJWT{}
 		err = json.Unmarshal(decoded, decodedJWT)
 		if err != nil {
-			log.Printf("Error parsing token: %v", err)
+			log.Print("Error parsing token: ", err)
 			c.Next()
 			return
 		}

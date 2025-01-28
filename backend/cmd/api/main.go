@@ -49,12 +49,12 @@ func main() {
 	// Initialize database connection
 	dbStarrocks, err := database.NewStarrocksDB()
 	if err != nil {
-		log.Printf("Failed to initialize starrocks database: %v", err)
+		log.Print("Failed to initialize starrocks database: ", err)
 	}
 
 	dbPostgres, err := database.NewPostgresDB()
 	if err != nil {
-		log.Fatalf("Failed to initialize postgres database: %v", err)
+		log.Fatal("Failed to initialize postgres database: ", err)
 	}
 
 	// Create repository
