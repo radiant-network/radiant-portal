@@ -1,15 +1,15 @@
 import { useState } from "react";
 import {
+  CoreQueryBuilderProps,
   createQueryBuilder,
   QueryBuilderInstance,
   QueryBuilderProps,
 } from "./core/query-builder";
-import { PartialKeys } from "@/lib/utils";
 
 export const useQueryBuilder = (
-  props: PartialKeys<QueryBuilderProps, "state">
+  props: QueryBuilderProps
 ): QueryBuilderInstance => {
-  const defaultProps: QueryBuilderProps = {
+  const defaultProps: CoreQueryBuilderProps = {
     state: {},
     onStateChange: () => {},
     ...props,
@@ -30,9 +30,9 @@ export const useQueryBuilder = (
       ...state,
       ...props.state,
     },
-    onStateChange: (updater) => {
-      setState(updater);
-      props.onStateChange?.(updater);
+    onStateChange: (newState) => {
+      setState(newState);
+      props.onStateChange?.(newState);
     },
   }));
 

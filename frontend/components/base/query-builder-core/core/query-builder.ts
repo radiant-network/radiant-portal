@@ -1,18 +1,20 @@
-import { ISyntheticSqon } from "@/model/sqon";
-import { ISavedFilter } from "@/model/saved-filter";
-import { SavedFilterInstance } from "./saved-filter";
-import { QueryInstance } from "./query";
+import { ISyntheticSqon } from "../../../model/sqon";
+import { ISavedFilter } from "../../../model/saved-filter";
+import { createSavedFilter, SavedFilterInstance } from "./saved-filter";
+import { createQuery, QueryInstance } from "./query";
+import { PartialKeys } from "../../../lib/utils";
+import { v4 } from "uuid";
 
 export type QueryBuilderState = {
   /**
    * Id of the active query
    */
-  activeQueryId?: string;
+  activeQueryId: string;
 
   /**
    * List of queries
    */
-  queries?: ISyntheticSqon[];
+  queries: ISyntheticSqon[];
 
   /**
    * List of saved filters
@@ -20,9 +22,7 @@ export type QueryBuilderState = {
   savedFilters?: ISavedFilter[];
 };
 
-export type QueryBuilderInitialState = Partial<QueryBuilderState>;
-
-export type QueryBuilderProps = {
+export type CoreQueryBuilderProps = {
   /**
    * Unique ID for the QueryBuilder
    */
@@ -31,19 +31,19 @@ export type QueryBuilderProps = {
   /**
    * State of the QueryBuilder. Use this to control the QueryBuilder
    */
-  state: QueryBuilderState;
+  state: Partial<QueryBuilderState>;
 
   /**
    * Initial state of the QueryBuilder
    */
-  initialState?: QueryBuilderInitialState;
+  initialState?: Partial<QueryBuilderState>;
 
   /**
    * Callback when the state of the QueryBuilder changes
    *
    * @param state Partial<QueryBuilderState>
    */
-  onStateChange?(state: Partial<QueryBuilderState>): void;
+  onStateChange?(state: QueryBuilderState): void;
 
   /**
    * Callback when a new query is added
@@ -103,6 +103,8 @@ export type QueryBuilderProps = {
   fieldsToIgnore?: string[];
 };
 
+export type QueryBuilderProps = PartialKeys<CoreQueryBuilderProps, "state">;
+
 export type QueryBuilderInstance = {
   /**
    * Call this function to get the state of the QueryBuilder
@@ -114,17 +116,17 @@ export type QueryBuilderInstance = {
    *
    * @param state QueryBuilderState
    */
-  setState(state: Partial<QueryBuilderState>): void;
+  setState(state: QueryBuilderState): void;
 
   /**
    * Readonly core properties of the QueryBuilder
    */
-  coreProps: Readonly<QueryBuilderProps>;
+  coreProps: Readonly<CoreQueryBuilderProps>;
 
   /**
    * Initial state of the QueryBuilder
    */
-  initialState: QueryBuilderInitialState;
+  initialState: QueryBuilderState;
 
   /**
    * Call this function to set the core properties of the QueryBuilder
@@ -132,7 +134,9 @@ export type QueryBuilderInstance = {
    * @param coreProps QueryBuilderProps
    */
   setCoreProps(
-    newCoreProps: (coreProps: Partial<QueryBuilderProps>) => QueryBuilderProps
+    newCoreProps: (
+      coreProps: Partial<CoreQueryBuilderProps>
+    ) => CoreQueryBuilderProps
   ): void;
 
   /**
@@ -172,7 +176,7 @@ export type QueryBuilderInstance = {
   /**
    * Call this function to get the selected SavedFilter
    */
-  getSelectedSavedFilter(): SavedFilterInstance;
+  getSelectedSavedFilter(): SavedFilterInstance | null;
 
   /**
    * Call this function to get the list of SavedFilter
@@ -237,9 +241,14 @@ export type QueryBuilderInstance = {
   getQueries(): QueryInstance[];
 
   /**
+   * Call this function to get the list of Queries
+   */
+  getRawQueries(): ISyntheticSqon[];
+
+  /**
    * Call this function to get the active Query
    */
-  getActiveQuery(): QueryInstance;
+  getActiveQuery(): QueryInstance | null;
 
   /**
    * Call this function to check if the QueryBuilder has queries
@@ -250,22 +259,33 @@ export type QueryBuilderInstance = {
    * Call this function to check if the QueryBuilder can combine queries
    */
   canCombine(): boolean;
+
+  /**
+   * Call this function to reset the QueryBuilder
+   */
+  reset: () => void;
 };
 
 export const createQueryBuilder = (
-  props: QueryBuilderProps
+  coreProps: CoreQueryBuilderProps
 ): QueryBuilderInstance => {
   const queryBuilder: QueryBuilderInstance = {} as QueryBuilderInstance;
 
   const coreInstance: QueryBuilderInstance = {
-    initialState: props.initialState || {},
+    coreProps,
+    initialState: (coreProps.initialState || {}) as QueryBuilderState,
+    reset: () => {
+      queryBuilder.setState(queryBuilder.initialState);
+    },
     getState: () => {
-      return queryBuilder.coreProps.state;
+      return queryBuilder.coreProps.state as QueryBuilderState;
     },
-    setState: (newState: Partial<QueryBuilderState>) => {
-      queryBuilder.coreProps.onStateChange?.(newState);
+    setState: (newState: QueryBuilderState) => {
+      queryBuilder.coreProps.onStateChange?.({
+        ...queryBuilder.coreProps.state,
+        ...newState,
+      });
     },
-    coreProps: props,
     setCoreProps: (updater) => {
       queryBuilder.coreProps = updater(queryBuilder.coreProps);
     },
@@ -274,35 +294,100 @@ export const createQueryBuilder = (
     updateSavedFilter: (id: string, data: Omit<ISavedFilter, "id">) => {},
     saveSavedFilter: (filter: ISavedFilter) => {},
     setSelectedSavedFilter: (id: string) => {},
-    getSelectedSavedFilter: () => {
-      return {} as SavedFilterInstance;
-    },
     getSavedFilters: () => {
-      return [] as SavedFilterInstance[];
+      if (
+        queryBuilder.coreProps.state.savedFilters &&
+        queryBuilder.coreProps.state.savedFilters.length > 0
+      ) {
+        return queryBuilder.coreProps.state.savedFilters.map((savedFilter) =>
+          createSavedFilter(savedFilter)
+        );
+      }
+
+      return [];
+    },
+    getSelectedSavedFilter: () => {
+      const activeQuery = queryBuilder.getActiveQuery();
+
+      if (activeQuery) {
+        return (
+          queryBuilder
+            .getSavedFilters()
+            .find((savedFilter) =>
+              savedFilter
+                .getQueries()
+                .find((query) => query.id === activeQuery.id)
+            ) || null
+        );
+      }
+
+      return null;
     },
     getSavedFilterById: (id: string) => {
-      return {} as SavedFilterInstance;
+      return (
+        queryBuilder
+          .getSavedFilters()
+          .find((savedFilter) => savedFilter.id === id) || null
+      );
     },
-    addQuery: (query: ISyntheticSqon) => {},
-    deleteQuery: (id: string) => {},
-    updateQuery: (id: string, data: Omit<ISyntheticSqon, "id">) => {},
-    duplicateQuery: (id: string) => {},
-    getQueryIndexById: (id: string) => {
-      return 0;
-    },
-    getQueryById: (id: string) => {
-      return {} as QueryInstance;
+    getRawQueries: () => {
+      return queryBuilder.coreProps.state.queries || [];
     },
     getQueries: () => {
-      return [] as QueryInstance[];
+      if (
+        queryBuilder.coreProps.state.queries &&
+        queryBuilder.coreProps.state.queries.length > 0
+      ) {
+        return queryBuilder.coreProps.state.queries.map((query) =>
+          createQuery(query)
+        );
+      }
+
+      return [];
+    },
+    getQueryById: (id: string) => {
+      return queryBuilder.getQueries().find((query) => query.id === id) || null;
     },
     getActiveQuery: () => {
-      return {} as QueryInstance;
+      if (!queryBuilder.coreProps.state.activeQueryId) {
+        return null;
+      }
+
+      return queryBuilder.getQueryById(
+        queryBuilder.coreProps.state.activeQueryId
+      );
+    },
+    getQueryIndexById: (id: string) => {
+      return queryBuilder.getQueries().findIndex((query) => query.id === id);
+    },
+    addQuery: (query: Omit<ISyntheticSqon, "id">) => {
+      const newQuery: ISyntheticSqon = {
+        ...query,
+        id: v4(),
+      };
+
+      queryBuilder.setState({
+        activeQueryId: newQuery.id,
+        queries: [...queryBuilder.getRawQueries(), newQuery],
+      });
+    },
+    deleteQuery: (id: string) => {},
+    updateQuery: (id: string, data: Omit<ISyntheticSqon, "id">) => {},
+    duplicateQuery: (id: string) => {
+      const query = queryBuilder.getQueryById(id);
+
+      console.log("duplicateQuery", query);
+
+      if (query) {
+        queryBuilder.addQuery(query.syntheticSqon);
+      }
     },
     hasQueries: () => {
-      return false;
+      return queryBuilder.getQueries().length > 0;
     },
-    canCombine: () => true,
+    canCombine: () => {
+      return queryBuilder.getQueries().length > 1;
+    },
   };
 
   Object.assign(queryBuilder, coreInstance);

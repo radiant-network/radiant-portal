@@ -1,4 +1,4 @@
-import { ISyntheticSqon } from "@/model/sqon";
+import { ISyntheticSqon } from "../../../model/sqon";
 import { isEmptySqon } from "../utils/sqon";
 
 export type CoreQuery = {
