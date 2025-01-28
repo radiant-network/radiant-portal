@@ -97,6 +97,64 @@ CREATE TABLE IF NOT EXISTS interpretation_germinal_history
     updated_at              TIMESTAMPTZ      DEFAULT NOW()
     );
 
+CREATE TABLE interpretation_somatic
+(
+    id                       UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    sequencing_id            TEXT NOT NULL,
+    locus_id                 TEXT NOT NULL,
+    transcript_id            TEXT NOT NULL,
+    tumoral_type             TEXT,
+    oncogenicity             TEXT,
+    oncogenicity_classification_criterias   TEXT,
+    clinical_utility         TEXT,
+    interpretation           TEXT,
+    pubmed                   TEXT,
+    created_by               TEXT,
+    created_by_name          TEXT,
+    created_at               TIMESTAMPTZ      DEFAULT NOW(),
+    updated_by               TEXT,
+    updated_by_name          TEXT,
+    updated_at               TIMESTAMPTZ      DEFAULT NOW(),
+    CONSTRAINT UC_Interpretation_somatic UNIQUE (sequencing_id, locus_id, transcript_id)
+);
+
+CREATE SEQUENCE IF NOT EXISTS interpretation_somatic_history_seq
+    INCREMENT BY 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    START 1
+    CACHE 1
+    NO CYCLE;
+
+CREATE TRIGGER trg_interpretation_somatic
+    AFTER INSERT OR UPDATE OR DELETE
+                    ON interpretation_somatic
+                        FOR EACH ROW
+                        EXECUTE PROCEDURE tp_history_func();
+
+CREATE TABLE IF NOT EXISTS interpretation_somatic_history
+(
+    history_id               BIGSERIAL PRIMARY KEY,
+    history_timestamp        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    history_deleted_by       VARCHAR,
+    history_op               VARCHAR     NOT NULL,
+    id                       UUID,
+    sequencing_id            TEXT NOT NULL,
+    locus_id                 TEXT NOT NULL,
+    transcript_id            TEXT NOT NULL,
+    tumoral_type             TEXT,
+    oncogenicity             TEXT,
+    oncogenicity_classification_criterias   TEXT,
+    clinical_utility         TEXT,
+    interpretation           TEXT,
+    pubmed                   TEXT,
+    created_by               TEXT,
+    created_by_name          TEXT,
+    created_at               TIMESTAMPTZ      DEFAULT NOW(),
+    updated_by               TEXT,
+    updated_by_name          TEXT,
+    updated_at               TIMESTAMPTZ      DEFAULT NOW()
+    );
 
 
 

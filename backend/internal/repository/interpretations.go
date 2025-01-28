@@ -6,6 +6,7 @@ import (
 	"html"
 	"strings"
 
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/client"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/Goldziher/go-utils/sliceutils"
 	"gorm.io/gorm"
@@ -13,18 +14,21 @@ import (
 
 type InterpretationsRepository struct {
 	db *gorm.DB
+	pubmedClient * client.PubmedClient
 }
 
 type InterpretationsDAO interface {
-	First(sequencingId string, locusId string, transcriptId string) (*types.InterpretationGerminal, error)
-	CreateOrUpdate(interpretation *types.InterpretationGerminal) error
+	FirstGermline(sequencingId string, locusId string, transcriptId string) (*types.InterpretationGerminal, error)
+	CreateOrUpdateGermline(interpretation *types.InterpretationGerminal) error
+	FirstSomatic(sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error)
+	CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error
 }
 
-func NewInterpretationsRepository(db *gorm.DB) *InterpretationsRepository {
-	return &InterpretationsRepository{db: db}
+func NewInterpretationsRepository(db *gorm.DB, pubmedClient * client.PubmedClient) *InterpretationsRepository {
+	return &InterpretationsRepository{db: db, pubmedClient: pubmedClient}
 }
 
-func mapToInterpretationGerminal(dao *types.InterpretationGerminalDAO) *types.InterpretationGerminal {
+func (r *InterpretationsRepository) mapToInterpretationGerminal(dao *types.InterpretationGerminalDAO) *types.InterpretationGerminal {
 	interpretation := &types.InterpretationGerminal{
 		ID:                dao.ID,
 		SequencingId:      dao.SequencingId,
@@ -44,16 +48,17 @@ func mapToInterpretationGerminal(dao *types.InterpretationGerminalDAO) *types.In
 		UpdatedAt: dao.UpdatedAt,
 	}	
 	sliceutils.ForEach(strings.Split(dao.Pubmed, ","), func(pubmed string, i int, slice []string) {
+		citation, _ := r.pubmedClient.GetCitationById(pubmed);
 		interpretationPubmed := types.InterpretationPubmed{
 			CitationID: pubmed,
-			Citation: "",
+			Citation: citation.Nlm.Format,
 		}
 		interpretation.Pubmed = append(interpretation.Pubmed, interpretationPubmed)
 	});
 	return interpretation
 }
 
-func mapToInterpretationGerminalDAO(interpretation *types.InterpretationGerminal) *types.InterpretationGerminalDAO {
+func (r *InterpretationsRepository) mapToInterpretationGerminalDAO(interpretation *types.InterpretationGerminal) *types.InterpretationGerminalDAO {
 	return &types.InterpretationGerminalDAO{
 		ID:                interpretation.ID,
 		SequencingId:      interpretation.SequencingId,
@@ -74,8 +79,7 @@ func mapToInterpretationGerminalDAO(interpretation *types.InterpretationGerminal
 	}	
 }
 
-
-func (r *InterpretationsRepository) First(sequencingId string, locus string, transcriptId string) (*types.InterpretationGerminal, error) {
+func (r *InterpretationsRepository) FirstGermline(sequencingId string, locus string, transcriptId string) (*types.InterpretationGerminal, error) {
 	var dao types.InterpretationGerminalDAO
 	if result := r.db.
 		Table(types.InterpretationGerminalTable.Name).
@@ -88,11 +92,11 @@ func (r *InterpretationsRepository) First(sequencingId string, locus string, tra
 			return nil, nil
 		}
 	}
-	return mapToInterpretationGerminal(&dao), nil
+	return r.mapToInterpretationGerminal(&dao), nil
 }
 
-func (r* InterpretationsRepository) CreateOrUpdate(interpretation *types.InterpretationGerminal) error {
-	dao := mapToInterpretationGerminalDAO(interpretation)
+func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types.InterpretationGerminal) error {
+	dao := r.mapToInterpretationGerminalDAO(interpretation)
 	var res types.InterpretationGerminalDAO
 	result := r.db.
 		Table(types.InterpretationGerminalTable.Name).
@@ -104,6 +108,90 @@ func (r* InterpretationsRepository) CreateOrUpdate(interpretation *types.Interpr
 		return err
 	}
 	fmt.Printf("Interpretation created or updated: %+v\n", res)
-	interpretation.ID = res.ID
+	*interpretation = *r.mapToInterpretationGerminal(&res)
+	return nil
+}
+
+func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.InterpretationSomaticDAO) *types.InterpretationSomatic {
+	interpretation := &types.InterpretationSomatic{
+		ID:                dao.ID,
+		SequencingId:      dao.SequencingId,
+		LocusId:		   dao.LocusId,		
+		TranscriptId:	   dao.TranscriptId,
+		TumoralType:	   dao.TumoralType,
+		Oncogenicity:      dao.Oncogenicity,
+		OncogenicityClassificationCriterias: strings.Split(dao.OncogenicityClassificationCriterias, ","),
+		ClinicalUtility: dao.ClinicalUtility,
+		Interpretation: html.UnescapeString(dao.Interpretation),
+		Pubmed: make([]types.InterpretationPubmed, 0),
+		CreatedBy: dao.CreatedBy,
+		CreatedByName: dao.CreatedByName,
+		CreatedAt: dao.CreatedAt,
+		UpdatedBy: dao.UpdatedBy,
+		UpdatedByName: dao.UpdatedByName,
+		UpdatedAt: dao.UpdatedAt,
+	}	
+	sliceutils.ForEach(strings.Split(dao.Pubmed, ","), func(pubmed string, i int, slice []string) {
+		citation, _ := r.pubmedClient.GetCitationById(pubmed);
+		interpretationPubmed := types.InterpretationPubmed{
+			CitationID: pubmed,
+			Citation: citation.Nlm.Format,
+		}
+		interpretation.Pubmed = append(interpretation.Pubmed, interpretationPubmed)
+	});
+	return interpretation
+}
+
+func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation *types.InterpretationSomatic) *types.InterpretationSomaticDAO {
+	return &types.InterpretationSomaticDAO{
+		ID:                interpretation.ID,
+		SequencingId:      interpretation.SequencingId,
+		LocusId:		   interpretation.LocusId,		
+		TranscriptId:	   interpretation.TranscriptId,
+		TumoralType:	   interpretation.TumoralType,
+		Oncogenicity:      interpretation.Oncogenicity,
+		OncogenicityClassificationCriterias: strings.Join(interpretation.OncogenicityClassificationCriterias, ","),
+		ClinicalUtility: interpretation.ClinicalUtility,
+		Interpretation: html.EscapeString(interpretation.Interpretation),
+		Pubmed: strings.Join(sliceutils.Map(interpretation.Pubmed, func(pubmed types.InterpretationPubmed, i int, slice []types.InterpretationPubmed) string { return interpretation.Pubmed[i].CitationID }), ","),
+		CreatedBy: interpretation.CreatedBy,
+		CreatedByName: interpretation.CreatedByName,
+		CreatedAt: interpretation.CreatedAt,
+		UpdatedBy: interpretation.UpdatedBy,
+		UpdatedByName: interpretation.UpdatedByName,
+		UpdatedAt: interpretation.UpdatedAt,
+	}	
+}
+
+func (r *InterpretationsRepository) FirstSomatic(sequencingId string, locus string, transcriptId string) (*types.InterpretationSomatic, error) {
+	var dao types.InterpretationSomaticDAO
+	if result := r.db.
+		Table(types.InterpretationSomaticTable.Name).
+		Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", sequencingId, locus, transcriptId).
+		First(&dao); result.Error != nil {
+		err := result.Error
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		} else {
+			return nil, nil
+		}
+	}
+	return r.mapToInterpretationSomatic(&dao), nil
+}
+
+func (r* InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error {
+	dao := r.mapToInterpretationSomaticDAO(interpretation)
+	var res types.InterpretationSomaticDAO
+	result := r.db.
+		Table(types.InterpretationSomaticTable.Name).
+		Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId).
+		Assign(dao).
+		FirstOrCreate(&res)
+	err := result.Error
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Interpretation created or updated: %+v\n", res)
+	*interpretation = *r.mapToInterpretationSomatic(&res)
 	return nil
 }

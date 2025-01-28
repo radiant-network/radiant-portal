@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/client"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/gin-gonic/gin"
@@ -173,7 +174,7 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	}
 }
 
-func extractInterpretationGermlineParams(c *gin.Context) (string, string, string) {
+func extractInterpretationParams(c *gin.Context) (string, string, string) {
 	sequencingId := c.Param("sequencing_id")
 	locusId := c.Param("locus_id")
 	transcriptId := c.Param("transcript_id")
@@ -182,8 +183,8 @@ func extractInterpretationGermlineParams(c *gin.Context) (string, string, string
 
 func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sequencingId, locusId, transcriptId := extractInterpretationGermlineParams(c)
-		interpretation, err := repo.First(sequencingId, locusId, transcriptId)
+		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
+		interpretation, err := repo.FirstGermline(sequencingId, locusId, transcriptId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
@@ -198,7 +199,7 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 
 func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sequencingId, locusId, transcriptId := extractInterpretationGermlineParams(c)
+		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 
 		interpretation := &types.InterpretationGerminal{}
 		err := c.BindJSON(interpretation)
@@ -212,7 +213,7 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 		interpretation.LocusId = locusId
 		interpretation.TranscriptId = transcriptId
 
-		err = repo.CreateOrUpdate(interpretation)
+		err = repo.CreateOrUpdateGermline(interpretation)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
@@ -220,5 +221,64 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 		}
 
 		c.JSON(http.StatusOK, interpretation)
+	}
+}
+
+func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
+		interpretation, err := repo.FirstSomatic(sequencingId, locusId, transcriptId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		if (interpretation == nil) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		c.JSON(http.StatusOK, interpretation)
+	}
+}
+
+func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
+
+		interpretation := &types.InterpretationSomatic{}
+		err := c.BindJSON(interpretation)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+
+		interpretation.SequencingId = sequencingId
+		interpretation.LocusId = locusId
+		interpretation.TranscriptId = transcriptId
+
+		err = repo.CreateOrUpdateSomatic(interpretation)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+
+		c.JSON(http.StatusOK, interpretation)
+	}
+}
+
+func GetPubmedCitation(pubmedClient *client.PubmedClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("citation_id")
+		citation, err := pubmedClient.GetCitationById(id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		if (citation == nil) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		c.JSON(http.StatusOK, citation)
 	}
 }

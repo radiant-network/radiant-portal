@@ -24,6 +24,26 @@ type InterpretationGerminal struct {
 	
 } // @name InterpretationGerminal
 
+type InterpretationSomatic struct {
+	ID               		string				    `json:"id,omitempty"`
+	SequencingId        	string         			`json:"sequencing_id,omitempty"`
+	LocusId               	string             		`json:"locus_id,omitempty"`
+	TranscriptId     		string             		`json:"transcript_id,omitempty"`
+	TumoralType				string					`json:"tumoral_type,omitempty"`
+	Oncogenicity      	    string             		`json:"oncogenicity,omitempty"`
+    OncogenicityClassificationCriterias []string    `json:"oncogenicity_classification_criterias,omitempty"`
+    ClinicalUtility         string            	    `json:"clinical_utility,omitempty"`
+    Interpretation          string              	`json:"interpretation,omitempty"`
+    Pubmed	                []InterpretationPubmed	`json:"pubmed,omitempty"`
+	CreatedBy               string              	`json:"-"`
+    CreatedByName          	string        			`json:"-"`      	
+    CreatedAt               time.Time     			`json:"-"`      	
+    UpdatedBy              	string      			`json:"-"`      	
+    UpdatedByName         	string       			`json:"-"`       	
+    UpdatedAt              	time.Time    			`json:"-"`
+	
+} // @name InterpretationSomatic
+
 type InterpretationPubmed struct {
 	CitationID			  string              `json:"citation_id,omitempty"`
 	Citation			  string              `json:"citation,omitempty"`
@@ -32,6 +52,10 @@ type InterpretationPubmed struct {
 
 var InterpretationGerminalTable = Table{
 	Name:  "interpretation_germinal",
+}
+
+var InterpretationSomaticTable = Table{
+	Name:  "interpretation_somatic",
 }
 
 type InterpretationGerminalDAO struct {
@@ -52,3 +76,23 @@ type InterpretationGerminalDAO struct {
     UpdatedByName         	string              	
     UpdatedAt              	time.Time        		
 }
+
+type InterpretationSomaticDAO struct {
+	ID 						string `gorm:"primary_key; unique; type:uuid; default:gen_random_uuid()"`
+	SequencingId        	string         			
+	LocusId               	string             		
+	TranscriptId     		string             		
+	TumoralType				string					
+	Oncogenicity      	    string             		
+    OncogenicityClassificationCriterias string            	
+    ClinicalUtility         string            	
+    Interpretation          string              	
+    Pubmed	                string	
+    CreatedBy               string              	
+    CreatedByName          	string              	
+    CreatedAt               time.Time           	
+    UpdatedBy              	string              	
+    UpdatedByName         	string              	
+    UpdatedAt              	time.Time        		
+}
+

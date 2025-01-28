@@ -3,6 +3,7 @@ package repository
 import (
 	"log"
 
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/client"
 	"gorm.io/gorm"
 )
 
@@ -15,8 +16,8 @@ type PostgresDAO interface {
 	CheckDatabaseConnection() string
 }
 
-func NewPostgresRepository(db *gorm.DB) *PostgresRepository {
-	return &PostgresRepository{db: db, Interpretations: NewInterpretationsRepository(db)}
+func NewPostgresRepository(db *gorm.DB, pubmedClient * client.PubmedClient) *PostgresRepository {
+	return &PostgresRepository{db: db, Interpretations: NewInterpretationsRepository(db, pubmedClient)}
 }
 
 func (r *PostgresRepository) CheckDatabaseConnection() string {

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/client"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/database"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/server"
@@ -58,7 +59,8 @@ func main() {
 
 	// Create repository
 	repoStarrocks := repository.NewStarrocksRepository(dbStarrocks)
-	repoPostgres := repository.NewPostgresRepository(dbPostgres)
+	pubmedClient := client.NewPubmedClient()
+	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -72,7 +74,7 @@ func main() {
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true, // Enable cookies/auth
 	}))
-
+	
 	occurrencesGroup := r.Group("/occurrences")
 
 	role := os.Getenv("KEYCLOAK_CLIENT_ROLE")
@@ -90,8 +92,13 @@ func main() {
 	interpretationsGroup.Use(ginkeycloak.NewAccessBuilder(keycloakConfig).
 		RestrictButForRole(role).
 		Build())
+	interpretationsGroup.GET("/pubmed/:citation_id", server.GetPubmedCitation(pubmedClient))
 	interpretationsGermlineGroup := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres.Interpretations))
 	interpretationsGermlineGroup.POST("", server.PostInterpretationGermline(repoPostgres.Interpretations))
+	interpretationsSomaticGroup := interpretationsGroup.Group("/somatic/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
+	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
+
 	r.Run(":8090")
 }
