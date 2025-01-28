@@ -1,4 +1,4 @@
-import { ISyntheticSqon } from "@/model/sqon";
+import { ISyntheticSqon } from "../../../../../model/sqon";
 import isEmpty from "lodash/isEmpty";
 
 export const isEmptySqon = (

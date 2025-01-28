@@ -4,7 +4,7 @@ import {
   createQueryBuilder,
   QueryBuilderInstance,
   QueryBuilderProps,
-} from "./core/query-builder";
+} from "./query-builder";
 
 export const useQueryBuilder = (
   props: QueryBuilderProps

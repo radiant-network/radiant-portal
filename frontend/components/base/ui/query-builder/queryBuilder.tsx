@@ -1,5 +1,5 @@
-import { QueryBuilderProps } from "../../../base/query-builder-core/core/query-builder";
-import { useQueryBuilder } from "../../../base/query-builder-core/useQueryBuilder";
+import { QueryBuilderProps } from "./core/query-builder";
+import { useQueryBuilder } from "./core/useQueryBuilder";
 import { Button } from "../button";
 
 const QueryBuilder = (props: QueryBuilderProps) => {
