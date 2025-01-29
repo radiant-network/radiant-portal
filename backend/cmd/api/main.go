@@ -67,7 +67,6 @@ func main() {
 
 	r.Use(ginglog.Logger(3 * time.Second))
 	r.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
-	r.Use(server.ExtractJWTInformation())
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     corsAllowedOrigins,
@@ -101,5 +100,6 @@ func main() {
 	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
 
+	r.Use(gin.Recovery())
 	r.Run(":8090")
 }

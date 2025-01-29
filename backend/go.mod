@@ -8,7 +8,6 @@ require (
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/glog v1.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/magiconair/properties v1.8.7

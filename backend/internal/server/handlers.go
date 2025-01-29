@@ -8,6 +8,7 @@ import (
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/gin-gonic/gin"
+	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
 // StatusHandler handles the status endpoint
@@ -188,14 +189,14 @@ func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.I
 	interpretation.LocusId = locusId
 	interpretation.TranscriptId = transcriptId
 
-	contextDecodedJWT, exist := c.Get("decodedJWT")
+	ginToken, exist := c.Get("token")
 	if exist {
-		decodedJWT := contextDecodedJWT.(*DecodedJWT)
-		
-		interpretation.CreatedBy = decodedJWT.Subject
+		decodedJWT := ginToken.(ginkeycloak.KeyCloakToken)
+
+		interpretation.CreatedBy = decodedJWT.Sub
 		interpretation.CreatedByName = decodedJWT.Name
 
-		interpretation.UpdatedBy = decodedJWT.Subject
+		interpretation.UpdatedBy = decodedJWT.Sub
 		interpretation.UpdatedByName = decodedJWT.Name
 	}
 }

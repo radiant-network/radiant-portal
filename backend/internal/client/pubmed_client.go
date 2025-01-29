@@ -47,13 +47,20 @@ func (client * PubmedClient) GetCitationById(id string) (*types.PubmedCitation, 
 	if err != nil {
 		return nil, err
 	}
-	if res.StatusCode != http.StatusOK {
-		log.Print("Error while fetching citation from pubmed: ", res.StatusCode, string(data))
+	// could'nt get one during tests but just in case
+	if res.StatusCode == http.StatusNotFound { 
 		return nil, nil
+	}
+	if res.StatusCode != http.StatusOK {
+		err = fmt.Errorf("Error while fetching citation from pubmed: %d %s", res.StatusCode, string(data));
+		log.Print(err)
+		return nil, err
 	}
 	citation = &types.PubmedCitation{}
 	if err := json.Unmarshal(data, citation); err != nil {
-		return nil, err
+		err = fmt.Errorf("Error while parsing citation from pubmed: %d %s", res.StatusCode, string(data));
+		log.Print(err)
+		return nil, nil // equivalent to NOT FOUND during tests
 	}
 	client.cacheMutex.Lock()
 	client.cache[id] = citation

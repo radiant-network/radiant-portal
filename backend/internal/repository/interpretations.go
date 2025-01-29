@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"html"
 	"strings"
 
@@ -44,13 +45,13 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 		UpdatedByName: dao.UpdatedByName,
 		UpdatedAt: dao.UpdatedAt,
 	};
-	sliceutils.ForEach(strings.Split(dao.Pubmed, ","), func(pubmed string, i int, slice []string) {
+	sliceutils.ForEach(pubmeds, func(pubmed string, i int, slice []string) {
 		citation, _ := r.pubmedClient.GetCitationById(pubmed);
 		interpretationPubmed := types.InterpretationPubmed{
 			CitationID: pubmed,
 			Citation: citation.Nlm.Format,
 		}
-		interpretation.Pubmed = append(interpretation.Pubmed, interpretationPubmed)
+		interpretation.Pubmed[i] = interpretationPubmed
 	});
 	return interpretation
 }
@@ -123,7 +124,7 @@ func (r *InterpretationsRepository) FirstGermline(sequencingId string, locus str
 		First(&dao); result.Error != nil {
 		err := result.Error
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, fmt.Errorf("error while fetching germline interpretation: %w", err)
 		} else {
 			return nil, nil
 		}
@@ -149,7 +150,7 @@ func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 		FirstOrCreate(&res)
 	err = result.Error
 	if err != nil {
-		return err
+		return fmt.Errorf("error while create/update germline interpretation: %w", err)
 	}
 	*interpretation = *r.mapToInterpretationGerminal(&res)
 	return nil
@@ -163,7 +164,7 @@ func (r *InterpretationsRepository) FirstSomatic(sequencingId string, locus stri
 		First(&dao); result.Error != nil {
 		err := result.Error
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, fmt.Errorf("error while fetching somatic interpretation: %w", err)
 		} else {
 			return nil, nil
 		}
@@ -188,7 +189,7 @@ func (r* InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.
 		FirstOrCreate(&res)
 	err = result.Error
 	if err != nil {
-		return err
+		return fmt.Errorf("error while create/update somatic interpretation: %w", err)
 	}
 	*interpretation = *r.mapToInterpretationSomatic(&res)
 	return nil
