@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest, test } from "@jest/globals";
 import type { Mock } from "jest-mock";
-import { createQueryBuilder, CoreQueryBuilderProps } from "./query-builder";
+import { createQueryBuilder, CoreQueryBuilderProps } from "../query-builder";
 
 let defaultProps: CoreQueryBuilderProps = {
   id: "test-query-builder",
