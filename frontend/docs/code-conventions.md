@@ -2,6 +2,7 @@
 
 ## Files and Folders
 - Use PascalCase for component files: `UserProfile.tsx`
+- Use PascalCase for component directories: `AllProfile/UserProfile.tsx`
 - Use kebab-case for non-component files: `auth-utils.ts`
 - Use plural for folder names: `components/`, `utils/`
 - Name page components with "Page" suffix: `HomePage.tsx`, `UserProfilePage.tsx`
