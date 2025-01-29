@@ -39,10 +39,6 @@ export enum FilterOperators {
 export const SET_ID_PREFIX = "set_id:";
 
 export type TFilterValue = Array<string | number | boolean>;
-<<<<<<< HEAD
-
-=======
->>>>>>> 6363026 (query-builder wip)
 export interface IRemoteComponent {
   id: string;
   props?: {
@@ -63,10 +59,6 @@ export interface IWildCardValueContent extends Omit<IValueContent, "field"> {
 }
 
 export type TValueOp = FieldOperators | string;
-<<<<<<< HEAD
-
-=======
->>>>>>> 6363026 (query-builder wip)
 export interface IValueFilter {
   content: IValueContent;
   op: TValueOp;
@@ -92,10 +84,6 @@ export interface IWildCardValueFilter extends Omit<IValueFilter, "content"> {
 export type TSqonGroupOp = BooleanOperators | string;
 export type TSqonContentValue = ISqonGroupFilter | IValueFilter;
 export type TSqonContent = Array<TSqonContentValue>;
-<<<<<<< HEAD
-
-=======
->>>>>>> 6363026 (query-builder wip)
 export interface ISqonGroupFilter {
   op: TSqonGroupOp;
   skipBooleanOperatorCheck?: boolean;

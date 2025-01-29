@@ -10,7 +10,7 @@ import {
   TSqonContentValue,
   TSyntheticSqonContent,
   TSyntheticSqonContentValue,
-} from "../../../../../model/sqon";
+} from "../../sqon";
 import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
 import { QueryBuilderInstance } from "../query-builder";

@@ -1,6 +1,6 @@
-import { ISyntheticSqon } from "../../../../model/sqon";
+import { ISyntheticSqon } from "../sqon";
 import { QueryInstance } from "./query";
-import { ISavedFilter } from "../../../../model/saved-filter";
+import { ISavedFilter } from "../saved-filter";
 
 export type CoreSavedFilter = {
   /**

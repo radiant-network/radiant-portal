@@ -1,4 +1,4 @@
-import { ISyntheticSqon } from "../../../../model/sqon";
+import { ISyntheticSqon } from "../sqon";
 import { QueryBuilderInstance } from "./query-builder";
 import { isEmptySqon } from "./utils/sqon";
 

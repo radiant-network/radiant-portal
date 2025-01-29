@@ -1,8 +1,8 @@
-import { ISyntheticSqon } from "../../../../model/sqon";
-import { ISavedFilter } from "../../../../model/saved-filter";
+import { ISyntheticSqon } from "../sqon";
+import { ISavedFilter } from "../saved-filter";
 import { createSavedFilter, SavedFilterInstance } from "./saved-filter";
 import { createQuery, QueryInstance } from "./query";
-import { PartialKeys } from "../../../../lib/utils";
+import { PartialKeys } from "../../lib/utils";
 import { v4 } from "uuid";
 import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
