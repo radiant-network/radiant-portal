@@ -11,14 +11,14 @@ export type CoreQuery = {
   /**
    * SyntheticSqon representing the query
    */
-  syntheticSqon: ISyntheticSqon;
+  raw(): ISyntheticSqon;
 
   /**
    * Call this function to know if the Query is empty
    *
    * @returns boolean
    */
-  isEmpty: () => boolean;
+  isEmpty(): boolean;
 
   /**
    * Call this function to delete the Query
@@ -48,7 +48,7 @@ export const createQuery = (
 
   const coreInstance: CoreQuery = {
     id: syntheticSqon.id,
-    syntheticSqon,
+    raw: () => syntheticSqon,
     isEmpty: (): boolean => isEmptySqon(syntheticSqon),
     delete: () => queryBuilder.deleteQuery(query.id),
     update: (data) => queryBuilder.updateQuery(query.id, data),

@@ -141,9 +141,7 @@ export type QueryBuilderInstance = {
    * @param coreProps QueryBuilderProps
    */
   setCoreProps(
-    newCoreProps: (
-      coreProps: Partial<CoreQueryBuilderProps>
-    ) => CoreQueryBuilderProps
+    newCoreProps: (coreProps: CoreQueryBuilderProps) => CoreQueryBuilderProps
   ): void;
 
   /**
@@ -320,7 +318,7 @@ export const createQueryBuilder = (
         queryBuilder.coreProps.state.savedFilters.length > 0
       ) {
         return queryBuilder.coreProps.state.savedFilters.map((savedFilter) =>
-          createSavedFilter(savedFilter)
+          createSavedFilter(queryBuilder, savedFilter)
         );
       }
 
@@ -350,9 +348,6 @@ export const createQueryBuilder = (
           .find((savedFilter) => savedFilter.id === id) || null
       );
     },
-    getRawQueries: () => {
-      return queryBuilder.coreProps.state.queries || [];
-    },
     getQueries: () => {
       if (
         queryBuilder.coreProps.state.queries &&
@@ -364,6 +359,9 @@ export const createQueryBuilder = (
       }
 
       return [];
+    },
+    getRawQueries: () => {
+      return queryBuilder.coreProps.state.queries || [];
     },
     getQueryById: (id: string) => {
       return queryBuilder.getQueries().find((query) => query.id === id) || null;
@@ -419,7 +417,7 @@ export const createQueryBuilder = (
       const query = queryBuilder.getQueryById(id);
 
       if (query) {
-        queryBuilder.createQuery(query.syntheticSqon);
+        queryBuilder.createQuery(query.raw());
       }
     },
     deleteQuery: (id: string) => {},
