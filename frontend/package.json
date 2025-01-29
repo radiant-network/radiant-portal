@@ -7,6 +7,7 @@
     "portals/*"
   ],
   "devDependencies": {
-    "@ferlab/eslint-config": "^2.0.0"
+    "@ferlab/eslint-config": "^2.0.0",
+    "eslint-plugin-prettier": "^5.2.3"
   }
 }

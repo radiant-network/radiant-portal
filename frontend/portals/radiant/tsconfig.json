@@ -3,7 +3,8 @@
     "**/*",
     "**/.server/**/*",
     "**/.client/**/*",
-    ".react-router/types/**/*"
+    ".react-router/types/**/*",
+    "app/types/**/*"
   ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
@@ -20,6 +21,7 @@
       "@/base/ui/*": ["../../components/base/ui/*"],
       "@/lib/*": ["../../components/lib/*"],
       "@/hooks/*": ["../../components/hooks/*"],
+      "@assets/*": ["../../themes/radiant/assets/*"],
       "variant/*": ["../../apps/variant/src/*"],
       "~/*": ["./app/*"],
       "react": ["./node_modules/@types/react"]

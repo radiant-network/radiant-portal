@@ -30,7 +30,12 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["base/**/*", "composite/**/*", "feature/**/*", "utils/**/*"],
+  "include": [
+    "base/**/*",
+    "composite/**/*",
+    "feature/**/*",
+    "utils/**/*",
+    "types/**/*"
+  ],
   "exclude": ["node_modules", "dist"]
 }
-
