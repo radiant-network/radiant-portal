@@ -5,7 +5,7 @@ SET schema 'radiant';
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE TABLE interpretation_germinal
+CREATE TABLE interpretation_germline
 (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     sequencing_id            TEXT NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE interpretation_germinal
     updated_by               TEXT,
     updated_by_name          TEXT,
     updated_at               TIMESTAMPTZ      DEFAULT NOW(),
-    CONSTRAINT UC_Interpretation_germinal UNIQUE (sequencing_id, locus_id, transcript_id)
+    CONSTRAINT UC_Interpretation_germline UNIQUE (sequencing_id, locus_id, transcript_id)
 );
 
 CREATE OR REPLACE FUNCTION tp_history_func() RETURNS TRIGGER AS
@@ -59,7 +59,7 @@ $$
 LANGUAGE plpgsql;
 
 
-CREATE SEQUENCE IF NOT EXISTS interpretation_germinal_history_seq
+CREATE SEQUENCE IF NOT EXISTS interpretation_germline_history_seq
     INCREMENT BY 1
     MINVALUE 1
     MAXVALUE 9223372036854775807
@@ -67,13 +67,13 @@ CREATE SEQUENCE IF NOT EXISTS interpretation_germinal_history_seq
     CACHE 1
     NO CYCLE;
 
-CREATE TRIGGER trg_interpretation_germinal
+CREATE TRIGGER trg_interpretation_germline
     AFTER INSERT OR UPDATE OR DELETE
-                    ON interpretation_germinal
+                    ON interpretation_germline
                         FOR EACH ROW
                         EXECUTE PROCEDURE tp_history_func();
 
-CREATE TABLE IF NOT EXISTS interpretation_germinal_history
+CREATE TABLE IF NOT EXISTS interpretation_germline_history
 (
     history_id               BIGSERIAL PRIMARY KEY,
     history_timestamp        TIMESTAMPTZ NOT NULL DEFAULT now(),

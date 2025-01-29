@@ -18,8 +18,8 @@ type InterpretationsRepository struct {
 }
 
 type InterpretationsDAO interface {
-	FirstGermline(sequencingId string, locusId string, transcriptId string) (*types.InterpretationGerminal, error)
-	CreateOrUpdateGermline(interpretation *types.InterpretationGerminal) error
+	FirstGermline(sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error)
+	CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error
 	FirstSomatic(sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error)
 	CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error
 }
@@ -29,7 +29,7 @@ func NewInterpretationsRepository(db *gorm.DB, pubmedClient * client.PubmedClien
 }
 
 // mappers, could be moved to a separate file
-func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.InterpretationCommonDAO) *types.InterpretationCommon {
+func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
 	pubmeds := strings.Split(dao.Pubmed, ",");
 	interpretation:= &types.InterpretationCommon{
 		ID:                dao.ID,
@@ -45,15 +45,14 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 		UpdatedByName: dao.UpdatedByName,
 		UpdatedAt: dao.UpdatedAt,
 	};
-	sliceutils.ForEach(pubmeds, func(pubmed string, i int, slice []string) {
-		citation, _ := r.pubmedClient.GetCitationById(pubmed);
-		interpretationPubmed := types.InterpretationPubmed{
-			CitationID: pubmed,
-			Citation: citation.Nlm.Format,
+	for i, v := range pubmeds {
+		citation, _ := r.pubmedClient.GetCitationById(v);
+		if citation == nil {
+			return nil, fmt.Errorf("Pubmed citation not found: %s", v)
 		}
-		interpretation.Pubmed[i] = interpretationPubmed
-	});
-	return interpretation
+		interpretation.Pubmed[i] = types.InterpretationPubmed{CitationID: v, Citation: citation.Nlm.Format}
+	}
+	return interpretation, nil
 }
 
 func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation *types.InterpretationCommon) *types.InterpretationCommonDAO {
@@ -73,19 +72,23 @@ func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation 
 	};
 }
 
-func (r *InterpretationsRepository) mapToInterpretationGerminal(dao *types.InterpretationGerminalDAO) *types.InterpretationGerminal {
-	interpretation := &types.InterpretationGerminal{
-		InterpretationCommon: *r.mapToInterpretationCommon(&dao.InterpretationCommonDAO),
+func (r *InterpretationsRepository) mapToInterpretationGermline(dao *types.InterpretationGermlineDAO) (*types.InterpretationGermline, error) {
+	common, err := r.mapToInterpretationCommon(&dao.InterpretationCommonDAO)
+	if err != nil {
+		return nil, err
+	}
+	interpretation := &types.InterpretationGermline{
+		InterpretationCommon: *common,
 		Condition:		   dao.Condition,
 		Classification:    dao.Classification,
 		ClassificationCriterias: strings.Split(dao.ClassificationCriterias, ","),
 		TransmissionModes: strings.Split(dao.TransmissionModes, ","),
 	}	
-	return interpretation
+	return interpretation, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationGerminalDAO(interpretation *types.InterpretationGerminal) *types.InterpretationGerminalDAO {
-	return &types.InterpretationGerminalDAO{
+func (r *InterpretationsRepository) mapToInterpretationGermlineDAO(interpretation *types.InterpretationGermline) *types.InterpretationGermlineDAO {
+	return &types.InterpretationGermlineDAO{
 		InterpretationCommonDAO: *r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon),
 		Condition:		   interpretation.Condition,
 		Classification:    interpretation.Classification,
@@ -94,16 +97,20 @@ func (r *InterpretationsRepository) mapToInterpretationGerminalDAO(interpretatio
 	}	
 }
 
-func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.InterpretationSomaticDAO) *types.InterpretationSomatic {
+func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.InterpretationSomaticDAO) (*types.InterpretationSomatic, error) {
+	common, err := r.mapToInterpretationCommon(&dao.InterpretationCommonDAO)
+	if err != nil {
+		return nil, err
+	}
 	interpretation := &types.InterpretationSomatic{
-		InterpretationCommon: *r.mapToInterpretationCommon(&dao.InterpretationCommonDAO),
+		InterpretationCommon: *common,
 		TumoralType:	   dao.TumoralType,
 		Oncogenicity:      dao.Oncogenicity,
 		OncogenicityClassificationCriterias: strings.Split(dao.OncogenicityClassificationCriterias, ","),
 		ClinicalUtility: dao.ClinicalUtility,
 
 	}	
-	return interpretation
+	return interpretation, nil
 }
 
 func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation *types.InterpretationSomatic) *types.InterpretationSomaticDAO {
@@ -116,10 +123,10 @@ func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation
 	}	
 }
 
-func (r *InterpretationsRepository) FirstGermline(sequencingId string, locus string, transcriptId string) (*types.InterpretationGerminal, error) {
-	var dao types.InterpretationGerminalDAO
+func (r *InterpretationsRepository) FirstGermline(sequencingId string, locus string, transcriptId string) (*types.InterpretationGermline, error) {
+	var dao types.InterpretationGermlineDAO
 	if result := r.db.
-		Table(types.InterpretationGerminalTable.Name).
+		Table(types.InterpretationGermlineTable.Name).
 		Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", sequencingId, locus, transcriptId).
 		First(&dao); result.Error != nil {
 		err := result.Error
@@ -129,11 +136,15 @@ func (r *InterpretationsRepository) FirstGermline(sequencingId string, locus str
 			return nil, nil
 		}
 	}
-	return r.mapToInterpretationGerminal(&dao), nil
+	mapped, err := r.mapToInterpretationGermline(&dao)
+	if err != nil {
+		return nil, err
+	}
+	return mapped, nil
 }
 
-func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types.InterpretationGerminal) error {
-	dao := r.mapToInterpretationGerminalDAO(interpretation)
+func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error {
+	dao := r.mapToInterpretationGermlineDAO(interpretation)
 	existing, err := r.FirstGermline(interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if err != nil {
 		return err
@@ -142,9 +153,9 @@ func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 		dao.CreatedBy = existing.CreatedBy
 		dao.CreatedByName = existing.CreatedByName
 	}
-	var res types.InterpretationGerminalDAO
+	var res types.InterpretationGermlineDAO
 	result := r.db.
-		Table(types.InterpretationGerminalTable.Name).
+		Table(types.InterpretationGermlineTable.Name).
 		Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId).
 		Assign(dao).
 		FirstOrCreate(&res)
@@ -152,7 +163,11 @@ func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 	if err != nil {
 		return fmt.Errorf("error while create/update germline interpretation: %w", err)
 	}
-	*interpretation = *r.mapToInterpretationGerminal(&res)
+	mapped, err := r.mapToInterpretationGermline(&res)
+	if err != nil {
+		return err
+	}
+	*interpretation = *mapped
 	return nil
 }
 
@@ -169,7 +184,11 @@ func (r *InterpretationsRepository) FirstSomatic(sequencingId string, locus stri
 			return nil, nil
 		}
 	}
-	return r.mapToInterpretationSomatic(&dao), nil
+	mapped, err := r.mapToInterpretationSomatic(&dao)
+	if err != nil {
+		return nil, err
+	}
+	return mapped, nil
 }
 
 func (r* InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error {
@@ -191,6 +210,10 @@ func (r* InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.
 	if err != nil {
 		return fmt.Errorf("error while create/update somatic interpretation: %w", err)
 	}
-	*interpretation = *r.mapToInterpretationSomatic(&res)
+	mapped, err := r.mapToInterpretationSomatic(&res)
+	if err != nil {
+		return err
+	}
+	*interpretation = *mapped
 	return nil
 }

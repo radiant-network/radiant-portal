@@ -11,6 +11,20 @@ Radiant Data Platform
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
+### Install swag
+Before using `make doc` command:
+
+```
+go get github.com/swaggo/swag/v2@v2.0.0-rc4
+go install github.com/swaggo/swag/v2/cmd/swag@v2.0.0-rc4
+```
+
+### Create keycloak User
+
+Realm settings are imported at start, still a user needs to be created manually in the UI `http://localhost:8080`.
+
+Once created, assign the role `api` and a password in`credentials` tab.
+
 ## MakeFile
 
 Install all dependencies

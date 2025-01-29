@@ -19,13 +19,13 @@ type InterpretationCommon struct {
     UpdatedAt              	time.Time    			`json:"-"`
 }
 
-type InterpretationGerminal struct {
+type InterpretationGermline struct {
     InterpretationCommon
 	Condition				string					`json:"condition,omitempty"`
 	Classification      	string             		`json:"classification,omitempty"`
     ClassificationCriterias []string            	`json:"classification_criterias,omitempty"`
     TransmissionModes       []string            	`json:"transmission_modes,omitempty"`
-} // @name InterpretationGerminal
+} // @name InterpretationGermline
 
 type InterpretationSomatic struct {
 	InterpretationCommon
@@ -41,8 +41,8 @@ type InterpretationPubmed struct {
 	
 } // @name InterpretationPubmed
 
-var InterpretationGerminalTable = Table{
-	Name:  "interpretation_germinal",
+var InterpretationGermlineTable = Table{
+	Name:  "interpretation_germline",
 }
 
 var InterpretationSomaticTable = Table{
@@ -64,7 +64,7 @@ type InterpretationCommonDAO struct {
     UpdatedAt              	time.Time     
 }
 
-type InterpretationGerminalDAO struct {
+type InterpretationGermlineDAO struct {
     InterpretationCommonDAO           		
 	Condition				string					
 	Classification      	string             		
