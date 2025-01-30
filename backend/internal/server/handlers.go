@@ -347,7 +347,7 @@ func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFu
 // @Success 200 {object} types.PubmedCitation
 // @Failure 404 {object} map[string]string
 // @Router /interpretations/pubmed/{citation_id} [get]
-func GetPubmedCitation(pubmedClient *client.PubmedClient) gin.HandlerFunc {
+func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("citation_id")
 		citation, err := pubmedClient.GetCitationById(id)
