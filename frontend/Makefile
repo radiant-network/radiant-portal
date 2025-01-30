@@ -1,6 +1,6 @@
 # Project variables
 DOCKER_IMAGE_PREFIX := portal
-PORTALS := radiant:8080 include:8081
+PORTALS := radiant:3000 include:8081
 PORTALS_PATH := ./portals
 
 # Default help target
@@ -33,7 +33,7 @@ endef
 $(addprefix docker-build-, $(subst :, ,$(PORTALS))): docker-build-%:
 	$(eval PORTAL := $(subst docker-build-,,$@))  # Remove 'build-' prefix
 	@echo "Building Docker image for portal: $(PORTAL)"
-	docker build --progress=plain --no-cache -t $(DOCKER_IMAGE_PREFIX)-$(PORTAL) -f $(PORTALS_PATH)/radiant/Dockerfile.$(PORTAL) .
+	docker build --progress=plain --no-cache -t $(DOCKER_IMAGE_PREFIX)-$(PORTAL) -f ./Dockerfile.$(PORTAL) .
 
 # Run a specific portal
 .PHONY: $(addprefix docker-run-, $(subst :, ,$(PORTALS)))
@@ -41,4 +41,14 @@ $(addprefix docker-run-, $(subst :, ,$(PORTALS))): docker-run-%:
 	$(eval PORTAL := $(subst docker-run-,,$@))  # Remove 'run-' prefix
 	$(eval PORTAL_PORT := $(call get_portal_port,$(filter $(PORTAL):%,$(PORTALS))))
 	@echo "Running portal: $(PORTAL) on port $(PORTAL_PORT)"
-	docker run --rm -p $(PORTAL_PORT):80 $(DOCKER_IMAGE_PREFIX)-$(PORTAL)
+	docker run --rm -p $(PORTAL_PORT):3000 --env-file ./portals/radiant/.env.production $(DOCKER_IMAGE_PREFIX)-$(PORTAL)
+
+# Run dev mode a specific portal
+.PHONY: $(addprefix docker-dev-, $(subst :, ,$(PORTALS)))
+$(addprefix docker-dev-, $(subst :, ,$(PORTALS))): docker-dev-%:
+	$(eval PORTAL := $(subst docker-dev-,,$@))  # Remove 'run-' prefix
+	$(eval PORTAL_PORT := $(call get_portal_port,$(filter $(PORTAL):%,$(PORTALS))))
+	@echo "Running portal: $(PORTAL) on port $(PORTAL_PORT)"
+	docker build --target development -t $(DOCKER_IMAGE_PREFIX)-$(PORTAL)-dev -f ./Dockerfile.$(PORTAL).dev .
+	docker run --rm -p $(PORTAL_PORT):3000 --env-file ./portals/radiant/.env.production $(DOCKER_IMAGE_PREFIX)-$(PORTAL)-dev
+
