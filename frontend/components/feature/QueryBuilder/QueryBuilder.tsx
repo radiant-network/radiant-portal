@@ -7,20 +7,7 @@ import {
 const QueryBuilder = (props: QueryBuilderProps) => {
   const queryBuilder = useQueryBuilder(props);
 
-  console.log(queryBuilder.getQueries());
-
-  return (
-    <div>
-      QueryBuilder
-      <Button
-        onClick={() => {
-          queryBuilder.duplicateQuery("1");
-        }}
-      >
-        Duplicate
-      </Button>
-    </div>
-  );
+  return <div>QueryBuilder</div>;
 };
 
 export default QueryBuilder;

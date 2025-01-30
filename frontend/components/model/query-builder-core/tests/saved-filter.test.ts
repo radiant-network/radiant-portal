@@ -7,6 +7,7 @@ let defaultProps: CoreQueryBuilderProps = {
   state: {
     activeQueryId: "test-id",
     queries: [],
+    selectedQueryIndexes: [],
   },
 };
 

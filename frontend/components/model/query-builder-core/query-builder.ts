@@ -27,6 +27,11 @@ export type QueryBuilderState = {
    * List of saved filters
    */
   savedFilters?: ISavedFilter[];
+
+  /**
+   * List of selected query indexes
+   */
+  selectedQueryIndexes: number[];
 };
 
 export type CoreQueryBuilderProps = {
@@ -43,7 +48,7 @@ export type CoreQueryBuilderProps = {
   /**
    * Initial state of the QueryBuilder
    */
-  initialState?: Partial<QueryBuilderState>;
+  initialState?: QueryBuilderState;
 
   /**
    * Callback when the state of the QueryBuilder changes
@@ -105,6 +110,13 @@ export type CoreQueryBuilderProps = {
   onFilterSave?(filter: ISavedFilter): void;
 
   /**
+   * Callback when a Query is selected
+   *
+   * @param queryId string
+   */
+  onQuerySelectChange?(selectedIndexes: number[]): void;
+
+  /**
    * List of fields to ignore in a Query
    */
   fieldsToIgnore?: string[];
@@ -129,11 +141,6 @@ export type QueryBuilderInstance = {
    * Readonly core properties of the QueryBuilder
    */
   coreProps: Readonly<CoreQueryBuilderProps>;
-
-  /**
-   * Initial state of the QueryBuilder
-   */
-  initialState: QueryBuilderState;
 
   /**
    * Call this function to set the core properties of the QueryBuilder
@@ -227,6 +234,30 @@ export type QueryBuilderInstance = {
   duplicateQuery(id: string): void;
 
   /**
+   * Call this function to select a Query
+   *
+   * @param id Query id
+   */
+  selectQuery(id: string): void;
+
+  /**
+   * Call this function to unselect a Query
+   *
+   * @param id Query id
+   */
+  unselectQuery(id: string): void;
+
+  /**
+   * Call this function to reset Query selection
+   */
+  resetQuerySelection(): void;
+
+  /**
+   * Call this function to get the selected Query indexes
+   */
+  getSelectedQueryIndexes(): number[];
+
+  /**
    * Call this function to set the active Query
    *
    * @param id Query id
@@ -291,6 +322,16 @@ export type QueryBuilderInstance = {
   reset: () => void;
 };
 
+export const getDefaultQueryBuilderState = (): QueryBuilderState => {
+  const defaultUUID = v4();
+
+  return {
+    activeQueryId: defaultUUID,
+    queries: [getDefaultSyntheticSqon(defaultUUID)],
+    selectedQueryIndexes: [],
+  };
+};
+
 export const createQueryBuilder = (
   coreProps: CoreQueryBuilderProps
 ): QueryBuilderInstance => {
@@ -298,9 +339,8 @@ export const createQueryBuilder = (
 
   const coreInstance: QueryBuilderInstance = {
     coreProps,
-    initialState: (coreProps.initialState || {}) as QueryBuilderState,
     reset: () => {
-      queryBuilder.setState(() => queryBuilder.initialState);
+      queryBuilder.setState(() => queryBuilder.coreProps.initialState!);
     },
     getState: () => {
       return queryBuilder.coreProps.state as QueryBuilderState;
@@ -368,6 +408,39 @@ export const createQueryBuilder = (
     },
     getRawQueries: () => {
       return queryBuilder.coreProps.state.queries || [];
+    },
+    getSelectedQueryIndexes: () => {
+      return queryBuilder.getState().selectedQueryIndexes;
+    },
+    selectQuery: (id) => {
+      const queryIndex = queryBuilder.getQueryIndexById(id);
+      const newSelectedQueryIndexes = [
+        ...queryBuilder.getState().selectedQueryIndexes,
+        queryIndex,
+      ];
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        selectedQueryIndexes: newSelectedQueryIndexes,
+      }));
+      queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
+    },
+    unselectQuery: (id) => {
+      const queryIndex = queryBuilder.getQueryIndexById(id);
+      const newSelectedQueryIndexes = queryBuilder
+        .getState()
+        .selectedQueryIndexes.filter((index) => index !== queryIndex);
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        selectedQueryIndexes: newSelectedQueryIndexes,
+      }));
+      queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
+    },
+    resetQuerySelection: () => {
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        selectedQueryIndexes: [],
+      }));
+      queryBuilder.coreProps.onQuerySelectChange?.([]);
     },
     getQueryById: (id) => {
       return queryBuilder.getQueries().find((query) => query.id === id) || null;

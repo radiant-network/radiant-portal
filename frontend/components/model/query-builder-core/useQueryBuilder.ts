@@ -2,19 +2,16 @@ import { useState } from "react";
 import {
   CoreQueryBuilderProps,
   createQueryBuilder,
+  getDefaultQueryBuilderState,
   QueryBuilderInstance,
   QueryBuilderProps,
 } from "./query-builder";
-import { v4 } from "uuid";
 
 export const useQueryBuilder = (
   props: QueryBuilderProps
 ): QueryBuilderInstance => {
   const defaultProps: CoreQueryBuilderProps = {
-    state: {
-      activeQueryId: v4(),
-      queries: [],
-    },
+    state: getDefaultQueryBuilderState(),
     onStateChange: () => {},
     ...props,
   };
@@ -24,7 +21,7 @@ export const useQueryBuilder = (
   }));
 
   const [state, setState] = useState(
-    () => queryBuilderRef.current.initialState
+    () => defaultProps.initialState || defaultProps.state
   );
 
   queryBuilderRef.current.setCoreProps((prevProps) => ({

@@ -11,6 +11,7 @@ import {
   createQueryBuilder,
   CoreQueryBuilderProps,
   QueryBuilderState,
+  QueryBuilderInstance,
 } from "../query-builder";
 import { ISyntheticSqon } from "../../sqon";
 import { getDefaultSyntheticSqon, isEmptySqon } from "../utils/sqon";
@@ -47,15 +48,20 @@ let defaultProps: CoreQueryBuilderProps = {
         ],
       },
     ],
+    selectedQueryIndexes: [],
   },
 };
 
 let mockOnQueryCreate: Mock<void, [any]>;
 let mockOnQueryUpdate: Mock<void, [any]>;
 let mockOnQueryDelete: Mock<void, [any]>;
+let mockOnQuerySelectChange: Mock<void, [any]>;
 let mockOnStateChange: Mock<void, [any]>;
 
 const mockUUID = "abababab-abab-4bab-abab-abababababab";
+
+let qb: QueryBuilderInstance;
+let state: QueryBuilderState = defaultProps.state;
 
 describe("QueryBuilder Core", () => {
   beforeAll(() => {
@@ -73,20 +79,28 @@ describe("QueryBuilder Core", () => {
     mockOnQueryUpdate = jest.fn();
     mockOnQueryDelete = jest.fn();
     mockOnStateChange = jest.fn();
-    defaultProps.onQueryCreate = mockOnQueryCreate;
-    defaultProps.onQueryUpdate = mockOnQueryUpdate;
-    defaultProps.onQueryDelete = mockOnQueryDelete;
+    mockOnQuerySelectChange = jest.fn();
     defaultProps.onStateChange = mockOnStateChange;
+
+    state = defaultProps.state;
+    qb = createQueryBuilder({
+      ...defaultProps,
+      onStateChange: (newState) => {
+        state = newState;
+        mockOnStateChange(newState);
+      },
+      onQueryCreate: mockOnQueryCreate,
+      onQueryDelete: mockOnQueryDelete,
+      onQueryUpdate: mockOnQueryUpdate,
+      onQuerySelectChange: mockOnQuerySelectChange,
+    });
   });
 
   it("should initialize with provided state", () => {
-    const qb = createQueryBuilder(defaultProps);
     expect(qb.coreProps.state).toEqual(defaultProps.state);
   });
 
   it("should update state when setCoreProps is called", () => {
-    const qb = createQueryBuilder(defaultProps);
-
     qb.setCoreProps((prev) => ({
       ...prev,
       state: { ...prev.state, activeQueryId: "new-id" },
@@ -96,8 +110,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should update state and trigger onStateChange", () => {
-    const qb = createQueryBuilder(defaultProps);
-
     qb.setState((prev) => ({ ...prev, activeQueryId: "new-id" }));
 
     expect(mockOnStateChange).toHaveBeenCalledTimes(1);
@@ -111,38 +123,36 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should correctly reset the state to the initial state", () => {
-    let state = defaultProps.state;
-    const initialState = {
+    const initialState: QueryBuilderState = {
       activeQueryId: "initial-query-id",
       queries: [],
+      selectedQueryIndexes: [],
     };
 
-    const qb = createQueryBuilder({
-      ...defaultProps,
+    qb.setCoreProps((prev) => ({
+      ...prev,
       initialState,
-      onStateChange: (newState) => {
-        state = newState;
-      },
-    });
+    }));
 
     qb.setState((prev) => ({ ...prev, activeQueryId: "new-id" }));
-    expect(state).toStrictEqual({
+
+    const expectedState: QueryBuilderState = {
       activeQueryId: "new-id",
       queries: defaultProps.state.queries,
-    });
+      selectedQueryIndexes: [],
+    };
+
+    expect(state).toStrictEqual(expectedState);
     qb.reset();
     expect(state).toBe(initialState);
   });
 
   it("should return the list of queries", () => {
-    const qb = createQueryBuilder(defaultProps);
-
     expect(qb.getQueries().length).toBe(2);
     expect(qb.getRawQueries().length).toBe(2);
   });
 
   it("should return the associated query by id", () => {
-    const qb = createQueryBuilder(defaultProps);
     const foundQuery = qb.getQueryById("1");
 
     expect(foundQuery).toBeDefined();
@@ -150,29 +160,18 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should return null if a query by id is not found", () => {
-    const qb = createQueryBuilder(defaultProps);
     const foundQuery = qb.getQueryById("undefined-query-id");
 
     expect(foundQuery).toBeNull();
   });
 
   it("should return the correct active query", () => {
-    const qb = createQueryBuilder(defaultProps);
     const activeQuery = qb.getActiveQuery();
 
     expect(activeQuery?.id).toBe(defaultProps.state.activeQueryId);
   });
 
   it("should currectly change the active query", () => {
-    let state = defaultProps.state;
-
-    const qb = createQueryBuilder({
-      ...defaultProps,
-      onStateChange: (newState) => {
-        state = newState;
-      },
-    });
-
     qb.setActiveQuery("2");
     expect(state.activeQueryId).toBe("2");
 
@@ -186,16 +185,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should create a new query", () => {
-    let state = defaultProps.state;
-
-    const qb = createQueryBuilder({
-      ...defaultProps,
-      onStateChange: (newState) => {
-        state = newState;
-        mockOnStateChange(newState);
-      },
-    });
-
     const newQuery = {
       op: "and",
       content: [],
@@ -224,15 +213,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should update a query", () => {
-    let state = defaultProps.state;
-
-    const qb = createQueryBuilder({
-      ...defaultProps,
-      onStateChange: (newState) => {
-        state = newState;
-      },
-    });
-
     const updatePayload: Omit<ISyntheticSqon, "id"> = {
       op: "or",
       content: [
@@ -269,15 +249,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should remove query when trying to update with empty synthetic sqon and queries.length > 1", () => {
-    let state = defaultProps.state;
-
-    const qb = createQueryBuilder({
-      ...defaultProps,
-      onStateChange: (newState) => {
-        state = newState;
-      },
-    });
-
     const updatePayload: Omit<ISyntheticSqon, "id"> = {
       op: "or",
       content: [],
@@ -293,10 +264,8 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should not remove query when trying to update with empty synthetic sqon and queries.length === 1", () => {
-    let state = defaultProps.state;
-
-    const qb = createQueryBuilder({
-      id: defaultProps.id,
+    qb.setCoreProps((prev) => ({
+      ...prev,
       state: {
         activeQueryId: "1",
         queries: [
@@ -314,11 +283,9 @@ describe("QueryBuilder Core", () => {
             ],
           },
         ],
+        selectedQueryIndexes: [],
       },
-      onStateChange: (newState) => {
-        state = newState;
-      },
-    });
+    }));
 
     const updatePayload: Omit<ISyntheticSqon, "id"> = {
       op: "or",
@@ -336,17 +303,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should duplicate query", () => {
-    let state = defaultProps.state;
-
-    const qb = createQueryBuilder({
-      ...defaultProps,
-      onStateChange: (newState) => {
-        state = newState;
-        mockOnStateChange(newState);
-      },
-      onQueryCreate: mockOnQueryCreate,
-    });
-
     expect(state.queries.length).toBe(2);
 
     qb.duplicateQuery("1");
@@ -376,16 +332,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should reset queries", () => {
-    let state = defaultProps.state;
-
-    const qb = createQueryBuilder({
-      ...defaultProps,
-      onStateChange: (newState) => {
-        state = newState;
-        mockOnStateChange(newState);
-      },
-    });
-
     expect(state.activeQueryId).toBe("1");
     expect(state.queries.length).toBe(2);
 
@@ -401,8 +347,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should have queries", () => {
-    const qb = createQueryBuilder(defaultProps);
-
     expect(qb.hasQueries()).toBeTruthy();
   });
 
@@ -412,6 +356,7 @@ describe("QueryBuilder Core", () => {
       state: {
         activeQueryId: "1",
         queries: [],
+        selectedQueryIndexes: [],
       },
     });
 
@@ -419,8 +364,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should be able to combine", () => {
-    const qb = createQueryBuilder(defaultProps);
-
     expect(qb.coreProps.state.queries.length).toBe(2);
     expect(qb.canCombine()).toBeTruthy();
   });
@@ -431,6 +374,7 @@ describe("QueryBuilder Core", () => {
       state: {
         activeQueryId: "1",
         queries: [defaultProps.state.queries[0]],
+        selectedQueryIndexes: [],
       },
     });
 
@@ -439,16 +383,6 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should set raw queries", () => {
-    let state = defaultProps.state;
-
-    const qb = createQueryBuilder({
-      ...defaultProps,
-      onStateChange: (newState) => {
-        mockOnStateChange(newState);
-        state = newState;
-      },
-    });
-
     const newRawQueries = [
       {
         id: "3",
@@ -476,8 +410,57 @@ describe("QueryBuilder Core", () => {
     const expectedHaveBeenCalledWith: QueryBuilderState = {
       activeQueryId: "3",
       queries: newRawQueries,
+      selectedQueryIndexes: [],
     };
 
     expect(mockOnStateChange).toHaveBeenCalledWith(expectedHaveBeenCalledWith);
+  });
+
+  it("should add query to selection list", () => {
+    expect(state.selectedQueryIndexes.length).toBe(0);
+
+    qb.selectQuery("1");
+
+    expect(state.selectedQueryIndexes.length).toBe(1);
+    expect(state.selectedQueryIndexes[0]).toBe(0);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledWith([0]);
+  });
+
+  it("should remove query from selection list", () => {
+    expect(state.selectedQueryIndexes.length).toBe(0);
+
+    qb.selectQuery("1");
+
+    expect(state.selectedQueryIndexes.length).toBe(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledWith([0]);
+
+    qb.unselectQuery("1");
+
+    expect(state.selectedQueryIndexes.length).toBe(0);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(2);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledWith([]);
+  });
+
+  it("should reset selection list", () => {
+    expect(state.selectedQueryIndexes.length).toBe(0);
+
+    qb.selectQuery("1");
+
+    expect(state.selectedQueryIndexes.length).toBe(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledWith([0]);
+
+    qb.resetQuerySelection();
+
+    expect(state.selectedQueryIndexes.length).toBe(0);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(2);
+  });
+
+  it("should return selected query indexes", () => {
+    expect(qb.getSelectedQueryIndexes()).toEqual([]);
+    qb.selectQuery("1");
+    expect(state.selectedQueryIndexes).toEqual([0]);
   });
 });

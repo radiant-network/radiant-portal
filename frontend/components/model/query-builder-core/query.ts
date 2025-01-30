@@ -38,6 +38,21 @@ export type CoreQuery = {
   duplicate(): void;
 
   /**
+   * Call this function to get the index of the Query
+   */
+  index(): number;
+
+  /**
+   * Call this function to select the Query
+   */
+  select(): void;
+
+  /**
+   * Call this function to unselect the Query
+   */
+  unselect(): void;
+
+  /**
    * Call this function to set the Query as active
    */
   setAsActive(): void;
@@ -54,6 +69,9 @@ export const createQuery = (
   const coreInstance: CoreQuery = {
     id: syntheticSqon.id,
     raw: () => syntheticSqon,
+    select: () => queryBuilder.selectQuery(query.id),
+    unselect: () => queryBuilder.unselectQuery(query.id),
+    index: () => queryBuilder.getQueryIndexById(query.id),
     isEmpty: (): boolean => isEmptySqon(syntheticSqon),
     delete: () => queryBuilder.deleteQuery(query.id),
     update: (data) => queryBuilder.updateQuery(query.id, data),

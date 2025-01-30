@@ -1,20 +1,11 @@
-import {
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  jest,
-  test,
-} from "@jest/globals";
-import type { Mock } from "jest-mock";
+import { beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
 import {
   CoreQueryBuilderProps,
   createQueryBuilder,
+  QueryBuilderInstance,
   QueryBuilderState,
 } from "../query-builder";
 import { ISyntheticSqon } from "../../sqon";
-import { getDefaultSyntheticSqon, isEmptySqon } from "../utils/sqon";
 
 let defaultProps: CoreQueryBuilderProps = {
   id: "test-query-builder",
@@ -47,16 +38,20 @@ let defaultProps: CoreQueryBuilderProps = {
           },
         ],
       },
+      {
+        id: "3",
+        op: "and",
+        content: [],
+      },
     ],
+    selectedQueryIndexes: [],
   },
 };
 
-let mockOnQueryCreate: Mock<void, [any]>;
-let mockOnQueryUpdate: Mock<void, [any]>;
-let mockOnQueryDelete: Mock<void, [any]>;
-let mockOnStateChange: Mock<void, [any]>;
-
 const mockUUID = "abababab-abab-4bab-abab-abababababab";
+
+let qb: QueryBuilderInstance;
+let state: QueryBuilderState = defaultProps.state;
 
 describe("Query Manipulation", () => {
   beforeAll(() => {
@@ -70,16 +65,100 @@ describe("Query Manipulation", () => {
   });
 
   beforeEach(() => {
-    mockOnQueryCreate = jest.fn();
-    mockOnQueryUpdate = jest.fn();
-    mockOnQueryDelete = jest.fn();
-    mockOnStateChange = jest.fn();
-    defaultProps.onQueryCreate = mockOnQueryCreate;
-    defaultProps.onQueryUpdate = mockOnQueryUpdate;
-    defaultProps.onQueryDelete = mockOnQueryDelete;
+    state = defaultProps.state;
+    qb = createQueryBuilder({
+      ...defaultProps,
+      onStateChange: (newState) => {
+        state = newState;
+      },
+    });
   });
 
-  it("should", () => {
-    expect(true).toBe(true);
+  it("should return the query id", () => {
+    expect(qb.getQueryById("1")?.id).toBe("1");
+  });
+
+  it("should be empty", () => {
+    expect(qb.getQueryById("3")?.isEmpty()).toBe(true);
+  });
+
+  it("should not be empty", () => {
+    expect(qb.getQueryById("2")?.isEmpty()).toBe(false);
+  });
+
+  it("should return the raw query", () => {
+    expect(qb.getQueryById("2")?.raw()).toStrictEqual(
+      defaultProps.state.queries.find((q) => q.id === "2")
+    );
+  });
+
+  it("should delete the query", () => {
+    // TODO: Implement deleteQuery
+  });
+
+  it("should update the query", () => {
+    const newSqon: Omit<ISyntheticSqon, "id"> = {
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["new-value"],
+            field: "new-field",
+          },
+          op: "in",
+        },
+      ],
+    };
+
+    qb.getQueryById("2")?.update(newSqon);
+
+    expect(state.queries.find((q) => q.id === "2")).toStrictEqual({
+      id: "2",
+      ...newSqon,
+    });
+  });
+
+  it("should duplicate the query", () => {
+    expect(state.queries.length).toBe(3);
+
+    qb.getQueryById("3")?.duplicate();
+
+    expect(state.queries.length).toBe(4);
+    expect(state.queries.find((q) => q.id === mockUUID)).toStrictEqual({
+      ...qb.getQueryById("3")?.raw(),
+      id: mockUUID,
+    });
+  });
+
+  it("should set query as active", () => {
+    expect(state.activeQueryId).toBe(defaultProps.state.activeQueryId);
+
+    qb.getQueryById("3")?.setAsActive();
+
+    expect(state.activeQueryId).toBe("3");
+  });
+
+  it("should select query", () => {
+    expect(state.selectedQueryIndexes.length).toBe(0);
+
+    qb.getQueryById("1")?.select();
+
+    expect(state.selectedQueryIndexes.length).toBe(1);
+  });
+
+  it("should unselect query", () => {
+    qb.getQueryById("1")?.select();
+
+    expect(state.selectedQueryIndexes.length).toBe(1);
+
+    qb.getQueryById("1")?.unselect();
+
+    expect(state.selectedQueryIndexes.length).toBe(0);
+  });
+
+  it("should return the query index", () => {
+    expect(qb.getQueryById("1")?.index()).toBe(0);
+    expect(qb.getQueryById("2")?.index()).toBe(1);
+    expect(qb.getQueryById("3")?.index()).toBe(2);
   });
 });
