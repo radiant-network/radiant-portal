@@ -132,8 +132,8 @@ export const generateEmptyQuery = (
 });
 
 export const getDefaultSyntheticSqon = (id: string = v4()): ISyntheticSqon => ({
-  content: [],
   id,
+  content: [],
   op: BooleanOperators.and,
 });
 
@@ -295,7 +295,7 @@ export const deleteQueryAndSetNext = (
       //   );
       // }
 
-      queryBuilder.setQueries(nextID, updatedQueries);
+      queryBuilder.setRawQueries(nextID, updatedQueries);
     } else {
       queryBuilder.resetQueries(queryId);
     }

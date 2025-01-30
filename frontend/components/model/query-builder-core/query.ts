@@ -36,6 +36,11 @@ export type CoreQuery = {
    * Call this function to duplicate the Query
    */
   duplicate(): void;
+
+  /**
+   * Call this function to set the Query as active
+   */
+  setAsActive(): void;
 };
 
 export type QueryInstance = CoreQuery;
@@ -53,6 +58,7 @@ export const createQuery = (
     delete: () => queryBuilder.deleteQuery(query.id),
     update: (data) => queryBuilder.updateQuery(query.id, data),
     duplicate: () => queryBuilder.duplicateQuery(query.id),
+    setAsActive: () => queryBuilder.setActiveQuery(query.id),
   };
 
   Object.assign(query, coreInstance);
