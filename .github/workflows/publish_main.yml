@@ -32,4 +32,4 @@ jobs:
           image: ferlabcrsj/radiant-portal
           tag_format: "{sha}-{timestamp}"
           location: ./frontend
-          dockerfile: ./frontend/Dockerfile
+          dockerfile: ./frontend/Dockerfile.radiant
