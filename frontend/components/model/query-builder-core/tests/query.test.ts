@@ -5,7 +5,8 @@ import {
   QueryBuilderInstance,
   QueryBuilderState,
 } from "../query-builder";
-import { ISyntheticSqon } from "../../sqon";
+import { BooleanOperators, ISyntheticSqon } from "../../sqon";
+import { isEmptySqon } from "../utils/sqon";
 
 let defaultProps: CoreQueryBuilderProps = {
   id: "test-query-builder",
@@ -41,7 +42,15 @@ let defaultProps: CoreQueryBuilderProps = {
       {
         id: "3",
         op: "and",
-        content: [],
+        content: [
+          {
+            content: {
+              value: ["something-else"],
+              field: "field3",
+            },
+            op: "in",
+          },
+        ],
       },
     ],
     selectedQueryIndexes: [],
@@ -79,7 +88,15 @@ describe("Query Manipulation", () => {
   });
 
   it("should be empty", () => {
-    expect(qb.getQueryById("3")?.isEmpty()).toBe(true);
+    qb.createQuery({
+      id: "new-query",
+      op: BooleanOperators.and,
+      content: [],
+    });
+
+    expect(isEmptySqon(state.queries.find((q) => q.id === "new-query")!)).toBe(
+      true
+    );
   });
 
   it("should not be empty", () => {

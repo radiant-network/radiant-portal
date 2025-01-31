@@ -13,7 +13,11 @@ import {
   QueryBuilderState,
   QueryBuilderInstance,
 } from "../query-builder";
-import { ISyntheticSqon } from "../../sqon";
+import {
+  BooleanOperators,
+  ISyntheticSqon,
+  TSyntheticSqonContent,
+} from "../../sqon";
 import { getDefaultSyntheticSqon, isEmptySqon } from "../utils/sqon";
 
 let defaultProps: CoreQueryBuilderProps = {
@@ -185,18 +189,21 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should create a new query", () => {
-    const newQuery = {
-      op: "and",
+    const newQuery: Omit<ISyntheticSqon, "id"> = {
+      op: BooleanOperators.and,
       content: [],
     };
 
     expect(qb.getQueryById("3")).toBeNull();
     expect(state.queries.length).toBe(2);
 
-    const createdQueryId = qb.createQuery(newQuery);
+    const createdQueryId = qb.createQuery({
+      ...newQuery,
+      op: newQuery.op as BooleanOperators,
+    });
 
-    expect(qb.getQueryById(createdQueryId)).toBeDefined();
     expect(state.queries.length).toBe(3);
+    expect(state.queries.find((q) => q.id === createdQueryId)).toBeDefined();
     expect(mockOnQueryCreate).toHaveBeenCalledTimes(1);
 
     const expectedOnCreatedHaveBeenCalledWith: ISyntheticSqon = {
@@ -292,7 +299,7 @@ describe("QueryBuilder Core", () => {
       content: [],
     };
 
-    expect(state.queries.length).toBe(2);
+    expect(qb.coreProps.state.queries.length).toBe(1);
 
     qb.updateQuery("1", updatePayload);
 
@@ -462,5 +469,541 @@ describe("QueryBuilder Core", () => {
     expect(qb.getSelectedQueryIndexes()).toEqual([]);
     qb.selectQuery("1");
     expect(state.selectedQueryIndexes).toEqual([0]);
+  });
+
+  it("should delete query", () => {
+    expect(state.queries.length).toBe(2);
+
+    qb.deleteQuery("1");
+
+    expect(state.queries.length).toBe(1);
+    expect(state.activeQueryId).toBe("2");
+    expect(state.queries.find((q) => q.id === "1")).toBeUndefined();
+    expect(mockOnQueryDelete).toHaveBeenCalledTimes(1);
+    expect(mockOnQueryDelete).toHaveBeenCalledWith("1");
+  });
+
+  it("should delete query and reset when initial queries list.length = 1", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    expect(qb.coreProps.state.queries.length).toBe(1);
+
+    qb.deleteQuery("1");
+
+    expect(state.activeQueryId).toBe("1");
+    expect(state.queries.length).toBe(1);
+    expect(state.queries.find((q) => q.id === "1")).toBeDefined();
+    expect(isEmptySqon(state.queries.find((q) => q.id === "1")!)).toBeTruthy();
+  });
+
+  it("should delete query and set next when initial queries list.length > 1", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something2"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    expect(qb.coreProps.state.queries.length).toBe(2);
+
+    qb.deleteQuery("1");
+
+    expect(state.activeQueryId).toBe("2");
+    expect(state.queries.length).toBe(1);
+    expect(state.queries.find((q) => q.id === "1")).toBeUndefined();
+  });
+
+  it("should delete query, set next and remove from selectedQueryIndexes list when initial queries list.length > 1", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something2"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [0],
+      },
+    }));
+
+    expect(qb.coreProps.state.queries.length).toBe(2);
+    expect(qb.coreProps.state.selectedQueryIndexes.length).toBe(1);
+    expect(qb.coreProps.state.selectedQueryIndexes[0]).toBe(0);
+
+    qb.deleteQuery("1");
+
+    expect(state.activeQueryId).toBe("2");
+    expect(state.queries.length).toBe(1);
+    expect(state.queries.find((q) => q.id === "1")).toBeUndefined();
+    expect(state.selectedQueryIndexes).toEqual([]);
+  });
+
+  it("should delete query, set next and update selectedQueryIndexes list when initial queries list.length > 1 and selectedIndexes.length > 1", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something2"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "3",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something3"],
+                  field: "field3",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [0, 1, 2],
+      },
+    }));
+
+    expect(qb.coreProps.state.queries.length).toBe(3);
+    expect(qb.coreProps.state.selectedQueryIndexes.length).toBe(3);
+    expect(qb.coreProps.state.selectedQueryIndexes).toEqual([0, 1, 2]);
+
+    qb.deleteQuery("1");
+
+    expect(state.activeQueryId).toBe("2");
+    expect(state.queries.length).toBe(2);
+    expect(state.queries.find((q) => q.id === "1")).toBeUndefined();
+    expect(state.selectedQueryIndexes).toEqual([0, 1]);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledWith([0, 1]);
+  });
+
+  it("should create a new queries with both indexes when combining", () => {
+    expect(state.queries.length).toBe(2);
+
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something-else"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [0, 1],
+      },
+    }));
+
+    qb.combineSelectedQueries(BooleanOperators.and);
+
+    expect(state.selectedQueryIndexes.length).toBe(0);
+    expect(state.queries.length).toBe(3);
+    expect(state.activeQueryId).toBe(mockUUID);
+    expect(state.queries.find((q) => q.id === mockUUID)).toBeDefined();
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledWith([]);
+    expect(mockOnQueryCreate).toHaveBeenCalledTimes(1);
+    expect(mockOnQueryCreate).toHaveBeenCalledWith({
+      id: mockUUID,
+      op: BooleanOperators.and,
+      content: [0, 1],
+    });
+  });
+
+  it("should update combined queries when deleting a query include in the combined query", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something-else"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "3",
+            op: "and",
+            content: [0, 1],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    qb.deleteQuery("1");
+
+    expect(state.queries.length).toBe(2);
+    expect(state.queries.find((q) => q.id === "1")).toBeUndefined();
+    expect(state.queries.find((q) => q.id === "3")).toBeDefined();
+    expect(state.queries.find((q) => q.id === "3")?.content).toEqual([0]);
+  });
+
+  it("should delete combined queries when deleting all queries included in the combined query", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [0],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    qb.deleteQuery("1");
+
+    expect(state.queries.length).toBe(1);
+    expect(state.activeQueryId).toBe("1");
+    expect(state.queries.find((q) => q.id === "1")).toBeDefined();
+    expect(state.queries.find((q) => q.id === "1")?.content).toEqual([]);
+    expect(state.queries.find((q) => q.id === "2")).toBeUndefined();
+  });
+
+  it("should recursively update combined queries when deleting a query included in the combined query", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "3",
+            op: "and",
+            content: [0, 1],
+          },
+          {
+            id: "4",
+            op: "and",
+            content: [0, 1, 2],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    expect(qb.coreProps.state.queries.length).toBe(4);
+
+    qb.deleteQuery("1");
+
+    expect(state.queries.length).toBe(3);
+    expect(state.queries.find((q) => q.id === "1")).toBeUndefined();
+    expect(state.queries.find((q) => q.id === "2")).toBeDefined();
+    expect(state.queries.find((q) => q.id === "3")).toBeDefined();
+    expect(state.queries.find((q) => q.id === "4")).toBeDefined();
+    expect(state.queries.find((q) => q.id === "3")?.content).toEqual([0]);
+    expect(state.queries.find((q) => q.id === "4")?.content).toEqual([0, 1]);
+  });
+
+  it("should recursively delete combined queries when deleting a query included in the combined query", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "3",
+            op: "and",
+            content: [0],
+          },
+          {
+            id: "4",
+            op: "and",
+            content: [0],
+          },
+          {
+            id: "5",
+            op: "and",
+            content: [0, 1, 2],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    expect(qb.coreProps.state.queries.length).toBe(5);
+
+    qb.deleteQuery("1");
+
+    expect(state.queries.length).toBe(2);
+    expect(state.queries.find((q) => q.id === "1")).toBeUndefined();
+    expect(state.queries.find((q) => q.id === "2")).toBeDefined();
+    expect(state.queries.find((q) => q.id === "3")).toBeUndefined();
+    expect(state.queries.find((q) => q.id === "4")).toBeUndefined();
+    expect(state.queries.find((q) => q.id === "5")).toBeDefined();
+    expect(state.queries.find((q) => q.id === "5")?.content).toEqual([0]);
+  });
+
+  it("should change combine operator recursively", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      value: ["something"],
+                      field: "field2",
+                    },
+                    op: "in",
+                  },
+                ],
+                op: "and",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    qb.changeCombineOperator("1", BooleanOperators.or);
+
+    expect(state.queries.find((q) => q.id === "1")?.op).toBe(
+      BooleanOperators.or
+    );
+
+    const subSqon = state.queries.find((q) => q.id === "1")
+      ?.content[0] as ISyntheticSqon;
+
+    expect(subSqon.op).toBe(BooleanOperators.or);
+    expect(mockOnStateChange).toHaveBeenCalledTimes(1);
+    expect(mockOnStateChange).toHaveBeenCalledWith({
+      activeQueryId: "1",
+      queries: [
+        {
+          content: [
+            {
+              content: [
+                {
+                  content: { field: "field2", value: ["something"] },
+                  op: "in",
+                },
+              ],
+              op: "or",
+            },
+          ],
+          id: "1",
+          op: "or",
+        },
+      ],
+      selectedQueryIndexes: [],
+    });
   });
 });

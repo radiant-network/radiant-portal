@@ -8,12 +8,13 @@ import {
   RangeOperators,
   SET_ID_PREFIX,
   TSqonContentValue,
+  TSqonGroupOp,
   TSyntheticSqonContent,
   TSyntheticSqonContentValue,
 } from "../../sqon";
 import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
-import { QueryBuilderInstance } from "../query-builder";
+import { QueryBuilderInstance, QueryBuilderState } from "../query-builder";
 import { v4 } from "uuid";
 
 /**
@@ -205,9 +206,9 @@ export const cleanUpQueries = (queries: ISyntheticSqon[]) => {
   const fullQueries = queries.filter((obj) => isNotEmptySqon(obj));
   if (currentEmptyQueries.length) {
     const emptyQuery = currentEmptyQueries[0];
-    newQueries = cloneDeep([...fullQueries, emptyQuery]);
+    newQueries = [...fullQueries, emptyQuery];
   }
-  return newQueries;
+  return cloneDeep(newQueries);
 };
 
 /**
@@ -284,18 +285,25 @@ export const deleteQueryAndSetNext = (
         queryIndex
       );
       const nextQuery = updatedQueries[nextSelectedIndex];
-      const nextID = nextQuery.id;
+      let selectedQueryIndexes = queryBuilder.getSelectedQueryIndexes();
 
-      // TODO I think this is to handle combined queries
-      // if (selectedQueryIndices.includes(currentQueryIndex)) {
-      //   setSelectedQueryIndices(
-      //     selectedQueryIndices.filter(
-      //       (index: number) => index !== currentQueryIndex
-      //     )
-      //   );
-      // }
+      if (selectedQueryIndexes.includes(queryIndex)) {
+        selectedQueryIndexes = selectedQueryIndexes
+          .filter((index) => index !== queryIndex)
+          .map((index) => (index > queryIndex ? index - 1 : index));
+        queryBuilder.coreProps.onQuerySelectChange?.(selectedQueryIndexes);
+      }
 
-      queryBuilder.setRawQueries(nextID, updatedQueries);
+      const newQueryState: QueryBuilderState = {
+        activeQueryId: nextQuery.id,
+        queries: updatedQueries,
+        selectedQueryIndexes,
+      };
+
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        ...newQueryState,
+      }));
     } else {
       queryBuilder.resetQueries(queryId);
     }
@@ -320,3 +328,25 @@ export const findNextSelectedQuery = (
 
   return queryIndex + 1;
 };
+
+/**
+ * Recursively change the operator throughout a given synthetic sqon
+ *
+ * @param {TSqonGroupOp} operator The new operator
+ * @param {ISyntheticSqon} syntheticSqon The synthetic sqon to update
+ *
+ * @returns {ISyntheticSqon} The modified synthetic sqon
+ */
+export const changeCombineOperator = (
+  operator: TSqonGroupOp,
+  syntheticSqon: ISyntheticSqon
+): ISyntheticSqon => ({
+  ...syntheticSqon,
+  content: syntheticSqon.content.map((subContent: TSyntheticSqonContentValue) =>
+    isBooleanOperator(subContent) &&
+    !(subContent as ISqonGroupFilter).skipBooleanOperatorCheck
+      ? changeCombineOperator(operator, subContent as ISyntheticSqon)
+      : subContent
+  ) as TSyntheticSqonContent,
+  op: operator,
+});

@@ -7,7 +7,12 @@ import {
 const QueryBuilder = (props: QueryBuilderProps) => {
   const queryBuilder = useQueryBuilder(props);
 
-  return <div>QueryBuilder</div>;
+  return (
+    <div>
+      QueryBuilder
+      <Button onClick={() => queryBuilder.deleteQuery("1")}>Add Query</Button>
+    </div>
+  );
 };
 
 export default QueryBuilder;

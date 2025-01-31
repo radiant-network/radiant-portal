@@ -1,4 +1,9 @@
-import { ISyntheticSqon } from "../sqon";
+import {
+  BooleanOperators,
+  ISyntheticSqon,
+  TSqonGroupOp,
+  TSyntheticSqonContent,
+} from "../sqon";
 import { ISavedFilter } from "../saved-filter";
 import { createSavedFilter, SavedFilterInstance } from "./saved-filter";
 import { createQuery, QueryInstance } from "./query";
@@ -7,6 +12,7 @@ import { v4 } from "uuid";
 import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
 import {
+  changeCombineOperator,
   cleanUpQueries,
   deleteQueryAndSetNext,
   getDefaultSyntheticSqon,
@@ -52,67 +58,46 @@ export type CoreQueryBuilderProps = {
 
   /**
    * Callback when the state of the QueryBuilder changes
-   *
-   * @param state Partial<QueryBuilderState>
    */
   onStateChange?(state: QueryBuilderState): void;
 
   /**
    * Callback when a new query is added
-   *
-   * @param query ISyntheticSqon
-   * @returns void
    */
   onQueryCreate?(query: ISyntheticSqon): void;
 
   /**
    * Callback when a new query is updated
-   *
-   * @param query: ISyntheticSqon
-   * @returns void
    */
   onQueryUpdate?(id: string, query: ISyntheticSqon): void;
 
   /**
    * Callback when a new query is deleted
-   *
-   * @param queryId: string
-   * @returns void
    */
   onQueryDelete?(id: string): void;
 
   /**
    * Callback when a SavedFilter is created
-   *
-   * @param filter ISavedFilter
    */
   onFilterCreate?(filter: ISavedFilter): void;
 
   /**
    * Callback when a SavedFilter is updated
-   *
-   * @param filter ISavedFilter
    */
   onFilterUpdate?(filter: ISavedFilter): void;
 
   /**
    * Callback when a SavedFilter is deleted
-   *
-   * @param filterId string
    */
   onFilterDelete?(id: string): void;
 
   /**
    * Callback when a SavedFilter is saved
-   *
-   * @param filter ISavedFilter
    */
   onFilterSave?(filter: ISavedFilter): void;
 
   /**
    * Callback when a Query is selected
-   *
-   * @param queryId string
    */
   onQuerySelectChange?(selectedIndexes: number[]): void;
 
@@ -132,8 +117,6 @@ export type QueryBuilderInstance = {
 
   /**
    * Call this function to set the state of the QueryBuilder
-   *
-   * @param state QueryBuilderState
    */
   setState(newState: (prevState: QueryBuilderState) => QueryBuilderState): void;
 
@@ -144,8 +127,6 @@ export type QueryBuilderInstance = {
 
   /**
    * Call this function to set the core properties of the QueryBuilder
-   *
-   * @param coreProps QueryBuilderProps
    */
   setCoreProps(
     newCoreProps: (
@@ -161,29 +142,21 @@ export type QueryBuilderInstance = {
 
   /**
    * Call this function to delete a SavedFilter
-   *
-   * @param id SavedFilter id
    */
   deleteSavedFilter(id: string): void;
 
   /**
    * Call this function to update a SavedFilter
-   *
-   * @param filter SavedFilter
    */
   updateSavedFilter(id: string, data: Omit<ISavedFilter, "id">): void;
 
   /**
    * Call this function to persist a SavedFilter
-   *
-   * @param filter SavedFilter
    */
   saveSavedFilter(filter: ISavedFilter): void;
 
   /**
    * Call this function to set the selected SavedFilter
-   *
-   * @param id SavedFilter id
    */
   setSelectedSavedFilter(id: string): void;
 
@@ -199,51 +172,40 @@ export type QueryBuilderInstance = {
 
   /**
    * Call this function to get a SavedFilter by id
-   *
-   * @param id SavedFilter id
    */
   getSavedFilterById(id: string): SavedFilterInstance | null;
 
   /**
    * Call this function to add a new Query to the list
-   *
-   * @param query ISyntheticSqon
    */
-  createQuery(query: Omit<ISyntheticSqon, "id">): string;
+  createQuery(input: {
+    id?: string;
+    op: BooleanOperators;
+    content: TSyntheticSqonContent;
+  }): string;
 
   /**
    * Call this function to delete a Query
-   *
-   * @param id Query id
    */
   deleteQuery(id: string): void;
 
   /**
    * Call this function to update a Query
-   *
-   * @param id Query id
-   * @param data ISyntheticSqon
    */
   updateQuery(id: string, data: Omit<ISyntheticSqon, "id">): void;
 
   /**
    * Call this function to duplicate a Query
-   *
-   * @param id Query id
    */
   duplicateQuery(id: string): void;
 
   /**
    * Call this function to select a Query
-   *
-   * @param id Query id
    */
   selectQuery(id: string): void;
 
   /**
    * Call this function to unselect a Query
-   *
-   * @param id Query id
    */
   unselectQuery(id: string): void;
 
@@ -258,23 +220,22 @@ export type QueryBuilderInstance = {
   getSelectedQueryIndexes(): number[];
 
   /**
+   * Call this function to get the selected Query indexes
+   */
+  setSelectedQueryIndexes(indexes: number[]): void;
+
+  /**
    * Call this function to set the active Query
-   *
-   * @param id Query id
    */
   getQueryIndexById(id: string): number;
 
   /**
    * Call this function to get a Query by id
-   *
-   * @param id Query id
    */
   getQueryById(id: string): QueryInstance | null;
 
   /**
    * Call this function to get the list of Queries
-   *
-   * @param id Query id
    */
   getQueries(): QueryInstance[];
 
@@ -294,10 +255,12 @@ export type QueryBuilderInstance = {
   getActiveQuery(): QueryInstance | null;
 
   /**
+   *  Call this function to change the combine operator of a Query
+   */
+  changeCombineOperator: (id: string, operator: BooleanOperators) => void;
+
+  /**
    * Call this function to set the Queries list
-   *
-   * @param activeQueryId string
-   * @param newQueries ISyntheticSqon[]
    */
   setRawQueries(activeQueryId: string, newQueries: ISyntheticSqon[]): void;
 
@@ -315,6 +278,11 @@ export type QueryBuilderInstance = {
    * Call this function to check if the QueryBuilder can combine queries
    */
   canCombine(): boolean;
+
+  /**
+   * Call this function to combine selected queries
+   */
+  combineSelectedQueries(operator: BooleanOperators): void;
 
   /**
    * Call this function to reset the QueryBuilder
@@ -412,6 +380,12 @@ export const createQueryBuilder = (
     getSelectedQueryIndexes: () => {
       return queryBuilder.getState().selectedQueryIndexes;
     },
+    setSelectedQueryIndexes: (indexes) => {
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        selectedQueryIndexes: indexes,
+      }));
+    },
     selectQuery: (id) => {
       const queryIndex = queryBuilder.getQueryIndexById(id);
       const newSelectedQueryIndexes = [
@@ -463,16 +437,13 @@ export const createQueryBuilder = (
     getQueryIndexById: (id) => {
       return queryBuilder.getQueries().findIndex((query) => query.id === id);
     },
-    createQuery: (query) => {
-      const newQuery: ISyntheticSqon = {
-        ...query,
-        id: v4(),
-      };
+    createQuery: ({ id = v4(), op = BooleanOperators.and, content }) => {
+      const newQuery: ISyntheticSqon = { id, op, content };
 
-      queryBuilder.setRawQueries(newQuery.id, [
-        ...queryBuilder.getRawQueries(),
-        newQuery,
-      ]);
+      queryBuilder.setRawQueries(
+        newQuery.id,
+        cleanUpQueries([...queryBuilder.getRawQueries(), newQuery])
+      );
       queryBuilder.coreProps.onQueryCreate?.(newQuery);
 
       return newQuery.id;
@@ -504,10 +475,16 @@ export const createQueryBuilder = (
       const query = queryBuilder.getQueryById(id);
 
       if (query) {
-        queryBuilder.createQuery(query.raw());
+        queryBuilder.createQuery({
+          op: query.raw().op as BooleanOperators,
+          content: query.raw().content,
+        });
       }
     },
-    deleteQuery: (id) => {},
+    deleteQuery: (id) => {
+      deleteQueryAndSetNext(id, queryBuilder);
+      queryBuilder.coreProps.onQueryDelete?.(id);
+    },
     setRawQueries: (activeQueryId, newQueries) => {
       queryBuilder.setState((prev) => ({
         ...prev,
@@ -522,11 +499,45 @@ export const createQueryBuilder = (
         queries: [getDefaultSyntheticSqon(activeQueryId)],
       }));
     },
+    changeCombineOperator: (id, operator) => {
+      const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
+      const currentQueryIndex = queryBuilder.getQueryIndexById(id);
+      const currentQuery = updatedQueries[currentQueryIndex];
+      const newQuery = changeCombineOperator(operator, currentQuery);
+
+      updatedQueries[currentQueryIndex] = {
+        ...currentQuery,
+        content: newQuery.content,
+        op: newQuery.op,
+      };
+
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        queries: cleanUpQueries(updatedQueries),
+      }));
+    },
     hasQueries: () => {
       return queryBuilder.getQueries().length > 0;
     },
     canCombine: () => {
       return queryBuilder.getQueries().length > 1;
+    },
+    combineSelectedQueries: (operator: BooleanOperators) => {
+      const combinedQuery: ISyntheticSqon = {
+        id: v4(),
+        op: operator,
+        content: queryBuilder.getSelectedQueryIndexes(),
+      };
+      const selectedQueryIndexes: number[] = [];
+
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        activeQueryId: combinedQuery.id,
+        queries: [...prev.queries, combinedQuery],
+        selectedQueryIndexes,
+      }));
+      queryBuilder.coreProps.onQueryCreate?.(combinedQuery);
+      queryBuilder.coreProps.onQuerySelectChange?.(selectedQueryIndexes);
     },
   };
 
