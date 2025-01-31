@@ -1,7 +1,6 @@
 import {
   BooleanOperators,
   ISyntheticSqon,
-  TSqonGroupOp,
   TSyntheticSqonContent,
 } from "../sqon";
 import { ISavedFilter } from "../saved-filter";
@@ -9,12 +8,10 @@ import { createSavedFilter, SavedFilterInstance } from "./saved-filter";
 import { createQuery, QueryInstance } from "./query";
 import { PartialKeys } from "../../lib/utils";
 import { v4 } from "uuid";
-import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
 import {
   changeCombineOperatorForQuery,
   cleanUpQueries,
-  deleteQueryAndSetNext,
   getDefaultSyntheticSqon,
 } from "./utils/sqon";
 
@@ -173,7 +170,7 @@ export type QueryBuilderInstance = {
   /**
    * Call this function to get a SavedFilter by id
    */
-  getSavedFilterById(id: string): SavedFilterInstance | null;
+  getSavedFilter(id: string): SavedFilterInstance | null;
 
   /**
    * Call this function to add a new Query to the list
@@ -226,13 +223,15 @@ export type QueryBuilderInstance = {
 
   /**
    * Call this function to set the active Query
+   *
+   * @return The query index or -1 if the query is not found
    */
-  getQueryIndexById(id: string): number;
+  getQueryIndex(id: string): number;
 
   /**
    * Call this function to get a Query by id
    */
-  getQueryById(id: string): QueryInstance | null;
+  getQuery(id: string): QueryInstance | null;
 
   /**
    * Call this function to get the list of Queries
@@ -355,7 +354,7 @@ export const createQueryBuilder = (
 
       return null;
     },
-    getSavedFilterById: (id) => {
+    getSavedFilter: (id) => {
       return (
         queryBuilder
           .getSavedFilters()
@@ -387,27 +386,10 @@ export const createQueryBuilder = (
       }));
     },
     selectQuery: (id) => {
-      const queryIndex = queryBuilder.getQueryIndexById(id);
-      const newSelectedQueryIndexes = [
-        ...queryBuilder.getState().selectedQueryIndexes,
-        queryIndex,
-      ];
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        selectedQueryIndexes: newSelectedQueryIndexes,
-      }));
-      queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
+      queryBuilder.getQuery(id)?.select();
     },
     unselectQuery: (id) => {
-      const queryIndex = queryBuilder.getQueryIndexById(id);
-      const newSelectedQueryIndexes = queryBuilder
-        .getState()
-        .selectedQueryIndexes.filter((index) => index !== queryIndex);
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        selectedQueryIndexes: newSelectedQueryIndexes,
-      }));
-      queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
+      queryBuilder.getQuery(id)?.unselect();
     },
     resetQuerySelection: () => {
       queryBuilder.setState((prev) => ({
@@ -416,26 +398,23 @@ export const createQueryBuilder = (
       }));
       queryBuilder.coreProps.onQuerySelectChange?.([]);
     },
-    getQueryById: (id) => {
+    getQuery: (id) => {
       return queryBuilder.getQueries().find((query) => query.id === id) || null;
     },
     setActiveQuery: (id) => {
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        activeQueryId: id,
-      }));
+      queryBuilder.getQuery(id)?.setAsActive();
     },
     getActiveQuery: () => {
       if (!queryBuilder.coreProps.state.activeQueryId) {
         return null;
       }
 
-      return queryBuilder.getQueryById(
-        queryBuilder.coreProps.state.activeQueryId
-      );
+      return queryBuilder.getQuery(queryBuilder.coreProps.state.activeQueryId);
     },
-    getQueryIndexById: (id) => {
-      return queryBuilder.getQueries().findIndex((query) => query.id === id);
+    getQueryIndex: (id) => {
+      const query = queryBuilder.getQuery(id);
+
+      return query ? query.index() : -1;
     },
     createQuery: ({ id = v4(), op = BooleanOperators.and, content }) => {
       const newQuery: ISyntheticSqon = { id, op, content };
@@ -449,41 +428,13 @@ export const createQueryBuilder = (
       return newQuery.id;
     },
     updateQuery: (id, updatedQuery) => {
-      if (!id) return;
-
-      if (isEmpty(updatedQuery.content)) {
-        deleteQueryAndSetNext(id, queryBuilder);
-      } else {
-        const currentQueryIndex = queryBuilder.getQueryIndexById(id);
-        const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
-        const newQuery: ISyntheticSqon = {
-          ...updatedQuery,
-          id,
-          content: updatedQuery.content,
-          op: updatedQuery.op,
-        };
-        updatedQueries[currentQueryIndex] = newQuery;
-
-        queryBuilder.setRawQueries(
-          queryBuilder.coreProps.state.activeQueryId,
-          cleanUpQueries(updatedQueries)
-        );
-        queryBuilder.coreProps.onQueryUpdate?.(id, newQuery);
-      }
+      queryBuilder.getQuery(id)?.update(updatedQuery);
     },
     duplicateQuery: (id) => {
-      const query = queryBuilder.getQueryById(id);
-
-      if (query) {
-        queryBuilder.createQuery({
-          op: query.raw().op as BooleanOperators,
-          content: query.raw().content,
-        });
-      }
+      queryBuilder.getQuery(id)?.duplicate();
     },
     deleteQuery: (id) => {
-      deleteQueryAndSetNext(id, queryBuilder);
-      queryBuilder.coreProps.onQueryDelete?.(id);
+      queryBuilder.getQuery(id)?.delete();
     },
     setRawQueries: (activeQueryId, newQueries) => {
       queryBuilder.setState((prev) => ({
@@ -500,21 +451,7 @@ export const createQueryBuilder = (
       }));
     },
     changeQueryCombineOperator: (id, operator) => {
-      const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
-      const currentQueryIndex = queryBuilder.getQueryIndexById(id);
-      const currentQuery = updatedQueries[currentQueryIndex];
-      const newQuery = changeCombineOperatorForQuery(operator, currentQuery);
-
-      updatedQueries[currentQueryIndex] = {
-        ...currentQuery,
-        content: newQuery.content,
-        op: newQuery.op,
-      };
-
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        queries: cleanUpQueries(updatedQueries),
-      }));
+      queryBuilder.getQuery(id)?.changeCombineOperator(operator);
     },
     hasQueries: () => {
       return queryBuilder.getQueries().length > 0;

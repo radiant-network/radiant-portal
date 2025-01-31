@@ -1,6 +1,19 @@
-import { BooleanOperators, ISyntheticSqon } from "../sqon";
+import isEmpty from "lodash/isEmpty";
+import {
+  BooleanOperators,
+  ISyntheticSqon,
+  IValueFilter,
+  IValueQuery,
+  TSyntheticSqonContentValue,
+} from "../sqon";
 import { QueryBuilderInstance } from "./query-builder";
-import { isEmptySqon } from "./utils/sqon";
+import {
+  changeCombineOperatorForQuery,
+  cleanUpQueries,
+  deleteQueryAndSetNext,
+  isEmptySqon,
+} from "./utils/sqon";
+import cloneDeep from "lodash/cloneDeep";
 
 export type CoreQuery = {
   /**
@@ -58,6 +71,16 @@ export type CoreQuery = {
   setAsActive(): void;
 
   /**
+   * Call this function to add pill to the Query
+   */
+  addPill: (pill: IValueQuery) => void;
+
+  /**
+   * Call this function to remove pill from the Query
+   */
+  removePill: (pillId: string) => void;
+
+  /**
    * Call this function to set the Query as active
    */
   changeCombineOperator(operator: BooleanOperators): void;
@@ -70,20 +93,114 @@ export const createQuery = (
   syntheticSqon: ISyntheticSqon
 ): QueryInstance => {
   const query: QueryInstance = {} as QueryInstance;
+  const queryId = syntheticSqon.id;
 
   const coreInstance: CoreQuery = {
-    id: syntheticSqon.id,
+    id: queryId,
     raw: () => syntheticSqon,
-    select: () => queryBuilder.selectQuery(query.id),
-    unselect: () => queryBuilder.unselectQuery(query.id),
-    index: () => queryBuilder.getQueryIndexById(query.id),
+    select: () => {
+      const queryIndex = queryBuilder.getQueryIndex(queryId);
+      const newSelectedQueryIndexes = [
+        ...queryBuilder.getState().selectedQueryIndexes,
+        queryIndex,
+      ];
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        selectedQueryIndexes: newSelectedQueryIndexes,
+      }));
+      queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
+    },
+    unselect: () => {
+      const queryIndex = queryBuilder.getQueryIndex(queryId);
+      const newSelectedQueryIndexes = queryBuilder
+        .getState()
+        .selectedQueryIndexes.filter((index) => index !== queryIndex);
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        selectedQueryIndexes: newSelectedQueryIndexes,
+      }));
+      queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
+    },
+    index: () => {
+      return queryBuilder
+        .getQueries()
+        .findIndex((query) => query.id === queryId);
+    },
     isEmpty: (): boolean => isEmptySqon(syntheticSqon),
-    delete: () => queryBuilder.deleteQuery(query.id),
-    update: (data) => queryBuilder.updateQuery(query.id, data),
-    duplicate: () => queryBuilder.duplicateQuery(query.id),
-    setAsActive: () => queryBuilder.setActiveQuery(query.id),
-    changeCombineOperator: (operator) =>
-      queryBuilder.changeQueryCombineOperator(query.id, operator),
+    delete: () => {
+      deleteQueryAndSetNext(queryId, queryBuilder);
+      queryBuilder.coreProps.onQueryDelete?.(queryId);
+    },
+    update: (data) => {
+      if (isEmpty(data.content)) {
+        deleteQueryAndSetNext(queryId, queryBuilder);
+      } else {
+        const currentQueryIndex = queryBuilder.getQueryIndex(queryId);
+        const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
+        const newQuery: ISyntheticSqon = {
+          ...data,
+          id: queryId,
+          content: data.content,
+          op: data.op,
+        };
+        updatedQueries[currentQueryIndex] = newQuery;
+
+        queryBuilder.setRawQueries(
+          queryBuilder.coreProps.state.activeQueryId,
+          cleanUpQueries(updatedQueries)
+        );
+        queryBuilder.coreProps.onQueryUpdate?.(queryId, newQuery);
+      }
+    },
+    duplicate: () => {
+      const query = queryBuilder.getQuery(syntheticSqon.id);
+
+      if (query) {
+        queryBuilder.createQuery({
+          op: query.raw().op as BooleanOperators,
+          content: query.raw().content,
+        });
+      }
+    },
+    setAsActive: () => {
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        activeQueryId: queryId,
+      }));
+    },
+    changeCombineOperator: (operator) => {
+      const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
+      const currentQueryIndex = queryBuilder.getQueryIndex(queryId);
+      const currentQuery = updatedQueries[currentQueryIndex];
+      const newQuery = changeCombineOperatorForQuery(operator, currentQuery);
+
+      updatedQueries[currentQueryIndex] = {
+        ...currentQuery,
+        content: newQuery.content,
+        op: newQuery.op,
+      };
+
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        queries: cleanUpQueries(updatedQueries),
+      }));
+    },
+    addPill: (pill) => {
+      queryBuilder.updateQuery(syntheticSqon.id, {
+        ...syntheticSqon,
+        content: [...syntheticSqon.content, pill],
+      });
+    },
+    removePill: (pillId) => {
+      queryBuilder.updateQuery(syntheticSqon.id, {
+        ...syntheticSqon,
+        content: syntheticSqon.content
+          .map((sqonContent: TSyntheticSqonContentValue) => {
+            if ((sqonContent as IValueFilter).id !== pillId) return sqonContent;
+          })
+          .filter((el) => el !== undefined),
+      });
+    },
   };
 
   Object.assign(query, coreInstance);

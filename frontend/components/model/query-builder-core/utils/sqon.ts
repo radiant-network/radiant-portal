@@ -1,12 +1,21 @@
 import {
   BooleanOperators,
   FieldOperators,
+  FilterOperators,
+  IMergeOptions,
+  IRemoteComponent,
   ISqonGroupFilter,
   ISyntheticSqon,
   IValueContent,
   IValueFilter,
+  IValueQuery,
+  IWildCardValueContent,
+  MERGE_OPERATOR_STRATEGIES,
+  MERGE_VALUES_STRATEGIES,
   RangeOperators,
   SET_ID_PREFIX,
+  TermOperators,
+  TSqonContent,
   TSqonContentValue,
   TSqonGroupOp,
   TSyntheticSqonContent,
@@ -16,11 +25,11 @@ import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
 import { QueryBuilderInstance, QueryBuilderState } from "../query-builder";
 import { v4 } from "uuid";
+import merge from "lodash/merge";
+import union from "lodash/union";
 
 /**
  * Check if a synthetic sqon is empty.
- *
- * @param {ISyntheticSqon} syntheticSqon The synthetic sqon to check
  */
 export const isEmptySqon = (
   sqon: ISyntheticSqon | Record<string, never>
@@ -32,8 +41,6 @@ export const isNotEmptySqon = (
 
 /**
  * Check if a synthetic sqon is a reference to another sqon.
- *
- * @param {ISyntheticSqon} syntheticSqon The synthetic sqon to check
  */
 export const isReference = (
   sqon: ISyntheticSqon | Record<string, never> | TSyntheticSqonContentValue
@@ -43,8 +50,6 @@ export const isNotReference = (sqon: any): boolean => isNaN(sqon);
 
 /**
  * Check if a sqon value is a set.
- *
- * @param {ISyntheticSqon} syntheticSqon The synthetic sqon to check
  */
 export const isSet = (value: IValueFilter): boolean =>
   value.content.value &&
@@ -56,16 +61,12 @@ export const isNotSet = (value: IValueFilter): boolean => !isSet(value);
 
 /**
  * Check if a sqon value is an uploaded list.
- *
- * @param {IValueFilter} value The value to check
  */
 export const isUploadedList = (value: IValueFilter): boolean =>
   Boolean(value.content.isUploadedList);
 
 /**
- *
- * @param value Check if a sqon value is a treefacet
- * @returns
+ * Check if a sqon value is a remote component.
  */
 export const isRemoteComponent = (value: IValueFilter): boolean =>
   !!value.content.remoteComponent;
@@ -73,8 +74,6 @@ export const isRemoteComponent = (value: IValueFilter): boolean =>
 /**
  * Check if a synthetic sqon is a boolean operator
  * Operator is either one of the following: 'or', 'and' or 'not'
- *
- * @param {ISyntheticSqon} syntheticSqon The synthetic sqon to check
  */
 export const isBooleanOperator = (
   sqon: ISyntheticSqon | Record<string, never> | TSyntheticSqonContentValue
@@ -87,8 +86,6 @@ export const isBooleanOperator = (
 /**
  * Check if a synthetic sqon is a field operator
  * Operator is either one of the following: '>', '<', 'between', '>=','<=', 'in', 'not-in' or 'all'
- *
- * @param {ISyntheticSqon} sqon The synthetic sqon to check
  */
 export const isFieldOperator = (
   sqon: ISyntheticSqon | Record<string, never> | ISqonGroupFilter
@@ -97,8 +94,6 @@ export const isFieldOperator = (
 
 /**
  * Check if a query filter is a boolean one.
- *
- * @param {IValueFilter} query
  */
 export const isBooleanFilter = (query: IValueFilter): boolean =>
   query.content.value.every((val) =>
@@ -107,23 +102,17 @@ export const isBooleanFilter = (query: IValueFilter): boolean =>
 
 /**
  * Check if a query filter is a range one.
- *
- * @param {IValueFilter} query
  */
 export const isRangeFilter = (query: IValueFilter): boolean =>
   query.op === RangeOperators.in ? false : query.op in RangeOperators;
 
 /**
  * Check if a query filter is a custom pill.
- *
- * @param {IValueFilter} query
  */
 export const isCustomPill = (query: IValueFilter): boolean => !!query.title;
 
 /**
  * Generates an empty synthetic sqon
- *
- * @param {ISyntheticSqon} syntheticSqon The empty synthetic sqon
  */
 export const generateEmptyQuery = (
   sqon: ISyntheticSqon = { content: [], id: v4(), op: BooleanOperators.and }
@@ -274,7 +263,7 @@ export const deleteQueryAndSetNext = (
   if (queries.length === 1) {
     queryBuilder.resetQueries(queryId);
   } else {
-    const queryIndex = queryBuilder.getQueryIndexById(queryId);
+    const queryIndex = queryBuilder.getQueryIndex(queryId);
     const updatedQueries = cleanUpQueries(
       removeSqonAtIndex(queryIndex, queries)
     );
@@ -350,3 +339,267 @@ export const changeCombineOperatorForQuery = (
   ) as TSyntheticSqonContent,
   op: operator,
 });
+
+export const removeFieldFromSqon = (
+  field: string,
+  sqon: ISyntheticSqon
+): ISyntheticSqon => ({
+  ...sqon,
+  content: sqon.content.filter(function f(sqon: any): boolean {
+    if (isReference(sqon)) {
+      return true;
+    }
+
+    if (isBooleanOperator(sqon)) {
+      return (sqon.content as TSqonContent).filter(f).length > 0;
+    }
+
+    return !((sqon as IValueFilter).content.field === field);
+  }),
+});
+
+export const deepMergeFieldInQuery = ({
+  query,
+  field,
+  index,
+  isUploadedList,
+  merge_strategy = MERGE_VALUES_STRATEGIES.APPEND_VALUES,
+  operator = TermOperators.in,
+  overrideValuesName,
+  remoteComponent,
+  value,
+}: {
+  query: ISyntheticSqon;
+  field: string;
+  value: Array<string | number | boolean>;
+  index?: string;
+  merge_strategy?: MERGE_VALUES_STRATEGIES;
+  operator?: TermOperators | RangeOperators;
+  overrideValuesName?: string;
+  isUploadedList?: boolean;
+  remoteComponent?: IRemoteComponent;
+}): ISyntheticSqon => {
+  let newSqon;
+  const newSqonContent: IValueFilter = {
+    content: {
+      field,
+      index,
+      isUploadedList,
+      overrideValuesName,
+      remoteComponent,
+      value,
+    },
+    op: operator,
+  };
+
+  if (!isEmpty(query)) {
+    newSqon = deepMergeSqonValue(query, newSqonContent, {
+      operator: MERGE_OPERATOR_STRATEGIES.OVERRIDE_OPERATOR,
+      values: merge_strategy,
+    });
+  } else {
+    newSqon = getDefaultSyntheticSqon();
+    newSqon.content = [newSqonContent];
+  }
+
+  return newSqon;
+};
+
+export const deepMergeSqonValue = (
+  sourceSqon: ISyntheticSqon,
+  newSqon: IValueFilter,
+  opts: IMergeOptions
+): ISyntheticSqon => {
+  const clonedSqons = cloneDeep(sourceSqon);
+
+  opts = merge(
+    {},
+    {
+      operator: MERGE_OPERATOR_STRATEGIES.DEFAULT,
+      values: MERGE_VALUES_STRATEGIES.DEFAULT,
+    },
+    opts
+  );
+
+  const found = deeplySetSqonValue(clonedSqons, newSqon, opts);
+
+  return found
+    ? clonedSqons
+    : {
+        ...clonedSqons,
+        content: [...clonedSqons.content, newSqon],
+      };
+};
+
+/**
+  * Recursively traverse the `sourceSqon` and mutate the matching field's value and, optionaly, it's operator.
+
+  * @param {Object} sourceSqon - a sqon object to traverse recursively and mutate
+  * @param {Object} newSqon - a sqon, that may omit the operator,
+  * that provide the field name searched and value to be set
+  * @param {Object} opts - options to handle merging the values.
+  *
+  * @returns `true` if the field was found; `false` otherwise.
+  */
+const deeplySetSqonValue = (
+  sourceSqon: ISyntheticSqon,
+  newSqon: IValueFilter,
+  opts: IMergeOptions
+) => {
+  let found = false;
+
+  sourceSqon.content.forEach((sqon) => {
+    // dont follow references and custom pill
+    if (isReference(sqon)) return;
+    if ((sqon as IValueQuery).title) return;
+
+    const castedSqon = sqon as TSqonContentValue;
+
+    // traverse nested sqons recursively
+    if (isBooleanOperator(castedSqon)) {
+      found = deeplySetSqonValue(castedSqon as ISyntheticSqon, newSqon, opts);
+      return;
+    }
+
+    const castedValueSqon = castedSqon as IValueFilter;
+
+    // field found, set the value and operator
+    if (castedValueSqon.content.field === newSqon.content.field) {
+      found = true;
+
+      if (newSqon.content.overrideValuesName) {
+        castedValueSqon.content.overrideValuesName =
+          newSqon.content.overrideValuesName;
+      }
+
+      if (newSqon.op) {
+        if (opts.operator !== MERGE_OPERATOR_STRATEGIES.KEEP_OPERATOR) {
+          castedValueSqon.op = newSqon.op;
+        }
+      }
+
+      if (opts.values === MERGE_VALUES_STRATEGIES.APPEND_VALUES) {
+        castedValueSqon.content.value = union(
+          [],
+          castedValueSqon.content.value,
+          newSqon.content.value
+        );
+      }
+
+      if (opts.values === MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES) {
+        castedValueSqon.content.value = newSqon.content.value;
+      }
+    }
+  });
+
+  return found;
+};
+
+export const findSqonValueByField = (
+  field: string,
+  sqon: ISqonGroupFilter,
+  prevValue: any = undefined
+): any => {
+  let value: any = prevValue;
+  sqon.content.forEach((content) => {
+    if (isReference(content)) {
+      return;
+    } else if (isBooleanOperator(content)) {
+      value =
+        value ||
+        findSqonValueByField(field, content as ISqonGroupFilter, prevValue);
+    } else {
+      const valueContent = content as IValueFilter;
+
+      if (valueContent.content.field === field) {
+        value = value || valueContent.content.value;
+      }
+    }
+  });
+  return value;
+};
+
+export const generateWildCardValueFilter = ({
+  fields,
+  index = "",
+  operator = FilterOperators.filter,
+  overrideValuesName,
+  value,
+}: {
+  fields: string[];
+  value: string[];
+  index?: string;
+  operator?: TermOperators | string;
+  overrideValuesName?: string;
+}): { content: IWildCardValueContent; op: TermOperators | string } => ({
+  content: { fields, index, overrideValuesName, value },
+  op: operator,
+});
+
+/**
+ * Remove a value from a given synthetic sqon
+ *
+ * @param {*} contentToRemove The content/value to remove
+ * @param {ISyntheticSqon} syntheticSqon The synthetic sqon to update
+ *
+ * @returns {ISyntheticSqon} The modified synthetic sqon
+ */
+export const removeContentFromSqon = (
+  indexOrField: string | number,
+  syntheticSqon: ISyntheticSqon
+): ISyntheticSqon => {
+  const content = syntheticSqon.content as TSyntheticSqonContent;
+  const contentCleaned =
+    typeof indexOrField === "number"
+      ? content.filter((c) => c !== indexOrField)
+      : content.filter((c) => {
+          if (typeof c === "number") {
+            return true;
+          }
+
+          const contentAsSqonGroupFilter = c as ISqonGroupFilter;
+          const { skipBooleanOperatorCheck } = contentAsSqonGroupFilter;
+
+          const isValueContentToDelete =
+            skipBooleanOperatorCheck &&
+            (contentAsSqonGroupFilter.content[0].content as IValueContent)
+              .field !== indexOrField;
+
+          const isValueFilterToDelete =
+            (c as IValueFilter).content.field !== indexOrField;
+
+          return skipBooleanOperatorCheck
+            ? isValueContentToDelete
+            : isValueFilterToDelete;
+        });
+
+  return {
+    ...syntheticSqon,
+    content: contentCleaned,
+    op: syntheticSqon.op,
+  };
+};
+
+/**
+ * Recursively check if a synthetic sqon index is referenced inside a given synthetic sqon
+ *
+ * @param {number} indexReference The index of the synthetic sqon to check
+ * @param {ISyntheticSqon} syntheticSqon The synthetic sqon from which to verified
+ *
+ * @returns {boolean} If the index is referenced or not
+ */
+export const isIndexReferencedInSqon = (
+  indexReference: number,
+  syntheticSqon: ISyntheticSqon
+): boolean =>
+  isBooleanOperator(syntheticSqon)
+    ? syntheticSqon.content.reduce(
+        (acc: boolean, contentSqon: TSyntheticSqonContentValue) =>
+          acc ||
+          isIndexReferencedInSqon(
+            indexReference,
+            contentSqon as ISyntheticSqon
+          ),
+        false
+      )
+    : typeof syntheticSqon === "number" && syntheticSqon === indexReference;

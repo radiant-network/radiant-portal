@@ -157,14 +157,14 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should return the associated query by id", () => {
-    const foundQuery = qb.getQueryById("1");
+    const foundQuery = qb.getQuery("1");
 
     expect(foundQuery).toBeDefined();
     expect(foundQuery?.id).toBe("1");
   });
 
   it("should return null if a query by id is not found", () => {
-    const foundQuery = qb.getQueryById("undefined-query-id");
+    const foundQuery = qb.getQuery("undefined-query-id");
 
     expect(foundQuery).toBeNull();
   });
@@ -185,7 +185,7 @@ describe("QueryBuilder Core", () => {
 
   it("should return the correct query index", () => {
     const qb = createQueryBuilder(defaultProps);
-    expect(qb.getQueryIndexById("1")).toBe(0);
+    expect(qb.getQueryIndex("1")).toBe(0);
   });
 
   it("should create a new query", () => {
@@ -194,7 +194,7 @@ describe("QueryBuilder Core", () => {
       content: [],
     };
 
-    expect(qb.getQueryById("3")).toBeNull();
+    expect(qb.getQuery("3")).toBeNull();
     expect(state.queries.length).toBe(2);
 
     const createdQueryId = qb.createQuery({

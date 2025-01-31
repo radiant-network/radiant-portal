@@ -1,11 +1,19 @@
-import { beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
+import {
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from "@jest/globals";
+import type { Mock } from "jest-mock";
 import {
   CoreQueryBuilderProps,
   createQueryBuilder,
   QueryBuilderInstance,
   QueryBuilderState,
 } from "../query-builder";
-import { BooleanOperators, ISyntheticSqon } from "../../sqon";
+import { BooleanOperators, ISyntheticSqon, IValueQuery } from "../../sqon";
 import { isEmptySqon } from "../utils/sqon";
 
 let defaultProps: CoreQueryBuilderProps = {
@@ -62,6 +70,8 @@ const mockUUID = "abababab-abab-4bab-abab-abababababab";
 let qb: QueryBuilderInstance;
 let state: QueryBuilderState = defaultProps.state;
 
+let mockOnQuerySelectChange: Mock<void, [any]>;
+
 describe("Query Manipulation", () => {
   beforeAll(() => {
     Object.defineProperty(globalThis, "crypto", {
@@ -75,16 +85,19 @@ describe("Query Manipulation", () => {
 
   beforeEach(() => {
     state = defaultProps.state;
+    mockOnQuerySelectChange = jest.fn();
+
     qb = createQueryBuilder({
       ...defaultProps,
       onStateChange: (newState) => {
         state = newState;
       },
+      onQuerySelectChange: mockOnQuerySelectChange,
     });
   });
 
   it("should return the query id", () => {
-    expect(qb.getQueryById("1")?.id).toBe("1");
+    expect(qb.getQuery("1")?.id).toBe("1");
   });
 
   it("should be empty", () => {
@@ -100,11 +113,11 @@ describe("Query Manipulation", () => {
   });
 
   it("should not be empty", () => {
-    expect(qb.getQueryById("2")?.isEmpty()).toBe(false);
+    expect(qb.getQuery("2")?.isEmpty()).toBe(false);
   });
 
   it("should return the raw query", () => {
-    expect(qb.getQueryById("2")?.raw()).toStrictEqual(
+    expect(qb.getQuery("2")?.raw()).toStrictEqual(
       defaultProps.state.queries.find((q) => q.id === "2")
     );
   });
@@ -127,7 +140,7 @@ describe("Query Manipulation", () => {
       ],
     };
 
-    qb.getQueryById("2")?.update(newSqon);
+    qb.getQuery("2")?.update(newSqon);
 
     expect(state.queries.find((q) => q.id === "2")).toStrictEqual({
       id: "2",
@@ -138,11 +151,11 @@ describe("Query Manipulation", () => {
   it("should duplicate the query", () => {
     expect(state.queries.length).toBe(3);
 
-    qb.getQueryById("3")?.duplicate();
+    qb.getQuery("3")?.duplicate();
 
     expect(state.queries.length).toBe(4);
     expect(state.queries.find((q) => q.id === mockUUID)).toStrictEqual({
-      ...qb.getQueryById("3")?.raw(),
+      ...qb.getQuery("3")?.raw(),
       id: mockUUID,
     });
   });
@@ -150,7 +163,7 @@ describe("Query Manipulation", () => {
   it("should set query as active", () => {
     expect(state.activeQueryId).toBe(defaultProps.state.activeQueryId);
 
-    qb.getQueryById("3")?.setAsActive();
+    qb.getQuery("3")?.setAsActive();
 
     expect(state.activeQueryId).toBe("3");
   });
@@ -158,25 +171,36 @@ describe("Query Manipulation", () => {
   it("should select query", () => {
     expect(state.selectedQueryIndexes.length).toBe(0);
 
-    qb.getQueryById("1")?.select();
+    qb.getQuery("1")?.select();
 
     expect(state.selectedQueryIndexes.length).toBe(1);
+    expect(state.selectedQueryIndexes).toContain(0);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledWith([0]);
   });
 
   it("should unselect query", () => {
-    qb.getQueryById("1")?.select();
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        ...prev.state,
+        selectedQueryIndexes: [0],
+      },
+    }));
 
-    expect(state.selectedQueryIndexes.length).toBe(1);
+    expect(qb.coreProps.state.selectedQueryIndexes.length).toBe(1);
 
-    qb.getQueryById("1")?.unselect();
+    qb.getQuery("1")?.unselect();
 
     expect(state.selectedQueryIndexes.length).toBe(0);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
+    expect(mockOnQuerySelectChange).toHaveBeenCalledWith([]);
   });
 
   it("should return the query index", () => {
-    expect(qb.getQueryById("1")?.index()).toBe(0);
-    expect(qb.getQueryById("2")?.index()).toBe(1);
-    expect(qb.getQueryById("3")?.index()).toBe(2);
+    expect(qb.getQuery("1")?.index()).toBe(0);
+    expect(qb.getQuery("2")?.index()).toBe(1);
+    expect(qb.getQuery("3")?.index()).toBe(2);
   });
 
   it("should change combine operator", () => {
@@ -208,7 +232,7 @@ describe("Query Manipulation", () => {
       },
     }));
 
-    qb.getQueryById("1")?.changeCombineOperator(BooleanOperators.or);
+    qb.getQuery("1")?.changeCombineOperator(BooleanOperators.or);
 
     expect(state.queries.find((q) => q.id === "1")?.op).toBe("or");
 
@@ -216,5 +240,81 @@ describe("Query Manipulation", () => {
       ?.content[0] as ISyntheticSqon;
 
     expect(subSqon.op).toBe(BooleanOperators.or);
+  });
+
+  it("should add pill to the query", () => {
+    const pill: IValueQuery = {
+      content: [
+        {
+          content: {
+            value: ["pill-value"],
+            field: "pill-field",
+          },
+          op: "in",
+        },
+      ],
+      id: "pill-id",
+      op: "and",
+    };
+
+    expect(
+      qb.coreProps.state.queries.find((q) => q.id === "1")?.content
+    ).not.toContainEqual(pill);
+
+    qb.getQuery("1")?.addPill(pill);
+
+    expect(state.queries.find((q) => q.id === "1")?.content).toContainEqual(
+      pill
+    );
+  });
+
+  it("should remove pill from the query", () => {
+    const pill: IValueQuery = {
+      id: "pill-id",
+      content: [
+        {
+          content: {
+            value: ["pill-value"],
+            field: "pill-field",
+          },
+          op: "in",
+        },
+      ],
+      op: "and",
+    };
+
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+              pill,
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    expect(
+      qb.coreProps.state.queries.find((q) => q.id === "1")?.content
+    ).toContainEqual(pill);
+
+    qb.getQuery("1")?.removePill("pill-id");
+
+    expect(state.queries.find((q) => q.id === "1")?.content).not.toContainEqual(
+      pill
+    );
   });
 });
