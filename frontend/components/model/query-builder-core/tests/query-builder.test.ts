@@ -676,7 +676,7 @@ describe("QueryBuilder Core", () => {
     expect(mockOnQuerySelectChange).toHaveBeenCalledWith([0, 1]);
   });
 
-  it("should create a new queries with both indexes when combining", () => {
+  it("should create a new query with both indexes when combining", () => {
     expect(state.queries.length).toBe(2);
 
     qb.setCoreProps((prev) => ({
@@ -721,6 +721,9 @@ describe("QueryBuilder Core", () => {
     expect(state.queries.length).toBe(3);
     expect(state.activeQueryId).toBe(mockUUID);
     expect(state.queries.find((q) => q.id === mockUUID)).toBeDefined();
+    expect(state.queries.find((q) => q.id === mockUUID)?.content).toEqual([
+      0, 1,
+    ]);
     expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
     expect(mockOnQuerySelectChange).toHaveBeenCalledWith([]);
     expect(mockOnQueryCreate).toHaveBeenCalledTimes(1);
@@ -731,7 +734,7 @@ describe("QueryBuilder Core", () => {
     });
   });
 
-  it("should update combined queries when deleting a query include in the combined query", () => {
+  it("should update combined query when deleting a query", () => {
     qb.setCoreProps((prev) => ({
       ...prev,
       state: {
@@ -781,7 +784,7 @@ describe("QueryBuilder Core", () => {
     expect(state.queries.find((q) => q.id === "3")?.content).toEqual([0]);
   });
 
-  it("should delete combined queries when deleting all queries included in the combined query", () => {
+  it("should delete combined query when deleting all queries", () => {
     qb.setCoreProps((prev) => ({
       ...prev,
       state: {
@@ -819,7 +822,7 @@ describe("QueryBuilder Core", () => {
     expect(state.queries.find((q) => q.id === "2")).toBeUndefined();
   });
 
-  it("should recursively update combined queries when deleting a query included in the combined query", () => {
+  it("should recursively update combined queries when deleting a query", () => {
     qb.setCoreProps((prev) => ({
       ...prev,
       state: {
@@ -879,7 +882,7 @@ describe("QueryBuilder Core", () => {
     expect(state.queries.find((q) => q.id === "4")?.content).toEqual([0, 1]);
   });
 
-  it("should recursively delete combined queries when deleting a query included in the combined query", () => {
+  it("should recursively delete combined queries when deleting a query", () => {
     qb.setCoreProps((prev) => ({
       ...prev,
       state: {
@@ -944,7 +947,7 @@ describe("QueryBuilder Core", () => {
     expect(state.queries.find((q) => q.id === "5")?.content).toEqual([0]);
   });
 
-  it("should change combine operator recursively", () => {
+  it("should change combine operator of a query recursively", () => {
     qb.setCoreProps((prev) => ({
       ...prev,
       state: {
