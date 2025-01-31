@@ -973,7 +973,7 @@ describe("QueryBuilder Core", () => {
       },
     }));
 
-    qb.changeCombineOperator("1", BooleanOperators.or);
+    qb.changeQueryCombineOperator("1", BooleanOperators.or);
 
     expect(state.queries.find((q) => q.id === "1")?.op).toBe(
       BooleanOperators.or

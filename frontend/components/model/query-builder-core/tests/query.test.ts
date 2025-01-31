@@ -178,4 +178,43 @@ describe("Query Manipulation", () => {
     expect(qb.getQueryById("2")?.index()).toBe(1);
     expect(qb.getQueryById("3")?.index()).toBe(2);
   });
+
+  it("should change combine operator", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      value: ["something"],
+                      field: "field2",
+                    },
+                    op: "in",
+                  },
+                ],
+                op: "and",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+      },
+    }));
+
+    qb.getQueryById("1")?.changeCombineOperator(BooleanOperators.or);
+
+    expect(state.queries.find((q) => q.id === "1")?.op).toBe("or");
+
+    const subSqon = state.queries.find((q) => q.id === "1")
+      ?.content[0] as ISyntheticSqon;
+
+    expect(subSqon.op).toBe(BooleanOperators.or);
+  });
 });

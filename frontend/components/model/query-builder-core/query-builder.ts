@@ -12,7 +12,7 @@ import { v4 } from "uuid";
 import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
 import {
-  changeCombineOperator,
+  changeCombineOperatorForQuery,
   cleanUpQueries,
   deleteQueryAndSetNext,
   getDefaultSyntheticSqon,
@@ -257,7 +257,7 @@ export type QueryBuilderInstance = {
   /**
    *  Call this function to change the combine operator of a Query
    */
-  changeCombineOperator: (id: string, operator: BooleanOperators) => void;
+  changeQueryCombineOperator: (id: string, operator: BooleanOperators) => void;
 
   /**
    * Call this function to set the Queries list
@@ -499,11 +499,11 @@ export const createQueryBuilder = (
         queries: [getDefaultSyntheticSqon(activeQueryId)],
       }));
     },
-    changeCombineOperator: (id, operator) => {
+    changeQueryCombineOperator: (id, operator) => {
       const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
       const currentQueryIndex = queryBuilder.getQueryIndexById(id);
       const currentQuery = updatedQueries[currentQueryIndex];
-      const newQuery = changeCombineOperator(operator, currentQuery);
+      const newQuery = changeCombineOperatorForQuery(operator, currentQuery);
 
       updatedQueries[currentQueryIndex] = {
         ...currentQuery,

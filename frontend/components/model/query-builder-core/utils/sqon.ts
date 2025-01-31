@@ -337,7 +337,7 @@ export const findNextSelectedQuery = (
  *
  * @returns {ISyntheticSqon} The modified synthetic sqon
  */
-export const changeCombineOperator = (
+export const changeCombineOperatorForQuery = (
   operator: TSqonGroupOp,
   syntheticSqon: ISyntheticSqon
 ): ISyntheticSqon => ({
@@ -345,7 +345,7 @@ export const changeCombineOperator = (
   content: syntheticSqon.content.map((subContent: TSyntheticSqonContentValue) =>
     isBooleanOperator(subContent) &&
     !(subContent as ISqonGroupFilter).skipBooleanOperatorCheck
-      ? changeCombineOperator(operator, subContent as ISyntheticSqon)
+      ? changeCombineOperatorForQuery(operator, subContent as ISyntheticSqon)
       : subContent
   ) as TSyntheticSqonContent,
   op: operator,

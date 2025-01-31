@@ -1,4 +1,4 @@
-import { ISyntheticSqon } from "../sqon";
+import { BooleanOperators, ISyntheticSqon } from "../sqon";
 import { QueryBuilderInstance } from "./query-builder";
 import { isEmptySqon } from "./utils/sqon";
 
@@ -56,6 +56,11 @@ export type CoreQuery = {
    * Call this function to set the Query as active
    */
   setAsActive(): void;
+
+  /**
+   * Call this function to set the Query as active
+   */
+  changeCombineOperator(operator: BooleanOperators): void;
 };
 
 export type QueryInstance = CoreQuery;
@@ -77,6 +82,8 @@ export const createQuery = (
     update: (data) => queryBuilder.updateQuery(query.id, data),
     duplicate: () => queryBuilder.duplicateQuery(query.id),
     setAsActive: () => queryBuilder.setActiveQuery(query.id),
+    changeCombineOperator: (operator) =>
+      queryBuilder.changeQueryCombineOperator(query.id, operator),
   };
 
   Object.assign(query, coreInstance);
