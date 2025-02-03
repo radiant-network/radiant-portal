@@ -41,7 +41,7 @@ $(addprefix docker-run-, $(subst :, ,$(PORTALS))): docker-run-%:
 	$(eval PORTAL := $(subst docker-run-,,$@))  # Remove 'run-' prefix
 	$(eval PORTAL_PORT := $(call get_portal_port,$(filter $(PORTAL):%,$(PORTALS))))
 	@echo "Running portal: $(PORTAL) on port $(PORTAL_PORT)"
-	docker run --rm -p $(PORTAL_PORT):3000 --env-file ./portals/radiant/.env.production $(DOCKER_IMAGE_PREFIX)-$(PORTAL)
+	docker run --rm -p $(PORTAL_PORT):3000 $(DOCKER_IMAGE_PREFIX)-$(PORTAL)
 
 # Run dev mode a specific portal
 .PHONY: $(addprefix docker-dev-, $(subst :, ,$(PORTALS)))
