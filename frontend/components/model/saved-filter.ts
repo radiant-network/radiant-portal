@@ -6,4 +6,6 @@ export interface ISavedFilter {
   favorite: boolean;
   queries: ISyntheticSqon[];
   type?: string;
+  isDirty?: boolean;
+  isNew?: boolean;
 }

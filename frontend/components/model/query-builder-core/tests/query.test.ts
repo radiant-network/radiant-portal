@@ -62,6 +62,7 @@ let defaultProps: CoreQueryBuilderProps = {
       },
     ],
     selectedQueryIndexes: [],
+    savedFilters: [],
   },
 };
 
@@ -229,6 +230,7 @@ describe("Query Manipulation", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -304,6 +306,7 @@ describe("Query Manipulation", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 

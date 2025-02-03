@@ -40,8 +40,6 @@ export type CoreQuery = {
 
   /**
    * Call this function to update the Query
-   *
-   * @param data ISyntheticSqon
    */
   update(data: Omit<ISyntheticSqon, "id">): void;
 
@@ -64,6 +62,11 @@ export type CoreQuery = {
    * Call this function to unselect the Query
    */
   unselect(): void;
+
+  /**
+   * Call this function to know if the Query is active
+   */
+  isActive(): void;
 
   /**
    * Call this function to set the Query as active
@@ -89,8 +92,8 @@ export type CoreQuery = {
 export type QueryInstance = CoreQuery;
 
 export const createQuery = (
-  queryBuilder: QueryBuilderInstance,
-  syntheticSqon: ISyntheticSqon
+  syntheticSqon: ISyntheticSqon,
+  queryBuilder: QueryBuilderInstance
 ): QueryInstance => {
   const query: QueryInstance = {} as QueryInstance;
   const queryId = syntheticSqon.id;
@@ -98,6 +101,15 @@ export const createQuery = (
   const coreInstance: CoreQuery = {
     id: queryId,
     raw: () => syntheticSqon,
+    index: () => {
+      return queryBuilder
+        .getQueries()
+        .findIndex((query) => query.id === queryId);
+    },
+    isActive: () => {
+      return queryBuilder.getState().activeQueryId === queryId;
+    },
+    isEmpty: (): boolean => isEmptySqon(syntheticSqon),
     select: () => {
       const queryIndex = queryBuilder.getQueryIndex(queryId);
       const newSelectedQueryIndexes = [
@@ -121,12 +133,6 @@ export const createQuery = (
       }));
       queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
     },
-    index: () => {
-      return queryBuilder
-        .getQueries()
-        .findIndex((query) => query.id === queryId);
-    },
-    isEmpty: (): boolean => isEmptySqon(syntheticSqon),
     delete: () => {
       deleteQueryAndSetNext(queryId, queryBuilder);
       queryBuilder.coreProps.onQueryDelete?.(queryId);
@@ -153,7 +159,7 @@ export const createQuery = (
       }
     },
     duplicate: () => {
-      const query = queryBuilder.getQuery(syntheticSqon.id);
+      const query = queryBuilder.getQuery(queryId);
 
       if (query) {
         queryBuilder.createQuery({
@@ -169,20 +175,23 @@ export const createQuery = (
       }));
     },
     changeCombineOperator: (operator) => {
-      const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
+      const clonedQueries = cloneDeep(queryBuilder.getRawQueries());
       const currentQueryIndex = queryBuilder.getQueryIndex(queryId);
-      const currentQuery = updatedQueries[currentQueryIndex];
-      const newQuery = changeCombineOperatorForQuery(operator, currentQuery);
+      const currentQuery = clonedQueries[currentQueryIndex];
+      const updatedQuery = changeCombineOperatorForQuery(
+        operator,
+        currentQuery
+      );
 
-      updatedQueries[currentQueryIndex] = {
+      clonedQueries[currentQueryIndex] = {
         ...currentQuery,
-        content: newQuery.content,
-        op: newQuery.op,
+        content: updatedQuery.content,
+        op: updatedQuery.op,
       };
 
       queryBuilder.setState((prev) => ({
         ...prev,
-        queries: cleanUpQueries(updatedQueries),
+        queries: cleanUpQueries(clonedQueries),
       }));
     },
     addPill: (pill) => {

@@ -8,6 +8,7 @@ import {
   ISyntheticSqon,
   IValueContent,
   IValueFilter,
+  IValueFilterQuery,
   IValueQuery,
   IWildCardValueContent,
   MERGE_OPERATOR_STRATEGIES,
@@ -283,7 +284,7 @@ export const deleteQueryAndSetNext = (
         queryBuilder.coreProps.onQuerySelectChange?.(selectedQueryIndexes);
       }
 
-      const newQueryState: QueryBuilderState = {
+      const newQueryState: Partial<QueryBuilderState> = {
         activeQueryId: nextQuery.id,
         queries: updatedQueries,
         selectedQueryIndexes,
@@ -603,3 +604,18 @@ export const isIndexReferencedInSqon = (
         false
       )
     : typeof syntheticSqon === "number" && syntheticSqon === indexReference;
+
+export const formatQueriesWithPill = (
+  queries: ISyntheticSqon[]
+): ISyntheticSqon[] => {
+  const queriesCloned = structuredClone(queries);
+  const formattedQueries = queriesCloned.map((query: ISyntheticSqon) => {
+    const newContent = query.content.map((c: TSyntheticSqonContentValue) => {
+      if (c.hasOwnProperty("title") && (c as IValueQuery).id)
+        return { filterID: (c as IValueQuery).id } as IValueFilterQuery;
+      return c;
+    });
+    return { ...query, content: newContent };
+  });
+  return formattedQueries;
+};

@@ -53,6 +53,7 @@ let defaultProps: CoreQueryBuilderProps = {
       },
     ],
     selectedQueryIndexes: [],
+    savedFilters: [],
   },
 };
 
@@ -131,6 +132,7 @@ describe("QueryBuilder Core", () => {
       activeQueryId: "initial-query-id",
       queries: [],
       selectedQueryIndexes: [],
+      savedFilters: [],
     };
 
     qb.setCoreProps((prev) => ({
@@ -144,6 +146,7 @@ describe("QueryBuilder Core", () => {
       activeQueryId: "new-id",
       queries: defaultProps.state.queries,
       selectedQueryIndexes: [],
+      savedFilters: [],
     };
 
     expect(state).toStrictEqual(expectedState);
@@ -291,6 +294,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -364,6 +368,7 @@ describe("QueryBuilder Core", () => {
         activeQueryId: "1",
         queries: [],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     });
 
@@ -382,6 +387,7 @@ describe("QueryBuilder Core", () => {
         activeQueryId: "1",
         queries: [defaultProps.state.queries[0]],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     });
 
@@ -418,6 +424,7 @@ describe("QueryBuilder Core", () => {
       activeQueryId: "3",
       queries: newRawQueries,
       selectedQueryIndexes: [],
+      savedFilters: [],
     };
 
     expect(mockOnStateChange).toHaveBeenCalledWith(expectedHaveBeenCalledWith);
@@ -504,6 +511,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -551,6 +559,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -597,6 +606,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [0],
+        savedFilters: [],
       },
     }));
 
@@ -659,6 +669,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [0, 1, 2],
+        savedFilters: [],
       },
     }));
 
@@ -712,6 +723,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [0, 1],
+        savedFilters: [],
       },
     }));
 
@@ -773,6 +785,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -810,6 +823,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -866,6 +880,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -931,6 +946,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -973,6 +989,7 @@ describe("QueryBuilder Core", () => {
           },
         ],
         selectedQueryIndexes: [],
+        savedFilters: [],
       },
     }));
 
@@ -1007,6 +1024,7 @@ describe("QueryBuilder Core", () => {
         },
       ],
       selectedQueryIndexes: [],
+      savedFilters: [],
     });
   });
 });
