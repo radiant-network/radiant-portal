@@ -11,6 +11,13 @@ import { PartialKeys } from "../../lib/utils";
 import { v4 } from "uuid";
 import { cleanUpQueries, getDefaultSyntheticSqon } from "./utils/sqon";
 
+export const QUERY_BUILDER_UPDATE_EVENT_KEY = "QBCacheUpdate";
+
+export type QueryBuilderUpdateEvent = Event & {
+  queryBuilderId?: string;
+  value?: Pick<QueryBuilderState, "activeQueryId" | "queries">;
+};
+
 export type QueryBuilderState = {
   /**
    * Id of the active query
@@ -87,12 +94,12 @@ export type CoreQueryBuilderProps = {
   /**
    * Callback when a SavedFilter is deleted
    */
-  onSavedFilterDelete?(id: string): Promise<{ savedFilterId: string }>;
+  onSavedFilterDelete?(id: string): { savedFilterId: string };
 
   /**
    * Callback when a SavedFilter is saved
    */
-  onSavedFilterSave?(filter: ISavedFilter): Promise<ISavedFilter>;
+  onSavedFilterSave?(filter: ISavedFilter): ISavedFilter;
 
   /**
    * Callback when a Query is selected
@@ -298,6 +305,7 @@ export const createQueryBuilder = (
       queryBuilder.setState((prev) => ({
         ...prev,
         activeQueryId: newActiveQueryId,
+        queries: newSavedFilter.queries,
         savedFilters: [...prev.savedFilters, newSavedFilter],
       }));
 

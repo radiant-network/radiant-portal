@@ -7,10 +7,19 @@ import {
 const QueryBuilder = (props: QueryBuilderProps) => {
   const queryBuilder = useQueryBuilder(props);
 
+  console.log(queryBuilder.getState());
+  console.log("selected", queryBuilder.getSelectedSavedFilter());
+
   return (
     <div>
       QueryBuilder
-      <Button onClick={() => queryBuilder.deleteQuery("1")}>Add Query</Button>
+      <Button
+        onClick={async () => {
+          queryBuilder.createSavedFilter();
+        }}
+      >
+        Add Query
+      </Button>
     </div>
   );
 };

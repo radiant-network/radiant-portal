@@ -19,44 +19,48 @@ import {
   TSyntheticSqonContent,
 } from "../../sqon";
 import { getDefaultSyntheticSqon, isEmptySqon } from "../utils/sqon";
+import { ISavedFilter } from "../../saved-filter";
+
+const defaultQueries: ISyntheticSqon[] = [
+  {
+    id: "1",
+    op: "and",
+    content: [
+      {
+        content: {
+          value: ["something"],
+          field: "field1",
+        },
+        op: "in",
+      },
+    ],
+  },
+  {
+    id: "2",
+    op: "and",
+    content: [
+      {
+        content: {
+          value: ["something-else"],
+          field: "field2",
+        },
+        op: "in",
+      },
+    ],
+  },
+];
 
 let defaultProps: CoreQueryBuilderProps = {
   id: "test-query-builder",
   state: {
-    activeQueryId: "1",
-    queries: [
-      {
-        id: "1",
-        op: "and",
-        content: [
-          {
-            content: {
-              value: ["something"],
-              field: "field1",
-            },
-            op: "in",
-          },
-        ],
-      },
-      {
-        id: "2",
-        op: "and",
-        content: [
-          {
-            content: {
-              value: ["something-else"],
-              field: "field2",
-            },
-            op: "in",
-          },
-        ],
-      },
-    ],
+    activeQueryId: defaultQueries[0].id,
+    queries: defaultQueries,
     selectedQueryIndexes: [],
     savedFilters: [],
   },
 };
 
+let mockOnFilterCreate: Mock<void, [any]>;
 let mockOnQueryCreate: Mock<void, [any]>;
 let mockOnQueryUpdate: Mock<void, [any]>;
 let mockOnQueryDelete: Mock<void, [any]>;
@@ -84,6 +88,7 @@ describe("QueryBuilder Core", () => {
     mockOnQueryUpdate = jest.fn();
     mockOnQueryDelete = jest.fn();
     mockOnStateChange = jest.fn();
+    mockOnFilterCreate = jest.fn();
     mockOnQuerySelectChange = jest.fn();
     defaultProps.onStateChange = mockOnStateChange;
 
@@ -98,6 +103,7 @@ describe("QueryBuilder Core", () => {
       onQueryDelete: mockOnQueryDelete,
       onQueryUpdate: mockOnQueryUpdate,
       onQuerySelectChange: mockOnQuerySelectChange,
+      onSavedFilterCreate: mockOnFilterCreate,
     });
   });
 
@@ -1026,5 +1032,53 @@ describe("QueryBuilder Core", () => {
       selectedQueryIndexes: [],
       savedFilters: [],
     });
+  });
+
+  it("should add a new saved filter with isNew true when calling createSavedFilter", () => {
+    const savedFilter: ISavedFilter = {
+      id: "1",
+      title: "Saved Filter 1",
+      queries: defaultQueries,
+      favorite: false,
+    };
+
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        ...state,
+        savedFilters: [savedFilter],
+      },
+    }));
+
+    expect(state.activeQueryId).toBe("1");
+    expect(qb.getSelectedSavedFilter()).toBeTruthy();
+    expect(qb.getSelectedSavedFilter()?.getQueries().length).toBe(2);
+    expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(
+      defaultQueries
+    );
+
+    qb.createSavedFilter();
+
+    // Cant test that qb.getSelectedSavedFilter() is the new saved filter
+    // Since this would only work with the real useQueryBuilderHook.
+    // But we can check that the activeQueryId was updated with the ID of
+    // the first query in the new savedFilter
+    expect(state.activeQueryId).toBe(mockUUID);
+    expect(state.queries).toEqual([getDefaultSyntheticSqon()]);
+    expect(state.savedFilters.length).toBe(2);
+    expect(state.savedFilters[1].isNew).toBe(true);
+    expect(state.savedFilters[1].isDirty).toBe(false);
+    expect(state.savedFilters[1].id).toBe(mockUUID);
+    expect(state.savedFilters[1].queries).toEqual([getDefaultSyntheticSqon()]);
+    expect(mockOnFilterCreate).toHaveBeenCalledTimes(1);
+    expect(mockOnFilterCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: mockUUID,
+        isNew: true,
+        isDirty: false,
+        favorite: false,
+        queries: [getDefaultSyntheticSqon()],
+      })
+    );
   });
 });
