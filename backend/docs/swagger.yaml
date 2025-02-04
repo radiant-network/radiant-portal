@@ -31,6 +31,74 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
+    InterpretationGermline:
+      properties:
+        classification:
+          type: string
+        classification_criterias:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        condition:
+          type: string
+        id:
+          type: string
+        interpretation:
+          type: string
+        locus_id:
+          type: string
+        pubmed:
+          items:
+            $ref: '#/components/schemas/InterpretationPubmed'
+          type: array
+          uniqueItems: false
+        sequencing_id:
+          type: string
+        transcript_id:
+          type: string
+        transmission_modes:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
+    InterpretationPubmed:
+      properties:
+        citation:
+          type: string
+        citation_id:
+          type: string
+      type: object
+    InterpretationSomatic:
+      properties:
+        clinical_utility:
+          type: string
+        id:
+          type: string
+        interpretation:
+          type: string
+        locus_id:
+          type: string
+        oncogenicity:
+          type: string
+        oncogenicity_classification_criterias:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        pubmed:
+          items:
+            $ref: '#/components/schemas/InterpretationPubmed'
+          type: array
+          uniqueItems: false
+        sequencing_id:
+          type: string
+        transcript_id:
+          type: string
+        tumoral_type:
+          type: string
+      type: object
     ListBody:
       description: Body of a list request
       properties:
@@ -94,6 +162,18 @@ components:
         zygosity:
           type: string
       type: object
+    PubmedCitation:
+      properties:
+        id:
+          type: string
+        nlm:
+          $ref: '#/components/schemas/PubmedCitationDetails'
+      type: object
+    PubmedCitationDetails:
+      properties:
+        format:
+          type: string
+      type: object
     SortBody:
       properties:
         field:
@@ -150,6 +230,221 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}:
+    get:
+      description: Get interpretation germline
+      operationId: GetInterpretationGermline
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: sequencing_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationGermline'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+      security:
+      - bearerauth: []
+      summary: Get interpretation germline
+      tags:
+      - interpretations
+    post:
+      description: Create or Update interpretation germline
+      operationId: PostInterpretationGermline
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: sequencing_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterpretationGermline'
+        description: Interpretation Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationGermline'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+      security:
+      - bearerauth: []
+      summary: Create or Update interpretation germline
+      tags:
+      - interpretations
+  /interpretations/pubmed/{citation_id}:
+    get:
+      description: Get pubmed citation by ID
+      operationId: GetPubmedCitation
+      parameters:
+      - description: Citation ID
+        in: path
+        name: citation_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PubmedCitation'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+      security:
+      - bearerauth: []
+      summary: Get pubmed citation by ID
+      tags:
+      - interpretations
+  /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}:
+    get:
+      description: Get interpretation somatic
+      operationId: GetInterpretationSomatic
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: sequencing_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationSomatic'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+      security:
+      - bearerauth: []
+      summary: Get interpretation somatic
+      tags:
+      - interpretations
+    post:
+      description: Create or Update interpretation somatic
+      operationId: PostInterpretationSomatic
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: sequencing_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterpretationSomatic'
+        description: Interpretation Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationSomatic'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+      security:
+      - bearerauth: []
+      summary: Create or Update interpretation somatic
+      tags:
+      - interpretations
   /occurrences/{seq_id}/aggregate:
     post:
       description: Aggregate occurrences for a given sequence ID

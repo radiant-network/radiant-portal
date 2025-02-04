@@ -2,31 +2,40 @@ package repository
 
 import (
 	"fmt"
+	"log"
+	"slices"
+
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/Goldziher/go-utils/sliceutils"
 	"gorm.io/gorm"
-	"log"
-	"slices"
 )
 
 type Occurrence = types.Occurrence
 type Aggregation = types.Aggregation
-type Repository interface {
+
+type StarrocksRepository struct {
+	db *gorm.DB
+}
+
+type StarrocksDAO interface {
 	CheckDatabaseConnection() string
 	GetOccurrences(seqId int, userFilter types.ListQuery) ([]Occurrence, error)
 	CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error)
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 }
 
-type MySQLRepository struct {
-	db *gorm.DB
+func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
+	if (db == nil) {
+		log.Print("StarrocksRepository: db is nil")
+		return nil
+	}
+	return &StarrocksRepository{db: db}
 }
 
-func New(db *gorm.DB) *MySQLRepository {
-	return &MySQLRepository{db: db}
-}
-
-func (r *MySQLRepository) CheckDatabaseConnection() string {
+func (r *StarrocksRepository) CheckDatabaseConnection() string {
+	if r == nil || r.db == nil {
+		return "down"
+	}
 	sqlDb, err := r.db.DB()
 	if err != nil {
 		log.Fatal("failed to get database object:", err)
@@ -73,7 +82,7 @@ func addWhere(userQuery types.Query, tx *gorm.DB) {
 	}
 }
 
-func addImplicitOccurrencesFilters(seqId int, r *MySQLRepository, part int) *gorm.DB {
+func addImplicitOccurrencesFilters(seqId int, r *StarrocksRepository, part int) *gorm.DB {
 	tx := r.db.Table("occurrences o").Where("o.seq_id = ? and o.part=? and has_alt", seqId, part)
 	return tx
 }
@@ -83,7 +92,7 @@ func joinWithVariants(userQuery types.Query, tx *gorm.DB) *gorm.DB {
 	}
 	return tx
 }
-func (r *MySQLRepository) GetPart(seqId int) (int, error) { //TODO cache
+func (r *StarrocksRepository) GetPart(seqId int) (int, error) { //TODO cache
 	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
 	var part int
 	err := tx.Scan(&part).Error
@@ -93,7 +102,7 @@ func (r *MySQLRepository) GetPart(seqId int) (int, error) { //TODO cache
 	return part, err
 }
 
-func (r *MySQLRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]Occurrence, error) {
+func (r *StarrocksRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]Occurrence, error) {
 	var occurrences []Occurrence
 
 	tx, part, err := prepareListOrCountQuery(seqId, userQuery, r)
@@ -134,7 +143,7 @@ func (r *MySQLRepository) GetOccurrences(seqId int, userQuery types.ListQuery) (
 
 }
 
-func prepareListOrCountQuery(seqId int, userQuery types.Query, r *MySQLRepository) (*gorm.DB, int, error) {
+func prepareListOrCountQuery(seqId int, userQuery types.Query, r *StarrocksRepository) (*gorm.DB, int, error) {
 	part, err := r.GetPart(seqId)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
@@ -211,7 +220,7 @@ func getDistinctTablesFromFields(selectedPanelsField []types.Field) []types.Tabl
 	return selectedPanelsTables
 }
 
-func (r *MySQLRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
+func (r *StarrocksRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
 	tx, _, err := prepareListOrCountQuery(seqId, userQuery, r)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
@@ -225,7 +234,7 @@ func (r *MySQLRepository) CountOccurrences(seqId int, userQuery types.CountQuery
 
 }
 
-func prepareAggQuery(seqId int, userQuery types.AggQuery, r *MySQLRepository) (*gorm.DB, int, error) {
+func prepareAggQuery(seqId int, userQuery types.AggQuery, r *StarrocksRepository) (*gorm.DB, int, error) {
 	part, err := r.GetPart(seqId)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
@@ -248,7 +257,7 @@ func prepareAggQuery(seqId int, userQuery types.AggQuery, r *MySQLRepository) (*
 	return tx, part, nil
 }
 
-func (r *MySQLRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
+func (r *StarrocksRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
 	tx, _, err := prepareAggQuery(seqId, userQuery, r)
 	var aggregation []Aggregation
 	if err != nil {

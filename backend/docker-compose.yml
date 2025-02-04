@@ -14,10 +14,27 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  postgres:
+    image: postgres
+    container_name: postgres_radiant
+    volumes:
+      - ./scripts/init-sql/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: radiant
+      POSTGRES_USER: radiant
+      POSTGRES_DB: radiant
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
+    volumes:
+      - ./scripts/init-keycloak:/opt/keycloak/data/import
     environment:
         KC_HOSTNAME: localhost
         KC_HOSTNAME_PORT: 8080
@@ -28,7 +45,7 @@ services:
         KC_HEALTH_ENABLED: true
         KEYCLOAK_ADMIN: admin
         KEYCLOAK_ADMIN_PASSWORD: admin
-    command: start-dev
+    command: ["start-dev", "--import-realm"]
     ports:
       - "8080:8080"
 
@@ -41,4 +58,4 @@ services:
       - ./scripts/init-sql:/docker-entrypoint-initdb.d
     entrypoint: >
       /bin/bash -c "
-      mysql -hstarrocks -P9030 -uroot < /docker-entrypoint-initdb.d/init.sql;"
+      mysql -hstarrocks -P9030 -uroot < /docker-entrypoint-initdb.d/init_starrocks.sql;"

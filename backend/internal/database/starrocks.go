@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"os"
 	"time"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/joho/godotenv/autoload"
@@ -19,7 +20,10 @@ var (
 	dbPassword = os.Getenv("DB_PASSWORD")
 )
 
-func New() (*gorm.DB, error) {
+func NewStarrocksDB() (*gorm.DB, error) {
+	if dbHost == "" {
+		return nil, fmt.Errorf("DB_HOST is not set")
+	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?interpolateParams=true",
 		dbUserName, dbPassword, dbHost, dbPort, dbName)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
