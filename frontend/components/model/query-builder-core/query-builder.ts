@@ -11,11 +11,17 @@ import { PartialKeys } from "../../lib/utils";
 import { v4 } from "uuid";
 import { cleanUpQueries, getDefaultSyntheticSqon } from "./utils/sqon";
 
+export const QUERY_BUILDER_STATE_CACHE_KEY_PREFIX = "query-builder-cache";
 export const QUERY_BUILDER_UPDATE_EVENT_KEY = "QBCacheUpdate";
+
+export type QueryBuilderRemoteState = Pick<
+  QueryBuilderState,
+  "activeQueryId" | "queries"
+>;
 
 export type QueryBuilderUpdateEvent = Event & {
   queryBuilderId?: string;
-  value?: Pick<QueryBuilderState, "activeQueryId" | "queries">;
+  value?: QueryBuilderRemoteState;
 };
 
 export type QueryBuilderState = {
