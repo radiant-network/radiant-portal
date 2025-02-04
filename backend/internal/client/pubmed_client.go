@@ -63,8 +63,8 @@ func (client * PubmedClient) GetCitationById(id string) (*types.PubmedCitation, 
 		return nil, nil // equivalent to NOT FOUND during tests
 	}
 	client.cacheMutex.Lock()
-	client.cache[id] = citation
 	defer client.cacheMutex.Unlock()
+	client.cache[id] = citation
 	return citation, nil
 }
 

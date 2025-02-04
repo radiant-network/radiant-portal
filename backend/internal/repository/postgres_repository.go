@@ -16,7 +16,7 @@ type PostgresDAO interface {
 	CheckDatabaseConnection() string
 }
 
-func NewPostgresRepository(db *gorm.DB, pubmedClient * client.PubmedClient) *PostgresRepository {
+func NewPostgresRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *PostgresRepository {
 	return &PostgresRepository{db: db, Interpretations: NewInterpretationsRepository(db, pubmedClient)}
 }
 

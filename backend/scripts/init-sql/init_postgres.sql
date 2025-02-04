@@ -5,7 +5,7 @@ SET schema 'radiant';
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE TABLE interpretation_germline
+CREATE TABLE IF NOT EXISTS interpretation_germline
 (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     sequencing_id            TEXT NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS interpretation_germline_history
     updated_at              TIMESTAMPTZ      DEFAULT NOW()
     );
 
-CREATE TABLE interpretation_somatic
+CREATE TABLE IF NOT EXISTS interpretation_somatic
 (
     id                       UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     sequencing_id            TEXT NOT NULL,

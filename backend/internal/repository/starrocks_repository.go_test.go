@@ -565,8 +565,8 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(
 }
 
 func TestMain(m *testing.M) {
-	testutils.SetupContainer()
+	testutils.StartStarrocksContainer()
 	code := m.Run()
-	testutils.StopContainer()
+	testutils.StopAllContainers()
 	os.Exit(code)
 }

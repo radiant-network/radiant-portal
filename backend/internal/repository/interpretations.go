@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"slices"
 	"strings"
 
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/client"
@@ -14,7 +15,7 @@ import (
 
 type InterpretationsRepository struct {
 	db *gorm.DB
-	pubmedClient * client.PubmedClient
+	pubmedClient client.PubmedClientService
 }
 
 type InterpretationsDAO interface {
@@ -24,13 +25,20 @@ type InterpretationsDAO interface {
 	CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error
 }
 
-func NewInterpretationsRepository(db *gorm.DB, pubmedClient * client.PubmedClient) *InterpretationsRepository {
+func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *InterpretationsRepository {
 	return &InterpretationsRepository{db: db, pubmedClient: pubmedClient}
+}
+
+func split(s string) []string {
+	// split and remove empty elements
+	return slices.DeleteFunc(strings.Split(s, ","), func(e string) bool {
+        return e == ""
+    })
 }
 
 // mappers, could be moved to a separate file
 func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
-	pubmeds := strings.Split(dao.Pubmed, ",");
+	pubmeds := split(dao.Pubmed)
 	interpretation:= &types.InterpretationCommon{
 		ID:                dao.ID,
 		SequencingId:      dao.SequencingId,
@@ -48,15 +56,15 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 	for i, v := range pubmeds {
 		citation, _ := r.pubmedClient.GetCitationById(v);
 		if citation == nil {
-			return nil, fmt.Errorf("Pubmed citation not found: %s", v)
+			return nil, fmt.Errorf("pubmed citation not found: %s", v)
 		}
 		interpretation.Pubmed[i] = types.InterpretationPubmed{CitationID: v, Citation: citation.Nlm.Format}
 	}
 	return interpretation, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation *types.InterpretationCommon) *types.InterpretationCommonDAO {
-	return &types.InterpretationCommonDAO{
+func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation *types.InterpretationCommon) (*types.InterpretationCommonDAO, error) {
+	common:= &types.InterpretationCommonDAO{
 		ID:                interpretation.ID,
 		SequencingId:      interpretation.SequencingId,
 		LocusId:		   interpretation.LocusId,		
@@ -70,6 +78,13 @@ func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation 
 		UpdatedByName: interpretation.UpdatedByName,
 		UpdatedAt: interpretation.UpdatedAt,
 	};
+	for _, v := range interpretation.Pubmed {
+		citation, _ := r.pubmedClient.GetCitationById(v.CitationID);
+		if citation == nil {
+			return nil, fmt.Errorf("pubmed citation not found: %s", v.CitationID)
+		}
+	}
+	return common, nil
 }
 
 func (r *InterpretationsRepository) mapToInterpretationGermline(dao *types.InterpretationGermlineDAO) (*types.InterpretationGermline, error) {
@@ -81,20 +96,25 @@ func (r *InterpretationsRepository) mapToInterpretationGermline(dao *types.Inter
 		InterpretationCommon: *common,
 		Condition:		   dao.Condition,
 		Classification:    dao.Classification,
-		ClassificationCriterias: strings.Split(dao.ClassificationCriterias, ","),
-		TransmissionModes: strings.Split(dao.TransmissionModes, ","),
+		ClassificationCriterias: split(dao.ClassificationCriterias),
+		TransmissionModes: split(dao.TransmissionModes),
 	}	
 	return interpretation, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationGermlineDAO(interpretation *types.InterpretationGermline) *types.InterpretationGermlineDAO {
-	return &types.InterpretationGermlineDAO{
-		InterpretationCommonDAO: *r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon),
+func (r *InterpretationsRepository) mapToInterpretationGermlineDAO(interpretation *types.InterpretationGermline) (*types.InterpretationGermlineDAO, error) {
+	common, err := r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon)
+	if err != nil {
+		return nil, err
+	}
+	dao := &types.InterpretationGermlineDAO{
+		InterpretationCommonDAO: *common,
 		Condition:		   interpretation.Condition,
 		Classification:    interpretation.Classification,
 		ClassificationCriterias: strings.Join(interpretation.ClassificationCriterias, ","),
 		TransmissionModes: strings.Join(interpretation.TransmissionModes, ","),
-	}	
+	}
+	return dao, nil
 }
 
 func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.InterpretationSomaticDAO) (*types.InterpretationSomatic, error) {
@@ -106,21 +126,26 @@ func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.Interp
 		InterpretationCommon: *common,
 		TumoralType:	   dao.TumoralType,
 		Oncogenicity:      dao.Oncogenicity,
-		OncogenicityClassificationCriterias: strings.Split(dao.OncogenicityClassificationCriterias, ","),
+		OncogenicityClassificationCriterias: split(dao.OncogenicityClassificationCriterias),
 		ClinicalUtility: dao.ClinicalUtility,
 
 	}	
 	return interpretation, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation *types.InterpretationSomatic) *types.InterpretationSomaticDAO {
-	return &types.InterpretationSomaticDAO{
-		InterpretationCommonDAO: *r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon),
+func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation *types.InterpretationSomatic) (*types.InterpretationSomaticDAO, error) {
+	common, err := r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon)
+	if err != nil {
+		return nil, err
+	}
+	dao := &types.InterpretationSomaticDAO{
+		InterpretationCommonDAO: *common,
 		TumoralType:	   interpretation.TumoralType,
 		Oncogenicity:      interpretation.Oncogenicity,
 		OncogenicityClassificationCriterias: strings.Join(interpretation.OncogenicityClassificationCriterias, ","),
 		ClinicalUtility: interpretation.ClinicalUtility,
 	}	
+	return dao, nil
 }
 
 func (r *InterpretationsRepository) FirstGermline(sequencingId string, locus string, transcriptId string) (*types.InterpretationGermline, error) {
@@ -144,7 +169,10 @@ func (r *InterpretationsRepository) FirstGermline(sequencingId string, locus str
 }
 
 func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error {
-	dao := r.mapToInterpretationGermlineDAO(interpretation)
+	dao, err := r.mapToInterpretationGermlineDAO(interpretation)
+	if err != nil {
+		return err
+	}
 	existing, err := r.FirstGermline(interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if err != nil {
 		return err
@@ -192,7 +220,10 @@ func (r *InterpretationsRepository) FirstSomatic(sequencingId string, locus stri
 }
 
 func (r* InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error {
-	dao := r.mapToInterpretationSomaticDAO(interpretation)
+	dao, err := r.mapToInterpretationSomaticDAO(interpretation)
+	if err != nil {
+		return err
+	}
 	existing, err := r.FirstSomatic(interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if err != nil {
 		return err
