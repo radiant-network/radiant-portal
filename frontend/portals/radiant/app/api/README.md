@@ -1,7 +1,10 @@
-import { SortBodyOrderEnum, SqonOpEnum } from "@/api/api";
-import { getOccurrencesApi } from "~/utils/api.server";
-import type { Route } from "./+types/occurrences";
+# Proxy API
 
+## The proxy API is to be used by apps
+
+#### Adding a GET request endpoint
+
+```typescript
 /**
  * loader func handles GET requests
  */
@@ -13,7 +16,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     },
   });
 }
+```
 
+#### Adding a PUT, PATCH, POST or DELETE endpoint
+
+```typescript
 /**
  * action func handles everything else
  */
@@ -37,3 +44,10 @@ export function action({ request }: Route.ActionArgs) {
       });
   }
 }
+```
+
+### Making the endpoint avaiable
+
+In order to make the endpoint available, you need to add it to the `routes.ts` file in the prefix api route list `prefix("api", [...])`
+
+see: `/frontend/portals/radiant/app/routes.ts`
