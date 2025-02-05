@@ -7,10 +7,18 @@ export const axiosClient = axios.create({
   },
 });
 
+let refreshTokenPromise: Promise<any> | null = null;
+
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    if (refreshTokenPromise) {
+      await refreshTokenPromise;
+
+      return axiosClient(originalRequest);
+    }
 
     if (
       error.response.status === HttpStatusCode.Unauthorized &&
@@ -19,7 +27,11 @@ axiosClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await axios.post("/api/refresh-token");
+        refreshTokenPromise = axios.post("/api/refresh-token").finally(() => {
+          refreshTokenPromise = null;
+        });
+
+        await refreshTokenPromise;
 
         return axiosClient(originalRequest);
       } catch (refreshError) {
