@@ -48,7 +48,7 @@ function App() {
     },
     fetcher,
     {
-      revalidateOnFocus: true,
+      revalidateOnFocus: false,
     }
   );
   const occurrences = data || [];
