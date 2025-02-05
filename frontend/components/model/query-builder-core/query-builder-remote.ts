@@ -1,3 +1,4 @@
+import { ISyntheticSqon } from "../sqon";
 import {
   getDefaultQueryBuilderState,
   QUERY_BUILDER_STATE_CACHE_KEY_PREFIX,
@@ -5,6 +6,7 @@ import {
   QueryBuilderRemoteState,
   QueryBuilderUpdateEvent,
 } from "./query-builder";
+import isEmpty from "lodash/isEmpty";
 
 /**
  * Update the state of a given QueryBuilder.
@@ -14,7 +16,7 @@ import {
  * @param value The new state value
  * ```
  */
-export const setQueryBuilderState = (
+const setLocalQueryBuilderState = (
   queryBuilderId: string,
   value: QueryBuilderRemoteState
 ): void => {
@@ -32,28 +34,29 @@ export const setQueryBuilderState = (
   document.dispatchEvent(QBUpdateEvent);
 };
 
-export const setDefaultQueryBuilderState = (
+const setDefaultLocalQueryBuilderState = (
   queryBuilderId: string
 ): QueryBuilderRemoteState => {
   const state = getDefaultQueryBuilderState();
-  setQueryBuilderState(queryBuilderId, state);
+  setLocalQueryBuilderState(queryBuilderId, state);
   return state;
 };
 
-export const getQueryBuilderState = (
+const getLocalQueryBuilderState = (
   queryBuilderId: string
-): QueryBuilderRemoteState | undefined => {
+): QueryBuilderRemoteState => {
   const qbState = window.localStorage.getItem(
     `${QUERY_BUILDER_STATE_CACHE_KEY_PREFIX}-${queryBuilderId}`
   );
+
   if (!qbState) {
-    return setDefaultQueryBuilderState(queryBuilderId);
+    return setDefaultLocalQueryBuilderState(queryBuilderId);
   }
 
   try {
     return JSON.parse(qbState);
   } catch (err) {
-    return setDefaultQueryBuilderState(queryBuilderId);
+    return setDefaultLocalQueryBuilderState(queryBuilderId);
   }
 };
 
@@ -67,7 +70,7 @@ export const getQueryBuilderState = (
  * - setAsActive: To set this query as active
  * ```
  */
-export const addQuery = ({
+const addQuery = ({
   query,
   queryBuilderId,
   setAsActive = false,
@@ -76,13 +79,13 @@ export const addQuery = ({
   query: ISyntheticSqon;
   setAsActive?: boolean;
 }): void => {
-  const qbState = getQueryBuilderState(queryBuilderId);
-  const queries = qbState?.state ?? [];
+  const qbState = getLocalQueryBuilderState(queryBuilderId);
+  const queries = qbState?.queries ?? [];
   const hasEmptyQuery = queries.find(({ content }) => isEmpty(content));
 
-  setQueryBuilderState(queryBuilderId, {
-    active: setAsActive ? query.id! : qbState?.active ?? query.id!,
-    state: hasEmptyQuery
+  setLocalQueryBuilderState(queryBuilderId, {
+    activeQueryId: setAsActive ? query.id : qbState?.activeQueryId ?? query.id!,
+    queries: hasEmptyQuery
       ? queries.map((cQuery) => {
           if (isEmpty(cQuery.content)) {
             return query;
@@ -94,3 +97,10 @@ export const addQuery = ({
 };
 
 // TODO add other remote methods
+
+export const queryBuilderRemote = {
+  addQuery,
+  setLocalQueryBuilderState,
+  getLocalQueryBuilderState,
+  setDefaultLocalQueryBuilderState,
+};

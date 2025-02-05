@@ -2,18 +2,22 @@ import { useEffect, useState } from "react";
 import {
   CoreQueryBuilderProps,
   createQueryBuilder,
-  getDefaultQueryBuilderState,
   QUERY_BUILDER_UPDATE_EVENT_KEY,
   QueryBuilderInstance,
   QueryBuilderProps,
   QueryBuilderUpdateEvent,
 } from "./query-builder";
+import { queryBuilderRemote } from "./query-builder-remote";
 
 export const useQueryBuilder = (
   props: QueryBuilderProps
 ): QueryBuilderInstance => {
   const defaultProps: CoreQueryBuilderProps = {
-    state: getDefaultQueryBuilderState(),
+    state: {
+      ...queryBuilderRemote.getLocalQueryBuilderState(props.id),
+      savedFilters: [],
+      selectedQueryIndexes: [],
+    },
     onStateChange: () => {},
     ...props,
   };
@@ -59,6 +63,7 @@ export const useQueryBuilder = (
     onStateChange: (newState) => {
       setState(newState);
       props.onStateChange?.(newState);
+      queryBuilderRemote.setLocalQueryBuilderState(props.id, newState);
     },
   }));
 
