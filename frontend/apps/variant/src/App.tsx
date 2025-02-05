@@ -14,12 +14,19 @@ import {
   defaultSettings,
 } from "./include_variant_table";
 import { IVariantEntity } from "@/variant_type";
+import useSWR, { Fetcher } from "swr";
 
-export interface AppProps {
-  data: Occurrence[];
-}
+export interface AppProps {}
 
-function App({ data = [] }: AppProps) {
+const fetcher: Fetcher<Occurrence[], string> = (url: string) =>
+  fetch(url).then((res) => res.json());
+
+function App({}: AppProps) {
+  const { data, error, isLoading } = useSWR("/api/occurrences", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const occurrences = data || [];
+
   return (
     <div className={styles.appLayout}>
       <aside>
@@ -77,8 +84,8 @@ function App({ data = [] }: AppProps) {
         <Table
           columns={columns}
           defaultColumnSettings={defaultSettings}
-          data={data}
-          total={data.length}
+          data={occurrences}
+          total={occurrences.length}
           columnSettings={userSettings}
           subComponent={(data: IVariantEntity) => {
             return (

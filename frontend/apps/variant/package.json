@@ -25,7 +25,8 @@
   "dependencies": {
     "components": "file:../../components",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "swr": "^2.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
