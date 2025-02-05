@@ -1,34 +1,22 @@
-import { SortBodyOrderEnum, SqonOpEnum } from "@/api/api";
 import { getOccurrencesApi } from "~/utils/api.server";
 import type { Route } from "./+types/occurrences";
 
-/**
- * loader func handles GET requests
- */
-export async function loader({ request }: Route.LoaderArgs) {
-  const url = new URL(request.url);
-  const page = Number(url.searchParams.get("page") || 0);
-  const limit = Number(url.searchParams.get("limit") || 20);
+export function action({ request }: Route.ActionArgs) {
+  switch (request.method) {
+    case "POST":
+      return fetchOccurences(request);
+  }
+}
 
+const fetchOccurences = async (request: Request) => {
+  const body = await request.json();
   const occurenceApi = await getOccurrencesApi(request);
 
   try {
-    const response = await occurenceApi.listOccurrences("5011", {
-      selected_fields: ["hgvsg", "variant_class"],
-      limit: limit,
-      offset: page * limit,
-      sort: [
-        {
-          field: "pf",
-          order: SortBodyOrderEnum.Asc,
-        },
-      ],
-      sqon: {
-        field: "impact_score",
-        op: SqonOpEnum.In,
-        value: [4],
-      },
-    });
+    const response = await occurenceApi.listOccurrences(
+      body.seqId,
+      body.listBody
+    );
 
     return new Response(JSON.stringify(response.data), {
       status: 200,
@@ -44,4 +32,4 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
     });
   }
-}
+};
