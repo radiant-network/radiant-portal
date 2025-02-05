@@ -1,6 +1,6 @@
 import "./App.css";
 import styles from "./App.module.css";
-import { Occurrence } from "@/api/api";
+import { ListBody, Occurrence, SortBodyOrderEnum, SqonOpEnum } from "@/api/api";
 import {
   Accordion,
   AccordionContent,
@@ -19,7 +19,28 @@ import useSWR, { Fetcher } from "swr";
 export interface AppProps {}
 
 const fetcher: Fetcher<Occurrence[], string> = (url: string) =>
-  fetch(url).then((res) => res.json());
+  fetch(url, {
+    method: "POST",
+    body: JSON.stringify({
+      seqId: "5011",
+      listBody: {
+        selected_fields: ["hgvsg", "variant_class"],
+        limit: 20,
+        offset: 0,
+        sort: [
+          {
+            field: "pf",
+            order: SortBodyOrderEnum.Asc,
+          },
+        ],
+        sqon: {
+          field: "impact_score",
+          op: SqonOpEnum.In,
+          value: [4],
+        },
+      },
+    }),
+  }).then((res) => res.json());
 
 function App({}: AppProps) {
   const { data, error, isLoading } = useSWR("/api/occurrences", fetcher, {
