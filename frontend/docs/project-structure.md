@@ -13,6 +13,7 @@ Instead of working by portals, now we work by applications and we have to make s
 ## Project Structure
 
 ### Directory Organization
+
 ```
 frontend/
 ├── apps/                # Full applications for a domain (e.g., Variant, Prescription)
@@ -28,36 +29,43 @@ frontend/
 ├── themes/              #
 │   ├── themesX/        # Theme-specific assets
 │   |   └── assets/     #
+│   utils/              # Shared utils
 └── types/               # TypeScript types/interfaces
 ```
 
 ---
 
 ### 1. **Apps**
+
 The `Apps` directory contains full applications designed to serve specific business domains.
 Each application is a complete unit, including pages and modal dialogs specific to its purpose.
 
 It does not contain navigation, site layout. Only the core features of the application.
 
 #### Examples:
+
 - **Variant**: Application related to variant exploration.
 - **Prescription**: Handles prescription-related functionalities.
 - **Community**: Manages community-specific features.
 
 #### Key Characteristics:
+
 - Combines pages and modals for cohesive user flows for a specific domain.
 - Leverages components from the `Components` directory for reusable building blocks.
 
 ---
 
 ### 2. **Components**
+
 The `Components` directory holds all basic to advanced UI components required to build applications. These components are categorized into generic and custom components.
 
 #### Types of Components:
+
 - **Generic Components**: Built using [shadcn](https://shadcn.dev), leveraging pre-made, highly customizable components.
 - **Custom Components**: Created with React and TailwindCSS for unique design and behavior tailored to application needs.
 
 #### Key Features:
+
 - Encourages reusability across multiple applications.
 - Provides a shared library of consistent UI elements.
 
@@ -66,26 +74,32 @@ The `Components` directory holds all basic to advanced UI components required to
 ---
 
 ### 3. **Portals**
+
 The `Portals` directory contains the layout and setup for portals, including the base structure for generating different portals (e.g., "Radiant").
 
 #### Functionality:
+
 - Uses `react-router` for navigation and routing.
 - Capable of generating multiple portals based on different themes and environment configurations during the build process.
 
 ---
 
 ### 4. **Themes**
+
 The `Themes` directory houses theme-related assets such as images and TailwindCSS configurations. These themes are used to style the portals and applications, ensuring a consistent look and feel across the project.
 
 #### Contents:
+
 - **Images**: Logos, backgrounds, and other visual assets.
 - **CSS**: TailwindCSS configurations for styling components and layouts.
 
 ---
 
 ### 5. **Storybook**
+
 The `Storybook` directory contains a setup for testing and demonstrating components. It allows developers to preview individual components or groups of components in isolation.
 
 #### Capabilities:
+
 - Select and test components with different themes applied.
 - Serves as a living documentation for the component library.

@@ -14,14 +14,20 @@ import {
   defaultSettings,
 } from "./include_variant_table";
 import { IVariantEntity } from "@/variant_type";
-import useSWR, { Fetcher } from "swr";
+import useSWR from "swr";
+import { axiosClient } from "@/utils/axios";
 
-export interface AppProps {}
+type OccurrenceInput = {
+  seqId: string;
+  listBody: ListBody;
+};
 
-const fetcher: Fetcher<Occurrence[], string> = (url: string) =>
-  fetch(url, {
-    method: "POST",
-    body: JSON.stringify({
+const fetcher = (input: OccurrenceInput) =>
+  axiosClient.post("/occurrences", input).then((res) => res.data);
+
+function App() {
+  const { data } = useSWR<Occurrence[], any, OccurrenceInput>(
+    {
       seqId: "5011",
       listBody: {
         selected_fields: ["hgvsg", "variant_class"],
@@ -39,13 +45,12 @@ const fetcher: Fetcher<Occurrence[], string> = (url: string) =>
           value: [4],
         },
       },
-    }),
-  }).then((res) => res.json());
-
-function App({}: AppProps) {
-  const { data, error, isLoading } = useSWR("/api/occurrences", fetcher, {
-    revalidateOnFocus: false,
-  });
+    },
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
   const occurrences = data || [];
 
   return (

@@ -27,6 +27,7 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/api/*": ["../../api/*"],
+      "@/utils/*": ["../../utils/*"],
       "@/components/*": ["../../components/*"],
       "@/base/ui/*": ["../../components/base/ui/*"],
       "@/lib/*": ["../../components/lib/*"],
