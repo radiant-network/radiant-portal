@@ -37,8 +37,6 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
     });
   } catch (error: any) {
-    console.log(error);
-
     return new Response(JSON.stringify([]), {
       status: 200,
       headers: {
