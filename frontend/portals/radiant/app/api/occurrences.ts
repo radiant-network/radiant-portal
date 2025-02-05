@@ -1,6 +1,6 @@
 import { getOccurrencesApi } from "~/utils/api.server";
 import type { Route } from "./+types/occurrences";
-import { AxiosError } from "axios";
+import { AxiosError, HttpStatusCode } from "axios";
 
 export function action({ request }: Route.ActionArgs) {
   switch (request.method) {
@@ -28,14 +28,14 @@ const fetchOccurences = async (request: Request) => {
   } catch (error: any) {
     if (error instanceof AxiosError) {
       return new Response(JSON.stringify(error.response?.data), {
-        status: error.response?.status || 500,
+        status: error.response?.status || HttpStatusCode.InternalServerError,
         headers: {
           "Content-Type": "application/json",
         },
       });
     } else {
       return new Response(JSON.stringify(error), {
-        status: 500,
+        status: HttpStatusCode.InternalServerError,
         headers: {
           "Content-Type": "application/json",
         },
