@@ -19,11 +19,18 @@ var (
 	dbPgHost 	 = os.Getenv("PGHOST")
 	dbPgDatabase = os.Getenv("PGDATABASE")
 	dbPgSSLMode  = os.Getenv("PGSSLMODE")
+	dbPgSSLCert  = os.Getenv("PGSSLROOTCERT")
 )
 
 func NewPostgresDB() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-		dbPgHost, dbPgUser, dbPgPassword, dbPgDatabase, dbPgPort, dbPgSSLMode)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
+		dbPgHost, dbPgUser, dbPgPassword, dbPgDatabase, dbPgPort)
+	if dbPgSSLMode != "" {
+		dsn += fmt.Sprintf(" sslmode=%s", dbPgSSLMode)
+	}
+	if dbPgSSLCert != "" {
+		dsn += fmt.Sprintf(" sslrootcert=%s", dbPgSSLCert)
+	}
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
