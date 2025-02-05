@@ -6,6 +6,7 @@ import {
   type IAuthUser,
   type IAuthUserWithToken,
 } from "./auth.types";
+import { isTokenValid } from "./tokens";
 
 const createSessionStorage = (cookieName: string) => {
   return createCookieSessionStorage({
@@ -52,6 +53,26 @@ export const getSessionAccessToken = async (
 ): Promise<string> => {
   const accessTokenSession = await getAccessTokenSessionStorage(request);
   return accessTokenSession.get("token");
+};
+
+export const refreshAccessToken = async (
+  request: Request
+): Promise<{ cookie: string }> => {
+  const refreshTokenSession = await getRefreshTokenSessionStorage(request);
+  const refreshToken = refreshTokenSession.get("token");
+
+  if (isTokenValid(refreshToken)) {
+    const tokens = await authStrategy.refreshToken(refreshToken);
+
+    const accessTokenSession = await getAccessTokenSessionStorage(request);
+    accessTokenSession.set("token", tokens.accessToken());
+
+    return {
+      cookie: await accessTokenSessionStorage.commitSession(accessTokenSession),
+    };
+  }
+
+  throw logout(request);
 };
 
 export const getSessionRefreshToken = async (
@@ -129,36 +150,35 @@ export const requireAuth = async (request: Request): Promise<boolean> => {
 
 const authenticator = new Authenticator<IAuthUserWithToken>();
 
-authenticator.use(
-  new OAuth2Strategy(
-    {
-      cookie: "oauth2",
+export const authStrategy = new OAuth2Strategy(
+  {
+    cookie: "oauth2",
 
-      clientId: process.env.KEYCLOAK_CLIENT || "",
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET || "",
+    clientId: process.env.KEYCLOAK_CLIENT || "",
+    clientSecret: process.env.KEYCLOAK_CLIENT_SECRET || "",
 
-      tokenEndpoint: `${getKeycloakOauth2Url("token")}`,
-      authorizationEndpoint: `${getKeycloakOauth2Url("auth")}`,
+    tokenEndpoint: `${getKeycloakOauth2Url("token")}`,
+    authorizationEndpoint: `${getKeycloakOauth2Url("auth")}`,
 
-      redirectURI: `${process.env.PORTAL_HOST}/auth/callback`,
+    redirectURI: `${process.env.PORTAL_HOST}/auth/callback`,
 
-      scopes: ["openid", "email", "profile"], // optional
-    },
-    async ({ tokens }) => {
-      const response = await fetch(getKeycloakOauth2Url("userinfo"), {
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken()}`,
-        },
-      });
+    scopes: ["openid", "email", "profile"], // optional
+  },
+  async ({ tokens }) => {
+    const response = await fetch(getKeycloakOauth2Url("userinfo"), {
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken()}`,
+      },
+    });
 
-      const userInfo = await response.json();
+    const userInfo = await response.json();
 
-      return {
-        ...userInfo,
-        refresh_token: tokens.refreshToken(),
-        access_token: tokens.accessToken(),
-      };
-    }
-  ),
-  AuthStrategyName
+    return {
+      ...userInfo,
+      refresh_token: tokens.refreshToken(),
+      access_token: tokens.accessToken(),
+    };
+  }
 );
+
+authenticator.use(authStrategy, AuthStrategyName);

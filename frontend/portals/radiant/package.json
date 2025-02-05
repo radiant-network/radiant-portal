@@ -20,7 +20,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "remix-auth": "^4.1.0",
-    "remix-auth-oauth2": "^3.2.2"
+    "remix-auth-oauth2": "^3.2.2",
+    "jwt-decode": "4.0.0"
   },
   "devDependencies": {
     "@react-router/dev": "^7.0.2",
