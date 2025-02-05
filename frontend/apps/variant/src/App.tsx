@@ -1,6 +1,6 @@
 import "./App.css";
 import styles from "./App.module.css";
-import { Occurrence } from "@/api/api";
+import { ListBody, Occurrence, SortBodyOrderEnum, SqonOpEnum } from "@/api/api";
 import {
   Accordion,
   AccordionContent,
@@ -14,12 +14,40 @@ import {
   defaultSettings,
 } from "./include_variant_table";
 import { IVariantEntity } from "@/variant_type";
+import useSWR, { Fetcher } from "swr";
 
-export interface AppProps {
-  data: Occurrence[];
-}
+export interface AppProps {}
 
-function App({ data = [] }: AppProps) {
+const fetcher: Fetcher<Occurrence[], string> = (url: string) =>
+  fetch(url, {
+    method: "POST",
+    body: JSON.stringify({
+      seqId: "5011",
+      listBody: {
+        selected_fields: ["hgvsg", "variant_class"],
+        limit: 20,
+        offset: 0,
+        sort: [
+          {
+            field: "pf",
+            order: SortBodyOrderEnum.Asc,
+          },
+        ],
+        sqon: {
+          field: "impact_score",
+          op: SqonOpEnum.In,
+          value: [4],
+        },
+      },
+    }),
+  }).then((res) => res.json());
+
+function App({}: AppProps) {
+  const { data, error, isLoading } = useSWR("/api/occurrences", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const occurrences = data || [];
+
   return (
     <div className={styles.appLayout}>
       <aside>
@@ -77,8 +105,8 @@ function App({ data = [] }: AppProps) {
         <Table
           columns={columns}
           defaultColumnSettings={defaultSettings}
-          data={data}
-          total={data.length}
+          data={occurrences}
+          total={occurrences.length}
           columnSettings={userSettings}
           subComponent={(data: IVariantEntity) => {
             return (
