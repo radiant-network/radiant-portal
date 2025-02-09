@@ -3,19 +3,24 @@ import {
   QueryBuilderProps,
   useQueryBuilder,
 } from "../../model/query-builder-core";
+import { queryBuilderRemote } from "@/model/query-builder-core/query-builder-remote";
+import { v4 } from "uuid";
 
 const QueryBuilder = (props: QueryBuilderProps) => {
   const queryBuilder = useQueryBuilder(props);
 
   console.log(queryBuilder.getState());
-  console.log("selected", queryBuilder.getSelectedSavedFilter());
 
   return (
     <div>
       QueryBuilder
       <Button
         onClick={async () => {
-          queryBuilder.createSavedFilter();
+          queryBuilderRemote.addQuery("variant", {
+            id: v4(),
+            op: "and",
+            content: [],
+          });
         }}
       >
         Add Query

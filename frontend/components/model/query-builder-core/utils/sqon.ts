@@ -28,6 +28,7 @@ import { QueryBuilderInstance, QueryBuilderState } from "../query-builder";
 import { v4 } from "uuid";
 import merge from "lodash/merge";
 import union from "lodash/union";
+import { queryBuilderRemote } from "../query-builder-remote";
 
 /**
  * Check if a synthetic sqon is empty.
@@ -332,11 +333,12 @@ export const changeCombineOperatorForQuery = (
   syntheticSqon: ISyntheticSqon
 ): ISyntheticSqon => ({
   ...syntheticSqon,
-  content: syntheticSqon.content.map((subContent: TSyntheticSqonContentValue) =>
-    isBooleanOperator(subContent) &&
-    !(subContent as ISqonGroupFilter).skipBooleanOperatorCheck
-      ? changeCombineOperatorForQuery(operator, subContent as ISyntheticSqon)
-      : subContent
+  content: syntheticSqon.content.map(
+    (subContent: TSyntheticSqonContentValue) =>
+      isBooleanOperator(subContent) &&
+      !(subContent as ISqonGroupFilter).skipBooleanOperatorCheck
+        ? changeCombineOperatorForQuery(operator, subContent as ISyntheticSqon)
+        : subContent
   ) as TSyntheticSqonContent,
   op: operator,
 });
@@ -360,7 +362,7 @@ export const removeFieldFromSqon = (
 });
 
 export const deepMergeFieldInQuery = ({
-  query,
+  sqon,
   field,
   index,
   isUploadedList,
@@ -370,7 +372,7 @@ export const deepMergeFieldInQuery = ({
   remoteComponent,
   value,
 }: {
-  query: ISyntheticSqon;
+  sqon: ISyntheticSqon;
   field: string;
   value: Array<string | number | boolean>;
   index?: string;
@@ -393,8 +395,8 @@ export const deepMergeFieldInQuery = ({
     op: operator,
   };
 
-  if (!isEmpty(query)) {
-    newSqon = deepMergeSqonValue(query, newSqonContent, {
+  if (!isEmpty(sqon)) {
+    newSqon = deepMergeSqonValue(sqon, newSqonContent, {
       operator: MERGE_OPERATOR_STRATEGIES.OVERRIDE_OPERATOR,
       values: merge_strategy,
     });
@@ -618,4 +620,40 @@ export const formatQueriesWithPill = (
     return { ...query, content: newContent };
   });
   return formattedQueries;
+};
+
+export const getFilterWithNoSelection = (
+  filters: ISyntheticSqon,
+  field: string
+) => {
+  let fieldIndex = -1;
+  const filtered = filters.content.filter((filter: any, index: number) => {
+    if (isReference(filter)) {
+      return true;
+    }
+
+    const filterAsSqonGroupFilter = filter as ISqonGroupFilter;
+    const { skipBooleanOperatorCheck } = filterAsSqonGroupFilter;
+    const skipBooleanOperatorCheckField =
+      skipBooleanOperatorCheck &&
+      filterAsSqonGroupFilter.content.find(
+        (f) => (f.content as IValueContent).field === field
+      );
+
+    if (skipBooleanOperatorCheckField || filter.content.field == field) {
+      fieldIndex = index;
+    }
+
+    return skipBooleanOperatorCheck
+      ? !skipBooleanOperatorCheckField
+      : filter.content.field !== field;
+  });
+
+  return [
+    fieldIndex,
+    {
+      ...filters,
+      content: filtered,
+    },
+  ];
 };

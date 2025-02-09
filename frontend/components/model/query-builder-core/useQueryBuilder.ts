@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   CoreQueryBuilderProps,
   createQueryBuilder,
+  getDefaultQueryBuilderState,
   QUERY_BUILDER_UPDATE_EVENT_KEY,
   QueryBuilderInstance,
   QueryBuilderProps,
@@ -14,7 +15,7 @@ export const useQueryBuilder = (
 ): QueryBuilderInstance => {
   const defaultProps: CoreQueryBuilderProps = {
     state: {
-      ...queryBuilderRemote.getLocalQueryBuilderState(props.id),
+      ...getDefaultQueryBuilderState(),
       savedFilters: [],
       selectedQueryIndexes: [],
     },
@@ -46,10 +47,10 @@ export const useQueryBuilder = (
       }
     };
 
-    document.addEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener);
+    window.addEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener);
 
     return () => {
-      document.removeEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener);
+      window.removeEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener);
     };
   }, []);
 
