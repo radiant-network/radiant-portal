@@ -16,6 +16,39 @@ import {
 } from "../query-builder";
 import { ISavedFilter } from "../../saved-filter";
 import { ISyntheticSqon } from "../../sqon";
+import { queryBuilderRemote } from "../query-builder-remote";
+
+class LocalStorageMock {
+  store: Record<string, string>;
+
+  constructor() {
+    this.store = {};
+  }
+
+  clear() {
+    this.store = {};
+  }
+
+  getItem(key) {
+    return this.store[key] || null;
+  }
+
+  setItem(key, value) {
+    this.store[key] = value;
+  }
+
+  removeItem(key) {
+    delete this.store[key];
+  }
+
+  get length() {
+    return Object.keys(this.store).length;
+  }
+
+  key(index: number) {
+    return Object.keys(this.store)[index];
+  }
+}
 
 const defaultQueries: ISyntheticSqon[] = [
   {
@@ -58,13 +91,8 @@ let defaultProps: CoreQueryBuilderProps = {
 
 const mockUUID = "abababab-abab-4bab-abab-abababababab";
 
-let qb: QueryBuilderInstance;
-let state: QueryBuilderState = defaultProps.state;
-
-let mockOnFilterCreate: Mock<void, [any]>;
-let mockOnFilterUpdate: Mock<void, [any]>;
-let mockOnFilterDelete: Mock<{ savedFilterId: string }, [any]>;
-let mockOnFilterSave: Mock<ISavedFilter, [any]>;
+let qbId: string = "test-query-builder";
+let mockDispatchEvent: Mock<boolean, [Event]>;
 
 describe("SavedFilters Manipulation", () => {
   beforeAll(() => {
@@ -78,28 +106,15 @@ describe("SavedFilters Manipulation", () => {
   });
 
   beforeEach(() => {
-    state = defaultProps.state;
-
-    mockOnFilterCreate = jest.fn();
-    mockOnFilterUpdate = jest.fn();
-    mockOnFilterDelete = jest.fn();
-    mockOnFilterSave = jest.fn();
-    defaultProps.onSavedFilterCreate = mockOnFilterCreate;
-    defaultProps.onSavedFilterUpdate = mockOnFilterUpdate;
-    defaultProps.onSavedFilterDelete = mockOnFilterDelete;
-    defaultProps.onSavedFilterSave = mockOnFilterSave;
-
-    qb = createQueryBuilder({
-      ...defaultProps,
-      onStateChange: (newState) => {
-        state = newState;
-      },
-      onSavedFilterCreate: mockOnFilterCreate,
-      onSavedFilterUpdate: mockOnFilterUpdate,
-      onSavedFilterDelete: mockOnFilterDelete,
-      onSavedFilterSave: mockOnFilterSave,
-    });
+    mockDispatchEvent = jest.fn();
+    // @ts-ignore
+    global.window = {
+      localStorage: new LocalStorageMock(),
+      dispatchEvent: mockDispatchEvent,
+    };
   });
 
-  it("test remote", () => {});
+  it("test remote", () => {
+    queryBuilderRemote.getActiveQuery(qbId);
+  });
 });
