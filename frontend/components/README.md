@@ -28,6 +28,13 @@ shadcd components should be put here.
 - `Dropdown.jsx`
 - `Modal.jsx`
 
+### To add a components
+
+1. go to the `components/` directory
+2. run `make shadcn-add COMPONENT_NAME`
+or 
+2. run `npx shadcn@latest add COMPONENT_NAME` 
+
 ---
 
 ## `feature/`

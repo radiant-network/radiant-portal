@@ -9,7 +9,7 @@ import {
   ColumnOrderState,
   getExpandedRowModel,
 } from "@tanstack/react-table";
-import { Button } from "@/base/ui/button";
+import { Button } from "@/base/Buttons/Button";
 import {
   DoubleLeftOutlinedIcon,
   LeftOutlinedIcon,
