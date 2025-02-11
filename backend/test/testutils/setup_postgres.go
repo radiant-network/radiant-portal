@@ -64,7 +64,7 @@ func initPostgresDb() (*gorm.DB, error) {
 	// parallel tests can create the schema at the same time
 	setupPostgresMutex.Lock()
 	defer setupPostgresMutex.Unlock()
-	res, err := db.Exec("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'radiant'")
+	res, err := db.Exec("SELECT * FROM pg_catalog.pg_tables WHERE tablename = 'interpretation_germline'")
 	if err != nil {
 		log.Fatal("failed to verify if schema already exist in Postgres", err)
 		return nil, err
