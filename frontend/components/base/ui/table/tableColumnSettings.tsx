@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ColumnSettings, TableColumnDef } from "@/base/ui/table/table";
 import { ColumnOrderState } from "@tanstack/react-table";
-import { Button } from "@/base/ui/button";
+import { Button } from "@/base/Buttons/Button";
 
 /**
  * Read user config to return column order (in asc)

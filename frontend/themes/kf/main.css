@@ -1,0 +1,40 @@
+.bg-default {
+  @apply bg-transparent;
+}
+
+.text-default-foreground {
+  @apply text-gray-700;
+}
+
+.bg-primary {
+  @apply bg-blue-500; 
+}
+
+.text-primary-foreground {
+  @apply text-white;
+}
+
+.bg-secondary {
+  @apply bg-gray-500;
+}
+
+.text-secondary-foreground {
+  @apply text-white; 
+}
+
+.bg-destructive {
+  @apply bg-red-500;
+}
+
+.text-destructive-foreground {
+  @apply text-white;
+}
+
+.bg-accent {
+  @apply bg-transparent;
+}
+
+.text-accent-foreground {
+  @apply text-gray-700;
+}
+

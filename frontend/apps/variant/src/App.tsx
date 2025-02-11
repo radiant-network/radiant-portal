@@ -8,6 +8,8 @@ import {
   AccordionTrigger,
 } from "components/base/ui/accordion";
 import { Table } from "components/base/ui/table/table";
+import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
+
 import {
   columns,
   userSettings,
@@ -60,14 +62,9 @@ function App() {
           <li>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
-                <AccordionTrigger>Aggregation 1</AccordionTrigger>
+                <AccordionTrigger>MultiSelect</AccordionTrigger>
                 <AccordionContent>
-                  <input
-                    type="checkbox"
-                    id="aggre1"
-                    name="aggre1"
-                    value="Aggre1"
-                  />
+                   <MultiSelect /> 
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

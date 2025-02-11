@@ -42,6 +42,7 @@ bin/
 
 #config
 .env
+.env*
 
 test.http
 /http-client.private.env.json
