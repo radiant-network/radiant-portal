@@ -9,7 +9,6 @@ import {
 } from "components/base/ui/accordion";
 import { Table } from "components/base/ui/table/table";
 import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
-
 import {
   columns,
   userSettings,
@@ -64,7 +63,7 @@ function App() {
               <AccordionItem value="item-1">
                 <AccordionTrigger>MultiSelect</AccordionTrigger>
                 <AccordionContent>
-                   <MultiSelect /> 
+                  <MultiSelect />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
