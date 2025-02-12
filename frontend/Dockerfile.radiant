@@ -5,6 +5,7 @@ COPY ./portals/radiant/.env* /workspace/portals/radiant/
 COPY ./portals/radiant /workspace/portals/radiant/
 COPY ./apps /workspace/apps
 COPY ./api /workspace/api
+COPY ./utils /workspace/utils
 COPY ./components /workspace/components
 COPY ./themes/radiant /workspace/themes/radiant
 
