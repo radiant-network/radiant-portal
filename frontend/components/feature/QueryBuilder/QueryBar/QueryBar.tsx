@@ -3,6 +3,8 @@ import QueryBarIdentifier from "./QueryBar.Identifier";
 import QueryBarActions from "./QueryBar.Actions";
 import { QueryInstance } from "@/components/model/query-builder-core";
 import { QueryBarContext } from "./QueryBar.Context";
+import QueryBarCount from "./QueryBar.Count";
+import QueryBarSelector from "./QueryBar.Selector";
 
 const queryBar = cva("flex flex-1 py-2 px-3 border ", {
   variants: {
@@ -27,12 +29,16 @@ const QueryBar = ({ query }: QueryBarProps) => {
     <QueryBarContext.Provider value={{ query }}>
       <div className="flex" onClick={() => query.setAsActive()}>
         <QueryBarIdentifier />
+        <QueryBarSelector />
         <div className={queryBar({ selected })}>
           <div className="flex-1">
             {query.isEmpty() ? (
-              <> Use the search tools & facets on the left to build a query</>
+              <>Use the search tools & facets on the left to build a query</>
             ) : (
-              <>pills</>
+              <div className="flex">
+                <div className="flex-1">Pills</div>
+                <QueryBarCount />
+              </div>
             )}
           </div>
         </div>

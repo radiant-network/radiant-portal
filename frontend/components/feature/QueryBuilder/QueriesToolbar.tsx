@@ -1,7 +1,5 @@
-import { Button } from "@/components/base/Buttons";
-import React from "react";
+import { ActionButton, Button } from "@/components/base/Buttons";
 import { useQueryBuilderContext } from "./QueryBuilder.Context";
-import { getDefaultSyntheticSqon } from "@/components/model/query-builder-core";
 import { BooleanOperators } from "@/components/model/sqon";
 import { PlusIcon } from "lucide-react";
 
@@ -13,20 +11,46 @@ const QueriesToolbar = () => {
 
   return (
     <div>
-      <Button
-        size="xs"
-        variant="primary"
-        disabled={hasEmptyQuery}
-        onClick={() =>
-          queryBuilder.createQuery({
-            op: BooleanOperators.and,
-            content: [],
-          })
-        }
-      >
-        <PlusIcon />
-        New Query
-      </Button>
+      {!queryBuilder.canCombine() && (
+        <Button
+          size="xs"
+          variant="primary"
+          disabled={hasEmptyQuery}
+          onClick={() =>
+            queryBuilder.createQuery({
+              op: BooleanOperators.and,
+              content: [],
+            })
+          }
+        >
+          <PlusIcon />
+          New Query
+        </Button>
+      )}
+      {queryBuilder.canCombine() && (
+        <ActionButton
+          actions={[
+            {
+              label: "And",
+              onClick: () =>
+                queryBuilder.combineSelectedQueries(BooleanOperators.and),
+            },
+            {
+              label: "Or",
+              onClick: () =>
+                queryBuilder.combineSelectedQueries(BooleanOperators.or),
+            },
+          ]}
+          onDefaultAction={() =>
+            queryBuilder.combineSelectedQueries(BooleanOperators.and)
+          }
+          size="xs"
+          variant="primary"
+          disabled={hasEmptyQuery}
+        >
+          Combine
+        </ActionButton>
+      )}
     </div>
   );
 };

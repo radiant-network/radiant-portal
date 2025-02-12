@@ -15,7 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/base/ui/accordion";
-import QueryBar from "./QueryBar";
+import QueryBar from "./QueryBar/QueryBar";
 import QueriesToolbar from "./QueriesToolbar";
 import { QueryBuilderContext } from "./QueryBuilder.Context";
 
@@ -26,7 +26,7 @@ const QueryBuilder = (props: QueryBuilderProps) => {
     <QueryBuilderContext.Provider value={{ queryBuilder }}>
       <Accordion type="multiple" defaultValue={["query-builder"]}>
         <AccordionItem value="query-builder" className="border-none">
-          <AccordionTrigger className="border py-4 px-5">
+          <AccordionTrigger className="border py-4 px-5 rounded-t-sm data-[state=closed]:rounded-sm">
             <div className="flex w-full">
               <div>My Filter</div>
               <div className="flex flex-1 justify-end">
@@ -45,7 +45,7 @@ const QueryBuilder = (props: QueryBuilderProps) => {
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4">
+          <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
             <div className="flex flex-col gap-2">
               {queryBuilder.getQueries().map((query) => (
                 <QueryBar key={query.id} query={query} />

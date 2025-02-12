@@ -94,6 +94,11 @@ function App() {
                   },
                 ],
               },
+              {
+                id: "3",
+                op: "and",
+                content: [],
+              },
             ],
             savedFilters: [
               {

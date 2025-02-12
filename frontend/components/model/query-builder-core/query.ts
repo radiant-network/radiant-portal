@@ -71,6 +71,11 @@ export type CoreQuery = {
   unselect(): void;
 
   /**
+   * Call this function to know if the Query is selected
+   */
+  isSelected(): boolean;
+
+  /**
    * Call this function to know if the Query is active
    */
   isActive(): boolean;
@@ -140,6 +145,11 @@ export const createQuery = (
         selectedQueryIndexes: newSelectedQueryIndexes,
       }));
       queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
+    },
+    isSelected: () => {
+      return queryBuilder
+        .getState()
+        .selectedQueryIndexes.includes(queryBuilder.getQueryIndex(queryId));
     },
     delete: () => {
       deleteQueryAndSetNext(queryId, queryBuilder);

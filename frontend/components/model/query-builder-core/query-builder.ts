@@ -418,7 +418,10 @@ export const createQueryBuilder = (
       return queryBuilder.getQueries().length > 0;
     },
     canCombine: () => {
-      return queryBuilder.getQueries().length > 1;
+      return (
+        queryBuilder.getQueries().length > 1 &&
+        queryBuilder.getSelectedQueryIndexes().length > 1
+      );
     },
     setRawQueries: (activeQueryId, newQueries) => {
       queryBuilder.setState((prev) => ({
