@@ -63,6 +63,63 @@ function App() {
       <SidenavFilters />
       <main className="flex-1 p-4 h-full">
         <h1 className="text-2xl font-bold">Variant</h1>
+        <QueryBuilder
+          id="variant"
+          initialState={{
+            activeQueryId: "1",
+            queries: [
+              {
+                id: "1",
+                op: "and",
+                content: [
+                  {
+                    content: {
+                      value: ["something"],
+                      field: "field1",
+                    },
+                    op: "in",
+                  },
+                ],
+              },
+              {
+                id: "2",
+                op: "and",
+                content: [
+                  {
+                    content: {
+                      value: ["something"],
+                      field: "field2",
+                    },
+                    op: "in",
+                  },
+                ],
+              },
+            ],
+            savedFilters: [
+              {
+                id: "1",
+                title: "Filter 1",
+                queries: [
+                  {
+                    id: "2",
+                    op: "and",
+                    content: [
+                      {
+                        content: {
+                          value: ["something"],
+                          field: "field2",
+                        },
+                        op: "in",
+                      },
+                    ],
+                  },
+                ],
+                favorite: false,
+              },
+            ],
+            selectedQueryIndexes: [],
+          }}
+        />
         <Table
           columns={columns}
           defaultColumnSettings={defaultSettings}

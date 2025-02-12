@@ -34,6 +34,13 @@ export type CoreQuery = {
   isEmpty(): boolean;
 
   /**
+   * Call this function to know if the Query is empty
+   *
+   * @returns boolean
+   */
+  isNotEmpty(): boolean;
+
+  /**
    * Call this function to delete the Query
    */
   delete(): void;
@@ -66,7 +73,7 @@ export type CoreQuery = {
   /**
    * Call this function to know if the Query is active
    */
-  isActive(): void;
+  isActive(): boolean;
 
   /**
    * Call this function to set the Query as active
@@ -110,6 +117,7 @@ export const createQuery = (
       return queryBuilder.getState().activeQueryId === queryId;
     },
     isEmpty: (): boolean => isEmptySqon(syntheticSqon),
+    isNotEmpty: (): boolean => !isEmptySqon(syntheticSqon),
     select: () => {
       const queryIndex = queryBuilder.getQueryIndex(queryId);
       const newSelectedQueryIndexes = [
