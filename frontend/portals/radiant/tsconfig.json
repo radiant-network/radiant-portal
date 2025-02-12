@@ -19,7 +19,7 @@
       "@/api/*": ["../../api/*"],
       "@/utils/*": ["../../utils/*"],
       "@/components/*": ["../../components/*"],
-      "@/base/ui/*": ["../../components/base/ui/*"],
+      "@/base/*": ["../../components/base/*"],
       "@/lib/*": ["../../components/lib/*"],
       "@/hooks/*": ["../../components/hooks/*"],
       "@assets/*": ["../../themes/radiant/assets/*"],
