@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-   "declaration": true,
+    "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -27,8 +27,11 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
+      "@/api/*": ["../api/*"],
       "@/components/*": ["./*"],
+      "@/lib/*": ["./lib/*"],
       "@/base/*": ["./base/*"],
+      "@/utils/*": ["../utils/*"],
       "@/*": ["./*"]
     }
   },

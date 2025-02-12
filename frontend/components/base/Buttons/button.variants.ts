@@ -16,7 +16,7 @@ export const baseButtonVariants = tv({
         "bg-secondary text-secondary-foreground enabled:hover:bg-secondary/80",
       ghost:
         "bg-accent text-accent-foreground enabled:hover:bg-primary enabled:hover:text-primary-foreground",
-      link: "bg-transparent text-default-foreground underline underline-offset-4 enabled:hover:underline",
+      link: "bg-transparent text-default-foreground underline underline-offset-4 enabled:hover:no-underline pl-0 pr-0",
     },
   },
   defaultVariants: {

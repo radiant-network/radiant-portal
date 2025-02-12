@@ -1,13 +1,12 @@
 import "./App.css";
 import styles from "./App.module.css";
-import {ListBody, Occurrence, SortBodyOrderEnum, SqonOpEnum} from "@/api/api";
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "components/base/ui/accordion";
-import {Table} from "@/components/base/Table/Table";
-import {MultiSelect} from "@/components/feature/QueryFilters/MultiSelect";
-import {columns, defaultSettings, userSettings,} from "./include_variant_table";
-import {IVariantEntity} from "@/variant_type";
+import { ListBody, Occurrence, SortBodyOrderEnum, SqonOpEnum } from "@/api/api";
+import { Table } from "@/components/base/Table/Table";
+import { columns, defaultSettings, userSettings, } from "./include_variant_table";
+import { IVariantEntity } from "@/variant_type";
 import useSWR from "swr";
-import {occurrencesApi} from "@/utils/api";
+import { occurrencesApi } from "@/utils/api";
+import SidenavFilters from "./components/layouts/SidenavFilters";
 
 type OccurrenceInput = {
   seqId: string;
@@ -15,7 +14,7 @@ type OccurrenceInput = {
 };
 
 const fetcher = (input: OccurrenceInput) =>
-    occurrencesApi.listOccurrences(input.seqId, input.listBody).then((response) => response.data);
+  occurrencesApi.listOccurrences(input.seqId, input.listBody).then((response) => response.data);
 
 function App() {
   const { data } = useSWR<Occurrence[], any, OccurrenceInput>(
@@ -43,57 +42,13 @@ function App() {
     fetcher,
     {
       revalidateOnFocus: false,
-    }
+    },
   );
   const occurrences = data || [];
 
   return (
     <div className={styles.appLayout}>
-      <aside>
-        <ul>
-          <li>
-            <Accordion type="single" collapsible>
-              <AccordionItem value="item-1">
-                <AccordionTrigger>MultiSelect</AccordionTrigger>
-                <AccordionContent>
-                  <MultiSelect />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </li>
-          <li>
-            <Accordion type="single" collapsible>
-              <AccordionItem value="item-1">
-                <AccordionTrigger>Aggregation 2</AccordionTrigger>
-                <AccordionContent>
-                  <input
-                    type="checkbox"
-                    id="aggre1"
-                    name="aggre1"
-                    value="Aggre1"
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </li>
-          <li>
-            <Accordion type="single" collapsible>
-              <AccordionItem value="item-1">
-                <AccordionTrigger>Aggregation 3</AccordionTrigger>
-                <AccordionContent>
-                  <input
-                    type="checkbox"
-                    id="aggre1"
-                    name="aggre1"
-                    value="Aggre1"
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </li>
-        </ul>
-      </aside>
-
+      <SidenavFilters />
       <main className="flex-1 p-4 h-full">
         <h1 className="text-2xl font-bold">Variant</h1>
         <Table
