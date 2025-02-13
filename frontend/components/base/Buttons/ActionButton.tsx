@@ -1,36 +1,48 @@
+import { VariantProps } from "tailwind-variants";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../DropdownMenu';
-import { type VariantProps } from "class-variance-authority";
-
+} from "../DropdownMenu";
 import { Button } from "./Button";
-import { buttonVariants, buttonVariantsType } from "./";
+import { cn } from "@/lib/utils";
+import { MoreHorizontalIcon } from "lucide-react";
+import { actionButtonVariants } from "./button.variants";
 
-import { cn } from '@/lib/utils';
 // Define types for the props
 interface Action {
   label: string;
   onClick: () => void;
 }
 
-interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<buttonVariantsType> {
+interface ActionButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof actionButtonVariants> {
   children: React.ReactNode;
   actions: Action[];
   onDefaultAction: () => void;
   className?: string;
 }
 
-function ActionButton({ actions, className, children, onDefaultAction, size, variant }: ActionButtonProps) {
+function ActionButton({
+  actions,
+  className,
+  children,
+  onDefaultAction,
+  size,
+  variant,
+}: ActionButtonProps) {
+  const style = actionButtonVariants({ size, variant });
+
   return (
-    <div className={ cn("flex items-center") }>
+    <div className={cn("flex items-center", className)}>
       {/* Default Action Button */}
       <Button
-        className={ cn(buttonVariants({ variant, size, className }), 'px-2') }
+        size={size}
+        variant={variant}
         onClick={onDefaultAction}
+        className={cn("rounded-r-none", style.defaultButton())}
       >
         {children}
       </Button>
@@ -38,17 +50,18 @@ function ActionButton({ actions, className, children, onDefaultAction, size, var
       {/* Dropdown Button */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className={ cn(buttonVariants({ variant, size, className }), 'px-2') }>
-            ...
+          <Button
+            size={size}
+            variant={variant}
+            className={cn("rounded-l-none", style.actionsButton())}
+          >
+            <MoreHorizontalIcon />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="bg-white">
           {actions.map((action, index) => (
-            <DropdownMenuItem
-              key={index}
-              onClick={action.onClick}
-            >
+            <DropdownMenuItem key={index} onClick={action.onClick}>
               {action.label}
             </DropdownMenuItem>
           ))}
