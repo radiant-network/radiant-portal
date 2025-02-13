@@ -1,4 +1,4 @@
-import { ActionButton, ButtonTypes } from '../../base/Buttons';
+import { ActionButton } from "../../base/Buttons";
 
 interface IProps {}
 
@@ -31,7 +31,14 @@ export function MultiSelect({}: IProps) {
       <div className="flex align-right justify-end items-center space-x-2">
         <button className="text-gray-600">Clear</button>
         <div className="flex space-x-2">
-          <ActionButton className="h-7" variant="primary" actions={[]} onDefaultAction={() => {}}>Apply</ActionButton>
+          <ActionButton
+            className="h-7"
+            variant="primary"
+            actions={[]}
+            onDefaultAction={() => {}}
+          >
+            Apply
+          </ActionButton>
         </div>
       </div>
     </div>

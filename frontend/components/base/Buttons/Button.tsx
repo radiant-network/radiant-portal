@@ -1,13 +1,12 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
-import { type VariantProps } from "class-variance-authority";
-import { buttonVariants, buttonVariantsType } from "./";
-
+import { buttonVariants } from "./button.variants";
 import { cn } from "@/lib/utils";
+import { VariantProps } from "tailwind-variants";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<buttonVariantsType> {
+    VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
@@ -21,9 +20,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-  },
+  }
 );
 Button.displayName = "Button";
 
 export { Button, buttonVariants };
-
