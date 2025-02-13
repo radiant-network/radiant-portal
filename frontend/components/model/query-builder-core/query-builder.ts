@@ -448,7 +448,7 @@ export const createQueryBuilder = (
       const combinedQuery: ISyntheticSqon = {
         id: v4(),
         op: operator,
-        content: queryBuilder.getSelectedQueryIndexes(),
+        content: queryBuilder.getSelectedQueryIndexes().sort(),
       };
       const selectedQueryIndexes: number[] = [];
 

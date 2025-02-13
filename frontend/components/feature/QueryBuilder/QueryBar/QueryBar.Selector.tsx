@@ -27,7 +27,6 @@ const QueryBarSelector = () => {
       <Checkbox
         checked={query.isSelected()}
         onClick={(e) => {
-          e.preventDefault();
           e.stopPropagation();
 
           if (query.isSelected()) {

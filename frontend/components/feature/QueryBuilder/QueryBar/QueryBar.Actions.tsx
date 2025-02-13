@@ -28,15 +28,14 @@ const QueryBarActions = () => {
   const { query } = useQueryBarContext();
 
   return (
-    <div className={actions({ selected: query.isActive() })}>
+    <div
+      className={actions({ selected: query.isActive() })}
+      onClick={(e) => e.stopPropagation()}
+    >
       <CopyIcon
         size={16}
         className="hover:cursor-pointer"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          query.duplicate();
-        }}
+        onClick={() => query.duplicate()}
       />
       <Popover>
         <PopoverTrigger asChild>
@@ -55,11 +54,7 @@ const QueryBarActions = () => {
               <Button
                 size="xs"
                 variant="primary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  query.delete();
-                }}
+                onClick={() => query.delete()}
               >
                 Delete
               </Button>

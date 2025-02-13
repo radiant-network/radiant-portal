@@ -21,11 +21,12 @@ const QueryBuilder = (props: QueryBuilderProps) => {
     <QueryBuilderContext.Provider value={{ queryBuilder }}>
       <Accordion type="multiple" defaultValue={["query-builder"]}>
         <AccordionItem value="query-builder" className="border-none">
-          <AccordionTrigger className="border py-4 px-5 rounded-t-sm data-[state=closed]:rounded-sm">
-            <div className="flex w-full">
-              <SavedFiltersLeftActions />
-              <SavedFiltersRightActions className="flex flex-1 justify-end" />
-            </div>
+          <AccordionTrigger
+            asChild
+            className="border py-4 px-5 rounded-t-sm data-[state=closed]:rounded-sm hover:cursor-pointer"
+          >
+            <SavedFiltersLeftActions className="mr-4" />
+            <SavedFiltersRightActions className="ml-auto" />
           </AccordionTrigger>
           <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
             <div className="flex flex-col gap-2">
