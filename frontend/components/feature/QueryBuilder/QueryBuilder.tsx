@@ -1,11 +1,4 @@
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/base/select";
-import {
   QueryBuilderProps,
   useQueryBuilder,
 } from "../../model/query-builder-core";
@@ -18,6 +11,8 @@ import {
 import QueryBar from "./QueryBar/QueryBar";
 import QueriesToolbar from "./QueriesToolbar";
 import { QueryBuilderContext } from "./QueryBuilder.Context";
+import SavedFiltersRightActions from "./SavedFilters/SavedFilters.RightActions";
+import SavedFiltersLeftActions from "./SavedFilters/SavedFilters.LeftActions";
 
 const QueryBuilder = (props: QueryBuilderProps) => {
   const queryBuilder = useQueryBuilder(props);
@@ -28,21 +23,8 @@ const QueryBuilder = (props: QueryBuilderProps) => {
         <AccordionItem value="query-builder" className="border-none">
           <AccordionTrigger className="border py-4 px-5 rounded-t-sm data-[state=closed]:rounded-sm">
             <div className="flex w-full">
-              <div>My Filter</div>
-              <div className="flex flex-1 justify-end">
-                <Select>
-                  <SelectTrigger className="w-[120px] h-6">
-                    My Filters
-                  </SelectTrigger>
-                  <SelectContent>
-                    {queryBuilder._getSavedFilters().map((filter) => (
-                      <SelectItem key={filter.id} value={filter.id}>
-                        {filter.raw().title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <SavedFiltersLeftActions />
+              <SavedFiltersRightActions className="flex flex-1 justify-end" />
             </div>
           </AccordionTrigger>
           <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
