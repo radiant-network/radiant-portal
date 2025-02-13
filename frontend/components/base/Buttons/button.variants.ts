@@ -3,7 +3,9 @@ export { default as ActionButton } from "./ActionButton";
 export { Button } from "./Button";
 
 export const baseButtonVariants = tv({
-  base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  slots: {
+    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  },
   variants: {
     variant: {
       default: "bg-default text-default-foreground",
@@ -20,7 +22,6 @@ export const baseButtonVariants = tv({
   },
   defaultVariants: {
     variant: "default",
-    size: "default",
   },
 });
 
@@ -28,44 +29,84 @@ export const buttonVariants = tv({
   extend: baseButtonVariants,
   variants: {
     size: {
-      default: "h-8 px-4 py-2",
-      xs: "h-6 px-2",
-      sm: "h-7 px-3",
-      md: "h-8 px-4 py-2",
-      lg: "h-11 px-10",
-      icon: "h-10 w-10",
+      default: "h-8 px-4 py-2 [&_svg]:size-4",
+      xs: "h-6 px-2 text-sm [&_svg]:size-3",
+      sm: "h-7 px-3 [&_svg]:size-4",
+      md: "h-8 px-4 py-2 [&_svg]:size-4",
+      lg: "h-9 px-5 text-lg [&_svg]:size-5",
     },
+  },
+  defaultVariants: {
+    size: "default",
   },
 });
 
 export const actionButtonVariants = tv({
   extend: baseButtonVariants,
   slots: {
-    defaultButton: "",
-    actionsButton: "",
+    base: "",
+    actionsButton: "rounded-l-none",
   },
   variants: {
     size: {
       default: {
-        defaultButton: "h-8 px-3",
-        actionsButton: "h-8 px-2",
+        base: "h-8 px-3 [&_svg]:size-5",
+        actionsButton: "h-8 px-2 [&_svg]:size-5",
       },
       xs: {
-        defaultButton: "h-6 px-2",
-        actionsButton: "h-6 px-1",
+        base: "h-6 px-2 text-sm [&_svg]:size-3",
+        actionsButton: "h-6 px-1.5 [&_svg]:size-3",
       },
       sm: {
-        defaultButton: "h-7 px-3",
-        actionsButton: "h-7 px-2",
+        base: "h-7 px-3 [&_svg]:size-4",
+        actionsButton: "h-7 px-2 [&_svg]:size-4",
       },
       md: {
-        defaultButton: "h-8 px-3",
-        actionsButton: "h-8 px-2",
+        base: "h-8 px-3 [&_svg]:size-5",
+        actionsButton: "h-8 px-2 [&_svg]:size-5",
       },
       lg: {
-        defaultButton: "h-10 px-4",
-        actionsButton: "h-10 px-3",
+        base: "h-9 px-4 text-lg [&_svg]:size-6",
+        actionsButton: "h-9 px-2 [&_svg]:size-6",
       },
     },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+});
+
+export const iconButtonVariants = tv({
+  extend: baseButtonVariants,
+  slots: {
+    base: "px-0",
+    icon: "",
+  },
+  variants: {
+    size: {
+      default: {
+        base: "size-8",
+        icon: "size-4",
+      },
+      xs: {
+        base: "size-6",
+        icon: "size-4",
+      },
+      sm: {
+        base: "size-7",
+        icon: "size-4",
+      },
+      md: {
+        base: "size-8",
+        icon: "size-5",
+      },
+      lg: {
+        base: "size-11",
+        icon: "size-6",
+      },
+    },
+  },
+  defaultVariants: {
+    size: "default",
   },
 });
