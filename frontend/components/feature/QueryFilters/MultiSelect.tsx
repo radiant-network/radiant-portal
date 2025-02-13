@@ -32,6 +32,7 @@ export function MultiSelect({}: IProps) {
         <button className="text-gray-600">Clear</button>
         <div className="flex space-x-2">
           <ActionButton
+            size="sm"
             className="h-7"
             variant="primary"
             actions={[]}

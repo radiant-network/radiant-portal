@@ -38,25 +38,19 @@ function ActionButton({
   return (
     <div className={cn("flex items-center", className)}>
       {/* Default Action Button */}
-      <Button
-        size={size}
-        variant={variant}
+      <button
         onClick={onDefaultAction}
-        className={cn("rounded-r-none", style.defaultButton())}
+        className={cn(style.base(), "rounded-r-none")}
       >
         {children}
-      </Button>
+      </button>
 
       {/* Dropdown Button */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            size={size}
-            variant={variant}
-            className={cn("rounded-l-none", style.actionsButton())}
-          >
+          <button className={cn(style.base(), style.actionsButton())}>
             <MoreHorizontalIcon />
-          </Button>
+          </button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="bg-white">
