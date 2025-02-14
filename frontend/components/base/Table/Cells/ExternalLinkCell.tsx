@@ -1,5 +1,5 @@
-import { OpenInNewIcon } from "@/base/Icons";
 import { cn } from "@/lib/utils";
+import { SquareArrowOutUpRightIcon } from "lucide-react";
 import * as React from "react";
 type ExternalLinkCellProps = {
   className?: string;
@@ -17,7 +17,7 @@ const ExternalLinkCell = React.forwardRef<
       href={url}
       target="_blank"
     >
-      <OpenInNewIcon />
+      <SquareArrowOutUpRightIcon />
       {children}
     </a>
   );
