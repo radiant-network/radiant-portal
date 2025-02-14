@@ -7,6 +7,8 @@ import SavedFiltersSaveAction from "./SavedFilters.SaveAction";
 import SavedFiltersDeleteAction from "./SavedFilters.DeleteAction";
 import SavedFiltersShareAction from "./SavedFilters.ShareAction";
 import SavedFiltersSelect from "./SavedFilters.Select";
+import { IconButton } from "@/components/base/Buttons";
+import { TrashIcon } from "lucide-react";
 
 const SavedFiltersRightActions = ({
   className,
@@ -18,12 +20,14 @@ const SavedFiltersRightActions = ({
         className="flex gap-4 items-center"
         onClick={(e) => e.stopPropagation()}
       >
-        <div>
+        <div className="whitespace-nowrap">
           <TooltipProvider>
             <SavedFiltersNewAction />
             <SavedFiltersSaveAction />
             <SavedFiltersDuplicateAction />
-            <SavedFiltersDeleteAction />
+            <SavedFiltersDeleteAction
+              trigger={<IconButton icon={TrashIcon} />}
+            />
             <SavedFiltersShareAction />
           </TooltipProvider>
         </div>

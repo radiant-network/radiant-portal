@@ -1,10 +1,11 @@
 import { cn } from "@/components/lib/utils";
-import { RotateCcw, StarIcon } from "lucide-react";
+import { PencilLineIcon } from "lucide-react";
 import React from "react";
 import SavedFiltersEditAction from "./SavedFilters.EditAction";
 import SavedFiltersUndoAction from "./SavedFilters.UndoAction";
 import SavedFiltersStarAction from "./SavedFilters.StarAction";
 import { TooltipProvider } from "@/components/base/tooltip";
+import { IconButton } from "@/components/base/Buttons";
 
 const SavedFiltersLeftActions = ({
   className,
@@ -21,7 +22,9 @@ const SavedFiltersLeftActions = ({
       <div className="text-ellipsis overflow-hidden">My Filter</div>
       <TooltipProvider>
         <div className="flex" onClick={(e) => e.stopPropagation()}>
-          <SavedFiltersEditAction />
+          <SavedFiltersEditAction
+            trigger={<IconButton icon={PencilLineIcon} />}
+          />
           <SavedFiltersStarAction />
           <SavedFiltersUndoAction />
         </div>

@@ -9,7 +9,7 @@ const QueryToolbarAddAction = () => {
   if (!queryBuilder.canCombine()) {
     return (
       <Button
-        size="sm"
+        size="xs"
         variant="primary"
         disabled={queryBuilder.hasEmptyQuery()}
         onClick={() =>

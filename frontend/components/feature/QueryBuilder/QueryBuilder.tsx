@@ -64,10 +64,10 @@ const QueryBuilder = ({
         <AccordionItem value="query-builder" className="border-none">
           <AccordionTrigger
             asChild
-            className="border py-4 px-5 rounded-t-sm data-[state=closed]:rounded-sm hover:cursor-pointer"
+            className="border py-0 px-5 rounded-t-sm data-[state=closed]:rounded-sm hover:cursor-pointer"
           >
-            <SavedFiltersLeftActions className="mr-4" />
-            <SavedFiltersRightActions className="ml-auto" />
+            <SavedFiltersLeftActions className="py-4 pr-4" />
+            <SavedFiltersRightActions className="ml-auto py-4" />
           </AccordionTrigger>
           <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
             <div className="flex flex-col gap-2">

@@ -61,6 +61,11 @@ export type CoreSavedFilter = {
   save(): void;
 
   /**
+   * Call this function to discard the changes made to the SavedFilter
+   */
+  discardChanges(): void;
+
+  /**
    * Call this function to set the SavedFilter title
    */
   setTile(title: string): void;
@@ -211,6 +216,17 @@ export const createSavedFilter = (
         console.error("Can only save the selected saved filter");
       }
     },
+    discardChanges: () => {
+      if (_savedFilter.isSelected()) {
+        queryBuilder.setState((prev) => ({
+          ...prev,
+          activeQueryId: rawSavedFilter.queries[0].id,
+          queries: rawSavedFilter.queries,
+        }));
+      } else {
+        console.error("Can only discard changes to the selected saved filter");
+      }
+    },
     setTile: (title) => {
       _savedFilter.update({ title });
     },
@@ -219,12 +235,13 @@ export const createSavedFilter = (
     },
     hasQueries: () => _savedFilter.getQueries().length > 0,
     isSelected: () => {
+      const currentQueryIds = queryBuilder.getState().queries.map((q) => q.id);
       /**
        * Compare against queryBuilder queries to ensure that the saved filter is selected
        */
       return (
-        rawSavedFilter.queries.find(
-          (query) => query.id === queryBuilder.getState().activeQueryId
+        rawSavedFilter.queries.find((query) =>
+          currentQueryIds.includes(query.id)
         ) !== undefined
       );
     },

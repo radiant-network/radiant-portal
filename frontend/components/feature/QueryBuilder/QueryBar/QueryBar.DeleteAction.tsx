@@ -26,7 +26,11 @@ const QueryBarDeleteAction = () => {
             <Button size="xs">Cancel</Button>
           </PopoverClose>
           <PopoverClose asChild>
-            <Button size="xs" variant="primary" onClick={() => query.delete()}>
+            <Button
+              size="xs"
+              variant="destructive"
+              onClick={() => query.delete()}
+            >
               Delete
             </Button>
           </PopoverClose>

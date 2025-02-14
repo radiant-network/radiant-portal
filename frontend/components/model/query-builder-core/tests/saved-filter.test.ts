@@ -374,6 +374,7 @@ describe("SavedFilters Manipulation", () => {
     expect(mockOnFilterDelete).toHaveBeenCalledWith("1");
   });
 
+  // Test discardChanges
   // Test save saved filter
   // Test update saved filter
   // Test hasQueries

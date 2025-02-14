@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { PropsWithChildren, ReactNode, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -29,7 +29,7 @@ const formSchema = z.object({
   title: z.string().min(2, "Min 2 characters").max(50, "Max 50 characters"),
 });
 
-const SavedFiltersEditAction = () => {
+const SavedFiltersEditAction = ({ trigger }: { trigger: ReactNode }) => {
   const [open, setOpen] = useState(false);
   const { queryBuilder } = useQueryBuilderContext();
   const savedFilter = queryBuilder.getSelectedSavedFilter();
@@ -47,9 +47,7 @@ const SavedFiltersEditAction = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <IconButton icon={EditIcon} />
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Filter</DialogTitle>

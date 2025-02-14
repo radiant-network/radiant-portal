@@ -5,15 +5,38 @@ import {
   TooltipTrigger,
 } from "@/components/base/tooltip";
 import { CopyIcon } from "lucide-react";
+import { useState } from "react";
+import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import SavedFiltersOvewriteDialog from "./SavedFilters.OverwriteDialog";
 
 const SavedFiltersDuplicateAction = () => {
+  const [open, toggleOpen] = useState(false);
+  const { queryBuilder } = useQueryBuilderContext();
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
+  const isDirty = selectedSavedFilter?.isDirty();
+
+  const handleDuplicate = () => {
+    if (isDirty) {
+      toggleOpen(true);
+    } else {
+      // TODO create new filter
+    }
+  };
+
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <IconButton icon={CopyIcon} />
-      </TooltipTrigger>
-      <TooltipContent>Duplicate filter</TooltipContent>
-    </Tooltip>
+    <>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <IconButton
+            icon={CopyIcon}
+            disabled={!selectedSavedFilter}
+            onClick={handleDuplicate}
+          />
+        </TooltipTrigger>
+        <TooltipContent>Duplicate filter</TooltipContent>
+      </Tooltip>
+      <SavedFiltersOvewriteDialog open={open} onOpenChange={toggleOpen} />
+    </>
   );
 };
 

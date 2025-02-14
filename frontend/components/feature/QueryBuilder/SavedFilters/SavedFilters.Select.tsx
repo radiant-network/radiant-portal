@@ -6,14 +6,17 @@ import {
   SelectTrigger,
 } from "@/components/base/select";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
-import { Button } from "@/components/base/Buttons";
 import { FolderIcon } from "lucide-react";
+import SavedFiltersManageAction from "./SavedFilters.ManagerAction";
 
 const SavedFiltersSelect = () => {
   const { queryBuilder } = useQueryBuilderContext();
 
   return (
-    <Select>
+    <Select
+      value={queryBuilder.getSelectedSavedFilter()?.id}
+      onValueChange={(savedFilterId) => {}}
+    >
       <SelectTrigger className="w-[135px] h-7">
         <div className="flex items-center gap-2">
           <FolderIcon size={14} /> My Filters
@@ -26,9 +29,7 @@ const SavedFiltersSelect = () => {
           </SelectItem>
         ))}
         <SelectSeparator />
-        <Button size="sm" className="w-full pl-1">
-          Manage filters
-        </Button>
+        <SavedFiltersManageAction />
       </SelectContent>
     </Select>
   );

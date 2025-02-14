@@ -5,14 +5,26 @@ import {
   TooltipTrigger,
 } from "@/components/base/tooltip";
 import { SaveIcon } from "lucide-react";
+import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
 const SavedFiltersSaveAction = () => {
+  const { queryBuilder } = useQueryBuilderContext();
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
+  const isDirty = selectedSavedFilter?.isDirty();
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <IconButton icon={SaveIcon} />
+        <IconButton
+          icon={SaveIcon}
+          color="orange-400"
+          disabled={!selectedSavedFilter}
+          className={isDirty ? "text-[--gold-7]" : ""}
+        />
       </TooltipTrigger>
-      <TooltipContent>Save filter</TooltipContent>
+      <TooltipContent>
+        {isDirty ? "Save changes" : "Save filter"}
+      </TooltipContent>
     </Tooltip>
   );
 };

@@ -7,7 +7,6 @@ import { getNewSavedFilter } from "./utils/saved-filter";
 import { ISavedFilter } from "../saved-filter";
 import { createSavedFilter, SavedFilterInstance } from "./saved-filter";
 import { createQuery, QueryInstance } from "./query";
-import { PartialKeys } from "../../lib/utils";
 import { v4 } from "uuid";
 import { cleanUpQueries, getDefaultSyntheticSqon } from "./utils/sqon";
 

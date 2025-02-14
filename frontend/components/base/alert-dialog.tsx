@@ -3,6 +3,7 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "./Buttons/button.variants";
+import { VariantProps } from "tailwind-variants";
 
 const AlertDialog = AlertDialogPrimitive.Root;
 
@@ -98,9 +99,10 @@ AlertDialogDescription.displayName =
 
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
->(({ className, ...props }, ref) => {
-  const style = buttonVariants({ variant: "primary" });
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action> &
+    VariantProps<typeof buttonVariants>
+>(({ className, variant = "primary", size, ...props }, ref) => {
+  const style = buttonVariants({ variant, size });
 
   return (
     <AlertDialogPrimitive.Action
@@ -114,9 +116,10 @@ AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
 const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
->(({ className, ...props }, ref) => {
-  const style = buttonVariants({ variant: "outline" });
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel> &
+    VariantProps<typeof buttonVariants>
+>(({ className, variant = "outline", size, ...props }, ref) => {
+  const style = buttonVariants({ variant, size });
 
   return (
     <AlertDialogPrimitive.Cancel
