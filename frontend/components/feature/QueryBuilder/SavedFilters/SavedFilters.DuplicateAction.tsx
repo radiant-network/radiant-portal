@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/base/Buttons";
 import {
   Tooltip,
   TooltipContent,
@@ -8,8 +9,8 @@ import { CopyIcon } from "lucide-react";
 const SavedFiltersDuplicateAction = () => {
   return (
     <Tooltip>
-      <TooltipTrigger>
-        <CopyIcon size={14} />
+      <TooltipTrigger asChild>
+        <IconButton icon={CopyIcon} />
       </TooltipTrigger>
       <TooltipContent>Duplicate filter</TooltipContent>
     </Tooltip>

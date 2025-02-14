@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/base/Buttons";
 import {
   Tooltip,
   TooltipContent,
@@ -8,8 +9,8 @@ import { TrashIcon } from "lucide-react";
 const SavedFiltersDeleteAction = () => {
   return (
     <Tooltip>
-      <TooltipTrigger>
-        <TrashIcon size={14} />
+      <TooltipTrigger asChild>
+        <IconButton icon={TrashIcon} />
       </TooltipTrigger>
       <TooltipContent>Delete filter</TooltipContent>
     </Tooltip>

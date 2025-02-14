@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/base/Buttons";
 import {
   Tooltip,
   TooltipContent,
@@ -8,8 +9,8 @@ import { RotateCcw } from "lucide-react";
 const SavedFiltersUndoAction = () => {
   return (
     <Tooltip>
-      <TooltipTrigger>
-        <RotateCcw size={14} />
+      <TooltipTrigger asChild>
+        <IconButton icon={RotateCcw} />
       </TooltipTrigger>
       <TooltipContent>Discard unsaved changes</TooltipContent>
     </Tooltip>

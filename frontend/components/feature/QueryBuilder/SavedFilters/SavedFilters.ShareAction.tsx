@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/base/Buttons";
 import {
   Tooltip,
   TooltipContent,
@@ -8,8 +9,8 @@ import { Share2Icon } from "lucide-react";
 const SavedFiltersShareAction = () => {
   return (
     <Tooltip>
-      <TooltipTrigger>
-        <Share2Icon size={14} />
+      <TooltipTrigger asChild>
+        <IconButton icon={Share2Icon} />
       </TooltipTrigger>
       <TooltipContent>Share (Copy url)</TooltipContent>
     </Tooltip>

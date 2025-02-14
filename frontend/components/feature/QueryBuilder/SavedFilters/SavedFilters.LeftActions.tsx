@@ -11,22 +11,22 @@ const SavedFiltersLeftActions = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <TooltipProvider>
-      <div
-        className={cn(
-          "flex items-center gap-4 whitespace-nowrap text-ellipsis overflow-hidden",
-          className
-        )}
-        {...props}
-      >
-        <div className="text-ellipsis overflow-hidden">My Filter</div>
-        <div className="flex gap-4" onClick={(e) => e.stopPropagation()}>
+    <div
+      className={cn(
+        "flex items-center gap-4 whitespace-nowrap text-ellipsis overflow-hidden",
+        className
+      )}
+      {...props}
+    >
+      <div className="text-ellipsis overflow-hidden">My Filter</div>
+      <TooltipProvider>
+        <div className="flex" onClick={(e) => e.stopPropagation()}>
           <SavedFiltersEditAction />
           <SavedFiltersStarAction />
           <SavedFiltersUndoAction />
         </div>
-      </div>
-    </TooltipProvider>
+      </TooltipProvider>
+    </div>
   );
 };
 

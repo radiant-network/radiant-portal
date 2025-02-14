@@ -2,9 +2,11 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
 } from "@/components/base/select";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import { Button } from "@/components/base/Buttons";
 
 const SavedFiltersSelect = () => {
   const { queryBuilder } = useQueryBuilderContext();
@@ -20,6 +22,10 @@ const SavedFiltersSelect = () => {
             {filter.raw().title}
           </SelectItem>
         ))}
+        <SelectSeparator />
+        <Button variant="primary" className="hover:bg-red-950">
+          New Filter
+        </Button>
       </SelectContent>
     </Select>
   );

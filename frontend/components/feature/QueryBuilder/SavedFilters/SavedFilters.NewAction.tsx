@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/base/Buttons";
 import {
   Tooltip,
   TooltipContent,
@@ -8,8 +9,8 @@ import { PlusIcon } from "lucide-react";
 const SavedFiltersNewAction = () => {
   return (
     <Tooltip>
-      <TooltipTrigger>
-        <PlusIcon size={14} />
+      <TooltipTrigger asChild>
+        <IconButton icon={PlusIcon} />
       </TooltipTrigger>
       <TooltipContent>New filter</TooltipContent>
     </Tooltip>

@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/base/dialog";
-import { Button } from "@/components/base/Buttons";
+import { Button, IconButton } from "@/components/base/Buttons";
 import { EditIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -48,7 +48,7 @@ const SavedFiltersEditAction = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <EditIcon size={14} />
+        <IconButton icon={EditIcon} />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
