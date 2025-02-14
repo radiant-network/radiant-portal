@@ -88,6 +88,13 @@ function App() {
                     },
                     op: "in",
                   },
+                  {
+                    content: {
+                      value: ["something"],
+                      field: "field2",
+                    },
+                    op: "in",
+                  },
                 ],
               },
               {

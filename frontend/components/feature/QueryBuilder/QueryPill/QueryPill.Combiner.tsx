@@ -1,7 +1,7 @@
 import React from "react";
 
 const QueryCombiner = () => {
-  return <div>QueryCombiner</div>;
+  return <div className="px-2">QueryCombiner</div>;
 };
 
 export default QueryCombiner;

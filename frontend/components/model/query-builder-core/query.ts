@@ -72,7 +72,8 @@ export type CoreQuery = {
   isSelected(): boolean;
 
   /**
-   * Call this function to know if the Query is selectable
+   * Call this function to know if the Query is selectable,
+   * meaning the query can be selected for a combine operation
    */
   isSelectable(): boolean;
 
@@ -116,8 +117,8 @@ export const createQuery = (
     raw: () => syntheticSqon,
     index: () => {
       return queryBuilder
-        .getQueries()
-        .findIndex((query) => query.id === queryId);
+        .getState()
+        .queries.findIndex((query) => query.id === queryId);
     },
     isActive: () => {
       return queryBuilder.getState().activeQueryId === queryId;
@@ -153,7 +154,13 @@ export const createQuery = (
         .selectedQueryIndexes.includes(queryBuilder.getQueryIndex(queryId));
     },
     isSelectable: () => {
-      return queryBuilder.getState().queries.length > 1 && query.isNotEmpty();
+      const queries = queryBuilder.getState().queries;
+
+      if (queries.length === 2 && queryBuilder.hasEmptyQuery()) {
+        return false;
+      }
+
+      return queries.length > 1 && query.isNotEmpty();
     },
     delete: () => {
       deleteQueryAndSetNext(queryId, queryBuilder);

@@ -1,11 +1,15 @@
 import QueryBarIdentifier from "./QueryBar.Identifier";
 import QueryBarActions from "./QueryBar.Actions";
-import { QueryInstance } from "@/components/model/query-builder-core";
+import {
+  isBooleanOperator,
+  QueryInstance,
+} from "@/components/model/query-builder-core";
 import { QueryBarContext } from "./QueryBar.Context";
 import QueryBarCount from "./QueryBar.Count";
 import QueryBarSelector from "./QueryBar.Selector";
 import { tv } from "tailwind-variants";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import QueryPillBoolean from "../QueryPill/QueryPill.Boolean";
 
 const queryBar = tv({
   base: "flex flex-1 py-2 px-3 border ",
@@ -39,7 +43,13 @@ const QueryBar = ({ query }: QueryBarProps) => {
               <>Use the search tools & facets on the left to build a query</>
             ) : (
               <div className="flex">
-                <div className="flex-1">Pills</div>
+                <div className="flex-1">
+                  {isBooleanOperator(query.raw()) && (
+                    <div className="flex items-center">
+                      <QueryPillBoolean sqon={query.raw()} />
+                    </div>
+                  )}
+                </div>
                 <QueryBarCount />
               </div>
             )}

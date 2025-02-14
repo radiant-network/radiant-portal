@@ -321,5 +321,107 @@ describe("Query Manipulation", () => {
     );
   });
 
+  it("should be selectable", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    expect(qb.getQuery("1")?.isSelectable()).toBe(true);
+  });
+
+  it("should not be selectable when only 1 query", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    expect(qb.getQuery("1")?.isSelectable()).toBe(false);
+  });
+
+  it("should not be selectable when 2 queries and 1 is empty", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    expect(qb.getQuery("1")?.isSelectable()).toBe(false);
+  });
+
   // Test isSelectable
 });
