@@ -6,8 +6,7 @@ export const baseButtonVariants = tv({
   },
   variants: {
     variant: {
-      default:
-        "bg-transparent text-default-foreground enabled:hover:bg-gray/90",
+      default: "bg-transparent text-default-foreground hover:bg-gray-100",
       primary: "bg-primary text-primary-foreground enabled:hover:bg-primary/90",
       destructive:
         "bg-destructive text-destructive-foreground enabled:hover:bg-destructive/90",

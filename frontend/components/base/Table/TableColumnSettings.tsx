@@ -17,12 +17,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { SettingIcon, HolderIcon } from "@/base/Icons";
 import { cn } from "@/lib/utils";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ColumnSettings, TableColumnDef } from "@/base/Table/Table";
 import { ColumnOrderState } from "@tanstack/react-table";
 import { Button } from "@/base/ui/button";
+import { GripVerticalIcon, SettingsIcon } from "lucide-react";
+import { IconButton } from "../Buttons";
 
 /**
  * Read user config to return column order (in asc)
@@ -107,12 +108,7 @@ const TableColumnSettings = React.forwardRef<
       <span ref={ref}>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <button
-              className="inline-flex size-[35px] items-center justify-center rounded-full"
-              aria-label="Customise options"
-            >
-              <SettingIcon />
-            </button>
+            <IconButton icon={SettingsIcon} />
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
             <DropdownMenu.Content className="min-w-[220px] bg-white p-[5px] shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] will-change-[opacity,transform] data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade data-[side=right]:animate-slideLeftAndFade data-[side=top]:animate-slideDownAndFade">
@@ -192,7 +188,7 @@ const SortableColumnSetting = ({
       className={cn("flex items-center gap-[8xp] mt-[8px] mr-[8px]")}
     >
       <div {...attributes} {...listeners}>
-        <HolderIcon className="mr-[4px]" />
+        <GripVerticalIcon className="mr-[4px]" size={14} />
       </div>
       <input
         type="checkbox"

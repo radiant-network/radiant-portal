@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button } from "@/base/ui/button";
-import { PlusOutlinedIcon } from "@/base/Icons";
 import { cn } from "@/lib/utils";
+import { PlusIcon } from "lucide-react";
 
 type GeneCellProps = {
   className?: string;
@@ -21,7 +21,7 @@ const GeneCell = React.forwardRef<HTMLDivElement, GeneCellProps>(
           {name}
         </a>
         <Button onClick={onClick}>
-          <PlusOutlinedIcon />
+          <PlusIcon />
         </Button>
       </div>
     );

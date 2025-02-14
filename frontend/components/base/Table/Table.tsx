@@ -10,14 +10,14 @@ import {
   getExpandedRowModel,
 } from "@tanstack/react-table";
 import { Button } from "@/base/ui/button";
-import {
-  DoubleLeftOutlinedIcon,
-  LeftOutlinedIcon,
-  RightOutlinedIcon,
-} from "@/base/Icons";
 import { TableColumnSettings } from "@/base/Table/TableColumnSettings";
 import { cn } from "@/lib/utils";
 import { useResizeObserver } from "@/base/Table/TableObserver";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
+} from "lucide-react";
 
 export interface TableColumnDef<TData, TValue>
   extends Omit<ColumnDef<TData, TValue>, "id" | "header"> {
@@ -286,20 +286,20 @@ const Table = React.forwardRef<HTMLTableElement, TableProps<any>>(
             onClick={() => table.firstPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            <DoubleLeftOutlinedIcon /> First
+            <ChevronsLeftIcon /> First
           </Button>
           <Button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            <LeftOutlinedIcon />
+            <ChevronLeftIcon />
             Prev.
           </Button>
           <Button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next <RightOutlinedIcon />
+            Next <ChevronRightIcon />
           </Button>
         </div>
       </div>
