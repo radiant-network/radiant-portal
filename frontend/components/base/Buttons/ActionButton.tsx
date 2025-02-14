@@ -31,6 +31,7 @@ function ActionButton({
   onDefaultAction,
   size,
   variant,
+  ...btnProps
 }: ActionButtonProps) {
   const style = actionButtonVariants({ size, variant });
 
@@ -40,14 +41,18 @@ function ActionButton({
       <button
         onClick={onDefaultAction}
         className={cn(style.base(), "rounded-r-none")}
+        {...btnProps}
       >
         {children}
       </button>
 
       {/* Dropdown Button */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className={cn(style.base(), style.actionsButton())}>
+        <DropdownMenuTrigger asChild disabled={btnProps.disabled}>
+          <button
+            className={cn(style.base(), style.actionsButton())}
+            {...btnProps}
+          >
             <MoreHorizontalIcon />
           </button>
         </DropdownMenuTrigger>
