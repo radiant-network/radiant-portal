@@ -7,7 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/base/alert-dialog";
+} from "@/components/base/ui/alert-dialog";
 import { SavedFilterInstance } from "@/components/model/query-builder-core";
 
 const SavedFiltersDeleteDialog = ({

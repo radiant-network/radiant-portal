@@ -22,6 +22,7 @@ import { useMemo, useState } from "react";
 
 export type QueryBuilderProps = PartialKeys<CoreQueryBuilderProps, "state"> & {
   enableCombine?: boolean;
+  enableFavorite?: boolean;
   enableShowHideLabels?: boolean;
   initialShowHideLabels?: boolean;
   queryCountIcon?: React.ForwardRefExoticComponent<
@@ -31,6 +32,7 @@ export type QueryBuilderProps = PartialKeys<CoreQueryBuilderProps, "state"> & {
 
 const QueryBuilder = ({
   enableCombine = true,
+  enableFavorite = false,
   enableShowHideLabels,
   initialShowHideLabels = false,
   queryCountIcon,
@@ -43,6 +45,7 @@ const QueryBuilder = ({
     () => ({
       queryBuilder,
       enableCombine,
+      enableFavorite,
       enableShowHideLabels,
       showLabels,
       toggleLabels,
@@ -51,6 +54,7 @@ const QueryBuilder = ({
     [
       queryBuilder,
       enableCombine,
+      enableFavorite,
       enableShowHideLabels,
       showLabels,
       toggleLabels,

@@ -379,7 +379,7 @@ describe("SavedFilters Manipulation", () => {
   // Test save saved filter
   // Test update saved filter
   // Test hasQueries
-  // Test setAsFavorite
+  // Test toggleFavorite
   // Test isFavorite
   // Test setTitle
   // Test isNew

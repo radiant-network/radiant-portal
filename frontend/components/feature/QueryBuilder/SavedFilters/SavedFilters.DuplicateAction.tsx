@@ -3,7 +3,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/base/tooltip";
+} from "@/components/base/ui/tooltip";
 import { CopyIcon } from "lucide-react";
 import { useState } from "react";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";

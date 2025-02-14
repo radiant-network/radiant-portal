@@ -2,7 +2,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/base/tooltip";
+} from "@/components/base/ui/tooltip";
 import { useState } from "react";
 import SavedFiltersDeleteDialog from "./SavedFilters.DeleteDialog";
 import { IconButton } from "@/components/base/Buttons";

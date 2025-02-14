@@ -66,8 +66,14 @@ function App() {
         <QueryBuilder
           id="variant"
           enableCombine
+          enableFavorite
           enableShowHideLabels
           queryCountIcon={UsersIcon}
+          onQueryCreate={() => console.log("onQueryCreate")}
+          onQueryDelete={() => console.log("onQueryDelete")}
+          onQueryUpdate={() => console.log("onQueryUpdate")}
+          onQuerySelectChange={() => console.log("onQuerySelectChange")}
+          onStateChange={(newState) => console.log("onStateChange", newState)}
           initialState={{
             activeQueryId: "1",
             queries: [

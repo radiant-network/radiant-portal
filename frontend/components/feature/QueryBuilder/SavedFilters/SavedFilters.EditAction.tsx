@@ -1,16 +1,14 @@
-import { PropsWithChildren, ReactNode, useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/base/dialog";
-import { Button, IconButton } from "@/components/base/Buttons";
-import { EditIcon } from "lucide-react";
+} from "@/components/base/ui/dialog";
+import { Button } from "@/components/base/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -21,8 +19,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/base/form";
-import { Input } from "@/components/base/input";
+} from "@/components/base/ui/form";
+import { Input } from "@/components/base/ui/input";
 import { SavedFilterInstance } from "@/components/model/query-builder-core";
 
 const formSchema = z.object({

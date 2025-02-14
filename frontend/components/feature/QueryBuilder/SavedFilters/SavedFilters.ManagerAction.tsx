@@ -7,8 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/base/dialog";
-import { Button } from "@/components/base/Buttons";
+} from "@/components/base/ui/dialog";
+import { Button } from "@/components/base/ui/button";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
 const SavedFiltersManageAction = () => {

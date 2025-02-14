@@ -3,7 +3,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/base/tooltip";
+} from "@/components/base/ui/tooltip";
 import { RotateCcw } from "lucide-react";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 

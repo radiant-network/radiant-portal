@@ -1,6 +1,5 @@
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import { cn } from "@/components/lib/utils";
-import { TooltipProvider } from "@/components/base/tooltip";
+import { TooltipProvider } from "@/components/base/ui/tooltip";
 import SavedFiltersDuplicateAction from "./SavedFilters.DuplicateAction";
 import SavedFiltersNewAction from "./SavedFilters.NewAction";
 import SavedFiltersSaveAction from "./SavedFilters.SaveAction";

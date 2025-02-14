@@ -7,7 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/base/alert-dialog";
+} from "@/components/base/ui/alert-dialog";
 
 const SavedFiltersOvewriteDialog = (props: {
   open: boolean;

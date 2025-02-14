@@ -8,8 +8,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/base/alert-dialog";
-import { Button } from "@/components/base/Buttons";
+} from "@/components/base/ui/alert-dialog";
+import { Button } from "@/components/base/ui/button";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
 const QueryToolbarClearAction = () => {
@@ -19,7 +19,11 @@ const QueryToolbarClearAction = () => {
     return (
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="link" size="xs" className="hover:no-underline">
+          <Button
+            variant="link"
+            size="xs"
+            className="no-underline enabled:hover:no-underline"
+          >
             Clear all
           </Button>
         </AlertDialogTrigger>
@@ -33,7 +37,10 @@ const QueryToolbarClearAction = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => queryBuilder.clearQueries()}>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => queryBuilder.clearQueries()}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

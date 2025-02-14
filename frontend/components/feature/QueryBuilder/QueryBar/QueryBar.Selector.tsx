@@ -1,5 +1,5 @@
 import { useQueryBarContext } from "./QueryBar.Context";
-import { Checkbox } from "@/components/base/checkbox";
+import { Checkbox } from "@/components/base/ui/checkbox";
 import { tv } from "tailwind-variants";
 
 const selector = tv({

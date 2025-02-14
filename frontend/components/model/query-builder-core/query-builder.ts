@@ -92,11 +92,6 @@ export type CoreQueryBuilderProps = {
   onSavedFilterCreate?(filter: ISavedFilter): void;
 
   /**
-   * Callback when a SavedFilter is updated
-   */
-  onSavedFilterUpdate?(filter: ISavedFilter): void;
-
-  /**
    * Callback when a SavedFilter is deleted
    */
   onSavedFilterDelete?(id: string): { savedFilterId: string };
@@ -105,6 +100,11 @@ export type CoreQueryBuilderProps = {
    * Callback when a SavedFilter is saved
    */
   onSavedFilterSave?(filter: ISavedFilter): ISavedFilter;
+
+  /**
+   * Callback when a SavedFilter favorite changes
+   */
+  onSavedFilterFavoriteChange?(id: string, favorite: boolean): ISavedFilter;
 
   /**
    * Callback when a Query is selected

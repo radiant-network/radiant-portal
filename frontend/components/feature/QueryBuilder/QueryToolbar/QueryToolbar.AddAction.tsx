@@ -1,4 +1,4 @@
-import { Button } from "@/components/base/Buttons";
+import { Button } from "@/components/base/ui/button";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import { BooleanOperators } from "@/components/model/sqon";
 import { PlusIcon } from "lucide-react";

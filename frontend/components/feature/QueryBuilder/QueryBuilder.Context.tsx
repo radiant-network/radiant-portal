@@ -5,6 +5,7 @@ import { createContext, useContext } from "react";
 export type QueryBuilderContextType = {
   queryBuilder: QueryBuilderInstance;
   enableCombine?: boolean;
+  enableFavorite?: boolean;
   enableShowHideLabels?: boolean;
   showLabels?: boolean;
   toggleLabels?: (show: boolean) => void;

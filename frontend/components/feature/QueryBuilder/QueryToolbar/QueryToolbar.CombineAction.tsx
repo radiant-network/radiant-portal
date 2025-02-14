@@ -25,7 +25,6 @@ const QueryToolbarCombineAction = () => {
         }
         size="xs"
         variant="primary"
-        disabled={queryBuilder.hasEmptyQuery()}
       >
         Combine
       </ActionButton>

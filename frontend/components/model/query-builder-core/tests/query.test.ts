@@ -320,4 +320,6 @@ describe("Query Manipulation", () => {
       pill
     );
   });
+
+  // Test isSelectable
 });

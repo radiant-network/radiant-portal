@@ -1,4 +1,4 @@
-import { Switch } from "@/components/base/switch";
+import { Switch } from "@/components/base/ui/switch";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
 const QueryToolbarLabelsAction = () => {

@@ -71,14 +71,14 @@ export type CoreSavedFilter = {
   setTile(title: string): void;
 
   /**
-   *  Call this function to set the SavedFilter as favorite
-   */
-  setAsFavorite(): void;
-
-  /**
    * Call this function to select the SavedFilter
    */
   select(): void;
+
+  /**
+   * Call this function to set the SavedFilter as favorite
+   */
+  toggleFavorite(): void;
 
   /**
    * Call this function to check if the SavedFilter is a favorite
@@ -242,8 +242,11 @@ export const createSavedFilter = (
     setTile: (title) => {
       _savedFilter.update({ title });
     },
-    setAsFavorite: () => {
-      _savedFilter.update({ favorite: !rawSavedFilter.favorite });
+    toggleFavorite: () => {
+      queryBuilder.coreProps.onSavedFilterFavoriteChange?.(
+        savedFilterId,
+        !rawSavedFilter.favorite
+      );
     },
     hasQueries: () => _savedFilter.getQueries().length > 0,
     isSelected: () => {

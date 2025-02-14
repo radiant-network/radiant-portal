@@ -4,8 +4,8 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/base/popover";
-import { Button } from "@/components/base/Buttons";
+} from "@/components/base/ui/popover";
+import { Button } from "@/components/base/ui/button";
 import { PopoverClose } from "@radix-ui/react-popover";
 
 const QueryBarDeleteAction = () => {

@@ -4,7 +4,7 @@ import {
   SelectItem,
   SelectSeparator,
   SelectTrigger,
-} from "@/components/base/select";
+} from "@/components/base/ui/select";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import { FolderIcon } from "lucide-react";
 import SavedFiltersManageAction from "./SavedFilters.ManagerAction";

@@ -28,15 +28,11 @@ export type CoreQuery = {
 
   /**
    * Call this function to know if the Query is empty
-   *
-   * @returns boolean
    */
   isEmpty(): boolean;
 
   /**
    * Call this function to know if the Query is empty
-   *
-   * @returns boolean
    */
   isNotEmpty(): boolean;
 
@@ -157,7 +153,7 @@ export const createQuery = (
         .selectedQueryIndexes.includes(queryBuilder.getQueryIndex(queryId));
     },
     isSelectable: () => {
-      return queryBuilder.getState().queries.length > 1;
+      return queryBuilder.getState().queries.length > 1 && query.isNotEmpty();
     },
     delete: () => {
       deleteQueryAndSetNext(queryId, queryBuilder);
