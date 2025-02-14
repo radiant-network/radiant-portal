@@ -17,6 +17,7 @@ const IconButton = ({
   variant,
   className,
   iconClassName,
+
   ...props
 }: IconButtonProps) => {
   const style = iconButtonVariants({ size, variant });

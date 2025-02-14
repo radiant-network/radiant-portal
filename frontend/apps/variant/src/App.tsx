@@ -6,7 +6,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "components/base/ui/accordion";
+} from "@/components/base/ui/accordion";
 import { Table } from "@/components/base/Table/Table";
 import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
 import {

@@ -1147,4 +1147,6 @@ describe("QueryBuilder Core", () => {
     expect(state.queries.length).toBe(1);
     expect(state.activeQueryId).toBe(mockUUID);
   });
+
+  // Test isEmpty
 });

@@ -2,11 +2,12 @@ import { tv } from "tailwind-variants";
 
 export const baseButtonVariants = tv({
   slots: {
-    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   },
   variants: {
     variant: {
-      default: "bg-transparent text-default-foreground hover:bg-gray-100",
+      default:
+        "bg-transparent text-default-foreground enabled:hover:bg-gray-100",
       primary: "bg-primary text-primary-foreground enabled:hover:bg-primary/90",
       destructive:
         "bg-destructive text-destructive-foreground enabled:hover:bg-destructive/90",

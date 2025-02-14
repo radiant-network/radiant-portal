@@ -21,7 +21,7 @@ const SavedFiltersDeleteAction = () => {
           <span tabIndex={0} className="inline-flex">
             <IconButton
               icon={TrashIcon}
-              disabled={!selectedSavedFilter}
+              disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}
               onClick={() => toggleOpen(true)}
             />
           </span>

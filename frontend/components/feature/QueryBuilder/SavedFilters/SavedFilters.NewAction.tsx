@@ -13,10 +13,9 @@ const SavedFiltersNewAction = () => {
   const [open, toggleOpen] = useState(false);
   const { queryBuilder } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
-  const isDirty = selectedSavedFilter?.isDirty();
 
   const handleNew = () => {
-    if (isDirty) {
+    if (selectedSavedFilter?.isDirty()) {
       toggleOpen(true);
     } else {
       // TODO create new filter
@@ -31,7 +30,7 @@ const SavedFiltersNewAction = () => {
             <IconButton
               icon={PlusIcon}
               onClick={handleNew}
-              disabled={!selectedSavedFilter}
+              disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}
             />
           </span>
         </TooltipTrigger>

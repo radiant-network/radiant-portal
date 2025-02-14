@@ -230,6 +230,12 @@ export type QueryBuilderInstance = {
   hasEmptyQuery(): boolean;
 
   /**
+   * Call this function to check if the QueryBuilder is empty,
+   * meaning there is maximum one query and it is empty
+   */
+  isEmpty(): boolean;
+
+  /**
    * Call this function to set the active Query
    */
   setActiveQuery(id: string): void;
@@ -341,7 +347,9 @@ export const createQueryBuilder = (
         return (
           queryBuilder
             ._getSavedFilters()
-            .find((savedFilter) => savedFilter.isSelected()) || null
+            .find(
+              (savedFilter) => savedFilter.isSelected() && !savedFilter.isNew()
+            ) || null
         );
       }
 
@@ -480,6 +488,12 @@ export const createQueryBuilder = (
       }));
       queryBuilder.coreProps.onQueryCreate?.(combinedQuery);
       queryBuilder.coreProps.onQuerySelectChange?.(selectedQueryIndexes);
+    },
+    isEmpty: () => {
+      return (
+        queryBuilder.getQueries().length === 1 &&
+        queryBuilder.getQueries()[0].isEmpty()
+      );
     },
   };
 

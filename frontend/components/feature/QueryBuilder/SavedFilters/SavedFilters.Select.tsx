@@ -11,6 +11,9 @@ import SavedFiltersManageAction from "./SavedFilters.ManagerAction";
 
 const SavedFiltersSelect = () => {
   const { queryBuilder } = useQueryBuilderContext();
+  const savedFilters = queryBuilder
+    ._getSavedFilters()
+    .filter((filter) => !filter.isNew());
 
   return (
     <Select
@@ -21,6 +24,7 @@ const SavedFiltersSelect = () => {
           .find((filter) => filter.id === savedFilterId)
           ?.select()
       }
+      disabled={savedFilters.length === 0}
     >
       <SelectTrigger className="w-[135px] h-7">
         <div className="flex items-center gap-2">
@@ -28,7 +32,7 @@ const SavedFiltersSelect = () => {
         </div>
       </SelectTrigger>
       <SelectContent>
-        {queryBuilder._getSavedFilters().map((filter) => (
+        {savedFilters.map((filter) => (
           <SelectItem key={filter.id} value={filter.id}>
             {filter.raw().title}
           </SelectItem>

@@ -13,10 +13,9 @@ const SavedFiltersDuplicateAction = () => {
   const [open, toggleOpen] = useState(false);
   const { queryBuilder } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
-  const isDirty = selectedSavedFilter?.isDirty();
 
   const handleDuplicate = () => {
-    if (isDirty) {
+    if (selectedSavedFilter?.isDirty()) {
       toggleOpen(true);
     } else {
       // TODO create new filter
@@ -30,7 +29,7 @@ const SavedFiltersDuplicateAction = () => {
           <span tabIndex={0} className="inline-flex">
             <IconButton
               icon={CopyIcon}
-              disabled={!selectedSavedFilter}
+              disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}
               onClick={handleDuplicate}
             />
           </span>
