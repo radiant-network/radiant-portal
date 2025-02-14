@@ -1,7 +1,11 @@
-import React from "react";
+import { IValueFilter } from "@/components/model/sqon";
 
-const QueryPillField = () => {
-  return <div>QueryPillField</div>;
+export type QueryPillFieldProps = {
+  valueFilter: IValueFilter;
+};
+
+const QueryPillField = ({ valueFilter }: QueryPillFieldProps) => {
+  return <div>Field</div>;
 };
 
 export default QueryPillField;

@@ -14,13 +14,13 @@ import QueryPillBoolean from "../QueryPill/QueryPill.Boolean";
 const queryBar = tv({
   base: "flex flex-1 py-2 px-3 border ",
   variants: {
-    selected: {
+    active: {
       true: ["border-[--gold-6] bg-[--gold-2]"],
       false: ["border-[--gray-5] bg-[--gray-2]"],
     },
   },
   defaultVariants: {
-    selected: false,
+    active: false,
   },
 });
 
@@ -29,15 +29,19 @@ export type QueryBarProps = {
 };
 
 const QueryBar = ({ query }: QueryBarProps) => {
-  const selected = query.isActive();
+  const active = query.isActive();
   const { enableCombine } = useQueryBuilderContext();
 
   return (
     <QueryBarContext.Provider value={{ query }}>
-      <div className="flex" onClick={() => query.setAsActive()}>
+      <div
+        data-query-active={active}
+        className="flex group/query"
+        onClick={() => query.setAsActive()}
+      >
         <QueryBarIdentifier />
         {query.isSelectable() && enableCombine && <QueryBarSelector />}
-        <div className={queryBar({ selected })}>
+        <div className={queryBar({ active })}>
           <div className="flex-1">
             {query.isEmpty() ? (
               <>Use the search tools & facets on the left to build a query</>

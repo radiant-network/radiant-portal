@@ -44,7 +44,7 @@ const QueryPillBoolean = ({ sqon }: QueryPillBooleanProps) => {
           ) : isRemoteComponent(f) ? (
             <QueryPillRemoteComponent />
           ) : (
-            <QueryPillField />
+            <QueryPillField valueFilter={f} />
           )}
           {isNotEnd(sqon.content, i) && <QueryCombiner />}
         </div>

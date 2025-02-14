@@ -9,7 +9,7 @@ import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
 const SavedFiltersSaveAction = () => {
   const { queryBuilder } = useQueryBuilderContext();
-  const isDirty = queryBuilder.getSelectedSavedFilter()?.isDirty();
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
   const cantSave =
     queryBuilder.hasEmptyQuery() && queryBuilder.getQueries().length === 1;
 
@@ -20,13 +20,13 @@ const SavedFiltersSaveAction = () => {
           <IconButton
             icon={SaveIcon}
             color="orange-400"
-            disabled={cantSave}
-            className={isDirty ? "text-[--gold-6]" : ""}
+            disabled={cantSave && selectedSavedFilter?.isNew()}
+            className={selectedSavedFilter?.isDirty() ? "text-[--gold-6]" : ""}
           />
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        {isDirty ? "Save changes" : "Save filter"}
+        {selectedSavedFilter?.isDirty() ? "Save changes" : "Save filter"}
       </TooltipContent>
     </Tooltip>
   );
