@@ -65,6 +65,9 @@ function App() {
         <h1 className="text-2xl font-bold">Variant</h1>
         <QueryBuilder
           id="variant"
+          enableCombine
+          enableShowHideLabels
+          queryCountIcon={UsersIcon}
           initialState={{
             activeQueryId: "1",
             queries: [

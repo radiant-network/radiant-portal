@@ -367,6 +367,54 @@ describe("QueryBuilder Core", () => {
     expect(qb.hasQueries()).toBeTruthy();
   });
 
+  it("should have empty queries positive", () => {
+    const qb = createQueryBuilder({
+      ...defaultProps,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    });
+
+    expect(qb.hasEmptyQuery()).toBeTruthy();
+  });
+
+  it("should have empty queries positive", () => {
+    const qb = createQueryBuilder({
+      ...defaultProps,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: [],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    });
+
+    expect(qb.hasEmptyQuery()).toBeFalsy();
+  });
+
   it("should not have queries", () => {
     const qb = createQueryBuilder({
       ...defaultProps,
@@ -382,6 +430,15 @@ describe("QueryBuilder Core", () => {
   });
 
   it("should be able to combine", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        ...prev.state,
+        selectedQueryIndexes: [0, 1],
+        savedFilters: [],
+      },
+    }));
+
     expect(qb.coreProps.state.queries.length).toBe(2);
     expect(qb.canCombine()).toBeTruthy();
   });
@@ -1080,5 +1137,14 @@ describe("QueryBuilder Core", () => {
         queries: [getDefaultSyntheticSqon()],
       })
     );
+  });
+
+  it("should clear all queries", () => {
+    expect(state.queries.length).toBe(2);
+
+    qb.clearQueries();
+
+    expect(state.queries.length).toBe(1);
+    expect(state.activeQueryId).toBe(mockUUID);
   });
 });

@@ -118,8 +118,6 @@ export type CoreQueryBuilderProps = {
   fieldsToIgnore?: string[];
 };
 
-export type QueryBuilderProps = PartialKeys<CoreQueryBuilderProps, "state">;
-
 export type QueryBuilderInstance = {
   /**
    * Call this function to get the state of the QueryBuilder
@@ -228,6 +226,11 @@ export type QueryBuilderInstance = {
   getRawQueries(): ISyntheticSqon[];
 
   /**
+   * Call this function to check if the QueryBuilder has at least one empty query
+   */
+  hasEmptyQuery(): boolean;
+
+  /**
    * Call this function to set the active Query
    */
   setActiveQuery(id: string): void;
@@ -268,6 +271,11 @@ export type QueryBuilderInstance = {
   combineSelectedQueries(operator: BooleanOperators): void;
 
   /**
+   * Call this function to clear all queries
+   */
+  clearQueries: () => void;
+
+  /**
    * Call this function to reset the QueryBuilder
    */
   reset: () => void;
@@ -304,6 +312,16 @@ export const createQueryBuilder = (
     },
     reset: () => {
       queryBuilder.setState(() => queryBuilder.coreProps.initialState!);
+    },
+    clearQueries: () => {
+      const newActiveId = v4();
+      const defaultQuery = getDefaultSyntheticSqon(newActiveId);
+
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        activeQueryId: newActiveId,
+        queries: [defaultQuery],
+      }));
     },
     createSavedFilter: () => {
       const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();
@@ -414,6 +432,9 @@ export const createQueryBuilder = (
     changeQueryCombineOperator: (id, operator) => {
       queryBuilder.getQuery(id)?.changeCombineOperator(operator);
     },
+    hasEmptyQuery: () => {
+      return queryBuilder.getQueries().some((query) => query.isEmpty());
+    },
     hasQueries: () => {
       return queryBuilder.getQueries().length > 0;
     },
@@ -455,7 +476,7 @@ export const createQueryBuilder = (
       queryBuilder.setState((prev) => ({
         ...prev,
         activeQueryId: combinedQuery.id,
-        queries: [...prev.queries, combinedQuery],
+        queries: cleanUpQueries([...prev.queries, combinedQuery]),
         selectedQueryIndexes,
       }));
       queryBuilder.coreProps.onQueryCreate?.(combinedQuery);

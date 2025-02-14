@@ -1,4 +1,3 @@
-import { cva } from "class-variance-authority";
 import { useQueryBarContext } from "./QueryBar.Context";
 import { CopyIcon, InfoIcon, TrashIcon } from "lucide-react";
 import {
@@ -8,21 +7,20 @@ import {
 } from "@/components/base/popover";
 import { Button } from "@/components/base/Buttons";
 import { PopoverClose } from "@radix-ui/react-popover";
+import { tv } from "tailwind-variants";
 
-const actions = cva(
-  "flex gap-4 items-center py-2 px-4 border-r border-t border-b",
-  {
-    variants: {
-      selected: {
-        true: ["border-[--gold-6] bg-[--gold-2]"],
-        false: ["border-[--gray-5] bg-[--gray-2]"],
-      },
+const actions = tv({
+  base: "flex gap-4 items-center py-2 px-4 border-r border-t border-b",
+  variants: {
+    selected: {
+      true: ["border-[--gold-6] bg-[--gold-2]"],
+      false: ["border-[--gray-5] bg-[--gray-2]"],
     },
-    defaultVariants: {
-      selected: false,
-    },
-  }
-);
+  },
+  defaultVariants: {
+    selected: false,
+  },
+});
 
 const QueryBarActions = () => {
   const { query } = useQueryBarContext();

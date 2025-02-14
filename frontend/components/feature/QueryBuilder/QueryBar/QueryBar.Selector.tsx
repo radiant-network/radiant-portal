@@ -1,23 +1,19 @@
-import { cva } from "class-variance-authority";
-import React from "react";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import { useQueryBarContext } from "./QueryBar.Context";
 import { Checkbox } from "@/components/base/checkbox";
+import { tv } from "tailwind-variants";
 
-const selector = cva(
-  "flex gap-2 items-center py-2 px-4 border-l border-t border-b",
-  {
-    variants: {
-      selected: {
-        true: ["border-[--gold-6] bg-[--gold-2]"],
-        false: ["border-[--gray-5] bg-[--gray-2]"],
-      },
+const selector = tv({
+  base: "flex gap-2 items-center py-2 px-4 border-l border-t border-b",
+  variants: {
+    selected: {
+      true: ["border-[--gold-6] bg-[--gold-2]"],
+      false: ["border-[--gray-5] bg-[--gray-2]"],
     },
-    defaultVariants: {
-      selected: false,
-    },
-  }
-);
+  },
+  defaultVariants: {
+    selected: false,
+  },
+});
 
 const QueryBarSelector = () => {
   const { query } = useQueryBarContext();
@@ -25,6 +21,7 @@ const QueryBarSelector = () => {
   return (
     <div className={selector({ selected: query.isActive() })}>
       <Checkbox
+        size="sm"
         checked={query.isSelected()}
         onClick={(e) => {
           e.stopPropagation();

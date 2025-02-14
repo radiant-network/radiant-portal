@@ -76,6 +76,11 @@ export type CoreQuery = {
   isSelected(): boolean;
 
   /**
+   * Call this function to know if the Query is selectable
+   */
+  isSelectable(): boolean;
+
+  /**
    * Call this function to know if the Query is active
    */
   isActive(): boolean;
@@ -150,6 +155,9 @@ export const createQuery = (
       return queryBuilder
         .getState()
         .selectedQueryIndexes.includes(queryBuilder.getQueryIndex(queryId));
+    },
+    isSelectable: () => {
+      return queryBuilder.getState().queries.length > 1;
     },
     delete: () => {
       deleteQueryAndSetNext(queryId, queryBuilder);

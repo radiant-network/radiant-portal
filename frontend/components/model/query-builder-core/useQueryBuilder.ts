@@ -5,13 +5,13 @@ import {
   getDefaultQueryBuilderState,
   QUERY_BUILDER_UPDATE_EVENT_KEY,
   QueryBuilderInstance,
-  QueryBuilderProps,
   QueryBuilderUpdateEvent,
 } from "./query-builder";
 import { queryBuilderRemote } from "./query-builder-remote";
+import { PartialKeys } from "@/components/lib/utils";
 
 export const useQueryBuilder = (
-  props: QueryBuilderProps
+  props: PartialKeys<CoreQueryBuilderProps, "state">
 ): QueryBuilderInstance => {
   const defaultProps: CoreQueryBuilderProps = {
     state: {

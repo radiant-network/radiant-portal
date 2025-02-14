@@ -1,7 +1,8 @@
-import { cva, VariantProps } from "class-variance-authority";
 import { useQueryBarContext } from "./QueryBar.Context";
+import { tv } from "tailwind-variants";
 
-const identifer = cva("w-1 rounded-s-sm", {
+const identifer = tv({
+  base: "w-1 rounded-s-sm",
   variants: {
     selected: {
       true: ["bg-[--gold-6]"],

@@ -1,5 +1,5 @@
 import {
-  QueryBuilderProps,
+  CoreQueryBuilderProps,
   useQueryBuilder,
 } from "../../model/query-builder-core";
 import {
@@ -9,16 +9,57 @@ import {
   AccordionTrigger,
 } from "@/components/base/ui/accordion";
 import QueryBar from "./QueryBar/QueryBar";
-import QueriesToolbar from "./QueriesToolbar";
-import { QueryBuilderContext } from "./QueryBuilder.Context";
+import QueryToolbar from "./QueryToolbar/QueryToolbar";
+import {
+  QueryBuilderContext,
+  QueryBuilderContextType,
+} from "./QueryBuilder.Context";
 import SavedFiltersRightActions from "./SavedFilters/SavedFilters.RightActions";
 import SavedFiltersLeftActions from "./SavedFilters/SavedFilters.LeftActions";
+import { PartialKeys } from "@/components/lib/utils";
+import { LucideProps } from "lucide-react";
+import { useMemo, useState } from "react";
 
-const QueryBuilder = (props: QueryBuilderProps) => {
-  const queryBuilder = useQueryBuilder(props);
+export type QueryBuilderProps = PartialKeys<CoreQueryBuilderProps, "state"> & {
+  enableCombine?: boolean;
+  enableShowHideLabels?: boolean;
+  initialShowHideLabels?: boolean;
+  queryCountIcon?: React.ForwardRefExoticComponent<
+    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+  >;
+};
+
+const QueryBuilder = ({
+  enableCombine = true,
+  enableShowHideLabels,
+  initialShowHideLabels = false,
+  queryCountIcon,
+  ...hookProps
+}: QueryBuilderProps) => {
+  const queryBuilder = useQueryBuilder(hookProps);
+  const [showLabels, toggleLabels] = useState(initialShowHideLabels);
+
+  const memoedContextValue = useMemo<QueryBuilderContextType>(
+    () => ({
+      queryBuilder,
+      enableCombine,
+      enableShowHideLabels,
+      showLabels,
+      toggleLabels,
+      queryCountIcon,
+    }),
+    [
+      queryBuilder,
+      enableCombine,
+      enableShowHideLabels,
+      showLabels,
+      toggleLabels,
+      queryCountIcon,
+    ]
+  );
 
   return (
-    <QueryBuilderContext.Provider value={{ queryBuilder }}>
+    <QueryBuilderContext.Provider value={memoedContextValue}>
       <Accordion type="multiple" defaultValue={["query-builder"]}>
         <AccordionItem value="query-builder" className="border-none">
           <AccordionTrigger
@@ -34,7 +75,7 @@ const QueryBuilder = (props: QueryBuilderProps) => {
                 <QueryBar key={query.id} query={query} />
               ))}
             </div>
-            <QueriesToolbar />
+            <QueryToolbar />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

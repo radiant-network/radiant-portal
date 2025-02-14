@@ -1,12 +1,14 @@
-import { cva } from "class-variance-authority";
 import QueryBarIdentifier from "./QueryBar.Identifier";
 import QueryBarActions from "./QueryBar.Actions";
 import { QueryInstance } from "@/components/model/query-builder-core";
 import { QueryBarContext } from "./QueryBar.Context";
 import QueryBarCount from "./QueryBar.Count";
 import QueryBarSelector from "./QueryBar.Selector";
+import { tv } from "tailwind-variants";
+import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
-const queryBar = cva("flex flex-1 py-2 px-3 border ", {
+const queryBar = tv({
+  base: "flex flex-1 py-2 px-3 border ",
   variants: {
     selected: {
       true: ["border-[--gold-6] bg-[--gold-2]"],
@@ -24,12 +26,13 @@ export type QueryBarProps = {
 
 const QueryBar = ({ query }: QueryBarProps) => {
   const selected = query.isActive();
+  const { enableCombine } = useQueryBuilderContext();
 
   return (
     <QueryBarContext.Provider value={{ query }}>
       <div className="flex" onClick={() => query.setAsActive()}>
         <QueryBarIdentifier />
-        <QueryBarSelector />
+        {query.isSelectable() && enableCombine && <QueryBarSelector />}
         <div className={queryBar({ selected })}>
           <div className="flex-1">
             {query.isEmpty() ? (
