@@ -4,8 +4,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../DropdownMenu";
-import { Button } from "./Button";
+} from "../ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { MoreHorizontalIcon } from "lucide-react";
 import { actionButtonVariants } from "./button.variants";

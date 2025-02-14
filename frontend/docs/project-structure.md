@@ -18,7 +18,8 @@ Instead of working by portals, now we work by applications and we have to make s
 frontend/
 ├── apps/                # Full applications for a domain (e.g., Variant, Prescription)
 ├── components/
-│   ├── base/           # Simple, first level Reusable components, create with shadcn when possible
+│   ├── base/           # Simple, first level Reusable components
+|   │   ├──ui           # Shadcn imported primitive components (keep name lowercase so that shadcn import doesn't re-import)
 │   ├── features/       # Feature-specific components
 │   ├── layout/         # Layout components
 │   └── models/         # Models, types and headless features

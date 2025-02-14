@@ -17,12 +17,12 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { SettingIcon, HolderIcon } from "@/base/ui/icons";
+import { SettingIcon, HolderIcon } from "@/base/Icons";
 import { cn } from "@/lib/utils";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ColumnSettings, TableColumnDef } from "@/base/ui/table/table";
+import { ColumnSettings, TableColumnDef } from "@/base/Table/Table";
 import { ColumnOrderState } from "@tanstack/react-table";
-import { Button } from "@/base/Buttons/Button";
+import { Button } from "@/base/ui/button";
 
 /**
  * Read user config to return column order (in asc)

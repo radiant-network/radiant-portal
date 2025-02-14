@@ -1,4 +1,4 @@
-import { OpenInNewIcon } from "@/base/ui/icons";
+import { OpenInNewIcon } from "@/base/Icons";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 type ExternalLinkCellProps = {

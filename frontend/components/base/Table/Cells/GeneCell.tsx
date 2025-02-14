@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Button } from "@/base/Buttons/Button";
-import { PlusOutlinedIcon } from "@/base/ui/icons";
+import { Button } from "@/base/ui/button";
+import { PlusOutlinedIcon } from "@/base/Icons";
 import { cn } from "@/lib/utils";
 
 type GeneCellProps = {

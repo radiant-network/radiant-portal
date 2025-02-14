@@ -1,6 +1,4 @@
 import { tv } from "tailwind-variants";
-export { default as ActionButton } from "./ActionButton";
-export { Button } from "./Button";
 
 export const baseButtonVariants = tv({
   slots: {
