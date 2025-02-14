@@ -76,6 +76,11 @@ export type CoreSavedFilter = {
   setAsFavorite(): void;
 
   /**
+   * Call this function to select the SavedFilter
+   */
+  select(): void;
+
+  /**
    * Call this function to check if the SavedFilter is a favorite
    */
   isFavorite(): boolean;
@@ -215,6 +220,13 @@ export const createSavedFilter = (
       } else {
         console.error("Can only save the selected saved filter");
       }
+    },
+    select: () => {
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        activeQueryId: rawSavedFilter.queries[0].id,
+        queries: rawSavedFilter.queries,
+      }));
     },
     discardChanges: () => {
       if (_savedFilter.isSelected()) {

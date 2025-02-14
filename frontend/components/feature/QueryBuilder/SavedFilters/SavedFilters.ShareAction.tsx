@@ -9,7 +9,8 @@ import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
 const SavedFiltersShareAction = () => {
   const { queryBuilder } = useQueryBuilderContext();
-  const isDirty = queryBuilder.getSelectedSavedFilter()?.isDirty();
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
+  const isDirty = selectedSavedFilter?.isDirty();
 
   const handleShare = () => {
     // Share
@@ -17,15 +18,19 @@ const SavedFiltersShareAction = () => {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild={!isDirty}>
-        <IconButton
-          icon={Share2Icon}
-          disabled={isDirty}
-          onClick={handleShare}
-        />
+      <TooltipTrigger asChild>
+        <span tabIndex={0} className="inline-flex">
+          <IconButton
+            icon={Share2Icon}
+            disabled={isDirty || !selectedSavedFilter}
+            onClick={handleShare}
+          />
+        </span>
       </TooltipTrigger>
       <TooltipContent>
-        {isDirty ? "Save filter to share" : "Share (Copy url)"}
+        {isDirty || !selectedSavedFilter
+          ? "Save filter to share"
+          : "Share (Copy url)"}
       </TooltipContent>
     </Tooltip>
   );

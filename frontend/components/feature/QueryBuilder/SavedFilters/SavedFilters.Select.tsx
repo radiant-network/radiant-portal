@@ -15,7 +15,12 @@ const SavedFiltersSelect = () => {
   return (
     <Select
       value={queryBuilder.getSelectedSavedFilter()?.id}
-      onValueChange={(savedFilterId) => {}}
+      onValueChange={(savedFilterId) =>
+        queryBuilder
+          ._getSavedFilters()
+          .find((filter) => filter.id === savedFilterId)
+          ?.select()
+      }
     >
       <SelectTrigger className="w-[135px] h-7">
         <div className="flex items-center gap-2">

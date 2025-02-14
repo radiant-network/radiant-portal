@@ -14,7 +14,6 @@ import { EditIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import {
   Form,
   FormField,
@@ -24,19 +23,24 @@ import {
   FormMessage,
 } from "@/components/base/form";
 import { Input } from "@/components/base/input";
+import { SavedFilterInstance } from "@/components/model/query-builder-core";
 
 const formSchema = z.object({
   title: z.string().min(2, "Min 2 characters").max(50, "Max 50 characters"),
 });
 
-const SavedFiltersEditAction = ({ trigger }: { trigger: ReactNode }) => {
+const SavedFiltersEditAction = ({
+  trigger,
+  savedFilter,
+}: {
+  trigger: ReactNode;
+  savedFilter: SavedFilterInstance | null;
+}) => {
   const [open, setOpen] = useState(false);
-  const { queryBuilder } = useQueryBuilderContext();
-  const savedFilter = queryBuilder.getSelectedSavedFilter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    values: {
       title: savedFilter?.raw().title || "",
     },
   });

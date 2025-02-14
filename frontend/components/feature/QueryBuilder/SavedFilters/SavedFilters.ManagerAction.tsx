@@ -10,7 +10,6 @@ import {
 } from "@/components/base/dialog";
 import { Button } from "@/components/base/Buttons";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
-import { Separator } from "@/components/base/separator";
 
 const SavedFiltersManageAction = () => {
   const [open, setOpen] = useState(false);

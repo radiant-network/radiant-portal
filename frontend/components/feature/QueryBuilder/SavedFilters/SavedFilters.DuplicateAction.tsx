@@ -27,11 +27,13 @@ const SavedFiltersDuplicateAction = () => {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <IconButton
-            icon={CopyIcon}
-            disabled={!selectedSavedFilter}
-            onClick={handleDuplicate}
-          />
+          <span tabIndex={0} className="inline-flex">
+            <IconButton
+              icon={CopyIcon}
+              disabled={!selectedSavedFilter}
+              onClick={handleDuplicate}
+            />
+          </span>
         </TooltipTrigger>
         <TooltipContent>Duplicate filter</TooltipContent>
       </Tooltip>

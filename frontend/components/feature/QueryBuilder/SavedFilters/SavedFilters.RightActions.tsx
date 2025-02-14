@@ -7,8 +7,6 @@ import SavedFiltersSaveAction from "./SavedFilters.SaveAction";
 import SavedFiltersDeleteAction from "./SavedFilters.DeleteAction";
 import SavedFiltersShareAction from "./SavedFilters.ShareAction";
 import SavedFiltersSelect from "./SavedFilters.Select";
-import { IconButton } from "@/components/base/Buttons";
-import { TrashIcon } from "lucide-react";
 
 const SavedFiltersRightActions = ({
   className,
@@ -25,9 +23,7 @@ const SavedFiltersRightActions = ({
             <SavedFiltersNewAction />
             <SavedFiltersSaveAction />
             <SavedFiltersDuplicateAction />
-            <SavedFiltersDeleteAction
-              trigger={<IconButton icon={TrashIcon} />}
-            />
+            <SavedFiltersDeleteAction />
             <SavedFiltersShareAction />
           </TooltipProvider>
         </div>

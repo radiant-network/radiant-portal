@@ -15,12 +15,14 @@ const SavedFiltersSaveAction = () => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <IconButton
-          icon={SaveIcon}
-          color="orange-400"
-          disabled={!selectedSavedFilter}
-          className={isDirty ? "text-[--gold-7]" : ""}
-        />
+        <span tabIndex={0} className="inline-flex">
+          <IconButton
+            icon={SaveIcon}
+            color="orange-400"
+            disabled={!selectedSavedFilter}
+            className={isDirty ? "text-[--gold-7]" : ""}
+          />
+        </span>
       </TooltipTrigger>
       <TooltipContent>
         {isDirty ? "Save changes" : "Save filter"}

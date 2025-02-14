@@ -18,11 +18,13 @@ const SavedFiltersDeleteAction = () => {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <IconButton
-            icon={TrashIcon}
-            disabled={!selectedSavedFilter}
-            onClick={() => toggleOpen(true)}
-          />
+          <span tabIndex={0} className="inline-flex">
+            <IconButton
+              icon={TrashIcon}
+              disabled={!selectedSavedFilter}
+              onClick={() => toggleOpen(true)}
+            />
+          </span>
         </TooltipTrigger>
         <TooltipContent>Delete filter</TooltipContent>
       </Tooltip>

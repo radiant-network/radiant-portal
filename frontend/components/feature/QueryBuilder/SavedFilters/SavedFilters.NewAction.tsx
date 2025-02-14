@@ -12,7 +12,8 @@ import { useState } from "react";
 const SavedFiltersNewAction = () => {
   const [open, toggleOpen] = useState(false);
   const { queryBuilder } = useQueryBuilderContext();
-  const isDirty = queryBuilder.getSelectedSavedFilter()?.isDirty();
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
+  const isDirty = selectedSavedFilter?.isDirty();
 
   const handleNew = () => {
     if (isDirty) {
@@ -26,7 +27,13 @@ const SavedFiltersNewAction = () => {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <IconButton icon={PlusIcon} onClick={handleNew} />
+          <span tabIndex={0} className="inline-flex">
+            <IconButton
+              icon={PlusIcon}
+              onClick={handleNew}
+              disabled={!selectedSavedFilter}
+            />
+          </span>
         </TooltipTrigger>
         <TooltipContent>New filter</TooltipContent>
       </Tooltip>
