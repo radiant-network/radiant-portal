@@ -28,10 +28,10 @@ export const buttonVariants = tv({
   extend: baseButtonVariants,
   variants: {
     size: {
-      default: "h-8 px-4 py-2 [&_svg]:size-4",
+      default: "h-8 px-4 py-2 text-base [&_svg]:size-4",
       xs: "h-6 px-2 text-sm [&_svg]:size-3",
-      sm: "h-7 px-3 [&_svg]:size-4",
-      md: "h-8 px-4 py-2 [&_svg]:size-4",
+      sm: "h-7 px-3 text-sm [&_svg]:size-4",
+      md: "h-8 px-4 py-2 text-base [&_svg]:size-4",
       lg: "h-9 px-5 text-lg [&_svg]:size-5",
     },
   },
@@ -49,7 +49,7 @@ export const actionButtonVariants = tv({
   variants: {
     size: {
       default: {
-        base: "h-8 px-3 [&_svg]:size-5",
+        base: "h-8 px-3 text-base [&_svg]:size-5",
         actionsButton: "h-8 px-2 [&_svg]:size-5",
       },
       xs: {
@@ -57,11 +57,11 @@ export const actionButtonVariants = tv({
         actionsButton: "h-6 px-1.5 [&_svg]:size-3",
       },
       sm: {
-        base: "h-7 px-3 [&_svg]:size-4",
+        base: "h-7 px-3 text-sm [&_svg]:size-4",
         actionsButton: "h-7 px-2 [&_svg]:size-4",
       },
       md: {
-        base: "h-8 px-3 [&_svg]:size-5",
+        base: "h-8 px-3 text-base [&_svg]:size-5",
         actionsButton: "h-8 px-2 [&_svg]:size-5",
       },
       lg: {
