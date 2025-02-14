@@ -7,7 +7,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "components/base/ui/accordion";
-import { Checkbox } from "@/components/base/ui/checkbox";
 import { Table } from "@/components/base/Table/Table";
 import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
 import {
