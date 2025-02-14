@@ -1,23 +1,23 @@
 import { tv } from "tailwind-variants";
-export { default as ActionButton } from "./ActionButton";
-export { Button } from "./Button";
 
 export const baseButtonVariants = tv({
   slots: {
-    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   },
   variants: {
     variant: {
-      default: "bg-default text-default-foreground",
-      primary: "bg-primary text-primary-foreground",
+      default:
+        "bg-transparent text-default-foreground enabled:hover:bg-gray/90",
+      primary: "bg-primary text-primary-foreground enabled:hover:bg-primary/90",
       destructive:
-        "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        "bg-destructive text-destructive-foreground enabled:hover:bg-destructive/90",
       outline:
-        "border border-input bg-background hover:bg-accent text-accent-foreground hover:text-accent-foreground/90",
-      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        "border border-input bg-background enabled:hover:bg-accent text-accent-foreground enabled:hover:text-accent-foreground/90",
+      secondary:
+        "bg-secondary text-secondary-foreground enabled:hover:bg-secondary/80",
       ghost:
-        "bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground",
-      link: "bg-transparent text-default-foreground underline underline-offset-4 hover:underline",
+        "bg-accent text-accent-foreground enabled:hover:bg-primary enabled:hover:text-primary-foreground",
+      link: "bg-transparent text-default-foreground underline underline-offset-4 enabled:hover:underline",
     },
   },
   defaultVariants: {

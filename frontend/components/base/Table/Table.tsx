@@ -9,15 +9,15 @@ import {
   ColumnOrderState,
   getExpandedRowModel,
 } from "@tanstack/react-table";
-import { Button } from "@/base/Buttons/Button";
+import { Button } from "@/base/ui/button";
 import {
   DoubleLeftOutlinedIcon,
   LeftOutlinedIcon,
   RightOutlinedIcon,
-} from "@/base/ui/icons";
-import { TableColumnSettings } from "@/base/ui/table/tableColumnSettings";
+} from "@/base/Icons";
+import { TableColumnSettings } from "@/base/Table/TableColumnSettings";
 import { cn } from "@/lib/utils";
-import { useResizeObserver } from "@/base/ui/table/tableObserver";
+import { useResizeObserver } from "@/base/Table/TableObserver";
 
 export interface TableColumnDef<TData, TValue>
   extends Omit<ColumnDef<TData, TValue>, "id" | "header"> {

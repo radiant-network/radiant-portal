@@ -4,8 +4,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../DropdownMenu";
-import { Button } from "./Button";
+} from "../ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { MoreHorizontalIcon } from "lucide-react";
 import { actionButtonVariants } from "./button.variants";
@@ -32,6 +31,7 @@ function ActionButton({
   onDefaultAction,
   size,
   variant,
+  ...btnProps
 }: ActionButtonProps) {
   const style = actionButtonVariants({ size, variant });
 
@@ -41,14 +41,18 @@ function ActionButton({
       <button
         onClick={onDefaultAction}
         className={cn(style.base(), "rounded-r-none")}
+        {...btnProps}
       >
         {children}
       </button>
 
       {/* Dropdown Button */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className={cn(style.base(), style.actionsButton())}>
+        <DropdownMenuTrigger asChild disabled={btnProps.disabled}>
+          <button
+            className={cn(style.base(), style.actionsButton())}
+            {...btnProps}
+          >
             <MoreHorizontalIcon />
           </button>
         </DropdownMenuTrigger>
