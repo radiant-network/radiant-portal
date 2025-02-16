@@ -1,10 +1,8 @@
 import * as React from "react";
 import { tv, VariantProps } from "tailwind-variants";
 
-import { cn } from "@/lib/utils";
-
 const badgeVariants = tv({
-  base: "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  base: "inline-flex items-center rounded-sm border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   variants: {
     variant: {
       default:
@@ -15,9 +13,17 @@ const badgeVariants = tv({
         "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
       outline: "text-foreground",
     },
+    size: {
+      default: "text-xs py-1 px-2",
+      xs: "text-xs py-1 px-2",
+      sm: "text-sm py-1 px-2",
+      md: "text-sm py-1 px-3",
+      lg: "text-base py-1 px-4",
+    },
   },
   defaultVariants: {
     variant: "default",
+    size: "default",
   },
 });
 
@@ -25,9 +31,9 @@ export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
+function Badge({ className, variant, size, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div className={badgeVariants({ variant, size, className })} {...props} />
   );
 }
 
