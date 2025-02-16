@@ -15,7 +15,7 @@ const queryBar = tv({
   base: "flex flex-1 py-2 px-3 border ",
   variants: {
     active: {
-      true: ["border-[--gold-6] bg-[--gold-2]"],
+      true: ["border-[--gold-5] bg-[--gold-2]"],
       false: ["border-[--gray-5] bg-[--gray-2]"],
     },
   },
@@ -40,7 +40,7 @@ const QueryBar = ({ query }: QueryBarProps) => {
         onClick={() => query.setAsActive()}
       >
         <QueryBarIdentifier />
-        {query.isSelectable() && enableCombine && <QueryBarSelector />}
+        {enableCombine && <QueryBarSelector />}
         <div className={queryBar({ active })}>
           <div className="flex-1">
             {query.isEmpty() ? (
@@ -49,7 +49,7 @@ const QueryBar = ({ query }: QueryBarProps) => {
               <div className="flex">
                 <div className="flex-1">
                   {isBooleanOperator(query.raw()) && (
-                    <div className="flex items-center">
+                    <div className="flex items-center flex-wrap pr-2">
                       <QueryPillBoolean sqon={query.raw()} />
                     </div>
                   )}

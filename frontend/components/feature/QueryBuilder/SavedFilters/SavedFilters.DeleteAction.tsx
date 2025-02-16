@@ -18,7 +18,7 @@ const SavedFiltersDeleteAction = () => {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span tabIndex={0} className="inline-flex">
+          <span className="inline-flex">
             <IconButton
               icon={TrashIcon}
               disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}

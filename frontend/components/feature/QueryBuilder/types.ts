@@ -12,7 +12,7 @@ export type ArrayTenOrMore<T> = {
   10: T;
 } & Array<T>;
 
-export const defaultReferenceColors: ArrayTenOrMore<string> = [
+export const defaultQueryReferenceColors: ArrayTenOrMore<string> = [
   "#C31D7E",
   "#328536",
   "#AA00FF",

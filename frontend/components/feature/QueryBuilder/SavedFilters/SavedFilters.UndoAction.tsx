@@ -21,7 +21,7 @@ const SavedFiltersUndoAction = () => {
         <IconButton
           icon={RotateCcw}
           disabled={!selectedSavedFilter}
-          onClick={() => selectedSavedFilter?.discardChanges()}
+          onClick={() => selectedSavedFilter.discardChanges()}
         />
       </TooltipTrigger>
       <TooltipContent>Discard unsaved changes</TooltipContent>

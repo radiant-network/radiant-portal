@@ -12,6 +12,7 @@ export type QueryBuilderContextType = {
   queryCountIcon?: React.ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
   >;
+  getQueryReferenceColor: (refIndex: number) => string;
 };
 export const QueryBuilderContext =
   createContext<QueryBuilderContextType | null>(null);

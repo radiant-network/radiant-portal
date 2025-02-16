@@ -532,9 +532,9 @@ export const generateWildCardValueFilter = ({
   fields: string[];
   value: string[];
   index?: string;
-  operator?: TermOperators | string;
+  operator?: TermOperators | (string & {});
   overrideValuesName?: string;
-}): { content: IWildCardValueContent; op: TermOperators | string } => ({
+}): { content: IWildCardValueContent; op: TermOperators | (string & {}) } => ({
   content: { fields, index, overrideValuesName, value },
   op: operator,
 });
@@ -552,6 +552,7 @@ export const removeContentFromSqon = (
   syntheticSqon: ISyntheticSqon
 ): ISyntheticSqon => {
   const content = syntheticSqon.content as TSyntheticSqonContent;
+
   const contentCleaned =
     typeof indexOrField === "number"
       ? content.filter((c) => c !== indexOrField)
@@ -575,6 +576,22 @@ export const removeContentFromSqon = (
             ? isValueContentToDelete
             : isValueFilterToDelete;
         });
+
+  return {
+    ...syntheticSqon,
+    content: contentCleaned,
+    op: syntheticSqon.op,
+  };
+};
+
+export const removeQueryFromSqon = (
+  id: string,
+  syntheticSqon: ISyntheticSqon
+): ISyntheticSqon => {
+  const content = syntheticSqon.content as TSyntheticSqonContent;
+  const contentCleaned = content.filter(
+    (contentValue) => (contentValue as IValueQuery).id !== id
+  );
 
   return {
     ...syntheticSqon,

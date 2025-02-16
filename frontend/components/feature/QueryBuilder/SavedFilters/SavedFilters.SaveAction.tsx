@@ -11,13 +11,13 @@ const SavedFiltersSaveAction = () => {
   const { queryBuilder } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
   const isDisabled = selectedSavedFilter
-    ? !selectedSavedFilter.isDirty() || queryBuilder.isEmpty()
+    ? !selectedSavedFilter.isDirty()
     : queryBuilder.isEmpty();
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span tabIndex={0} className="inline-flex">
+        <span className="inline-flex">
           <IconButton
             icon={SaveIcon}
             color="orange-400"

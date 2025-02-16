@@ -26,7 +26,7 @@ const SavedFiltersNewAction = () => {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span tabIndex={0} className="inline-flex">
+          <span className="inline-flex">
             <IconButton
               icon={PlusIcon}
               onClick={handleNew}

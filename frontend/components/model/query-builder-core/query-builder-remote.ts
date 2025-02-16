@@ -34,7 +34,8 @@ import { v4 } from "uuid";
  */
 const setLocalQueryBuilderState = (
   queryBuilderId: string,
-  value: QueryBuilderRemoteState
+  value: QueryBuilderRemoteState,
+  skipEvent: boolean = false
 ): void => {
   const QBUpdateEvent: QueryBuilderUpdateEvent = new Event(
     QUERY_BUILDER_UPDATE_EVENT_KEY
@@ -47,7 +48,10 @@ const setLocalQueryBuilderState = (
     `${QUERY_BUILDER_STATE_CACHE_KEY_PREFIX}-${queryBuilderId}`,
     JSON.stringify(value)
   );
-  window.dispatchEvent(QBUpdateEvent);
+
+  if (!skipEvent) {
+    window.dispatchEvent(QBUpdateEvent);
+  }
 };
 
 /**
@@ -67,18 +71,22 @@ const setDefaultLocalQueryBuilderState = (
 const getLocalQueryBuilderState = (
   queryBuilderId: string
 ): QueryBuilderRemoteState => {
-  const qbState = window.localStorage.getItem(
-    `${QUERY_BUILDER_STATE_CACHE_KEY_PREFIX}-${queryBuilderId}`
-  );
+  if (typeof window !== "undefined") {
+    const qbState = window.localStorage.getItem(
+      `${QUERY_BUILDER_STATE_CACHE_KEY_PREFIX}-${queryBuilderId}`
+    );
 
-  if (!qbState) {
-    return setDefaultLocalQueryBuilderState(queryBuilderId);
-  }
+    if (!qbState) {
+      return setDefaultLocalQueryBuilderState(queryBuilderId);
+    }
 
-  try {
-    return JSON.parse(qbState);
-  } catch (err) {
-    return setDefaultLocalQueryBuilderState(queryBuilderId);
+    try {
+      return JSON.parse(qbState);
+    } catch (err) {
+      return setDefaultLocalQueryBuilderState(queryBuilderId);
+    }
+  } else {
+    return {} as any;
   }
 };
 
@@ -93,11 +101,15 @@ const addQuery = (
   const qbState = getLocalQueryBuilderState(queryBuilderId);
   const queries = qbState?.queries ?? [];
   const hasEmptyQuery = queries.find((q) => isEmptySqon(q));
+  const isActiveQueryEmpty = queries.find(
+    (q) => q.id === qbState.activeQueryId && isEmptySqon(q)
+  );
 
   setLocalQueryBuilderState(queryBuilderId, {
-    activeQueryId: setAsActive
-      ? query.id
-      : (qbState?.activeQueryId ?? query.id),
+    activeQueryId:
+      setAsActive || isActiveQueryEmpty
+        ? query.id
+        : (qbState?.activeQueryId ?? query.id),
     queries: hasEmptyQuery
       ? queries.map((q) => {
           if (isEmptySqon(q)) {

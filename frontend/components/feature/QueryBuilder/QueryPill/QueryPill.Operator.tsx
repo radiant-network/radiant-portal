@@ -1,28 +1,43 @@
+import ElementOperatorIcon from "@/components/base/Icons/ElementOperatorIcon";
+import EqualOperatorIcon from "@/components/base/Icons/EqualOperatorIcon";
+import GreaterThanOperatorIcon from "@/components/base/Icons/GreaterThanOperatorIcon";
+import GreaterThanOrEqualOperatorIcon from "@/components/base/Icons/GreaterThanOrEqualOperatorIcon";
+import LessThanOperatorIcon from "@/components/base/Icons/LessThanOperatorIcon";
+import LessThanOrEqualEqualOperatorIcon from "@/components/base/Icons/LessThanOrEqualEqualOperatorIcon";
+import NotInOperatorIcon from "@/components/base/Icons/NotInOperatorIcon";
 import { FieldOperators } from "@/components/model/sqon";
-import React from "react";
 
 export type QueryPillOperatorProps = {
-  type: string;
+  size?: number;
+  type: FieldOperators | (string & {});
   className?: string;
 };
 
-const QueryPillOperator = ({ type, className }: QueryPillOperatorProps) => {
+const QueryPillOperator = ({
+  type,
+  size,
+  className,
+}: QueryPillOperatorProps) => {
   switch (type) {
     case FieldOperators[">"]:
-      return <GreaterThanOperator className={className} />;
+      return <GreaterThanOperatorIcon size={size} className={className} />;
     case FieldOperators[">="]:
-      return <GreaterThanOrEqualOperator className={className} />;
+      return (
+        <GreaterThanOrEqualOperatorIcon size={size} className={className} />
+      );
     case FieldOperators["<"]:
-      return <LessThanOperator className={className} />;
+      return <LessThanOperatorIcon size={size} className={className} />;
     case FieldOperators["<="]:
-      return <LessThanOrEqualOperator className={className} />;
+      return (
+        <LessThanOrEqualEqualOperatorIcon size={size} className={className} />
+      );
     case FieldOperators.between:
-      return <ElementOperator className={className} />;
+      return <ElementOperatorIcon size={size} className={className} />;
     case FieldOperators["not-in"]:
     case FieldOperators["some-not-in"]:
-      return <NotInOperator className={className} />;
+      return <NotInOperatorIcon size={size} className={className} />;
     default:
-      return <EqualOperator className={className} />;
+      return <EqualOperatorIcon size={size} className={className} />;
   }
 };
 

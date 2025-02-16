@@ -1148,5 +1148,51 @@ describe("QueryBuilder Core", () => {
     expect(state.activeQueryId).toBe(mockUUID);
   });
 
-  // Test isEmpty
+  it("should be empty valid", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    expect(qb.isEmpty()).toBeTruthy();
+  });
+
+  it("should be empty not valid", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field2",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    expect(qb.isEmpty()).toBeFalsy();
+  });
 });

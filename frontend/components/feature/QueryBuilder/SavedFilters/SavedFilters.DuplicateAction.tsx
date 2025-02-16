@@ -26,7 +26,7 @@ const SavedFiltersDuplicateAction = () => {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span tabIndex={0} className="inline-flex">
+          <span className="inline-flex">
             <IconButton
               icon={CopyIcon}
               disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}

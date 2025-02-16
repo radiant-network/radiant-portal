@@ -58,7 +58,11 @@ export interface IWildCardValueContent extends Omit<IValueContent, "field"> {
   fields: string[];
 }
 
-export type TValueOp = FieldOperators | string;
+export type TValueOp = FieldOperators | (string & {});
+export type TSqonGroupOp = BooleanOperators | (string & {});
+export type TSqonContentValue = ISqonGroupFilter | IValueFilter;
+export type TSqonContent = Array<TSqonContentValue>;
+
 export interface IValueFilter {
   content: IValueContent;
   op: TValueOp;
@@ -69,8 +73,8 @@ export interface IValueFilter {
 export interface IValueQuery {
   content: TSyntheticSqonContent;
   op: TValueOp;
-  id?: string;
-  title?: string;
+  id: string;
+  title: string;
 }
 
 export interface IValueFilterQuery {
@@ -81,9 +85,6 @@ export interface IWildCardValueFilter extends Omit<IValueFilter, "content"> {
   content: IWildCardValueContent;
 }
 
-export type TSqonGroupOp = BooleanOperators | string;
-export type TSqonContentValue = ISqonGroupFilter | IValueFilter;
-export type TSqonContent = Array<TSqonContentValue>;
 export interface ISqonGroupFilter {
   op: TSqonGroupOp;
   skipBooleanOperatorCheck?: boolean;

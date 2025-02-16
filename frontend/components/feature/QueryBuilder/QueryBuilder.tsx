@@ -18,13 +18,15 @@ import SavedFiltersRightActions from "./SavedFilters/SavedFilters.RightActions";
 import SavedFiltersLeftActions from "./SavedFilters/SavedFilters.LeftActions";
 import { PartialKeys } from "@/components/lib/utils";
 import { LucideProps } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { ArrayTenOrMore, defaultQueryReferenceColors } from "./types";
 
 export type QueryBuilderProps = PartialKeys<CoreQueryBuilderProps, "state"> & {
   enableCombine?: boolean;
   enableFavorite?: boolean;
   enableShowHideLabels?: boolean;
   initialShowHideLabels?: boolean;
+  queryReferenceColors?: ArrayTenOrMore<string>;
   queryCountIcon?: React.ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
   >;
@@ -34,12 +36,19 @@ const QueryBuilder = ({
   enableCombine = true,
   enableFavorite = false,
   enableShowHideLabels,
-  initialShowHideLabels = false,
+  initialShowHideLabels = true,
+  queryReferenceColors = defaultQueryReferenceColors,
   queryCountIcon,
   ...hookProps
 }: QueryBuilderProps) => {
   const queryBuilder = useQueryBuilder(hookProps);
   const [showLabels, toggleLabels] = useState(initialShowHideLabels);
+
+  const getQueryReferenceColor = useCallback(
+    (refIndex: number) =>
+      queryReferenceColors[refIndex % queryReferenceColors.length],
+    [queryReferenceColors]
+  );
 
   const memoedContextValue = useMemo<QueryBuilderContextType>(
     () => ({
@@ -50,6 +59,7 @@ const QueryBuilder = ({
       showLabels,
       toggleLabels,
       queryCountIcon,
+      getQueryReferenceColor,
     }),
     [
       queryBuilder,
@@ -59,6 +69,7 @@ const QueryBuilder = ({
       showLabels,
       toggleLabels,
       queryCountIcon,
+      getQueryReferenceColor,
     ]
   );
 

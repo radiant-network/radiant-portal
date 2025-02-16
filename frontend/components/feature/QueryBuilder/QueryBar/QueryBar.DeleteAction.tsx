@@ -17,10 +17,7 @@ const QueryBarDeleteAction = () => {
         <TrashIcon size={16} className="hover:cursor-pointer" />
       </PopoverTrigger>
       <PopoverContent side="left" className="w-[200px] space-y-3">
-        <div className="flex items-center gap-2">
-          <InfoIcon size={16} className="shrink-0" />
-          <span className="text-sm">Delete this query?</span>
-        </div>
+        <span className="text-sm">Delete this query?</span>
         <div className="flex gap-1 justify-end">
           <PopoverClose asChild>
             <Button size="xs">Cancel</Button>

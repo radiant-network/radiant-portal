@@ -270,7 +270,7 @@ describe("Query Manipulation", () => {
     );
   });
 
-  it("should remove pill from the query", () => {
+  it("should remove pill by id from the query", () => {
     const pill: IValueQuery = {
       id: "pill-id",
       content: [
@@ -314,7 +314,7 @@ describe("Query Manipulation", () => {
       qb.coreProps.state.queries.find((q) => q.id === "1")?.content
     ).toContainEqual(pill);
 
-    qb.getQuery("1")?.removePill("pill-id");
+    qb.getQuery("1")?.removePillById("pill-id");
 
     expect(state.queries.find((q) => q.id === "1")?.content).not.toContainEqual(
       pill
@@ -423,5 +423,152 @@ describe("Query Manipulation", () => {
     expect(qb.getQuery("1")?.isSelectable()).toBe(false);
   });
 
-  // Test isSelectable
+  it("should remove pill using field name", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    qb.getQuery("1")?.removePillByFieldOrIndex("field1");
+
+    expect(state.queries.find((q) => q.id === "1")?.content).toEqual([]);
+  });
+
+  it("should remove pill using ref index", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "1",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "3",
+            op: "and",
+            content: [0, 1],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    qb.getQuery("3")?.removePillByFieldOrIndex(0);
+
+    expect(state.queries.find((q) => q.id === "3")?.content).toEqual([1]);
+  });
+
+  it("should be referenced in query valid", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "2",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [0],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    expect(qb.getQuery("1")?.isReferencedInActiveQuery()).toBe(true);
+  });
+
+  it("should be referenced in query not valid", () => {
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: "2",
+        queries: [
+          {
+            id: "1",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something"],
+                  field: "field1",
+                },
+                op: "in",
+              },
+            ],
+          },
+          {
+            id: "2",
+            op: "and",
+            content: [],
+          },
+          {
+            id: "3",
+            op: "and",
+            content: [0],
+          },
+        ],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    expect(qb.getQuery("2")?.isReferencedInActiveQuery()).toBe(false);
+  });
 });

@@ -1,17 +1,14 @@
 import isEmpty from "lodash/isEmpty";
-import {
-  BooleanOperators,
-  ISyntheticSqon,
-  IValueFilter,
-  IValueQuery,
-  TSyntheticSqonContentValue,
-} from "../sqon";
+import { BooleanOperators, ISyntheticSqon, IValueQuery } from "../sqon";
 import { QueryBuilderInstance } from "./query-builder";
 import {
   changeCombineOperatorForQuery,
   cleanUpQueries,
   deleteQueryAndSetNext,
   isEmptySqon,
+  isIndexReferencedInSqon,
+  removeContentFromSqon,
+  removeQueryFromSqon,
 } from "./utils/sqon";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -93,14 +90,24 @@ export type CoreQuery = {
   addPill: (pill: IValueQuery) => void;
 
   /**
-   * Call this function to remove pill from the Query
+   * Call this function to remove pill from the Query by ID
    */
-  removePill: (pillId: string) => void;
+  removePillById: (pillId: string) => void;
+
+  /**
+   * Call this function to remove pill from the Query by field name
+   */
+  removePillByFieldOrIndex: (indexOfField: string | number) => void;
 
   /**
    * Call this function to set the Query as active
    */
   changeCombineOperator(operator: BooleanOperators): void;
+
+  /**
+   * Call this function to know if the Query is referenced in the active query
+   */
+  isReferencedInActiveQuery(): boolean;
 };
 
 export type QueryInstance = CoreQuery;
@@ -224,20 +231,25 @@ export const createQuery = (
       }));
     },
     addPill: (pill) => {
-      queryBuilder.updateQuery(syntheticSqon.id, {
+      query.update({
         ...syntheticSqon,
         content: [...syntheticSqon.content, pill],
       });
     },
-    removePill: (pillId) => {
-      queryBuilder.updateQuery(syntheticSqon.id, {
-        ...syntheticSqon,
-        content: syntheticSqon.content
-          .map((sqonContent: TSyntheticSqonContentValue) => {
-            if ((sqonContent as IValueFilter).id !== pillId) return sqonContent;
-          })
-          .filter((el) => el !== undefined),
-      });
+    removePillById: (pillId) => {
+      query.update(removeQueryFromSqon(pillId, syntheticSqon));
+    },
+    removePillByFieldOrIndex: (indexOrField) => {
+      query.update(removeContentFromSqon(indexOrField, syntheticSqon));
+    },
+    isReferencedInActiveQuery: () => {
+      const activeQuery = queryBuilder.getActiveQuery();
+
+      if (activeQuery) {
+        return isIndexReferencedInSqon(query.index(), activeQuery.raw());
+      }
+
+      return false;
     },
   };
 

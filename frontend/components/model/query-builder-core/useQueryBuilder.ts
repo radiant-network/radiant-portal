@@ -5,6 +5,7 @@ import {
   getDefaultQueryBuilderState,
   QUERY_BUILDER_UPDATE_EVENT_KEY,
   QueryBuilderInstance,
+  QueryBuilderState,
   QueryBuilderUpdateEvent,
 } from "./query-builder";
 import { queryBuilderRemote } from "./query-builder-remote";
@@ -16,6 +17,7 @@ export const useQueryBuilder = (
   const defaultProps: CoreQueryBuilderProps = {
     state: {
       ...getDefaultQueryBuilderState(),
+      ...queryBuilderRemote.getLocalQueryBuilderState(props.id),
       savedFilters: [],
       selectedQueryIndexes: [],
     },
@@ -35,7 +37,7 @@ export const useQueryBuilder = (
     const listener = (event: QueryBuilderUpdateEvent) => {
       if (event.queryBuilderId === props.id) {
         setState((prev) => {
-          const newState = {
+          const newState: QueryBuilderState = {
             ...prev,
             ...event.value,
           };
@@ -64,7 +66,7 @@ export const useQueryBuilder = (
     onStateChange: (newState) => {
       setState(newState);
       props.onStateChange?.(newState);
-      queryBuilderRemote.setLocalQueryBuilderState(props.id, newState);
+      queryBuilderRemote.setLocalQueryBuilderState(props.id, newState, true);
     },
   }));
 

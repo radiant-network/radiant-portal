@@ -5,7 +5,6 @@ import {
   isRemoteComponent,
   isSet,
   isUploadedList,
-  QueryInstance,
 } from "@/components/model/query-builder-core";
 import { ISyntheticSqon } from "@/components/model/sqon";
 import QueryPillField from "./QueryPill.Field";
@@ -36,7 +35,7 @@ const QueryPillBoolean = ({ sqon }: QueryPillBooleanProps) => {
           ) : isBooleanOperator(f) ? (
             <QueryPillBoolean sqon={f} />
           ) : isReference(f) ? (
-            <QueryPillReference />
+            <QueryPillReference refIndex={f as number} />
           ) : isSet(f) ? (
             <QueryPillSet />
           ) : isUploadedList(f) ? (

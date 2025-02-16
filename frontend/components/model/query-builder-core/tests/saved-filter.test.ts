@@ -5,7 +5,6 @@ import {
   expect,
   it,
   jest,
-  test,
 } from "@jest/globals";
 import type { Mock } from "jest-mock";
 import {
@@ -86,7 +85,6 @@ describe("SavedFilters Manipulation", () => {
     mockOnFilterDelete = jest.fn();
     mockOnFilterSave = jest.fn();
     defaultProps.onSavedFilterCreate = mockOnFilterCreate;
-    defaultProps.onSavedFilterUpdate = mockOnFilterUpdate;
     defaultProps.onSavedFilterDelete = mockOnFilterDelete;
     defaultProps.onSavedFilterSave = mockOnFilterSave;
 
@@ -96,7 +94,6 @@ describe("SavedFilters Manipulation", () => {
         state = newState;
       },
       onSavedFilterCreate: mockOnFilterCreate,
-      onSavedFilterUpdate: mockOnFilterUpdate,
       onSavedFilterDelete: mockOnFilterDelete,
       onSavedFilterSave: mockOnFilterSave,
     });
