@@ -21,7 +21,7 @@ export default defineConfig({
     alias: {
       "@/utils": path.resolve(__dirname, "../../utils"),
       "@/components": path.resolve(__dirname, "../../components"),
-      "@/base/ui": path.resolve(__dirname, "../../components/base/ui"),
+      "@/base": path.resolve(__dirname, "../../components/base"),
       "@/lib": path.resolve(__dirname, "../../components/lib"),
       "@/hooks": path.resolve(__dirname, "../../components/hooks"),
     },

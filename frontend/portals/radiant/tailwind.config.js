@@ -10,7 +10,7 @@ module.exports = {
     "../../components/base/**/*.{html,js,ts,tsx,jsx}",
     "../../components/feature/**/*.{html,js,ts,tsx,jsx}",
     "../../components/composite/**/*.{html,js,ts,tsx,jsx}",
-    "../../components/base/ui/**/*.{js,jsx,ts,tsx}",
+    "../../components/base/**/*.{js,jsx,ts,tsx}",
   ],
   fontFamily: {
     sans: [

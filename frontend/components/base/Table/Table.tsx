@@ -9,7 +9,7 @@ import {
   ColumnOrderState,
   getExpandedRowModel,
 } from "@tanstack/react-table";
-import { Button } from "@/base/ui/button";
+import { Button } from "@/base/button";
 import { TableColumnSettings } from "@/base/Table/TableColumnSettings";
 import { cn } from "@/lib/utils";
 import { useResizeObserver } from "@/base/Table/TableObserver";

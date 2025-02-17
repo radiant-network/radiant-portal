@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
-import { buttonVariants } from "../Buttons";
+import { buttonVariants } from "../base/Buttons";
 import { VariantProps } from "tailwind-variants";
 
 export interface ButtonProps

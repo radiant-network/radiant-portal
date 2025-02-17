@@ -1,4 +1,4 @@
-import { Button } from "@/components/base/ui/button";
+import { Button } from "@/components/base/button";
 import { ActionButton } from "../../base/Buttons";
 
 interface IProps {}

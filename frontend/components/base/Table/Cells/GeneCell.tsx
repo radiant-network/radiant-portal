@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button } from "@/base/ui/button";
+import { Button } from "@/base/button";
 import { cn } from "@/lib/utils";
 import { PlusIcon } from "lucide-react";
 
