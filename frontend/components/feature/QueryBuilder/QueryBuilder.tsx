@@ -1,7 +1,4 @@
-import {
-  CoreQueryBuilderProps,
-  useQueryBuilder,
-} from "../../model/query-builder-core";
+import { useQueryBuilder } from "../../model/query-builder-core";
 import {
   Accordion,
   AccordionContent,

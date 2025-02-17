@@ -246,6 +246,8 @@ describe("Query Manipulation", () => {
 
   it("should add pill to the query", () => {
     const pill: IValueQuery = {
+      id: "pill-id",
+      title: "Pill Title",
       content: [
         {
           content: {
@@ -255,7 +257,6 @@ describe("Query Manipulation", () => {
           op: "in",
         },
       ],
-      id: "pill-id",
       op: "and",
     };
 
@@ -273,6 +274,7 @@ describe("Query Manipulation", () => {
   it("should remove pill by id from the query", () => {
     const pill: IValueQuery = {
       id: "pill-id",
+      title: "Pill Title",
       content: [
         {
           content: {

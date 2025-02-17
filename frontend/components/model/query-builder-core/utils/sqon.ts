@@ -627,7 +627,7 @@ export const isIndexReferencedInSqon = (
 export const formatQueriesWithPill = (
   queries: ISyntheticSqon[]
 ): ISyntheticSqon[] => {
-  const queriesCloned = structuredClone(queries);
+  const queriesCloned = cloneDeep(queries);
   const formattedQueries = queriesCloned.map((query: ISyntheticSqon) => {
     const newContent = query.content.map((c: TSyntheticSqonContentValue) => {
       if (c.hasOwnProperty("title") && (c as IValueQuery).id)

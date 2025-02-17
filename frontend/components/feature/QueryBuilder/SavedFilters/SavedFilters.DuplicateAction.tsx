@@ -18,7 +18,7 @@ const SavedFiltersDuplicateAction = () => {
     if (selectedSavedFilter?.isDirty()) {
       toggleOpen(true);
     } else {
-      // TODO create new filter
+      selectedSavedFilter?.duplicate();
     }
   };
 

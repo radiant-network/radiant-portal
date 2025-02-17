@@ -1,5 +1,5 @@
 import { useQueryBarContext } from "./QueryBar.Context";
-import { InfoIcon, TrashIcon } from "lucide-react";
+import { TrashIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,

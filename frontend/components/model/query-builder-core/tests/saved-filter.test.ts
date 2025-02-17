@@ -62,7 +62,6 @@ let qb: QueryBuilderInstance;
 let state: QueryBuilderState = defaultProps.state;
 
 let mockOnFilterCreate: Mock<void, [any]>;
-let mockOnFilterUpdate: Mock<void, [any]>;
 let mockOnFilterDelete: Mock<{ savedFilterId: string }, [any]>;
 let mockOnFilterSave: Mock<ISavedFilter, [any]>;
 
@@ -81,7 +80,6 @@ describe("SavedFilters Manipulation", () => {
     state = defaultProps.state;
 
     mockOnFilterCreate = jest.fn();
-    mockOnFilterUpdate = jest.fn();
     mockOnFilterDelete = jest.fn();
     mockOnFilterSave = jest.fn();
     defaultProps.onSavedFilterCreate = mockOnFilterCreate;
@@ -371,14 +369,146 @@ describe("SavedFilters Manipulation", () => {
     expect(mockOnFilterDelete).toHaveBeenCalledWith("1");
   });
 
-  // Test select
-  // Test discardChanges
-  // Test save saved filter
-  // Test update saved filter
+  it("should select savedfilter", () => {
+    const savedFilter: ISavedFilter = {
+      id: "saved-filter-id-1",
+      title: "Saved Filter 1",
+      queries: [
+        {
+          id: "query-id-1",
+          op: "and",
+          content: [
+            {
+              content: {
+                value: ["something"],
+                field: "field1",
+              },
+              op: "in",
+            },
+          ],
+        },
+      ],
+      favorite: false,
+    };
+
+    expect(qb.getSelectedSavedFilter()).toBeNull();
+
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        ...state,
+        savedFilters: [savedFilter],
+      },
+    }));
+
+    expect(qb.getSelectedSavedFilter()).toBeNull();
+
+    qb.getSavedFilters()[0].select();
+
+    expect(state.activeQueryId).toBe("query-id-1");
+    expect(state.queries).toEqual(savedFilter.queries);
+  });
+
+  it("should discard changes", () => {
+    const savedFilter: ISavedFilter = {
+      id: "1",
+      title: "Saved Filter 1",
+      queries: defaultQueries,
+      favorite: false,
+    };
+
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        ...state,
+        queries: [
+          ...defaultQueries,
+          {
+            id: "3",
+            op: "and",
+            content: [
+              {
+                content: {
+                  value: ["something-else"],
+                  field: "field3",
+                },
+                op: "in",
+              },
+            ],
+          },
+        ],
+        savedFilters: [savedFilter],
+      },
+    }));
+
+    expect(qb.getSelectedSavedFilter()).toBeTruthy();
+    expect(qb.getSelectedSavedFilter()?.isDirty()).toBe(true);
+
+    qb.getSelectedSavedFilter()?.discardChanges();
+
+    expect(state.savedFilters[0].queries).toEqual(defaultQueries);
+  });
+
+  it("should save filter", () => {
+    const savedFilter: ISavedFilter = {
+      id: "1",
+      title: "Saved Filter 1",
+      queries: defaultQueries,
+      favorite: false,
+    };
+
+    const newQueries: ISyntheticSqon[] = [
+      ...defaultQueries,
+      {
+        id: "3",
+        op: "and",
+        content: [
+          {
+            content: {
+              value: ["something-else"],
+              field: "field3",
+            },
+            op: "in",
+          },
+        ],
+      },
+    ];
+
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        ...state,
+        queries: newQueries,
+        savedFilters: [savedFilter],
+      },
+    }));
+
+    expect(qb.getSelectedSavedFilter()).toBeTruthy();
+    expect(qb.getSelectedSavedFilter()?.isDirty()).toBe(true);
+
+    const updatedTitle = "Saved Filter 1 Updated";
+
+    qb.getSelectedSavedFilter()?.save({
+      title: updatedTitle,
+      favorite: true,
+    });
+
+    expect(state.savedFilters[0].queries).toEqual(newQueries);
+    expect(state.savedFilters[0].isDirty).toBeFalsy();
+    expect(state.savedFilters[0].isNew).toBeFalsy();
+    expect(state.savedFilters[0].title).toEqual(updatedTitle);
+    expect(state.savedFilters[0].favorite).toBeTruthy();
+    expect(mockOnFilterSave).toBeCalledTimes(1);
+    expect(mockOnFilterSave).toBeCalledWith({
+      id: "1",
+      title: updatedTitle,
+      queries: newQueries,
+      favorite: true,
+    });
+  });
+
   // Test hasQueries
-  // Test toggleFavorite
   // Test isFavorite
-  // Test setTitle
   // Test isNew
   // Test isDirty
 });

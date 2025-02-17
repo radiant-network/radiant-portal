@@ -1,11 +1,9 @@
 import { FieldOperators, IValueFilter } from "@/components/model/sqon";
-import React, { useState } from "react";
+import { useState } from "react";
 import take from "lodash/take";
 import IntersectionOperator from "../Operator/IntersectionOperator";
 import UnionOperator from "../Operator/UnionOperator";
-import { cn } from "@/components/lib/utils";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import { Button } from "@/components/base/ui/button";
 import QueryPillValuesContainer from "./QueryPill.ValuesContainer";
 
 export type QueryPillValuesProps = {

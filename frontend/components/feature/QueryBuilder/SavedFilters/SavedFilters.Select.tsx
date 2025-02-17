@@ -7,7 +7,7 @@ import {
 } from "@/components/base/ui/select";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import { FolderIcon } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/base/ui/button";
 import SavedFiltersManageDialog from "./SavedFilters.ManageDialog";
 
@@ -16,16 +16,20 @@ const SavedFiltersSelect = () => {
   const [openManage, setOpenManage] = useState(false);
   const { queryBuilder } = useQueryBuilderContext();
   const savedFilters = queryBuilder.getSavedFilters();
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   const handleManageAction = () => {
     setOpen(false);
     setOpenManage(true);
   };
 
+  const selectKey = useMemo(() => new Date(), [selectedSavedFilter?.id]);
+
   return (
     <>
       <Select
-        value={queryBuilder.getSelectedSavedFilter()?.id}
+        key={+selectKey}
+        value={selectedSavedFilter?.id}
         onValueChange={(savedFilterId) =>
           savedFilters.find((filter) => filter.id === savedFilterId)?.select()
         }
