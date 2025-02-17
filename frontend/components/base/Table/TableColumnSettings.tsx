@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ColumnSettings, TableColumnDef } from "@/base/Table/Table";
 import { ColumnOrderState } from "@tanstack/react-table";
-import { Button } from "@/base/button";
+import { Button } from "@/base/ui/button";
 import { GripVerticalIcon, SettingsIcon } from "lucide-react";
 import { IconButton } from "../Buttons";
 

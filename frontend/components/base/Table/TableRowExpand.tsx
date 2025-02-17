@@ -1,4 +1,4 @@
-import { Button } from "@/base/button";
+import { Button } from "@/base/ui/button";
 import { CellContext } from "@tanstack/react-table";
 
 const getTableRowExpandCell = ({ row }: CellContext<any, any>) => {
