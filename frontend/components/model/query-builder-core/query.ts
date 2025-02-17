@@ -209,6 +209,7 @@ export const createQuery = (
         ...prev,
         activeQueryId: queryId,
       }));
+      queryBuilder.coreProps.onActiveQueryChange?.(query.raw());
     },
     changeCombineOperator: (operator) => {
       const clonedQueries = cloneDeep(queryBuilder.getRawQueries());

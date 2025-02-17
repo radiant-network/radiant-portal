@@ -9,9 +9,11 @@ import { Button } from "@/components/base/ui/button";
 import AndOperator from "../Operator/AndOperator";
 import OrOperator from "../Operator/OrOperator";
 import { BooleanOperators } from "@/components/model/sqon";
+import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
 
 const QueryCombiner = () => {
   const { query } = useQueryBarContext();
+  const dict = useQueryBuilderDictContext();
   const isAndOperator = query.raw().op === BooleanOperators.and;
 
   return (
@@ -32,7 +34,11 @@ const QueryCombiner = () => {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            Change operator to "{isAndOperator ? "or" : "and"}"
+            {dict.queryPill.operator.changeOperatorTo} "
+            {isAndOperator
+              ? dict.queryPill.operator.or
+              : dict.queryPill.operator.and}
+            "
           </TooltipContent>
         </Tooltip>
       </div>

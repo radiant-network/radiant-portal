@@ -72,6 +72,7 @@ let qb: QueryBuilderInstance;
 let state: QueryBuilderState = defaultProps.state;
 
 let mockOnQuerySelectChange: Mock<void, [any]>;
+let mockOnActiveQueryChange: Mock<void, [any]>;
 
 describe("Query Manipulation", () => {
   beforeAll(() => {
@@ -87,6 +88,7 @@ describe("Query Manipulation", () => {
   beforeEach(() => {
     state = defaultProps.state;
     mockOnQuerySelectChange = jest.fn();
+    mockOnActiveQueryChange = jest.fn();
 
     qb = createQueryBuilder({
       ...defaultProps,
@@ -94,6 +96,7 @@ describe("Query Manipulation", () => {
         state = newState;
       },
       onQuerySelectChange: mockOnQuerySelectChange,
+      onActiveQueryChange: mockOnActiveQueryChange,
     });
   });
 
@@ -169,9 +172,13 @@ describe("Query Manipulation", () => {
   it("should set query as active", () => {
     expect(state.activeQueryId).toBe(defaultProps.state.activeQueryId);
 
+    const rawQuery = qb.getQuery("3")?.raw();
+
     qb.getQuery("3")?.setAsActive();
 
     expect(state.activeQueryId).toBe("3");
+    expect(mockOnActiveQueryChange).toHaveBeenCalledTimes(1);
+    expect(mockOnActiveQueryChange).toHaveBeenCalledWith(rawQuery);
   });
 
   it("should select query", () => {

@@ -5,18 +5,23 @@ import {
   SelectSeparator,
   SelectTrigger,
 } from "@/components/base/ui/select";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 import { FolderIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/base/ui/button";
 import SavedFiltersManageDialog from "./SavedFilters.ManageDialog";
 
 const SavedFiltersSelect = () => {
-  const [open, setOpen] = useState(false);
-  const [openManage, setOpenManage] = useState(false);
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
   const savedFilters = queryBuilder.getSavedFilters();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
+
+  const [open, setOpen] = useState(false);
+  const [openManage, setOpenManage] = useState(false);
 
   const handleManageAction = () => {
     setOpen(false);
@@ -39,7 +44,7 @@ const SavedFiltersSelect = () => {
       >
         <SelectTrigger className="w-[135px] h-7">
           <div className="flex items-center gap-2">
-            <FolderIcon size={14} /> My Filters
+            <FolderIcon size={14} /> {dict.savedFilter.myFilters}
           </div>
         </SelectTrigger>
         <SelectContent>
@@ -54,7 +59,7 @@ const SavedFiltersSelect = () => {
             className="w-full pl-1"
             onClick={handleManageAction}
           >
-            Manage filters
+            {dict.savedFilter.manageFilters}
           </Button>
         </SelectContent>
       </Select>

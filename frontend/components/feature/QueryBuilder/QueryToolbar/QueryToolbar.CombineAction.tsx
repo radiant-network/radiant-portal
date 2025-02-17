@@ -1,8 +1,13 @@
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 import { ActionButton } from "@/components/base/Buttons";
 import { BooleanOperators } from "@/components/model/sqon";
+import capitalize from "lodash/capitalize";
 
 const QueryToolbarCombineAction = () => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder, enableCombine } = useQueryBuilderContext();
 
   if (queryBuilder.canCombine() && enableCombine) {
@@ -10,12 +15,12 @@ const QueryToolbarCombineAction = () => {
       <ActionButton
         actions={[
           {
-            label: "And",
+            label: capitalize(dict.queryPill.operator.and),
             onClick: () =>
               queryBuilder.combineSelectedQueries(BooleanOperators.and),
           },
           {
-            label: "Or",
+            label: capitalize(dict.queryPill.operator.or),
             onClick: () =>
               queryBuilder.combineSelectedQueries(BooleanOperators.or),
           },
@@ -26,7 +31,7 @@ const QueryToolbarCombineAction = () => {
         size="xs"
         variant="primary"
       >
-        Combine
+        {dict.toolbar.combine}
       </ActionButton>
     );
   }

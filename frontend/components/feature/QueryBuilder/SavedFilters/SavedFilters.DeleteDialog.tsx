@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/base/ui/alert-dialog";
 import { SavedFilterInstance } from "@/components/model/query-builder-core";
+import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
 
 const SavedFiltersDeleteDialog = ({
   savedFilter,
@@ -17,27 +18,34 @@ const SavedFiltersDeleteDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   savedFilter: SavedFilterInstance;
-}) => (
-  <AlertDialog {...props}>
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Permanently delete this filter?</AlertDialogTitle>
-        <AlertDialogDescription>
-          You are about to permanently delete this filter and all of its
-          queries.
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
-        <AlertDialogAction
-          variant="destructive"
-          onClick={() => savedFilter.delete()}
-        >
-          Delete filter
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-);
+}) => {
+  const dict = useQueryBuilderDictContext();
+
+  return (
+    <AlertDialog {...props}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {dict.savedFilter.deleteDialog.title}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {dict.savedFilter.deleteDialog.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>
+            {dict.savedFilter.deleteDialog.cancel}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={() => savedFilter.delete()}
+          >
+            {dict.savedFilter.deleteDialog.ok}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 export default SavedFiltersDeleteDialog;

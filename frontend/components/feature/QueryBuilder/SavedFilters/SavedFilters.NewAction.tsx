@@ -5,14 +5,19 @@ import {
   TooltipTrigger,
 } from "@/components/base/ui/tooltip";
 import { PlusIcon } from "lucide-react";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 import SavedFiltersOvewriteDialog from "./SavedFilters.OverwriteDialog";
 import { useState } from "react";
 
 const SavedFiltersNewAction = () => {
-  const [open, toggleOpen] = useState(false);
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
+
+  const [open, toggleOpen] = useState(false);
 
   const handleNew = () => {
     if (selectedSavedFilter?.isDirty()) {
@@ -34,7 +39,7 @@ const SavedFiltersNewAction = () => {
             />
           </span>
         </TooltipTrigger>
-        <TooltipContent>New filter</TooltipContent>
+        <TooltipContent>{dict.savedFilter.newFilter}</TooltipContent>
       </Tooltip>
       <SavedFiltersOvewriteDialog open={open} onOpenChange={toggleOpen} />
     </>

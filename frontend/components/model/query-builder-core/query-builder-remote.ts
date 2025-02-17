@@ -20,6 +20,8 @@ import {
 } from "./query-builder";
 import isEmpty from "lodash/isEmpty";
 import {
+  createInlineFilters,
+  createSQONFromFilters,
   deepMergeFieldInQuery,
   getDefaultSyntheticSqon,
   getFilterWithNoSelection,
@@ -220,10 +222,19 @@ const updateActiveQueryFilters = (
     index?: string;
     operator?: TSqonGroupOp;
   }
-): void => {
-  // TODO
-  console.warn("updateActiveQueryFilters is not implemented yet");
-};
+): void =>
+  updateQuery(
+    queryBuilderId,
+    getUpdatedActiveQuery(queryBuilderId, {
+      field: params.filterGroup.field,
+      operator: params.operator,
+      sqonContent: createSQONFromFilters(
+        params.filterGroup,
+        params.selectedFilters,
+        params.index
+      ),
+    })
+  );
 
 const getUpdatedActiveQuery = (
   queryBuilderId: string,
@@ -290,10 +301,19 @@ const updateQueryByTableFilter = (
     field: string;
     selectedFilters: any[]; // TODO change with Filter type
   }
-): void => {
-  // TODO
-  console.warn("updateQueryByTableFilter is not implemented yet");
-};
+): void =>
+  updateQuery(
+    queryBuilderId,
+    params.selectedFilters.length > 0
+      ? getUpdatedActiveQuery(queryBuilderId, {
+          field: params.field,
+          sqonContent: createInlineFilters(
+            params.field,
+            params.selectedFilters
+          ),
+        })
+      : removeFieldFromSqon(params.field, getActiveQuery(queryBuilderId))
+  );
 
 /**
  * Remove a pill from the active query of a given QueryBuilder
@@ -338,6 +358,7 @@ export const queryBuilderRemote = {
   getActiveQuery,
   updateActiveQueryField,
   updateActiveQueryFilters,
+  updateQueryByTableFilter,
   addPillToActiveQuery,
   removePillFromActiveQuery,
   setLocalQueryBuilderState,

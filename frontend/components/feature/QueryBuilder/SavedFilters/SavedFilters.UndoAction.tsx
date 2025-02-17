@@ -5,9 +5,13 @@ import {
   TooltipTrigger,
 } from "@/components/base/ui/tooltip";
 import { RotateCcw } from "lucide-react";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 
 const SavedFiltersUndoAction = () => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
@@ -24,7 +28,7 @@ const SavedFiltersUndoAction = () => {
           onClick={() => selectedSavedFilter.discardChanges()}
         />
       </TooltipTrigger>
-      <TooltipContent>Discard unsaved changes</TooltipContent>
+      <TooltipContent>{dict.savedFilter.discardTooltip}</TooltipContent>
     </Tooltip>
   );
 };

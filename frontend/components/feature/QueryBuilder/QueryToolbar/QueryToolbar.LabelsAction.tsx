@@ -1,7 +1,11 @@
 import { Switch } from "@/components/base/ui/switch";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 
 const QueryToolbarLabelsAction = () => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder, enableShowHideLabels, showLabels, toggleLabels } =
     useQueryBuilderContext();
 
@@ -9,7 +13,7 @@ const QueryToolbarLabelsAction = () => {
     return (
       <div className="flex items-center gap-1.5">
         <Switch size="xs" checked={showLabels} onCheckedChange={toggleLabels} />{" "}
-        Labels
+        {dict.toolbar.labels}
       </div>
     );
   }

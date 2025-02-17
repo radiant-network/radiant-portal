@@ -674,3 +674,32 @@ export const getFilterWithNoSelection = (
     },
   ];
 };
+
+export const createInlineFilters = (
+  field: string,
+  filters: any[], // IFilter<IFilterCount>[],
+  index?: string
+): TSqonContent => {
+  console.error("createSQONFromFilters is not implemented");
+
+  return [];
+};
+
+export const createSQONFromFilters = (
+  filterGroup: any, // IFilterGroup,
+  selectedFilters: any[], // IFilter[],
+  index?: string
+): TSyntheticSqonContent => {
+  console.error("createSQONFromFilters is not implemented");
+
+  // switch (filterGroup.type) {
+  //     case VisualType.Range:
+  //         return createRangeFilter(filterGroup.field, selectedFilters, index);
+  //     case VisualType.Text:
+  //         return createTextFilter(filterGroup.field, selectedFilters, index);
+  //     default:
+  //         return createInlineFilters(filterGroup.field, selectedFilters, index);
+  // }
+
+  return [];
+};

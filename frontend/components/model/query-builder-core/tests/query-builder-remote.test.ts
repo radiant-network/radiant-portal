@@ -1,4 +1,11 @@
-import { beforeAll, beforeEach, describe, it, jest } from "@jest/globals";
+import {
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from "@jest/globals";
 import type { Mock } from "jest-mock";
 import { CoreQueryBuilderProps } from "../query-builder";
 import { ISyntheticSqon } from "../../sqon";
@@ -98,9 +105,12 @@ describe("SavedFilters Manipulation", () => {
       localStorage: new LocalStorageMock(),
       dispatchEvent: mockDispatchEvent,
     };
+
+    queryBuilderRemote.setLocalQueryBuilderState(qbId, defaultProps.state);
   });
 
   it("test remote", () => {
-    queryBuilderRemote.getActiveQuery(qbId);
+    let state = queryBuilderRemote.getLocalQueryBuilderState(qbId);
+    expect(state).toEqual(defaultProps.state);
   });
 });

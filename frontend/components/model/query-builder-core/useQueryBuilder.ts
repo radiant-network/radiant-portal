@@ -17,7 +17,6 @@ export const useQueryBuilder = (
   const defaultProps: CoreQueryBuilderProps = {
     state: {
       ...getDefaultQueryBuilderState(),
-      ...queryBuilderRemote.getLocalQueryBuilderState(props.id),
       savedFilters: [],
       selectedQueryIndexes: [],
     },
@@ -57,7 +56,7 @@ export const useQueryBuilder = (
   }, []);
 
   queryBuilderRef.current.setCoreProps((prevProps) => ({
-    savedFilterDefaultTitle: "New Filter",
+    savedFilterDefaultTitle: "Untitled filter",
     ...prevProps,
     ...props,
     state: {

@@ -69,6 +69,9 @@ function App() {
           enableFavorite
           enableShowHideLabels
           queryCountIcon={UsersIcon}
+          onActiveQueryChange={(queryId) =>
+            console.log("onActiveQueryChange", queryId)
+          }
           onSavedFilterSave={() => console.log("onSavedFilterSave")}
           onQueryCreate={() => console.log("onQueryCreate")}
           onQueryDelete={() => console.log("onQueryDelete")}

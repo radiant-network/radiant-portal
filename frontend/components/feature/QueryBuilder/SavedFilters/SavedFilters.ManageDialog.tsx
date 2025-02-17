@@ -8,7 +8,10 @@ import {
   DialogTitle,
 } from "@/components/base/ui/dialog";
 import { Button } from "@/components/base/ui/button";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 import List from "@/components/base/List/List";
 import ListItemAction from "@/components/base/List/ListItemWithAction";
 import SavedFiltersDeleteDialog from "./SavedFilters.DeleteDialog";
@@ -22,6 +25,7 @@ const SavedFiltersManageDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   const savedFilters = queryBuilder.getSavedFilters();
@@ -37,7 +41,7 @@ const SavedFiltersManageDialog = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-full max-w-[550px]">
           <DialogHeader>
-            <DialogTitle>Manage filters</DialogTitle>
+            <DialogTitle>{dict.savedFilter.manageDialog.title}</DialogTitle>
           </DialogHeader>
           <List bordered className="max-h-[250px]">
             {savedFilters.map((savedFilter) => (
@@ -49,7 +53,9 @@ const SavedFiltersManageDialog = ({
           </List>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="primary">Close</Button>
+              <Button variant="primary">
+                {dict.savedFilter.manageDialog.close}
+              </Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
@@ -63,6 +69,7 @@ const SavedFilterListItem = ({
 }: {
   savedFilter: SavedFilterInstance;
 }) => {
+  const dict = useQueryBuilderDictContext();
   const [openDelete, setOpenDelete] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
 
@@ -71,7 +78,7 @@ const SavedFilterListItem = ({
       <ListItemAction
         key={savedFilter.id}
         title={savedFilter.raw().title}
-        description="Last saved at: "
+        description={`${dict.savedFilter.manageDialog.lastSaveAt}: TODO`}
         className="border-b last:border-b-0 relative px-3 py-2 group"
         onEdit={() => setOpenEdit(true)}
         onDelete={() => setOpenDelete(true)}

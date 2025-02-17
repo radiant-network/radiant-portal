@@ -1,5 +1,8 @@
 import React, { ReactNode } from "react";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 import {
   isBooleanFilter,
   isRangeFilter,
@@ -18,6 +21,7 @@ const QueryPillLabelOperator = ({
   className,
   ...props
 }: QueryPillLabelProps) => {
+  const dict = useQueryBuilderDictContext();
   const { showLabels } = useQueryBuilderContext();
 
   return (
@@ -27,7 +31,7 @@ const QueryPillLabelOperator = ({
         isRangeFilter(valueFilter)) && (
         <>
           <QueryPillLabelContainer>
-            {valueFilter.content.field}
+            {dict.queryPill.facet(valueFilter.content.field)}
           </QueryPillLabelContainer>
           <QueryPillOperatorContainer>{operator}</QueryPillOperatorContainer>
         </>

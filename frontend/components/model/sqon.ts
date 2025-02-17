@@ -39,12 +39,7 @@ export enum FilterOperators {
 export const SET_ID_PREFIX = "set_id:";
 
 export type TFilterValue = Array<string | number | boolean>;
-export interface IRemoteComponent {
-  id: string;
-  props?: {
-    [value: string]: any;
-  };
-}
+
 export interface IValueContent {
   field: string;
   value: TFilterValue;
@@ -53,9 +48,15 @@ export interface IValueContent {
   isUploadedList?: boolean;
   remoteComponent?: IRemoteComponent;
 }
-
 export interface IWildCardValueContent extends Omit<IValueContent, "field"> {
   fields: string[];
+}
+
+export interface IRemoteComponent {
+  id: string;
+  props?: {
+    [value: string]: any;
+  };
 }
 
 export type TValueOp = FieldOperators | (string & {});

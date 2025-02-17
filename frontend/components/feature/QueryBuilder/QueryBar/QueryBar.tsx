@@ -8,7 +8,10 @@ import { QueryBarContext } from "./QueryBar.Context";
 import QueryBarCount from "./QueryBar.Count";
 import QueryBarSelector from "./QueryBar.Selector";
 import { tv } from "tailwind-variants";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 import QueryPillBoolean from "../QueryPill/QueryPill.Boolean";
 
 const queryBar = tv({
@@ -30,6 +33,7 @@ export type QueryBarProps = {
 
 const QueryBar = ({ query }: QueryBarProps) => {
   const active = query.isActive();
+  const dict = useQueryBuilderDictContext();
   const { enableCombine } = useQueryBuilderContext();
 
   return (
@@ -44,7 +48,7 @@ const QueryBar = ({ query }: QueryBarProps) => {
         <div className={queryBar({ active })}>
           <div className="flex-1">
             {query.isEmpty() ? (
-              <>Use the search tools & facets on the left to build a query</>
+              <>{dict.queryBar.empty}</>
             ) : (
               <div className="flex">
                 <div className="flex-1">

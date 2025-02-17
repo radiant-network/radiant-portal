@@ -5,9 +5,13 @@ import {
   TooltipTrigger,
 } from "@/components/base/ui/tooltip";
 import { StarIcon } from "lucide-react";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 
 const SavedFiltersStarAction = () => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder, enableFavorite } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
@@ -37,8 +41,11 @@ const SavedFiltersStarAction = () => {
           onClick={handleStar}
         />
       </TooltipTrigger>
-      {/* Unset default filter */}
-      <TooltipContent>Set as default filter</TooltipContent>
+      <TooltipContent>
+        {selectedSavedFilter?.isFavorite()
+          ? dict.savedFilter.favoriteTooltip.unset
+          : dict.savedFilter.favoriteTooltip.set}
+      </TooltipContent>
     </Tooltip>
   );
 };

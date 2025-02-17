@@ -22,7 +22,10 @@ import {
 } from "@/components/base/ui/form";
 import { Input } from "@/components/base/ui/input";
 import { SavedFilterInstance } from "@/components/model/query-builder-core";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 
 const formSchema = z.object({
   title: z.string().min(2, "Min 2 characters").max(50, "Max 50 characters"),
@@ -37,6 +40,7 @@ const SavedFiltersEditDialog = ({
   onOpenChange: (open: boolean) => void;
   savedFilter: SavedFilterInstance | null;
 }) => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -60,7 +64,7 @@ const SavedFiltersEditDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Filter</DialogTitle>
+          <DialogTitle>{dict.savedFilter.editDialog.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -69,9 +73,16 @@ const SavedFiltersEditDialog = ({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>
+                    {dict.savedFilter.editDialog.fields.title.label}
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Untitled query" {...field} />
+                    <Input
+                      placeholder={
+                        dict.savedFilter.editDialog.fields.title.placeholder
+                      }
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -79,10 +90,12 @@ const SavedFiltersEditDialog = ({
             />
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline">
+                  {dict.savedFilter.editDialog.cancel}
+                </Button>
               </DialogClose>
               <Button type="submit" variant="primary">
-                Save
+                {dict.savedFilter.editDialog.ok}
               </Button>
             </DialogFooter>
           </form>

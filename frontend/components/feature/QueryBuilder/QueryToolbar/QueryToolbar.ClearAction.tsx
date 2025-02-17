@@ -10,9 +10,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/base/ui/alert-dialog";
 import { Button } from "@/components/base/ui/button";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 
 const QueryToolbarClearAction = () => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   if (queryBuilder.getQueries().length > 1) {
@@ -24,24 +28,27 @@ const QueryToolbarClearAction = () => {
             size="xs"
             className="no-underline enabled:hover:no-underline"
           >
-            Clear all
+            {dict.toolbar.clearAll}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete all queries?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {dict.toolbar.clearAllDialog.title}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to delete all your queries. They will be lost
-              forever.
+              {dict.toolbar.clearAllDialog.description}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {dict.toolbar.clearAllDialog.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => queryBuilder.clearQueries()}
             >
-              Delete
+              {dict.toolbar.clearAllDialog.ok}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -116,6 +116,11 @@ export type CoreQueryBuilderProps = {
   onQuerySelectChange?(selectedIndexes: number[]): void;
 
   /**
+   * Callback when the active query changes
+   */
+  onActiveQueryChange?(sqon: ISyntheticSqon): void;
+
+  /**
    * List of fields to ignore in a Query
    */
   fieldsToIgnore?: string[];

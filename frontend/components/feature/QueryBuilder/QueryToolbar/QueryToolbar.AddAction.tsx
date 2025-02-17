@@ -1,9 +1,13 @@
 import { Button } from "@/components/base/ui/button";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 import { BooleanOperators } from "@/components/model/sqon";
 import { PlusIcon } from "lucide-react";
 
 const QueryToolbarAddAction = () => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   if (!queryBuilder.canCombine()) {
@@ -20,7 +24,7 @@ const QueryToolbarAddAction = () => {
         }
       >
         <PlusIcon />
-        New Query
+        {dict.toolbar.newQuery}
       </Button>
     );
   }

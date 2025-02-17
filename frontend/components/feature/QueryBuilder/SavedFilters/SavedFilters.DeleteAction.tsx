@@ -7,12 +7,17 @@ import { useState } from "react";
 import SavedFiltersDeleteDialog from "./SavedFilters.DeleteDialog";
 import { IconButton } from "@/components/base/Buttons";
 import { TrashIcon } from "lucide-react";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 
 const SavedFiltersDeleteAction = () => {
-  const [open, toggleOpen] = useState(false);
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
+
+  const [open, toggleOpen] = useState(false);
 
   return (
     <>
@@ -26,7 +31,7 @@ const SavedFiltersDeleteAction = () => {
             />
           </span>
         </TooltipTrigger>
-        <TooltipContent>Delete filter</TooltipContent>
+        <TooltipContent>{dict.savedFilter.deleteTooltip}</TooltipContent>
       </Tooltip>
       {selectedSavedFilter && (
         <SavedFiltersDeleteDialog

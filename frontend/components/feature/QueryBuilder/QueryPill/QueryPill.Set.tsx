@@ -9,6 +9,7 @@ import { IValueFilter } from "@/components/model/sqon";
 import ElementOperatorIcon from "@/components/base/Icons/ElementOperatorIcon";
 import QueryPillValues from "./QueryPill.Values";
 import { useQueryBarContext } from "../QueryBar/QueryBar.Context";
+import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
 
 export type QueryPillSetProps = {
   valueFilter: IValueFilter;
@@ -16,6 +17,7 @@ export type QueryPillSetProps = {
 
 const QueryPillSet = ({ valueFilter }: QueryPillSetProps) => {
   const { query } = useQueryBarContext();
+  const dict = useQueryBuilderDictContext();
 
   return (
     <QueryPillContainer
@@ -27,7 +29,7 @@ const QueryPillSet = ({ valueFilter }: QueryPillSetProps) => {
         <QueryPillLabelContainer>
           {valueFilter.content.index
             ? capitalize(valueFilter.content.index)
-            : valueFilter.content.field}
+            : dict.queryPill.facet(valueFilter.content.field)}
         </QueryPillLabelContainer>
         <QueryPillOperatorContainer>
           <ElementOperatorIcon size={14} />

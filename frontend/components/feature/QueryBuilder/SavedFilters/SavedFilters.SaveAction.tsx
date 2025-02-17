@@ -5,9 +5,13 @@ import {
   TooltipTrigger,
 } from "@/components/base/ui/tooltip";
 import { SaveIcon } from "lucide-react";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 
 const SavedFiltersSaveAction = () => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
   const isDisabled = selectedSavedFilter
@@ -37,10 +41,10 @@ const SavedFiltersSaveAction = () => {
       </TooltipTrigger>
       <TooltipContent>
         {queryBuilder.isEmpty()
-          ? "Add a query to save"
+          ? dict.savedFilter.saveTooltip.whenEmpty
           : selectedSavedFilter?.isDirty()
-            ? "Save changes"
-            : "Save filter"}
+            ? dict.savedFilter.saveTooltip.whenDirty
+            : dict.savedFilter.saveTooltip.default}
       </TooltipContent>
     </Tooltip>
   );

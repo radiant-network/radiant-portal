@@ -5,9 +5,13 @@ import {
   TooltipTrigger,
 } from "@/components/base/ui/tooltip";
 import { Share2Icon } from "lucide-react";
-import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import {
+  useQueryBuilderContext,
+  useQueryBuilderDictContext,
+} from "../QueryBuilder.Context";
 
 const SavedFiltersShareAction = () => {
+  const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
@@ -32,8 +36,8 @@ const SavedFiltersShareAction = () => {
       </TooltipTrigger>
       <TooltipContent>
         {selectedSavedFilter?.isDirty() || !selectedSavedFilter
-          ? "Save filter to share"
-          : "Share (Copy url)"}
+          ? dict.savedFilter.shareTooltip.whenNotSaved
+          : dict.savedFilter.shareTooltip.default}
       </TooltipContent>
     </Tooltip>
   );

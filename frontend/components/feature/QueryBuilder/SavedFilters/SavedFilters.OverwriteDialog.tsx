@@ -8,32 +8,41 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/base/ui/alert-dialog";
+import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
 
 const SavedFiltersOvewriteDialog = (props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}) => (
-  <AlertDialog {...props}>
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-        <AlertDialogDescription>
-          You are about to create a new filter; all modifications will be lost.
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
-        <AlertDialogAction
-          variant="primary"
-          onClick={() => {
-            // todo create new filter
-          }}
-        >
-          Create
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-);
+}) => {
+  const dict = useQueryBuilderDictContext();
+
+  return (
+    <AlertDialog {...props}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {dict.savedFilter.overwriteDialog.title}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {dict.savedFilter.overwriteDialog.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>
+            {dict.savedFilter.overwriteDialog.cancel}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="primary"
+            onClick={() => {
+              // todo create new filter
+            }}
+          >
+            {dict.savedFilter.overwriteDialog.ok}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 export default SavedFiltersOvewriteDialog;

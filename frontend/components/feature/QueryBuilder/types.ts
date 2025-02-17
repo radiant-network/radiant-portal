@@ -20,24 +20,6 @@ export type ArrayTenOrMore<T> = {
   10: T;
 } & Array<T>;
 
-export const defaultQueryReferenceColors: ArrayTenOrMore<string> = [
-  "#C31D7E",
-  "#328536",
-  "#AA00FF",
-  "#C2410C",
-  "#047ABE",
-  "#E5231F",
-  "#007D85",
-  "#C51162",
-  "#7B5A90",
-  "#B85C00",
-  "#722ED1",
-  "#4D7C0F",
-  "#9F1239",
-  "#2D7D9A",
-  "#847545",
-];
-
 type QueryBuilderSharedProps = {
   /**
    * Enable the combine feature
@@ -63,22 +45,109 @@ type QueryBuilderSharedProps = {
   fetchQueryCount: (sqon: ISyntheticSqon) => Promise<number>;
 };
 
-export type QueryBuilderProps = PartialKeys<CoreQueryBuilderProps, "state"> &
-  QueryBuilderSharedProps & {
-    className?: string;
-    /**
-     * Initial state of the show/hide labels feature
-     */
-    initialShowHideLabels?: boolean;
-    /**
-     * Colors to use for query reference
-     */
-    queryReferenceColors?: ArrayTenOrMore<string>;
-  };
+export type QueryBuilderProps = PartialKeys<
+  CoreQueryBuilderProps &
+    QueryBuilderSharedProps & {
+      className?: string;
+      /**
+       * Initial state of the show/hide labels feature
+       */
+      initialShowHideLabels?: boolean;
+      /**
+       * Colors to use for query reference
+       */
+      queryReferenceColors?: ArrayTenOrMore<string>;
+      /**
+       * Dictionnary for copies
+       */
+      dictionnary: QueryBuilderDictionnary;
+    },
+  "state"
+>;
 
 export type QueryBuilderContextType = QueryBuilderSharedProps & {
   queryBuilder: QueryBuilderInstance;
   showLabels?: boolean;
   toggleLabels?: (show: boolean) => void;
   getQueryReferenceColor: (refIndex: number) => string;
+};
+
+export type QueryBuilderDictionnary = {
+  queryBar: {
+    empty: string;
+    deletePopover: {
+      title: string;
+      cancel: string;
+      ok: string;
+    };
+  };
+  queryPill: {
+    operator: {
+      changeOperatorTo: string;
+      and: string;
+      or: string;
+    };
+    facet: (key: string) => React.ReactNode;
+  };
+  toolbar: {
+    combine: string;
+    newQuery: string;
+    clearAll: string;
+    clearAllDialog: {
+      title: string;
+      description: string;
+      cancel: string;
+      ok: string;
+    };
+    labels: string;
+  };
+  savedFilter: {
+    deleteTooltip: string;
+    deleteDialog: {
+      title: string;
+      description: string;
+      cancel: string;
+      ok: string;
+    };
+    duplicateTooltip: string;
+    overwriteDialog: {
+      title: string;
+      description: string;
+      cancel: string;
+      ok: string;
+    };
+    editDialog: {
+      title: string;
+      cancel: string;
+      ok: string;
+      fields: {
+        title: {
+          label: string;
+          placeholder: string;
+        };
+      };
+    };
+    myFilters: string;
+    manageFilters: string;
+    manageDialog: {
+      title: string;
+      close: string;
+      lastSaveAt: string;
+    };
+    newFilter: string;
+    saveTooltip: {
+      whenEmpty: string;
+      whenDirty: string;
+      default: string;
+    };
+    shareTooltip: {
+      whenNotSaved: string;
+      default: string;
+    };
+    favoriteTooltip: {
+      set: string;
+      unset: string;
+    };
+    discardTooltip: string;
+  };
 };
