@@ -69,11 +69,13 @@ function App() {
           enableFavorite
           enableShowHideLabels
           queryCountIcon={UsersIcon}
+          onSavedFilterSave={() => console.log("onSavedFilterSave")}
           onQueryCreate={() => console.log("onQueryCreate")}
           onQueryDelete={() => console.log("onQueryDelete")}
           onQueryUpdate={() => console.log("onQueryUpdate")}
           onQuerySelectChange={() => console.log("onQuerySelectChange")}
           onStateChange={(newState) => console.log("onStateChange", newState)}
+          fetchQueryCount={() => Promise.resolve(15)}
           initialState={{
             activeQueryId: "1",
             queries: [

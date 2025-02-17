@@ -20,13 +20,7 @@ const QueryPillField = ({ valueFilter }: QueryPillFieldProps) => {
     >
       <QueryPillLabelOperator
         valueFilter={valueFilter}
-        operator={
-          <QueryPillOperator
-            size={14}
-            className="ml-[2px] mr-[4px]"
-            type={valueFilter.op}
-          />
-        }
+        operator={<QueryPillOperator size={14} type={valueFilter.op} />}
       />
       <QueryPillValues valueFilter={valueFilter} />
     </QueryPillContainer>

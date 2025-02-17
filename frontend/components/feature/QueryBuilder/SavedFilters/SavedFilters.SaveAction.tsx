@@ -14,6 +14,14 @@ const SavedFiltersSaveAction = () => {
     ? !selectedSavedFilter.isDirty()
     : queryBuilder.isEmpty();
 
+  const handleSave = () => {
+    if (selectedSavedFilter) {
+      selectedSavedFilter.save();
+    } else {
+      queryBuilder.saveNewFilter();
+    }
+  };
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -23,6 +31,7 @@ const SavedFiltersSaveAction = () => {
             color="orange-400"
             disabled={isDisabled}
             className={selectedSavedFilter?.isDirty() ? "text-[--gold-6]" : ""}
+            onClick={handleSave}
           />
         </span>
       </TooltipTrigger>

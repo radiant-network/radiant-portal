@@ -30,8 +30,6 @@ export type CoreSavedFilter = {
 
   /**
    * Call this function to get a Query by id
-   *
-   * @param id Query id
    */
   getQueryById(id: string): QueryInstance | null;
 
@@ -46,11 +44,6 @@ export type CoreSavedFilter = {
   delete(): void;
 
   /**
-   * Call this function to update the SavedFilter
-   */
-  update(data: Partial<Pick<ISavedFilter, "favorite" | "title">>): void;
-
-  /**
    * Call this function to duplicate the SavedFilter
    */
   duplicate(): void;
@@ -58,7 +51,7 @@ export type CoreSavedFilter = {
   /**
    * Call this function to save the SavedFilter
    */
-  save(): void;
+  save(params?: { title?: string; favorite?: boolean }): void;
 
   /**
    * Call this function to discard the changes made to the SavedFilter
@@ -66,19 +59,9 @@ export type CoreSavedFilter = {
   discardChanges(): void;
 
   /**
-   * Call this function to set the SavedFilter title
-   */
-  setTile(title: string): void;
-
-  /**
    * Call this function to select the SavedFilter
    */
   select(): void;
-
-  /**
-   * Call this function to set the SavedFilter as favorite
-   */
-  toggleFavorite(): void;
 
   /**
    * Call this function to check if the SavedFilter is a favorite
@@ -128,23 +111,6 @@ export const createSavedFilter = (
     getQueryById: (id) => {
       return _savedFilter.getQueries().find((query) => query.id === id) || null;
     },
-    update: (data) => {
-      const updatedSavedFilter: ISavedFilter = {
-        ...rawSavedFilter,
-        ...data,
-        isNew: false,
-        isDirty: true,
-      };
-
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        savedFilters: prev.savedFilters.map((filter) =>
-          filter.id === savedFilterId ? updatedSavedFilter : filter
-        ),
-      }));
-
-      queryBuilder.coreProps.onSavedFilterSave?.(updatedSavedFilter);
-    },
     duplicate: () => {
       if (_savedFilter.isSelected()) {
         const duplicatedQueries: ISyntheticSqon[] = _savedFilter
@@ -178,48 +144,45 @@ export const createSavedFilter = (
     delete: () => {
       queryBuilder.coreProps.onSavedFilterDelete?.(savedFilterId);
 
-      if (_savedFilter.isSelected()) {
-        const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();
+      const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();
 
-        queryBuilder.setState((prev) => ({
-          ...prev,
-          activeQueryId: newActiveQueryId,
-          queries: newSavedFilter.queries,
-          savedFilters: [
-            ...prev.savedFilters.filter(
-              (filter) => filter.id !== savedFilterId
-            ),
-            newSavedFilter,
-          ],
-        }));
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        activeQueryId: newActiveQueryId,
+        queries: newSavedFilter.queries,
+        savedFilters: [
+          ...prev.savedFilters.filter((filter) => filter.id !== savedFilterId),
+          newSavedFilter,
+        ],
+      }));
 
-        queryBuilder.coreProps.onSavedFilterCreate?.(newSavedFilter);
-      }
+      queryBuilder.coreProps.onSavedFilterCreate?.(newSavedFilter);
     },
-    save: () => {
-      if (_savedFilter.isSelected()) {
-        const savedFilterToSave: ISavedFilter = {
-          ..._savedFilter.raw(),
-          queries: formatQueriesWithPill(queryBuilder.getRawQueries()),
-        };
+    save: (params) => {
+      const savedFilterToSave: ISavedFilter = {
+        ..._savedFilter.raw(),
+        title: params?.title || _savedFilter.raw().title,
+        favorite:
+          params?.favorite === undefined
+            ? _savedFilter.raw().favorite
+            : params.favorite,
+        queries: formatQueriesWithPill(queryBuilder.getRawQueries()),
+      };
 
-        queryBuilder.coreProps.onSavedFilterSave?.(savedFilterToSave);
+      queryBuilder.coreProps.onSavedFilterSave?.(savedFilterToSave);
 
-        queryBuilder.setState((prev) => ({
-          ...prev,
-          savedFilters: prev.savedFilters.map((filter) =>
-            filter.id === savedFilterId
-              ? {
-                  ...savedFilterToSave,
-                  isNew: false,
-                  isDirty: false,
-                }
-              : filter
-          ),
-        }));
-      } else {
-        console.error("Can only save the selected saved filter");
-      }
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        savedFilters: prev.savedFilters.map((filter) =>
+          filter.id === savedFilterId
+            ? {
+                ...savedFilterToSave,
+                isNew: false,
+                isDirty: false,
+              }
+            : filter
+        ),
+      }));
     },
     select: () => {
       queryBuilder.setState((prev) => ({
@@ -239,15 +202,6 @@ export const createSavedFilter = (
         console.error("Can only discard changes to the selected saved filter");
       }
     },
-    setTile: (title) => {
-      _savedFilter.update({ title });
-    },
-    toggleFavorite: () => {
-      queryBuilder.coreProps.onSavedFilterFavoriteChange?.(
-        savedFilterId,
-        !rawSavedFilter.favorite
-      );
-    },
     hasQueries: () => _savedFilter.getQueries().length > 0,
     isSelected: () => {
       const currentQueryIds = queryBuilder.getState().queries.map((q) => q.id);
@@ -264,10 +218,6 @@ export const createSavedFilter = (
       return rawSavedFilter.favorite || false;
     },
     isNew: () => {
-      if (!_savedFilter.isSelected()) {
-        return false;
-      }
-
       return rawSavedFilter.isNew || false;
     },
     isDirty: () => {

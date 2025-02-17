@@ -90,7 +90,7 @@ export const iconButtonVariants = tv({
       },
       xs: {
         base: "size-6",
-        icon: "size-4",
+        icon: "size-[14px]",
       },
       sm: {
         base: "size-7",

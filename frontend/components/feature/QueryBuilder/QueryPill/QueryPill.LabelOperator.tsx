@@ -26,14 +26,37 @@ const QueryPillLabelOperator = ({
         isBooleanFilter(valueFilter) ||
         isRangeFilter(valueFilter)) && (
         <>
-          <span className="ml-[4px] mr-[2px] text-xs font-medium">
+          <QueryPillLabelContainer>
             {valueFilter.content.field}
-          </span>
-          {operator}
+          </QueryPillLabelContainer>
+          <QueryPillOperatorContainer>{operator}</QueryPillOperatorContainer>
         </>
       )}
     </div>
   );
 };
+
+export const QueryPillOperatorContainer = ({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => (
+  <span className={cn("ml-[2px] mr-[4px]", className)} {...props}>
+    {children}
+  </span>
+);
+
+export const QueryPillLabelContainer = ({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => (
+  <span
+    className={cn("ml-[4px] mr-[2px] text-xs font-medium", className)}
+    {...props}
+  >
+    {children}
+  </span>
+);
 
 export default QueryPillLabelOperator;

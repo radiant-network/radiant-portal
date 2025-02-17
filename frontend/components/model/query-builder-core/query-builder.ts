@@ -8,7 +8,11 @@ import { ISavedFilter } from "../saved-filter";
 import { createSavedFilter, SavedFilterInstance } from "./saved-filter";
 import { createQuery, QueryInstance } from "./query";
 import { v4 } from "uuid";
-import { cleanUpQueries, getDefaultSyntheticSqon } from "./utils/sqon";
+import {
+  cleanUpQueries,
+  formatQueriesWithPill,
+  getDefaultSyntheticSqon,
+} from "./utils/sqon";
 
 export const QUERY_BUILDER_STATE_CACHE_KEY_PREFIX = "query-builder-cache";
 export const QUERY_BUILDER_UPDATE_EVENT_KEY = "QBCacheUpdate";
@@ -99,7 +103,7 @@ export type CoreQueryBuilderProps = {
   /**
    * Callback when a SavedFilter is saved
    */
-  onSavedFilterSave?(filter: ISavedFilter): ISavedFilter;
+  onSavedFilterSave?(filter: ISavedFilter): void;
 
   /**
    * Callback when a SavedFilter favorite changes
@@ -143,6 +147,11 @@ export type QueryBuilderInstance = {
   ): void;
 
   /**
+   * Call this function to save the current filter
+   */
+  saveNewFilter: (params?: { title?: string; favorite?: boolean }) => void;
+
+  /**
    * Call this function to create a new SavedFilter.
    * This new filter will be set as the new selectedFilter.
    */
@@ -155,8 +164,9 @@ export type QueryBuilderInstance = {
 
   /**
    * Call this function to get the list of SavedFilter
+   * excluding new unsaved filter
    */
-  _getSavedFilters(): SavedFilterInstance[];
+  getSavedFilters(): SavedFilterInstance[];
 
   /**
    * Call this function to add a new Query to the list
@@ -328,6 +338,31 @@ export const createQueryBuilder = (
         queries: [defaultQuery],
       }));
     },
+    saveNewFilter: (params) => {
+      const savedFilterToSave: ISavedFilter = {
+        id: v4(),
+        title:
+          params?.title ||
+          queryBuilder.coreProps.savedFilterDefaultTitle ||
+          "New Filter",
+        favorite: params?.favorite === undefined ? false : params.favorite,
+        queries: formatQueriesWithPill(queryBuilder.getRawQueries()),
+      };
+
+      queryBuilder.coreProps.onSavedFilterSave?.(savedFilterToSave);
+
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        savedFilters: [
+          ...prev.savedFilters,
+          {
+            ...savedFilterToSave,
+            isNew: false,
+            isDirty: false,
+          },
+        ],
+      }));
+    },
     createSavedFilter: () => {
       const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();
 
@@ -346,7 +381,7 @@ export const createQueryBuilder = (
       if (activeQuery) {
         return (
           queryBuilder
-            ._getSavedFilters()
+            .getSavedFilters()
             .find(
               (savedFilter) => savedFilter.isSelected() && !savedFilter.isNew()
             ) || null
@@ -355,14 +390,14 @@ export const createQueryBuilder = (
 
       return null;
     },
-    _getSavedFilters: () => {
+    getSavedFilters: () => {
       if (
         queryBuilder.coreProps.state.savedFilters &&
         queryBuilder.coreProps.state.savedFilters.length > 0
       ) {
-        return queryBuilder.coreProps.state.savedFilters.map((savedFilter) =>
-          createSavedFilter(savedFilter, queryBuilder)
-        );
+        return queryBuilder.coreProps.state.savedFilters
+          .map((savedFilter) => createSavedFilter(savedFilter, queryBuilder))
+          .filter((filter) => !filter.isNew());
       }
 
       return [];

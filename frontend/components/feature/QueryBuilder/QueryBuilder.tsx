@@ -10,35 +10,25 @@ import {
 } from "@/components/base/ui/accordion";
 import QueryBar from "./QueryBar/QueryBar";
 import QueryToolbar from "./QueryToolbar/QueryToolbar";
-import {
-  QueryBuilderContext,
-  QueryBuilderContextType,
-} from "./QueryBuilder.Context";
+import { QueryBuilderContext } from "./QueryBuilder.Context";
 import SavedFiltersRightActions from "./SavedFilters/SavedFilters.RightActions";
 import SavedFiltersLeftActions from "./SavedFilters/SavedFilters.LeftActions";
-import { PartialKeys } from "@/components/lib/utils";
-import { LucideProps } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { ArrayTenOrMore, defaultQueryReferenceColors } from "./types";
-
-export type QueryBuilderProps = PartialKeys<CoreQueryBuilderProps, "state"> & {
-  enableCombine?: boolean;
-  enableFavorite?: boolean;
-  enableShowHideLabels?: boolean;
-  initialShowHideLabels?: boolean;
-  queryReferenceColors?: ArrayTenOrMore<string>;
-  queryCountIcon?: React.ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-  >;
-};
+import {
+  defaultQueryReferenceColors,
+  QueryBuilderContextType,
+  QueryBuilderProps,
+} from "./types";
 
 const QueryBuilder = ({
+  className,
   enableCombine = true,
   enableFavorite = false,
   enableShowHideLabels,
   initialShowHideLabels = true,
   queryReferenceColors = defaultQueryReferenceColors,
   queryCountIcon,
+  fetchQueryCount,
   ...hookProps
 }: QueryBuilderProps) => {
   const queryBuilder = useQueryBuilder(hookProps);
@@ -60,6 +50,7 @@ const QueryBuilder = ({
       toggleLabels,
       queryCountIcon,
       getQueryReferenceColor,
+      fetchQueryCount,
     }),
     [
       queryBuilder,
@@ -70,12 +61,17 @@ const QueryBuilder = ({
       toggleLabels,
       queryCountIcon,
       getQueryReferenceColor,
+      fetchQueryCount,
     ]
   );
 
   return (
     <QueryBuilderContext.Provider value={memoedContextValue}>
-      <Accordion type="multiple" defaultValue={["query-builder"]}>
+      <Accordion
+        type="multiple"
+        defaultValue={["query-builder"]}
+        className={className}
+      >
         <AccordionItem value="query-builder" className="border-none">
           <AccordionTrigger
             asChild

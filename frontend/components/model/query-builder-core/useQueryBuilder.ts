@@ -57,6 +57,7 @@ export const useQueryBuilder = (
   }, []);
 
   queryBuilderRef.current.setCoreProps((prevProps) => ({
+    savedFilterDefaultTitle: "New Filter",
     ...prevProps,
     ...props,
     state: {

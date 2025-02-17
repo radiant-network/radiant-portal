@@ -1,12 +1,36 @@
+import { useEffect, useState } from "react";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
+import { useQueryBarContext } from "./QueryBar.Context";
+import { Spinner } from "@/components/base/Spinner";
 
 const QueryBarCount = () => {
-  const { queryCountIcon: QueryCountIcon } = useQueryBuilderContext();
+  const {
+    queryBuilder,
+    queryCountIcon: QueryCountIcon,
+    fetchQueryCount,
+  } = useQueryBuilderContext();
+  const { query } = useQueryBarContext();
+
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchQueryCount(query.raw())
+      .then((count) => setTotal(count))
+      .finally(() => setLoading(false));
+  }, [fetchQueryCount, query.raw(), queryBuilder.getRawQueries()]);
 
   return (
     <div className="flex items-center gap-1">
-      {QueryCountIcon && <QueryCountIcon size={14} />}
-      <span className="font-medium">12</span>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <>
+          {QueryCountIcon && <QueryCountIcon size={14} />}
+          <span className="font-medium">{total}</span>
+        </>
+      )}
     </div>
   );
 };

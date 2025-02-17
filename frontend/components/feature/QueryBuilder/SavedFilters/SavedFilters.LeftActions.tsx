@@ -24,14 +24,13 @@ const SavedFiltersLeftActions = ({
       {...props}
     >
       <div className="text-ellipsis overflow-hidden">
-        {selectedSavedFilter ? selectedSavedFilter.raw().title : "My Filter"}
+        {selectedSavedFilter
+          ? selectedSavedFilter.raw().title
+          : queryBuilder.coreProps.savedFilterDefaultTitle}
       </div>
       <TooltipProvider>
         <div className="flex" onClick={(e) => e.stopPropagation()}>
-          <SavedFiltersEditAction
-            trigger={<IconButton icon={PencilLineIcon} />}
-            savedFilter={selectedSavedFilter}
-          />
+          <SavedFiltersEditAction />
           <SavedFiltersStarAction />
           <SavedFiltersUndoAction />
         </div>

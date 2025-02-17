@@ -15,6 +15,14 @@ const SavedFiltersStarAction = () => {
     return null;
   }
 
+  const handleStar = () => {
+    if (selectedSavedFilter) {
+      selectedSavedFilter.save({ favorite: !selectedSavedFilter.isFavorite() });
+    } else {
+      queryBuilder.saveNewFilter({ favorite: true });
+    }
+  };
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -26,7 +34,7 @@ const SavedFiltersStarAction = () => {
               : ""
           }
           disabled={!selectedSavedFilter}
-          onClick={() => selectedSavedFilter?.toggleFavorite()}
+          onClick={handleStar}
         />
       </TooltipTrigger>
       {/* Unset default filter */}
