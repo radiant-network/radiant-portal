@@ -51,7 +51,7 @@ const ListItemAction = ({
       </ConditionalWrapper>
       <div className="text-xs">{description}</div>
     </div>
-    <div className="flex items-start gap-1 ml-2">
+    <div className="hidden items-start group-hover:flex gap-1 ml-2">
       {onShare && <IconButton size="xs" icon={Share2Icon} onClick={onShare} />}
       {onEdit && <IconButton size="xs" icon={Edit2Icon} onClick={onEdit} />}
       {onDelete && <IconButton size="xs" icon={TrashIcon} onClick={onDelete} />}
