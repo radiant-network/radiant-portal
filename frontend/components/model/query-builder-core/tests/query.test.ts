@@ -124,7 +124,12 @@ describe("Query Manipulation", () => {
   });
 
   it("should delete the query", () => {
-    // TODO: Implement deleteQuery
+    expect(state.queries.length).toBe(3);
+
+    qb.getQuery("2")?.delete();
+
+    expect(state.queries.length).toBe(2);
+    expect(state.queries.find((q) => q.id === "2")).toBeUndefined();
   });
 
   it("should update the query", () => {

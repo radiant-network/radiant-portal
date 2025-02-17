@@ -13,11 +13,7 @@ import {
   QueryBuilderState,
   QueryBuilderInstance,
 } from "../query-builder";
-import {
-  BooleanOperators,
-  ISyntheticSqon,
-  TSyntheticSqonContent,
-} from "../../sqon";
+import { BooleanOperators, ISyntheticSqon } from "../../sqon";
 import { getDefaultSyntheticSqon, isEmptySqon } from "../utils/sqon";
 import { ISavedFilter } from "../../saved-filter";
 

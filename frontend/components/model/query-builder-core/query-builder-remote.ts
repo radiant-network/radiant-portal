@@ -221,6 +221,7 @@ const updateActiveQueryFilters = (
     operator?: TSqonGroupOp;
   }
 ): void => {
+  // TODO
   console.warn("updateActiveQueryFilters is not implemented yet");
 };
 
@@ -290,6 +291,7 @@ const updateQueryByTableFilter = (
     selectedFilters: any[]; // TODO change with Filter type
   }
 ): void => {
+  // TODO
   console.warn("updateQueryByTableFilter is not implemented yet");
 };
 

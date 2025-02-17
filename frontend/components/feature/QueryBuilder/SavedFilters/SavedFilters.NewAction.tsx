@@ -18,7 +18,7 @@ const SavedFiltersNewAction = () => {
     if (selectedSavedFilter?.isDirty()) {
       toggleOpen(true);
     } else {
-      // TODO create new filter
+      queryBuilder.createSavedFilter();
     }
   };
 
