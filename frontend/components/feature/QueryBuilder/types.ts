@@ -60,7 +60,7 @@ export type QueryBuilderProps = PartialKeys<
       /**
        * Dictionnary for copies
        */
-      dictionnary: QueryBuilderDictionnary;
+      dictionnary?: QueryBuilderDictionnary;
     },
   "state"
 >;

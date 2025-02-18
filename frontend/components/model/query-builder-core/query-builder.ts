@@ -22,10 +22,59 @@ export type QueryBuilderRemoteState = Pick<
   "activeQueryId" | "queries"
 >;
 
-export type QueryBuilderUpdateEvent = Event & {
-  queryBuilderId?: string;
-  value?: QueryBuilderRemoteState;
+interface BaseQueryBuilderEventData {
+  eventType: QueryBuilderUpdateEventType;
+  eventData: any;
+  value: QueryBuilderRemoteState;
+}
+
+interface AddQueryEventParams extends BaseQueryBuilderEventData {
+  eventType: QueryBuilderUpdateEventType.ADD_QUERY;
+  eventData: ISyntheticSqon;
+  value: QueryBuilderRemoteState;
+}
+
+interface UpdateQueryEventParams extends BaseQueryBuilderEventData {
+  eventType: QueryBuilderUpdateEventType.UPDATE_QUERY;
+  eventData: ISyntheticSqon;
+  value: QueryBuilderRemoteState;
+}
+
+interface SetStateEventParams extends BaseQueryBuilderEventData {
+  eventType: QueryBuilderUpdateEventType.SET_STATE;
+  eventData: QueryBuilderRemoteState;
+  value: QueryBuilderRemoteState;
+}
+
+export type QueryBuilderEventParams =
+  | AddQueryEventParams
+  | UpdateQueryEventParams
+  | SetStateEventParams;
+
+export type QueryBuilderRemoteEventParams = QueryBuilderEventParams & {
+  queryBuilderId: string;
 };
+
+export enum QueryBuilderUpdateEventType {
+  ADD_QUERY = "ADD_QUERY",
+  UPDATE_QUERY = "UPDATE_QUERY",
+  SET_STATE = "SET_STATE",
+}
+
+export class QueryBuilderRemoteEvent extends Event {
+  eventData: ISyntheticSqon | QueryBuilderRemoteState;
+  eventType: QueryBuilderUpdateEventType;
+  value: QueryBuilderRemoteState;
+  queryBuilderId: string;
+
+  constructor(params: QueryBuilderRemoteEventParams) {
+    super(QUERY_BUILDER_UPDATE_EVENT_KEY);
+    this.eventType = params.eventType;
+    this.queryBuilderId = params.queryBuilderId;
+    this.value = params.value;
+    this.eventData = params.eventData;
+  }
+}
 
 export type QueryBuilderState = {
   /**
@@ -83,7 +132,7 @@ export type CoreQueryBuilderProps = {
   /**
    * Callback when a new query is updated
    */
-  onQueryUpdate?(id: string, query: ISyntheticSqon): void;
+  onQueryUpdate?(query: ISyntheticSqon): void;
 
   /**
    * Callback when a new query is deleted
@@ -116,7 +165,7 @@ export type CoreQueryBuilderProps = {
   onQuerySelectChange?(selectedIndexes: number[]): void;
 
   /**
-   * Callback when the active query changes
+   * Callback when the active query sqon changes
    */
   onActiveQueryChange?(sqon: ISyntheticSqon): void;
 
@@ -264,11 +313,6 @@ export type QueryBuilderInstance = {
    *  Call this function to change the combine operator of a Query
    */
   changeQueryCombineOperator: (id: string, operator: BooleanOperators) => void;
-
-  /**
-   * Call this function to set the Queries list
-   */
-  setRawQueries(activeQueryId: string, newQueries: ISyntheticSqon[]): void;
 
   /**
    * Call this function to reset the Queries
@@ -441,10 +485,13 @@ export const createQueryBuilder = (
     createQuery: ({ id = v4(), op = BooleanOperators.and, content }) => {
       const newQuery: ISyntheticSqon = { id, op, content };
 
-      queryBuilder.setRawQueries(
-        newQuery.id,
-        cleanUpQueries([...queryBuilder.getRawQueries(), newQuery])
-      );
+      queryBuilder.setState((prev) => ({
+        ...prev,
+        activeQueryId: newQuery.id,
+        queries: cleanUpQueries([...queryBuilder.getRawQueries(), newQuery]),
+      }));
+
+      queryBuilder.coreProps.onActiveQueryChange?.(newQuery);
       queryBuilder.coreProps.onQueryCreate?.(newQuery);
 
       return newQuery.id;
@@ -491,18 +538,15 @@ export const createQueryBuilder = (
         queryBuilder.getSelectedQueryIndexes().length > 1
       );
     },
-    setRawQueries: (activeQueryId, newQueries) => {
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        activeQueryId,
-        queries: newQueries,
-      }));
-    },
     resetQueries: (activeQueryId) => {
+      const newActiveQuery = getDefaultSyntheticSqon(activeQueryId);
+
+      queryBuilder.coreProps.onActiveQueryChange?.(newActiveQuery);
+
       queryBuilder.setState((prev) => ({
         ...prev,
         activeQueryId,
-        queries: [getDefaultSyntheticSqon(activeQueryId)],
+        queries: [newActiveQuery],
       }));
     },
     combineSelectedQueries: (operator: BooleanOperators) => {

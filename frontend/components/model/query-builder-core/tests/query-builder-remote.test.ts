@@ -7,8 +7,16 @@ import {
   jest,
 } from "@jest/globals";
 import type { Mock } from "jest-mock";
-import { CoreQueryBuilderProps } from "../query-builder";
-import { ISyntheticSqon } from "../../sqon";
+import {
+  CoreQueryBuilderProps,
+  QueryBuilderRemoteState,
+  QueryBuilderUpdateEventType,
+} from "../query-builder";
+import {
+  ISyntheticSqon,
+  MERGE_VALUES_STRATEGIES,
+  TermOperators,
+} from "../../sqon";
 import { queryBuilderRemote } from "../query-builder-remote";
 
 class LocalStorageMock {
@@ -106,11 +114,305 @@ describe("SavedFilters Manipulation", () => {
       dispatchEvent: mockDispatchEvent,
     };
 
-    queryBuilderRemote.setLocalQueryBuilderState(qbId, defaultProps.state);
+    queryBuilderRemote.setLocalQueryBuilderState(qbId, {
+      eventType: QueryBuilderUpdateEventType.SET_STATE,
+      eventData: defaultProps.state,
+      value: defaultProps.state,
+    });
   });
 
-  it("test remote", () => {
-    let state = queryBuilderRemote.getLocalQueryBuilderState(qbId);
-    expect(state).toEqual(defaultProps.state);
+  it("should add query", () => {
+    const newQuery: ISyntheticSqon = {
+      id: mockUUID,
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["something"],
+            field: "field",
+          },
+          op: "in",
+        },
+      ],
+    };
+
+    const qbState = queryBuilderRemote.getLocalQueryBuilderState(qbId);
+    expect(qbState?.queries).toHaveLength(2);
+
+    queryBuilderRemote.addQuery(qbId, newQuery);
+
+    const qbStateUpdated = queryBuilderRemote.getLocalQueryBuilderState(qbId);
+
+    expect(qbStateUpdated?.queries).toHaveLength(3);
+    expect(qbStateUpdated?.queries).toContainEqual(newQuery);
   });
+
+  it("should return the active query", () => {
+    const activeQuery = queryBuilderRemote.getActiveQuery(qbId);
+    expect(activeQuery).toEqual(defaultQueries[0]);
+  });
+
+  it("should update query", () => {
+    const queryToUpdate: ISyntheticSqon = {
+      id: defaultQueries[0].id,
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["new-value"],
+            field: "field1",
+          },
+          op: "in",
+        },
+      ],
+    };
+
+    const qbState = queryBuilderRemote.getLocalQueryBuilderState(qbId);
+    expect(qbState?.queries).toHaveLength(2);
+
+    queryBuilderRemote.updateQuery(qbId, queryToUpdate);
+
+    const qbStateUpdated = queryBuilderRemote.getLocalQueryBuilderState(qbId);
+
+    expect(qbStateUpdated?.queries).toHaveLength(2);
+    expect(qbStateUpdated?.queries).toContainEqual(queryToUpdate);
+  });
+
+  it("should update query when query doesn't exist", () => {
+    const queryToUpdate: ISyntheticSqon = {
+      id: "unexistent-query-id",
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["new-value"],
+            field: "field1",
+          },
+          op: "in",
+        },
+      ],
+    };
+
+    expect(() => queryBuilderRemote.updateQuery(qbId, queryToUpdate)).toThrow(
+      Error
+    );
+  });
+
+  it("should update active query field - MERGE_VALUES_STRATEGIES -> OVERRIDE_VALUES", () => {
+    const activeQuery: ISyntheticSqon = {
+      id: "active-query-id",
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["value"],
+            field: "field1",
+          },
+          op: "in",
+        },
+      ],
+    };
+
+    const newState: QueryBuilderRemoteState = {
+      ...defaultProps.state,
+      activeQueryId: activeQuery.id,
+      queries: [...defaultProps.state.queries, activeQuery],
+    };
+
+    queryBuilderRemote.setLocalQueryBuilderState(qbId, {
+      eventType: QueryBuilderUpdateEventType.SET_STATE,
+      eventData: newState,
+      value: newState,
+    });
+
+    const updatedQuery: ISyntheticSqon = {
+      id: activeQuery.id,
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["new-value"],
+            field: "field1",
+          },
+          op: "not-in",
+        },
+      ],
+    };
+
+    queryBuilderRemote.updateActiveQueryField(qbId, {
+      field: "field1",
+      value: ["new-value"],
+      operator: TermOperators["not-in"],
+      merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
+    });
+
+    const updatedActiveQuery = queryBuilderRemote.getActiveQuery(qbId);
+
+    expect(updatedActiveQuery.content).toHaveLength(1);
+    expect(updatedActiveQuery).toEqual(updatedQuery);
+  });
+
+  it("should update active query field - MERGE_VALUES_STRATEGIES -> APPEND_VALUES", () => {
+    const activeQuery: ISyntheticSqon = {
+      id: "active-query-id",
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["value"],
+            field: "field1",
+          },
+          op: "in",
+        },
+      ],
+    };
+
+    const newState: QueryBuilderRemoteState = {
+      ...defaultProps.state,
+      activeQueryId: activeQuery.id,
+      queries: [...defaultProps.state.queries, activeQuery],
+    };
+
+    queryBuilderRemote.setLocalQueryBuilderState(qbId, {
+      eventType: QueryBuilderUpdateEventType.SET_STATE,
+      eventData: newState,
+      value: newState,
+    });
+
+    const updatedQuery: ISyntheticSqon = {
+      id: activeQuery.id,
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["value", "new-value"],
+            field: "field1",
+          },
+          op: "not-in",
+        },
+      ],
+    };
+
+    queryBuilderRemote.updateActiveQueryField(qbId, {
+      field: "field1",
+      value: ["new-value"],
+      operator: TermOperators["not-in"],
+      merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
+    });
+
+    const updatedActiveQuery = queryBuilderRemote.getActiveQuery(qbId);
+
+    expect(updatedActiveQuery.content).toHaveLength(1);
+    expect(updatedActiveQuery).toEqual(updatedQuery);
+  });
+
+  it("should update active query field - Recurive - MERGE_VALUES_STRATEGIES -> APPEND_VALUES", () => {
+    const activeQuery: ISyntheticSqon = {
+      id: "active-query-id",
+      op: "and",
+      content: [
+        {
+          content: [
+            {
+              content: {
+                value: ["value"],
+                field: "field1",
+              },
+              op: "in",
+            },
+          ],
+          op: "and",
+        },
+      ],
+    };
+
+    const newState: QueryBuilderRemoteState = {
+      ...defaultProps.state,
+      activeQueryId: activeQuery.id,
+      queries: [...defaultProps.state.queries, activeQuery],
+    };
+
+    queryBuilderRemote.setLocalQueryBuilderState(qbId, {
+      eventType: QueryBuilderUpdateEventType.SET_STATE,
+      eventData: newState,
+      value: newState,
+    });
+
+    const updatedQuery: ISyntheticSqon = {
+      id: activeQuery.id,
+      op: "and",
+      content: [
+        {
+          content: [
+            {
+              content: {
+                value: ["value", "new-value"],
+                field: "field1",
+              },
+              op: "not-in",
+            },
+          ],
+          op: "and",
+        },
+      ],
+    };
+
+    queryBuilderRemote.updateActiveQueryField(qbId, {
+      field: "field1",
+      value: ["new-value"],
+      operator: TermOperators["not-in"],
+      merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
+    });
+
+    const updatedActiveQuery = queryBuilderRemote.getActiveQuery(qbId);
+
+    expect(updatedActiveQuery.content).toHaveLength(1);
+    expect(updatedActiveQuery).toEqual(updatedQuery);
+  });
+
+  it("should remove field when value list is empty", () => {
+    const activeQuery: ISyntheticSqon = {
+      id: "active-query-id",
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["value"],
+            field: "field1",
+          },
+          op: "in",
+        },
+      ],
+    };
+
+    const newState: QueryBuilderRemoteState = {
+      ...defaultProps.state,
+      activeQueryId: activeQuery.id,
+      queries: [...defaultProps.state.queries, activeQuery],
+    };
+
+    queryBuilderRemote.setLocalQueryBuilderState(qbId, {
+      eventType: QueryBuilderUpdateEventType.SET_STATE,
+      eventData: newState,
+      value: newState,
+    });
+
+    const updatedQuery: ISyntheticSqon = {
+      id: activeQuery.id,
+      op: "and",
+      content: [],
+    };
+
+    queryBuilderRemote.updateActiveQueryField(qbId, {
+      field: "field1",
+      value: [],
+    });
+
+    const updatedActiveQuery = queryBuilderRemote.getActiveQuery(qbId);
+
+    expect(updatedActiveQuery.content).toHaveLength(0);
+    expect(updatedActiveQuery).toEqual(updatedQuery);
+  });
+
+  // TOOD test updateQueryByTableFilter
 });

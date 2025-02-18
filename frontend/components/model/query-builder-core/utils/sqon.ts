@@ -261,6 +261,7 @@ export const deleteQueryAndSetNext = (
   queryBuilder: QueryBuilderInstance
 ) => {
   const queries = queryBuilder.getRawQueries();
+  const activeQueryId = queryBuilder.getState().activeQueryId;
 
   if (queries.length === 1) {
     queryBuilder.resetQueries(queryId);
@@ -276,6 +277,7 @@ export const deleteQueryAndSetNext = (
         queryIndex
       );
       const nextQuery = updatedQueries[nextSelectedIndex];
+
       let selectedQueryIndexes = queryBuilder.getSelectedQueryIndexes();
 
       if (selectedQueryIndexes.includes(queryIndex)) {
@@ -285,11 +287,19 @@ export const deleteQueryAndSetNext = (
         queryBuilder.coreProps.onQuerySelectChange?.(selectedQueryIndexes);
       }
 
+      const activeQueryStillExists = updatedQueries.find(
+        (query) => query.id === activeQueryId
+      );
+
       const newQueryState: Partial<QueryBuilderState> = {
-        activeQueryId: nextQuery.id,
+        activeQueryId: activeQueryStillExists ? activeQueryId : nextQuery.id,
         queries: updatedQueries,
         selectedQueryIndexes,
       };
+
+      if (!activeQueryStillExists) {
+        queryBuilder.coreProps.onActiveQueryChange?.(nextQuery);
+      }
 
       queryBuilder.setState((prev) => ({
         ...prev,

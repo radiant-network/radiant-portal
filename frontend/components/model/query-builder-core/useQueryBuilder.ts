@@ -5,11 +5,14 @@ import {
   getDefaultQueryBuilderState,
   QUERY_BUILDER_UPDATE_EVENT_KEY,
   QueryBuilderInstance,
+  QueryBuilderRemoteEvent,
+  QueryBuilderRemoteState,
   QueryBuilderState,
-  QueryBuilderUpdateEvent,
+  QueryBuilderUpdateEventType,
 } from "./query-builder";
 import { queryBuilderRemote } from "./query-builder-remote";
 import { PartialKeys } from "@/components/lib/utils";
+import { ISyntheticSqon } from "../sqon";
 
 export const useQueryBuilder = (
   props: PartialKeys<CoreQueryBuilderProps, "state">
@@ -33,25 +36,53 @@ export const useQueryBuilder = (
   );
 
   useEffect(() => {
-    const listener = (event: QueryBuilderUpdateEvent) => {
+    props.onStateChange?.(state);
+  }, [state]);
+
+  useEffect(() => {
+    const listener = (event: QueryBuilderRemoteEvent) => {
       if (event.queryBuilderId === props.id) {
+        if (event.eventType === QueryBuilderUpdateEventType.ADD_QUERY) {
+          const sqon = event.eventData as ISyntheticSqon;
+
+          props.onQueryCreate?.(sqon);
+
+          if (sqon.id === event.value.activeQueryId) {
+            props.onActiveQueryChange?.(sqon);
+          }
+        } else if (
+          event.eventType === QueryBuilderUpdateEventType.UPDATE_QUERY
+        ) {
+          const sqon = event.eventData as ISyntheticSqon;
+
+          props.onQueryUpdate?.(sqon);
+
+          if (sqon.id === event.value.activeQueryId) {
+            props.onActiveQueryChange?.(sqon);
+          }
+        }
+
         setState((prev) => {
           const newState: QueryBuilderState = {
             ...prev,
             ...event.value,
           };
 
-          props.onStateChange?.(newState);
-
           return newState;
         });
       }
     };
 
-    window.addEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener);
+    window.addEventListener(
+      QUERY_BUILDER_UPDATE_EVENT_KEY,
+      listener as EventListener
+    );
 
     return () => {
-      window.removeEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener);
+      window.removeEventListener(
+        QUERY_BUILDER_UPDATE_EVENT_KEY,
+        listener as EventListener
+      );
     };
   }, []);
 
@@ -65,8 +96,10 @@ export const useQueryBuilder = (
     },
     onStateChange: (newState) => {
       setState(newState);
-      props.onStateChange?.(newState);
-      queryBuilderRemote.setLocalQueryBuilderState(props.id, newState, true);
+      queryBuilderRemote.setLocalQueryBuilderState(props.id, {
+        value: newState,
+        skipEvent: true,
+      });
     },
   }));
 

@@ -187,11 +187,11 @@ export const createQuery = (
         };
         updatedQueries[currentQueryIndex] = newQuery;
 
-        queryBuilder.setRawQueries(
-          queryBuilder.coreProps.state.activeQueryId,
-          cleanUpQueries(updatedQueries)
-        );
-        queryBuilder.coreProps.onQueryUpdate?.(queryId, newQuery);
+        queryBuilder.setState((prev) => ({
+          ...prev,
+          queries: cleanUpQueries(updatedQueries),
+        }));
+        queryBuilder.coreProps.onQueryUpdate?.(newQuery);
       }
     },
     duplicate: () => {

@@ -36,12 +36,18 @@ const QueryBar = ({ query }: QueryBarProps) => {
   const dict = useQueryBuilderDictContext();
   const { enableCombine } = useQueryBuilderContext();
 
+  const handleSetAsActive = () => {
+    if (!active) {
+      query.setAsActive();
+    }
+  };
+
   return (
     <QueryBarContext.Provider value={{ query }}>
       <div
         data-query-active={active}
         className="flex group/query"
-        onClick={() => query.setAsActive()}
+        onClick={handleSetAsActive}
       >
         <QueryBarIdentifier />
         {enableCombine && <QueryBarSelector />}

@@ -63,14 +63,40 @@ function App() {
       <SidenavFilters />
       <main className="flex-1 p-4 h-full">
         <h1 className="text-2xl font-bold">Variant</h1>
+        <Button
+          onClick={() => {
+            queryBuilderRemote.addQuery("variant", {
+              id: v4(),
+              op: "and",
+              content: [
+                {
+                  content: {
+                    value: ["something"],
+                    field: "field1",
+                  },
+                  op: "in",
+                },
+                {
+                  content: {
+                    value: ["something"],
+                    field: "field2",
+                  },
+                  op: "in",
+                },
+              ],
+            });
+          }}
+        >
+          Add Query
+        </Button>
         <QueryBuilder
           id="variant"
           enableCombine
           enableFavorite
           enableShowHideLabels
           queryCountIcon={UsersIcon}
-          onActiveQueryChange={(queryId) =>
-            console.log("onActiveQueryChange", queryId)
+          onActiveQueryChange={(sqon) =>
+            console.log("onActiveQueryChange", sqon)
           }
           onSavedFilterSave={() => console.log("onSavedFilterSave")}
           onQueryCreate={() => console.log("onQueryCreate")}
@@ -79,72 +105,6 @@ function App() {
           onQuerySelectChange={() => console.log("onQuerySelectChange")}
           onStateChange={(newState) => console.log("onStateChange", newState)}
           fetchQueryCount={() => Promise.resolve(15)}
-          initialState={{
-            activeQueryId: "1",
-            queries: [
-              {
-                id: "1",
-                op: "and",
-                content: [
-                  {
-                    content: {
-                      value: ["something"],
-                      field: "field1",
-                    },
-                    op: "in",
-                  },
-                  {
-                    content: {
-                      value: ["something"],
-                      field: "field2",
-                    },
-                    op: "in",
-                  },
-                ],
-              },
-              {
-                id: "2",
-                op: "and",
-                content: [
-                  {
-                    content: {
-                      value: ["something"],
-                      field: "field2",
-                    },
-                    op: "in",
-                  },
-                ],
-              },
-              {
-                id: "3",
-                op: "and",
-                content: [],
-              },
-            ],
-            savedFilters: [
-              {
-                id: "1123123",
-                title: "Filter 1",
-                queries: [
-                  {
-                    id: "4",
-                    op: "and",
-                    content: [
-                      {
-                        content: {
-                          value: ["something"],
-                          field: "field2",
-                        },
-                        op: "in",
-                      },
-                    ],
-                  },
-                ],
-                favorite: false,
-              },
-            ],
-            selectedQueryIndexes: [],
-          }}
         />
         <Table
           columns={columns}

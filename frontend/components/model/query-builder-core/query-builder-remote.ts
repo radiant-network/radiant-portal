@@ -14,9 +14,11 @@ import {
 import {
   getDefaultQueryBuilderState,
   QUERY_BUILDER_STATE_CACHE_KEY_PREFIX,
-  QUERY_BUILDER_UPDATE_EVENT_KEY,
+  QueryBuilderEventParams,
+  QueryBuilderRemoteEvent,
   QueryBuilderRemoteState,
-  QueryBuilderUpdateEvent,
+  QueryBuilderRemoteEventParams,
+  QueryBuilderUpdateEventType,
 } from "./query-builder";
 import isEmpty from "lodash/isEmpty";
 import {
@@ -30,29 +32,42 @@ import {
 } from "./utils/sqon";
 import { v4 } from "uuid";
 
+type SetLocalQBStateNoEvent = {
+  skipEvent: true;
+  value: QueryBuilderEventParams["value"];
+} & Partial<Record<Exclude<keyof QueryBuilderEventParams, "value">, never>>;
+
+type SetLocalQBStateWithEvent = QueryBuilderEventParams & {
+  skipEvent?: never | false | undefined;
+};
+
 /**
  * Set the state of a given QueryBuilder in the local storage and
  * dispatch an event (QUERY_BUILDER_UPDATE_EVENT_KEY) to notify other components of the change.
  */
 const setLocalQueryBuilderState = (
   queryBuilderId: string,
-  value: QueryBuilderRemoteState,
-  skipEvent: boolean = false
+  {
+    eventType,
+    eventData,
+    value,
+    skipEvent,
+  }: SetLocalQBStateWithEvent | SetLocalQBStateNoEvent
 ): void => {
-  const QBUpdateEvent: QueryBuilderUpdateEvent = new Event(
-    QUERY_BUILDER_UPDATE_EVENT_KEY
-  );
-
-  QBUpdateEvent.queryBuilderId = queryBuilderId;
-  QBUpdateEvent.value = value;
-
   window.localStorage.setItem(
     `${QUERY_BUILDER_STATE_CACHE_KEY_PREFIX}-${queryBuilderId}`,
     JSON.stringify(value)
   );
 
   if (!skipEvent) {
-    window.dispatchEvent(QBUpdateEvent);
+    const qbUpdateEvent = new QueryBuilderRemoteEvent({
+      queryBuilderId,
+      value,
+      eventType,
+      eventData,
+    } as QueryBuilderRemoteEventParams);
+
+    window.dispatchEvent(qbUpdateEvent);
   }
 };
 
@@ -63,7 +78,11 @@ const setDefaultLocalQueryBuilderState = (
   queryBuilderId: string
 ): QueryBuilderRemoteState => {
   const state = getDefaultQueryBuilderState();
-  setLocalQueryBuilderState(queryBuilderId, state);
+  setLocalQueryBuilderState(queryBuilderId, {
+    value: state,
+    eventType: QueryBuilderUpdateEventType.SET_STATE,
+    eventData: state,
+  });
   return state;
 };
 
@@ -108,18 +127,22 @@ const addQuery = (
   );
 
   setLocalQueryBuilderState(queryBuilderId, {
-    activeQueryId:
-      setAsActive || isActiveQueryEmpty
-        ? query.id
-        : (qbState?.activeQueryId ?? query.id),
-    queries: hasEmptyQuery
-      ? queries.map((q) => {
-          if (isEmptySqon(q)) {
-            return query;
-          }
-          return q;
-        })
-      : [...queries, query],
+    eventType: QueryBuilderUpdateEventType.ADD_QUERY,
+    eventData: query,
+    value: {
+      activeQueryId:
+        setAsActive || isActiveQueryEmpty
+          ? query.id
+          : (qbState?.activeQueryId ?? query.id),
+      queries: hasEmptyQuery
+        ? queries.map((q) => {
+            if (isEmptySqon(q)) {
+              return query;
+            }
+            return q;
+          })
+        : [...queries, query],
+    },
   });
 };
 
@@ -140,12 +163,19 @@ const getActiveQuery = (queryBuilderId: string): ISyntheticSqon => {
 const updateQuery = (queryBuilderId: string, query: ISyntheticSqon) => {
   const qbState = getLocalQueryBuilderState(queryBuilderId);
   const queryToUpdate = qbState?.queries?.find(({ id }) => id === query.id);
+
   if (queryToUpdate) {
     queryToUpdate.content = query.content;
     queryToUpdate.op = query.op;
+  } else {
+    throw new Error(`Query with id ${query.id} not found`);
   }
 
-  setLocalQueryBuilderState(queryBuilderId, qbState);
+  setLocalQueryBuilderState(queryBuilderId, {
+    eventType: QueryBuilderUpdateEventType.UPDATE_QUERY,
+    eventData: queryToUpdate,
+    value: qbState,
+  });
 };
 
 /**
@@ -322,21 +352,16 @@ const removePillFromActiveQuery = (
   queryBuilderId: string,
   pillId: string
 ): void => {
-  const qbState = getLocalQueryBuilderState(queryBuilderId);
-  const updatedQueries: ISyntheticSqon[] = qbState?.queries?.map(
-    (sqon: ISyntheticSqon) => {
-      const newContent = sqon.content.map(
-        (sqonContent: TSyntheticSqonContentValue) => {
-          if ((sqonContent as IValueFilter).id !== pillId) return sqonContent;
-        }
-      );
-      return { ...sqon, content: newContent.filter((el) => el !== undefined) };
-    }
-  );
-  setLocalQueryBuilderState(queryBuilderId, {
-    ...qbState,
-    queries: updatedQueries,
-  });
+  const activeQuery = getActiveQuery(queryBuilderId);
+
+  activeQuery.content = activeQuery.content
+    .filter(
+      (sqonContent: TSyntheticSqonContentValue) =>
+        (sqonContent as IValueFilter).id !== pillId
+    )
+    .filter((el) => el !== undefined);
+
+  updateQuery(queryBuilderId, activeQuery);
 };
 
 /*
@@ -355,6 +380,7 @@ const addPillToActiveQuery = (
 
 export const queryBuilderRemote = {
   addQuery,
+  updateQuery,
   getActiveQuery,
   updateActiveQueryField,
   updateActiveQueryFilters,

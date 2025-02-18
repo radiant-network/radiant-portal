@@ -16,51 +16,53 @@ import {
 import { BooleanOperators, ISyntheticSqon, IValueQuery } from "../../sqon";
 import { isEmptySqon } from "../utils/sqon";
 
+const defaultQueries: ISyntheticSqon[] = [
+  {
+    id: "1",
+    op: "and",
+    content: [
+      {
+        content: {
+          value: ["something"],
+          field: "field1",
+        },
+        op: "in",
+      },
+    ],
+  },
+  {
+    id: "2",
+    op: "and",
+    content: [
+      {
+        content: {
+          value: ["something-else"],
+          field: "field2",
+        },
+        op: "in",
+      },
+    ],
+  },
+  {
+    id: "3",
+    op: "and",
+    content: [
+      {
+        content: {
+          value: ["something-else"],
+          field: "field3",
+        },
+        op: "in",
+      },
+    ],
+  },
+];
+
 let defaultProps: CoreQueryBuilderProps = {
   id: "test-query-builder",
   state: {
     activeQueryId: "1",
-    queries: [
-      {
-        id: "1",
-        op: "and",
-        content: [
-          {
-            content: {
-              value: ["something"],
-              field: "field1",
-            },
-            op: "in",
-          },
-        ],
-      },
-      {
-        id: "2",
-        op: "and",
-        content: [
-          {
-            content: {
-              value: ["something-else"],
-              field: "field2",
-            },
-            op: "in",
-          },
-        ],
-      },
-      {
-        id: "3",
-        op: "and",
-        content: [
-          {
-            content: {
-              value: ["something-else"],
-              field: "field3",
-            },
-            op: "in",
-          },
-        ],
-      },
-    ],
+    queries: defaultQueries,
     selectedQueryIndexes: [],
     savedFilters: [],
   },
@@ -126,13 +128,27 @@ describe("Query Manipulation", () => {
     );
   });
 
-  it("should delete the query", () => {
+  it("should delete query and keep active query", () => {
+    expect(state.activeQueryId).toBe(defaultQueries[0].id);
     expect(state.queries.length).toBe(3);
 
     qb.getQuery("2")?.delete();
 
+    expect(state.activeQueryId).toBe(defaultQueries[0].id);
     expect(state.queries.length).toBe(2);
     expect(state.queries.find((q) => q.id === "2")).toBeUndefined();
+  });
+
+  it("should delete active query and set next query", () => {
+    expect(state.activeQueryId).toBe(defaultQueries[0].id);
+    expect(state.queries.length).toBe(3);
+
+    qb.getQuery("1")?.delete();
+
+    expect(state.activeQueryId).toBe(defaultQueries[1].id);
+    expect(state.queries.length).toBe(2);
+    expect(state.queries.find((q) => q.id === "1")).toBeUndefined();
+    expect(mockOnActiveQueryChange).toHaveBeenCalledTimes(1);
   });
 
   it("should update the query", () => {
