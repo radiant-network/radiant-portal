@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -14,9 +14,12 @@ import {
 } from "../QueryBuilder.Context";
 import List from "@/components/base/List/List";
 import ListItemAction from "@/components/base/List/ListItemWithAction";
-import SavedFiltersDeleteDialog from "./SavedFilters.DeleteDialog";
 import { SavedFilterInstance } from "@/components/model/query-builder-core";
 import SavedFiltersEditDialog from "./SavedFilters.EditDialog";
+import { frCA } from "date-fns/locale/fr-CA";
+import { formatDistance } from "date-fns";
+import { ISavedFilter } from "@/components/model/saved-filter";
+import { openDeleteSavedFilterAlert } from "../alerts";
 
 const SavedFiltersManageDialog = ({
   open,
@@ -70,23 +73,45 @@ const SavedFilterListItem = ({
   savedFilter: SavedFilterInstance;
 }) => {
   const dict = useQueryBuilderDictContext();
+
   const [openDelete, setOpenDelete] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+
+  const getLastSaveAtDisplay = useCallback(() => {
+    const savedFilterObj = savedFilter.raw() as ISavedFilter & {
+      updated_date: string;
+    };
+
+    if (!savedFilterObj.updated_date) {
+      return dict.savedFilter.manageDialog.lastSaveAt.replace(
+        "{lastSaveAt}",
+        "n/a"
+      );
+    }
+
+    const lastSaveAt = formatDistance(
+      new Date(),
+      new Date(savedFilterObj.updated_date),
+      {
+        locale: frCA,
+      }
+    );
+
+    return dict.savedFilter.manageDialog.lastSaveAt.replace(
+      "{lastSaveAt}",
+      lastSaveAt
+    );
+  }, [savedFilter.raw()]);
 
   return (
     <>
       <ListItemAction
         key={savedFilter.id}
         title={savedFilter.raw().title}
-        description={`${dict.savedFilter.manageDialog.lastSaveAt}: TODO`}
+        description={getLastSaveAtDisplay()}
         className="border-b last:border-b-0 relative px-3 py-2 group"
         onEdit={() => setOpenEdit(true)}
-        onDelete={() => setOpenDelete(true)}
-      />
-      <SavedFiltersDeleteDialog
-        open={openDelete}
-        onOpenChange={setOpenDelete}
-        savedFilter={savedFilter}
+        onDelete={() => openDeleteSavedFilterAlert(savedFilter, dict)}
       />
       <SavedFiltersEditDialog
         open={openEdit}

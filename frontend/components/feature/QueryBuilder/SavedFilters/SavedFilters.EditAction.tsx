@@ -6,9 +6,10 @@ import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
 const SavedFiltersEditAction = () => {
   const { queryBuilder } = useQueryBuilderContext();
-  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   const [open, setOpen] = useState(false);
+
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   return (
     <>

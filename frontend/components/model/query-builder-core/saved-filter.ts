@@ -1,6 +1,6 @@
 import { ISyntheticSqon } from "../sqon";
 import { createQuery, QueryInstance } from "./query";
-import { ISavedFilter } from "../saved-filter";
+import { ISavedFilter, SavedFilterTypeEnum } from "../saved-filter";
 import { QueryBuilderInstance } from "./query-builder";
 import { v4 } from "uuid";
 import { getNewSavedFilter } from "./utils/saved-filter";
@@ -41,7 +41,7 @@ export type CoreSavedFilter = {
   /**
    * Call this function to delete the SavedFilter
    */
-  delete(): void;
+  delete(): void | Promise<void>;
 
   /**
    * Call this function to duplicate the SavedFilter
@@ -49,9 +49,15 @@ export type CoreSavedFilter = {
   duplicate(): void;
 
   /**
-   * Call this function to save the SavedFilter
+   * Call this function to save (update) the SavedFilter
    */
-  save(params?: { title?: string; favorite?: boolean }): void;
+  save(
+    type: SavedFilterTypeEnum,
+    params?: {
+      title?: string;
+      favorite?: boolean;
+    }
+  ): Promise<void>;
 
   /**
    * Call this function to discard the changes made to the SavedFilter
@@ -141,48 +147,63 @@ export const createSavedFilter = (
         console.error("Can only duplicate the selected saved filter");
       }
     },
-    delete: () => {
-      queryBuilder.coreProps.onSavedFilterDelete?.(savedFilterId);
+    delete: async () => {
+      return Promise.resolve(
+        queryBuilder.coreProps.onSavedFilterDelete?.(savedFilterId)
+      ).then(() => {
+        const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();
 
-      const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();
+        queryBuilder.setState((prev) => ({
+          ...prev,
+          activeQueryId: newActiveQueryId,
+          queries: newSavedFilter.queries,
+          savedFilters: [
+            ...prev.savedFilters.filter(
+              (filter) => filter.id !== savedFilterId
+            ),
+            newSavedFilter,
+          ],
+        }));
 
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        activeQueryId: newActiveQueryId,
-        queries: newSavedFilter.queries,
-        savedFilters: [
-          ...prev.savedFilters.filter((filter) => filter.id !== savedFilterId),
-          newSavedFilter,
-        ],
-      }));
-
-      queryBuilder.coreProps.onSavedFilterCreate?.(newSavedFilter);
+        queryBuilder.coreProps.onSavedFilterCreate?.(newSavedFilter);
+      });
     },
-    save: (params) => {
+    save: async (type, params) => {
       const savedFilterToSave: ISavedFilter = {
         ..._savedFilter.raw(),
         title: params?.title || _savedFilter.raw().title,
-        favorite:
-          params?.favorite === undefined
-            ? _savedFilter.raw().favorite
-            : params.favorite,
-        queries: formatQueriesWithPill(queryBuilder.getRawQueries()),
+        favorite: params?.favorite || _savedFilter.raw().favorite,
+        type,
+        queries: queryBuilder.getRawQueries(),
       };
 
-      queryBuilder.coreProps.onSavedFilterSave?.(savedFilterToSave);
+      const asCustomPill = type === SavedFilterTypeEnum.Query;
 
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        savedFilters: prev.savedFilters.map((filter) =>
-          filter.id === savedFilterId
-            ? {
-                ...savedFilterToSave,
-                isNew: false,
-                isDirty: false,
-              }
-            : filter
-        ),
-      }));
+      if (asCustomPill) {
+        return Promise.resolve(
+          queryBuilder.coreProps.onCustomPillUpdate?.(savedFilterToSave)
+        ).then(() => {});
+      } else {
+        return Promise.resolve(
+          queryBuilder.coreProps.onSavedFilterUpdate?.({
+            ...savedFilterToSave,
+            queries: formatQueriesWithPill(savedFilterToSave.queries),
+          })
+        ).then(() =>
+          queryBuilder.setState((prev) => ({
+            ...prev,
+            savedFilters: prev.savedFilters.map((filter) =>
+              filter.id === savedFilterId
+                ? {
+                    ...savedFilterToSave,
+                    isNew: false,
+                    isDirty: false,
+                  }
+                : filter
+            ),
+          }))
+        );
+      }
     },
     select: () => {
       queryBuilder.setState((prev) => ({

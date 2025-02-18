@@ -1,58 +1,44 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/base/ui/alert-dialog";
 import { Button } from "@/components/base/ui/button";
 import {
   useQueryBuilderContext,
   useQueryBuilderDictContext,
 } from "../QueryBuilder.Context";
+import { useAlertDialog } from "@/components/base/Dialog/AlertDialogProvider";
+import { useCallback } from "react";
 
 const QueryToolbarClearAction = () => {
+  const alertDialog = useAlertDialog();
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
+  const openAlertDialog = useCallback(
+    () =>
+      alertDialog.open({
+        type: "warning",
+        title: dict.toolbar.clearAllDialog.title,
+        description: dict.toolbar.clearAllDialog.description,
+        cancelProps: {
+          children: dict.toolbar.clearAllDialog.cancel,
+        },
+        actionProps: {
+          variant: "destructive",
+          onClick: () => queryBuilder.clearQueries(),
+          children: dict.toolbar.clearAllDialog.ok,
+        },
+      }),
+    [queryBuilder, dict]
+  );
+
   if (queryBuilder.getQueries().length > 1) {
     return (
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            variant="link"
-            size="xs"
-            className="no-underline enabled:hover:no-underline"
-          >
-            {dict.toolbar.clearAll}
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {dict.toolbar.clearAllDialog.title}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {dict.toolbar.clearAllDialog.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              {dict.toolbar.clearAllDialog.cancel}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() => queryBuilder.clearQueries()}
-            >
-              {dict.toolbar.clearAllDialog.ok}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Button
+        variant="link"
+        size="xs"
+        className="no-underline enabled:hover:no-underline"
+        onClick={openAlertDialog}
+      >
+        {dict.toolbar.clearAll}
+      </Button>
     );
   }
 

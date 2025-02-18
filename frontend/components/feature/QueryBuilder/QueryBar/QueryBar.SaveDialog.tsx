@@ -19,65 +19,57 @@ import {
   FormMessage,
 } from "@/components/base/ui/form";
 import { Input } from "@/components/base/ui/input";
-import { SavedFilterInstance } from "@/components/model/query-builder-core";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../QueryBuilder.Context";
+import { QueryInstance } from "@/components/model/query-builder-core";
+import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
 
 const formSchema = z.object({
-  title: z.string().min(2, "Min 2 characters").max(50, "Max 50 characters"),
+  title: z.string(),
 });
 
-const SavedFiltersEditDialog = ({
+const QueryBarSaveDialog = ({
   open,
   onOpenChange,
-  savedFilter,
+  query,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  savedFilter: SavedFilterInstance | null;
+  query: QueryInstance;
 }) => {
   const dict = useQueryBuilderDictContext();
-  const { queryBuilder } = useQueryBuilderContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     values: {
-      title: savedFilter?.raw().title || "",
+      title: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (savedFilter) {
-      savedFilter.save({ title: values.title });
-    } else {
-      queryBuilder.saveNewFilter({ title: values.title });
-    }
-
-    onOpenChange(false);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    return Promise.resolve(query.saveAsCustomPill(values.title)).then(() =>
+      onOpenChange(false)
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{dict.savedFilter.editDialog.title}</DialogTitle>
+          <DialogTitle>{dict.queryBar.saveDialog.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    {dict.savedFilter.editDialog.fields.title.label}
+                    {dict.queryBar.saveDialog.fields.title.label}
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder={
-                        dict.savedFilter.editDialog.fields.title.placeholder
+                        dict.queryBar.saveDialog.fields.title.placeholder
                       }
                       {...field}
                     />
@@ -86,14 +78,15 @@ const SavedFiltersEditDialog = ({
                 </FormItem>
               )}
             />
+            <div className="text-sm">{dict.queryBar.saveDialog.notice}</div>
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">
-                  {dict.savedFilter.editDialog.cancel}
+                  {dict.queryBar.saveDialog.cancel}
                 </Button>
               </DialogClose>
               <Button type="submit" variant="primary">
-                {dict.savedFilter.editDialog.ok}
+                {dict.queryBar.saveDialog.ok}
               </Button>
             </DialogFooter>
           </form>
@@ -103,4 +96,4 @@ const SavedFiltersEditDialog = ({
   );
 };
 
-export default SavedFiltersEditDialog;
+export default QueryBarSaveDialog;

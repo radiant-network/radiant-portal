@@ -10,7 +10,7 @@ const QueryBarIdentifier = () => {
 
   return (
     <div
-      className="w-1 rounded-s-sm bg-[--gray-5] group-data-[query-active=true]/query:bg-[--gold-6]"
+      className="w-1 rounded-s-sm bg-[--gray-6] group-data-[query-active=true]/query:bg-[--query-bar-identifier-active]"
       style={refColor ? { backgroundColor: refColor } : {}}
     />
   );

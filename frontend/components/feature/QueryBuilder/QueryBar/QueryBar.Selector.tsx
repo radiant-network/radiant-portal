@@ -10,8 +10,8 @@ const QueryBarSelector = () => {
         className="
       flex gap-2 items-center py-2 px-4 border-l border-t border-b 
       border-[--gray-5] bg-[--gray-2]
-      group-data-[query-active=true]/query:border-[--gold-5]
-      group-data-[query-active=true]/query:bg-[--gold-2]
+      group-data-[query-active=true]/query:border-[--query-bar-border-color-active]
+      group-data-[query-active=true]/query:bg-[--query-bar-bg-active]
       "
       >
         <Checkbox

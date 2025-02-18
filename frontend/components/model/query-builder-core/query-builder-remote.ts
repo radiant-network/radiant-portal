@@ -1,3 +1,15 @@
+/**
+ * QueryBuilder Remote
+ *
+ * This module provides a set of functions to interact with a given QueryBuilder state
+ * from anywhere in the page where the QueryBuilder is used.
+ *
+ * The QueryBuilder state is stored in the local storage.
+ *
+ * When the QueryBuilder state is updated using the query builder remote,
+ * an event is dispatched to notify the QueryBuilder component of the change.
+ */
+
 import {
   BooleanOperators,
   IRemoteComponent,
@@ -13,12 +25,7 @@ import {
 } from "../sqon";
 import {
   getDefaultQueryBuilderState,
-  QUERY_BUILDER_STATE_CACHE_KEY_PREFIX,
-  QueryBuilderEventParams,
-  QueryBuilderRemoteEvent,
-  QueryBuilderRemoteState,
-  QueryBuilderRemoteEventParams,
-  QueryBuilderUpdateEventType,
+  QueryBuilderState,
 } from "./query-builder";
 import isEmpty from "lodash/isEmpty";
 import {
@@ -40,6 +47,68 @@ type SetLocalQBStateNoEvent = {
 type SetLocalQBStateWithEvent = QueryBuilderEventParams & {
   skipEvent?: never | false | undefined;
 };
+
+export const QUERY_BUILDER_UPDATE_EVENT_KEY = "QBCacheUpdate";
+export const QUERY_BUILDER_STATE_CACHE_KEY_PREFIX = "query-builder-cache";
+
+export type QueryBuilderRemoteState = Pick<
+  QueryBuilderState,
+  "activeQueryId" | "queries"
+>;
+
+interface BaseQueryBuilderEventData {
+  eventType: QueryBuilderUpdateEventType;
+  eventData: any;
+  value: QueryBuilderRemoteState;
+}
+
+interface AddQueryEventParams extends BaseQueryBuilderEventData {
+  eventType: QueryBuilderUpdateEventType.ADD_QUERY;
+  eventData: ISyntheticSqon;
+  value: QueryBuilderRemoteState;
+}
+
+interface UpdateQueryEventParams extends BaseQueryBuilderEventData {
+  eventType: QueryBuilderUpdateEventType.UPDATE_QUERY;
+  eventData: ISyntheticSqon;
+  value: QueryBuilderRemoteState;
+}
+
+interface SetStateEventParams extends BaseQueryBuilderEventData {
+  eventType: QueryBuilderUpdateEventType.SET_STATE;
+  eventData: QueryBuilderRemoteState;
+  value: QueryBuilderRemoteState;
+}
+
+export type QueryBuilderEventParams =
+  | AddQueryEventParams
+  | UpdateQueryEventParams
+  | SetStateEventParams;
+
+export type QueryBuilderRemoteEventParams = QueryBuilderEventParams & {
+  queryBuilderId: string;
+};
+
+export enum QueryBuilderUpdateEventType {
+  ADD_QUERY = "ADD_QUERY",
+  UPDATE_QUERY = "UPDATE_QUERY",
+  SET_STATE = "SET_STATE",
+}
+
+export class QueryBuilderRemoteEvent extends Event {
+  eventData: ISyntheticSqon | QueryBuilderRemoteState;
+  eventType: QueryBuilderUpdateEventType;
+  value: QueryBuilderRemoteState;
+  queryBuilderId: string;
+
+  constructor(params: QueryBuilderRemoteEventParams) {
+    super(QUERY_BUILDER_UPDATE_EVENT_KEY);
+    this.eventType = params.eventType;
+    this.queryBuilderId = params.queryBuilderId;
+    this.value = params.value;
+    this.eventData = params.eventData;
+  }
+}
 
 /**
  * Set the state of a given QueryBuilder in the local storage and
@@ -179,7 +248,7 @@ const updateQuery = (queryBuilderId: string, query: ISyntheticSqon) => {
 };
 
 /**
- * Update the active query field of a given QueryBuilder
+ * Update a field value of the active query of a given QueryBuilder
  *
  * @param params
  * ```json
@@ -345,6 +414,20 @@ const updateQueryByTableFilter = (
       : removeFieldFromSqon(params.field, getActiveQuery(queryBuilderId))
   );
 
+/*
+ * Add a pill to the active query of a given QueryBuilder
+ */
+const addPillToActiveQuery = (
+  queryBuilderId: string,
+  pill: IValueQuery
+): void => {
+  const activeQuery = getActiveQuery(queryBuilderId);
+  updateQuery(queryBuilderId, {
+    ...activeQuery,
+    content: [...activeQuery.content, pill],
+  });
+};
+
 /**
  * Remove a pill from the active query of a given QueryBuilder
  */
@@ -362,20 +445,6 @@ const removePillFromActiveQuery = (
     .filter((el) => el !== undefined);
 
   updateQuery(queryBuilderId, activeQuery);
-};
-
-/*
- * Add a pill to the active query of a given QueryBuilder
- */
-const addPillToActiveQuery = (
-  queryBuilderId: string,
-  pill: IValueQuery
-): void => {
-  const activeQuery = getActiveQuery(queryBuilderId);
-  updateQuery(queryBuilderId, {
-    ...activeQuery,
-    content: [...activeQuery.content, pill],
-  });
 };
 
 export const queryBuilderRemote = {

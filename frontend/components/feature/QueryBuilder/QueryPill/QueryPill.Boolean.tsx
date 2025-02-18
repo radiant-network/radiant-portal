@@ -6,7 +6,11 @@ import {
   isSet,
   isUploadedList,
 } from "@/components/model/query-builder-core";
-import { ISyntheticSqon } from "@/components/model/sqon";
+import {
+  ISqonGroupFilter,
+  ISyntheticSqon,
+  IValueQuery,
+} from "@/components/model/sqon";
 import QueryPillField from "./QueryPill.Field";
 import QueryPillRemoteComponent from "./QueryPill.RemoteComponent";
 import QueryPillUploadList from "./QueryPill.UploadList";
@@ -25,9 +29,9 @@ const QueryPillBoolean = ({ sqon }: QueryPillBooleanProps) => (
     {sqon.content.map((f: any, i: number) => (
       <div key={i} className="flex items-center py-[2px]">
         {f.skipBooleanOperatorCheck ? (
-          <QueryPillIsolatedBoolean />
+          <QueryPillIsolatedBoolean groupFilter={f as ISqonGroupFilter} />
         ) : isCustomPill(f) ? (
-          <QueryPillCustom />
+          <QueryPillCustom valueQuery={f as IValueQuery} />
         ) : isBooleanOperator(f) ? (
           <QueryPillBoolean sqon={f} />
         ) : isReference(f) ? (
@@ -35,7 +39,7 @@ const QueryPillBoolean = ({ sqon }: QueryPillBooleanProps) => (
         ) : isSet(f) ? (
           <QueryPillSet valueFilter={f} />
         ) : isUploadedList(f) ? (
-          <QueryPillUploadList />
+          <QueryPillUploadList valueFilter={f} />
         ) : isRemoteComponent(f) ? (
           <QueryPillRemoteComponent />
         ) : (

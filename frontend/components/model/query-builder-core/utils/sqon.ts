@@ -29,6 +29,7 @@ import { v4 } from "uuid";
 import merge from "lodash/merge";
 import union from "lodash/union";
 import { queryBuilderRemote } from "../query-builder-remote";
+import { ISavedFilter } from "../../saved-filter";
 
 /**
  * Check if a synthetic sqon is empty.
@@ -97,21 +98,24 @@ export const isFieldOperator = (
 /**
  * Check if a query filter is a boolean one.
  */
-export const isBooleanFilter = (query: IValueFilter): boolean =>
-  query.content.value.every((val) =>
+export const isBooleanFilter = (valueFilter: IValueFilter): boolean =>
+  valueFilter.content.value.every((val) =>
     ["false", "true"].includes(val.toString().toLowerCase())
   );
 
 /**
  * Check if a query filter is a range one.
  */
-export const isRangeFilter = (query: IValueFilter): boolean =>
-  query.op === RangeOperators.in ? false : query.op in RangeOperators;
+export const isRangeFilter = (valueFilter: IValueFilter): boolean =>
+  valueFilter.op === RangeOperators.in
+    ? false
+    : valueFilter.op in RangeOperators;
 
 /**
  * Check if a query filter is a custom pill.
  */
-export const isCustomPill = (query: IValueFilter): boolean => !!query.title;
+export const isCustomPill = (valueFilter: IValueFilter): boolean =>
+  !!valueFilter.title;
 
 /**
  * Generates an empty synthetic sqon
@@ -633,6 +637,32 @@ export const isIndexReferencedInSqon = (
         false
       )
     : typeof syntheticSqon === "number" && syntheticSqon === indexReference;
+
+export const updateQueriesWithCustomPill = (
+  queries: ISyntheticSqon[],
+  customPill: ISavedFilter
+): ISyntheticSqon[] => {
+  const queriesCloned = cloneDeep(queries);
+
+  return queriesCloned.map((query: ISyntheticSqon) => {
+    const newContent = query.content.map(
+      (filter: TSyntheticSqonContentValue) => {
+        if ((filter as IValueQuery).id === customPill.id) {
+          const newFilter: IValueQuery = {
+            id: customPill.id,
+            // Custom pills have only one query
+            content: customPill.queries[0].content,
+            op: (filter as IValueQuery).op,
+            title: customPill.title,
+          };
+          return newFilter;
+        }
+        return filter;
+      }
+    );
+    return { ...query, content: newContent };
+  });
+};
 
 export const formatQueriesWithPill = (
   queries: ISyntheticSqon[]

@@ -13,7 +13,11 @@ import {
   QueryBuilderInstance,
   QueryBuilderState,
 } from "../query-builder";
-import { ISavedFilter } from "../../saved-filter";
+import {
+  ISavedFilter,
+  IUserSavedFilter,
+  SavedFilterTypeEnum,
+} from "../../saved-filter";
 import { ISyntheticSqon } from "../../sqon";
 import { getDefaultSyntheticSqon } from "../utils/sqon";
 
@@ -63,7 +67,7 @@ let state: QueryBuilderState = defaultProps.state;
 
 let mockOnFilterCreate: Mock<void, [any]>;
 let mockOnFilterDelete: Mock<{ savedFilterId: string }, [any]>;
-let mockOnFilterSave: Mock<ISavedFilter, [any]>;
+let mockOnFilterUpdate: Mock<void | Promise<IUserSavedFilter>, [any]>;
 
 describe("SavedFilters Manipulation", () => {
   beforeAll(() => {
@@ -81,10 +85,10 @@ describe("SavedFilters Manipulation", () => {
 
     mockOnFilterCreate = jest.fn();
     mockOnFilterDelete = jest.fn();
-    mockOnFilterSave = jest.fn();
+    mockOnFilterUpdate = jest.fn();
     defaultProps.onSavedFilterCreate = mockOnFilterCreate;
     defaultProps.onSavedFilterDelete = mockOnFilterDelete;
-    defaultProps.onSavedFilterSave = mockOnFilterSave;
+    defaultProps.onSavedFilterUpdate = mockOnFilterUpdate;
 
     qb = createQueryBuilder({
       ...defaultProps,
@@ -93,7 +97,7 @@ describe("SavedFilters Manipulation", () => {
       },
       onSavedFilterCreate: mockOnFilterCreate,
       onSavedFilterDelete: mockOnFilterDelete,
-      onSavedFilterSave: mockOnFilterSave,
+      onSavedFilterUpdate: mockOnFilterUpdate,
     });
   });
 
@@ -353,7 +357,7 @@ describe("SavedFilters Manipulation", () => {
     expect(qb.getState().savedFilters[0].id).toBe("1");
     expect(qb.getState().savedFilters[0].queries).toEqual(defaultQueries);
 
-    qb.getSelectedSavedFilter()?.delete();
+    await qb.getSelectedSavedFilter()?.delete();
 
     // Cant test that qb.getSelectedSavedFilter() is the new saved filter
     // Since this would only work with the real useQueryBuilderHook.
@@ -449,7 +453,7 @@ describe("SavedFilters Manipulation", () => {
     expect(state.savedFilters[0].queries).toEqual(defaultQueries);
   });
 
-  it("should save filter", () => {
+  it("should save filter", async () => {
     const savedFilter: ISavedFilter = {
       id: "1",
       title: "Saved Filter 1",
@@ -488,7 +492,7 @@ describe("SavedFilters Manipulation", () => {
 
     const updatedTitle = "Saved Filter 1 Updated";
 
-    qb.getSelectedSavedFilter()?.save({
+    await qb.getSelectedSavedFilter()?.save(SavedFilterTypeEnum.Filter, {
       title: updatedTitle,
       favorite: true,
     });
@@ -498,17 +502,20 @@ describe("SavedFilters Manipulation", () => {
     expect(state.savedFilters[0].isNew).toBeFalsy();
     expect(state.savedFilters[0].title).toEqual(updatedTitle);
     expect(state.savedFilters[0].favorite).toBeTruthy();
-    expect(mockOnFilterSave).toBeCalledTimes(1);
-    expect(mockOnFilterSave).toBeCalledWith({
+    expect(mockOnFilterUpdate).toBeCalledTimes(1);
+    expect(mockOnFilterUpdate).toBeCalledWith({
       id: "1",
       title: updatedTitle,
       queries: newQueries,
       favorite: true,
+      type: SavedFilterTypeEnum.Filter,
     });
   });
 
+  // add test for save (custom pill)
   // Test hasQueries
   // Test isFavorite
   // Test isNew
   // Test isDirty
+  // Test saveNewFilter
 });

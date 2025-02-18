@@ -10,26 +10,26 @@ const QueryToolbarAddAction = () => {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
-  if (!queryBuilder.canCombine()) {
-    return (
-      <Button
-        size="xs"
-        variant="primary"
-        disabled={queryBuilder.hasEmptyQuery()}
-        onClick={() =>
-          queryBuilder.createQuery({
-            op: BooleanOperators.and,
-            content: [],
-          })
-        }
-      >
-        <PlusIcon />
-        {dict.toolbar.newQuery}
-      </Button>
-    );
+  if (queryBuilder.canCombine()) {
+    return null;
   }
 
-  return null;
+  return (
+    <Button
+      size="xs"
+      variant="primary"
+      disabled={queryBuilder.hasEmptyQuery()}
+      onClick={() =>
+        queryBuilder.createQuery({
+          op: BooleanOperators.and,
+          content: [],
+        })
+      }
+    >
+      <PlusIcon />
+      {dict.toolbar.newQuery}
+    </Button>
+  );
 };
 
 export default QueryToolbarAddAction;

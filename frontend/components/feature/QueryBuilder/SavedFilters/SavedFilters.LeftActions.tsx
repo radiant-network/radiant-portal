@@ -11,6 +11,7 @@ const SavedFiltersLeftActions = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => {
   const { queryBuilder } = useQueryBuilderContext();
+
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   return (
@@ -27,7 +28,7 @@ const SavedFiltersLeftActions = ({
           : queryBuilder.coreProps.savedFilterDefaultTitle}
       </div>
       <TooltipProvider>
-        <div className="flex" onClick={(e) => e.stopPropagation()}>
+        <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
           <SavedFiltersEditAction />
           <SavedFiltersStarAction />
           <SavedFiltersUndoAction />

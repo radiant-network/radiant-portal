@@ -3,8 +3,13 @@ import {
   CoreQueryBuilderProps,
   QueryBuilderInstance,
 } from "@/components/model/query-builder-core";
+import {
+  ISavedFilter,
+  IUserSavedFilter,
+} from "@/components/model/saved-filter";
 import { ISyntheticSqon } from "@/components/model/sqon";
 import { LucideProps } from "lucide-react";
+import { ReactElement } from "react";
 
 export type ArrayTenOrMore<T> = {
   0: T;
@@ -19,6 +24,25 @@ export type ArrayTenOrMore<T> = {
   9: T;
   10: T;
 } & Array<T>;
+
+type QueryPillCustomConfig = {
+  /**
+   * Query builder id for custom pill edition
+   */
+  queryBuilderEditId: string;
+  /**
+   * Validate the title of the custom pill
+   */
+  validateCustomPillTitle: (title: string, tag: string) => Promise<boolean>;
+  /**
+   * Get the custom pill by id
+   */
+  fetchCustomPillById: (id: string) => Promise<IUserSavedFilter>;
+  /**
+   * Get the filters by custom pill id
+   */
+  fetchSavedFiltersByCustomPillId: (id: string) => Promise<ISavedFilter[]>;
+};
 
 type QueryBuilderSharedProps = {
   /**
@@ -36,13 +60,19 @@ type QueryBuilderSharedProps = {
   /**
    * Icon to use for the query count
    */
-  queryCountIcon?: React.ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-  >;
+  queryCountIcon?:
+    | React.ForwardRefExoticComponent<
+        Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+      >
+    | ReactElement;
   /**
    * Fetch the query count
    */
   fetchQueryCount: (sqon: ISyntheticSqon) => Promise<number>;
+  /**
+   * Custom pill configuration
+   */
+  customPillConfig?: QueryPillCustomConfig;
 };
 
 export type QueryBuilderProps = PartialKeys<
@@ -80,6 +110,22 @@ export type QueryBuilderDictionnary = {
       cancel: string;
       ok: string;
     };
+    customPill: {
+      createTooltip: string;
+      cannotSaveAsCustomPill: string;
+    };
+    saveDialog: {
+      title: string;
+      fields: {
+        title: {
+          label: string;
+          placeholder: string;
+        };
+      };
+      notice: string;
+      cancel: string;
+      ok: string;
+    };
   };
   queryPill: {
     operator: {
@@ -88,6 +134,18 @@ export type QueryBuilderDictionnary = {
       or: string;
     };
     facet: (key: string) => React.ReactNode;
+    customPill: {
+      editDialog: {
+        title: string;
+        cancel: string;
+        ok: string;
+      };
+      cantBeEmptyDialod: {
+        title: string;
+        description: string;
+        ok: string;
+      };
+    };
   };
   toolbar: {
     combine: string;
@@ -132,7 +190,9 @@ export type QueryBuilderDictionnary = {
     manageDialog: {
       title: string;
       close: string;
-      lastSaveAt: string;
+      lastSaveAt:
+        | `${string}{lastSaveAt}${string}`
+        | `${string}${string}{lastSaveAt}`;
     };
     newFilter: string;
     saveTooltip: {

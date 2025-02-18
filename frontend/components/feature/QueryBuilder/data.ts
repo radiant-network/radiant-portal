@@ -8,6 +8,24 @@ export const defaultDictionnary: QueryBuilderDictionnary = {
       cancel: "Cancel",
       ok: "Delete",
     },
+    customPill: {
+      createTooltip: "Create a custom query",
+      cannotSaveAsCustomPill:
+        "Custom queries cannot include other custom queries",
+    },
+    saveDialog: {
+      title: "Save this query",
+      fields: {
+        title: {
+          label: "Query name",
+          placeholder: "Untitled query",
+        },
+      },
+      notice:
+        "You will find your saved queries in the sidebar under the “Queries” heading.",
+      cancel: "Cancel",
+      ok: "Save",
+    },
   },
   queryPill: {
     operator: {
@@ -16,6 +34,18 @@ export const defaultDictionnary: QueryBuilderDictionnary = {
       or: "or",
     },
     facet: (key) => key,
+    customPill: {
+      editDialog: {
+        title: "Edit custom query",
+        cancel: "Cancel",
+        ok: "Save",
+      },
+      cantBeEmptyDialod: {
+        title: "Query cannot be empty",
+        description: "Your custom query must contain at least one criteria.",
+        ok: "Close",
+      },
+    },
   },
   toolbar: {
     combine: "Combine",
@@ -63,7 +93,7 @@ export const defaultDictionnary: QueryBuilderDictionnary = {
     manageDialog: {
       title: "Manage filters",
       close: "Close",
-      lastSaveAt: "Last saved at",
+      lastSaveAt: "Last saved at: {lastSaveAt} ago",
     },
     newFilter: "New filter",
     saveTooltip: {

@@ -602,3 +602,5 @@ describe("Query Manipulation", () => {
     expect(qb.getQuery("2")?.isReferencedInActiveQuery()).toBe(false);
   });
 });
+
+// TEST saveAsCustomPill

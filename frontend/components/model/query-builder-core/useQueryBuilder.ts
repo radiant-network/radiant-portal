@@ -3,14 +3,15 @@ import {
   CoreQueryBuilderProps,
   createQueryBuilder,
   getDefaultQueryBuilderState,
-  QUERY_BUILDER_UPDATE_EVENT_KEY,
   QueryBuilderInstance,
-  QueryBuilderRemoteEvent,
-  QueryBuilderRemoteState,
   QueryBuilderState,
-  QueryBuilderUpdateEventType,
 } from "./query-builder";
-import { queryBuilderRemote } from "./query-builder-remote";
+import {
+  QUERY_BUILDER_UPDATE_EVENT_KEY,
+  queryBuilderRemote,
+  QueryBuilderRemoteEvent,
+  QueryBuilderUpdateEventType,
+} from "./query-builder-remote";
 import { PartialKeys } from "@/components/lib/utils";
 import { ISyntheticSqon } from "../sqon";
 
@@ -36,7 +37,9 @@ export const useQueryBuilder = (
   );
 
   useEffect(() => {
-    props.onStateChange?.(state);
+    if (state) {
+      props.onStateChange?.(state);
+    }
   }, [state]);
 
   useEffect(() => {
@@ -65,6 +68,7 @@ export const useQueryBuilder = (
         setState((prev) => {
           const newState: QueryBuilderState = {
             ...prev,
+            ...props.state,
             ...event.value,
           };
 
@@ -84,7 +88,7 @@ export const useQueryBuilder = (
         listener as EventListener
       );
     };
-  }, []);
+  }, [props.state]);
 
   queryBuilderRef.current.setCoreProps((prevProps) => ({
     savedFilterDefaultTitle: "Untitled filter",

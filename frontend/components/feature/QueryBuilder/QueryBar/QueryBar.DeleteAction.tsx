@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/base/ui/button";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
+import { IconButton } from "@/components/base/Buttons";
 
 const QueryBarDeleteAction = () => {
   const { query } = useQueryBarContext();
@@ -16,7 +17,7 @@ const QueryBarDeleteAction = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <TrashIcon size={16} className="hover:cursor-pointer" />
+        <IconButton icon={TrashIcon} />
       </PopoverTrigger>
       <PopoverContent side="left" className="w-[200px] space-y-3">
         <span className="text-sm">{dict.queryBar.deletePopover.title}</span>

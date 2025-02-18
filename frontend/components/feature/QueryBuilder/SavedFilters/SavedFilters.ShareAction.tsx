@@ -13,6 +13,7 @@ import {
 const SavedFiltersShareAction = () => {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
+
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   const handleShare = () => {

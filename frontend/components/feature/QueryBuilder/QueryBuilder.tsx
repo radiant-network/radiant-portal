@@ -27,9 +27,11 @@ const QueryBuilder = ({
   queryCountIcon,
   fetchQueryCount,
   dictionnary = defaultDictionnary,
+  customPillConfig,
   ...hookProps
 }: QueryBuilderProps) => {
   const queryBuilder = useQueryBuilder(hookProps);
+
   const [showLabels, toggleLabels] = useState(initialShowHideLabels);
 
   const getQueryReferenceColor = useCallback(
@@ -50,6 +52,7 @@ const QueryBuilder = ({
       getQueryReferenceColor,
       fetchQueryCount,
       dictionnary,
+      customPillConfig,
     }),
     [
       queryBuilder,
@@ -62,6 +65,7 @@ const QueryBuilder = ({
       getQueryReferenceColor,
       fetchQueryCount,
       dictionnary,
+      customPillConfig,
     ]
   );
 

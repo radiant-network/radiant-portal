@@ -13,6 +13,7 @@ import {
 const SavedFiltersUndoAction = () => {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
+
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   if (!selectedSavedFilter?.isDirty()) {

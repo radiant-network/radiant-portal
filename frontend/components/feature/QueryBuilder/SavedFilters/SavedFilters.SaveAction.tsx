@@ -9,10 +9,12 @@ import {
   useQueryBuilderContext,
   useQueryBuilderDictContext,
 } from "../QueryBuilder.Context";
+import { SavedFilterTypeEnum } from "@/components/model/saved-filter";
 
 const SavedFiltersSaveAction = () => {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
+
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
   const isDisabled = selectedSavedFilter
     ? !selectedSavedFilter.isDirty()
@@ -20,7 +22,7 @@ const SavedFiltersSaveAction = () => {
 
   const handleSave = () => {
     if (selectedSavedFilter) {
-      selectedSavedFilter.save();
+      selectedSavedFilter.save(SavedFilterTypeEnum.Filter);
     } else {
       queryBuilder.saveNewFilter();
     }

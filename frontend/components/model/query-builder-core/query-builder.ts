@@ -4,7 +4,7 @@ import {
   TSyntheticSqonContent,
 } from "../sqon";
 import { getNewSavedFilter } from "./utils/saved-filter";
-import { ISavedFilter } from "../saved-filter";
+import { ISavedFilter, IUserSavedFilter } from "../saved-filter";
 import { createSavedFilter, SavedFilterInstance } from "./saved-filter";
 import { createQuery, QueryInstance } from "./query";
 import { v4 } from "uuid";
@@ -13,68 +13,6 @@ import {
   formatQueriesWithPill,
   getDefaultSyntheticSqon,
 } from "./utils/sqon";
-
-export const QUERY_BUILDER_STATE_CACHE_KEY_PREFIX = "query-builder-cache";
-export const QUERY_BUILDER_UPDATE_EVENT_KEY = "QBCacheUpdate";
-
-export type QueryBuilderRemoteState = Pick<
-  QueryBuilderState,
-  "activeQueryId" | "queries"
->;
-
-interface BaseQueryBuilderEventData {
-  eventType: QueryBuilderUpdateEventType;
-  eventData: any;
-  value: QueryBuilderRemoteState;
-}
-
-interface AddQueryEventParams extends BaseQueryBuilderEventData {
-  eventType: QueryBuilderUpdateEventType.ADD_QUERY;
-  eventData: ISyntheticSqon;
-  value: QueryBuilderRemoteState;
-}
-
-interface UpdateQueryEventParams extends BaseQueryBuilderEventData {
-  eventType: QueryBuilderUpdateEventType.UPDATE_QUERY;
-  eventData: ISyntheticSqon;
-  value: QueryBuilderRemoteState;
-}
-
-interface SetStateEventParams extends BaseQueryBuilderEventData {
-  eventType: QueryBuilderUpdateEventType.SET_STATE;
-  eventData: QueryBuilderRemoteState;
-  value: QueryBuilderRemoteState;
-}
-
-export type QueryBuilderEventParams =
-  | AddQueryEventParams
-  | UpdateQueryEventParams
-  | SetStateEventParams;
-
-export type QueryBuilderRemoteEventParams = QueryBuilderEventParams & {
-  queryBuilderId: string;
-};
-
-export enum QueryBuilderUpdateEventType {
-  ADD_QUERY = "ADD_QUERY",
-  UPDATE_QUERY = "UPDATE_QUERY",
-  SET_STATE = "SET_STATE",
-}
-
-export class QueryBuilderRemoteEvent extends Event {
-  eventData: ISyntheticSqon | QueryBuilderRemoteState;
-  eventType: QueryBuilderUpdateEventType;
-  value: QueryBuilderRemoteState;
-  queryBuilderId: string;
-
-  constructor(params: QueryBuilderRemoteEventParams) {
-    super(QUERY_BUILDER_UPDATE_EVENT_KEY);
-    this.eventType = params.eventType;
-    this.queryBuilderId = params.queryBuilderId;
-    this.value = params.value;
-    this.eventData = params.eventData;
-  }
-}
 
 export type QueryBuilderState = {
   /**
@@ -140,24 +78,36 @@ export type CoreQueryBuilderProps = {
   onQueryDelete?(id: string): void;
 
   /**
+   * Callback when a SavedFilter is deleted
+   */
+  onSavedFilterDelete?(
+    id: string
+  ): { savedFilterId: string } | Promise<{ savedFilterId: string }>;
+
+  /**
    * Callback when a SavedFilter is created
    */
   onSavedFilterCreate?(filter: ISavedFilter): void;
 
   /**
-   * Callback when a SavedFilter is deleted
-   */
-  onSavedFilterDelete?(id: string): { savedFilterId: string };
-
-  /**
    * Callback when a SavedFilter is saved
    */
-  onSavedFilterSave?(filter: ISavedFilter): void;
+  onSavedFilterSave?(filter: ISavedFilter): void | Promise<IUserSavedFilter>;
 
   /**
-   * Callback when a SavedFilter favorite changes
+   * Callback when a SavedFilter is updated
    */
-  onSavedFilterFavoriteChange?(id: string, favorite: boolean): ISavedFilter;
+  onSavedFilterUpdate?(filter: ISavedFilter): void | Promise<IUserSavedFilter>;
+
+  /**
+   * Callback when a custom pill is saved
+   */
+  onCustomPillSave?(filter: ISavedFilter): void | Promise<IUserSavedFilter>;
+
+  /**
+   * Callback when a custom pill is updated
+   */
+  onCustomPillUpdate?(filter: ISavedFilter): void | Promise<IUserSavedFilter>;
 
   /**
    * Callback when a Query is selected
@@ -203,7 +153,10 @@ export type QueryBuilderInstance = {
   /**
    * Call this function to save the current filter
    */
-  saveNewFilter: (params?: { title?: string; favorite?: boolean }) => void;
+  saveNewFilter: (params?: {
+    title?: string;
+    favorite?: boolean;
+  }) => Promise<void>;
 
   /**
    * Call this function to create a new SavedFilter.
@@ -387,7 +340,7 @@ export const createQueryBuilder = (
         queries: [defaultQuery],
       }));
     },
-    saveNewFilter: (params) => {
+    saveNewFilter: async (params) => {
       const savedFilterToSave: ISavedFilter = {
         id: v4(),
         title:
@@ -395,22 +348,27 @@ export const createQueryBuilder = (
           queryBuilder.coreProps.savedFilterDefaultTitle ||
           "New Filter",
         favorite: params?.favorite === undefined ? false : params.favorite,
-        queries: formatQueriesWithPill(queryBuilder.getRawQueries()),
+        queries: queryBuilder.getRawQueries(),
       };
 
-      queryBuilder.coreProps.onSavedFilterSave?.(savedFilterToSave);
-
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        savedFilters: [
-          ...prev.savedFilters,
-          {
-            ...savedFilterToSave,
-            isNew: false,
-            isDirty: false,
-          },
-        ],
-      }));
+      return Promise.resolve(
+        queryBuilder.coreProps.onSavedFilterSave?.({
+          ...savedFilterToSave,
+          queries: formatQueriesWithPill(savedFilterToSave.queries),
+        })
+      ).then(() =>
+        queryBuilder.setState((prev) => ({
+          ...prev,
+          savedFilters: [
+            ...prev.savedFilters,
+            {
+              ...savedFilterToSave,
+              isNew: false,
+              isDirty: false,
+            },
+          ],
+        }))
+      );
     },
     createSavedFilter: () => {
       const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();

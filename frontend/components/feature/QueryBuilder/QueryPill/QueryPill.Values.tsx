@@ -20,25 +20,23 @@ const QueryPillValues = ({ valueFilter }: QueryPillValuesProps) => {
 
   return (
     <QueryPillValuesContainer canExpand={canExpand}>
-      <>
-        {valueFilter.content.overrideValuesName ? (
-          <div>
-            <span>{valueFilter.content.overrideValuesName}</span>
+      {valueFilter.content.overrideValuesName ? (
+        <div>
+          <span>{valueFilter.content.overrideValuesName}</span>
+        </div>
+      ) : (
+        values.map((val, i) => (
+          <div key={`${val}-${i}`}>
+            <span>{val}</span>
+            {values.length - 1 > i &&
+              (valueFilter.op === FieldOperators.all ? (
+                <IntersectionOperator className="px-1" />
+              ) : (
+                <UnionOperator className="px-1" />
+              ))}
           </div>
-        ) : (
-          values.map((val, i) => (
-            <div key={`${val}-${i}`}>
-              <span>{val}</span>
-              {values.length - 1 > i &&
-                (valueFilter.op === FieldOperators.all ? (
-                  <IntersectionOperator className="px-1" />
-                ) : (
-                  <UnionOperator className="px-1" />
-                ))}
-            </div>
-          ))
-        )}
-      </>
+        ))
+      )}
       {canExpand && (
         <div className="absolute right-1">
           {expanded ? (

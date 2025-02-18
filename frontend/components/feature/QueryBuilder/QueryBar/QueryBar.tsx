@@ -18,7 +18,9 @@ const queryBar = tv({
   base: "flex flex-1 py-2 px-3 border ",
   variants: {
     active: {
-      true: ["border-[--gold-5] bg-[--gold-2]"],
+      true: [
+        "border-[--query-bar-border-color-active] bg-[--query-bar-bg-active]",
+      ],
       false: ["border-[--gray-5] bg-[--gray-2]"],
     },
   },

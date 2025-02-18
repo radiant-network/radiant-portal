@@ -18,10 +18,11 @@ const SavedFiltersSelect = () => {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
   const savedFilters = queryBuilder.getSavedFilters();
-  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   const [open, setOpen] = useState(false);
   const [openManage, setOpenManage] = useState(false);
+
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   const handleManageAction = () => {
     setOpen(false);
@@ -56,7 +57,7 @@ const SavedFiltersSelect = () => {
           <SelectSeparator />
           <Button
             size="sm"
-            className="w-full pl-1"
+            className="w-full pl-2 justify-start"
             onClick={handleManageAction}
           >
             {dict.savedFilter.manageFilters}

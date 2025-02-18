@@ -17,7 +17,7 @@ const SavedFiltersRightActions = ({
         className="flex gap-4 items-center"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="whitespace-nowrap">
+        <div className="flex gap-1.5 whitespace-nowrap">
           <TooltipProvider>
             <SavedFiltersNewAction />
             <SavedFiltersSaveAction />

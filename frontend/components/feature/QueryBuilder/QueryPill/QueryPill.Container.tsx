@@ -14,7 +14,7 @@ const QueryPillContainer = ({
 }: QueryPillContainerProps) => (
   <div
     className={cn(
-      "flex items-center rounded-sm p-[2px] bg-[--gray-4] group-data-[query-active=true]/query:bg-[--gold-5]",
+      "flex items-center rounded-sm p-[2px] bg-[--gray-4] group-data-[query-active=true]/query:bg-[--query-pill-bg-active]",
       className
     )}
     {...props}

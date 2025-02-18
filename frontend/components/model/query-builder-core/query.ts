@@ -1,5 +1,10 @@
 import isEmpty from "lodash/isEmpty";
-import { BooleanOperators, ISyntheticSqon, IValueQuery } from "../sqon";
+import {
+  BooleanOperators,
+  ISyntheticSqon,
+  IValueQuery,
+  TSyntheticSqonContentValue,
+} from "../sqon";
 import { QueryBuilderInstance } from "./query-builder";
 import {
   changeCombineOperatorForQuery,
@@ -11,6 +16,8 @@ import {
   removeQueryFromSqon,
 } from "./utils/sqon";
 import cloneDeep from "lodash/cloneDeep";
+import { ISavedFilter, SavedFilterTypeEnum } from "../saved-filter";
+import { v4 } from "uuid";
 
 export type CoreQuery = {
   /**
@@ -42,6 +49,11 @@ export type CoreQuery = {
    * Call this function to update the Query
    */
   update(data: Omit<ISyntheticSqon, "id">): void;
+
+  /**
+   * Call this function to save the Query as a custom pill
+   */
+  saveAsCustomPill(title: string): void | Promise<void>;
 
   /**
    * Call this function to duplicate the Query
@@ -108,6 +120,11 @@ export type CoreQuery = {
    * Call this function to know if the Query is referenced in the active query
    */
   isReferencedInActiveQuery(): boolean;
+
+  /**
+   * Call this function to know if the Query has a custom pill
+   */
+  hasCustomPill(): boolean;
 };
 
 export type QueryInstance = CoreQuery;
@@ -168,6 +185,31 @@ export const createQuery = (
       }
 
       return queries.length > 1 && query.isNotEmpty();
+    },
+    saveAsCustomPill: async (title) => {
+      const customPill: ISavedFilter = {
+        favorite: false,
+        id: v4(),
+        queries: [query.raw()],
+        title,
+        type: SavedFilterTypeEnum.Query,
+      };
+
+      return Promise.resolve(
+        queryBuilder.coreProps.onCustomPillSave?.(customPill)
+      ).then(() =>
+        query.update({
+          ...query.raw(),
+          content: [
+            {
+              id: customPill.id,
+              op: customPill.queries[0].op,
+              content: customPill.queries[0].content,
+              title: customPill.title,
+            },
+          ],
+        })
+      );
     },
     delete: () => {
       deleteQueryAndSetNext(queryId, queryBuilder);
@@ -251,6 +293,15 @@ export const createQuery = (
       }
 
       return false;
+    },
+    hasCustomPill: () => {
+      return query
+        .raw()
+        .content.some(
+          (queryPart: TSyntheticSqonContentValue) =>
+            (queryPart as IValueQuery).title ||
+            !(queryPart as IValueQuery).content
+        );
     },
   };
 

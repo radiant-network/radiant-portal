@@ -13,6 +13,7 @@ import {
 const SavedFiltersStarAction = () => {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder, enableFavorite } = useQueryBuilderContext();
+
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   if (!enableFavorite) {

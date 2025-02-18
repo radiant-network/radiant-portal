@@ -1,5 +1,4 @@
 import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 import useSWR from "swr";
 import React from "react";
@@ -12,6 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/base/ui/accordion";
 import { occurrencesApi } from "@/utils/api";
+import { SearchIcon } from "lucide-react";
 
 type OccurrenceAggregationInput = {
   seqId: string;
@@ -19,35 +19,37 @@ type OccurrenceAggregationInput = {
 };
 
 const fetcher = (input: OccurrenceAggregationInput): Promise<Aggregation[]> => {
-  return occurrencesApi.aggregateOccurrences(input.seqId, input.aggregationBody).then((response) => response.data);
+  return occurrencesApi
+    .aggregateOccurrences(input.seqId, input.aggregationBody)
+    .then((response) => response.data);
 };
 
 function useAggregationBuilder(
   field: string,
   size: number = 30,
-  shouldFetch: boolean = false,
+  shouldFetch: boolean = false
 ) {
   return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
     shouldFetch
       ? {
-        seqId: "5011",
-        aggregationBody: {
-          field: field,
-          size: size,
-          sqon: {
-            content: {
-              field: "impact_score",
-              value: [4],
+          seqId: "5011",
+          aggregationBody: {
+            field: field,
+            size: size,
+            sqon: {
+              content: {
+                field: "impact_score",
+                value: [4],
+              },
+              op: SqonOpEnum.In,
             },
-            op: SqonOpEnum.In,
           },
-        },
-      }
+        }
       : null,
     fetcher,
     {
       revalidateOnFocus: false,
-    },
+    }
   );
 }
 
@@ -57,7 +59,7 @@ function FilterBuilder({ field }: { field: string }) {
   let { data } = useAggregationBuilder(field, undefined, !collapsed);
 
   data?.sort((a, b) => b.count! - a.count!);
-  console.log('data in FilterBuilder:', data, ' -- ', field);
+  console.log("data in FilterBuilder:", data, " -- ", field);
 
   function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
     e.stopPropagation();
@@ -75,8 +77,9 @@ function FilterBuilder({ field }: { field: string }) {
           <div className="flex items-center justify-between w-full">
             <span>{field}</span>
             {!collapsed && (
-              <MagnifyingGlassIcon
-                className="h-5 w-5 z-40"
+              <SearchIcon
+                size={18}
+                className="z-40"
                 aria-hidden
                 onClick={handleSearch}
               />

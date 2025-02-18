@@ -2,7 +2,7 @@ import { tv } from "tailwind-variants";
 
 export const baseButtonVariants = tv({
   slots: {
-    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   },
   variants: {
     variant: {
@@ -85,7 +85,7 @@ export const iconButtonVariants = tv({
   variants: {
     size: {
       default: {
-        base: "size-8",
+        base: "size-6",
         icon: "size-4",
       },
       xs: {
@@ -93,15 +93,15 @@ export const iconButtonVariants = tv({
         icon: "size-[14px]",
       },
       sm: {
-        base: "size-7",
+        base: "size-6",
         icon: "size-4",
       },
       md: {
-        base: "size-8",
+        base: "size-7",
         icon: "size-5",
       },
       lg: {
-        base: "size-11",
+        base: "size-8",
         icon: "size-6",
       },
     },

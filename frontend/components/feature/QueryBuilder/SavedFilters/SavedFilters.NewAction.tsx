@@ -9,40 +9,35 @@ import {
   useQueryBuilderContext,
   useQueryBuilderDictContext,
 } from "../QueryBuilder.Context";
-import SavedFiltersOvewriteDialog from "./SavedFilters.OverwriteDialog";
-import { useState } from "react";
+import { openOverwriteSavedFilterAlert } from "../alerts";
 
 const SavedFiltersNewAction = () => {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
-  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
-  const [open, toggleOpen] = useState(false);
+  const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   const handleNew = () => {
     if (selectedSavedFilter?.isDirty()) {
-      toggleOpen(true);
+      openOverwriteSavedFilterAlert(queryBuilder, dict);
     } else {
       queryBuilder.createSavedFilter();
     }
   };
 
   return (
-    <>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex">
-            <IconButton
-              icon={PlusIcon}
-              onClick={handleNew}
-              disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}
-            />
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>{dict.savedFilter.newFilter}</TooltipContent>
-      </Tooltip>
-      <SavedFiltersOvewriteDialog open={open} onOpenChange={toggleOpen} />
-    </>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex">
+          <IconButton
+            icon={PlusIcon}
+            onClick={handleNew}
+            disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}
+          />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{dict.savedFilter.newFilter}</TooltipContent>
+    </Tooltip>
   );
 };
 

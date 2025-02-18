@@ -1,8 +1,9 @@
 import {
   AlertDialogActionProps,
   AlertDialogCancelProps,
-  AlertDialogType,
 } from "../ui/alert-dialog";
+
+export type AlertDialogType = "success" | "info" | "warning" | "error";
 
 interface OpenAlertDialogBaseProps {
   title: string;

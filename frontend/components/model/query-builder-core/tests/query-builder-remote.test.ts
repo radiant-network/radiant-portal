@@ -7,17 +7,17 @@ import {
   jest,
 } from "@jest/globals";
 import type { Mock } from "jest-mock";
-import {
-  CoreQueryBuilderProps,
-  QueryBuilderRemoteState,
-  QueryBuilderUpdateEventType,
-} from "../query-builder";
+import { CoreQueryBuilderProps } from "../query-builder";
 import {
   ISyntheticSqon,
   MERGE_VALUES_STRATEGIES,
   TermOperators,
 } from "../../sqon";
-import { queryBuilderRemote } from "../query-builder-remote";
+import {
+  queryBuilderRemote,
+  QueryBuilderRemoteState,
+  QueryBuilderUpdateEventType,
+} from "../query-builder-remote";
 
 class LocalStorageMock {
   store: Record<string, string>;
@@ -415,4 +415,5 @@ describe("SavedFilters Manipulation", () => {
   });
 
   // TOOD test updateQueryByTableFilter
+  // TODO test updateActiveQueryFilters
 });
