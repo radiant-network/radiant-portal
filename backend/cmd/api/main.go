@@ -78,10 +78,13 @@ func main() {
 	occurrencesGroup := r.Group("/occurrences")
 
 	role := os.Getenv("KEYCLOAK_CLIENT_ROLE")
-
-	occurrencesGroup.Use(ginkeycloak.NewAccessBuilder(keycloakConfig).
+	// check if role belongs of either ResourceAccess or RealmAccess
+	roleAccessMiddleware := ginkeycloak.NewAccessBuilder(keycloakConfig).
 		RestrictButForRole(role).
-		Build())
+		RestrictButForRealm(role).
+		Build()
+
+	occurrencesGroup.Use(roleAccessMiddleware)
 
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres))
 	occurrencesGroup.POST("/:seq_id/count", server.OccurrencesCountHandler(repoStarrocks))
@@ -89,9 +92,7 @@ func main() {
 	occurrencesGroup.POST("/:seq_id/aggregate", server.OccurrencesAggregateHandler(repoStarrocks))
 
 	interpretationsGroup := r.Group("/interpretations")
-	interpretationsGroup.Use(ginkeycloak.NewAccessBuilder(keycloakConfig).
-		RestrictButForRole(role).
-		Build())
+	interpretationsGroup.Use(roleAccessMiddleware)
 	interpretationsGroup.GET("/pubmed/:citation_id", server.GetPubmedCitation(pubmedClient))
 	interpretationsGermlineGroup := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres.Interpretations))
