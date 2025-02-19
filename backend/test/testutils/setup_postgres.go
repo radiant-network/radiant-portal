@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"sync"
 	"testing"
 
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/database"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -70,17 +70,9 @@ func initPostgresDb() (*gorm.DB, error) {
 		return nil, err
 	}
 	if count,_ := res.RowsAffected(); count == 0 {
-		file, err := os.ReadFile("../../scripts/init-sql/init_postgres.sql")
-		if err != nil {
-			log.Fatal("Failed to read init_postgres.sql file: ", err)
-		}
-	
-		_, err = db.Exec(string(file))
-		if err != nil {
-			log.Fatal("failed to init postgres tables: ", err)
-		}
+		database.MigrateWithParams(host, port.Port(), "radiant", "radiant", "radiant", "disable", "")
 	} else {
-		log.Print("Schema already exists")
+		log.Print("radiant postgres database already setup")
 	}
 
 	return gormDb, nil
