@@ -72,8 +72,10 @@ func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *tes
 			],
 			"sqon":{
 				"op":"in",
-				"field": "filter",
-				"value": "PASS"
+				"content":{
+					"field": "filter",
+					"value": "PASS"
+				}
 		}
 		}`
 	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "hgvsg":"hgvsg1", "locus_id":1000, "pf":0.99, "seq_id":1, "variant_class":"class1", "zygosity":"HET"}]`
@@ -92,8 +94,10 @@ func Test_OccurrencesCount_Return_Expected_Count_When_Sqon_Specified(t *testing.
 			],
 			"sqon":{
 				"op":"in",
-				"field": "filter",
-				"value": "PASS"
+				"content":{
+					"field": "filter",
+					"value": "PASS"
+				}
 		    }
 		}`
 	testCount(t, "multiple", body, 1)
@@ -107,13 +111,17 @@ func Test_Aggregation(t *testing.T) {
 				"content": [
 					{
 						"op":"in",
-						"field": "filter",
-						"value": "PASS"
+						"content":{
+							"field": "filter",
+							"value": "PASS"
+						}
 					},
 					{
 						"op": "in",
-						"field": "zygosity",
-						"value": "HOM"
+						"content":{
+							"field": "zygosity",
+							"value": "HOM"
+						}
 					}            
 		
 				]
@@ -134,8 +142,10 @@ func Test_Filter_On_Consequence_Column(t *testing.T) {
 				"content": [
 					{
 						"op": "in",
-						"field": "impact_score",
-						"value": "3"
+						"content": {
+							"field": "impact_score",
+							"value": "3"
+						}
 					}            
 		
 				]
@@ -146,10 +156,10 @@ func Test_Filter_On_Consequence_Column(t *testing.T) {
 	testList(t, "multiple", body, expected)
 }
 
-type MockExternalClient struct {}
+type MockExternalClient struct{}
 
 func (m *MockExternalClient) GetCitationById(id string) (*types.PubmedCitation, error) {
-	if id == "1" { 
+	if id == "1" {
 		return &types.PubmedCitation{
 			ID: "1",
 			Nlm: types.PubmedCitationDetails{
@@ -158,7 +168,7 @@ func (m *MockExternalClient) GetCitationById(id string) (*types.PubmedCitation, 
 		}, nil
 	} else if id == "2" {
 		return nil, fmt.Errorf("error")
-	} 
+	}
 	return nil, nil
 }
 
@@ -178,9 +188,9 @@ func Test_GetInterpretationGermline(t *testing.T) {
 		assert.Equal(t, actual.Condition, "one condition")
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
-		assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation,  `{"error":"pubmed citation not found: 2"}`)
+		assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"error":"pubmed citation not found: 2"}`)
 		// Update with known pubmed
-		interpretation.Pubmed[0].CitationID = "1";
+		interpretation.Pubmed[0].CitationID = "1"
 		actual = assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 	})
@@ -198,8 +208,7 @@ func assertGetInterpretationGermline(t *testing.T, repo repository.Interpretatio
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
-
-func assertPostInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, interpretation * types.InterpretationGermline, expected string) (*types.InterpretationGermline) {
+func assertPostInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationGermline, expected string) *types.InterpretationGermline {
 	router := gin.Default()
 	router.POST("/interpretations/germline/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationGermline(repo))
 
@@ -212,7 +221,7 @@ func assertPostInterpretationGermline(t *testing.T, repo repository.Interpretati
 	if expected != "" {
 		assert.JSONEq(t, expected, w.Body.String())
 	}
-	if (status == http.StatusOK) {	// dont try to parse if not 200
+	if status == http.StatusOK { // dont try to parse if not 200
 		actual := &types.InterpretationGermline{}
 		json.Unmarshal(w.Body.Bytes(), actual)
 		return actual
@@ -236,9 +245,9 @@ func Test_GetInterpretationsomatic(t *testing.T) {
 		assert.Equal(t, actual.Oncogenicity, "one Oncogenicity")
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
-		assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation,  `{"error":"pubmed citation not found: 2"}`)
+		assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"error":"pubmed citation not found: 2"}`)
 		// Update with known pubmed
-		interpretation.Pubmed[0].CitationID = "1";
+		interpretation.Pubmed[0].CitationID = "1"
 		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 	})
@@ -256,8 +265,7 @@ func assertGetInterpretationSomatic(t *testing.T, repo repository.Interpretation
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
-
-func assertPostInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, interpretation * types.InterpretationSomatic, expected string) (* types.InterpretationSomatic) {
+func assertPostInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationSomatic, expected string) *types.InterpretationSomatic {
 	router := gin.Default()
 	router.POST("/interpretations/somatic/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationSomatic(repo))
 
@@ -270,7 +278,7 @@ func assertPostInterpretationSomatic(t *testing.T, repo repository.Interpretatio
 	if expected != "" {
 		assert.JSONEq(t, expected, w.Body.String())
 	}
-	if (status == http.StatusOK) {	// dont try to parse if not 200
+	if status == http.StatusOK { // dont try to parse if not 200
 		actual := &types.InterpretationSomatic{}
 		json.Unmarshal(w.Body.Bytes(), actual)
 		return actual
