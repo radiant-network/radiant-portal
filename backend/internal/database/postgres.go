@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"time"
 
@@ -58,16 +59,16 @@ func NewPostgresDB() (*gorm.DB, error) {
 
 func MigrateWithParams(path string, host string, port string, database string, user string, password string, sslmode string, sslcert string) {
 	log.Print("Migrating postgres database...")
-	url := fmt.Sprintf("postgres://%s:%s/%s?user=%s&password=%s", host, port, database, user, password)
+	conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?", user, url.QueryEscape(password), host, port, database)
 	if sslmode != "" {
-		url += fmt.Sprintf("&sslmode=%s", sslmode)
+		conn += fmt.Sprintf("&sslmode=%s", sslmode)
 	}
 	if sslcert != "" {
-		url += fmt.Sprintf("&sslrootcert=%s", sslcert)
+		conn += fmt.Sprintf("&sslrootcert=%s", url.QueryEscape(sslcert))
 	}
 	m, err := migrate.New(
         path,
-        url,
+        conn,
     )
     if err != nil {
         log.Fatal(err)
