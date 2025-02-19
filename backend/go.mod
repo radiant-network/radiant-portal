@@ -9,7 +9,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-migrate/migrate/v4 v4.18.2
-	github.com/golang/glog v1.2.1
+	github.com/golang/glog v1.2.4
 	github.com/joho/godotenv v1.5.1
 	github.com/magiconair/properties v1.8.7
 	github.com/stretchr/testify v1.10.0
