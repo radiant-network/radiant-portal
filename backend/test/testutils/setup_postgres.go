@@ -66,11 +66,11 @@ func initPostgresDb() (*gorm.DB, error) {
 	defer setupPostgresMutex.Unlock()
 	res, err := db.Exec("SELECT * FROM pg_catalog.pg_tables WHERE tablename = 'interpretation_germline'")
 	if err != nil {
-		log.Fatal("failed to verify if schema already exist in Postgres", err)
+		log.Fatal("failed to verify if table already exist in Postgres", err)
 		return nil, err
 	}
 	if count,_ := res.RowsAffected(); count == 0 {
-		database.MigrateWithParams(host, port.Port(), "radiant", "radiant", "radiant", "disable", "")
+		database.MigrateWithParams("file://../../scripts/init-sql/migrations", host, port.Port(), "radiant", "radiant", "radiant", "disable", "")
 	} else {
 		log.Print("radiant postgres database already setup")
 	}

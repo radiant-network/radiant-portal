@@ -56,17 +56,17 @@ func NewPostgresDB() (*gorm.DB, error) {
 	return db, nil
 }
 
-func MigrateWithParams(host string, port string, database string, user string, password string, sslmode string, sslcert string) {
+func MigrateWithParams(path string, host string, port string, database string, user string, password string, sslmode string, sslcert string) {
 	log.Print("Migrating postgres database...")
-	url := fmt.Sprintf("postgres://%s:%s/%s?user=%s&password=%s", dbPgHost, dbPgPort, dbPgDatabase, dbPgUser, dbPgPassword)
-	if dbPgSSLMode != "" {
-		url += fmt.Sprintf("&sslmode=%s", dbPgSSLMode)
+	url := fmt.Sprintf("postgres://%s:%s/%s?user=%s&password=%s", host, port, database, user, password)
+	if sslmode != "" {
+		url += fmt.Sprintf("&sslmode=%s", sslmode)
 	}
-	if dbPgSSLCert != "" {
-		url += fmt.Sprintf("&sslrootcert=%s", dbPgSSLCert)
+	if sslcert != "" {
+		url += fmt.Sprintf("&sslrootcert=%s", sslcert)
 	}
 	m, err := migrate.New(
-        "file://scripts/init-sql/migrations",
+        path,
         url,
     )
     if err != nil {
@@ -82,5 +82,5 @@ func MigrateWithParams(host string, port string, database string, user string, p
 }
 
 func MigrateWithEnvDefault() {
-	MigrateWithParams(dbPgHost, dbPgPort, dbPgDatabase, dbPgUser, dbPgPassword, dbPgSSLMode, dbPgSSLCert)
+	MigrateWithParams("file://scripts/init-sql/migrations", dbPgHost, dbPgPort, dbPgDatabase, dbPgUser, dbPgPassword, dbPgSSLMode, dbPgSSLCert)
 }
