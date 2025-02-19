@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -9,6 +10,9 @@ import (
 	"gorm.io/gorm"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -50,4 +54,33 @@ func NewPostgresDB() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	return db, nil
+}
+
+func MigrateWithParams(path string, host string, port string, database string, user string, password string, sslmode string, sslcert string) {
+	log.Print("Migrating postgres database...")
+	url := fmt.Sprintf("postgres://%s:%s/%s?user=%s&password=%s", host, port, database, user, password)
+	if sslmode != "" {
+		url += fmt.Sprintf("&sslmode=%s", sslmode)
+	}
+	if sslcert != "" {
+		url += fmt.Sprintf("&sslrootcert=%s", sslcert)
+	}
+	m, err := migrate.New(
+        path,
+        url,
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+    if err := m.Up(); err != nil {
+		if "no change" == err.Error() {
+			log.Print(err)
+		} else {
+        	log.Fatal(err)
+		}
+    }
+}
+
+func MigrateWithEnvDefault() {
+	MigrateWithParams("file://scripts/init-sql/migrations", dbPgHost, dbPgPort, dbPgDatabase, dbPgUser, dbPgPassword, dbPgSSLMode, dbPgSSLCert)
 }

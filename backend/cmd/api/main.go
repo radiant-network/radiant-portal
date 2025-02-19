@@ -46,6 +46,9 @@ func init() {
 func main() {
 	flag.Parse()
 	defer glog.Flush()
+	
+	database.MigrateWithEnvDefault()
+
 	// Initialize database connection
 	dbStarrocks, err := database.NewStarrocksDB()
 	if err != nil {

@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"sync"
 	"testing"
 
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/database"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -66,21 +66,13 @@ func initPostgresDb() (*gorm.DB, error) {
 	defer setupPostgresMutex.Unlock()
 	res, err := db.Exec("SELECT * FROM pg_catalog.pg_tables WHERE tablename = 'interpretation_germline'")
 	if err != nil {
-		log.Fatal("failed to verify if schema already exist in Postgres", err)
+		log.Fatal("failed to verify if table already exist in Postgres", err)
 		return nil, err
 	}
 	if count,_ := res.RowsAffected(); count == 0 {
-		file, err := os.ReadFile("../../scripts/init-sql/init_postgres.sql")
-		if err != nil {
-			log.Fatal("Failed to read init_postgres.sql file: ", err)
-		}
-	
-		_, err = db.Exec(string(file))
-		if err != nil {
-			log.Fatal("failed to init postgres tables: ", err)
-		}
+		database.MigrateWithParams("file://../../scripts/init-sql/migrations", host, port.Port(), "radiant", "radiant", "radiant", "disable", "")
 	} else {
-		log.Print("Schema already exists")
+		log.Print("radiant postgres database already setup")
 	}
 
 	return gormDb, nil

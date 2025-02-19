@@ -151,13 +151,3 @@ CREATE TABLE IF NOT EXISTS interpretation_somatic_history
     updated_by_name          TEXT,
     updated_at               TIMESTAMPTZ      DEFAULT NOW()
     );
-
-
-
-
-
-
-
-
-
-

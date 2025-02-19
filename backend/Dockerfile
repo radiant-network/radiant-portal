@@ -12,5 +12,6 @@ RUN apk add --no-cache ca-certificates
 
 FROM scratch
 COPY --from=builder /app/bin/main /main
+COPY --from=builder /app/scripts/init-sql/migrations /scripts/init-sql/migrations
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/main"]

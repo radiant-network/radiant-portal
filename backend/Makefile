@@ -72,3 +72,8 @@ doc:
 	@go run scripts/openapi/generate.go
 
 .PHONY: all build run test clean watch docker-run docker-down itest
+
+migrate:
+	@echo "Create database migration..."
+	@go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
+	@migrate create -ext sql -dir ./scripts/init-sql/migrations -seq "todo"
