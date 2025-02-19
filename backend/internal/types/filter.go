@@ -1,6 +1,7 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Goldziher/go-utils/sliceutils"
 	"slices"
@@ -146,18 +147,18 @@ func placeholders(count int) string {
 }
 
 func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNode, []Field, error) {
-	if sqon.Field != "" && sqon.Content != nil {
-		return nil, nil, fmt.Errorf("a sqon cannot have both content and field defined: %s", sqon.Field)
+	if sqon.Content.Leaf() != nil && sqon.Content.Children() != nil {
+		return nil, nil, fmt.Errorf("a sqon cannot have both content and field defined: %s", sqon.Content.Leaf().Field)
 	}
 	switch sqon.Op {
 
 	case "and", "or":
-		if len(sqon.Content) == 1 { // Flatten single child AND/OR nodes
-			return sqonToFilter(&sqon.Content[0], fields, excludedFields)
+		if len(sqon.Content.Children()) == 1 { // Flatten single child AND/OR nodes
+			return sqonToFilter(&sqon.Content.Children()[0], fields, excludedFields)
 		}
 		var children []FilterNode
 		var newVisitedFields []Field
-		for _, item := range sqon.Content {
+		for _, item := range sqon.Content.Children() {
 			child, meta, err := sqonToFilter(&item, fields, excludedFields)
 			if err != nil {
 				return nil, nil, err
@@ -178,10 +179,10 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 		return nil, nil, nil
 
 	case "not":
-		if len(sqon.Content) != 1 {
-			return nil, nil, fmt.Errorf("'not' operation must have exactly one child: %s", sqon.Field)
+		if len(sqon.Content.Children()) != 1 {
+			return nil, nil, errors.New("'not' operation must have exactly one child")
 		}
-		ast, meta, err := sqonToFilter(&sqon.Content[0], fields, excludedFields)
+		ast, meta, err := sqonToFilter(&sqon.Content.Children()[0], fields, excludedFields)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -192,13 +193,13 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 		return nil, nil, nil
 
 	case "in", "not-in", "<", ">", "<=", ">=", "between", "all":
-		if sqon.Value == nil {
-			return nil, nil, fmt.Errorf("value must be defined: %s", sqon.Field)
+		if sqon.Content.Leaf().Value == nil {
+			return nil, nil, fmt.Errorf("value must be defined: %s", sqon.Content.Leaf().Field)
 		}
-		meta := findByAlias(fields, sqon.Field)
+		meta := findByAlias(fields, sqon.Content.Leaf().Field)
 
 		if meta == nil || !meta.CanBeFiltered {
-			return nil, nil, fmt.Errorf("unauthorized or unknown field: %s", sqon.Field)
+			return nil, nil, fmt.Errorf("unauthorized or unknown field: %s", sqon.Content.Leaf().Field)
 		}
 
 		//Field is in list of excludedFields, return empty node
@@ -207,23 +208,23 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 		}
 
 		if sqon.Op == "between" {
-			values, ok := sqon.Value.([]interface{})
+			values, ok := sqon.Content.Leaf().Value.([]interface{})
 			if !ok {
-				return nil, nil, fmt.Errorf("value should be an array of 2 elements when operation is 'between': %s", sqon.Field)
+				return nil, nil, fmt.Errorf("value should be an array of 2 elements when operation is 'between': %s", sqon.Content.Leaf().Field)
 			}
 			if len(values) != 2 {
-				return nil, nil, fmt.Errorf("value array should contain exactly 2 elements when operation is 'between': %s", sqon.Field)
+				return nil, nil, fmt.Errorf("value array should contain exactly 2 elements when operation is 'between': %s", sqon.Content.Leaf().Field)
 			}
 		}
 
-		_, isMultipleValue := sqon.Value.([]interface{})
+		_, isMultipleValue := sqon.Content.Leaf().Value.([]interface{})
 		if sqon.Op != "in" && sqon.Op != "not-in" && sqon.Op != "all" && isMultipleValue {
-			return nil, nil, fmt.Errorf("operation %s must have exactly one value: %s", sqon.Op, sqon.Field)
+			return nil, nil, fmt.Errorf("operation %s must have exactly one value: %s", sqon.Op, sqon.Content.Leaf().Field)
 		}
 
 		return &ComparisonNode{
 			Operator: sqon.Op,
-			Value:    sqon.Value,
+			Value:    sqon.Content.Leaf().Value,
 			Field:    *meta,
 		}, []Field{*meta}, nil
 

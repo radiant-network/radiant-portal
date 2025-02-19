@@ -99,6 +99,12 @@ components:
         tumoral_type:
           type: string
       type: object
+    LeafContent:
+      properties:
+        field:
+          type: string
+        value: {}
+      type: object
     ListBody:
       description: Body of a list request
       properties:
@@ -187,16 +193,12 @@ components:
     Sqon:
       properties:
         content:
-          description: Nested Sqon
-          items:
-            $ref: '#/components/schemas/Sqon'
-          type: array
-          uniqueItems: false
-        field:
-          description: Field to filter on (for leaf nodes)
-          type: string
+          oneOf:
+          - $ref: '#/components/schemas/LeafContent'
+          - items:
+              $ref: '#/components/schemas/Sqon'
+            type: array
         op:
-          description: Operation at this node
           enum:
           - in
           - and
@@ -210,8 +212,6 @@ components:
           - not-in
           - all
           type: string
-        value:
-          description: Value(s) for the filter
       type: object
   securitySchemes:
     bearerauth:

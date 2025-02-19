@@ -36,10 +36,9 @@ func Test_SqonToFilter_Return_Expected_Filters(t *testing.T) {
 
 	sqon := Sqon{
 		Op: "and",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
-			{Op: ">", Field: "salary", Value: 50000},
-		},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
+			{Op: ">", Content: LeafContent{Field: "salary", Value: 50000}}},
 	}
 
 	ast, fields, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
@@ -71,10 +70,8 @@ func Test_SqonToFilter_Return_Expected_Filters(t *testing.T) {
 func Test_SqonToFilter_Return_Error_When_Op_Is_Invalid(t *testing.T) {
 	t.Parallel()
 	invalidSQON := Sqon{
-		Op: "invalid_op",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
-		},
+		Op:      "invalid_op",
+		Content: SqonArray{{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}}},
 	}
 
 	_, _, err := sqonToFilter(&invalidSQON, allEmpoyeeFields, nil)
@@ -85,10 +82,8 @@ func Test_SqonToFilter_Return_Error_When_Op_Is_Invalid(t *testing.T) {
 func Test_SqonToFilter_Return_Error_When_Field_Is_Invalid(t *testing.T) {
 	t.Parallel()
 	invalidFieldSQON := Sqon{
-		Op: "and",
-		Content: []Sqon{
-			{Op: "in", Field: "my_field", Value: []interface{}{30, 40}},
-		},
+		Op:      "and",
+		Content: SqonArray{{Op: "in", Content: LeafContent{Field: "my_field", Value: []interface{}{30, 40}}}},
 	}
 
 	_, _, err := sqonToFilter(&invalidFieldSQON, allEmpoyeeFields, nil)
@@ -100,9 +95,8 @@ func Test_SqonToFilter_Return_Error_When_Field_Is_Invalid(t *testing.T) {
 func Test_SqonToFilter_Return_Expected_Filter_With_Only_One_Field(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
-		Op:    "in",
-		Field: "age",
-		Value: []interface{}{30, 40},
+		Op:      "in",
+		Content: LeafContent{Field: "age", Value: []interface{}{30, 40}},
 	}
 
 	_, visitedFields, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
@@ -114,33 +108,33 @@ func Test_SqonToFilter_Return_Expected_Filter_With_Only_One_Field(t *testing.T) 
 func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_A_Single_Value(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
-		Op:    "between",
-		Field: "age",
-		Value: 30,
+		Op:      "between",
+		Content: LeafContent{Field: "age", Value: 30},
 	}
 
 	_, _, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "value should be an array of 2 elements when operation is 'between'")
 }
+
 func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_An_Array_With_One_Element(t *testing.T) {
 	t.Parallel()
+
 	sqon := Sqon{
-		Op:    "between",
-		Field: "age",
-		Value: []interface{}{30},
+		Op:      "between",
+		Content: LeafContent{Field: "age", Value: []interface{}{30}},
 	}
 
 	_, _, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "value array should contain exactly 2 elements when operation is 'between'")
 }
+
 func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_An_Array_With_More_Than_Two_Elements(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
-		Op:    "between",
-		Field: "age",
-		Value: []interface{}{30, 40, 50},
+		Op:      "between",
+		Content: LeafContent{Field: "age", Value: []interface{}{30, 40, 50}},
 	}
 
 	_, _, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
@@ -151,9 +145,8 @@ func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_An_Array_With_More_Th
 func Test_SqonToFilter_Return_Error_When_Single_Operator_Is_An_Array(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
-		Op:    ">=",
-		Field: "age",
-		Value: []interface{}{30, 40, 50},
+		Op:      ">=",
+		Content: LeafContent{Field: "age", Value: []interface{}{30, 40, 50}},
 	}
 
 	_, _, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
@@ -161,26 +154,11 @@ func Test_SqonToFilter_Return_Error_When_Single_Operator_Is_An_Array(t *testing.
 	assert.ErrorContains(t, err, "operation >= must have exactly one value: age")
 }
 
-func Test_SqonToFilter_Return_Error_When_Both_Content_And_Field_Defined(t *testing.T) {
-	t.Parallel()
-	sqon := Sqon{
-		Op:    "and",
-		Field: "age",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
-		},
-	}
-
-	_, _, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "a sqon cannot have both content and field defined")
-}
-
 func Test_SqonToFilter_Return_Error_When_Value_IsEmpty_With_In_Operator(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
-		Op:    "in",
-		Field: "age",
+		Op:      "in",
+		Content: LeafContent{Field: "age"},
 	}
 
 	_, _, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
@@ -192,9 +170,9 @@ func Test_SqonToFilter_Return_Error_When_Not_Operator_Has_More_Than_One_Content(
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
-			{Op: "in", Field: "salary", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
+			{Op: "in", Content: LeafContent{Field: "salary", Value: []interface{}{30, 40}}},
 		},
 	}
 
@@ -205,22 +183,22 @@ func Test_SqonToFilter_Return_Error_When_Not_Operator_Has_More_Than_One_Content(
 
 func Test_SqonToFilter_Return_Expected_Filters_When_Sqon_Is_Complex(t *testing.T) {
 	t.Parallel()
+
 	sqon := &Sqon{
 		Op: "or",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 			{
 				Op: "and",
-				Content: []Sqon{
-					{Op: "in", Field: "age", Value: []interface{}{10, 20}},
-					{Op: ">=", Field: "salary", Value: 50000},
+				Content: SqonArray{
+					{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{10, 20}}},
+					{Op: ">=", Content: LeafContent{Field: "salary", Value: 50000}},
 				},
 			},
-			{Op: "in", Field: "hobbies", Value: []interface{}{"soccer", "hiking"}},
-			{
-				Op: "not",
-				Content: []Sqon{
-					{Op: "not-in", Field: "city", Value: []interface{}{"New York", "Los Angeles"}},
+			{Op: "in", Content: LeafContent{Field: "hobbies", Value: []interface{}{"soccer", "hiking"}}},
+			{Op: "not",
+				Content: SqonArray{
+					{Op: "not-in", Content: LeafContent{Field: "city", Value: []interface{}{"New York", "Los Angeles"}}},
 				},
 			},
 		},
@@ -280,8 +258,8 @@ func Test_SqonToFilter_Return_Direct_Child_When_Or_Operator_With_Single_Child(t 
 	t.Parallel()
 	sqon := Sqon{
 		Op: "or",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 
@@ -300,8 +278,8 @@ func Test_SqonToFilter_Return_Direct_Child_When_And_Operator_With_Single_Child(t
 	t.Parallel()
 	sqon := Sqon{
 		Op: "and",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 
@@ -315,6 +293,7 @@ func Test_SqonToFilter_Return_Direct_Child_When_And_Operator_With_Single_Child(t
 		assert.Equal(t, []interface{}{30, 40}, inNode.Value)
 	}
 }
+
 func Test_ToSQL_Return_Expected_Sql_Filter_When_In(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: []interface{}{10, 20}, Field: ageField}

@@ -109,8 +109,10 @@ func Test_OccurrencesAggregateHandler(t *testing.T) {
 			"field": "zygosity",
 			"sqon":{
 				"op":"in",
-				"field": "filter",
-				"value": "PASS"
+				"content":{
+					"field": "filter",
+					"value": "PASS"
+				}
 		    },
 			"size": 10
 	}`

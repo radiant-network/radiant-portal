@@ -114,9 +114,12 @@ func Test_CountOccurrences_Return_Count_That_Match_Filters(t *testing.T) {
 
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
-			Field: "filter",
-			Value: "PASS",
-			Op:    "in",
+			Content: &types.LeafContent{
+				Field: "filter",
+				Value: "PASS",
+			},
+
+			Op: "in",
 		}
 		query, err := types.NewCountQuery(sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
@@ -133,9 +136,11 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
-			Field: "filter",
-			Value: "PASS",
-			Op:    "in",
+			Content: &types.LeafContent{
+				Field: "filter",
+				Value: "PASS",
+			},
+			Op: "in",
 		}
 		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, nil, nil)
 		assert.NoError(t, err)
@@ -154,13 +159,17 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 		}
 	})
 }
+
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
-			Field: "clinvar",
-			Value: []string{"Pathogenic"},
-			Op:    "in",
+			Content: &types.LeafContent{
+				Field: "clinvar",
+				Value: "Pathogenic",
+			},
+
+			Op: "in",
 		}
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
@@ -181,13 +190,17 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 		}
 	})
 }
+
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
-			Field: "clinvar",
-			Value: []interface{}{"Pathogenic", "Likely_Pathogenic"},
-			Op:    "all",
+			Content: &types.LeafContent{
+				Field: "clinvar",
+				Value: []interface{}{"Pathogenic", "Likely_Pathogenic"},
+			},
+
+			Op: "all",
 		}
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
@@ -206,6 +219,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *test
 		}
 	})
 }
+
 func Test_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
@@ -222,6 +236,7 @@ func Test_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(t *testing.T)
 		assert.Len(t, occurrences, 5)
 	})
 }
+
 func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Specified(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
@@ -248,15 +263,18 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 		}
 	})
 }
+
 func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewStarrocksRepository(db)
-
 		sqon := &types.Sqon{
-			Field: "impact_score",
-			Value: 2,
-			Op:    ">",
+			Content: &types.LeafContent{
+				Field: "impact_score",
+				Value: 2,
+			},
+
+			Op: ">",
 		}
 		sortedBody := []types.SortBody{
 			{
@@ -275,17 +293,17 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 		}
 	})
 }
+
 func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_ScoreAnd_Quality(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewStarrocksRepository(db)
-
 		sqon := &types.Sqon{
-			Op: "and",
-			Content: []types.Sqon{
-				{Field: "impact_score", Value: 2, Op: ">"},
-				{Field: "gq", Value: 50, Op: ">"},
+			Content: types.SqonArray{
+				{Op: ">", Content: &types.LeafContent{Field: "impact_score", Value: 2}},
+				{Op: ">", Content: &types.LeafContent{Field: "gq", Value: 50}},
 			},
+			Op: "and",
 		}
 		sortedBody := []types.SortBody{
 			{
@@ -324,10 +342,11 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
-			Op: "and",
-			Content: []types.Sqon{
-				{Field: "filter", Value: "PASS", Op: "in"},
+			Content: types.LeafContent{
+				Field: "filter",
+				Value: "PASS",
 			},
+			Op: "in",
 		}
 		query, err := types.NewAggregationQuery("zygosity", sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
@@ -346,11 +365,11 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
-			Op: "and",
-			Content: []types.Sqon{
-				{Field: "filter", Value: "PASS", Op: "in"},
-				{Field: "zygosity", Value: "HOM", Op: "in"},
+			Content: types.SqonArray{
+				{Op: "in", Content: &types.LeafContent{Field: "filter", Value: "PASS"}},
+				{Op: "in", Content: &types.LeafContent{Field: "zygosity", Value: "HOM"}},
 			},
+			Op: "and",
 		}
 		query, err := types.NewAggregationQuery("zygosity", sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
@@ -401,15 +420,16 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Scor
 		}
 	})
 }
+
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score_Combined_With_Filter(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
-			Op: "and",
-			Content: []types.Sqon{
-				{Field: "filter", Value: "PASS", Op: "in"},
-				{Field: "impact_score", Value: 2, Op: ">"},
+			Content: types.SqonArray{
+				{Op: "in", Content: types.LeafContent{Field: "filter", Value: "PASS"}},
+				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: 2}},
 			},
+			Op: "and",
 		}
 		query, err := types.NewAggregationQuery("impact_score", sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
@@ -431,10 +451,13 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel(t *testing.
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
-			Field: "omim_gene_panel",
-			Value: []interface{}{"panel1", "panel2"},
-			Op:    "in",
+			Content: types.LeafContent{
+				Field: "omim_gene_panel",
+				Value: []interface{}{"panel1", "panel2"},
+			},
+			Op: "in",
 		}
+
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
 		}
@@ -457,15 +480,12 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
+			Content: types.SqonArray{
+				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: 2}},
+				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
+			},
 			Op: "and",
-			Content: []types.Sqon{
-				{Field: "impact_score", Value: 2, Op: ">"},
-				{
-					Field: "omim_gene_panel",
-					Value: []interface{}{"panel1", "panel2"},
-					Op:    "in",
-				},
-			}}
+		}
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
 		}
@@ -482,24 +502,18 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_
 		}
 	})
 }
+
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_And_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
+			Content: types.SqonArray{
+				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: 2}},
+				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
+				{Op: "in", Content: types.LeafContent{Field: "hpo_gene_panel", Value: []interface{}{"hpo_panel1"}}},
+			},
 			Op: "and",
-			Content: []types.Sqon{
-				{Field: "impact_score", Value: 2, Op: ">"},
-				{
-					Field: "omim_gene_panel",
-					Value: []interface{}{"panel1", "panel2"},
-					Op:    "in",
-				},
-				{
-					Field: "hpo_gene_panel",
-					Value: []interface{}{"hpo_panel1"},
-					Op:    "in",
-				},
-			}}
+		}
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
 		}
@@ -520,20 +534,13 @@ func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_pane
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
+			Content: types.SqonArray{
+				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: 2}},
+				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
+				{Op: "in", Content: types.LeafContent{Field: "hpo_gene_panel", Value: []interface{}{"hpo_panel1"}}},
+			},
 			Op: "and",
-			Content: []types.Sqon{
-				{Field: "impact_score", Value: 2, Op: ">"},
-				{
-					Field: "omim_gene_panel",
-					Value: []interface{}{"panel1", "panel2"},
-					Op:    "in",
-				},
-				{
-					Field: "hpo_gene_panel",
-					Value: []interface{}{"hpo_panel1"},
-					Op:    "in",
-				},
-			}}
+		}
 
 		query, err := types.NewCountQuery(sqon, types.OccurrencesFields)
 		assert.NoError(t, err)

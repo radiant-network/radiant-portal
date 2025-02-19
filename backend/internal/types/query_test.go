@@ -10,9 +10,9 @@ func Test_NewAggregationQuery_Return_Error_When_Aggregate_Field_Is_Unknown(t *te
 
 	sqon := Sqon{
 		Op: "and",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
-			{Op: ">", Field: "salary", Value: 50000},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
+			{Op: ">", Content: LeafContent{Field: "salary", Value: 50000}},
 		},
 	}
 
@@ -29,9 +29,9 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Or(t *testing.
 
 	sqon := Sqon{
 		Op: "or",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
-			{Op: ">", Field: "salary", Value: 50000},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
+			{Op: ">", Content: LeafContent{Field: "salary", Value: 50000}},
 		},
 	}
 
@@ -59,11 +59,10 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Not(t *testing
 
 	sqon := Sqon{
 		Op: "not",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-
 	aggregate := "age"
 
 	query, err := NewAggregationQuery(aggregate, &sqon, allEmpoyeeFields)
@@ -79,8 +78,8 @@ func Test_NewAggregationQuery_Return_Empty_Filter_If_Empty_Or(t *testing.T) {
 
 	sqon := Sqon{
 		Op: "or",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 
@@ -101,6 +100,7 @@ func TestListQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_SelectedL
 		assert.True(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
+
 func TestListQuery_HasFieldFromTables_Return_False_If_Not_Contains_Field_In_SelectedList(t *testing.T) {
 	t.Parallel()
 	fields := []string{"age", "salary"}
@@ -115,8 +115,8 @@ func TestListQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFiel
 	fields := []string{"department_name"}
 	sqon := Sqon{
 		Op: "not",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 	query, err := NewListQuery(fields, &sqon, allFields, nil, nil)
@@ -130,8 +130,8 @@ func TestListQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_Filer
 	fields := []string{"salary"}
 	sqon := Sqon{
 		Op: "not",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 	query, err := NewListQuery(fields, &sqon, allFields, nil, nil)
@@ -158,10 +158,11 @@ func TestAggQuery_HasFieldFromTables_Agg_Return_False_If_Not_Contains_Field_Aggr
 
 func TestAggQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
 	t.Parallel()
+
 	sqon := Sqon{
 		Op: "not",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 	query, err := NewAggregationQuery("salary", &sqon, allFields)
@@ -174,8 +175,8 @@ func TestAggQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerF
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 	query, err := NewAggregationQuery("salary", &sqon, allFields)
@@ -188,8 +189,8 @@ func TestCountQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFie
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 	query, err := NewCountQuery(&sqon, allFields)
@@ -202,8 +203,8 @@ func TestCountQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_File
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
-		Content: []Sqon{
-			{Op: "in", Field: "age", Value: []interface{}{30, 40}},
+		Content: SqonArray{
+			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
 	query, err := NewCountQuery(&sqon, allFields)

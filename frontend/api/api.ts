@@ -247,6 +247,25 @@ export interface InterpretationSomatic {
     'tumoral_type'?: string;
 }
 /**
+ * 
+ * @export
+ * @interface LeafContent
+ */
+export interface LeafContent {
+    /**
+     * 
+     * @type {string}
+     * @memberof LeafContent
+     */
+    'field'?: string;
+    /**
+     * 
+     * @type {any}
+     * @memberof LeafContent
+     */
+    'value'?: any;
+}
+/**
  * Body of a list request
  * @export
  * @interface ListBody
@@ -464,29 +483,17 @@ export type SortBodyOrderEnum = typeof SortBodyOrderEnum[keyof typeof SortBodyOr
  */
 export interface Sqon {
     /**
-     * Nested Sqon
-     * @type {Array<Sqon>}
+     * 
+     * @type {SqonContent}
      * @memberof Sqon
      */
-    'content'?: Array<Sqon>;
+    'content'?: SqonContent;
     /**
-     * Field to filter on (for leaf nodes)
-     * @type {string}
-     * @memberof Sqon
-     */
-    'field'?: string;
-    /**
-     * Operation at this node
+     * 
      * @type {string}
      * @memberof Sqon
      */
     'op'?: SqonOpEnum;
-    /**
-     * 
-     * @type {any}
-     * @memberof Sqon
-     */
-    'value'?: any;
 }
 
 export const SqonOpEnum = {
@@ -504,6 +511,12 @@ export const SqonOpEnum = {
 } as const;
 
 export type SqonOpEnum = typeof SqonOpEnum[keyof typeof SqonOpEnum];
+
+/**
+ * @type SqonContent
+ * @export
+ */
+export type SqonContent = Array<Sqon> | LeafContent;
 
 
 /**
