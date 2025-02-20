@@ -6,12 +6,11 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { MainNav } from "components/feature/main_navigation";
-
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import "@styles/colors.css";
 import "@styles/main.css";
+import { AlertDialogProvider } from "@/components/base/Dialog/AlertDialogProvider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -37,7 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <AlertDialogProvider>{children}</AlertDialogProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
