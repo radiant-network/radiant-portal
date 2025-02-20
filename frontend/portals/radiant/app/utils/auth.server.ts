@@ -12,7 +12,7 @@ const createSessionStorage = (cookieName: string) => {
   return createCookieSessionStorage({
     cookie: {
       name: cookieName,
-      sameSite: "lax",
+      sameSite: "strict",
       path: "/",
       httpOnly: true,
       secrets: [process.env.SESSION_SECRET!],
