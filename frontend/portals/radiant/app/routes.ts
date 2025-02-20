@@ -10,8 +10,8 @@ export default [
   layout("./layout/protected-layout.tsx", [index("./routes/home.tsx")]),
   route("auth/callback", "./routes/auth/callback.ts"),
   route("auth/logout", "./routes/auth/logout.ts"),
+  route("auth/refresh-token", "./api/refresh-token.ts"),
   ...prefix("api", [
-    route("occurrences", "./api/occurrences.ts"),
-    route("refresh-token", "./api/refresh-token.ts"),
+    route("*?", "./api/proxy.ts"),
   ]),
 ] satisfies RouteConfig;

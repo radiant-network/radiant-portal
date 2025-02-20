@@ -1,24 +1,13 @@
 import "./App.css";
 import styles from "./App.module.css";
-import { ListBody, Occurrence, SortBodyOrderEnum, SqonOpEnum } from "@/api/api";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "components/base/ui/accordion";
-import { Table } from "@/components/base/Table/Table";
-import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
-import {
-  columns,
-  userSettings,
-  defaultSettings,
-} from "./include_variant_table";
-import { IVariantEntity } from "@/variant_type";
+import {ListBody, Occurrence, SortBodyOrderEnum, SqonOpEnum} from "@/api/api";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "components/base/ui/accordion";
+import {Table} from "@/components/base/Table/Table";
+import {MultiSelect} from "@/components/feature/QueryFilters/MultiSelect";
+import {columns, defaultSettings, userSettings,} from "./include_variant_table";
+import {IVariantEntity} from "@/variant_type";
 import useSWR from "swr";
-import { axiosClient } from "@/utils/axios";
-import { Button } from "@/components/base/ui/button";
-import { alertDialog } from "@/components/base/Dialog/AlertDialogStore";
+import {occurrencesApi} from "@/utils/api";
 
 type OccurrenceInput = {
   seqId: string;
@@ -26,7 +15,7 @@ type OccurrenceInput = {
 };
 
 const fetcher = (input: OccurrenceInput) =>
-  axiosClient.post("/occurrences", input).then((res) => res.data);
+    occurrencesApi.listOccurrences(input.seqId, input.listBody).then((response) => response.data);
 
 function App() {
   const { data } = useSWR<Occurrence[], any, OccurrenceInput>(

@@ -27,7 +27,7 @@ axiosClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        refreshTokenPromise = axios.post("/api/refresh-token").finally(() => {
+        refreshTokenPromise = axios.post("/auth/refresh-token").finally(() => {
           refreshTokenPromise = null;
         });
 
