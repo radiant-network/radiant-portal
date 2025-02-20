@@ -22,12 +22,21 @@
 
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
+  
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
+
   --accent: 210 40% 96.1%;
   --accent-foreground: 222.2 47.4% 11.2%;
+
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
+
+  --info: 210 90% 55%;    
+  --warning: 42 85% 45%; 
+  --success: 145 63% 42%;
+  --error: 0 84.2% 60.2%; 
+
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
   --ring: 222.2 84% 4.9%;
@@ -36,7 +45,13 @@
   --chart-3: 197 37% 24%;
   --chart-4: 43 74% 66%;
   --chart-5: 27 87% 67%;
-  --radius: 0.5rem
+  --radius: 0.5rem;
+  
+  /* Query Builder */
+  --query-pill-bg-active: var(--cyan-2);
+  --query-bar-bg-active: var(--cyan-1);
+  --query-bar-border-color-active: var(--cyan-3);
+  --query-bar-identifier-active: var(--cyan-6);
 }
 
 .dark {

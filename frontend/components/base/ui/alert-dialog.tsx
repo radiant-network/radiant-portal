@@ -4,6 +4,12 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "../Buttons/button.variants";
 import { VariantProps } from "tailwind-variants";
+import {
+  CircleAlertIcon,
+  CircleCheckIcon,
+  CircleXIcon,
+  InfoIcon,
+} from "lucide-react";
 
 const AlertDialog = AlertDialogPrimitive.Root;
 
@@ -97,10 +103,14 @@ const AlertDialogDescription = React.forwardRef<
 AlertDialogDescription.displayName =
   AlertDialogPrimitive.Description.displayName;
 
+export type AlertDialogActionProps = React.ComponentPropsWithoutRef<
+  typeof AlertDialogPrimitive.Action
+> &
+  VariantProps<typeof buttonVariants>;
+
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action> &
-    VariantProps<typeof buttonVariants>
+  AlertDialogActionProps
 >(({ className, variant = "primary", size, ...props }, ref) => {
   const style = buttonVariants({ variant, size });
 
@@ -114,10 +124,14 @@ const AlertDialogAction = React.forwardRef<
 });
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
+export type AlertDialogCancelProps = React.ComponentPropsWithoutRef<
+  typeof AlertDialogPrimitive.Cancel
+> &
+  VariantProps<typeof buttonVariants>;
+
 const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel> &
-    VariantProps<typeof buttonVariants>
+  AlertDialogCancelProps
 >(({ className, variant = "outline", size, ...props }, ref) => {
   const style = buttonVariants({ variant, size });
 
@@ -131,7 +145,26 @@ const AlertDialogCancel = React.forwardRef<
 });
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
 
+export type AlertDialogType = "success" | "info" | "warning" | "error";
+
+const AlertDialogIcon = ({ type }: { type: AlertDialogType }) => {
+  switch (type) {
+    case "info":
+      return <InfoIcon className="stroke-info" />;
+    case "warning":
+      return <CircleAlertIcon className="stroke-warning" />;
+    case "error":
+      return <CircleXIcon className="stroke-error" />;
+    case "success":
+      return <CircleCheckIcon className="stroke-success" />;
+    default:
+      return null;
+  }
+};
+AlertDialogIcon.displayName = "AlertDialogIcon";
+
 export {
+  AlertDialogIcon,
   AlertDialog,
   AlertDialogPortal,
   AlertDialogOverlay,
