@@ -15,7 +15,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const style = buttonVariants({ variant, size });
 
     return <Comp className={style.base({ className })} ref={ref} {...props} />;
-  }
+  },
 );
 Button.displayName = "Button";
 

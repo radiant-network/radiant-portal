@@ -468,7 +468,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Aggregation'
+                items:
+                  $ref: '#/components/schemas/Aggregation'
+                type: array
           description: OK
         "400":
           content:

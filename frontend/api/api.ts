@@ -1153,7 +1153,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Aggregation>> {
+        async aggregateOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateOccurrences(seqId, aggregationBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -1205,7 +1205,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig): AxiosPromise<Aggregation> {
+        aggregateOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
             return localVarFp.aggregateOccurrences(seqId, aggregationBody, options).then((request) => request(axios, basePath));
         },
         /**
