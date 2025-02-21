@@ -2,11 +2,12 @@ import { tv } from "tailwind-variants";
 
 export const baseButtonVariants = tv({
   slots: {
-    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   },
   variants: {
     variant: {
-      default: "bg-transparent text-default-foreground hover:bg-gray-100",
+      default:
+        "bg-transparent text-default-foreground enabled:hover:bg-gray-100",
       primary: "bg-primary text-primary-foreground enabled:hover:bg-primary/90",
       destructive:
         "bg-destructive text-destructive-foreground enabled:hover:bg-destructive/90",
@@ -28,10 +29,10 @@ export const buttonVariants = tv({
   extend: baseButtonVariants,
   variants: {
     size: {
-      default: "h-8 px-4 py-2 [&_svg]:size-4",
+      default: "h-8 px-4 py-2 text-base [&_svg]:size-4",
       xs: "h-6 px-2 text-sm [&_svg]:size-3",
-      sm: "h-7 px-3 [&_svg]:size-4",
-      md: "h-8 px-4 py-2 [&_svg]:size-4",
+      sm: "h-7 px-3 text-sm [&_svg]:size-4",
+      md: "h-8 px-4 py-2 text-base [&_svg]:size-4",
       lg: "h-9 px-5 text-lg [&_svg]:size-5",
     },
   },
@@ -49,7 +50,7 @@ export const actionButtonVariants = tv({
   variants: {
     size: {
       default: {
-        base: "h-8 px-3 [&_svg]:size-5",
+        base: "h-8 px-3 text-base [&_svg]:size-5",
         actionsButton: "h-8 px-2 [&_svg]:size-5",
       },
       xs: {
@@ -57,11 +58,11 @@ export const actionButtonVariants = tv({
         actionsButton: "h-6 px-1.5 [&_svg]:size-3",
       },
       sm: {
-        base: "h-7 px-3 [&_svg]:size-4",
+        base: "h-7 px-3 text-sm [&_svg]:size-4",
         actionsButton: "h-7 px-2 [&_svg]:size-4",
       },
       md: {
-        base: "h-8 px-3 [&_svg]:size-5",
+        base: "h-8 px-3 text-base [&_svg]:size-5",
         actionsButton: "h-8 px-2 [&_svg]:size-5",
       },
       lg: {
@@ -84,23 +85,23 @@ export const iconButtonVariants = tv({
   variants: {
     size: {
       default: {
-        base: "size-8",
+        base: "size-6",
         icon: "size-4",
       },
       xs: {
         base: "size-6",
-        icon: "size-4",
+        icon: "size-[14px]",
       },
       sm: {
-        base: "size-7",
+        base: "size-6",
         icon: "size-4",
       },
       md: {
-        base: "size-8",
+        base: "size-7",
         icon: "size-5",
       },
       lg: {
-        base: "size-11",
+        base: "size-8",
         icon: "size-6",
       },
     },

@@ -8,6 +8,7 @@ export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     icon: React.ForwardRefExoticComponent<
       Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
     >;
+    iconClassName?: string;
   };
 
 const IconButton = ({
@@ -15,13 +16,15 @@ const IconButton = ({
   size,
   variant,
   className,
+  iconClassName,
+
   ...props
 }: IconButtonProps) => {
   const style = iconButtonVariants({ size, variant });
 
   return (
     <button {...props} className={style.base({ className })}>
-      <Icon className={style.icon()} />
+      <Icon className={style.icon({ className: iconClassName })} />
     </button>
   );
 };

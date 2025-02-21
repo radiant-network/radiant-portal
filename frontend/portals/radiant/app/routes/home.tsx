@@ -1,11 +1,13 @@
 import Variant from "variant/App";
+import type { Route } from "./+types/home";
+import { logout, requireAuth } from "~/utils/auth.server";
 
-const Home = () => {
-  return (
-    <main className="flex p-4">
-      <Variant />
-    </main>
-  );
-};
+export async function loader({ request }: Route.LoaderArgs) {
+  if (await requireAuth(request)) {
+    return logout(request);
+  }
+}
+
+const Home = () => <Variant />;
 
 export default Home;
