@@ -139,7 +139,7 @@ func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Param			message	body		types.AggregationBody	true	"Aggregation Body"
 // @Accept json
 // @Produce json
-// @Success 200 {object} types.Aggregation
+// @Success 200 {array} types.Aggregation
 // @Failure 400 {object} map[string]string
 // @Router /occurrences/{seq_id}/aggregate [post]
 func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
@@ -222,7 +222,7 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-		if (interpretation == nil) {
+		if interpretation == nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
@@ -290,7 +290,7 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFun
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-		if (interpretation == nil) {
+		if interpretation == nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
@@ -355,7 +355,7 @@ func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc 
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-		if (citation == nil) {
+		if citation == nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
