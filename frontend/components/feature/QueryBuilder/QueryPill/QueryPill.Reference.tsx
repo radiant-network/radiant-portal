@@ -7,20 +7,22 @@ export type QueryPillReferenceProps = {
   refIndex: number;
 };
 
-const QueryPillReference = ({ refIndex }: QueryPillReferenceProps) => {
+function QueryPillReference({ refIndex }: QueryPillReferenceProps) {
   const { query } = useQueryBarContext();
   const { getQueryReferenceColor } = useQueryBuilderContext();
   const refColor = getQueryReferenceColor(refIndex);
 
   return (
     <QueryPillContainer
-      onRemovePill={() => query.removePillByFieldOrIndex(refIndex)}
+      onRemovePill={function () {
+        query.removePillByFieldOrIndex(refIndex);
+      }}
     >
       <QueryPillValuesContainer>
         <span style={{ color: refColor }}>{`Q${refIndex + 1}`}</span>
       </QueryPillValuesContainer>
     </QueryPillContainer>
   );
-};
+}
 
 export default QueryPillReference;

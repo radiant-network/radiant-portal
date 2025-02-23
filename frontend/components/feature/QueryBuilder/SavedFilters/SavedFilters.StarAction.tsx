@@ -9,8 +9,9 @@ import {
   useQueryBuilderContext,
   useQueryBuilderDictContext,
 } from "../QueryBuilder.Context";
+import { SavedFilterTypeEnum } from "@/components/model/saved-filter";
 
-const SavedFiltersStarAction = () => {
+function SavedFiltersStarAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder, enableFavorite } = useQueryBuilderContext();
 
@@ -20,9 +21,11 @@ const SavedFiltersStarAction = () => {
     return null;
   }
 
-  const handleStar = () => {
+  const handleStar = function () {
     if (selectedSavedFilter) {
-      selectedSavedFilter.save({ favorite: !selectedSavedFilter.isFavorite() });
+      selectedSavedFilter.save(SavedFilterTypeEnum.Filter, {
+        favorite: !selectedSavedFilter.isFavorite(),
+      });
     } else {
       queryBuilder.saveNewFilter({ favorite: true });
     }
@@ -49,6 +52,6 @@ const SavedFiltersStarAction = () => {
       </TooltipContent>
     </Tooltip>
   );
-};
+}
 
 export default SavedFiltersStarAction;

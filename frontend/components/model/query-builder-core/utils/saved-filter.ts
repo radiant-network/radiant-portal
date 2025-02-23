@@ -2,7 +2,7 @@ import { v4 } from "uuid";
 import { ISavedFilter } from "../../saved-filter";
 import { getDefaultSyntheticSqon } from "./sqon";
 
-export const getNewSavedFilter = (defaultTitle = "New Filter") => {
+export function getNewSavedFilter(defaultTitle = "New Filter") {
   const newActiveQueryId = v4();
   const newSavedFilter: ISavedFilter = {
     id: v4(),
@@ -17,4 +17,4 @@ export const getNewSavedFilter = (defaultTitle = "New Filter") => {
     newActiveQueryId,
     newSavedFilter,
   };
-};
+}

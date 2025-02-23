@@ -1,7 +1,7 @@
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import { useQueryBarContext } from "./QueryBar.Context";
 
-const QueryBarIdentifier = () => {
+function QueryBarIdentifier() {
   const { query } = useQueryBarContext();
   const { getQueryReferenceColor } = useQueryBuilderContext();
   const refColor = query.isReferencedInActiveQuery()
@@ -14,6 +14,6 @@ const QueryBarIdentifier = () => {
       style={refColor ? { backgroundColor: refColor } : {}}
     />
   );
-};
+}
 
 export default QueryBarIdentifier;

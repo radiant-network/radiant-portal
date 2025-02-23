@@ -21,23 +21,26 @@ import { formatDistance } from "date-fns";
 import { ISavedFilter } from "@/components/model/saved-filter";
 import { openDeleteSavedFilterAlert } from "../alerts";
 
-const SavedFiltersManageDialog = ({
+function SavedFiltersManageDialog({
   open,
   onOpenChange,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}) => {
+}) {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   const savedFilters = queryBuilder.getSavedFilters();
 
-  useEffect(() => {
-    if (savedFilters.length === 0) {
-      onOpenChange(false);
-    }
-  }, [savedFilters]);
+  useEffect(
+    function () {
+      if (savedFilters.length === 0) {
+        onOpenChange(false);
+      }
+    },
+    [savedFilters]
+  );
 
   return (
     <>
@@ -47,12 +50,14 @@ const SavedFiltersManageDialog = ({
             <DialogTitle>{dict.savedFilter.manageDialog.title}</DialogTitle>
           </DialogHeader>
           <List bordered className="max-h-[250px]">
-            {savedFilters.map((savedFilter) => (
-              <SavedFilterListItem
-                key={savedFilter.id}
-                savedFilter={savedFilter}
-              />
-            ))}
+            {savedFilters.map(function (savedFilter) {
+              return (
+                <SavedFilterListItem
+                  key={savedFilter.id}
+                  savedFilter={savedFilter}
+                />
+              );
+            })}
           </List>
           <DialogFooter>
             <DialogClose asChild>
@@ -65,7 +70,7 @@ const SavedFiltersManageDialog = ({
       </Dialog>
     </>
   );
-};
+}
 
 const SavedFilterListItem = ({
   savedFilter,

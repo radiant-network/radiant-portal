@@ -14,7 +14,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/base/ui/button";
 import SavedFiltersManageDialog from "./SavedFilters.ManageDialog";
 
-const SavedFiltersSelect = () => {
+function SavedFiltersSelect() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
   const savedFilters = queryBuilder.getSavedFilters();
@@ -24,21 +24,26 @@ const SavedFiltersSelect = () => {
 
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
-  const handleManageAction = () => {
+  const handleManageAction = function () {
     setOpen(false);
     setOpenManage(true);
   };
 
-  const selectKey = useMemo(() => new Date(), [selectedSavedFilter?.id]);
+  const selectKey = useMemo(
+    function () {
+      return new Date();
+    },
+    [selectedSavedFilter?.id]
+  );
 
   return (
     <>
       <Select
         key={+selectKey}
         value={selectedSavedFilter?.id}
-        onValueChange={(savedFilterId) =>
-          savedFilters.find((filter) => filter.id === savedFilterId)?.select()
-        }
+        onValueChange={function (savedFilterId) {
+          savedFilters.find((filter) => filter.id === savedFilterId)?.select();
+        }}
         open={open}
         onOpenChange={setOpen}
         disabled={savedFilters.length === 0}
@@ -70,6 +75,6 @@ const SavedFiltersSelect = () => {
       />
     </>
   );
-};
+}
 
 export default SavedFiltersSelect;

@@ -15,12 +15,12 @@ type QueryPillLabelProps = React.HTMLAttributes<HTMLSpanElement> & {
   operator: ReactNode;
 };
 
-const QueryPillLabelOperator = ({
+function QueryPillLabelOperator({
   valueFilter,
   operator,
   className,
   ...props
-}: QueryPillLabelProps) => {
+}: QueryPillLabelProps) {
   const dict = useQueryBuilderDictContext();
   const { showLabels } = useQueryBuilderContext();
 
@@ -38,7 +38,7 @@ const QueryPillLabelOperator = ({
       )}
     </div>
   );
-};
+}
 
 export const QueryPillOperatorContainer = ({
   className,
@@ -50,17 +50,19 @@ export const QueryPillOperatorContainer = ({
   </span>
 );
 
-export const QueryPillLabelContainer = ({
+export function QueryPillLabelContainer({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLSpanElement>) => (
-  <span
-    className={cn("ml-[4px] mr-[2px] text-xs font-medium", className)}
-    {...props}
-  >
-    {children}
-  </span>
-);
+}: React.HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <span
+      className={cn("ml-[4px] mr-[2px] text-xs font-medium", className)}
+      {...props}
+    >
+      {children}
+    </span>
+  );
+}
 
 export default QueryPillLabelOperator;

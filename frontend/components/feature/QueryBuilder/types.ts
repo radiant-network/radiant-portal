@@ -60,11 +60,9 @@ type QueryBuilderSharedProps = {
   /**
    * Icon to use for the query count
    */
-  queryCountIcon?:
-    | React.ForwardRefExoticComponent<
-        Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-      >
-    | ReactElement;
+  queryCountIcon?: React.ForwardRefExoticComponent<
+    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+  >;
   /**
    * Fetch the query count
    */

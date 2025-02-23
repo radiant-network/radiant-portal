@@ -10,7 +10,7 @@ import { PopoverClose } from "@radix-ui/react-popover";
 import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
 import { IconButton } from "@/components/base/Buttons";
 
-const QueryBarDeleteAction = () => {
+function QueryBarDeleteAction() {
   const { query } = useQueryBarContext();
   const dict = useQueryBuilderDictContext();
 
@@ -38,6 +38,6 @@ const QueryBarDeleteAction = () => {
       </PopoverContent>
     </Popover>
   );
-};
+}
 
 export default QueryBarDeleteAction;

@@ -10,7 +10,7 @@ export type QueryPillValuesProps = {
   valueFilter: IValueFilter;
 };
 
-const QueryPillValues = ({ valueFilter }: QueryPillValuesProps) => {
+function QueryPillValues({ valueFilter }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
 
   const canExpand = valueFilter.content.value.length > 3;
@@ -48,6 +48,6 @@ const QueryPillValues = ({ valueFilter }: QueryPillValuesProps) => {
       )}
     </QueryPillValuesContainer>
   );
-};
+}
 
 export default QueryPillValues;

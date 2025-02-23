@@ -15,9 +15,9 @@ import {
 import { PartialKeys } from "@/components/lib/utils";
 import { ISyntheticSqon } from "../sqon";
 
-export const useQueryBuilder = (
+export function useQueryBuilder(
   props: PartialKeys<CoreQueryBuilderProps, "state">
-): QueryBuilderInstance => {
+): QueryBuilderInstance {
   const defaultProps: CoreQueryBuilderProps = {
     state: {
       ...getDefaultQueryBuilderState(),
@@ -108,4 +108,4 @@ export const useQueryBuilder = (
   }));
 
   return queryBuilderRef.current;
-};
+}

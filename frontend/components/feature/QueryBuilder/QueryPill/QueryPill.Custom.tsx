@@ -12,7 +12,7 @@ export type QueryPillCustomProps = {
   valueQuery: IValueQuery;
 };
 
-const QueryPillCustom = ({ valueQuery }: QueryPillCustomProps) => {
+function QueryPillCustom({ valueQuery }: QueryPillCustomProps) {
   const { query } = useQueryBarContext();
 
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
@@ -49,6 +49,6 @@ const QueryPillCustom = ({ valueQuery }: QueryPillCustomProps) => {
       )}
     </>
   );
-};
+}
 
 export default QueryPillCustom;

@@ -6,13 +6,13 @@ import {
 import { useAlertDialog } from "@/components/base/Dialog/AlertDialogProvider";
 import { useCallback } from "react";
 
-const QueryToolbarClearAction = () => {
+function QueryToolbarClearAction() {
   const alertDialog = useAlertDialog();
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   const openAlertDialog = useCallback(
-    () =>
+    function () {
       alertDialog.open({
         type: "warning",
         title: dict.toolbar.clearAllDialog.title,
@@ -25,7 +25,8 @@ const QueryToolbarClearAction = () => {
           onClick: () => queryBuilder.clearQueries(),
           children: dict.toolbar.clearAllDialog.ok,
         },
-      }),
+      });
+    },
     [queryBuilder, dict]
   );
 
@@ -43,6 +44,6 @@ const QueryToolbarClearAction = () => {
   }
 
   return null;
-};
+}
 
 export default QueryToolbarClearAction;

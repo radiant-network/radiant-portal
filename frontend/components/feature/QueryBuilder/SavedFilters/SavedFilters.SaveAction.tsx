@@ -11,7 +11,7 @@ import {
 } from "../QueryBuilder.Context";
 import { SavedFilterTypeEnum } from "@/components/model/saved-filter";
 
-const SavedFiltersSaveAction = () => {
+function SavedFiltersSaveAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
@@ -20,7 +20,7 @@ const SavedFiltersSaveAction = () => {
     ? !selectedSavedFilter.isDirty()
     : queryBuilder.isEmpty();
 
-  const handleSave = () => {
+  const handleSave = function () {
     if (selectedSavedFilter) {
       selectedSavedFilter.save(SavedFilterTypeEnum.Filter);
     } else {
@@ -50,6 +50,6 @@ const SavedFiltersSaveAction = () => {
       </TooltipContent>
     </Tooltip>
   );
-};
+}
 
 export default SavedFiltersSaveAction;

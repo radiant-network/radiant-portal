@@ -4,7 +4,7 @@ import QueryBarSaveAction from "./QueryBar.SaveAction";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import { TooltipProvider } from "@/components/base/ui/tooltip";
 
-const QueryBarActions = () => {
+function QueryBarActions() {
   const { customPillConfig } = useQueryBuilderContext();
 
   return (
@@ -24,6 +24,6 @@ group-data-[query-active=true]/query:bg-[--query-bar-bg-active]
       </div>
     </TooltipProvider>
   );
-};
+}
 
 export default QueryBarActions;

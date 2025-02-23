@@ -28,7 +28,7 @@ import {
 import { QueryBarContext } from "../QueryBar/QueryBar.Context";
 import { openCustomPillCantBeEmptyDialog } from "../alerts";
 
-const QueryPillCustomEditDialog = ({
+function QueryPillCustomEditDialog({
   open,
   onOpenChange,
   queryPill,
@@ -36,7 +36,7 @@ const QueryPillCustomEditDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   queryPill: ISavedFilter;
-}) => {
+}) {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder: rootQueryBuilder, customPillConfig } =
     useQueryBuilderContext();
@@ -73,7 +73,7 @@ const QueryPillCustomEditDialog = ({
   const hasChanged = title !== queryPill.title || coreSavedFilter?.isDirty();
 
   const handleOnOpenChange = useCallback(
-    (open: boolean) => {
+    function (open: boolean) {
       if (open) {
         onOpenChange(true);
       } else {
@@ -84,20 +84,23 @@ const QueryPillCustomEditDialog = ({
     [onOpenChange, customQueryBuilder]
   );
 
-  const handleSave = useCallback(() => {
-    // TODO: Before updating check:
-    // 1. If the query is empty, show an alert
-    // 2. If title is updated, validate the title
-    // 3. Fetch filtersByPill, show alert and optionaly show affected filters
+  const handleSave = useCallback(
+    function () {
+      // TODO: Before updating check:
+      // 1. If the query is empty, show an alert
+      // 2. If title is updated, validate the title
+      // 3. Fetch filtersByPill, show alert and optionaly show affected filters
 
-    if (coreQuery.isEmpty()) {
-      openCustomPillCantBeEmptyDialog(dict);
-    } else {
-      coreSavedFilter?.save(SavedFilterTypeEnum.Query, {
-        title,
-      });
-    }
-  }, [coreQuery, coreSavedFilter, dict, title]);
+      if (coreQuery.isEmpty()) {
+        openCustomPillCantBeEmptyDialog(dict);
+      } else {
+        coreSavedFilter?.save(SavedFilterTypeEnum.Query, {
+          title,
+        });
+      }
+    },
+    [coreQuery, coreSavedFilter, dict, title]
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleOnOpenChange}>
@@ -150,6 +153,6 @@ const QueryPillCustomEditDialog = ({
       </QueryBuilderContext.Provider>
     </Dialog>
   );
-};
+}
 
 export default QueryPillCustomEditDialog;

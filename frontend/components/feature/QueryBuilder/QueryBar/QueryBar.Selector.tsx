@@ -1,7 +1,7 @@
 import { useQueryBarContext } from "./QueryBar.Context";
 import { Checkbox } from "@/components/base/ui/checkbox";
 
-const QueryBarSelector = () => {
+function QueryBarSelector() {
   const { query } = useQueryBarContext();
 
   if (query.isSelectable()) {
@@ -33,6 +33,6 @@ const QueryBarSelector = () => {
   }
 
   return null;
-};
+}
 
 export default QueryBarSelector;

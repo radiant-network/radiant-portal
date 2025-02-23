@@ -9,14 +9,14 @@ export type QueryPillFieldProps = {
   valueFilter: IValueFilter;
 };
 
-const QueryPillField = ({ valueFilter }: QueryPillFieldProps) => {
+function QueryPillField({ valueFilter }: QueryPillFieldProps) {
   const { query } = useQueryBarContext();
 
   return (
     <QueryPillContainer
-      onRemovePill={() =>
-        query.removePillByFieldOrIndex(valueFilter.content.field)
-      }
+      onRemovePill={function () {
+        return query.removePillByFieldOrIndex(valueFilter.content.field);
+      }}
     >
       <QueryPillLabelOperator
         valueFilter={valueFilter}
@@ -25,6 +25,6 @@ const QueryPillField = ({ valueFilter }: QueryPillFieldProps) => {
       <QueryPillValues valueFilter={valueFilter} />
     </QueryPillContainer>
   );
-};
+}
 
 export default QueryPillField;

@@ -17,7 +17,7 @@ import { useCallback, useMemo, useState } from "react";
 import { QueryBuilderContextType, QueryBuilderProps } from "./types";
 import { defaultQueryReferenceColors, defaultDictionnary } from "./data";
 
-const QueryBuilder = ({
+function QueryBuilder({
   className,
   enableCombine = true,
   enableFavorite = false,
@@ -29,14 +29,15 @@ const QueryBuilder = ({
   dictionnary = defaultDictionnary,
   customPillConfig,
   ...hookProps
-}: QueryBuilderProps) => {
+}: QueryBuilderProps) {
   const queryBuilder = useQueryBuilder(hookProps);
 
   const [showLabels, toggleLabels] = useState(initialShowHideLabels);
 
   const getQueryReferenceColor = useCallback(
-    (refIndex: number) =>
-      queryReferenceColors[refIndex % queryReferenceColors.length],
+    function (refIndex: number) {
+      return queryReferenceColors[refIndex % queryReferenceColors.length];
+    },
     [queryReferenceColors]
   );
 
@@ -87,9 +88,9 @@ const QueryBuilder = ({
             </AccordionTrigger>
             <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
               <div className="flex flex-col gap-2">
-                {queryBuilder.getQueries().map((query) => (
-                  <QueryBar key={query.id} query={query} />
-                ))}
+                {queryBuilder.getQueries().map(function (query) {
+                  return <QueryBar key={query.id} query={query} />;
+                })}
               </div>
               <QueryToolbar />
             </AccordionContent>
@@ -98,6 +99,6 @@ const QueryBuilder = ({
       </QueryBuilderContext.Provider>
     </QueryBuilderDictContext.Provider>
   );
-};
+}
 
 export default QueryBuilder;

@@ -11,7 +11,7 @@ import OrOperator from "../Operator/OrOperator";
 import { BooleanOperators } from "@/components/model/sqon";
 import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
 
-const QueryCombiner = () => {
+function QueryCombiner() {
   const { query } = useQueryBarContext();
   const dict = useQueryBuilderDictContext();
   const isAndOperator = query.raw().op === BooleanOperators.and;
@@ -44,6 +44,6 @@ const QueryCombiner = () => {
       </div>
     </TooltipProvider>
   );
-};
+}
 
 export default QueryCombiner;

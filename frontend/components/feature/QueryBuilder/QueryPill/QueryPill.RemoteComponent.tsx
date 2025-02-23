@@ -1,7 +1,7 @@
 import React from "react";
 
-const QueryPillRemoteComponent = () => {
+function QueryPillRemoteComponent() {
   return <div>QueryPillRemoteComponent</div>;
-};
+}
 
 export default QueryPillRemoteComponent;

@@ -4,7 +4,7 @@ import { IconButton } from "@/components/base/Buttons";
 import { PencilLineIcon } from "lucide-react";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
-const SavedFiltersEditAction = () => {
+function SavedFiltersEditAction() {
   const { queryBuilder } = useQueryBuilderContext();
 
   const [open, setOpen] = useState(false);
@@ -13,7 +13,12 @@ const SavedFiltersEditAction = () => {
 
   return (
     <>
-      <IconButton icon={PencilLineIcon} onClick={() => setOpen(true)} />
+      <IconButton
+        icon={PencilLineIcon}
+        onClick={function () {
+          setOpen(true);
+        }}
+      />
       <SavedFiltersEditDialog
         open={open}
         onOpenChange={setOpen}
@@ -21,6 +26,6 @@ const SavedFiltersEditAction = () => {
       />
     </>
   );
-};
+}
 
 export default SavedFiltersEditAction;

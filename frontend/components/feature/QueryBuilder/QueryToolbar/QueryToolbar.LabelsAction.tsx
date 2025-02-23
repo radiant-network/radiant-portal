@@ -4,7 +4,7 @@ import {
   useQueryBuilderDictContext,
 } from "../QueryBuilder.Context";
 
-const QueryToolbarLabelsAction = () => {
+function QueryToolbarLabelsAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder, enableShowHideLabels, showLabels, toggleLabels } =
     useQueryBuilderContext();
@@ -19,6 +19,6 @@ const QueryToolbarLabelsAction = () => {
   }
 
   return null;
-};
+}
 
 export default QueryToolbarLabelsAction;

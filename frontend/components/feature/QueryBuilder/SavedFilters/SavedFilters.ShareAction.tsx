@@ -10,13 +10,13 @@ import {
   useQueryBuilderDictContext,
 } from "../QueryBuilder.Context";
 
-const SavedFiltersShareAction = () => {
+function SavedFiltersShareAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
-  const handleShare = () => {
+  const handleShare = function () {
     // Share
   };
 
@@ -42,6 +42,6 @@ const SavedFiltersShareAction = () => {
       </TooltipContent>
     </Tooltip>
   );
-};
+}
 
 export default SavedFiltersShareAction;

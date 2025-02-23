@@ -11,7 +11,7 @@ import {
 } from "../QueryBuilder.Context";
 import { openDeleteSavedFilterAlert } from "../alerts";
 
-const SavedFiltersDeleteAction = () => {
+function SavedFiltersDeleteAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
@@ -24,15 +24,15 @@ const SavedFiltersDeleteAction = () => {
           <IconButton
             icon={TrashIcon}
             disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}
-            onClick={() =>
-              openDeleteSavedFilterAlert(selectedSavedFilter!, dict)
-            }
+            onClick={function () {
+              openDeleteSavedFilterAlert(selectedSavedFilter!, dict);
+            }}
           />
         </span>
       </TooltipTrigger>
       <TooltipContent>{dict.savedFilter.deleteTooltip}</TooltipContent>
     </Tooltip>
   );
-};
+}
 
 export default SavedFiltersDeleteAction;
