@@ -1,6 +1,6 @@
-import { ArrayTenOrMore, QueryBuilderDictionnary } from "./types";
+import { ArrayTenOrMore, QueryBuilderDictionary } from "./types";
 
-export const defaultDictionnary: QueryBuilderDictionnary = {
+export const defaultDictionary: QueryBuilderDictionary = {
   queryBar: {
     empty: "Use the search tools & facets on the left to build a query",
     deletePopover: {

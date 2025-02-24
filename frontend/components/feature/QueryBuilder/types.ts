@@ -10,6 +10,7 @@ import {
 import { ISyntheticSqon } from "@/components/model/sqon";
 import { LucideProps } from "lucide-react";
 import { ReactElement } from "react";
+import { DeepPartial } from "react-hook-form";
 
 export type ArrayTenOrMore<T> = {
   0: T;
@@ -86,9 +87,9 @@ export type QueryBuilderProps = PartialKeys<
        */
       queryReferenceColors?: ArrayTenOrMore<string>;
       /**
-       * Dictionnary for copies
+       * Dictionary for copies
        */
-      dictionnary?: QueryBuilderDictionnary;
+      dictionary?: DeepPartial<QueryBuilderDictionary>;
     },
   "state"
 >;
@@ -100,7 +101,7 @@ export type QueryBuilderContextType = QueryBuilderSharedProps & {
   getQueryReferenceColor: (refIndex: number) => string;
 };
 
-export type QueryBuilderDictionnary = {
+export type QueryBuilderDictionary = {
   queryBar: {
     empty: string;
     deletePopover: {

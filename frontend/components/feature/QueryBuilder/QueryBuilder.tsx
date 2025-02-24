@@ -15,7 +15,8 @@ import SavedFiltersRightActions from "./SavedFilters/SavedFilters.RightActions";
 import SavedFiltersLeftActions from "./SavedFilters/SavedFilters.LeftActions";
 import { useCallback, useMemo, useState } from "react";
 import { QueryBuilderContextType, QueryBuilderProps } from "./types";
-import { defaultQueryReferenceColors, defaultDictionnary } from "./data";
+import { defaultQueryReferenceColors, defaultDictionary } from "./data";
+import { deepMerge } from "@/components/lib/merge";
 
 function QueryBuilder({
   className,
@@ -26,12 +27,16 @@ function QueryBuilder({
   queryReferenceColors = defaultQueryReferenceColors,
   queryCountIcon,
   fetchQueryCount,
-  dictionnary = defaultDictionnary,
+  dictionary = defaultDictionary,
   customPillConfig,
   ...hookProps
 }: QueryBuilderProps) {
   const queryBuilder = useQueryBuilder(hookProps);
 
+  const mergeDictionary = useMemo(
+    () => deepMerge(defaultDictionary, dictionary),
+    [dictionary]
+  );
   const [showLabels, toggleLabels] = useState(initialShowHideLabels);
 
   const getQueryReferenceColor = useCallback(
@@ -52,7 +57,7 @@ function QueryBuilder({
       queryCountIcon,
       getQueryReferenceColor,
       fetchQueryCount,
-      dictionnary,
+      dictionary,
       customPillConfig,
     }),
     [
@@ -65,13 +70,13 @@ function QueryBuilder({
       queryCountIcon,
       getQueryReferenceColor,
       fetchQueryCount,
-      dictionnary,
+      dictionary,
       customPillConfig,
     ]
   );
 
   return (
-    <QueryBuilderDictContext.Provider value={dictionnary}>
+    <QueryBuilderDictContext.Provider value={mergeDictionary}>
       <QueryBuilderContext.Provider value={memoedContextValue}>
         <Accordion
           type="multiple"
