@@ -10,7 +10,7 @@ import {
   useQueryBuilderDictContext,
 } from "../QueryBuilder.Context";
 
-const SavedFiltersUndoAction = () => {
+function SavedFiltersUndoAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
@@ -26,12 +26,14 @@ const SavedFiltersUndoAction = () => {
         <IconButton
           icon={RotateCcw}
           disabled={!selectedSavedFilter}
-          onClick={() => selectedSavedFilter.discardChanges()}
+          onClick={function () {
+            selectedSavedFilter.discardChanges();
+          }}
         />
       </TooltipTrigger>
       <TooltipContent>{dict.savedFilter.discardTooltip}</TooltipContent>
     </Tooltip>
   );
-};
+}
 
 export default SavedFiltersUndoAction;

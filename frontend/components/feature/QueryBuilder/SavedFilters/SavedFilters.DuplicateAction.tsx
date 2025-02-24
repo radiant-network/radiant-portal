@@ -11,13 +11,13 @@ import {
 } from "../QueryBuilder.Context";
 import { openOverwriteSavedFilterAlert } from "../alerts";
 
-const SavedFiltersDuplicateAction = () => {
+function SavedFiltersDuplicateAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
-  const handleDuplicate = () => {
+  const handleDuplicate = function () {
     if (selectedSavedFilter?.isDirty()) {
       openOverwriteSavedFilterAlert(queryBuilder, dict);
     } else {
@@ -39,6 +39,6 @@ const SavedFiltersDuplicateAction = () => {
       <TooltipContent>{dict.savedFilter.duplicateTooltip}</TooltipContent>
     </Tooltip>
   );
-};
+}
 
 export default SavedFiltersDuplicateAction;

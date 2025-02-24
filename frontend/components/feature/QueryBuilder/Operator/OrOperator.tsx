@@ -2,10 +2,10 @@ import { cn } from "@/components/lib/utils";
 import React from "react";
 import { useQueryBuilderDictContext } from "../QueryBuilder.Context";
 
-const OrOperator = ({
+function OrOperator({
   className,
   ...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
+}: React.HTMLAttributes<HTMLSpanElement>) {
   const dict = useQueryBuilderDictContext();
 
   return (
@@ -13,6 +13,6 @@ const OrOperator = ({
       {dict.queryPill.operator.or}
     </span>
   );
-};
+}
 
 export default OrOperator;

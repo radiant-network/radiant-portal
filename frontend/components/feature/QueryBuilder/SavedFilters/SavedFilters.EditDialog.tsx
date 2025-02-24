@@ -24,12 +24,13 @@ import {
   useQueryBuilderContext,
   useQueryBuilderDictContext,
 } from "../QueryBuilder.Context";
+import { SavedFilterTypeEnum } from "@/components/model/saved-filter";
 
 const formSchema = z.object({
   title: z.string().min(2, "Min 2 characters").max(50, "Max 50 characters"),
 });
 
-const SavedFiltersEditDialog = ({
+function SavedFiltersEditDialog({
   open,
   onOpenChange,
   savedFilter,
@@ -37,7 +38,7 @@ const SavedFiltersEditDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   savedFilter: SavedFilterInstance | null;
-}) => {
+}) {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
@@ -48,15 +49,15 @@ const SavedFiltersEditDialog = ({
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     if (savedFilter) {
-      savedFilter.save({ title: values.title });
+      savedFilter.save(SavedFilterTypeEnum.Filter, { title: values.title });
     } else {
       queryBuilder.saveNewFilter({ title: values.title });
     }
 
     onOpenChange(false);
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -101,6 +102,6 @@ const SavedFiltersEditDialog = ({
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export default SavedFiltersEditDialog;

@@ -6,10 +6,10 @@ import SavedFiltersStarAction from "./SavedFilters.StarAction";
 import { TooltipProvider } from "@/components/base/ui/tooltip";
 import { useQueryBuilderContext } from "../QueryBuilder.Context";
 
-const SavedFiltersLeftActions = ({
+function SavedFiltersLeftActions({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => {
+}: React.HTMLAttributes<HTMLDivElement>) {
   const { queryBuilder } = useQueryBuilderContext();
 
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
@@ -36,6 +36,6 @@ const SavedFiltersLeftActions = ({
       </TooltipProvider>
     </div>
   );
-};
+}
 
 export default SavedFiltersLeftActions;

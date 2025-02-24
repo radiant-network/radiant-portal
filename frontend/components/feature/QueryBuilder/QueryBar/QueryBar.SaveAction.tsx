@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useQueryBarContext } from "./QueryBar.Context";
 import { IconButton } from "@/components/base/Buttons";
 
-const QueryBarSaveAction = () => {
+function QueryBarSaveAction() {
   const { query } = useQueryBarContext();
   const dict = useQueryBuilderDictContext();
 
@@ -35,6 +35,6 @@ const QueryBarSaveAction = () => {
       <QueryBarSaveDialog open={open} onOpenChange={setOpen} query={query} />
     </>
   );
-};
+}
 
 export default QueryBarSaveAction;

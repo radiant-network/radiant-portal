@@ -13,11 +13,7 @@ export type QueryPillOperatorProps = {
   className?: string;
 };
 
-const QueryPillOperator = ({
-  type,
-  size,
-  className,
-}: QueryPillOperatorProps) => {
+function QueryPillOperator({ type, size, className }: QueryPillOperatorProps) {
   switch (type) {
     case FieldOperators[">"]:
       return <GreaterThanOperatorIcon size={size} className={className} />;
@@ -39,6 +35,6 @@ const QueryPillOperator = ({
     default:
       return <EqualOperatorIcon size={size} className={className} />;
   }
-};
+}
 
 export default QueryPillOperator;

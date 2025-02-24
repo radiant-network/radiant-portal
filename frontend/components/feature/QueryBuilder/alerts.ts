@@ -5,10 +5,10 @@ import {
   SavedFilterInstance,
 } from "@/components/model/query-builder-core";
 
-export const openDeleteSavedFilterAlert = (
+export function openDeleteSavedFilterAlert(
   savedFilter: SavedFilterInstance,
   dict: QueryBuilderDictionnary
-) =>
+) {
   alertDialog.open({
     type: "warning",
     title: dict.savedFilter.deleteDialog.title,
@@ -22,11 +22,12 @@ export const openDeleteSavedFilterAlert = (
       children: dict.savedFilter.deleteDialog.ok,
     },
   });
+}
 
-export const openOverwriteSavedFilterAlert = (
+export function openOverwriteSavedFilterAlert(
   queryBuilder: QueryBuilderInstance,
   dict: QueryBuilderDictionnary
-) =>
+) {
   alertDialog.open({
     type: "warning",
     title: dict.savedFilter.overwriteDialog.title,
@@ -39,10 +40,9 @@ export const openOverwriteSavedFilterAlert = (
       children: dict.savedFilter.overwriteDialog.ok,
     },
   });
+}
 
-export const openCustomPillCantBeEmptyDialog = (
-  dict: QueryBuilderDictionnary
-) =>
+export function openCustomPillCantBeEmptyDialog(dict: QueryBuilderDictionnary) {
   alertDialog.open({
     type: "error",
     title: dict.queryPill.customPill.cantBeEmptyDialod.title,
@@ -52,3 +52,4 @@ export const openCustomPillCantBeEmptyDialog = (
       children: dict.queryPill.customPill.cantBeEmptyDialod.ok,
     },
   });
+}

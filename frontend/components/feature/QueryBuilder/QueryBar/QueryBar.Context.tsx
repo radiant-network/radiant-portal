@@ -6,7 +6,7 @@ export type QueryBarContextType = {
 };
 export const QueryBarContext = createContext<QueryBarContextType | null>(null);
 
-export const useQueryBarContext = () => {
+export function useQueryBarContext() {
   const context = useContext(QueryBarContext);
   if (!context) {
     throw new Error(
@@ -14,4 +14,4 @@ export const useQueryBarContext = () => {
     );
   }
   return context;
-};
+}

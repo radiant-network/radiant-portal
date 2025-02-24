@@ -3,7 +3,7 @@ import { useQueryBuilderContext } from "../QueryBuilder.Context";
 import { useQueryBarContext } from "./QueryBar.Context";
 import { Spinner } from "@/components/base/Spinner";
 
-const QueryBarCount = () => {
+function QueryBarCount() {
   const {
     queryBuilder,
     queryCountIcon: QueryCountIcon,
@@ -33,6 +33,6 @@ const QueryBarCount = () => {
       )}
     </div>
   );
-};
+}
 
 export default QueryBarCount;

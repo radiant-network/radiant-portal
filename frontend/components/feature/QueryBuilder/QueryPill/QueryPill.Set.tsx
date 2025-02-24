@@ -15,15 +15,15 @@ export type QueryPillSetProps = {
   valueFilter: IValueFilter;
 };
 
-const QueryPillSet = ({ valueFilter }: QueryPillSetProps) => {
+function QueryPillSet({ valueFilter }: QueryPillSetProps) {
   const { query } = useQueryBarContext();
   const dict = useQueryBuilderDictContext();
 
   return (
     <QueryPillContainer
-      onRemovePill={() =>
-        query.removePillByFieldOrIndex(valueFilter.content.field)
-      }
+      onRemovePill={function () {
+        query.removePillByFieldOrIndex(valueFilter.content.field);
+      }}
     >
       <div className="flex items-center">
         <QueryPillLabelContainer>
@@ -40,6 +40,6 @@ const QueryPillSet = ({ valueFilter }: QueryPillSetProps) => {
       </QueryPillValuesContainer>
     </QueryPillContainer>
   );
-};
+}
 
 export default QueryPillSet;

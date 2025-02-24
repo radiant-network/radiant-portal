@@ -1,11 +1,14 @@
 import React, { ReactElement } from "react";
 
-const IntersectionOperator = ({
+function IntersectionOperator({
   className,
   ...props
-}: React.HTMLAttributes<HTMLSpanElement>): ReactElement => (
-  <span className={className} {...props}>
-    &
-  </span>
-);
+}: React.HTMLAttributes<HTMLSpanElement>): ReactElement {
+  return (
+    <span className={className} {...props}>
+      &
+    </span>
+  );
+}
+
 export default IntersectionOperator;

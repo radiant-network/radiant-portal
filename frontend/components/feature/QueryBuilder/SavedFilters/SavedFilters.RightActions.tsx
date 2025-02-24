@@ -7,15 +7,17 @@ import SavedFiltersDeleteAction from "./SavedFilters.DeleteAction";
 import SavedFiltersShareAction from "./SavedFilters.ShareAction";
 import SavedFiltersSelect from "./SavedFilters.Select";
 
-const SavedFiltersRightActions = ({
+function SavedFiltersRightActions({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => {
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("flex", className)} {...props}>
       <div
         className="flex gap-4 items-center"
-        onClick={(e) => e.stopPropagation()}
+        onClick={function (e) {
+          e.stopPropagation();
+        }}
       >
         <div className="flex gap-1.5 whitespace-nowrap">
           <TooltipProvider>
@@ -30,6 +32,6 @@ const SavedFiltersRightActions = ({
       </div>
     </div>
   );
-};
+}
 
 export default SavedFiltersRightActions;

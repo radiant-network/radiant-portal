@@ -4,7 +4,7 @@ import { QueryBuilderContextType, QueryBuilderDictionnary } from "./types";
 export const QueryBuilderContext =
   createContext<QueryBuilderContextType | null>(null);
 
-export const useQueryBuilderContext = () => {
+export function useQueryBuilderContext() {
   const context = useContext(QueryBuilderContext);
   if (!context) {
     throw new Error(
@@ -12,12 +12,12 @@ export const useQueryBuilderContext = () => {
     );
   }
   return context;
-};
+}
 
 export const QueryBuilderDictContext =
   createContext<QueryBuilderDictionnary | null>(null);
 
-export const useQueryBuilderDictContext = () => {
+export function useQueryBuilderDictContext() {
   const context = useContext(QueryBuilderDictContext);
   if (!context) {
     throw new Error(
@@ -25,4 +25,4 @@ export const useQueryBuilderDictContext = () => {
     );
   }
   return context;
-};
+}

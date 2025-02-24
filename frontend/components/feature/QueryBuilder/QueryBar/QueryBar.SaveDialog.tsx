@@ -26,7 +26,7 @@ const formSchema = z.object({
   title: z.string(),
 });
 
-const QueryBarSaveDialog = ({
+function QueryBarSaveDialog({
   open,
   onOpenChange,
   query,
@@ -34,7 +34,7 @@ const QueryBarSaveDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   query: QueryInstance;
-}) => {
+}) {
   const dict = useQueryBuilderDictContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -94,6 +94,6 @@ const QueryBarSaveDialog = ({
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export default QueryBarSaveDialog;

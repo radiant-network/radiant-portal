@@ -33,7 +33,7 @@ export type QueryBarProps = {
   query: QueryInstance;
 };
 
-const QueryBar = ({ query }: QueryBarProps) => {
+function QueryBar({ query }: QueryBarProps) {
   const active = query.isActive();
   const dict = useQueryBuilderDictContext();
   const { enableCombine } = useQueryBuilderContext();
@@ -75,6 +75,6 @@ const QueryBar = ({ query }: QueryBarProps) => {
       </div>
     </QueryBarContext.Provider>
   );
-};
+}
 
 export default QueryBar;

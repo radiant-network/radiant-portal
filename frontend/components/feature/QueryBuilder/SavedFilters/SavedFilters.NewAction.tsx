@@ -11,13 +11,13 @@ import {
 } from "../QueryBuilder.Context";
 import { openOverwriteSavedFilterAlert } from "../alerts";
 
-const SavedFiltersNewAction = () => {
+function SavedFiltersNewAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
-  const handleNew = () => {
+  const handleNew = function () {
     if (selectedSavedFilter?.isDirty()) {
       openOverwriteSavedFilterAlert(queryBuilder, dict);
     } else {
@@ -39,6 +39,6 @@ const SavedFiltersNewAction = () => {
       <TooltipContent>{dict.savedFilter.newFilter}</TooltipContent>
     </Tooltip>
   );
-};
+}
 
 export default SavedFiltersNewAction;
