@@ -6,11 +6,15 @@
     "components/*",
     "portals/*"
   ],
+  "scripts": {
+    "test": "vite-jest"
+  },
   "devDependencies": {
     "@ferlab/eslint-config": "^2.0.0",
     "eslint": "^8.57.1",
     "eslint-define-config": "^2.1.0",
-    "eslint-plugin-prettier": "^5.2.3"
+    "eslint-plugin-prettier": "^5.2.3",
+    "vite-jest": "^0.1.4"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.0.0",
