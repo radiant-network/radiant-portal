@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { QueryBuilderContextType, QueryBuilderDictionnary } from "./types";
+import { QueryBuilderContextType, QueryBuilderDictionary } from "./types";
 
 export const QueryBuilderContext =
   createContext<QueryBuilderContextType | null>(null);
@@ -15,7 +15,7 @@ export function useQueryBuilderContext() {
 }
 
 export const QueryBuilderDictContext =
-  createContext<QueryBuilderDictionnary | null>(null);
+  createContext<QueryBuilderDictionary | null>(null);
 
 export function useQueryBuilderDictContext() {
   const context = useContext(QueryBuilderDictContext);

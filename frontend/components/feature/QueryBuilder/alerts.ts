@@ -1,5 +1,5 @@
 import { alertDialog } from "@/components/base/Dialog/AlertDialogStore";
-import { QueryBuilderDictionnary } from "./types";
+import { QueryBuilderDictionary } from "./types";
 import {
   QueryBuilderInstance,
   SavedFilterInstance,
@@ -7,7 +7,7 @@ import {
 
 export function openDeleteSavedFilterAlert(
   savedFilter: SavedFilterInstance,
-  dict: QueryBuilderDictionnary
+  dict: QueryBuilderDictionary
 ) {
   alertDialog.open({
     type: "warning",
@@ -26,7 +26,7 @@ export function openDeleteSavedFilterAlert(
 
 export function openOverwriteSavedFilterAlert(
   queryBuilder: QueryBuilderInstance,
-  dict: QueryBuilderDictionnary
+  dict: QueryBuilderDictionary
 ) {
   alertDialog.open({
     type: "warning",
@@ -42,7 +42,7 @@ export function openOverwriteSavedFilterAlert(
   });
 }
 
-export function openCustomPillCantBeEmptyDialog(dict: QueryBuilderDictionnary) {
+export function openCustomPillCantBeEmptyDialog(dict: QueryBuilderDictionary) {
   alertDialog.open({
     type: "error",
     title: dict.queryPill.customPill.cantBeEmptyDialod.title,
