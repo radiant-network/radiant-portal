@@ -11,12 +11,12 @@ type InterpretationCommon struct {
 	TranscriptId     		string             		`json:"transcript_id,omitempty"`
     Interpretation          string              	`json:"interpretation,omitempty"`
     Pubmed	                []InterpretationPubmed	`json:"pubmed,omitempty"`
-	CreatedBy               string              	`json:"-"`
-    CreatedByName          	string        			`json:"-"`      	
-    CreatedAt               time.Time     			`json:"-"`      	
-    UpdatedBy              	string      			`json:"-"`      	
-    UpdatedByName         	string       			`json:"-"`       	
-    UpdatedAt              	time.Time    			`json:"-"`
+	CreatedBy               string              	`json:"created_by,omitempty"`
+    CreatedByName          	string        			`json:"created_by_name,omitempty"`      	
+    CreatedAt               time.Time     			`json:"created_at,omitempty"`      	
+    UpdatedBy              	string      			`json:"updated_by,omitempty"`      	
+    UpdatedByName         	string       			`json:"updated_by_name,omitempty"`       	
+    UpdatedAt              	time.Time    			`json:"updated_at,omitempty"`
 }
 
 type InterpretationGermline struct {
