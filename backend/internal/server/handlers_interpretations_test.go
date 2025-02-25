@@ -90,7 +90,7 @@ func assertGetInterpretationGermline(t *testing.T, sequencingId string, locusId 
 }
 
 func Test_GetInterpretationGermline_ok(t *testing.T) {
-	assertGetInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, `{"id":"seq1-locus1-trans1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1"}`)
+	assertGetInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, `{"created_at":"0001-01-01T00:00:00Z", "id":"seq1-locus1-trans1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_GetInterpretationGermline_error(t *testing.T) {
@@ -117,14 +117,14 @@ func assertPostInterpretationGermline(t *testing.T, sequencingId string, locusId
 func Test_PostInterpretationGermline_create_ok(t *testing.T) {
 	body := `{
 			}`
-	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"id":"uuid1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1"}`)
+	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_PostInterpretationGermline_update_ok(t *testing.T) {
 	body := `{
 				"id":"uuid1"
 			}`
-	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"id":"uuid1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1"}`)
+	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_PostInterpretationGermline_error(t *testing.T) {
@@ -148,7 +148,7 @@ func assertGetInterpretationSomatic(t *testing.T, sequencingId string, locusId s
 }
 
 func Test_GetInterpretationSomatic_ok(t *testing.T) {
-	assertGetInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, `{"id":"seq1-locus1-trans1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1"}`)
+	assertGetInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, `{"created_at":"0001-01-01T00:00:00Z", "id":"seq1-locus1-trans1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_GetInterpretationSomatic_error(t *testing.T) {
@@ -175,14 +175,14 @@ func assertPostInterpretationSomatic(t *testing.T, sequencingId string, locusId 
 func Test_PostInterpretationSomatic_create_ok(t *testing.T) {
 	body := `{
 			}`
-	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"id":"uuid1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1"}`)
+	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_PostInterpretationSomatic_update_ok(t *testing.T) {
 	body := `{
 				"id":"uuid1"
 			}`
-	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"id":"uuid1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1"}`)
+	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_PostInterpretationSomatic_error(t *testing.T) {
