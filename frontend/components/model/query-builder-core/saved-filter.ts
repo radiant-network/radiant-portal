@@ -172,7 +172,10 @@ export const createSavedFilter = (
       const savedFilterToSave: ISavedFilter = {
         ..._savedFilter.raw(),
         title: params?.title || _savedFilter.raw().title,
-        favorite: params?.favorite || _savedFilter.raw().favorite,
+        favorite:
+          params?.favorite !== undefined
+            ? params.favorite
+            : _savedFilter.raw().favorite,
         type,
         queries: queryBuilder.getRawQueries(),
       };
