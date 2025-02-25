@@ -33,8 +33,6 @@ export function MultiSelect({
   );
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
 
-  console.log("items ; ", items, maxVisibleItems, searchVisible, appliedItems);
-
   // Memoize these functions with useCallback
   //
   const updateSearch = useCallback(
