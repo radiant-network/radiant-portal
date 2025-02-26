@@ -1,29 +1,11 @@
 import { FilterList } from "@/components/feature/QueryFilters/FilterList";
+import { useConfig } from "@/components/model/applications-config";
 
 function SidenavFilters() {
-  const fields = [
-    "chromosome",
-    "filter",
-    "zygosity",
-    "impact_score",
-    "variant_class",
-    "symbol",
-    //"seq_id",
-    // "locus_id",
-    //"genotype_quality",
-    // "pf",
-    // "af",
-    // "gnomad_v3_af",
-    //"hgvsg",
-    // "ad_ratio",
-    // "vep_impact",
-    // "mane_select",
-    // "canonical",
-  ];
-
+  const config = useConfig(); 
   return (
     <aside>
-      <FilterList fields={fields} />
+      <FilterList fields={config.variant_entity.aggregations} />
     </aside>
   );
 }

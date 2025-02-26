@@ -12,6 +12,7 @@ import {
 } from "@/components/base/ui/accordion";
 import { occurrencesApi } from "@/utils/api";
 import { SearchIcon } from "lucide-react";
+import { type Aggregation as AggregationConfig } from "@/components/model/applications-config";
 
 type OccurrenceAggregationInput = {
   seqId: string;
@@ -53,13 +54,12 @@ function useAggregationBuilder(
   );
 }
 
-function FilterBuilder({ field }: { field: string }) {
+function FilterBuilder({ field }: { field: AggregationConfig }) {
   const [collapsed, setCollapsed] = React.useState(true);
   const [searchVisible, setSearchVisible] = React.useState(false);
-  let { data } = useAggregationBuilder(field, undefined, !collapsed);
+  let { data } = useAggregationBuilder(field.key, undefined, !collapsed);
 
   data?.sort((a, b) => b.count! - a.count!);
-  console.log("data in FilterBuilder:", data, " -- ", field);
 
   function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
     e.stopPropagation();
@@ -75,7 +75,7 @@ function FilterBuilder({ field }: { field: string }) {
       <AccordionItem value="item-1">
         <AccordionTrigger className="AccordionTrigger">
           <div className="flex items-center justify-between w-full">
-            <span>{field}</span>
+            <span className="capitalize">{field.key.replace('_', ' ')}</span>
             {!collapsed && (
               <SearchIcon
                 size={18}
@@ -90,18 +90,20 @@ function FilterBuilder({ field }: { field: string }) {
           {!data ? (
             <div>Loading...</div>
           ) : (
-            <MultiSelect searchVisible={searchVisible} data={data} />
+            field.type === 'multiple' 
+              ? <MultiSelect searchVisible={searchVisible} data={data} />
+              : <div>Not implemented</div>
           )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>
   );
 }
-export function FilterList({ fields }: { fields: string[] }) {
+export function FilterList({ fields }: { fields: AggregationConfig[] }) {
   return (
     <ul>
       {fields.map((field) => (
-        <li key={field}>
+        <li key={field.key}>
           <FilterBuilder field={field} />
         </li>
       ))}
