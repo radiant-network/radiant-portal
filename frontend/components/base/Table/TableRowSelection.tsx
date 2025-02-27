@@ -1,5 +1,5 @@
+import { useEffect, useRef } from "react";
 import { CellContext, HeaderContext } from "@tanstack/react-table";
-import * as React from "react";
 
 /**
  * Return TableRowSelection for a column header
@@ -12,7 +12,9 @@ import * as React from "react";
  *  minSize: 24,
  * }
  */
-const getTableRowSelectionHeader = ({ table }: HeaderContext<any, any>) => (
+export const getTableRowSelectionHeader = ({
+  table,
+}: HeaderContext<any, any>) => (
   <TableRowSelection
     checked={table.getIsAllRowsSelected()}
     indeterminate={table.getIsSomeRowsSelected()}
@@ -31,7 +33,7 @@ const getTableRowSelectionHeader = ({ table }: HeaderContext<any, any>) => (
  *  minSize: 24,
  * }
  */
-const getTableRowSelectionCell = ({ row }: CellContext<any, any>) => (
+export const getTableRowSelectionCell = ({ row }: CellContext<any, any>) => (
   <div className="px-1">
     <TableRowSelection
       checked={row.getIsSelected()}
@@ -53,14 +55,14 @@ type TableRowSelectCheckboxProps = {
   onChange: (event: unknown) => void;
 };
 
-const TableRowSelection = ({
+export const TableRowSelection = ({
   indeterminate,
   className = "",
   ...rest
 }: TableRowSelectCheckboxProps) => {
-  const ref = React.useRef<HTMLInputElement>(null!);
+  const ref = useRef<HTMLInputElement>(null!);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof indeterminate === "boolean") {
       ref.current.indeterminate = !rest.checked && indeterminate;
     }
@@ -74,10 +76,4 @@ const TableRowSelection = ({
       {...rest}
     />
   );
-};
-
-export {
-  TableRowSelection,
-  getTableRowSelectionHeader,
-  getTableRowSelectionCell,
 };
