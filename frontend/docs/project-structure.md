@@ -76,7 +76,23 @@ The `Components` directory holds all basic to advanced UI components required to
 
 ### 3. **Portals**
 
-The `Portals` directory contains the layout and setup for portals, including the base structure for generating different portals (e.g., "Radiant").
+The `Portals/radiant` directory contains the layout and setup for portals
+
+This is the structure for generating different portals (e.g., "Radiant", "kf", etc).
+
+#### Strategy:
+
+- Each portal is a separate build that can be customized with different themes and configurations.
+- Each Build is specified in the package.json file and can be run with `npm|bun build:[portal_name]`.
+
+#### Configuragion:
+
+- Each portal has its own configuration file that specifies the theme, environment, and other settings.
+- The configuration file is used to generate the portal with the correct settings.
+The configurations files are located in the `config` directory.
+
+The way it work, a configuration file is set to a global Variable name __PROJECT__ in the vite configuration file and set at compile time.
+In @/components/utils/config.ts, the configuration is imported and used to set the theme and other settings as a Provider.
 
 #### Functionality:
 

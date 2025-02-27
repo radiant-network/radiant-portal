@@ -259,7 +259,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps<any>>(
                   ))}
                 </tr>
                 {subComponent && row.getIsExpanded() && (
-                  <tr>
+                  <tr key={`${row.id}-sub`}>
                     <td colSpan={row.getVisibleCells().length}>
                       {subComponent(row.original)}
                     </td>

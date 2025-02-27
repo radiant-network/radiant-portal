@@ -84,7 +84,6 @@ function App() {
             fetchQueryCount={() => Promise.resolve(15)}
             onActiveQueryChange={(sqon) => setActiveSqon(sqon as Sqon)}
             onStateChange={(state) => {
-              console.log("onStateChange", state);
               setQbState(state);
             }}
           />

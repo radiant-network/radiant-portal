@@ -1,0 +1,12 @@
+{
+  "variant_entity": {
+    "aggregations": [
+      { "key": "chromosome", "type": "multiple" },
+      { "key": "filter", "type": "multiple" },
+      { "key": "zygosity", "type": "multiple" },
+      { "key": "impact_score", "type": "multiple" },
+      { "key": "variant_class", "type": "multiple" },
+      { "key": "symbol", "type": "multiple" }
+    ]
+  }
+}
