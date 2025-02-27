@@ -1,7 +1,7 @@
 import "./App.css";
 import styles from "./App.module.css";
 import { ListBody, Occurrence, SortBodyOrderEnum, Sqon } from "@/api/api";
-import { Table } from "@/components/base/Table/Table";
+import Table from "@/components/base/Table/Table";
 import {
   columns,
   defaultSettings,

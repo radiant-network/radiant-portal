@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useEffect, useRef } from "react";
 import { TableState } from "@tanstack/react-table";
 
 /**
@@ -10,8 +10,8 @@ export const useResizeObserver = (
   callback: (columnId: string, columnSize: number) => void
 ) => {
   // This Ref will contain the id of the column being resized or undefined
-  const columnResizeRef = React.useRef<string | false>();
-  React.useEffect(() => {
+  const columnResizeRef = useRef<string | false>();
+  useEffect(() => {
     // We are interested in calling the resize event only when "state.columnResizingInfo?.isResizingColumn" changes from
     // a string to false, because it indicates that it WAS resizing but it no longer is.
     if (

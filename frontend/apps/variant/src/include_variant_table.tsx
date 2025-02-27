@@ -7,7 +7,7 @@ import {
   getTableRowSelectionCell,
   getTableRowSelectionHeader,
 } from "@/components/base/Table/TableRowSelection";
-import { getTableRowExpandCell } from "@/components/base/Table/TableRowExpand";
+import TableRowExpandCell from "@/components/base/Table/Cells/TableRowExpand";
 import { Occurrence } from "@/api/api";
 
 const columnHelper = createColumnHelper<Occurrence>();
@@ -22,7 +22,7 @@ const columns = [
   },
   {
     id: "row_expand",
-    cell: getTableRowExpandCell,
+    cell: TableRowExpandCell,
     size: 32,
     minSize: 24,
   },

@@ -9,15 +9,16 @@ import {
   ColumnOrderState,
   getExpandedRowModel,
 } from "@tanstack/react-table";
-import { Button } from "@/base/ui/button";
-import { TableColumnSettings } from "@/base/Table/TableColumnSettings";
-import { cn } from "@/lib/utils";
-import { useResizeObserver } from "@/base/Table/TableObserver";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsLeftIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/base/ui/button";
+import TableColumnSettings from "@/base/Table/TableColumnSettings";
+import { useResizeObserver } from "@/base/Table/TableObserver";
+import TableIndexResult from "@/components/base/Table/TableIndexResult";
 
 export interface TableColumnDef<TData, TValue>
   extends Omit<ColumnDef<TData, TValue>, "id" | "header"> {
@@ -25,6 +26,15 @@ export interface TableColumnDef<TData, TValue>
   header: string;
   subComponent?: string;
 }
+
+type TableProps<TData> = {
+  total: number;
+  columns: TableColumnDef<TData, any>[];
+  data: TData[];
+  columnSettings: ColumnSettings[];
+  defaultColumnSettings: ColumnSettings[];
+  subComponent?: (data: TData) => JSX.Element;
+};
 
 export interface BaseColumnSettings {
   id: string;
@@ -46,7 +56,7 @@ type ColumnVisiblity = {
  * @param settings BaseColumnSettings[]
  * @returns ColumnSettings[]
  */
-const createColumnSettings = (
+export const createColumnSettings = (
   settings: BaseColumnSettings[]
 ): ColumnSettings[] =>
   settings.map((setting, index) => ({
@@ -109,228 +119,184 @@ const deserializeColumnOrder = (
  *   "fixed": {boolean},
  *  }]
  */
-type TableProps<TData> = {
-  total: number;
-  columns: TableColumnDef<TData, any>[];
-  data: TData[];
-  columnSettings: ColumnSettings[];
-  defaultColumnSettings: ColumnSettings[];
-  subComponent?: (data: TData) => JSX.Element;
-};
+const Table = ({
+  columns,
+  total,
+  data,
+  columnSettings,
+  defaultColumnSettings,
+  subComponent,
+}: TableProps<any>) => {
+  // default values
+  const defaultColumnVisibility = deserializeColumnVisibility(
+    defaultColumnSettings
+  );
+  const defaultColumnOrder = deserializeColumnOrder(defaultColumnSettings);
 
-const Table = React.forwardRef<HTMLTableElement, TableProps<any>>(
-  (
-    {
-      columns,
-      total,
-      data,
-      columnSettings,
-      defaultColumnSettings,
-      subComponent,
+  // table interactions
+  const [columnVisibility, setColumnVisibility] = React.useState(
+    deserializeColumnVisibility(columnSettings)
+  );
+  const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
+    deserializeColumnOrder(columnSettings)
+  );
+  // TODO: should be connected to user api
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  // Initialize tanstack table
+  const table = useReactTable({
+    columns,
+    onColumnVisibilityChange: setColumnVisibility,
+    onColumnOrderChange: setColumnOrder,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    columnResizeDirection: "ltr",
+    data: data,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
+    getRowCanExpand: () => true,
+    getExpandedRowModel: getExpandedRowModel(),
+    state: {
+      pagination,
+      columnVisibility,
+      columnOrder,
     },
-    ref
-  ) => {
-    // default values
-    const defaultColumnVisibility = deserializeColumnVisibility(
-      defaultColumnSettings
-    );
-    const defaultColumnOrder = deserializeColumnOrder(defaultColumnSettings);
+  });
 
-    // table interactions
-    const [columnVisibility, setColumnVisibility] = React.useState(
-      deserializeColumnVisibility(columnSettings)
-    );
-    const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
-      deserializeColumnOrder(columnSettings)
-    );
-    // TODO: should be connected to user api
-    const [pagination, setPagination] = React.useState<PaginationState>({
-      pageIndex: 0,
-      pageSize: 10,
-    });
+  const handleVisiblityChange = (target: string, checked: boolean) => {
+    setColumnVisibility({ ...columnVisibility, [target]: checked });
+  };
 
-    // Initialize tanstack table
-    const table = useReactTable({
-      columns,
-      onColumnVisibilityChange: setColumnVisibility,
-      onColumnOrderChange: setColumnOrder,
-      enableColumnResizing: true,
-      columnResizeMode: "onChange",
-      columnResizeDirection: "ltr",
-      data: data,
-      getCoreRowModel: getCoreRowModel(),
-      getPaginationRowModel: getPaginationRowModel(),
-      onPaginationChange: setPagination,
-      getRowCanExpand: () => true,
-      getExpandedRowModel: getExpandedRowModel(),
-      state: {
-        pagination,
-        columnVisibility,
-        columnOrder,
-      },
-    });
+  // @TODO: shout save column width in user data
+  useResizeObserver(table.getState(), (columnId, columnSize) => {
+    console.log(columnId);
+    console.log(columnSize);
+  });
 
-    const handleVisiblityChange = (target: string, checked: boolean) => {
-      setColumnVisibility({ ...columnVisibility, [target]: checked });
-    };
-
-    // @TODO: shout save column width in user data
-    useResizeObserver(table.getState(), (columnId, columnSize) => {
-      console.log(columnId);
-      console.log(columnSize);
-    });
-
-    return (
-      <div className="block min-w-full w-full overflow-x-auto overflow-y-auto">
-        <div className="w-full flex text-left justify-between">
-          <TableIndexResult
-            pageIndex={table.getState().pagination.pageIndex + 1}
-            pageSize={table.getState().pagination.pageSize}
-            total={total}
-          />
-          <TableColumnSettings
-            columns={columns}
-            defaultSettings={defaultColumnSettings}
-            visiblitySettings={columnVisibility}
-            handleVisiblityChange={handleVisiblityChange}
-            handleOrderChange={setColumnOrder}
-            pristine={
-              JSON.stringify(defaultColumnOrder) ==
-                JSON.stringify(columnOrder) &&
-              JSON.stringify(defaultColumnVisibility) ==
-                JSON.stringify(columnVisibility)
-            }
-            handleReset={() => {
-              setColumnOrder(defaultColumnOrder);
-              setColumnVisibility(defaultColumnVisibility);
-            }}
-          />
-        </div>
-        <table className={"w-full text-left table-fixed"} ref={ref}>
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    style={{ width: header.getSize() }}
-                    className="border relative bg-gray-100 border-gray-150 p-2 font-normal text-left truncate"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    <div
-                      onDoubleClick={() => header.column.resetSize()}
-                      onMouseDown={header.getResizeHandler()}
-                      onTouchStart={header.getResizeHandler()}
-                      className={cn(
-                        "absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50",
-                        table.options.columnResizeDirection,
-                        header.column.getIsResizing() ? "opacity-100" : ""
+  return (
+    <div className="block min-w-full w-full overflow-x-auto overflow-y-auto">
+      <div className="w-full flex text-left justify-between">
+        <TableIndexResult
+          pageIndex={table.getState().pagination.pageIndex + 1}
+          pageSize={table.getState().pagination.pageSize}
+          total={total}
+        />
+        <TableColumnSettings
+          columns={columns}
+          defaultSettings={defaultColumnSettings}
+          visiblitySettings={columnVisibility}
+          handleVisiblityChange={handleVisiblityChange}
+          handleOrderChange={setColumnOrder}
+          pristine={
+            JSON.stringify(defaultColumnOrder) == JSON.stringify(columnOrder) &&
+            JSON.stringify(defaultColumnVisibility) ==
+              JSON.stringify(columnVisibility)
+          }
+          handleReset={() => {
+            setColumnOrder(defaultColumnOrder);
+            setColumnVisibility(defaultColumnVisibility);
+          }}
+        />
+      </div>
+      <table className={"w-full text-left table-fixed"}>
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  style={{ width: header.getSize() }}
+                  className="border relative bg-gray-100 border-gray-150 p-2 font-normal text-left truncate"
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
                       )}
-                    />
-                  </th>
+                  <div
+                    onDoubleClick={() => header.column.resetSize()}
+                    onMouseDown={header.getResizeHandler()}
+                    onTouchStart={header.getResizeHandler()}
+                    className={cn(
+                      "absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50",
+                      table.options.columnResizeDirection,
+                      header.column.getIsResizing() ? "opacity-100" : ""
+                    )}
+                  />
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <>
+              <tr
+                key={row.id}
+                className={row.index % 2 != 0 ? "bg-gray-50" : ""}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className="border border-gray-100 p-2 font-normal text-left truncate"
+                    style={{ width: cell.column.getSize() }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
                 ))}
               </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <>
-                <tr
-                  key={row.id}
-                  className={row.index % 2 != 0 ? "bg-gray-50" : ""}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="border border-gray-100 p-2 font-normal text-left truncate"
-                      style={{ width: cell.column.getSize() }}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
+              {subComponent && row.getIsExpanded() && (
+                <tr key={`${row.id}-sub`}>
+                  <td colSpan={row.getVisibleCells().length}>
+                    {subComponent(row.original)}
+                  </td>
                 </tr>
-                {subComponent && row.getIsExpanded() && (
-                  <tr key={`${row.id}-sub`}>
-                    <td colSpan={row.getVisibleCells().length}>
-                      {subComponent(row.original)}
-                    </td>
-                  </tr>
-                )}
-              </>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex justify-end items-center gap-2">
-          <select
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-          >
-            {[10, 20, 30, 40, 50].map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                Show {pageSize}
-              </option>
-            ))}
-          </select>
-          <Button
-            onClick={() => table.firstPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronsLeftIcon /> First
-          </Button>
-          <Button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronLeftIcon />
-            Prev.
-          </Button>
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next <ChevronRightIcon />
-          </Button>
-        </div>
+              )}
+            </>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex justify-end items-center gap-2">
+        <select
+          value={table.getState().pagination.pageSize}
+          onChange={(e) => {
+            table.setPageSize(Number(e.target.value));
+          }}
+        >
+          {[10, 20, 30, 40, 50].map((pageSize) => (
+            <option key={pageSize} value={pageSize}>
+              Show {pageSize}
+            </option>
+          ))}
+        </select>
+        <Button
+          onClick={() => table.firstPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          <ChevronsLeftIcon /> First
+        </Button>
+        <Button
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          <ChevronLeftIcon />
+          Prev.
+        </Button>
+        <Button
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next <ChevronRightIcon />
+        </Button>
       </div>
-    );
-  }
-);
-Table.displayName = "Table";
-
-/**
- * TableIndexResult
- * show current page and total page
- */
-type TableIndexResultProp = {
-  total: number;
-  pageIndex: number;
-  pageSize: number;
+    </div>
+  );
 };
 
-const TableIndexResult = React.forwardRef<
-  HTMLSpanElement,
-  TableIndexResultProp
->(({ total, pageIndex, pageSize }, ref) => {
-  const result = total;
-  const to = pageSize * pageIndex;
-  const from = to - pageSize + 1;
-  return (
-    <span ref={ref}>
-      Results {from} - {to} of {result}
-    </span>
-  );
-});
-TableIndexResult.displayName = "TableIndexResult";
-
-export { Table, createColumnSettings };
+export default Table;

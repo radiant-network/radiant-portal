@@ -1,7 +1,6 @@
-import * as React from "react";
-import { Button } from "@/base/button";
 import { cn } from "@/lib/utils";
 import { PlusIcon } from "lucide-react";
+import { Button } from "@/components/base/ui/button";
 
 type GeneCellProps = {
   className?: string;
@@ -10,23 +9,15 @@ type GeneCellProps = {
   onClick: () => void;
 };
 
-const GeneCell = React.forwardRef<HTMLDivElement, GeneCellProps>(
-  ({ className, url, name, onClick }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn("flex items-center text-blue-500", className)}
-      >
-        <a href={url} target="_blank">
-          {name}
-        </a>
-        <Button onClick={onClick}>
-          <PlusIcon />
-        </Button>
-      </div>
-    );
-  }
+const GeneCell = ({ className, url, name, onClick }: GeneCellProps) => (
+  <div className={cn("flex items-center text-blue-500", className)}>
+    <a href={url} target="_blank">
+      {name}
+    </a>
+    <Button onClick={onClick}>
+      <PlusIcon />
+    </Button>
+  </div>
 );
-GeneCell.displayName = "GeneCell";
 
 export default GeneCell;

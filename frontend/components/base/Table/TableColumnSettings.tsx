@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useEffect, useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -13,36 +13,37 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ColumnSettings, TableColumnDef } from "@/base/Table/Table";
 import { ColumnOrderState } from "@tanstack/react-table";
 import { Button } from "@/base/ui/button";
-import { GripVerticalIcon, SettingsIcon } from "lucide-react";
-import { IconButton } from "../Buttons";
+import { SettingsIcon } from "lucide-react";
+import TableSortableColumnSetting from "@/components/base/Table/TableSortableColumnSetting";
+import IconButton from "@/components/base/Buttons/IconButton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuPortal,
+  DropdownMenuTrigger,
+} from "@/components/base/ui/dropdown-menu";
 
 /**
  * Read user config to return column order (in asc)
  * @param settings
  * @returns ['id1', 'id2']
  */
-const deserializeColumnFixed = (settings: ColumnSettings[]): string[] => {
-  return settings
+const deserializeColumnFixed = (settings: ColumnSettings[]): string[] =>
+  settings
     .sort((a, b) => a.index - b.index)
     .filter((setting) => setting.fixed === true)
     .map((setting) => setting.id);
-};
 
 /**
  * @returns list of all columns id that are not fixed
  */
-const deserializeColumns = (columns: TableColumnDef<any, any>[]) => {
-  return columns.map((column) => column.id);
-};
+const deserializeColumns = (columns: TableColumnDef<any, any>[]) =>
+  columns.map((column) => column.id);
 
 /**
  * TableColumnSettings
@@ -60,148 +61,91 @@ type TableColumnSettingsProps<TData> = {
   handleReset: () => void;
 };
 
-const TableColumnSettings = React.forwardRef<
-  HTMLSpanElement,
-  TableColumnSettingsProps<any>
->(
-  (
-    {
-      columns,
-      defaultSettings,
-      pristine,
-      visiblitySettings,
-      handleVisiblityChange,
-      handleReset,
-      handleOrderChange,
-    },
-    ref
-  ) => {
-    const fixedColumns = deserializeColumnFixed(defaultSettings);
-    const [items, setItems] = React.useState<UniqueIdentifier[]>(
-      deserializeColumns(columns)
-    );
-    const sensors = useSensors(
-      useSensor(PointerSensor),
-      useSensor(KeyboardSensor, {
-        coordinateGetter: sortableKeyboardCoordinates,
-      })
-    );
-    const handleDragEnd = (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over) return;
-      if (active.id !== over.id) {
-        setItems((items) => {
-          return arrayMove(
-            items,
-            items.indexOf(active.id),
-            items.indexOf(over.id)
-          );
-        });
-      }
-    };
-
-    React.useEffect(() => {
-      handleOrderChange(items as ColumnOrderState);
-    }, [items]);
-
-    return (
-      <span ref={ref}>
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <IconButton icon={SettingsIcon} />
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content className="min-w-[220px] bg-white p-[5px] shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] will-change-[opacity,transform] data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade data-[side=right]:animate-slideLeftAndFade data-[side=top]:animate-slideDownAndFade">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={items}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {items.map((id) => {
-                    const column = columns.find((column) => column.id === id);
-                    if (!column) return null;
-                    if (fixedColumns.includes(column.id)) return;
-                    return (
-                      <SortableColumnSetting
-                        key={id}
-                        id={id}
-                        column={column}
-                        checked={visiblitySettings[column.id]}
-                        handleCheckboxChange={handleVisiblityChange}
-                      />
-                    );
-                  })}
-                </SortableContext>
-              </DndContext>
-
-              <Button
-                disabled={pristine}
-                onClick={() => {
-                  setItems(deserializeColumns(columns));
-                  handleReset();
-                }}
-              >
-                Reset
-              </Button>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
-      </span>
-    );
-  }
-);
-TableColumnSettings.displayName = "TableColumnSettings";
-
-/**
- * SortableColumnSetting
- * - Checkbox manage columns visibility
- * - Drag'n drop manage columns order
- */
-type SortableColumnSetting<TData> = {
-  id: UniqueIdentifier;
-  column: TableColumnDef<TData, any>;
-  checked: boolean;
-  handleCheckboxChange: (target: string, checked: boolean) => void;
-};
-const SortableColumnSetting = ({
-  id,
-  column,
-  checked,
-  handleCheckboxChange,
-}: SortableColumnSetting<any>) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+const TableColumnSettings = ({
+  columns,
+  defaultSettings,
+  pristine,
+  visiblitySettings,
+  handleVisiblityChange,
+  handleReset,
+  handleOrderChange,
+}: TableColumnSettingsProps<any>) => {
+  const fixedColumns = deserializeColumnFixed(defaultSettings);
+  const [items, setItems] = useState<UniqueIdentifier[]>(
+    deserializeColumns(columns)
+  );
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    if (active.id !== over.id) {
+      setItems((items) => {
+        return arrayMove(
+          items,
+          items.indexOf(active.id),
+          items.indexOf(over.id)
+        );
+      });
+    }
   };
 
+  useEffect(() => {
+    handleOrderChange(items as ColumnOrderState);
+  }, [items]);
+
   return (
-    <div
-      key={id}
-      ref={setNodeRef}
-      style={style}
-      className={cn("flex items-center gap-[8xp] mt-[8px] mr-[8px]")}
-    >
-      <div {...attributes} {...listeners}>
-        <GripVerticalIcon className="mr-[4px]" size={14} />
-      </div>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => {
-          handleCheckboxChange(column.id, event.target.checked);
-        }}
-      />
-      <label className="flex pl-[4px] text-[15px] leading-none">
-        {column.header}
-      </label>
-    </div>
+    <span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <IconButton icon={SettingsIcon} />
+        </DropdownMenuTrigger>
+        <DropdownMenuPortal>
+          <DropdownMenuContent className="min-w-[220px] bg-white p-[5px] shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] will-change-[opacity,transform] data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade data-[side=right]:animate-slideLeftAndFade data-[side=top]:animate-slideDownAndFade">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={items}
+                strategy={verticalListSortingStrategy}
+              >
+                {items.map((id) => {
+                  const column = columns.find((column) => column.id === id);
+                  if (!column) return null;
+                  if (fixedColumns.includes(column.id)) return;
+                  return (
+                    <TableSortableColumnSetting
+                      key={id}
+                      id={id}
+                      column={column}
+                      checked={visiblitySettings[column.id]}
+                      handleCheckboxChange={handleVisiblityChange}
+                    />
+                  );
+                })}
+              </SortableContext>
+            </DndContext>
+
+            <Button
+              disabled={pristine}
+              onClick={() => {
+                setItems(deserializeColumns(columns));
+                handleReset();
+              }}
+            >
+              Reset
+            </Button>
+          </DropdownMenuContent>
+        </DropdownMenuPortal>
+      </DropdownMenu>
+    </span>
   );
 };
 
-export { TableColumnSettings };
+export default TableColumnSettings;
