@@ -177,17 +177,19 @@ func (r* InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 	if err != nil {
 		return err
 	}
+	query := r.db.
+	Table(types.InterpretationGermlineTable.Name).
+	Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if existing != nil {
 		dao.CreatedBy = existing.CreatedBy
 		dao.CreatedByName = existing.CreatedByName
+		query.Select("*").Updates(dao) // select * to update all fields
+	} else {
+		query.Save(dao)
 	}
 	var res types.InterpretationGermlineDAO
-	result := r.db.
-		Table(types.InterpretationGermlineTable.Name).
-		Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId).
-		Assign(dao).
-		FirstOrCreate(&res)
-	err = result.Error
+	query.FirstOrCreate(&res)
+	err = query.Error
 	if err != nil {
 		return fmt.Errorf("error while create/update germline interpretation: %w", err)
 	}
@@ -228,16 +230,18 @@ func (r* InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.
 	if err != nil {
 		return err
 	}
+	query := r.db.Table(types.InterpretationSomaticTable.Name).
+	Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if existing != nil {
 		dao.CreatedBy = existing.CreatedBy
 		dao.CreatedByName = existing.CreatedByName
+		query.Select("*").Updates(dao) // select * to update all fields
+	} else {
+		query.Save(dao)
 	}
  	var res types.InterpretationSomaticDAO
-	result := r.db.Table(types.InterpretationSomaticTable.Name).
-		Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId).
-		Assign(dao).
-		FirstOrCreate(&res)
-	err = result.Error
+	query.FirstOrCreate(&res)
+	err = query.Error
 	if err != nil {
 		return fmt.Errorf("error while create/update somatic interpretation: %w", err)
 	}
