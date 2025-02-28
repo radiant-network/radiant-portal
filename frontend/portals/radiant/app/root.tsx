@@ -10,7 +10,7 @@ import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import "@styles/colors.css";
 import "@styles/main.css";
-import { AlertDialogProvider } from "@/components/base/Dialog/AlertDialogProvider";
+import { AlertDialogProvider } from "@/components/base/dialog/alert-dialog-provider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
