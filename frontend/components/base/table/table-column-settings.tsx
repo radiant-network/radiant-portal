@@ -15,11 +15,11 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { ColumnSettings, TableColumnDef } from "@/base/Table/Table";
+import { ColumnSettings, TableColumnDef } from "@/components/base/table/table";
 import { ColumnOrderState } from "@tanstack/react-table";
 import { Button } from "@/base/ui/button";
 import { SettingsIcon } from "lucide-react";
-import TableSortableColumnSetting from "@/components/base/Table/TableSortableColumnSetting";
+import TableSortableColumnSetting from "@/components/base/table/table-sortable-column-setting";
 import IconButton from "@/components/base/Buttons/IconButton";
 import {
   DropdownMenu,

@@ -14,21 +14,43 @@ Why This Structure
 - Discoverability: Clear organization makes it easier for teammates to find and reuse components.
 - Separation of Concerns: Keeps base components and feature-specific components separate to avoid coupling.
 
-## `base/`
-**Description:**
-Contains foundational, reusable, and stateless components. These are the "atoms" of the application, representing single UI elements like buttons, inputs, or icons.
-shadcd components should be put here.
+
+### Naming Convention
+
+Both folders and files must follow the kebab-case conventions
 
 
 **Examples:**
-- `BaseButton.jsx`
-- `BaseInput.jsx`
-- `BaseIcon.jsx`
-- `Card.jsx`
-- `Dropdown.jsx`
-- `Modal.jsx`
+- `base/component-folder/my-component.jsx`
+- `base/component-folder/my-second-component.jsx`
+- `base/table/table.jsx`
+- `base/table/table-column-settings.jsx`
+- `base/table/cell/gene-cell.jsx`
 
-### To add a components
+
+## `base/`
+**Description:**
+Contains foundational, reusable, and stateless components. These are the "atoms" of the application, representing single UI elements like buttons, inputs, or icons.
+
+**Examples:**
+- `base/table/table.jsx`
+- `base/list/list.jsx`
+- `base/list/list-with-actions.jsx`
+
+
+### `base/ui`
+**Description:**
+Contains foundational, reusable, and stateless components created through shadcd cli.
+
+**Examples:**
+- `base/ui/base-button.jsx`
+- `base/ui/base-input.jsx`
+- `base/ui/base-icon.jsx`
+- `base/ui/card.jsx`
+- `base/ui/dropdown.jsx`
+- `base/ui/modal.jsx`
+
+#### To add a components
 
 1. go to the `components/` directory
 2. run `make shadcn-add COMPONENT_NAME`
@@ -42,9 +64,9 @@ or
 Includes higher-level components that often have business logic or are tied to specific application features. These "organisms" serve as building blocks for feature-specific functionality.
 
 **Examples:**
-- `UserProfile.jsx`
-- `ShoppingCart.jsx`
-- `ProductList.jsx`
+- `user-profile.jsx`
+- `shopping-cart.jsx`
+- `product-list.jsx`
 
 ---
 
@@ -53,8 +75,8 @@ Includes higher-level components that often have business logic or are tied to s
 Contains utility components that assist with layout, state management, or conditional rendering. These components are often helpers rather than UI elements.
 
 **Examples:**
-- `ConditionalRender.jsx`
-- `ErrorBoundary.jsx`
+- `conditional-render.jsx`
+- `error-boundary.jsx`
 
 ---
 
@@ -65,13 +87,13 @@ To validate if necessary or not with Tailwindcss.
 Stores global layout components that define the structure of pages or sections in the application. These components usually handle overall positioning and layout.
 
 **Examples:**
-- `Header.jsx`
-- `Footer.jsx`
-- `Sidebar.jsx`
+- `header.jsx`
+- `footer.jsx`
+- `sidebar.jsx`
 
 ## `models/`
 **Description:**
 Models, types and headless features
 
 **Examples:**
-- `QueryBuilder/` Directory containing components for building complex queries, their types and models.
+- `query-builder/` Directory containing components for building complex queries, their types and models.

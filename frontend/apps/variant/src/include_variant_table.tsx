@@ -2,12 +2,12 @@ import { createColumnHelper } from "@tanstack/react-table";
 import {
   TableColumnDef,
   createColumnSettings,
-} from "@/components/base/Table/Table";
+} from "@/components/base/table/table";
 import {
   getTableRowSelectionCell,
   getTableRowSelectionHeader,
-} from "@/components/base/Table/TableRowSelection";
-import TableRowExpandCell from "@/components/base/Table/Cells/TableRowExpand";
+} from "@/components/base/table/table-row-selection";
+import RowExpandCell from "@/components/base/table/cells/row-expand-cell";
 import { Occurrence } from "@/api/api";
 
 const columnHelper = createColumnHelper<Occurrence>();
@@ -22,7 +22,7 @@ const columns = [
   },
   {
     id: "row_expand",
-    cell: TableRowExpandCell,
+    cell: RowExpandCell,
     size: 32,
     minSize: 24,
   },

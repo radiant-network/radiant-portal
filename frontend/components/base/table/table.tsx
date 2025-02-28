@@ -16,9 +16,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/base/ui/button";
-import TableColumnSettings from "@/base/Table/TableColumnSettings";
-import { useResizeObserver } from "@/base/Table/TableObserver";
-import TableIndexResult from "@/components/base/Table/TableIndexResult";
+import TableColumnSettings from "@/components/base/table/table-column-settings";
+import { useResizeObserver } from "@/components/base/table/hooks/use-resize-observer";
+import TableIndexResult from "@/components/base/table/table-index-result";
 
 export interface TableColumnDef<TData, TValue>
   extends Omit<ColumnDef<TData, TValue>, "id" | "header"> {
