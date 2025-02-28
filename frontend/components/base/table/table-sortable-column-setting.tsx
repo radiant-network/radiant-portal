@@ -1,7 +1,7 @@
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import { UniqueIdentifier } from "@dnd-kit/core";
-import { TableColumnDef } from "@/base/Table/Table";
+import { TableColumnDef } from "@/components/base/table/table";
 import { GripVerticalIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
