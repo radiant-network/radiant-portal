@@ -200,14 +200,9 @@ export type QueryBuilderInstance = {
   duplicateQuery(id: string): void;
 
   /**
-   * Call this function to select a Query
+   * Call this function to select or unselect a Query
    */
-  selectQuery(id: string): void;
-
-  /**
-   * Call this function to unselect a Query
-   */
-  unselectQuery(id: string): void;
+  toggleQuerySelect(id: string, selected: boolean): void;
 
   /**
    * Call this function to reset Query selection
@@ -427,11 +422,8 @@ export const createQueryBuilder = (
     getSelectedQueryIndexes: () => {
       return queryBuilder.getState().selectedQueryIndexes;
     },
-    selectQuery: (id) => {
-      queryBuilder.getQuery(id)?.select();
-    },
-    unselectQuery: (id) => {
-      queryBuilder.getQuery(id)?.unselect();
+    toggleQuerySelect: (id, selected) => {
+      queryBuilder.getQuery(id)?.toggleSelect(selected);
     },
     resetQuerySelection: () => {
       queryBuilder.setState((prev) => ({

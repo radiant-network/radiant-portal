@@ -200,7 +200,7 @@ describe("Query Manipulation", () => {
   it("should select query", () => {
     expect(state.selectedQueryIndexes.length).toBe(0);
 
-    qb.getQuery("1")?.select();
+    qb.getQuery("1")?.toggleSelect(true);
 
     expect(state.selectedQueryIndexes.length).toBe(1);
     expect(state.selectedQueryIndexes).toContain(0);
@@ -219,7 +219,7 @@ describe("Query Manipulation", () => {
 
     expect(qb.coreProps.state.selectedQueryIndexes.length).toBe(1);
 
-    qb.getQuery("1")?.unselect();
+    qb.getQuery("1")?.toggleSelect(false);
 
     expect(state.selectedQueryIndexes.length).toBe(0);
     expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);

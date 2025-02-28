@@ -66,14 +66,9 @@ export type CoreQuery = {
   index(): number;
 
   /**
-   * Call this function to select the Query
+   * Call this function to select or unselect the Query
    */
-  select(): void;
-
-  /**
-   * Call this function to unselect the Query
-   */
-  unselect(): void;
+  toggleSelect(selected: boolean): void;
 
   /**
    * Call this function to know if the Query is selected
@@ -149,28 +144,26 @@ export const createQuery = (
     },
     isEmpty: (): boolean => isEmptySqon(syntheticSqon),
     isNotEmpty: (): boolean => !isEmptySqon(syntheticSqon),
-    select: () => {
+    toggleSelect: (selected) => {
       const queryIndex = queryBuilder.getQueryIndex(queryId);
-      const newSelectedQueryIndexes = [
-        ...queryBuilder.getState().selectedQueryIndexes,
-        queryIndex,
-      ];
+      let selectedQueryIndexes: number[] = [];
+
+      if (selected) {
+        selectedQueryIndexes = [
+          ...queryBuilder.getState().selectedQueryIndexes,
+          queryIndex,
+        ];
+      } else {
+        selectedQueryIndexes = queryBuilder
+          .getState()
+          .selectedQueryIndexes.filter((index) => index !== queryIndex);
+      }
+
       queryBuilder.setState((prev) => ({
         ...prev,
-        selectedQueryIndexes: newSelectedQueryIndexes,
+        selectedQueryIndexes,
       }));
-      queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
-    },
-    unselect: () => {
-      const queryIndex = queryBuilder.getQueryIndex(queryId);
-      const newSelectedQueryIndexes = queryBuilder
-        .getState()
-        .selectedQueryIndexes.filter((index) => index !== queryIndex);
-      queryBuilder.setState((prev) => ({
-        ...prev,
-        selectedQueryIndexes: newSelectedQueryIndexes,
-      }));
-      queryBuilder.coreProps.onQuerySelectChange?.(newSelectedQueryIndexes);
+      queryBuilder.coreProps.onQuerySelectChange?.(selectedQueryIndexes);
     },
     isSelected: () => {
       return queryBuilder

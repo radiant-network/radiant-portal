@@ -10,7 +10,7 @@ import {
 import { IVariantEntity } from "@/variant_type";
 import useSWR from "swr";
 import { occurrencesApi } from "@/utils/api";
-import QueryBuilder from "@/components/feature/QueryBuilder/QueryBuilder";
+import QueryBuilder from "@/components/feature/query-builder/query-builder";
 import { UsersIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { QueryBuilderState } from "@/components/model/query-builder-core";

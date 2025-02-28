@@ -464,7 +464,7 @@ describe("QueryBuilder Core", () => {
   it("should add query to selection list", () => {
     expect(state.selectedQueryIndexes.length).toBe(0);
 
-    qb.selectQuery("1");
+    qb.toggleQuerySelect("1", true);
 
     expect(state.selectedQueryIndexes.length).toBe(1);
     expect(state.selectedQueryIndexes[0]).toBe(0);
@@ -475,13 +475,13 @@ describe("QueryBuilder Core", () => {
   it("should remove query from selection list", () => {
     expect(state.selectedQueryIndexes.length).toBe(0);
 
-    qb.selectQuery("1");
+    qb.toggleQuerySelect("1", true);
 
     expect(state.selectedQueryIndexes.length).toBe(1);
     expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
     expect(mockOnQuerySelectChange).toHaveBeenCalledWith([0]);
 
-    qb.unselectQuery("1");
+    qb.toggleQuerySelect("1", false);
 
     expect(state.selectedQueryIndexes.length).toBe(0);
     expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(2);
@@ -491,7 +491,7 @@ describe("QueryBuilder Core", () => {
   it("should reset selection list", () => {
     expect(state.selectedQueryIndexes.length).toBe(0);
 
-    qb.selectQuery("1");
+    qb.toggleQuerySelect("1", true);
 
     expect(state.selectedQueryIndexes.length).toBe(1);
     expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
@@ -505,7 +505,7 @@ describe("QueryBuilder Core", () => {
 
   it("should return selected query indexes", () => {
     expect(qb.getSelectedQueryIndexes()).toEqual([]);
-    qb.selectQuery("1");
+    qb.toggleQuerySelect("1", true);
     expect(state.selectedQueryIndexes).toEqual([0]);
   });
 
