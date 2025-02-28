@@ -1,7 +1,7 @@
 import "./App.css";
 import styles from "./App.module.css";
 import { ListBody, Occurrence, SortBodyOrderEnum, Sqon } from "@/api/api";
-import Table from "@/components/base/table/table";
+import DataTable from "@/components/base/data-table/data-table";
 import {
   columns,
   defaultSettings,
@@ -88,7 +88,7 @@ function App() {
             }}
           />
         </div>
-        <Table
+        <DataTable
           columns={columns}
           defaultColumnSettings={defaultSettings}
           data={occurrences}
