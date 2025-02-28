@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -9,16 +9,35 @@ import {
   ColumnOrderState,
   getExpandedRowModel,
 } from "@tanstack/react-table";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-} from "lucide-react";
+
 import { cn } from "@/lib/utils";
-import { Button } from "@/base/ui/button";
-import TableColumnSettings from "@/components/base/table/table-column-settings";
-import { useResizeObserver } from "@/components/base/table/hooks/use-resize-observer";
-import TableIndexResult from "@/components/base/table/table-index-result";
+import TableColumnSettings from "@/components/base/data-table/data-table-column-settings";
+import { useResizeObserver } from "@/components/base/data-table/hooks/use-resize-observer";
+import TableIndexResult from "@/components/base/data-table/data-table-index-result";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/base/ui/pagination";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/base/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/base/ui/select";
 
 export interface TableColumnDef<TData, TValue>
   extends Omit<ColumnDef<TData, TValue>, "id" | "header"> {
@@ -33,7 +52,7 @@ type TableProps<TData> = {
   data: TData[];
   columnSettings: ColumnSettings[];
   defaultColumnSettings: ColumnSettings[];
-  subComponent?: (data: TData) => JSX.Element;
+  subComponent?: (data: TData) => React.JSX.Element;
 };
 
 export interface BaseColumnSettings {
@@ -119,7 +138,7 @@ const deserializeColumnOrder = (
  *   "fixed": {boolean},
  *  }]
  */
-const Table = ({
+const DataTable = ({
   columns,
   total,
   data,
@@ -134,14 +153,14 @@ const Table = ({
   const defaultColumnOrder = deserializeColumnOrder(defaultColumnSettings);
 
   // table interactions
-  const [columnVisibility, setColumnVisibility] = React.useState(
+  const [columnVisibility, setColumnVisibility] = useState(
     deserializeColumnVisibility(columnSettings)
   );
-  const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     deserializeColumnOrder(columnSettings)
   );
   // TODO: should be connected to user api
-  const [pagination, setPagination] = React.useState<PaginationState>({
+  const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
@@ -202,16 +221,16 @@ const Table = ({
           }}
         />
       </div>
-      <table className={"w-full text-left table-fixed"}>
-        <thead>
+      <Table>
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <th
+                <TableHead
                   key={header.id}
                   colSpan={header.colSpan}
                   style={{ width: header.getSize() }}
-                  className="border relative bg-gray-100 border-gray-150 p-2 font-normal text-left truncate"
+                  className="border relative"
                 >
                   {header.isPlaceholder
                     ? null
@@ -229,74 +248,96 @@ const Table = ({
                       header.column.getIsResizing() ? "opacity-100" : ""
                     )}
                   />
-                </th>
+                </TableHead>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </thead>
-        <tbody>
+        </TableHeader>
+        <TableBody>
           {table.getRowModel().rows.map((row) => (
             <>
-              <tr
+              <TableRow
                 key={row.id}
                 className={row.index % 2 != 0 ? "bg-gray-50" : ""}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td
+                  <TableCell
                     key={cell.id}
                     className="border border-gray-100 p-2 font-normal text-left truncate"
                     style={{ width: cell.column.getSize() }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
               {subComponent && row.getIsExpanded() && (
-                <tr key={`${row.id}-sub`}>
-                  <td colSpan={row.getVisibleCells().length}>
+                <TableRow key={`${row.id}-sub`}>
+                  <TableCell colSpan={row.getVisibleCells().length}>
                     {subComponent(row.original)}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
             </>
           ))}
-        </tbody>
-      </table>
-      <div className="flex justify-end items-center gap-2">
-        <select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => {
-            table.setPageSize(Number(e.target.value));
+        </TableBody>
+      </Table>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Select
+          value={String(table.getState().pagination.pageSize)}
+          onValueChange={(value) => {
+            table.setPageSize(Number(value));
           }}
         >
-          {[10, 20, 30, 40, 50].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
-        <Button
-          onClick={() => table.firstPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          <ChevronsLeftIcon /> First
-        </Button>
-        <Button
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          <ChevronLeftIcon />
-          Prev.
-        </Button>
-        <Button
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next <ChevronRightIcon />
-        </Button>
+          <SelectTrigger className="w-[180px] border-gray-300 bg-gray-100">
+            <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {[10, 20, 30, 40, 50].map((pageSize) => (
+              <SelectItem value={String(pageSize)}>{pageSize}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Pagination className="w-auto">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                className={cn(
+                  !table.getCanPreviousPage()
+                    ? "pointer-events-none disabled text-gray-400"
+                    : ""
+                )}
+                onClick={() => {
+                  if (!table.getCanPreviousPage()) return;
+                  table.previousPage();
+                }}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink onClick={() => table.firstPage()}>
+                1
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                className={cn(
+                  !table.getCanNextPage()
+                    ? "pointer-events-none disabled text-gray-400"
+                    : ""
+                )}
+                onClick={() => {
+                  if (!table.getCanNextPage()) return;
+                  table.nextPage();
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
 };
 
-export default Table;
+export default DataTable;
