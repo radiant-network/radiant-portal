@@ -182,6 +182,11 @@ func extractInterpretationParams(c *gin.Context) (string, string, string) {
 	return sequencingId, locusId, transcriptId
 }
 
+func extractUserSetParams(c *gin.Context) string {
+	userSetId := c.Param("user_set_id")
+	return userSetId
+}
+
 func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.InterpretationCommon) {
 	sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 

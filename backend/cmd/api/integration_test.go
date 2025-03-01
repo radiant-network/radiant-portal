@@ -286,6 +286,27 @@ func assertPostInterpretationSomatic(t *testing.T, repo repository.Interpretatio
 	return nil
 }
 
+func assertGetUserSet(t *testing.T, repo repository.UserSetsDAO, userSetId string, status int, expected string) {
+	router := gin.Default()
+	router.GET("/users/sets/:user_set_id", server.GetUserSet(repo))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/sets/%s", userSetId), bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, status, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetUserSet(t *testing.T) {
+	testutils.ParallelPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		pubmedService := &MockExternalClient{}
+		repo := repository.NewPostgresRepository(db, pubmedService)
+		// not found
+		assertGetUserSet(t, repo.UserSets, "bce3b031-c691-4680-878f-f43d661f9a9f", http.StatusNotFound, `{"error":"not found"}`)
+	})
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartAllContainers()
 	code := m.Run()
