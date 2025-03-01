@@ -42,6 +42,12 @@ components:
           uniqueItems: false
         condition:
           type: string
+        created_at:
+          type: string
+        created_by:
+          type: string
+        created_by_name:
+          type: string
         id:
           type: string
         interpretation:
@@ -62,6 +68,12 @@ components:
             type: string
           type: array
           uniqueItems: false
+        updated_at:
+          type: string
+        updated_by:
+          type: string
+        updated_by_name:
+          type: string
       type: object
     InterpretationPubmed:
       properties:
@@ -73,6 +85,12 @@ components:
     InterpretationSomatic:
       properties:
         clinical_utility:
+          type: string
+        created_at:
+          type: string
+        created_by:
+          type: string
+        created_by_name:
           type: string
         id:
           type: string
@@ -97,6 +115,12 @@ components:
         transcript_id:
           type: string
         tumoral_type:
+          type: string
+        updated_at:
+          type: string
+        updated_by:
+          type: string
+        updated_by_name:
           type: string
       type: object
     LeafContent:
@@ -211,26 +235,6 @@ components:
           - <=
           - not-in
           - all
-          type: string
-      type: object
-    UserSet:
-      properties:
-        active:
-          type: boolean
-        id:
-          type: string
-        ids:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        name:
-          type: string
-        type:
-          type: string
-        updated_at:
-          type: string
-        user_id:
           type: string
       type: object
   securitySchemes:
@@ -598,36 +602,5 @@ paths:
       summary: Get API status
       tags:
       - status
-  /users/sets/{user_set_id}:
-    get:
-      description: Get user set
-      operationId: GetUserSet
-      parameters:
-      - description: UserSet ID
-        in: path
-        name: user_set_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSet'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-          description: Not Found
-      security:
-      - bearerauth: []
-      summary: Get user set by id
-      tags:
-      - user_sets
 servers:
 - url: /
