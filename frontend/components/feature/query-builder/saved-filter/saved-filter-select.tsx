@@ -54,7 +54,7 @@ function SavedFiltersSelect() {
         disabled={savedFilters.length === 0}
       >
         <Tooltip open={savedFilters.length > 0 ? false : undefined}>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <SelectTrigger className="w-[135px] h-7">
               <div className="flex items-center gap-2">
                 <FolderIcon size={14} /> {dict.savedFilter.myFilters}

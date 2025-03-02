@@ -40,10 +40,24 @@ export const defaultDictionary: QueryBuilderDictionary = {
         cancel: "Cancel",
         ok: "Save",
       },
-      cantBeEmptyDialod: {
+      cantBeEmptyDialog: {
         title: "Query cannot be empty",
         description: "Your custom query must contain at least one criteria.",
         ok: "Close",
+      },
+      titleExistsDialog: {
+        title: "Name already in use",
+        description:
+          "A custom query with this name already exists. Please assign a unique name.",
+        ok: "Close",
+      },
+      saveDialog: {
+        title: "Edit this query?",
+        confirmationMessage:
+          'You are about to edit the custom query "{title}", which may affect your results.',
+        affectedFilters: "Affected saved filters:",
+        cancel: "Cancel",
+        ok: "Save",
       },
     },
   },

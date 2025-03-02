@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   AlertDialogActionProps,
   AlertDialogCancelProps,
@@ -7,7 +8,7 @@ export type AlertDialogType = "success" | "info" | "warning" | "error";
 
 interface OpenAlertDialogBaseProps {
   title: string;
-  description: string;
+  description: ReactNode;
   type?: AlertDialogType;
   actionProps: AlertDialogActionProps;
   className?: string;
@@ -19,7 +20,7 @@ interface OpenAlertDialogWithCancelProps extends OpenAlertDialogBaseProps {
 }
 
 interface OpenAlertDialogWithoutCancelProps extends OpenAlertDialogBaseProps {
-  hideCancel: true;
+  hideCancel?: true;
   cancelProps?: never;
 }
 
