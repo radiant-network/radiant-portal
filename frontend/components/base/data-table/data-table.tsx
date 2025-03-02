@@ -282,59 +282,55 @@ const DataTable = ({
         </TableBody>
       </Table>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <Select
-          value={String(table.getState().pagination.pageSize)}
-          onValueChange={(value) => {
-            table.setPageSize(Number(value));
-          }}
-        >
-          <SelectTrigger className="w-[180px] border-gray-300 bg-gray-100">
-            <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {[10, 20, 30, 40, 50].map((pageSize) => (
-              <SelectItem value={String(pageSize)}>{pageSize}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Pagination className="w-auto">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                className={cn(
-                  !table.getCanPreviousPage()
-                    ? "pointer-events-none disabled text-gray-400"
-                    : ""
-                )}
-                onClick={() => {
-                  if (!table.getCanPreviousPage()) return;
-                  table.previousPage();
-                }}
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink onClick={() => table.firstPage()}>
-                1
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                className={cn(
-                  !table.getCanNextPage()
-                    ? "pointer-events-none disabled text-gray-400"
-                    : ""
-                )}
-                onClick={() => {
-                  if (!table.getCanNextPage()) return;
-                  table.nextPage();
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <div>
+          <Select
+            value={String(table.getState().pagination.pageSize)}
+            onValueChange={(value) => {
+              table.setPageSize(Number(value));
+            }}
+          >
+            <SelectTrigger className="min-w-[125px] h-8">
+              <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <SelectItem value={String(pageSize)}>{pageSize}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Pagination className="w-auto">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  disabled={!table.getCanPreviousPage()}
+                  onClick={() => {
+                    if (!table.getCanPreviousPage()) return;
+                    table.previousPage();
+                  }}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink onClick={() => table.firstPage()}>
+                  1
+                </PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  disabled={!table.getCanNextPage()}
+                  onClick={() => {
+                    if (!table.getCanNextPage()) return;
+                    table.nextPage();
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
     </div>
   );
