@@ -34,7 +34,7 @@ type QueryPillCustomConfig = {
   /**
    * Validate the title of the custom pill
    */
-  validateCustomPillTitle: (title: string, tag: string) => Promise<boolean>;
+  validateCustomPillTitle: (title: string) => Promise<boolean>;
   /**
    * Get the custom pill by id
    */
@@ -139,9 +139,21 @@ export type QueryBuilderDictionary = {
         cancel: string;
         ok: string;
       };
-      cantBeEmptyDialod: {
+      cantBeEmptyDialog: {
         title: string;
         description: string;
+        ok: string;
+      };
+      titleExistsDialog: {
+        title: string;
+        description: string;
+        ok: string;
+      };
+      saveDialog: {
+        title: string;
+        confirmationMessage: `${string}{title}${string}`;
+        affectedFilters: string;
+        cancel: string;
         ok: string;
       };
     };

@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { alertDialog, OpenAlertDialogProps } from "./alert-dialog-store";
+import { Spinner } from "../spinner";
 
 type AlertDialogProps = OpenAlertDialogProps & {
   isOpen: boolean;
@@ -33,6 +34,7 @@ const AlertDialogContext = createContext<AlertDialogContextType | undefined>(
 );
 
 export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
+  const [loading, setLoading] = useState(false);
   const [activeAlertDialog, setActiveAlertDialog] =
     useState<AlertDialogProps | null>();
 
@@ -90,9 +92,28 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
             </div>
             <AlertDialogFooter>
               {activeAlertDialog.hideCancel ? null : (
-                <AlertDialogCancel {...activeAlertDialog.cancelProps} />
+                <AlertDialogCancel
+                  {...activeAlertDialog.cancelProps}
+                  children={activeAlertDialog.cancelProps?.children || "Cancel"}
+                />
               )}
-              <AlertDialogAction {...activeAlertDialog.actionProps} />
+              <AlertDialogAction
+                {...activeAlertDialog.actionProps}
+                disabled={activeAlertDialog.actionProps.disabled || loading}
+                children={
+                  <>
+                    {loading && <Spinner />}
+                    {activeAlertDialog.actionProps.children}
+                  </>
+                }
+                onClick={async (e) => {
+                  e.preventDefault();
+                  setLoading(true);
+                  await activeAlertDialog?.actionProps?.onClick?.(e);
+                  setLoading(false);
+                  close();
+                }}
+              />
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

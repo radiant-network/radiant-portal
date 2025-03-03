@@ -26,7 +26,11 @@ import {
   useQueryBuilder,
 } from "@/components/model/query-builder-core";
 import { QueryBarContext } from "../query-bar/query-bar-context";
-import { openCustomPillCantBeEmptyDialog } from "../alerts";
+import {
+  openCustomPillCantBeEmptyDialog,
+  openCustomPillSaveDialog,
+  openCustomPillTitleExistsDialog,
+} from "../alerts";
 
 function QueryPillCustomEditDialog({
   open,
@@ -70,7 +74,9 @@ function QueryPillCustomEditDialog({
 
   const coreQuery = customQueryBuilder.getQueries()[0];
   const coreSavedFilter = customQueryBuilder.getSelectedSavedFilter();
-  const hasChanged = title !== queryPill.title || coreSavedFilter?.isDirty();
+
+  const titleChanged = title !== queryPill.title;
+  const hasChanged = titleChanged || coreSavedFilter?.isDirty();
 
   const handleOnOpenChange = useCallback(
     function (open: boolean) {
@@ -85,21 +91,31 @@ function QueryPillCustomEditDialog({
   );
 
   const handleSave = useCallback(
-    function () {
-      // TODO: Before updating check:
-      // 1. If the query is empty, show an alert
-      // 2. If title is updated, validate the title
-      // 3. Fetch filtersByPill, show alert and optionaly show affected filters
-
+    async function () {
       if (coreQuery.isEmpty()) {
         openCustomPillCantBeEmptyDialog(dict);
-      } else {
+        return;
+      }
+
+      if (titleChanged) {
+        const valid = await customPillConfig?.validateCustomPillTitle(title);
+
+        if (valid !== undefined && valid === false) {
+          openCustomPillTitleExistsDialog(dict);
+          return;
+        }
+      }
+
+      const associatedSavedFilters =
+        await customPillConfig?.fetchSavedFiltersByCustomPillId(queryPill.id);
+
+      openCustomPillSaveDialog(dict, title, associatedSavedFilters, async () =>
         coreSavedFilter?.save(SavedFilterTypeEnum.Query, {
           title,
-        });
-      }
+        })
+      );
     },
-    [coreQuery, coreSavedFilter, dict, title]
+    [coreQuery, coreSavedFilter, dict, title, queryPill.id, customPillConfig]
   );
 
   return (
