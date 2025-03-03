@@ -8,8 +8,8 @@ import {
   getPaginationRowModel,
   ColumnOrderState,
   getExpandedRowModel,
+  OnChangeFn,
 } from "@tanstack/react-table";
-
 import { cn } from "@/lib/utils";
 import TableColumnSettings from "@/components/base/data-table/data-table-column-settings";
 import { useResizeObserver } from "@/components/base/data-table/hooks/use-resize-observer";
@@ -50,6 +50,8 @@ type TableProps<TData> = {
   total: number;
   columns: TableColumnDef<TData, any>[];
   data: TData[];
+  pagination: PaginationState;
+  onPaginationChange: OnChangeFn<PaginationState>;
   columnSettings: ColumnSettings[];
   defaultColumnSettings: ColumnSettings[];
   subComponent?: (data: TData) => React.JSX.Element;
@@ -75,13 +77,14 @@ type ColumnVisiblity = {
  * @param settings BaseColumnSettings[]
  * @returns ColumnSettings[]
  */
-export const createColumnSettings = (
+export function createColumnSettings(
   settings: BaseColumnSettings[]
-): ColumnSettings[] =>
-  settings.map((setting, index) => ({
+): ColumnSettings[] {
+  return settings.map((setting, index) => ({
     ...setting,
     index,
   }));
+}
 
 /**
  * Read user config to produce an object with column visibility value
@@ -90,28 +93,26 @@ export const createColumnSettings = (
  *  column.id: visibility,
  * }
  */
-const deserializeColumnVisibility = (
+function deserializeColumnVisibility(
   settings: ColumnSettings[]
-): ColumnVisiblity => {
+): ColumnVisiblity {
   const result: ColumnVisiblity = {};
   settings.forEach((setting) => {
     result[setting.id] = setting.visible;
   });
   return result;
-};
+}
 
 /**
  * Read user config to return column order (in asc)
  * @param settings
  * @returns [{ column.id: visibility }]
  */
-const deserializeColumnOrder = (
-  settings: ColumnSettings[]
-): ColumnOrderState => {
+function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
   return settings
     .sort((a, b) => a.index - b.index)
     .map((setting) => setting.id);
-};
+}
 
 /**
  * Table
@@ -138,14 +139,16 @@ const deserializeColumnOrder = (
  *   "fixed": {boolean},
  *  }]
  */
-const DataTable = ({
+function DataTable({
   columns,
   total,
   data,
+  pagination,
+  onPaginationChange,
   columnSettings,
   defaultColumnSettings,
   subComponent,
-}: TableProps<any>) => {
+}: TableProps<any>) {
   // default values
   const defaultColumnVisibility = deserializeColumnVisibility(
     defaultColumnSettings
@@ -159,11 +162,6 @@ const DataTable = ({
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     deserializeColumnOrder(columnSettings)
   );
-  // TODO: should be connected to user api
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
 
   // Initialize tanstack table
   const table = useReactTable({
@@ -176,9 +174,11 @@ const DataTable = ({
     data: data,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: setPagination,
     getRowCanExpand: () => true,
     getExpandedRowModel: getExpandedRowModel(),
+    onPaginationChange,
+    pageCount: total / pagination.pageSize,
+    manualPagination: true,
     state: {
       pagination,
       columnVisibility,
@@ -186,9 +186,9 @@ const DataTable = ({
     },
   });
 
-  const handleVisiblityChange = (target: string, checked: boolean) => {
+  function handleVisiblityChange(target: string, checked: boolean) {
     setColumnVisibility({ ...columnVisibility, [target]: checked });
-  };
+  }
 
   // @TODO: shout save column width in user data
   useResizeObserver(table.getState(), (columnId, columnSize) => {
@@ -334,6 +334,6 @@ const DataTable = ({
       </div>
     </div>
   );
-};
+}
 
 export default DataTable;

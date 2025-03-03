@@ -9,15 +9,17 @@ type GeneCellProps = {
   onClick: () => void;
 };
 
-const GeneCell = ({ className, url, name, onClick }: GeneCellProps) => (
-  <div className={cn("flex items-center text-blue-500", className)}>
-    <a href={url} target="_blank">
-      {name}
-    </a>
-    <Button onClick={onClick}>
-      <PlusIcon />
-    </Button>
-  </div>
-);
+function GeneCell({ className, url, name, onClick }: GeneCellProps) {
+  return (
+    <div className={cn("flex items-center text-blue-500", className)}>
+      <a href={url} target="_blank">
+        {name}
+      </a>
+      <Button onClick={onClick}>
+        <PlusIcon />
+      </Button>
+    </div>
+  );
+}
 
 export default GeneCell;
