@@ -1,7 +1,15 @@
 import "./App.css";
 import styles from "./App.module.css";
-import { ListBody, Occurrence, SortBodyOrderEnum, Sqon } from "@/api/api";
+import {
+  Count,
+  CountBody,
+  ListBody,
+  Occurrence,
+  SortBodyOrderEnum,
+  Sqon,
+} from "@/api/api";
 import DataTable from "@/components/base/data-table/data-table";
+import { PaginationState } from "@tanstack/react-table";
 import {
   columns,
   defaultSettings,
@@ -17,27 +25,55 @@ import { QueryBuilderState } from "@/components/model/query-builder-core";
 import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
 import SidenavFilters from "./components/layouts/SidenavFilters";
 
-type OccurrenceInput = {
+type OccurrencesListInput = {
   seqId: string;
   listBody: ListBody;
 };
 
-const fetcher = (input: OccurrenceInput) =>
-  occurrencesApi
+type OccurrenceCountInput = {
+  seqId: string;
+  countBody: CountBody;
+};
+
+function fetchOccurencesList(input: OccurrencesListInput) {
+  return occurrencesApi
     .listOccurrences(input.seqId, input.listBody)
     .then((response) => response.data);
+}
+
+function fetchOccurencesCount(input: OccurrenceCountInput) {
+  return occurrencesApi
+    .countOccurrences(input.seqId, input.countBody)
+    .then((response) => response.data);
+}
+
+const SEQ_ID = "5011";
 
 function App() {
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>();
-
-  const { data } = useSWR<Occurrence[], any, OccurrenceInput>(
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const { data: total } = useSWR<Count, any, OccurrenceCountInput>(
     {
-      seqId: "5011",
+      seqId: SEQ_ID,
+      countBody: { sqon: activeSqon },
+    },
+    fetchOccurencesCount,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
+  const { data: list } = useSWR<Occurrence[], any, OccurrencesListInput>(
+    {
+      seqId: SEQ_ID,
       listBody: {
         selected_fields: ["hgvsg", "variant_class"],
-        limit: 20,
-        offset: 0,
+        limit: pagination.pageSize,
+        offset: pagination.pageIndex,
         sort: [
           {
             field: "pf",
@@ -47,7 +83,7 @@ function App() {
         sqon: activeSqon,
       },
     },
-    fetcher,
+    fetchOccurencesList,
     {
       revalidateOnFocus: false,
     }
@@ -65,8 +101,6 @@ function App() {
 
     setActiveSqon(queryBuilderRemote.getActiveQuery("variant") as Sqon);
   }, []);
-
-  const occurrences = data || [];
 
   return (
     <div className={styles.appLayout}>
@@ -89,10 +123,12 @@ function App() {
           />
         </div>
         <DataTable
+          pagination={pagination}
+          onPaginationChange={setPagination}
           columns={columns}
           defaultColumnSettings={defaultSettings}
-          data={occurrences}
-          total={occurrences.length}
+          data={list ?? []}
+          total={total?.count ?? 0}
           columnSettings={userSettings}
           subComponent={(data: IVariantEntity) => {
             return (

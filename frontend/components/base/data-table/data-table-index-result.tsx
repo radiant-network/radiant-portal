@@ -1,3 +1,5 @@
+import { numberWithCommas } from "@/components/utils/number-format";
+
 /**
  * TableIndexResult
  * show current page and total page
@@ -8,19 +10,20 @@ type TableIndexResultProp = {
   pageSize: number;
 };
 
-const TableIndexResult = ({
+function TableIndexResult({
   total,
   pageIndex,
   pageSize,
-}: TableIndexResultProp) => {
+}: TableIndexResultProp) {
   const result = total;
   const to = pageSize * pageIndex;
   const from = to - pageSize + 1;
   return (
     <span>
-      Results {from} - {to} of {result}
+      Results {numberWithCommas(from)} - {numberWithCommas(to)} of{" "}
+      {numberWithCommas(result)}
     </span>
   );
-};
+}
 
 export default TableIndexResult;

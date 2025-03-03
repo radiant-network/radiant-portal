@@ -7,19 +7,17 @@ type ExternalLinkCellProps = {
   children?: React.ReactElement;
 };
 
-const ExternalLinkCell = ({
-  className,
-  url,
-  children,
-}: ExternalLinkCellProps) => (
-  <a
-    className={cn("text-blue-500 flex text-center ", className)}
-    href={url}
-    target="_blank"
-  >
-    <SquareArrowOutUpRightIcon />
-    {children}
-  </a>
-);
+function ExternalLinkCell({ className, url, children }: ExternalLinkCellProps) {
+  return (
+    <a
+      className={cn("text-blue-500 flex text-center ", className)}
+      href={url}
+      target="_blank"
+    >
+      <SquareArrowOutUpRightIcon />
+      {children}
+    </a>
+  );
+}
 
 export default ExternalLinkCell;

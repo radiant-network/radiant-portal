@@ -12,15 +12,15 @@ import { CellContext, HeaderContext } from "@tanstack/react-table";
  *  minSize: 24,
  * }
  */
-export const getTableRowSelectionHeader = ({
-  table,
-}: HeaderContext<any, any>) => (
-  <TableRowSelection
-    checked={table.getIsAllRowsSelected()}
-    indeterminate={table.getIsSomeRowsSelected()}
-    onChange={table.getToggleAllRowsSelectedHandler()}
-  />
-);
+export function getTableRowSelectionHeader({ table }: HeaderContext<any, any>) {
+  return (
+    <TableRowSelection
+      checked={table.getIsAllRowsSelected()}
+      indeterminate={table.getIsSomeRowsSelected()}
+      onChange={table.getToggleAllRowsSelectedHandler()}
+    />
+  );
+}
 
 /**
  * Return TableRowSelection for a column cell
@@ -33,16 +33,18 @@ export const getTableRowSelectionHeader = ({
  *  minSize: 24,
  * }
  */
-export const getTableRowSelectionCell = ({ row }: CellContext<any, any>) => (
-  <div className="px-1">
-    <TableRowSelection
-      checked={row.getIsSelected()}
-      disabled={!row.getCanSelect()}
-      indeterminate={row.getIsSomeSelected()}
-      onChange={row.getToggleSelectedHandler()}
-    />
-  </div>
-);
+export function getTableRowSelectionCell({ row }: CellContext<any, any>) {
+  return (
+    <div className="px-1">
+      <TableRowSelection
+        checked={row.getIsSelected()}
+        disabled={!row.getCanSelect()}
+        indeterminate={row.getIsSomeSelected()}
+        onChange={row.getToggleSelectedHandler()}
+      />
+    </div>
+  );
+}
 
 /**
  * Table row select component. Allow row selection
@@ -55,11 +57,11 @@ type TableRowSelectCheckboxProps = {
   onChange: (event: unknown) => void;
 };
 
-export const TableRowSelection = ({
+export function TableRowSelection({
   indeterminate,
   className = "",
   ...rest
-}: TableRowSelectCheckboxProps) => {
+}: TableRowSelectCheckboxProps) {
   const ref = useRef<HTMLInputElement>(null!);
 
   useEffect(() => {
@@ -76,4 +78,4 @@ export const TableRowSelection = ({
       {...rest}
     />
   );
-};
+}

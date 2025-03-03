@@ -5,10 +5,10 @@ import { TableState } from "@tanstack/react-table";
  * observes the state and triggers an event after a resize finishes
  * @src https://github.com/TanStack/table/discussions/2498#discussioncomment-8649218
  */
-export const useResizeObserver = (
+export function useResizeObserver(
   state: TableState,
   callback: (columnId: string, columnSize: number) => void
-) => {
+) {
   // This Ref will contain the id of the column being resized or undefined
   const columnResizeRef = useRef<string | false>();
   useEffect(() => {
@@ -27,4 +27,4 @@ export const useResizeObserver = (
     }
     columnResizeRef.current = state.columnSizingInfo?.isResizingColumn;
   }, [callback, state.columnSizingInfo, state.columnSizing]);
-};
+}

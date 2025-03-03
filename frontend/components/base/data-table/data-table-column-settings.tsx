@@ -36,17 +36,19 @@ import {
  * @param settings
  * @returns ['id1', 'id2']
  */
-const deserializeColumnFixed = (settings: ColumnSettings[]): string[] =>
-  settings
+function deserializeColumnFixed(settings: ColumnSettings[]): string[] {
+  return settings
     .sort((a, b) => a.index - b.index)
     .filter((setting) => setting.fixed === true)
     .map((setting) => setting.id);
+}
 
 /**
  * @returns list of all columns id that are not fixed
  */
-const deserializeColumns = (columns: TableColumnDef<any, any>[]) =>
-  columns.map((column) => column.id);
+function deserializeColumns(columns: TableColumnDef<any, any>[]) {
+  return columns.map((column) => column.id);
+}
 
 /**
  * TableColumnSettings
@@ -64,7 +66,7 @@ type TableColumnSettingsProps<TData> = {
   handleReset: () => void;
 };
 
-const TableColumnSettings = ({
+function TableColumnSettings({
   columns,
   defaultSettings,
   pristine,
@@ -72,7 +74,7 @@ const TableColumnSettings = ({
   handleVisiblityChange,
   handleReset,
   handleOrderChange,
-}: TableColumnSettingsProps<any>) => {
+}: TableColumnSettingsProps<any>) {
   const fixedColumns = deserializeColumnFixed(defaultSettings);
   const [items, setItems] = useState<UniqueIdentifier[]>(
     deserializeColumns(columns)
@@ -83,7 +85,7 @@ const TableColumnSettings = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  const handleDragEnd = (event: DragEndEvent) => {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
     if (active.id !== over.id) {
@@ -95,7 +97,7 @@ const TableColumnSettings = ({
         );
       });
     }
-  };
+  }
 
   useEffect(() => {
     handleOrderChange(items as ColumnOrderState);
@@ -149,6 +151,6 @@ const TableColumnSettings = ({
       </DropdownMenu>
     </span>
   );
-};
+}
 
 export default TableColumnSettings;

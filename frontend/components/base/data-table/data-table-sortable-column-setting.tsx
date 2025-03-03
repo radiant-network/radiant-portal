@@ -16,12 +16,12 @@ type SortableColumnSetting<TData> = {
   checked: boolean;
   handleCheckboxChange: (target: string, checked: boolean) => void;
 };
-const TableSortableColumnSetting = ({
+function TableSortableColumnSetting({
   id,
   column,
   checked,
   handleCheckboxChange,
-}: SortableColumnSetting<any>) => {
+}: SortableColumnSetting<any>) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
   const style = {
@@ -51,6 +51,6 @@ const TableSortableColumnSetting = ({
       </label>
     </div>
   );
-};
+}
 
 export default TableSortableColumnSetting;
