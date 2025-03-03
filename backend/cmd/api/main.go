@@ -46,7 +46,7 @@ func init() {
 func main() {
 	flag.Parse()
 	defer glog.Flush()
-	
+
 	database.MigrateWithEnvDefault()
 
 	// Initialize database connection
@@ -77,7 +77,7 @@ func main() {
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true, // Enable cookies/auth
 	}))
-	
+
 	occurrencesGroup := r.Group("/occurrences")
 
 	role := os.Getenv("KEYCLOAK_CLIENT_ROLE")
@@ -103,6 +103,9 @@ func main() {
 	interpretationsSomaticGroup := interpretationsGroup.Group("/somatic/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
+
+	usersGroup := r.Group("/users")
+	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoPostgres.UserSets))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")

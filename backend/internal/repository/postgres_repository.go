@@ -8,8 +8,9 @@ import (
 )
 
 type PostgresRepository struct {
-	db *gorm.DB
+	db              *gorm.DB
 	Interpretations *InterpretationsRepository
+	UserSets        *UserSetsRepository
 }
 
 type PostgresDAO interface {
@@ -17,7 +18,7 @@ type PostgresDAO interface {
 }
 
 func NewPostgresRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *PostgresRepository {
-	return &PostgresRepository{db: db, Interpretations: NewInterpretationsRepository(db, pubmedClient)}
+	return &PostgresRepository{db: db, Interpretations: NewInterpretationsRepository(db, pubmedClient), UserSets: NewUserSetsRepository(db)}
 }
 
 func (r *PostgresRepository) CheckDatabaseConnection() string {

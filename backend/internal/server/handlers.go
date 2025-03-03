@@ -182,6 +182,11 @@ func extractInterpretationParams(c *gin.Context) (string, string, string) {
 	return sequencingId, locusId, transcriptId
 }
 
+func extractUserSetParams(c *gin.Context) string {
+	userSetId := c.Param("user_set_id")
+	return userSetId
+}
+
 func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.InterpretationCommon) {
 	sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 
@@ -360,5 +365,32 @@ func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc 
 			return
 		}
 		c.JSON(http.StatusOK, citation)
+	}
+}
+
+// GetUserSet
+// @Summary Get user set by id
+// @Id GetUserSet
+// @Description Get user set
+// @Tags user_sets
+// @Security bearerauth
+// @Param user_set_id path string true "UserSet ID"
+// @Produce json
+// @Success 200 {object} types.UserSet
+// @Failure 404 {object} map[string]string
+// @Router /users/sets/{user_set_id} [get]
+func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userSetId := extractUserSetParams(c)
+		userSet, err := repo.GetUserSet(userSetId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		if userSet == nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		c.JSON(http.StatusOK, userSet)
 	}
 }
