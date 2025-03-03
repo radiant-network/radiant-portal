@@ -23,6 +23,7 @@ frontend/
 │   ├── features/       # Feature-specific components
 │   ├── layout/         # Layout components
 │   └── models/         # Models, types and headless features
+│   └── stories/         # Component stories for storybook
 ├── docs/                # General documentation
 ├── portals/             #
 │   ├── radiant/        # Portal build. Get a configuration an build a portal (e.g., Radiant, kf, include)
@@ -89,9 +90,9 @@ This is the structure for generating different portals (e.g., "Radiant", "kf", e
 
 - Each portal has its own configuration file that specifies the theme, environment, and other settings.
 - The configuration file is used to generate the portal with the correct settings.
-The configurations files are located in the `config` directory.
+  The configurations files are located in the `config` directory.
 
-The way it work, a configuration file is set to a global Variable name __PROJECT__ in the vite configuration file and set at compile time.
+The way it work, a configuration file is set to a global Variable name **PROJECT** in the vite configuration file and set at compile time.
 In @/components/utils/config.ts, the configuration is imported and used to set the theme and other settings as a Provider.
 
 #### Functionality:

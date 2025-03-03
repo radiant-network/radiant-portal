@@ -20,7 +20,7 @@ import {
 import { alertDialog, OpenAlertDialogProps } from "./alert-dialog-store";
 import { Spinner } from "../spinner";
 
-type AlertDialogProps = OpenAlertDialogProps & {
+export type AlertDialogProps = OpenAlertDialogProps & {
   isOpen: boolean;
 };
 

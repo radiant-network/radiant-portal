@@ -13,7 +13,6 @@ All shadcn components should be put in the `components/base/` directory.
 1. go to the `components/` directory
 2. run `make shadcn-add COMPONENT_NAME`
 
-
 ## Building different portals
 
 Frontend is a workspace. It contains multiple projects that works together. To make them see each other and import each other
@@ -25,9 +24,10 @@ Each portal has its own configuration and build.
 e.g.
 
 ### Dev build
+
 To build kidsfirst portal
 
-```bash
+````bash
 
 npm run dev:kf
 
@@ -42,4 +42,12 @@ make docker-run-kf
 
 make docker-build-radiant
 make docker-run-radiant
+````
+
+### Storybook
+
+To launch the storybook, from `components/`
+
+```bash
+npm run storybook
 ```

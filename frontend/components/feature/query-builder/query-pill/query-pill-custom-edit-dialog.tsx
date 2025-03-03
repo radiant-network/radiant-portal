@@ -71,6 +71,7 @@ function QueryPillCustomEditDialog({
   });
 
   const [title, setTitle] = useState(queryPill.title);
+  const [saving, setSaving] = useState(false);
 
   const coreQuery = customQueryBuilder.getQueries()[0];
   const coreSavedFilter = customQueryBuilder.getSelectedSavedFilter();
@@ -97,17 +98,21 @@ function QueryPillCustomEditDialog({
         return;
       }
 
+      setSaving(true);
+
       if (titleChanged) {
         const valid = await customPillConfig?.validateCustomPillTitle(title);
 
         if (valid !== undefined && valid === false) {
+          setSaving(false);
           openCustomPillTitleExistsDialog(dict);
           return;
         }
       }
 
-      const associatedSavedFilters =
-        await customPillConfig?.fetchSavedFiltersByCustomPillId(queryPill.id);
+      const associatedSavedFilters = await customPillConfig
+        ?.fetchSavedFiltersByCustomPillId(queryPill.id)
+        .finally(() => setSaving(false));
 
       openCustomPillSaveDialog(dict, title, associatedSavedFilters, async () =>
         coreSavedFilter?.save(SavedFilterTypeEnum.Query, {
@@ -143,7 +148,7 @@ function QueryPillCustomEditDialog({
               <div>
                 <EditableText onChangeText={setTitle}>{title}</EditableText>
               </div>
-              <div data-query-active className="flex group/query">
+              <div data-query-active className="flex flex-wrap group/query">
                 <QueryBarContext.Provider value={{ query: coreQuery }}>
                   <QueryPillBoolean sqon={coreQuery.raw()} />
                 </QueryBarContext.Provider>
@@ -157,6 +162,7 @@ function QueryPillCustomEditDialog({
                 <Button
                   type="submit"
                   variant="primary"
+                  loading={saving}
                   disabled={!hasChanged}
                   onClick={handleSave}
                 >

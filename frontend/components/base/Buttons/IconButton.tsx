@@ -12,7 +12,6 @@ export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     iconClassName?: string;
     loading?: boolean;
   };
-
 const IconButton = ({
   icon: Icon,
   size,
