@@ -40,7 +40,8 @@
     "composite/**/*",
     "feature/**/*",
     "utils/**/*",
-    "types/**/*"
+    "types/**/*",
+    "stories/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

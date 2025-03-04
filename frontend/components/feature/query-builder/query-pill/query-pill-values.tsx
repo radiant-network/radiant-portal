@@ -38,7 +38,7 @@ function QueryPillValues({ valueFilter }: QueryPillValuesProps) {
         ))
       )}
       {canExpand && (
-        <div className="absolute right-1">
+        <div className="absolute right-1 hover:cursor-pointer">
           {expanded ? (
             <ChevronLeft size={16} onClick={() => setExpanded(false)} />
           ) : (

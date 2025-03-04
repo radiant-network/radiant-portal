@@ -1164,3 +1164,5 @@ describe("QueryBuilder Core", () => {
     expect(qb.isEmpty()).toBeFalsy();
   });
 });
+
+// TODO test fieldsToIgnore

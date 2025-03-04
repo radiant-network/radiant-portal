@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/base/ui/input";
 import { QueryInstance } from "@/components/model/query-builder-core";
 import { useQueryBuilderDictContext } from "../query-builder-context";
+import { useState } from "react";
 
 const formSchema = z.object({
   title: z.string(),
@@ -35,6 +36,7 @@ function QueryBarSaveDialog({
   onOpenChange: (open: boolean) => void;
   query: QueryInstance;
 }) {
+  const [saving, setSaving] = useState(false);
   const dict = useQueryBuilderDictContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -45,9 +47,10 @@ function QueryBarSaveDialog({
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    return Promise.resolve(query.saveAsCustomPill(values.title)).then(() =>
-      onOpenChange(false)
-    );
+    setSaving(true);
+    return Promise.resolve(query.saveAsCustomPill(values.title))
+      .then(() => onOpenChange(false))
+      .finally(() => setSaving(false));
   };
 
   return (
@@ -85,7 +88,7 @@ function QueryBarSaveDialog({
                   {dict.queryBar.saveDialog.cancel}
                 </Button>
               </DialogClose>
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="primary" loading={saving}>
                 {dict.queryBar.saveDialog.ok}
               </Button>
             </DialogFooter>
