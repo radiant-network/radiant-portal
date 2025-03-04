@@ -13,10 +13,11 @@ import {
 } from "./query-builder-context";
 import SavedFiltersRightActions from "./saved-filter/saved-filter-right-actions";
 import SavedFiltersLeftActions from "./saved-filter/saved-filter-left-actions";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { QueryBuilderContextType, QueryBuilderProps } from "./types";
 import { defaultQueryReferenceColors, defaultDictionary } from "./data";
 import { deepMerge } from "@/components/lib/merge";
+import { cn } from "@/components/lib/utils";
 
 function QueryBuilder({
   className,
@@ -95,10 +96,10 @@ function QueryBuilder({
               <SavedFiltersRightActions className="ml-auto py-4" />
             </AccordionTrigger>
             <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
-              <div className="flex flex-col gap-2">
-                {queryBuilder.getQueries().map(function (query) {
-                  return <QueryBar key={query.id} query={query} />;
-                })}
+              <div className="flex flex-col gap-2 max-h-[30vh] overflow-scroll">
+                {queryBuilder.getQueries().map((query) => (
+                  <QueryBar key={query.id} query={query} />
+                ))}
               </div>
               <QueryToolbar />
             </AccordionContent>

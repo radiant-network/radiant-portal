@@ -4,11 +4,13 @@ import React from "react";
 export type QueryPillValuesContainerProps =
   React.HTMLAttributes<HTMLDivElement> & {
     canExpand?: boolean;
+    classNameContent?: string;
   };
 
 function QueryPillValuesContainer({
   canExpand,
   className,
+  classNameContent,
   children,
   onClick,
   ...props
@@ -28,7 +30,8 @@ function QueryPillValuesContainer({
           "flex flex-wrap items-center",
           onClick
             ? "hover:shadow-[inset_0_-4px_0_-2.5px_black] hover:cursor-pointer"
-            : ""
+            : "",
+          classNameContent
         )}
       >
         {children}
