@@ -45,9 +45,21 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
       {canExpand && (
         <div className="absolute right-1 hover:cursor-pointer">
           {expanded ? (
-            <ChevronLeft size={16} onClick={() => setExpanded(false)} />
+            <ChevronLeft
+              size={16}
+              onClick={(e) => {
+                e.preventDefault();
+                setExpanded(false);
+              }}
+            />
           ) : (
-            <ChevronRight size={16} onClick={() => setExpanded(true)} />
+            <ChevronRight
+              size={16}
+              onClick={(e) => {
+                e.preventDefault();
+                setExpanded(true);
+              }}
+            />
           )}
         </div>
       )}
