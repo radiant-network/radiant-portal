@@ -18,7 +18,7 @@ group-data-[query-active=true]/query:bg-[--query-bar-bg-active]
 "
         onClick={(e) => e.stopPropagation()}
       >
-        {customPillConfig && <QueryBarSaveAction />}
+        {customPillConfig?.enable && <QueryBarSaveAction />}
         <QueryBarDuplicateAction />
         <QueryBarDeleteAction />
       </div>

@@ -150,7 +150,10 @@ function QueryPillCustomEditDialog({
               </div>
               <div data-query-active className="flex flex-wrap group/query">
                 <QueryBarContext.Provider value={{ query: coreQuery }}>
-                  <QueryPillBoolean sqon={coreQuery.raw()} />
+                  <QueryPillBoolean
+                    sqon={coreQuery.raw()}
+                    customPillEditEnabled={true}
+                  />
                 </QueryBarContext.Provider>
               </div>
               <DialogFooter className="mt-5">

@@ -29,6 +29,7 @@ function QueryBuilder({
   fetchQueryCount,
   dictionary = defaultDictionary,
   customPillConfig,
+  queryPillFacetFilterConfig,
   ...hookProps
 }: QueryBuilderProps) {
   const queryBuilder = useQueryBuilder(hookProps);
@@ -59,6 +60,7 @@ function QueryBuilder({
       fetchQueryCount,
       dictionary,
       customPillConfig,
+      queryPillFacetFilterConfig,
     }),
     [
       queryBuilder,
@@ -72,6 +74,7 @@ function QueryBuilder({
       fetchQueryCount,
       dictionary,
       customPillConfig,
+      queryPillFacetFilterConfig,
     ]
   );
 

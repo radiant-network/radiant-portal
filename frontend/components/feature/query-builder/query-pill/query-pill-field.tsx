@@ -4,13 +4,41 @@ import QueryPillValues from "./query-pill-values";
 import QueryPillContainer from "./query-pill-container";
 import QueryPillLabelOperator from "./query-pill-label-operator";
 import { useQueryBarContext } from "../query-bar/query-bar-context";
+import { useQueryBuilderContext } from "../query-builder-context";
+import ConditionalWrapper from "@/components/base/conditional-wrapper";
+import { Popover, PopoverContent } from "@/components/base/ui/popover";
+import { PopoverTrigger } from "@radix-ui/react-popover";
+import { ReactNode, useCallback, useState } from "react";
 
 export type QueryPillFieldProps = {
   valueFilter: IValueFilter;
+  customPillEditEnabled?: boolean;
 };
 
-function QueryPillField({ valueFilter }: QueryPillFieldProps) {
+function QueryPillField({
+  valueFilter,
+  customPillEditEnabled,
+}: QueryPillFieldProps) {
   const { query } = useQueryBarContext();
+  const { queryPillFacetFilterConfig } = useQueryBuilderContext();
+
+  const [facetFilterComponent, setFacetFilterComponent] = useState<ReactNode>();
+
+  const isFacetFilterEnabled = Boolean(
+    !customPillEditEnabled &&
+      queryPillFacetFilterConfig?.enable &&
+      !queryPillFacetFilterConfig?.blacklistedFacets?.includes(
+        valueFilter.content.field
+      )
+  );
+
+  const handleFacetClick = useCallback(() => {
+    if (queryPillFacetFilterConfig?.onFacetClick && !facetFilterComponent) {
+      setFacetFilterComponent(
+        queryPillFacetFilterConfig.onFacetClick(valueFilter)
+      );
+    }
+  }, [facetFilterComponent, queryPillFacetFilterConfig?.onFacetClick]);
 
   return (
     <QueryPillContainer
@@ -22,7 +50,21 @@ function QueryPillField({ valueFilter }: QueryPillFieldProps) {
         valueFilter={valueFilter}
         operator={<QueryPillOperator size={14} type={valueFilter.op} />}
       />
-      <QueryPillValues valueFilter={valueFilter} />
+      <ConditionalWrapper
+        condition={isFacetFilterEnabled}
+        wrapper={(children) => (
+          <Popover>
+            <PopoverTrigger asChild onClick={handleFacetClick}>
+              {children}
+            </PopoverTrigger>
+            <PopoverContent align="start">
+              {facetFilterComponent}
+            </PopoverContent>
+          </Popover>
+        )}
+      >
+        <QueryPillValues valueFilter={valueFilter} />
+      </ConditionalWrapper>
     </QueryPillContainer>
   );
 }
