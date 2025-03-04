@@ -15,23 +15,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check Changed Files 👀
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+
       - name: Set up Go
+        if: steps.filter.outputs.backend == 'true'
         uses: actions/setup-go@v4
         with:
           go-version: '1.23'
 
       - name: Install dependencies
+        if: steps.filter.outputs.backend == 'true'
         run: go mod download
         working-directory: ./backend
 
       - name: Ensure dependencies are up-to-date
+        if: steps.filter.outputs.backend == 'true'
         run: go mod tidy
         working-directory: ./backend
 
       - name: Build
+        if: steps.filter.outputs.backend == 'true'
         run: go build -v ./...
         working-directory: ./backend
 
       - name: Test
+        if: steps.filter.outputs.backend == 'true'
         run: go test -v ./...
         working-directory: ./backend
