@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/base/ui/select";
 import { SortBody, SortBodyOrderEnum } from "@/api/api";
+import { Skeleton } from "@/components/base/ui/skeleton";
 
 export interface TableColumnDef<TData, TValue>
   extends Omit<ColumnDef<TData, TValue>, "id" | "header"> {
@@ -52,16 +53,20 @@ export interface TableColumnDef<TData, TValue>
 }
 
 type TableProps<TData> = {
-  total: number;
   columns: TableColumnDef<TData, any>[];
+  columnSettings: ColumnSettings[];
   data: TData[];
+  defaultColumnSettings: ColumnSettings[];
+  defaultServerSorting: SortBody[];
+  loadingStates?: {
+    total?: boolean;
+    list?: boolean;
+  };
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
   onServerSortingChange: (sorting: SortBody[]) => void;
-  defaultServerSorting: SortBody[];
-  columnSettings: ColumnSettings[];
-  defaultColumnSettings: ColumnSettings[];
   subComponent?: (data: TData) => React.JSX.Element;
+  total: number;
 };
 
 export interface BaseColumnSettings {
@@ -167,15 +172,16 @@ function getNextSortingOrderHeaderTitle(
  */
 function DataTable({
   columns,
-  total,
-  data,
-  pagination,
-  onPaginationChange,
-  onServerSortingChange: onClientSortingChange,
   columnSettings,
+  data,
   defaultColumnSettings,
   defaultServerSorting,
+  loadingStates,
+  pagination,
+  onPaginationChange,
+  onServerSortingChange,
   subComponent,
+  total,
 }: TableProps<any>) {
   // default values
   const defaultColumnVisibility = deserializeColumnVisibility(
@@ -235,9 +241,9 @@ function DataTable({
    */
   useEffect(() => {
     if (sorting.length === 0) {
-      onClientSortingChange(defaultServerSorting);
+      onServerSortingChange(defaultServerSorting);
     } else {
-      onClientSortingChange(
+      onServerSortingChange(
         sorting.map((s) => ({
           field: s.id,
           order: s.desc ? SortBodyOrderEnum.Desc : SortBodyOrderEnum.Asc,
@@ -255,6 +261,7 @@ function DataTable({
     <div className="block min-w-full w-full overflow-x-auto overflow-y-auto">
       <div className="w-full flex text-left justify-between">
         <TableIndexResult
+          loading={loadingStates?.total}
           pageIndex={table.getState().pagination.pageIndex + 1}
           pageSize={table.getState().pagination.pageSize}
           total={total}
@@ -301,14 +308,19 @@ function DataTable({
                         : undefined
                     }
                   >
+                    {/* Header rendering */}
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext()
                     )}
+
+                    {/* Sorted Icons */}
                     {{
                       asc: <ArrowDownAZ size={16} />,
                       desc: <ArrowDownZA size={16} />,
                     }[header.column.getIsSorted() as string] ?? null}
+
+                    {/* Resize Grip */}
                     <div
                       onDoubleClick={() => header.column.resetSize()}
                       onMouseDown={header.getResizeHandler()}
@@ -326,6 +338,20 @@ function DataTable({
           ))}
         </TableHeader>
         <TableBody>
+          {/* Loading Skeleton */}
+          {loadingStates?.list &&
+            new Array(pagination.pageSize).fill(0).map((_) => (
+              <TableRow className="border border-gray-100 p-2 font-normal text-left truncate">
+                <TableCell
+                  colSpan={columnSettings.length}
+                  className="border border-gray-100 p-2 font-normal text-left truncate"
+                >
+                  <Skeleton className="w-full h-[32px]" />
+                </TableCell>
+              </TableRow>
+            ))}
+
+          {/* Display list */}
           {table.getRowModel().rows.map((row) => (
             <>
               <TableRow
@@ -355,6 +381,7 @@ function DataTable({
       </Table>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div>
+          {/* PageSize select */}
           <Select
             value={String(table.getState().pagination.pageSize)}
             onValueChange={(value) => {
@@ -372,6 +399,7 @@ function DataTable({
           </Select>
         </div>
         <div>
+          {/* Pagination */}
           <Pagination className="w-auto">
             <PaginationContent>
               <PaginationItem>

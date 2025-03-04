@@ -68,7 +68,11 @@ function App() {
     pageIndex: 0,
     pageSize: 10,
   });
-  const { data: total } = useSWR<Count, any, OccurrenceCountInput>(
+  const { data: total, isLoading: totalIsLoading } = useSWR<
+    Count,
+    any,
+    OccurrenceCountInput
+  >(
     {
       seqId: SEQ_ID,
       countBody: { sqon: activeSqon },
@@ -80,7 +84,11 @@ function App() {
   );
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
 
-  const { data: list } = useSWR<Occurrence[], any, OccurrencesListInput>(
+  const { data: list, isLoading: listIsLoading } = useSWR<
+    Occurrence[],
+    any,
+    OccurrencesListInput
+  >(
     {
       seqId: SEQ_ID,
       listBody: {
@@ -131,15 +139,18 @@ function App() {
           />
         </div>
         <DataTable
+          columns={columns}
+          columnSettings={userSettings}
+          data={list ?? []}
+          defaultColumnSettings={defaultSettings}
+          defaultServerSorting={DEFAULT_SORTING}
+          loadingStates={{
+            total: totalIsLoading,
+            list: listIsLoading,
+          }}
           pagination={pagination}
           onPaginationChange={setPagination}
-          columns={columns}
-          defaultColumnSettings={defaultSettings}
           onServerSortingChange={setSorting}
-          defaultServerSorting={DEFAULT_SORTING}
-          data={list ?? []}
-          total={total?.count ?? 0}
-          columnSettings={userSettings}
           subComponent={(data: IVariantEntity) => {
             return (
               <pre style={{ fontSize: "10px" }}>
@@ -147,6 +158,7 @@ function App() {
               </pre>
             );
           }}
+          total={total?.count ?? 0}
         />
       </main>
     </div>

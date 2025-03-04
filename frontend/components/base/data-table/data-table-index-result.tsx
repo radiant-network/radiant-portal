@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/base/ui/skeleton";
 import { numberWithCommas } from "@/components/utils/number-format";
 
 /**
@@ -6,15 +7,19 @@ import { numberWithCommas } from "@/components/utils/number-format";
  */
 type TableIndexResultProp = {
   total: number;
+  loading?: boolean;
   pageIndex: number;
   pageSize: number;
 };
 
 function TableIndexResult({
-  total,
+  loading,
   pageIndex,
   pageSize,
+  total,
 }: TableIndexResultProp) {
+  if (loading) return <Skeleton className="h-[24px] w-[250px]" />;
+
   const result = total;
   const to = pageSize * pageIndex;
   const from = to - pageSize + 1;
