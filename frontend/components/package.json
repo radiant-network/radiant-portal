@@ -6,7 +6,7 @@
     "test": "vite-jest",
     "storybook:radiant": "THEME=radiant storybook dev -p 6006",
     "storybook:kf": "THEME=kf storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build:storybook:radiant": "THEME=radiant storybook build"
   },
   "keywords": [],
   "author": "",
