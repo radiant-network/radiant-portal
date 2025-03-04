@@ -10,7 +10,7 @@ const VALUE_SYMBOLE_LIST = [
 const BLACK_LIST_LENGTH = [1, 2, 3, 4];
 const NUM_FORMAT_REGEX = /\.0+$|(\.[0-9]*[1-9])0+$/;
 
-export const getDefaultDigits = (num: number): number => {
+export function getDefaultDigits(num: number): number {
   switch (num.toString().length) {
     case 5:
     case 7:
@@ -18,9 +18,9 @@ export const getDefaultDigits = (num: number): number => {
     default:
       return 0;
   }
-};
+}
 
-export const numberFormat = (num: number, digits = 0): number | string => {
+export function numberFormat(num: number, digits = 0): number | string {
   if (!num) return 0;
 
   const locale = localStorage.getItem("locale") === "fr" ? "fr-CA" : "en-US";
@@ -44,34 +44,38 @@ export const numberFormat = (num: number, digits = 0): number | string => {
         .replace(NUM_FORMAT_REGEX, "$1") + VALUE_SYMBOLE_LIST[index!].symbol
     );
   }
-};
+}
 
-export const numberWithCommas = (number: number): string =>
-  number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+export function numberWithCommas(number: number): string {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
-export const toExponentialNotation = (
+export function toExponentialNotation(
   numberCandidate?: number,
   fractionDigits = 2
-): string =>
-  numberCandidate ? numberCandidate.toExponential(fractionDigits) : "";
+): string {
+  return numberCandidate ? numberCandidate.toExponential(fractionDigits) : "";
+}
 
-export const canQuotientBeComputed = (num: number, denum: number): boolean => {
+export function canQuotientBeComputed(num: number, denum: number): boolean {
   const areNumbers = !isNaN(num) && !isNaN(denum);
   return areNumbers && denum !== 0;
-};
+}
 
-export const formatQuotientToExponentialOrElse = (
+export function formatQuotientToExponentialOrElse(
   num: number,
   denum: number,
   defaultValue = ""
-): string =>
-  canQuotientBeComputed(num, denum)
+): string {
+  return canQuotientBeComputed(num, denum)
     ? `${toExponentialNotation(num / denum)}`
     : defaultValue;
+}
 
-export const formatQuotientOrElse = (
+export function formatQuotientOrElse(
   num: number,
   denum: number,
   defaultValue = ""
-): string =>
-  canQuotientBeComputed(num, denum) ? `${num} / ${denum}` : defaultValue;
+): string {
+  return canQuotientBeComputed(num, denum) ? `${num} / ${denum}` : defaultValue;
+}
