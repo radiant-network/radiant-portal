@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -9,7 +9,11 @@ import {
   ColumnOrderState,
   getExpandedRowModel,
   OnChangeFn,
+  SortingState,
+  SortDirection,
 } from "@tanstack/react-table";
+
+import { ArrowDownAZ, ArrowDownZA } from "lucide-react";
 import { cn } from "@/lib/utils";
 import TableColumnSettings from "@/components/base/data-table/data-table-column-settings";
 import { useResizeObserver } from "@/components/base/data-table/hooks/use-resize-observer";
@@ -38,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/base/ui/select";
+import { SortBody, SortBodyOrderEnum } from "@/api/api";
 
 export interface TableColumnDef<TData, TValue>
   extends Omit<ColumnDef<TData, TValue>, "id" | "header"> {
@@ -52,6 +57,8 @@ type TableProps<TData> = {
   data: TData[];
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
+  onServerSortingChange: (sorting: SortBody[]) => void;
+  defaultServerSorting: SortBody[];
   columnSettings: ColumnSettings[];
   defaultColumnSettings: ColumnSettings[];
   subComponent?: (data: TData) => React.JSX.Element;
@@ -115,6 +122,25 @@ function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
 }
 
 /**
+ * Use header.column.getNextSortingOrder() to display the next action on sort
+ * @param sortingOrder 'asc' | 'desc' | false
+ * @returns String
+ */
+function getNextSortingOrderHeaderTitle(
+  sortingOrder: SortDirection | boolean
+): string {
+  if (sortingOrder === "asc") {
+    return "Sort ascending";
+  }
+
+  if (sortingOrder === "desc") {
+    return "Sort descending";
+  }
+
+  return "Clear sort";
+}
+
+/**
  * Table
  *
  * columns
@@ -145,8 +171,10 @@ function DataTable({
   data,
   pagination,
   onPaginationChange,
+  onServerSortingChange: onClientSortingChange,
   columnSettings,
   defaultColumnSettings,
+  defaultServerSorting,
   subComponent,
 }: TableProps<any>) {
   // default values
@@ -162,6 +190,7 @@ function DataTable({
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     deserializeColumnOrder(columnSettings)
   );
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   // Initialize tanstack table
   const table = useReactTable({
@@ -177,12 +206,15 @@ function DataTable({
     getRowCanExpand: () => true,
     getExpandedRowModel: getExpandedRowModel(),
     onPaginationChange,
+    onSortingChange: setSorting,
+    isMultiSortEvent: (_e) => true,
     pageCount: total / pagination.pageSize,
     manualPagination: true,
     state: {
       pagination,
       columnVisibility,
       columnOrder,
+      sorting,
     },
   });
 
@@ -195,6 +227,29 @@ function DataTable({
     console.log(columnId);
     console.log(columnSize);
   });
+
+  /**
+   * Sorting useEffect
+   * Update server-side calls to use the new sorting settings
+   * Reset pagination at the same time
+   */
+  useEffect(() => {
+    if (sorting.length === 0) {
+      onClientSortingChange(defaultServerSorting);
+    } else {
+      onClientSortingChange(
+        sorting.map((s) => ({
+          field: s.id,
+          order: s.desc ? SortBodyOrderEnum.Desc : SortBodyOrderEnum.Asc,
+        }))
+      );
+    }
+
+    onPaginationChange({
+      pageIndex: 0,
+      pageSize: pagination.pageSize,
+    });
+  }, [sorting]);
 
   return (
     <div className="block min-w-full w-full overflow-x-auto overflow-y-auto">
@@ -232,22 +287,39 @@ function DataTable({
                   style={{ width: header.getSize() }}
                   className="border relative"
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
                   <div
-                    onDoubleClick={() => header.column.resetSize()}
-                    onMouseDown={header.getResizeHandler()}
-                    onTouchStart={header.getResizeHandler()}
                     className={cn(
-                      "absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50",
-                      table.options.columnResizeDirection,
-                      header.column.getIsResizing() ? "opacity-100" : ""
+                      "flex align-middle gap-2",
+                      header.column.getCanSort() && "cursor-pointer select-none"
                     )}
-                  />
+                    onClick={header.column.getToggleSortingHandler()}
+                    title={
+                      header.column.getCanSort()
+                        ? getNextSortingOrderHeaderTitle(
+                            header.column.getNextSortingOrder()
+                          )
+                        : undefined
+                    }
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                    {{
+                      asc: <ArrowDownAZ size={16} />,
+                      desc: <ArrowDownZA size={16} />,
+                    }[header.column.getIsSorted() as string] ?? null}
+                    <div
+                      onDoubleClick={() => header.column.resetSize()}
+                      onMouseDown={header.getResizeHandler()}
+                      onTouchStart={header.getResizeHandler()}
+                      className={cn(
+                        "absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50",
+                        table.options.columnResizeDirection,
+                        header.column.getIsResizing() ? "opacity-100" : ""
+                      )}
+                    />
+                  </div>
                 </TableHead>
               ))}
             </TableRow>

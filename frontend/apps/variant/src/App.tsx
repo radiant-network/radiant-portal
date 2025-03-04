@@ -5,11 +5,12 @@ import {
   CountBody,
   ListBody,
   Occurrence,
+  SortBody,
   SortBodyOrderEnum,
   Sqon,
 } from "@/api/api";
 import DataTable from "@/components/base/data-table/data-table";
-import { PaginationState } from "@tanstack/react-table";
+import { PaginationState, SortingState } from "@tanstack/react-table";
 import {
   columns,
   defaultSettings,
@@ -35,16 +36,27 @@ type OccurrenceCountInput = {
   countBody: CountBody;
 };
 
-function fetchOccurencesList(input: OccurrencesListInput) {
-  return occurrencesApi
-    .listOccurrences(input.seqId, input.listBody)
-    .then((response) => response.data);
+const DEFAULT_SORTING = [
+  {
+    field: "pf",
+    order: SortBodyOrderEnum.Asc,
+  },
+];
+
+async function fetchOccurencesList(input: OccurrencesListInput) {
+  const response = await occurrencesApi.listOccurrences(
+    input.seqId,
+    input.listBody
+  );
+  return response.data;
 }
 
-function fetchOccurencesCount(input: OccurrenceCountInput) {
-  return occurrencesApi
-    .countOccurrences(input.seqId, input.countBody)
-    .then((response) => response.data);
+async function fetchOccurencesCount(input: OccurrenceCountInput) {
+  const response = await occurrencesApi.countOccurrences(
+    input.seqId,
+    input.countBody
+  );
+  return response.data;
 }
 
 const SEQ_ID = "5011";
@@ -66,6 +78,7 @@ function App() {
       revalidateOnFocus: false,
     }
   );
+  const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
 
   const { data: list } = useSWR<Occurrence[], any, OccurrencesListInput>(
     {
@@ -74,12 +87,7 @@ function App() {
         selected_fields: ["hgvsg", "variant_class"],
         limit: pagination.pageSize,
         offset: pagination.pageIndex,
-        sort: [
-          {
-            field: "pf",
-            order: SortBodyOrderEnum.Asc,
-          },
-        ],
+        sort: sorting,
         sqon: activeSqon,
       },
     },
@@ -127,6 +135,8 @@ function App() {
           onPaginationChange={setPagination}
           columns={columns}
           defaultColumnSettings={defaultSettings}
+          onServerSortingChange={setSorting}
+          defaultServerSorting={DEFAULT_SORTING}
           data={list ?? []}
           total={total?.count ?? 0}
           columnSettings={userSettings}
