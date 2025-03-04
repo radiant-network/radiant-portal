@@ -4,13 +4,18 @@ import take from "lodash/take";
 import IntersectionOperator from "../operator/operator-intersection";
 import UnionOperator from "../operator/operator-union";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import QueryPillValuesContainer from "./query-pill-values-container";
+import QueryPillValuesContainer, {
+  QueryPillValuesContainerProps,
+} from "./query-pill-values-container";
 
-export type QueryPillValuesProps = {
+export type QueryPillValuesProps = Exclude<
+  QueryPillValuesContainerProps,
+  "canExpand"
+> & {
   valueFilter: IValueFilter;
 };
 
-function QueryPillValues({ valueFilter }: QueryPillValuesProps) {
+function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
 
   const canExpand = valueFilter.content.value.length > 3;
@@ -19,7 +24,7 @@ function QueryPillValues({ valueFilter }: QueryPillValuesProps) {
     : take(valueFilter.content.value, 3);
 
   return (
-    <QueryPillValuesContainer canExpand={canExpand}>
+    <QueryPillValuesContainer canExpand={canExpand} {...props}>
       {valueFilter.content.overrideValuesName ? (
         <div>
           <span>{valueFilter.content.overrideValuesName}</span>

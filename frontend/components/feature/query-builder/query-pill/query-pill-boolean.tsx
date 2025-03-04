@@ -22,9 +22,13 @@ import QueryCombiner from "./query-pill-combiner";
 
 export type QueryPillBooleanProps = {
   sqon: ISyntheticSqon;
+  customPillEditEnabled?: boolean;
 };
 
-function QueryPillBoolean({ sqon }: QueryPillBooleanProps) {
+function QueryPillBoolean({
+  sqon,
+  customPillEditEnabled,
+}: QueryPillBooleanProps) {
   return (
     <>
       {sqon.content.map((f: any, i: number) => (
@@ -44,7 +48,10 @@ function QueryPillBoolean({ sqon }: QueryPillBooleanProps) {
           ) : isRemoteComponent(f) ? (
             <QueryPillRemoteComponent />
           ) : (
-            <QueryPillField valueFilter={f} />
+            <QueryPillField
+              valueFilter={f}
+              customPillEditEnabled={customPillEditEnabled}
+            />
           )}
           {isNotEnd(sqon.content, i) && <QueryCombiner />}
         </div>

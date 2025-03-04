@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "vite-jest",
-    "storybook": "THEME=radiant storybook dev -p 6006",
+    "storybook:radiant": "THEME=radiant storybook dev -p 6006",
+    "storybook:kf": "THEME=kf storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "keywords": [],

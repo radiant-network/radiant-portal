@@ -49,5 +49,5 @@ make docker-run-radiant
 To launch the storybook, from `components/`
 
 ```bash
-npm run storybook
+npm run storybook:radiant
 ```

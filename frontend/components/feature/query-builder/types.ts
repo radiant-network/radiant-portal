@@ -7,9 +7,9 @@ import {
   ISavedFilter,
   IUserSavedFilter,
 } from "@/components/model/saved-filter";
-import { ISyntheticSqon } from "@/components/model/sqon";
+import { ISyntheticSqon, IValueFilter } from "@/components/model/sqon";
 import { LucideProps } from "lucide-react";
-import { ReactElement } from "react";
+import { ReactNode } from "react";
 import { DeepPartial } from "react-hook-form";
 
 export type ArrayTenOrMore<T> = {
@@ -28,21 +28,49 @@ export type ArrayTenOrMore<T> = {
 
 type QueryPillCustomConfig = {
   /**
+   * Enable or disable custom pill.
+   * This basically only show or hide the save icon button on a query bar.
+   */
+  enable: boolean;
+
+  /**
    * Query builder id for custom pill edition
    */
   queryBuilderEditId: string;
+
   /**
    * Validate the title of the custom pill
    */
   validateCustomPillTitle: (title: string) => Promise<boolean>;
+
   /**
    * Get the custom pill by id
    */
   fetchCustomPillById: (id: string) => Promise<IUserSavedFilter>;
+
   /**
    * Get the filters by custom pill id
    */
   fetchSavedFiltersByCustomPillId: (id: string) => Promise<ISavedFilter[]>;
+};
+
+type QueryPillFacetFilterConfig = {
+  /**
+   * Enable or disable query pill filter.
+   */
+  enable: boolean;
+
+  /**
+   * List of blacklisted facets (fields).
+   * This will disable the query pill filter dropdown for those facets
+   */
+  blacklistedFacets?: string[];
+
+  /**
+   * Callback when a query pill facet is clicked.
+   * Should return the component to show in the popover
+   */
+  onFacetClick: (filter: IValueFilter) => ReactNode;
 };
 
 type QueryBuilderSharedProps = {
@@ -50,28 +78,38 @@ type QueryBuilderSharedProps = {
    * Enable the combine feature
    */
   enableCombine?: boolean;
+
   /**
    * Enable the favorite feature
    */
   enableFavorite?: boolean;
+
   /**
    * Enable the show/hide labels feature
    */
   enableShowHideLabels?: boolean;
+
   /**
    * Icon to use for the query count
    */
   queryCountIcon?: React.ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
   >;
+
   /**
    * Fetch the query count
    */
   fetchQueryCount: (sqon: ISyntheticSqon) => Promise<number>;
+
   /**
    * Custom pill configuration
    */
   customPillConfig?: QueryPillCustomConfig;
+
+  /**
+   * Query pill facet filter configuration
+   */
+  queryPillFacetFilterConfig?: QueryPillFacetFilterConfig;
 };
 
 export type QueryBuilderProps = PartialKeys<
@@ -82,10 +120,12 @@ export type QueryBuilderProps = PartialKeys<
        * Initial state of the show/hide labels feature
        */
       initialShowHideLabels?: boolean;
+
       /**
        * Colors to use for query reference
        */
       queryReferenceColors?: ArrayTenOrMore<string>;
+
       /**
        * Dictionary for copies
        */

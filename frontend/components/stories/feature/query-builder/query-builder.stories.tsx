@@ -20,6 +20,7 @@ import {
   ISavedFilter,
   IUserSavedFilter,
 } from "@/components/model/saved-filter";
+import { Spinner } from "@/components/base/spinner";
 
 const meta = {
   title: "Feature/Query Builder",
@@ -49,6 +50,7 @@ type Story = StoryObj<typeof meta>;
 
 const qbId = "query-builder-id";
 const qbCustomPillId = "query-builder-custom-pill-id";
+const qbQueryPillFilterId = "query-builder-query-pill-filter-id";
 
 const randomElement = <T,>(arr: T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
@@ -247,6 +249,7 @@ export const CustomPill: Story = {
     onSavedFilterSave: fn(),
     onSavedFilterUpdate: fn(),
     customPillConfig: {
+      enable: true,
       queryBuilderEditId: "qb-custom-pill-edit-id",
       fetchCustomPillById: () =>
         new Promise((resolve) =>
@@ -269,5 +272,43 @@ export const CustomPill: Story = {
   },
   render: (args) => {
     return <QueryBuilder {...args} />;
+  },
+};
+
+export const QueryPillFilter: Story = {
+  args: {
+    id: qbQueryPillFilterId,
+    initialState: {
+      ...queryBuilderRemote.getLocalQueryBuilderState(qbQueryPillFilterId),
+      savedFilters: [],
+      selectedQueryIndexes: [],
+    },
+    fetchQueryCount: async () => Promise.resolve(15),
+    onStateChange: fn(),
+    onActiveQueryChange: fn(),
+    onQueryCreate: fn(),
+    onQueryDelete: fn(),
+    onQuerySelectChange: fn(),
+    onQueryUpdate: fn(),
+    onSavedFilterCreate: fn(),
+    onSavedFilterDelete: fn(),
+    onSavedFilterSave: fn(),
+    onSavedFilterUpdate: fn(),
+    queryPillFacetFilterConfig: {
+      enable: true,
+      onFacetClick: (filter) => {
+        action("onFacetClick")(filter);
+
+        return <div className="italic text-sm">Insert Filter Content</div>;
+      },
+    },
+  },
+  render: (args) => {
+    return (
+      <div className="space-y-6">
+        <QueryBuilder {...args} />
+        <TestingTools queryBuilderId={qbQueryPillFilterId} />
+      </div>
+    );
   },
 };
