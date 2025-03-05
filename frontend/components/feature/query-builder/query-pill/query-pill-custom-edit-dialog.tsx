@@ -5,32 +5,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/base/ui/dialog";
-import {
-  QueryBuilderContext,
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
-import {
-  ISavedFilter,
-  IUserSavedFilter,
-  SavedFilterTypeEnum,
-} from "@/components/model/saved-filter";
-import EditableText from "@/components/base/editable-text";
-import { Separator } from "@/components/base/ui/separator";
-import { Button } from "@/components/base/ui/button";
-import { useCallback, useState } from "react";
-import QueryPillBoolean from "./query-pill-boolean";
-import {
-  updateQueriesWithCustomPill,
-  useQueryBuilder,
-} from "@/components/model/query-builder-core";
-import { QueryBarContext } from "../query-bar/query-bar-context";
-import {
-  openCustomPillCantBeEmptyDialog,
-  openCustomPillSaveDialog,
-  openCustomPillTitleExistsDialog,
-} from "../alerts";
+} from '@/components/base/ui/dialog';
+import { QueryBuilderContext, useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { ISavedFilter, IUserSavedFilter, SavedFilterTypeEnum } from '@/components/model/saved-filter';
+import EditableText from '@/components/base/data-entry/editable-text';
+import { Separator } from '@/components/base/ui/separator';
+import { Button } from '@/components/base/ui/button';
+import { useCallback, useState } from 'react';
+import QueryPillBoolean from './query-pill-boolean';
+import { updateQueriesWithCustomPill, useQueryBuilder } from '@/components/model/query-builder-core';
+import { QueryBarContext } from '../query-bar/query-bar-context';
+import { openCustomPillCantBeEmptyDialog, openCustomPillSaveDialog, openCustomPillTitleExistsDialog } from '../alerts';
+import { ISqonGroupFilter } from '@/components/model/sqon';
 
 function QueryPillCustomEditDialog({
   open,
@@ -42,8 +28,7 @@ function QueryPillCustomEditDialog({
   queryPill: ISavedFilter;
 }) {
   const dict = useQueryBuilderDictContext();
-  const { queryBuilder: rootQueryBuilder, customPillConfig } =
-    useQueryBuilderContext();
+  const { queryBuilder: rootQueryBuilder, customPillConfig } = useQueryBuilderContext();
   const customQueryBuilder = useQueryBuilder({
     id: customPillConfig?.queryBuilderEditId!,
     initialState: {
@@ -52,19 +37,19 @@ function QueryPillCustomEditDialog({
       savedFilters: [queryPill],
       selectedQueryIndexes: [],
     },
-    onCustomPillUpdate: async (customPill) => {
-      const result = await Promise.resolve(
-        rootQueryBuilder.coreProps.onCustomPillUpdate?.(customPill)
-      ).then((response) => {
-        rootQueryBuilder.setState((prev) => ({
-          ...prev,
-          queries: updateQueriesWithCustomPill(prev.queries, customPill),
-        }));
+    onCustomPillUpdate: async customPill => {
+      const result = await Promise.resolve(rootQueryBuilder.coreProps.onCustomPillUpdate?.(customPill)).then(
+        response => {
+          rootQueryBuilder.setState(prev => ({
+            ...prev,
+            queries: updateQueriesWithCustomPill(prev.queries, customPill),
+          }));
 
-        onOpenChange(false);
+          onOpenChange(false);
 
-        return response;
-      });
+          return response;
+        },
+      );
 
       return result as IUserSavedFilter;
     },
@@ -88,7 +73,7 @@ function QueryPillCustomEditDialog({
         onOpenChange(false);
       }
     },
-    [onOpenChange, customQueryBuilder]
+    [onOpenChange, customQueryBuilder],
   );
 
   const handleSave = useCallback(async () => {
@@ -116,7 +101,7 @@ function QueryPillCustomEditDialog({
     openCustomPillSaveDialog(dict, title, associatedSavedFilters, async () =>
       coreSavedFilter?.save(SavedFilterTypeEnum.Query, {
         title,
-      })
+      }),
     );
   }, [coreQuery, coreSavedFilter, dict, title, queryPill.id, customPillConfig]);
 
@@ -126,8 +111,9 @@ function QueryPillCustomEditDialog({
         value={{
           queryBuilder: customQueryBuilder,
           fetchQueryCount: async () => 0,
-          getQueryReferenceColor: () => "",
+          getQueryReferenceColor: () => '',
           showLabels: true,
+          resolveSyntheticSqon: sqon => sqon as ISqonGroupFilter,
         }}
       >
         <DialogContent className="flex flex-row gap-0 h-screen w-screen max-w-screen rounded-none border-none sm:rounded-none p-0">
@@ -137,9 +123,7 @@ function QueryPillCustomEditDialog({
           <div className="w-full bg-gray-100">
             <div className="flex flex-col bg-white gap-6 p-6">
               <DialogHeader>
-                <DialogTitle>
-                  {dict.queryPill.customPill.editDialog.title}
-                </DialogTitle>
+                <DialogTitle>{dict.queryPill.customPill.editDialog.title}</DialogTitle>
               </DialogHeader>
               <Separator />
               <div>
@@ -147,25 +131,14 @@ function QueryPillCustomEditDialog({
               </div>
               <div data-query-active className="flex flex-wrap group/query">
                 <QueryBarContext.Provider value={{ query: coreQuery }}>
-                  <QueryPillBoolean
-                    sqon={coreQuery.raw()}
-                    customPillEditEnabled={true}
-                  />
+                  <QueryPillBoolean sqon={coreQuery.raw()} customPillEditEnabled={true} />
                 </QueryBarContext.Provider>
               </div>
               <DialogFooter className="mt-5">
                 <DialogClose asChild>
-                  <Button variant="outlined">
-                    {dict.queryPill.customPill.editDialog.cancel}
-                  </Button>
+                  <Button variant="outlined">{dict.queryPill.customPill.editDialog.cancel}</Button>
                 </DialogClose>
-                <Button
-                  type="submit"
-                  color="primary"
-                  loading={saving}
-                  disabled={!hasChanged}
-                  onClick={handleSave}
-                >
+                <Button type="submit" color="primary" loading={saving} disabled={!hasChanged} onClick={handleSave}>
                   {dict.queryPill.customPill.editDialog.ok}
                 </Button>
               </DialogFooter>

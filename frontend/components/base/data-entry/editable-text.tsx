@@ -1,25 +1,15 @@
-import { LucideProps, PencilLineIcon } from "lucide-react";
-import React, { useState } from "react";
-import { Input } from "./ui/input";
-import { IconButton } from "./Buttons";
+import { LucideProps, PencilLineIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Input } from '@/components/base/ui/input';
+import { IconButton } from '@/components/base/Buttons';
 
-export type EditableTextProps = Omit<
-  React.HTMLAttributes<HTMLDivElement>,
-  "children"
-> & {
-  icon?: React.ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-  >;
+export type EditableTextProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> & {
+  icon?: React.ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>>;
   children: string;
   onChangeText?: (text: string) => void;
 };
 
-const EditableText = ({
-  children,
-  icon = PencilLineIcon,
-  onChangeText,
-  ...props
-}: EditableTextProps) => {
+const EditableText = ({ children, icon = PencilLineIcon, onChangeText, ...props }: EditableTextProps) => {
   const [edit, setEdit] = useState(false);
 
   return (
@@ -28,13 +18,13 @@ const EditableText = ({
         <Input
           defaultValue={children}
           autoFocus
-          onBlur={(e) => {
+          onBlur={e => {
             setEdit(false);
             onChangeText?.(e.currentTarget.value);
           }}
           className="max-w-96 w-full"
-          onKeyUp={(e) => {
-            if (e.key === "Enter") {
+          onKeyUp={e => {
+            if (e.key === 'Enter') {
               setEdit(false);
               onChangeText?.(e.currentTarget.value);
             }

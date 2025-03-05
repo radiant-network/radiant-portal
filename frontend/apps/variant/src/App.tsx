@@ -1,10 +1,8 @@
-import './App.css';
 import styles from './App.module.css';
 import { Count, CountBody, ListBody, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
-import { columns, defaultSettings, userSettings } from './include_variant_table';
-import { IVariantEntity } from '@/variant_type';
+import { columns, defaultSettings, userSettings } from '@/feature/variant-table/table-settings';
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
@@ -15,6 +13,7 @@ import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { useConfig } from '@/components/model/applications-config';
 import GermlineVariantPreview from '@/components/feature/preview/germline-variant-preview';
 import VariantIcon from '@/components/base/icons/variant-icon';
+import { IVariantEntity } from './feature/variant-table/variant-types';
 
 type OccurrencesListInput = {
   seqId: string;

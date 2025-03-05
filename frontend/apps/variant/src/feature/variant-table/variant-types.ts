@@ -1,11 +1,11 @@
 export const hydrateResults = <resultType extends ArrangerNodeData>(
-  results: ArrangerEdge<resultType>[]
+  results: ArrangerEdge<resultType>[],
 ): resultType[] =>
   results.map(
     (edge: ArrangerEdge<resultType>, index): resultType => ({
       ...edge.node,
       key: edge.node?.id || index,
-    })
+    }),
   );
 
 export interface ArrangerNodeData {
@@ -47,10 +47,10 @@ export interface IVariantEntityResultTree {
 }
 
 export enum Impact {
-  High = "HIGH",
-  Moderate = "MODERATE",
-  Low = "LOW",
-  Modifier = "MODIFIER",
+  High = 'HIGH',
+  Moderate = 'MODERATE',
+  Low = 'LOW',
+  Modifier = 'MODIFIER',
 }
 
 export interface IConservationsEntity {

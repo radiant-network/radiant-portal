@@ -1,37 +1,13 @@
-import { Command as CommandPrimitive, useCommandState } from "cmdk";
-import { Check, XIcon } from "lucide-react";
-import {
-  useEffect,
-  useCallback,
-  useState,
-  useImperativeHandle,
-  KeyboardEvent,
-  useMemo,
-  forwardRef,
-  ComponentProps,
-  useRef,
-} from "react";
-import { Badge } from "@/components/base/ui/badge";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from "@/components/base/ui/command";
-import { cn } from "@/lib/utils";
-import { useDebounce } from "@/hooks/useDebounce";
-import {
-  MultipleSelectorProps,
-  MultiSelectorGroupOption,
-  MultiSelectorOption,
-} from "./multi-selector.types";
-import {
-  getSelectedOptionByValue,
-  isOptionsExist,
-  transToGroupOption,
-} from "./multi-selector.utils";
-import { Skeleton } from "@/components/base/ui/skeleton";
+import { Command as CommandPrimitive } from 'cmdk';
+import { Check, XIcon } from 'lucide-react';
+import { useEffect, useCallback, useState, useImperativeHandle, KeyboardEvent, useRef } from 'react';
+import { Badge } from '@/components/base/ui/badge';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/base/ui/command';
+import { cn } from '@/lib/utils';
+import { useDebounce } from '@/hooks/useDebounce';
+import { MultipleSelectorProps, MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
+import { getSelectedOptionByValue, isOptionsExist, transToGroupOption } from './multi-selector.utils';
+import { Skeleton } from '@/components/base/ui/skeleton';
 
 function MultiSelector({
   value,
@@ -49,13 +25,13 @@ function MultiSelector({
   disabled,
   groupBy,
   className,
-  badgeClassName,
   selectFirstItem = true,
   creatable = false,
   triggerSearchOnFocus = false,
   commandProps,
   inputProps,
   hideClearAllButton = false,
+  renderBadge,
   ref,
 }: MultipleSelectorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -65,12 +41,10 @@ function MultiSelector({
   const dropdownRef = useRef<HTMLDivElement>(null); // Added this
 
   const [selected, setSelected] = useState<MultiSelectorOption[]>(
-    getSelectedOptionByValue(value || [], arrayDefaultOptions)
+    getSelectedOptionByValue(value || [], arrayDefaultOptions),
   );
-  const [options, setOptions] = useState<MultiSelectorGroupOption>(
-    transToGroupOption(arrayDefaultOptions, groupBy)
-  );
-  const [inputValue, setInputValue] = useState("");
+  const [options, setOptions] = useState<MultiSelectorGroupOption>(transToGroupOption(arrayDefaultOptions, groupBy));
+  const [inputValue, setInputValue] = useState('');
   const debouncedSearchTerm = useDebounce(inputValue, debounceDelay);
 
   useImperativeHandle(
@@ -81,7 +55,7 @@ function MultiSelector({
       focus: () => inputRef?.current?.focus(),
       reset: () => setSelected([]),
     }),
-    [selected]
+    [selected],
   );
 
   const handleClickOutside = (event: MouseEvent | TouchEvent) => {
@@ -98,19 +72,19 @@ function MultiSelector({
 
   const handleUnselect = useCallback(
     (option: MultiSelectorOption) => {
-      const newOptions = selected.filter((s) => s.value !== option.value);
+      const newOptions = selected.filter(s => s.value !== option.value);
       setSelected(newOptions);
-      onChange?.(newOptions.map((o) => o.value));
+      onChange?.(newOptions.map(o => o.value));
     },
-    [onChange, selected]
+    [onChange, selected],
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       const input = inputRef.current;
       if (input) {
-        if (e.key === "Delete" || e.key === "Backspace") {
-          if (input.value === "" && selected.length > 0) {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          if (input.value === '' && selected.length > 0) {
             const lastSelectOption = selected[selected.length - 1];
             // If last item is fixed, we should not remove it.
             if (!lastSelectOption.fixed) {
@@ -119,26 +93,26 @@ function MultiSelector({
           }
         }
         // This is not a default behavior of the <input /> field
-        if (e.key === "Escape") {
+        if (e.key === 'Escape') {
           input.blur();
         }
       }
     },
-    [handleUnselect, selected]
+    [handleUnselect, selected],
   );
 
   useEffect(() => {
     if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("touchend", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchend', handleClickOutside);
     } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchend", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchend', handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchend", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchend', handleClickOutside);
     };
   }, [open]);
 
@@ -211,7 +185,7 @@ function MultiSelector({
     if (!creatable) return undefined;
     if (
       isOptionsExist(options, [{ value: inputValue, label: inputValue }]) ||
-      selected.find((s) => s.value === inputValue)
+      selected.find(s => s.value === inputValue)
     ) {
       return undefined;
     }
@@ -220,7 +194,7 @@ function MultiSelector({
       <CommandItem
         value={inputValue}
         className="cursor-pointer"
-        onMouseDown={(e) => {
+        onMouseDown={e => {
           e.preventDefault();
           e.stopPropagation();
         }}
@@ -229,10 +203,10 @@ function MultiSelector({
             onMaxSelected?.(selected.length);
             return;
           }
-          setInputValue("");
+          setInputValue('');
           const newOptions = [...selected, { value, label: value }];
           setSelected(newOptions);
-          onChange?.(newOptions.map((o) => o.value));
+          onChange?.(newOptions.map(o => o.value));
         }}
       >
         {`Create "${inputValue}"`}
@@ -258,11 +232,7 @@ function MultiSelector({
       return <div className="p-2 py-4 text-center text-sm">No data</div>;
     }
 
-    return (
-      <CommandEmpty>
-        {emptyIndicator || <div className="text-center text-sm">No data</div>}
-      </CommandEmpty>
-    );
+    return <CommandEmpty>{emptyIndicator || <div className="text-center text-sm">No data</div>}</CommandEmpty>;
   }, [creatable, emptyIndicator, onSearch, options]);
 
   /** Avoid Creatable Selector freezing or lagging when paste a long string. */
@@ -284,29 +254,22 @@ function MultiSelector({
     <Command
       ref={dropdownRef}
       {...commandProps}
-      onKeyDown={(e) => {
+      onKeyDown={e => {
         handleKeyDown(e);
         commandProps?.onKeyDown?.(e);
       }}
-      className={cn(
-        "h-auto overflow-visible bg-background",
-        commandProps?.className
-      )}
-      shouldFilter={
-        commandProps?.shouldFilter !== undefined
-          ? commandProps.shouldFilter
-          : !onSearch
-      } // When onSearch is provided, we don't want to filter the options. You can still override it.
+      className={cn('h-auto overflow-visible bg-background', commandProps?.className)}
+      shouldFilter={commandProps?.shouldFilter !== undefined ? commandProps.shouldFilter : !onSearch} // When onSearch is provided, we don't want to filter the options. You can still override it.
       filter={commandFilter()}
     >
       <div
         className={cn(
-          "flex min-h-10 rounded-md border border-input text-base md:text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring",
+          'flex min-h-10 rounded-md border border-input text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring',
           {
-            "px-3 py-2": selected.length !== 0,
-            "cursor-text": !disabled && selected.length !== 0,
+            'px-3 py-2': selected.length !== 0,
+            'cursor-text': !disabled && selected.length !== 0,
           },
-          className
+          className,
         )}
         onClick={() => {
           if (disabled) return;
@@ -314,40 +277,22 @@ function MultiSelector({
         }}
       >
         <div className="relative flex flex-1 flex-wrap gap-1">
-          {selected.map((option) => {
+          {selected.map(option => {
+            if (renderBadge) {
+              return renderBadge({
+                option,
+                onRemove: () => handleUnselect(option),
+              });
+            }
+
             return (
               <Badge
-                size="xs"
                 key={option.value}
                 variant="default"
-                className={cn(
-                  "rounded-lg",
-                  "data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground",
-                  "data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground",
-                  badgeClassName
-                )}
-                data-fixed={option.fixed}
                 data-disabled={disabled || undefined}
+                onClose={() => handleUnselect(option)}
               >
                 {option.label}
-                <button
-                  className={cn(
-                    "ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring hover:cursor-pointer",
-                    (disabled || option.fixed) && "hidden"
-                  )}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleUnselect(option);
-                    }
-                  }}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={() => handleUnselect(option)}
-                >
-                  <XIcon size={12} className="text-primary-foreground" />
-                </button>
               </Badge>
             );
           })}
@@ -356,55 +301,50 @@ function MultiSelector({
             ref={inputRef}
             value={inputValue}
             disabled={disabled}
-            onValueChange={(value) => {
+            onValueChange={value => {
               setInputValue(value);
               inputProps?.onValueChange?.(value);
             }}
-            onBlur={(event) => {
+            onBlur={event => {
               if (!onScrollbar) {
                 setOpen(false);
               }
               inputProps?.onBlur?.(event);
             }}
-            onFocus={(event) => {
+            onFocus={event => {
               setOpen(true);
               inputProps?.onFocus?.(event);
             }}
-            placeholder={
-              hidePlaceholderWhenSelected && selected.length !== 0
-                ? ""
-                : placeholder
-            }
+            placeholder={hidePlaceholderWhenSelected && selected.length !== 0 ? '' : placeholder}
             className={cn(
-              "flex-1 bg-transparent outline-none placeholder:text-muted-foreground",
+              'flex-1 bg-transparent outline-none placeholder:text-muted-foreground',
               {
-                "w-full": hidePlaceholderWhenSelected,
-                "px-3 py-2": selected.length === 0,
-                "ml-1": selected.length !== 0,
+                'w-full': hidePlaceholderWhenSelected,
+                'px-3 py-2': selected.length === 0,
+                'ml-1': selected.length !== 0,
               },
-              inputProps?.className
+              inputProps?.className,
             )}
           />
-          <button
-            type="button"
-            onClick={() => {
-              setSelected(selected.filter((s) => s.fixed));
-              onChange?.(selected.filter((s) => s.fixed).map((o) => o.value));
-            }}
-            className={cn(
-              "absolute right-0 h-[26px] p-0",
-              (hideClearAllButton ||
-                disabled ||
-                selected.length < 1 ||
-                selected.filter((s) => s.fixed).length === selected.length) &&
-                "hidden"
-            )}
-          >
-            <XIcon size={18} className="" />
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            setSelected(selected.filter(s => s.fixed));
+            onChange?.(selected.filter(s => s.fixed).map(o => o.value));
+          }}
+          className={cn(
+            (hideClearAllButton ||
+              disabled ||
+              selected.length < 1 ||
+              selected.filter(s => s.fixed).length === selected.length) &&
+              'hidden',
+          )}
+        >
+          <XIcon size={18} className="" />
+        </button>
       </div>
-      <div className={cn("relative", open ? "block" : "hidden")}>
+      <div className={cn('relative', open ? 'block' : 'hidden')}>
         <CommandList
           className="absolute top-1 z-10 w-full rounded-md border border-border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95"
           onMouseLeave={() => {
@@ -427,23 +367,17 @@ function MultiSelector({
               {CreatableItem()}
               {!selectFirstItem && <CommandItem value="-" className="hidden" />}
               {Object.entries(options).map(([key, dropdowns]) => (
-                <CommandGroup
-                  key={key}
-                  heading={key}
-                  className="h-full overflow-auto"
-                >
+                <CommandGroup key={key} heading={key} className="h-full overflow-auto">
                   <>
-                    {dropdowns.map((option) => {
-                      const isSelected = selected
-                        .map((s) => s.value)
-                        ?.includes(option.value);
+                    {dropdowns.map(option => {
+                      const isSelected = selected.map(s => s.value)?.includes(option.value);
 
                       return (
                         <CommandItem
                           key={option.value}
                           value={option.label}
                           disabled={option.disable}
-                          onMouseDown={(e) => {
+                          onMouseDown={e => {
                             e.preventDefault();
                             e.stopPropagation();
                           }}
@@ -452,28 +386,20 @@ function MultiSelector({
                               onMaxSelected?.(selected.length);
                               return;
                             }
-                            setInputValue("");
+                            setInputValue('');
 
                             let newOptions: MultiSelectorOption[] = [];
 
-                            if (
-                              selected.find((s) => s.value === option.value)
-                            ) {
-                              newOptions = selected.filter(
-                                (s) => s.value !== option.value
-                              );
+                            if (selected.find(s => s.value === option.value)) {
+                              newOptions = selected.filter(s => s.value !== option.value);
                             } else {
                               newOptions = [...selected, option];
                             }
 
                             setSelected(newOptions);
-                            onChange?.(newOptions.map((o) => o.value));
+                            onChange?.(newOptions.map(o => o.value));
                           }}
-                          className={cn(
-                            "cursor-pointer",
-                            option.disable &&
-                              "cursor-default text-muted-foreground"
-                          )}
+                          className={cn('cursor-pointer', option.disable && 'cursor-default text-muted-foreground')}
                         >
                           <span className="flex-1">{option.label}</span>
                           {isSelected ? <Check className="w-4" /> : null}
@@ -491,6 +417,6 @@ function MultiSelector({
   );
 }
 
-MultiSelector.displayName = "MultipleSelector";
+MultiSelector.displayName = 'MultipleSelector';
 
 export default MultiSelector;

@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/base/ui/dropdown-menu";
-import { Toggle } from "../ui/toggle";
+import { Toggle } from "@/components/base/ui/toggle";
 import { ChevronDownIcon, Heading1Icon } from "lucide-react";
 
 interface FormatAction {

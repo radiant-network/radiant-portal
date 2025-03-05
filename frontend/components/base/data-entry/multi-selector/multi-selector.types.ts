@@ -1,12 +1,11 @@
-import { Command as CommandPrimitive } from "cmdk";
-import { Command } from "@/components/base/ui/command";
+import { Command as CommandPrimitive } from 'cmdk';
+import { Command } from '@/components/base/ui/command';
 
 export interface MultiSelectorOption {
   value: string;
   label: string;
-  disable?: boolean;
-  /** fixed option that can't be removed. */
   fixed?: boolean;
+  disable?: boolean;
   /** Group the options by providing key. */
   [key: string]: string | boolean | undefined;
 }
@@ -16,7 +15,7 @@ export interface MultiSelectorGroupOption {
 }
 
 export interface MultipleSelectorProps {
-  ref?: React.RefObject<MultipleSelectorRef>;
+  ref?: React.RefCallback<MultipleSelectorRef> | React.RefObject<MultipleSelectorRef>;
   value?: string[];
   defaultOptions?: MultiSelectorOption[];
   /** manually controlled options */
@@ -50,7 +49,6 @@ export interface MultipleSelectorProps {
   /** Group the options base on provided key. */
   groupBy?: string;
   className?: string;
-  badgeClassName?: string;
   /**
    * First item selected is a default behavior by cmdk. That is why the default is true.
    * This is a workaround solution by add a dummy item.
@@ -65,10 +63,15 @@ export interface MultipleSelectorProps {
   /** Props of `CommandInput` */
   inputProps?: Omit<
     React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>,
-    "value" | "placeholder" | "disabled"
+    'value' | 'placeholder' | 'disabled'
   >;
   /** hide the clear all button. */
   hideClearAllButton?: boolean;
+
+  /**
+   * Render the badge for each option.
+   */
+  renderBadge?: (params: { option: MultiSelectorOption; onRemove: () => void }) => React.ReactNode;
 }
 
 export interface MultipleSelectorRef {

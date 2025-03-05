@@ -1,14 +1,14 @@
-import React, { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
+import { useState } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
 
-import { Switch } from "@/components/base/ui/switch";
+import { Switch } from '@/components/base/ui/switch';
 
 const meta = {
-  title: "Base/Data Entry/Switch",
-  tags: ["autodocs"],
+  title: 'Base/Data Entry/Switch',
+  tags: ['autodocs'],
   args: {
-    size: "default",
+    size: 'default',
     checked: false,
     onCheckedChange: fn(),
   },
