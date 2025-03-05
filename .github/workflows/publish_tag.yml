@@ -31,4 +31,4 @@ jobs:
           image: ferlabcrsj/radiant-portal
           tag_format: "{semver}"
           location: ./frontend
-          dockerfile: ./frontend/Dockerfile
+          dockerfile: ./frontend/Dockerfile.radiant
