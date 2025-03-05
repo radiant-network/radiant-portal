@@ -13,11 +13,10 @@ import {
 } from "./query-builder-context";
 import SavedFiltersRightActions from "./saved-filter/saved-filter-right-actions";
 import SavedFiltersLeftActions from "./saved-filter/saved-filter-left-actions";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { QueryBuilderContextType, QueryBuilderProps } from "./types";
 import { defaultQueryReferenceColors, defaultDictionary } from "./data";
 import { deepMerge } from "@/components/lib/merge";
-import { cn } from "@/components/lib/utils";
 
 function QueryBuilder({
   className,
@@ -42,7 +41,7 @@ function QueryBuilder({
   const [showLabels, toggleLabels] = useState(initialShowHideLabels);
 
   const getQueryReferenceColor = useCallback(
-    function (refIndex: number) {
+    (refIndex: number) => {
       return queryReferenceColors[refIndex % queryReferenceColors.length];
     },
     [queryReferenceColors]

@@ -24,9 +24,9 @@ function SavedFiltersDeleteAction() {
           <IconButton
             icon={TrashIcon}
             disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}
-            onClick={function () {
-              openDeleteSavedFilterAlert(selectedSavedFilter!, dict);
-            }}
+            onClick={() =>
+              openDeleteSavedFilterAlert(selectedSavedFilter!, dict)
+            }
           />
         </span>
       </TooltipTrigger>

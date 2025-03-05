@@ -16,9 +16,7 @@ function SavedFiltersRightActions({
       <div className={cn("flex", className)} {...props}>
         <div
           className="flex gap-4 items-center"
-          onClick={function (e) {
-            e.stopPropagation();
-          }}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="flex gap-1.5 whitespace-nowrap">
             <SavedFiltersNewAction />

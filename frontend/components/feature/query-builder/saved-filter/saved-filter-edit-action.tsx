@@ -13,12 +13,7 @@ function SavedFiltersEditAction() {
 
   return (
     <>
-      <IconButton
-        icon={PencilLineIcon}
-        onClick={function () {
-          setOpen(true);
-        }}
-      />
+      <IconButton icon={PencilLineIcon} onClick={() => setOpen(true)} />
       <SavedFiltersEditDialog
         open={open}
         onOpenChange={setOpen}

@@ -34,21 +34,16 @@ function SavedFiltersSelect() {
     setOpenManage(true);
   };
 
-  const selectKey = useMemo(
-    function () {
-      return new Date();
-    },
-    [selectedSavedFilter?.id]
-  );
+  const selectKey = useMemo(() => new Date(), [selectedSavedFilter?.id]);
 
   return (
     <>
       <Select
         key={+selectKey}
         value={selectedSavedFilter?.id}
-        onValueChange={function (savedFilterId) {
-          savedFilters.find((filter) => filter.id === savedFilterId)?.select();
-        }}
+        onValueChange={(savedFilterId) =>
+          savedFilters.find((filter) => filter.id === savedFilterId)?.select()
+        }
         open={open}
         onOpenChange={setOpen}
         disabled={savedFilters.length === 0}
