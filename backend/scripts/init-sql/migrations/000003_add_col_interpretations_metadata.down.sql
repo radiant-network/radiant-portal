@@ -9,3 +9,11 @@ DROP COLUMN metadata;
 
 ALTER TABLE interpretation_somatic_history
 DROP COLUMN metadata;
+
+DROP INDEX IDX_Interpretation_germline_metadata_analysis_id;
+DROP INDEX IDX_Interpretation_germline_metadata_patient_id;
+DROP INDEX IDX_Interpretation_germline_metadata_variant_hash;
+
+DROP INDEX IDX_Interpretation_somatic_metadata_analysis_id;
+DROP INDEX IDX_Interpretation_somatic_metadata_patient_id;
+DROP INDEX IDX_Interpretation_somatic_metadata_variant_hash;

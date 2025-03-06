@@ -274,13 +274,13 @@ func (r* InterpretationsRepository) SearchGermline(analysisId []string, patientI
 	Where("metadata->>'analysis_id' IN ? OR metadata->>'patient_id' IN ? OR metadata->>'variant_hash' IN ?", analysisId, patientId, variantHash).
 	Find(&dao)
 
-	var interpretations []*types.InterpretationGermline
-	for _, v := range dao {
+	interpretations := make([]*types.InterpretationGermline, len(dao))
+	for i, v := range dao {
 		mapped, err := r.mapToInterpretationGermline(&v)
 		if err != nil {
 			return nil, err
 		}
-		interpretations = append(interpretations, mapped)
+		interpretations[i] = mapped
 	}
 
 	return interpretations, nil
@@ -294,13 +294,13 @@ func (r* InterpretationsRepository) SearchSomatic(analysisId []string, patientId
 	Where("metadata->>'analysis_id' IN ? OR metadata->>'patient_id' IN ? OR metadata->>'variant_hash' IN ?", analysisId, patientId, variantHash).
 	Find(&dao)
 
-	var interpretations []*types.InterpretationSomatic
-	for _, v := range dao {
+	interpretations := make([]*types.InterpretationSomatic, len(dao))
+	for i, v := range dao {
 		mapped, err := r.mapToInterpretationSomatic(&v)
 		if err != nil {
 			return nil, err
 		}
-		interpretations = append(interpretations, mapped)
+		interpretations[i] = mapped
 	}
 
 	return interpretations, nil
