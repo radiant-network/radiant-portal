@@ -16,20 +16,18 @@ function QueryToolbarCombineAction() {
         actions={[
           {
             label: capitalize(dict.queryPill.operator.and),
-            onClick: function () {
-              queryBuilder.combineSelectedQueries(BooleanOperators.and);
-            },
+            onClick: () =>
+              queryBuilder.combineSelectedQueries(BooleanOperators.and),
           },
           {
             label: capitalize(dict.queryPill.operator.or),
-            onClick: function () {
-              queryBuilder.combineSelectedQueries(BooleanOperators.or);
-            },
+            onClick: () =>
+              queryBuilder.combineSelectedQueries(BooleanOperators.or),
           },
         ]}
-        onDefaultAction={function () {
-          queryBuilder.combineSelectedQueries(BooleanOperators.and);
-        }}
+        onDefaultAction={() =>
+          queryBuilder.combineSelectedQueries(BooleanOperators.and)
+        }
         size="xs"
         variant="primary"
       >

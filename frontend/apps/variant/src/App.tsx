@@ -130,7 +130,7 @@ function App() {
             enableCombine
             enableFavorite
             enableShowHideLabels
-            queryCountIcon={UsersIcon}
+            queryCountIcon={<UsersIcon size={14} />}
             fetchQueryCount={() => Promise.resolve(15)}
             onActiveQueryChange={(sqon) => setActiveSqon(sqon as Sqon)}
             onStateChange={(state) => {

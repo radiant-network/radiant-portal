@@ -26,9 +26,7 @@ function SavedFiltersUndoAction() {
         <IconButton
           icon={RotateCcw}
           disabled={!selectedSavedFilter}
-          onClick={function () {
-            selectedSavedFilter.discardChanges();
-          }}
+          onClick={() => selectedSavedFilter.discardChanges()}
         />
       </TooltipTrigger>
       <TooltipContent>{dict.savedFilter.discardTooltip}</TooltipContent>

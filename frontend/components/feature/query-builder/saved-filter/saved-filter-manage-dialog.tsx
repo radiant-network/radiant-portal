@@ -33,14 +33,11 @@ function SavedFiltersManageDialog({
 
   const savedFilters = queryBuilder.getSavedFilters();
 
-  useEffect(
-    function () {
-      if (savedFilters.length === 0) {
-        onOpenChange(false);
-      }
-    },
-    [savedFilters]
-  );
+  useEffect(() => {
+    if (savedFilters.length === 0) {
+      onOpenChange(false);
+    }
+  }, [savedFilters]);
 
   return (
     <>
@@ -50,14 +47,12 @@ function SavedFiltersManageDialog({
             <DialogTitle>{dict.savedFilter.manageDialog.title}</DialogTitle>
           </DialogHeader>
           <List bordered className="max-h-[250px]">
-            {savedFilters.map(function (savedFilter) {
-              return (
-                <SavedFilterListItem
-                  key={savedFilter.id}
-                  savedFilter={savedFilter}
-                />
-              );
-            })}
+            {savedFilters.map((savedFilter) => (
+              <SavedFilterListItem
+                key={savedFilter.id}
+                savedFilter={savedFilter}
+              />
+            ))}
           </List>
           <DialogFooter>
             <DialogClose asChild>

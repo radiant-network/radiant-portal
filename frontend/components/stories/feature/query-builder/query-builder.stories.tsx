@@ -20,6 +20,7 @@ import {
   ISavedFilter,
   IUserSavedFilter,
 } from "@/components/model/saved-filter";
+import { UserIcon } from "lucide-react";
 
 const meta = {
   title: "Feature/Query Builder",
@@ -213,6 +214,7 @@ const customPillActiveQueryId = v4();
 export const CustomPill: Story = {
   args: {
     id: qbCustomPillId,
+    queryCountIcon: <UserIcon size={14} />,
     initialState: {
       activeQueryId: customPillActiveQueryId,
       queries: [

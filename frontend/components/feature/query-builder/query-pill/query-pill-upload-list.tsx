@@ -14,9 +14,9 @@ function QueryPillUploadList({ valueFilter }: QueryPillUploadListProps) {
 
   return (
     <QueryPillContainer
-      onRemovePill={function () {
-        query.removePillByFieldOrIndex(valueFilter.content.field);
-      }}
+      onRemovePill={() =>
+        query.removePillByFieldOrIndex(valueFilter.content.field)
+      }
     >
       <QueryPillLabelOperator
         valueFilter={valueFilter}

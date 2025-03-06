@@ -42,9 +42,9 @@ function QueryPillField({
 
   return (
     <QueryPillContainer
-      onRemovePill={function () {
-        return query.removePillByFieldOrIndex(valueFilter.content.field);
-      }}
+      onRemovePill={() =>
+        query.removePillByFieldOrIndex(valueFilter.content.field)
+      }
     >
       <QueryPillLabelOperator
         valueFilter={valueFilter}

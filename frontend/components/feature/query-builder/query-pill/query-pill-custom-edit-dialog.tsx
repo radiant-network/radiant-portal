@@ -80,7 +80,7 @@ function QueryPillCustomEditDialog({
   const hasChanged = titleChanged || coreSavedFilter?.isDirty();
 
   const handleOnOpenChange = useCallback(
-    function (open: boolean) {
+    (open: boolean) => {
       if (open) {
         onOpenChange(true);
       } else {
@@ -91,37 +91,34 @@ function QueryPillCustomEditDialog({
     [onOpenChange, customQueryBuilder]
   );
 
-  const handleSave = useCallback(
-    async function () {
-      if (coreQuery.isEmpty()) {
-        openCustomPillCantBeEmptyDialog(dict);
+  const handleSave = useCallback(async () => {
+    if (coreQuery.isEmpty()) {
+      openCustomPillCantBeEmptyDialog(dict);
+      return;
+    }
+
+    setSaving(true);
+
+    if (titleChanged) {
+      const valid = await customPillConfig?.validateCustomPillTitle(title);
+
+      if (valid !== undefined && valid === false) {
+        setSaving(false);
+        openCustomPillTitleExistsDialog(dict);
         return;
       }
+    }
 
-      setSaving(true);
+    const associatedSavedFilters = await customPillConfig
+      ?.fetchSavedFiltersByCustomPillId(queryPill.id)
+      .finally(() => setSaving(false));
 
-      if (titleChanged) {
-        const valid = await customPillConfig?.validateCustomPillTitle(title);
-
-        if (valid !== undefined && valid === false) {
-          setSaving(false);
-          openCustomPillTitleExistsDialog(dict);
-          return;
-        }
-      }
-
-      const associatedSavedFilters = await customPillConfig
-        ?.fetchSavedFiltersByCustomPillId(queryPill.id)
-        .finally(() => setSaving(false));
-
-      openCustomPillSaveDialog(dict, title, associatedSavedFilters, async () =>
-        coreSavedFilter?.save(SavedFilterTypeEnum.Query, {
-          title,
-        })
-      );
-    },
-    [coreQuery, coreSavedFilter, dict, title, queryPill.id, customPillConfig]
-  );
+    openCustomPillSaveDialog(dict, title, associatedSavedFilters, async () =>
+      coreSavedFilter?.save(SavedFilterTypeEnum.Query, {
+        title,
+      })
+    );
+  }, [coreQuery, coreSavedFilter, dict, title, queryPill.id, customPillConfig]);
 
   return (
     <Dialog open={open} onOpenChange={handleOnOpenChange}>

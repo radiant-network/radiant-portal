@@ -14,9 +14,7 @@ function QueryPillReference({ refIndex }: QueryPillReferenceProps) {
 
   return (
     <QueryPillContainer
-      onRemovePill={function () {
-        query.removePillByFieldOrIndex(refIndex);
-      }}
+      onRemovePill={() => query.removePillByFieldOrIndex(refIndex)}
     >
       <QueryPillValuesContainer>
         <span style={{ color: refColor }}>{`Q${refIndex + 1}`}</span>

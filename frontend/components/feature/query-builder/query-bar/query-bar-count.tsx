@@ -4,11 +4,8 @@ import { useQueryBarContext } from "./query-bar-context";
 import { Spinner } from "@/components/base/spinner";
 
 function QueryBarCount() {
-  const {
-    queryBuilder,
-    queryCountIcon: QueryCountIcon,
-    fetchQueryCount,
-  } = useQueryBuilderContext();
+  const { queryBuilder, queryCountIcon, fetchQueryCount } =
+    useQueryBuilderContext();
   const { query } = useQueryBarContext();
 
   const [total, setTotal] = useState(0);
@@ -27,7 +24,7 @@ function QueryBarCount() {
         <Spinner />
       ) : (
         <>
-          {QueryCountIcon && <QueryCountIcon size={14} />}
+          {queryCountIcon}
           <span className="font-medium">{total}</span>
         </>
       )}

@@ -21,9 +21,9 @@ function QueryPillSet({ valueFilter }: QueryPillSetProps) {
 
   return (
     <QueryPillContainer
-      onRemovePill={function () {
-        query.removePillByFieldOrIndex(valueFilter.content.field);
-      }}
+      onRemovePill={() =>
+        query.removePillByFieldOrIndex(valueFilter.content.field)
+      }
     >
       <div className="flex items-center">
         <QueryPillLabelContainer>

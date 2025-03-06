@@ -265,6 +265,10 @@ export const createQuery = (
         ...prev,
         queries: cleanUpQueries(clonedQueries),
       }));
+
+      queryBuilder.coreProps.onActiveQueryChange?.(
+        clonedQueries[currentQueryIndex]
+      );
     },
     addPill: (pill) => {
       query.update({

@@ -19,12 +19,12 @@ function QueryToolbarAddAction() {
       size="xs"
       variant="primary"
       disabled={queryBuilder.hasEmptyQuery()}
-      onClick={function () {
+      onClick={() =>
         queryBuilder.createQuery({
           op: BooleanOperators.and,
           content: [],
-        });
-      }}
+        })
+      }
     >
       <PlusIcon />
       {dict.toolbar.newQuery}

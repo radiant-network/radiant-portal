@@ -9,7 +9,7 @@ import {
 } from "@/components/model/saved-filter";
 import { ISyntheticSqon, IValueFilter } from "@/components/model/sqon";
 import { LucideProps } from "lucide-react";
-import { ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 import { DeepPartial } from "react-hook-form";
 
 export type ArrayTenOrMore<T> = {
@@ -92,9 +92,7 @@ type QueryBuilderSharedProps = {
   /**
    * Icon to use for the query count
    */
-  queryCountIcon?: React.ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-  >;
+  queryCountIcon?: ReactNode;
 
   /**
    * Fetch the query count

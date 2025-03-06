@@ -481,6 +481,7 @@ describe("Query Manipulation", () => {
     qb.getQuery("1")?.removePillByFieldOrIndex("field1");
 
     expect(state.queries.find((q) => q.id === "1")?.content).toEqual([]);
+    expect(mockOnActiveQueryChange).toHaveBeenCalledTimes(1);
   });
 
   it("should remove pill using ref index", () => {
