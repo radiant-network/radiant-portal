@@ -173,7 +173,7 @@ func (m *MockExternalClient) GetCitationById(id string) (*types.PubmedCitation, 
 }
 
 func Test_GetInterpretationGermline(t *testing.T) {
-	testutils.ParallelPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		// not found
@@ -184,8 +184,10 @@ func Test_GetInterpretationGermline(t *testing.T) {
 		assert.NotEmpty(t, actual.ID)
 		// update
 		interpretation.Condition = "one condition"
+		interpretation.Metadata.AnalysisId = "analysis1"
 		actual = assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.Equal(t, actual.Condition, "one condition")
+		assert.Equal(t, actual.Metadata.AnalysisId, "analysis1")
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
 		assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"error":"pubmed citation not found: 2"}`)
@@ -230,7 +232,7 @@ func assertPostInterpretationGermline(t *testing.T, repo repository.Interpretati
 }
 
 func Test_GetInterpretationsomatic(t *testing.T) {
-	testutils.ParallelPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		// not found
@@ -241,8 +243,10 @@ func Test_GetInterpretationsomatic(t *testing.T) {
 		assert.NotEmpty(t, actual.ID)
 		// update
 		interpretation.Oncogenicity = "one Oncogenicity"
+		interpretation.Metadata.AnalysisId = "analysis1"
 		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.Equal(t, actual.Oncogenicity, "one Oncogenicity")
+		assert.Equal(t, actual.Metadata.AnalysisId, "analysis1")
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
 		assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"error":"pubmed citation not found: 2"}`)
@@ -299,7 +303,7 @@ func assertGetUserSet(t *testing.T, repo repository.UserSetsDAO, userSetId strin
 }
 
 func Test_GetUserSet(t *testing.T) {
-	testutils.ParallelPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		// not found
