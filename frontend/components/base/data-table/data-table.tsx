@@ -169,6 +169,19 @@ function getNextSortingOrderHeaderTitle(
  *   "visible": {boolean},
  *   "fixed": {boolean},
  *  }]
+ *
+ * Row selection
+ * [{
+ *  id: "row_selection",
+ *  header: getTableRowSelectionHeader,
+ *  cell: getTableRowSelectionCell
+ * }]
+ *
+ * Row Expand for sub component
+ * [{
+ *  id: "row_expand",
+ *  cell: RowExpandCell
+ * }]
  */
 function DataTable({
   columns,
@@ -259,7 +272,7 @@ function DataTable({
 
   return (
     <div className="block min-w-full w-full overflow-x-auto overflow-y-auto">
-      <div className="w-full flex text-left justify-between">
+      <div className="w-full flex text-left justify-between mb-4">
         <TableIndexResult
           loading={loadingStates?.total}
           pageIndex={table.getState().pagination.pageIndex + 1}
@@ -340,9 +353,10 @@ function DataTable({
         <TableBody>
           {/* Loading Skeleton */}
           {loadingStates?.list &&
-            new Array(pagination.pageSize).fill(0).map((_) => (
+            new Array(pagination.pageSize).fill(0).map((_, index) => (
               <TableRow className="border border-gray-100 p-2 font-normal text-left truncate">
                 <TableCell
+                  key={`skeleton-row-${index}`}
                   colSpan={columnSettings.length}
                   className="border border-gray-100 p-2 font-normal text-left truncate"
                 >
@@ -379,7 +393,7 @@ function DataTable({
           ))}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end space-x-2 py-4 mt-4">
         <div>
           {/* PageSize select */}
           <Select

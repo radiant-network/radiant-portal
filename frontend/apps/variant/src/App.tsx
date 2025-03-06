@@ -63,7 +63,18 @@ const SEQ_ID = "5011";
 
 function App() {
   const [qbState, setQbState] = useState<QueryBuilderState>();
-  const [activeSqon, setActiveSqon] = useState<Sqon>();
+  const [activeSqon, setActiveSqon] = useState<Sqon>({
+    op: "and",
+    content: [
+      {
+        op: "in",
+        content: {
+          field: "hgvsg",
+          value: "chr18:g.3452225del",
+        },
+      },
+    ],
+  });
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -92,7 +103,21 @@ function App() {
     {
       seqId: SEQ_ID,
       listBody: {
-        selected_fields: ["hgvsg", "variant_class"],
+        selected_fields: [
+          "hgvsg",
+          "variant_class",
+          "rsnumber",
+          "symbol",
+          "vep_impact",
+          "mane_select",
+          "omim_inheritance_code",
+          "clinvar",
+          "gnomad_v3_af",
+          "pf",
+          "genotype_quality",
+          "zygosity",
+          "ad_ratio",
+        ],
         limit: pagination.pageSize,
         offset: pagination.pageIndex,
         sort: sorting,

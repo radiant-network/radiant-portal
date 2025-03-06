@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/base/ui/button";
 import { SquareArrowOutUpRightIcon } from "lucide-react";
 
 type ExternalLinkCellProps = {
@@ -9,14 +9,12 @@ type ExternalLinkCellProps = {
 
 function ExternalLinkCell({ className, url, children }: ExternalLinkCellProps) {
   return (
-    <a
-      className={cn("text-blue-500 flex text-center ", className)}
-      href={url}
-      target="_blank"
-    >
-      <SquareArrowOutUpRightIcon />
-      {children}
-    </a>
+    <Button variant="link" className={className}>
+      <a href={url} target="_blank">
+        <SquareArrowOutUpRightIcon />
+        {children}
+      </a>
+    </Button>
   );
 }
 
