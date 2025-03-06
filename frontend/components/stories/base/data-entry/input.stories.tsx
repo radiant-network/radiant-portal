@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
+import { action } from "@storybook/addon-actions";
 
 import { Input } from "@/components/base/ui/input";
 
@@ -25,7 +26,10 @@ export const Default: Story = {
     return (
       <Input
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          setValue(e.target.value);
+          action("onChange")(e);
+        }}
         className="max-w-[300px]"
         placeholder="Placeholder"
         autoFocus
