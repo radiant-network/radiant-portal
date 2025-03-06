@@ -234,21 +234,21 @@ func Test_GetInterpretationsomatic(t *testing.T) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		// not found
-		assertGetInterpretationSomatic(t, repo.Interpretations, "seq2", "locus1", "trans1", http.StatusNotFound, `{"error":"not found"}`)
+		assertGetInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusNotFound, `{"error":"not found"}`)
 		// create
 		interpretation := &types.InterpretationSomatic{}
-		actual := assertPostInterpretationSomatic(t, repo.Interpretations, "seq2", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual := assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 		// update
 		interpretation.Oncogenicity = "one Oncogenicity"
-		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "seq2", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.Equal(t, actual.Oncogenicity, "one Oncogenicity")
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
-		assertPostInterpretationSomatic(t, repo.Interpretations, "seq2", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"error":"pubmed citation not found: 2"}`)
+		assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"error":"pubmed citation not found: 2"}`)
 		// Update with known pubmed
 		interpretation.Pubmed[0].CitationID = "1"
-		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "seq2", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 	})
 }

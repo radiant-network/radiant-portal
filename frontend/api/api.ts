@@ -155,6 +155,12 @@ export interface InterpretationGermline {
     'locus_id'?: string;
     /**
      * 
+     * @type {InterpretationMetadata}
+     * @memberof InterpretationGermline
+     */
+    'metadata'?: InterpretationMetadata;
+    /**
+     * 
      * @type {Array<InterpretationPubmed>}
      * @memberof InterpretationGermline
      */
@@ -195,6 +201,31 @@ export interface InterpretationGermline {
      * @memberof InterpretationGermline
      */
     'updated_by_name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface InterpretationMetadata
+ */
+export interface InterpretationMetadata {
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
+    'analysis_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
+    'patient_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
+    'variant_hash'?: string;
 }
 /**
  * 
@@ -263,6 +294,12 @@ export interface InterpretationSomatic {
      * @memberof InterpretationSomatic
      */
     'locus_id'?: string;
+    /**
+     * 
+     * @type {InterpretationMetadata}
+     * @memberof InterpretationSomatic
+     */
+    'metadata'?: InterpretationMetadata;
     /**
      * 
      * @type {string}

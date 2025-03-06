@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html"
@@ -46,6 +47,7 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 		TranscriptId:	   dao.TranscriptId,
 		Interpretation: html.UnescapeString(dao.Interpretation),
 		Pubmed: make([]types.InterpretationPubmed, len(pubmeds)),
+		Metadata: types.InterpretationMetadata{},
 		CreatedBy: dao.CreatedBy,
 		CreatedByName: dao.CreatedByName,
 		CreatedAt: dao.CreatedAt,
@@ -53,6 +55,9 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 		UpdatedByName: dao.UpdatedByName,
 		UpdatedAt: dao.UpdatedAt,
 	};
+	if err := json.Unmarshal([]byte(dao.Metadata), &interpretation.Metadata); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal metadata from interpretation: %s", dao.Metadata)
+	}
 	for i, v := range pubmeds {
 		citation, _ := r.pubmedClient.GetCitationById(v);
 		if citation == nil {
@@ -64,6 +69,11 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 }
 
 func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation *types.InterpretationCommon) (*types.InterpretationCommonDAO, error) {
+	metadata, err := json.Marshal(interpretation.Metadata)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal metadata from interpretation: %s", interpretation.Metadata)
+	}
+	
 	common:= &types.InterpretationCommonDAO{
 		ID:                interpretation.ID,
 		SequencingId:      interpretation.SequencingId,
@@ -71,6 +81,7 @@ func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation 
 		TranscriptId:	   interpretation.TranscriptId,
 		Interpretation: html.EscapeString(interpretation.Interpretation),
 		Pubmed: strings.Join(sliceutils.Map(interpretation.Pubmed, func(pubmed types.InterpretationPubmed, i int, slice []types.InterpretationPubmed) string { return interpretation.Pubmed[i].CitationID }), ","),
+		Metadata: string(metadata),
 		CreatedBy: interpretation.CreatedBy,
 		CreatedByName: interpretation.CreatedByName,
 		CreatedAt: interpretation.CreatedAt,
