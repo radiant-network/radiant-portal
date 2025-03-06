@@ -1,9 +1,14 @@
-import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
-
 import useSWR from "swr";
 import React from "react";
 
-import { type Aggregation, SqonOpEnum, type AggregationBody } from "@/api/api";
+import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
+import { LoadingOverlay } from "@/components/base/overlays/loading-overlay";
+import {
+  SqonContent,
+  SqonOpEnum,
+  type Aggregation,
+  type AggregationBody,
+} from "@/api/api";
 import {
   Accordion,
   AccordionContent,
@@ -13,6 +18,8 @@ import {
 import { occurrencesApi } from "@/utils/api";
 import { SearchIcon } from "lucide-react";
 import { type Aggregation as AggregationConfig } from "@/components/model/applications-config";
+import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
+// import { ISqonGroupFilter } from "@/components/model/sqon";
 
 type OccurrenceAggregationInput = {
   seqId: string;
@@ -28,38 +35,46 @@ const fetcher = (input: OccurrenceAggregationInput): Promise<Aggregation[]> => {
 function useAggregationBuilder(
   field: string,
   size: number = 30,
-  shouldFetch: boolean = false
+  shouldFetch: boolean = false,
 ) {
+  let data: OccurrenceAggregationInput | null;
+
+  if (!shouldFetch) {
+    data = null;
+  } else {
+    data = {
+      seqId: "5011",
+      aggregationBody: {
+        field: field,
+        size: size,
+      },
+    };
+  }
+  const activeQuery = queryBuilderRemote.getActiveQuery("variant");
+
+  if (activeQuery && data) {
+    data.aggregationBody.sqon = {
+      content: activeQuery.content as SqonContent,
+      op: activeQuery.op as SqonOpEnum,
+    };
+  }
+
   return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
-    shouldFetch
-      ? {
-          seqId: "5011",
-          aggregationBody: {
-            field: field,
-            size: size,
-            sqon: {
-              content: {
-                field: "impact_score",
-                value: [4],
-              },
-              op: SqonOpEnum.In,
-            },
-          },
-        }
-      : null,
+    data,
     fetcher,
     {
       revalidateOnFocus: false,
-    }
+    },
   );
 }
-
 function FilterBuilder({ field }: { field: AggregationConfig }) {
   const [collapsed, setCollapsed] = React.useState(true);
   const [searchVisible, setSearchVisible] = React.useState(false);
-  let { data } = useAggregationBuilder(field.key, undefined, !collapsed);
-
-  data?.sort((a, b) => b.count! - a.count!);
+  let { data, isLoading } = useAggregationBuilder(
+    field.key,
+    undefined,
+    !collapsed,
+  );
 
   function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
     e.stopPropagation();
@@ -87,18 +102,23 @@ function FilterBuilder({ field }: { field: AggregationConfig }) {
           </div>
         </AccordionTrigger>
         <AccordionContent>
-          {!data ? (
-            <div>Loading...</div>
-          ) : field.type === "multiple" ? (
-            <MultiSelect searchVisible={searchVisible} data={data} />
-          ) : (
-            <div>Not implemented</div>
-          )}
+          <LoadingOverlay loading={isLoading}>
+            {field.type === "multiple" ? (
+              <MultiSelect
+                field={field}
+                searchVisible={searchVisible}
+                data={data}
+              />
+            ) : (
+              <div>Not implemented</div>
+            )}
+          </LoadingOverlay>
         </AccordionContent>
       </AccordionItem>
     </Accordion>
   );
 }
+
 export function FilterList({ fields }: { fields: AggregationConfig[] }) {
   return (
     <ul>

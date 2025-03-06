@@ -109,7 +109,7 @@ describe("Query Manipulation", () => {
   it("should be empty", () => {
     qb.createQuery({
       id: "new-query",
-      op: BooleanOperators.and,
+      op: BooleanOperators.And,
       content: [],
     });
 
@@ -262,14 +262,14 @@ describe("Query Manipulation", () => {
       },
     }));
 
-    qb.getQuery("1")?.changeCombineOperator(BooleanOperators.or);
+    qb.getQuery("1")?.changeCombineOperator(BooleanOperators.Or);
 
     expect(state.queries.find((q) => q.id === "1")?.op).toBe("or");
 
     const subSqon = state.queries.find((q) => q.id === "1")
       ?.content[0] as ISyntheticSqon;
 
-    expect(subSqon.op).toBe(BooleanOperators.or);
+    expect(subSqon.op).toBe(BooleanOperators.Or);
   });
 
   it("should add pill to the query", () => {

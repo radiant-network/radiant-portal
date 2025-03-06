@@ -21,7 +21,7 @@ function QueryToolbarAddAction() {
       disabled={queryBuilder.hasEmptyQuery()}
       onClick={() =>
         queryBuilder.createQuery({
-          op: BooleanOperators.and,
+          op: BooleanOperators.And,
           content: [],
         })
       }

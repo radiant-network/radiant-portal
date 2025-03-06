@@ -4,32 +4,29 @@ import GreaterThanOperatorIcon from "@/components/base/icons/greater-than-operat
 import GreaterThanOrEqualOperatorIcon from "@/components/base/icons/greater-than-or-equal-operator-icon";
 import LessThanOperatorIcon from "@/components/base/icons/less-than-operator-icon";
 import LessThanOrEqualOperatorIcon from "@/components/base/icons/less-than-or-equal-operator-icon";
-import NotInOperatorIcon from "@/components/base/icons/not-in-operator-icon";
-import { FieldOperators } from "@/components/model/sqon";
+import { SqonOpEnum } from "@/api/api";
 
 export type QueryPillOperatorProps = {
   size?: number;
-  type: FieldOperators | (string & {});
+  type: SqonOpEnum | (string & {});
   className?: string;
 };
 
 function QueryPillOperator({ type, size, className }: QueryPillOperatorProps) {
   switch (type) {
-    case FieldOperators[">"]:
+    case SqonOpEnum.GreaterThan:
       return <GreaterThanOperatorIcon size={size} className={className} />;
-    case FieldOperators[">="]:
+    case SqonOpEnum.GreaterThanOrEqualTo:
       return (
         <GreaterThanOrEqualOperatorIcon size={size} className={className} />
       );
-    case FieldOperators["<"]:
+    case SqonOpEnum.LessThan:
       return <LessThanOperatorIcon size={size} className={className} />;
-    case FieldOperators["<="]:
+    case SqonOpEnum.LessThanOrEqualTo:
       return <LessThanOrEqualOperatorIcon size={size} className={className} />;
-    case FieldOperators.between:
+    case SqonOpEnum.Between:
       return <ElementOperatorIcon size={size} className={className} />;
-    case FieldOperators["not-in"]:
-    case FieldOperators["some-not-in"]:
-      return <NotInOperatorIcon size={size} className={className} />;
+    case SqonOpEnum.NotIn:
     default:
       return <EqualOperatorIcon size={size} className={className} />;
   }

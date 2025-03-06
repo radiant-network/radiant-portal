@@ -21,7 +21,7 @@ function QueryPillIsolatedBoolean({
     groupFilter.content.forEach((f: any) => {
       if (newQueryDict.hasOwnProperty(f.content.field)) {
         newQueryDict[f.content.field] = cloneDeep(
-          newQueryDict[f.content.field]
+          newQueryDict[f.content.field],
         );
 
         newQueryDict[f.content.field].content.value = newQueryDict[
@@ -29,11 +29,11 @@ function QueryPillIsolatedBoolean({
         ].content.value.concat(f.content.value);
 
         if (
-          f.op === TermOperators.in &&
-          groupFilter.op === BooleanOperators.and &&
+          f.op === TermOperators.In &&
+          groupFilter.op === BooleanOperators.And &&
           groupFilter.skipBooleanOperatorCheck
         ) {
-          newQueryDict[f.content.field].op = TermOperators.all;
+          newQueryDict[f.content.field].op = TermOperators.All;
         }
       } else {
         newQueryDict[f.content.field] = cloneDeep(f);

@@ -121,11 +121,11 @@ const setLocalQueryBuilderState = (
     eventData,
     value,
     skipEvent,
-  }: SetLocalQBStateWithEvent | SetLocalQBStateNoEvent
+  }: SetLocalQBStateWithEvent | SetLocalQBStateNoEvent,
 ): void => {
   window.localStorage.setItem(
     `${QUERY_BUILDER_STATE_CACHE_KEY_PREFIX}-${queryBuilderId}`,
-    JSON.stringify(value)
+    JSON.stringify(value),
   );
 
   if (!skipEvent) {
@@ -144,7 +144,7 @@ const setLocalQueryBuilderState = (
  * Set the default state of a given QueryBuilder.
  */
 const setDefaultLocalQueryBuilderState = (
-  queryBuilderId: string
+  queryBuilderId: string,
 ): QueryBuilderRemoteState => {
   const state = getDefaultQueryBuilderState();
   setLocalQueryBuilderState(queryBuilderId, {
@@ -159,11 +159,11 @@ const setDefaultLocalQueryBuilderState = (
  * Get the state of a given QueryBuilder from the local storage.
  */
 const getLocalQueryBuilderState = (
-  queryBuilderId: string
+  queryBuilderId: string,
 ): QueryBuilderRemoteState => {
   if (typeof window !== "undefined") {
     const qbState = window.localStorage.getItem(
-      `${QUERY_BUILDER_STATE_CACHE_KEY_PREFIX}-${queryBuilderId}`
+      `${QUERY_BUILDER_STATE_CACHE_KEY_PREFIX}-${queryBuilderId}`,
     );
 
     if (!qbState) {
@@ -186,13 +186,13 @@ const getLocalQueryBuilderState = (
 const addQuery = (
   queryBuilderId: string,
   query: ISyntheticSqon,
-  setAsActive: boolean = false
+  setAsActive: boolean = false,
 ): void => {
   const qbState = getLocalQueryBuilderState(queryBuilderId);
   const queries = qbState?.queries ?? [];
   const hasEmptyQuery = queries.find((q) => isEmptySqon(q));
   const isActiveQueryEmpty = queries.find(
-    (q) => q.id === qbState.activeQueryId && isEmptySqon(q)
+    (q) => q.id === qbState.activeQueryId && isEmptySqon(q),
   );
 
   setLocalQueryBuilderState(queryBuilderId, {
@@ -267,7 +267,7 @@ const updateActiveQueryField = (
     index,
     isUploadedList,
     merge_strategy = MERGE_VALUES_STRATEGIES.APPEND_VALUES,
-    operator = TermOperators.in,
+    operator = TermOperators.In,
     overrideValuesName,
     remoteComponent,
     value,
@@ -280,7 +280,7 @@ const updateActiveQueryField = (
     overrideValuesName?: string;
     isUploadedList?: boolean;
     remoteComponent?: IRemoteComponent;
-  }
+  },
 ): void => {
   const activeQuery = queryBuilderRemote.getActiveQuery(queryBuilderId);
 
@@ -298,7 +298,7 @@ const updateActiveQueryField = (
           overrideValuesName,
           remoteComponent,
           value,
-        })
+        }),
   );
 };
 
@@ -320,7 +320,7 @@ const updateActiveQueryFilters = (
     selectedFilters: any[]; // TODO change with Filter type
     index?: string;
     operator?: TSqonGroupOp;
-  }
+  },
 ): void =>
   updateQuery(
     queryBuilderId,
@@ -330,22 +330,22 @@ const updateActiveQueryFilters = (
       sqonContent: createSQONFromFilters(
         params.filterGroup,
         params.selectedFilters,
-        params.index
+        params.index,
       ),
-    })
+    }),
   );
 
 const getUpdatedActiveQuery = (
   queryBuilderId: string,
   {
     field,
-    operator = BooleanOperators.and,
+    operator = BooleanOperators.And,
     sqonContent,
   }: {
     field: string;
     sqonContent: TSyntheticSqonContent;
     operator?: TSqonGroupOp;
-  }
+  },
 ): ISyntheticSqon => {
   const activeQuery = getActiveQuery(queryBuilderId);
 
@@ -368,7 +368,7 @@ const getUpdatedActiveQuery = (
         filterWithoutSelection.content.splice(
           fieldIndex as number,
           0,
-          ...sqonContent
+          ...sqonContent,
         );
       } else {
         filterWithoutSelection.content = [
@@ -399,7 +399,7 @@ const updateQueryByTableFilter = (
   params: {
     field: string;
     selectedFilters: any[]; // TODO change with Filter type
-  }
+  },
 ): void =>
   updateQuery(
     queryBuilderId,
@@ -408,10 +408,10 @@ const updateQueryByTableFilter = (
           field: params.field,
           sqonContent: createInlineFilters(
             params.field,
-            params.selectedFilters
+            params.selectedFilters,
           ),
         })
-      : removeFieldFromSqon(params.field, getActiveQuery(queryBuilderId))
+      : removeFieldFromSqon(params.field, getActiveQuery(queryBuilderId)),
   );
 
 /*
@@ -419,7 +419,7 @@ const updateQueryByTableFilter = (
  */
 const addPillToActiveQuery = (
   queryBuilderId: string,
-  pill: IValueQuery
+  pill: IValueQuery,
 ): void => {
   const activeQuery = getActiveQuery(queryBuilderId);
   updateQuery(queryBuilderId, {
@@ -433,14 +433,14 @@ const addPillToActiveQuery = (
  */
 const removePillFromActiveQuery = (
   queryBuilderId: string,
-  pillId: string
+  pillId: string,
 ): void => {
   const activeQuery = getActiveQuery(queryBuilderId);
 
   activeQuery.content = activeQuery.content
     .filter(
       (sqonContent: TSyntheticSqonContentValue) =>
-        (sqonContent as IValueFilter).id !== pillId
+        (sqonContent as IValueFilter).id !== pillId,
     )
     .filter((el) => el !== undefined);
 

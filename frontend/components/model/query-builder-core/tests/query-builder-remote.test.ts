@@ -242,7 +242,7 @@ describe("SavedFilters Manipulation", () => {
     queryBuilderRemote.updateActiveQueryField(qbId, {
       field: "field1",
       value: ["new-value"],
-      operator: TermOperators["not-in"],
+      operator: TermOperators.NotIn,
       merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
     });
 
@@ -296,7 +296,7 @@ describe("SavedFilters Manipulation", () => {
     queryBuilderRemote.updateActiveQueryField(qbId, {
       field: "field1",
       value: ["new-value"],
-      operator: TermOperators["not-in"],
+      operator: TermOperators.NotIn,
       merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
     });
 
@@ -360,7 +360,7 @@ describe("SavedFilters Manipulation", () => {
     queryBuilderRemote.updateActiveQueryField(qbId, {
       field: "field1",
       value: ["new-value"],
-      operator: TermOperators["not-in"],
+      operator: TermOperators.NotIn,
       merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
     });
 

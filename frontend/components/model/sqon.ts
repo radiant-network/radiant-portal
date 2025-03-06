@@ -1,40 +1,38 @@
-export enum FieldOperators {
-  ">" = ">",
-  "<" = "<",
-  between = "between",
-  ">=" = ">=",
-  "<=" = "<=",
-  in = "in",
-  "not-in" = "not-in",
-  "some-not-in" = "some-not-in",
-  all = "all",
-}
+// import { SqonOpEnum } from "@/api/api";
+import { SqonOpEnum } from "../../api/api";
 
-export enum RangeOperators {
-  ">" = ">",
-  "<" = "<",
-  between = "between",
-  ">=" = ">=",
-  "<=" = "<=",
-  in = "in",
-}
+export const RangeOperators = {
+  GreaterThan: SqonOpEnum.GreaterThan,
+  LessThan: SqonOpEnum.LessThan,
+  Between: SqonOpEnum.Between,
+  GreaterThanOrEqualTo: SqonOpEnum.GreaterThanOrEqualTo,
+  LessThanOrEqualTo: SqonOpEnum.LessThanOrEqualTo,
+  In: SqonOpEnum.In,
+} as const;
+export type RangeOperators =
+  (typeof RangeOperators)[keyof typeof RangeOperators];
 
-export enum TermOperators {
-  in = "in",
-  "not-in" = "not-in",
-  all = "all",
-  "some-not-in" = "some-not-in",
-}
+export const TermOperators = {
+  In: SqonOpEnum.In,
+  NotIn: SqonOpEnum.NotIn,
+  All: SqonOpEnum.All,
+  SomeNotIn: "some-not-in", // Adding your new value
+} as const;
+export type TermOperators = (typeof TermOperators)[keyof typeof TermOperators];
 
-export enum BooleanOperators {
-  and = "and",
-  or = "or",
-  not = "not",
-}
+export const BooleanOperators = {
+  And: SqonOpEnum.And,
+  Or: SqonOpEnum.Or,
+  Not: SqonOpEnum.Not,
+} as const;
+export type BooleanOperators =
+  (typeof BooleanOperators)[keyof typeof BooleanOperators];
 
-export enum FilterOperators {
-  filter = "filter",
-}
+export const FilterOperators = {
+  Filter: "filter", // This doesn't exist in SqonOpEnum
+} as const;
+export type FilterOperators =
+  (typeof FilterOperators)[keyof typeof FilterOperators];
 
 export const SET_ID_PREFIX = "set_id:";
 
@@ -59,7 +57,7 @@ export interface IRemoteComponent {
   };
 }
 
-export type TValueOp = FieldOperators | (string & {});
+export type TValueOp = SqonOpEnum | (string & {});
 export type TSqonGroupOp = BooleanOperators | (string & {});
 export type TSqonContentValue = ISqonGroupFilter | IValueFilter;
 export type TSqonContent = Array<TSqonContentValue>;

@@ -81,7 +81,7 @@ export type CoreQueryBuilderProps = {
    * Callback when a SavedFilter is deleted
    */
   onSavedFilterDelete?(
-    id: string
+    id: string,
   ): { savedFilterId: string } | Promise<{ savedFilterId: string }>;
 
   /**
@@ -146,8 +146,8 @@ export type QueryBuilderInstance = {
    */
   setCoreProps(
     newCoreProps: (
-      prevCoreProps: CoreQueryBuilderProps
-    ) => CoreQueryBuilderProps
+      prevCoreProps: CoreQueryBuilderProps,
+    ) => CoreQueryBuilderProps,
   ): void;
 
   /**
@@ -305,7 +305,7 @@ export const getDefaultQueryBuilderState = (): QueryBuilderState => {
 };
 
 export const createQueryBuilder = (
-  coreProps: CoreQueryBuilderProps
+  coreProps: CoreQueryBuilderProps,
 ): QueryBuilderInstance => {
   const queryBuilder: QueryBuilderInstance = {} as QueryBuilderInstance;
 
@@ -316,7 +316,7 @@ export const createQueryBuilder = (
     },
     setState: (updater) => {
       queryBuilder.coreProps.onStateChange?.(
-        updater(queryBuilder.coreProps.state)
+        updater(queryBuilder.coreProps.state),
       );
     },
     getState: () => {
@@ -350,7 +350,7 @@ export const createQueryBuilder = (
         queryBuilder.coreProps.onSavedFilterSave?.({
           ...savedFilterToSave,
           queries: formatQueriesWithPill(savedFilterToSave.queries),
-        })
+        }),
       ).then(() =>
         queryBuilder.setState((prev) => ({
           ...prev,
@@ -362,7 +362,7 @@ export const createQueryBuilder = (
               isDirty: false,
             },
           ],
-        }))
+        })),
       );
     },
     createSavedFilter: () => {
@@ -385,7 +385,7 @@ export const createQueryBuilder = (
           queryBuilder
             .getSavedFilters()
             .find(
-              (savedFilter) => savedFilter.isSelected() && !savedFilter.isNew()
+              (savedFilter) => savedFilter.isSelected() && !savedFilter.isNew(),
             ) || null
         );
       }
@@ -410,7 +410,7 @@ export const createQueryBuilder = (
         queryBuilder.coreProps.state.queries.length > 0
       ) {
         return queryBuilder.coreProps.state.queries.map((query) =>
-          createQuery(query, queryBuilder)
+          createQuery(query, queryBuilder),
         );
       }
 
@@ -432,7 +432,7 @@ export const createQueryBuilder = (
       }));
       queryBuilder.coreProps.onQuerySelectChange?.([]);
     },
-    createQuery: ({ id = v4(), op = BooleanOperators.and, content }) => {
+    createQuery: ({ id = v4(), op = BooleanOperators.And, content }) => {
       const newQuery: ISyntheticSqon = { id, op, content };
 
       queryBuilder.setState((prev) => ({
@@ -502,7 +502,7 @@ export const createQueryBuilder = (
     combineSelectedQueries: (operator: BooleanOperators) => {
       if (!queryBuilder.canCombine()) {
         console.error(
-          "Cannot combine queries. There must be at least 2 queries selected."
+          "Cannot combine queries. There must be at least 2 queries selected.",
         );
         return;
       }

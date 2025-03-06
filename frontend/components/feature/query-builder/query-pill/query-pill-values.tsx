@@ -1,4 +1,5 @@
-import { FieldOperators, IValueFilter } from "@/components/model/sqon";
+import { IValueFilter } from "@/components/model/sqon";
+import { SqonOpEnum } from "@/api/api";
 import { useState } from "react";
 import take from "lodash/take";
 import IntersectionOperator from "../operator/operator-intersection";
@@ -34,7 +35,7 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
           <div key={`${val}-${i}`}>
             <span>{val}</span>
             {values.length - 1 > i &&
-              (valueFilter.op === FieldOperators.all ? (
+              (valueFilter.op === SqonOpEnum.All ? (
                 <IntersectionOperator className="px-1" />
               ) : (
                 <UnionOperator className="px-1" />
