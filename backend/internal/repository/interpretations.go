@@ -22,8 +22,10 @@ type InterpretationsRepository struct {
 type InterpretationsDAO interface {
 	FirstGermline(sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error)
 	CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error
+	SearchGermline(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error)
 	FirstSomatic(sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error)
 	CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error
+	SearchSomatic(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error)
 }
 
 func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *InterpretationsRepository {
@@ -55,7 +57,7 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 		UpdatedByName: dao.UpdatedByName,
 		UpdatedAt: dao.UpdatedAt,
 	};
-	if err := json.Unmarshal([]byte(dao.Metadata), &interpretation.Metadata); err != nil {
+	if err := json.Unmarshal(dao.Metadata, &interpretation.Metadata); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal metadata from interpretation: %s", dao.Metadata)
 	}
 	for i, v := range pubmeds {
@@ -81,7 +83,7 @@ func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation 
 		TranscriptId:	   interpretation.TranscriptId,
 		Interpretation: html.EscapeString(interpretation.Interpretation),
 		Pubmed: strings.Join(sliceutils.Map(interpretation.Pubmed, func(pubmed types.InterpretationPubmed, i int, slice []types.InterpretationPubmed) string { return interpretation.Pubmed[i].CitationID }), ","),
-		Metadata: string(metadata),
+		Metadata: metadata,
 		CreatedBy: interpretation.CreatedBy,
 		CreatedByName: interpretation.CreatedByName,
 		CreatedAt: interpretation.CreatedAt,
@@ -262,4 +264,44 @@ func (r* InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.
 	}
 	*interpretation = *mapped
 	return nil
+}
+
+
+func (r* InterpretationsRepository) SearchGermline(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error) {
+	var dao []types.InterpretationGermlineDAO
+	r.db.
+	Table(types.InterpretationGermlineTable.Name).
+	Where("metadata->>'analysis_id' IN ? OR metadata->>'patient_id' IN ? OR metadata->>'variant_hash' IN ?", analysisId, patientId, variantHash).
+	Find(&dao)
+
+	var interpretations []*types.InterpretationGermline
+	for _, v := range dao {
+		mapped, err := r.mapToInterpretationGermline(&v)
+		if err != nil {
+			return nil, err
+		}
+		interpretations = append(interpretations, mapped)
+	}
+
+	return interpretations, nil
+}
+
+
+func (r* InterpretationsRepository) SearchSomatic(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error) {
+	var dao []types.InterpretationSomaticDAO
+	r.db.
+	Table(types.InterpretationSomaticTable.Name).
+	Where("metadata->>'analysis_id' IN ? OR metadata->>'patient_id' IN ? OR metadata->>'variant_hash' IN ?", analysisId, patientId, variantHash).
+	Find(&dao)
+
+	var interpretations []*types.InterpretationSomatic
+	for _, v := range dao {
+		mapped, err := r.mapToInterpretationSomatic(&v)
+		if err != nil {
+			return nil, err
+		}
+		interpretations = append(interpretations, mapped)
+	}
+
+	return interpretations, nil
 }

@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/client"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
@@ -274,6 +275,25 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 	}
 }
 
+// analysis_id=foo,bar&analysis_id=toto => ["foo", "bar", "toto"]
+func extractArrayQueryParam(c *gin.Context, key string) []string {
+	all := []string{}
+	values := c.QueryArray(key)
+	if len(values) > 0 {
+		for _, i := range values {
+			if (strings.Contains(i, ",")) {
+				idSplit := strings.Split(i, ",")
+				for _, i := range idSplit {
+					all = append(all, i)
+				}
+			} else {
+				all = append(all, i)
+			}
+		}
+	}
+	return all
+}
+
 // GetInterpretationSomatic
 // @Summary Get interpretation somatic
 // @Id GetInterpretationSomatic
@@ -392,5 +412,58 @@ func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, userSet)
+	}
+}
+
+// SearchInterpretationGermline
+// @Summary Search interpretation germline
+// @Id SearchInterpretationGermline
+// @Description Search interpretation germline
+// @Tags interpretations
+// @Security bearerauth
+// @Query analysis_id path string true "Analysis ID"
+// @Query patient_id path string true "Patient ID"
+// @Query variant_hash path string true "Variant Hash"
+// @Produce json
+// @Success 200 {object} []types.InterpretationGermline
+// @Router /interpretations/germline [get]
+func SearchInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		analysisIds := extractArrayQueryParam(c, "analysis_id")
+		patientIds := extractArrayQueryParam(c, "patient_id")
+		variantHashIds := extractArrayQueryParam(c, "variant_hash")
+		interpretations, err := repo.SearchGermline(analysisIds, patientIds, variantHashIds)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		c.JSON(http.StatusOK, interpretations)
+	}
+}
+
+
+// SearchInterpretationSomatic
+// @Summary Search interpretation somatic
+// @Id SearchInterpretationSomatic
+// @Description Search interpretation somatic
+// @Tags interpretations
+// @Security bearerauth
+// @Query analysis_id path string true "Analysis ID"
+// @Query patient_id path string true "Patient ID"
+// @Query variant_hash path string true "Variant Hash"
+// @Produce json
+// @Success 200 {object} []types.InterpretationSomatic
+// @Router /interpretations/somatic [get]
+func SearchInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		analysisIds := extractArrayQueryParam(c, "analysis_id")
+		patientIds := extractArrayQueryParam(c, "patient_id")
+		variantHashIds := extractArrayQueryParam(c, "variant_hash")
+		interpretations, err := repo.SearchSomatic(analysisIds, patientIds, variantHashIds)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		c.JSON(http.StatusOK, interpretations)
 	}
 }

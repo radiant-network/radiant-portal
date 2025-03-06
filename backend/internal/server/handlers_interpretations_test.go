@@ -75,6 +75,12 @@ func (m *MockRepository) CreateOrUpdateSomatic(interpretation *types.Interpretat
 	}
 	return nil
 }
+func (m *MockRepository) SearchGermline(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error) {
+	return nil, nil
+}
+func (m *MockRepository) SearchSomatic(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error) {
+	return nil, nil
+}
 
 func assertGetInterpretationGermline(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}

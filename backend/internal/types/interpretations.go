@@ -64,7 +64,7 @@ type InterpretationCommonDAO struct {
 	TranscriptId     		string             		         	
     Interpretation          string              	
     Pubmed	                string	
-    Metadata                string
+    Metadata                []byte
     CreatedBy               string              	
     CreatedByName          	string              	
     CreatedAt               time.Time           	
