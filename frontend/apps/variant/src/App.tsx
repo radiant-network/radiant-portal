@@ -10,7 +10,7 @@ import {
   Sqon,
 } from "@/api/api";
 import DataTable from "@/components/base/data-table/data-table";
-import { PaginationState, SortingState } from "@tanstack/react-table";
+import { PaginationState } from "@tanstack/react-table";
 import {
   columns,
   defaultSettings,
