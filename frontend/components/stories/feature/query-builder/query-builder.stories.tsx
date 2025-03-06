@@ -20,7 +20,6 @@ import {
   ISavedFilter,
   IUserSavedFilter,
 } from "@/components/model/saved-filter";
-import { Spinner } from "@/components/base/spinner";
 
 const meta = {
   title: "Feature/Query Builder",
