@@ -38,6 +38,7 @@ func Test_GetOccurrences(t *testing.T) {
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Equal(t, "HET", occurrences[0].Zygosity)
 			assert.Equal(t, 0.99, occurrences[0].Pf)
+			assert.Equal(t, 3, occurrences[0].Pc)
 			assert.Equal(t, 0.01, occurrences[0].Af)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
 			assert.Equal(t, 1.0, occurrences[0].AdRatio)
@@ -152,6 +153,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Equal(t, "HET", occurrences[0].Zygosity)
 			assert.Equal(t, 0.99, occurrences[0].Pf)
+			assert.Equal(t, 3, occurrences[0].Pc)
 			assert.Equal(t, 0.01, occurrences[0].Af)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
 			assert.Equal(t, 1.0, occurrences[0].AdRatio)
@@ -301,7 +303,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: ">", Content: &types.LeafContent{Field: "impact_score", Value: 2}},
-				{Op: ">", Content: &types.LeafContent{Field: "gq", Value: 50}},
+				{Op: ">", Content: &types.LeafContent{Field: "genotype_quality", Value: 50}},
 			},
 			Op: "and",
 		}

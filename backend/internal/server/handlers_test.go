@@ -21,15 +21,19 @@ func (m *MockRepository) CheckDatabaseConnection() string {
 func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrence, error) {
 	return []types.Occurrence{
 		{
-			SeqId:        1,
-			LocusId:      1000,
-			Filter:       "PASS",
-			Zygosity:     "HET",
-			Pf:           0.99,
-			Af:           0.01,
-			Hgvsg:        "hgvsg1",
-			AdRatio:      1.0,
-			VariantClass: "class1",
+			SeqId:              1,
+			LocusId:            1000,
+			Filter:             "PASS",
+			Zygosity:           "HET",
+			Pf:                 0.99,
+			Pc:                 3,
+			Af:                 0.01,
+			Hgvsg:              "hgvsg1",
+			AdRatio:            1.0,
+			VariantClass:       "class1",
+			RsNumber:           "rs111111111",
+			AaChange:           "p.Arg19His",
+			PickedConsequences: []string{"splice acceptor"},
 		},
 	}, nil
 }
@@ -66,7 +70,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 	router.POST("/occurrences/:seq_id/list", OccurrencesListHandler(repo))
 	body := `{
 			"selected_fields":[
-				"seq_id","locus_id","filter","zygosity","pf","af","hgvsg","ad_ratio","variant_class"
+				"seq_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
 			]
 	}`
 	req, _ := http.NewRequest("POST", "/occurrences/1/list", bytes.NewBuffer([]byte(body)))
@@ -80,10 +84,14 @@ func Test_OccurrencesListHandler(t *testing.T) {
         "filter": "PASS",
         "zygosity": "HET",
         "pf": 0.99,
+        "pc": 3,
         "af": 0.01,
         "hgvsg": "hgvsg1",
         "ad_ratio": 1.0,
-        "variant_class": "class1"
+        "variant_class": "class1",
+		"rsnumber": "rs111111111",
+		"aa_change": "p.Arg19His",
+		"picked_consequences": ["splice acceptor"]
     }]`, w.Body.String())
 }
 

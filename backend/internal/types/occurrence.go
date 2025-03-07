@@ -10,10 +10,11 @@ type Occurrence struct {
 	Filter              string            `json:"filter,omitempty"`
 	Zygosity            string            `json:"zygosity,omitempty"`
 	Pf                  float64           `json:"pf,omitempty"`
+	Pc                  int               `json:"pc,omitempty"`
 	Af                  float64           `json:"af,omitempty"`
 	GnomadV3Af          float64           `json:"gnomad_v3_af,omitempty"`
 	Hgvsg               string            `json:"hgvsg,omitempty"`
-	OmimInheritanceCode string            `json:"omim_inheritance_code,omitempty"`
+	OmimInheritanceCode JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
 	AdRatio             float64           `json:"ad_ratio,omitempty"`
 	VariantClass        string            `json:"variant_class,omitempty"`
 	VepImpact           string            `json:"vep_impact,omitempty"`
@@ -21,6 +22,9 @@ type Occurrence struct {
 	Clinvar             JsonArray[string] `gorm:"type:json" json:"clinvar,omitempty"`
 	ManeSelect          bool              `json:"mane_select,omitempty"`
 	Canonical           bool              `json:"canonical,omitempty"`
+	AaChange            string            `json:"aa_change,omitempty"`
+	RsNumber            string            `json:"rsnumber,omitempty"`
+	PickedConsequences  JsonArray[string] `gorm:"type:json" json:"picked_consequences,omitempty"`
 } // @name Occurrence
 
 var OccurrenceTable = Table{
@@ -57,6 +61,7 @@ var ZygosityField = Field{
 }
 var GenotypeQualityField = Field{
 	Name:          "gq",
+	Alias:         "genotype_quality",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	Table:         OccurrenceTable,
@@ -84,15 +89,24 @@ var OccurrencesFields = []Field{
 	GenotypeQualityField,
 	AdRatioField,
 	PfField,
+	PcField,
 	AfField,
 	VariantClassField,
 	HgvsgField,
 	ChromosomeField,
 	ClinvarField,
 	ConsequenceIdField,
-	SymbolField,
+	SymbolFilterField,
 	ImpactScoreField,
 	SiftPredField,
 	OmimGenePanelField,
 	HpoGenePanelField,
+	RsNumberField,
+	AaChangeField,
+	ConsequenceField,
+	VepImpactField,
+	SymbolField,
+	ManeSelectField,
+	OmimInheritanceCodeField,
+	GnomadV3AfField,
 }

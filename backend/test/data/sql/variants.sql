@@ -23,5 +23,6 @@ CREATE TABLE `variants`
     `alternate`              varchar(2000),
     `hgvsg`                  varchar(2000) NULL,
     `locus_full`             varchar(2000) NULL,
-    `dna_change`             varchar(2000)
+    `dna_change`             varchar(2000),
+    `aa_change`             varchar(2000) NULL COMMENT ""
 ) ENGINE = OLAP

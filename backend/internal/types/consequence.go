@@ -43,10 +43,11 @@ var ConsequenceIdField = Field{
 	Table:           ConsequenceFilterTable,
 }
 
-var SymbolField = Field{
+var SymbolFilterField = Field{
 	Name:            "symbol",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
+	CanBeSelected:   false,
 	Table:           ConsequenceFilterTable,
 }
 
