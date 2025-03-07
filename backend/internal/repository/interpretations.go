@@ -57,8 +57,10 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 		UpdatedByName: dao.UpdatedByName,
 		UpdatedAt: dao.UpdatedAt,
 	};
-	if err := json.Unmarshal(dao.Metadata, &interpretation.Metadata); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal metadata from interpretation: %s", dao.Metadata)
+	if (len(dao.Metadata) > 0) {
+		if err := json.Unmarshal(dao.Metadata, &interpretation.Metadata); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal metadata from interpretation: %s", dao.Metadata)
+		}
 	}
 	for i, v := range pubmeds {
 		citation, _ := r.pubmedClient.GetCitationById(v);
