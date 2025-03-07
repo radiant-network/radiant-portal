@@ -68,7 +68,7 @@ func Test_OccurrencesList(t *testing.T) {
 func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
 	body := `{
 			"selected_fields":[
-				"seq_id","locus_id","filter","zygosity","pf","af","hgvsg","ad_ratio","variant_class"
+				"seq_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class"
 			],
 			"sqon":{
 				"op":"in",
@@ -78,7 +78,7 @@ func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *tes
 				}
 		}
 		}`
-	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "hgvsg":"hgvsg1", "locus_id":1000, "pf":0.99, "seq_id":1, "variant_class":"class1", "zygosity":"HET"}]`
+	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "hgvsg":"hgvsg1", "locus_id":1000, "pf":0.99, "pc":3, "seq_id":1, "variant_class":"class1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
 
 }
@@ -135,7 +135,7 @@ func Test_Aggregation(t *testing.T) {
 func Test_Filter_On_Consequence_Column(t *testing.T) {
 	body := `{
 			"selected_fields":[
-				"seq_id","locus_id","filter","zygosity","pf","af","hgvsg","ad_ratio","variant_class"
+				"seq_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class"
 			],
 			"sqon": {
 				"op": "and",
@@ -152,7 +152,7 @@ func Test_Filter_On_Consequence_Column(t *testing.T) {
 			},
 			"size": 10
 		}`
-	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "hgvsg":"hgvsg1", "locus_id":1000, "pf":0.99, "seq_id":1, "variant_class":"class1", "zygosity":"HET"}]`
+	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "hgvsg":"hgvsg1", "locus_id":1000, "pf":0.99, "pc":3, "seq_id":1, "variant_class":"class1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
 }
 

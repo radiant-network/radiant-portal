@@ -51,12 +51,23 @@ func findByAlias(fields []Field, alias string) *Field {
 
 }
 
+// findByAlias returns the selectable field with the given name from the list of fields
+func findSelectableByAlias(fields []Field, alias string) *Field {
+	if fields == nil {
+		return nil
+	}
+	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
+		return field.GetAlias() == alias && field.CanBeSelected
+	})
+
+}
+
 // findSelectedFields returns the fields that can be selected from the list of string field names
 func findSelectedFields(fields []Field, selected []string) []Field {
 	var selectedFields []Field
 	for _, s := range selected {
-		field := findByAlias(fields, s)
-		if field != nil && field.CanBeSelected {
+		field := findSelectableByAlias(fields, s)
+		if field != nil {
 			selectedFields = append(selectedFields, *field)
 		}
 	}
