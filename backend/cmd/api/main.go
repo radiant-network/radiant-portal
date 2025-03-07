@@ -104,6 +104,10 @@ func main() {
 	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
 
+	// search endpoints
+	interpretationsGroup.GET("/germline", server.SearchInterpretationGermline(repoPostgres.Interpretations))
+	interpretationsGroup.GET("/somatic", server.SearchInterpretationSomatic(repoPostgres.Interpretations))
+
 	usersGroup := r.Group("/users")
 	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoPostgres.UserSets))
 

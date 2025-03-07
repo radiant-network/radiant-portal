@@ -15,8 +15,7 @@ import (
 
 var setupPostgresMutex sync.RWMutex
 
-func ParallelPostgresTestWithDb(t *testing.T, testFunc func(t *testing.T, db *gorm.DB)) {
-	t.Parallel()
+func SequentialPostgresTestWithDb(t *testing.T, testFunc func(t *testing.T, db *gorm.DB)) {
 	gormDb, err := initPostgresDb()
 	if err != nil {
 		log.Fatal("Failed to init db connection: ", err)

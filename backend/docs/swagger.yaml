@@ -54,6 +54,8 @@ components:
           type: string
         locus_id:
           type: string
+        metadata:
+          $ref: '#/components/schemas/InterpretationMetadata'
         pubmed:
           items:
             $ref: '#/components/schemas/InterpretationPubmed'
@@ -73,6 +75,15 @@ components:
         updated_by:
           type: string
         updated_by_name:
+          type: string
+      type: object
+    InterpretationMetadata:
+      properties:
+        analysis_id:
+          type: string
+        patient_id:
+          type: string
+        variant_hash:
           type: string
       type: object
     InterpretationPubmed:
@@ -98,6 +109,8 @@ components:
           type: string
         locus_id:
           type: string
+        metadata:
+          $ref: '#/components/schemas/InterpretationMetadata'
         oncogenicity:
           type: string
         oncogenicity_classification_criterias:
@@ -274,6 +287,24 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /interpretations/germline:
+    get:
+      description: Search interpretation germline
+      operationId: SearchInterpretationGermline
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InterpretationGermline'
+                type: array
+          description: OK
+      security:
+      - bearerauth: []
+      summary: Search interpretation germline
+      tags:
+      - interpretations
   /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       description: Get interpretation germline
@@ -395,6 +426,24 @@ paths:
       security:
       - bearerauth: []
       summary: Get pubmed citation by ID
+      tags:
+      - interpretations
+  /interpretations/somatic:
+    get:
+      description: Search interpretation somatic
+      operationId: SearchInterpretationSomatic
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InterpretationSomatic'
+                type: array
+          description: OK
+      security:
+      - bearerauth: []
+      summary: Search interpretation somatic
       tags:
       - interpretations
   /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}:

@@ -4,6 +4,13 @@ import (
 	"time"
 )
 
+// project specific, optional fields than can be used for search queries
+type InterpretationMetadata struct {
+    AnalysisId              string              `json:"analysis_id,omitempty"`
+    PatientId               string              `json:"patient_id,omitempty"`
+    VariantHash             string              `json:"variant_hash,omitempty"`
+}
+
 type InterpretationCommon struct {
     ID               		string				    `json:"id,omitempty"`
 	SequencingId        	string         			`json:"sequencing_id,omitempty"`
@@ -11,6 +18,7 @@ type InterpretationCommon struct {
 	TranscriptId     		string             		`json:"transcript_id,omitempty"`
     Interpretation          string              	`json:"interpretation,omitempty"`
     Pubmed	                []InterpretationPubmed	`json:"pubmed,omitempty"`
+    Metadata                InterpretationMetadata 	`json:"metadata,omitempty"`
 	CreatedBy               string              	`json:"created_by,omitempty"`
     CreatedByName          	string        			`json:"created_by_name,omitempty"`      	
     CreatedAt               time.Time     			`json:"created_at,omitempty"`      	
@@ -56,6 +64,7 @@ type InterpretationCommonDAO struct {
 	TranscriptId     		string             		         	
     Interpretation          string              	
     Pubmed	                string	
+    Metadata                []byte
     CreatedBy               string              	
     CreatedByName          	string              	
     CreatedAt               time.Time           	

@@ -155,6 +155,12 @@ export interface InterpretationGermline {
     'locus_id'?: string;
     /**
      * 
+     * @type {InterpretationMetadata}
+     * @memberof InterpretationGermline
+     */
+    'metadata'?: InterpretationMetadata;
+    /**
+     * 
      * @type {Array<InterpretationPubmed>}
      * @memberof InterpretationGermline
      */
@@ -195,6 +201,31 @@ export interface InterpretationGermline {
      * @memberof InterpretationGermline
      */
     'updated_by_name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface InterpretationMetadata
+ */
+export interface InterpretationMetadata {
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
+    'analysis_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
+    'patient_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
+    'variant_hash'?: string;
 }
 /**
  * 
@@ -263,6 +294,12 @@ export interface InterpretationSomatic {
      * @memberof InterpretationSomatic
      */
     'locus_id'?: string;
+    /**
+     * 
+     * @type {InterpretationMetadata}
+     * @memberof InterpretationSomatic
+     */
+    'metadata'?: InterpretationMetadata;
     /**
      * 
      * @type {string}
@@ -880,6 +917,74 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Search interpretation germline
+         * @summary Search interpretation germline
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchInterpretationGermline: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/interpretations/germline`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Search interpretation somatic
+         * @summary Search interpretation somatic
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchInterpretationSomatic: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/interpretations/somatic`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -965,6 +1070,30 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Search interpretation germline
+         * @summary Search interpretation germline
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchInterpretationGermline(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InterpretationGermline>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchInterpretationGermline(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.searchInterpretationGermline']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Search interpretation somatic
+         * @summary Search interpretation somatic
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchInterpretationSomatic(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InterpretationSomatic>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchInterpretationSomatic(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.searchInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -1034,6 +1163,24 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          */
         postInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
             return localVarFp.postInterpretationSomatic(sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Search interpretation germline
+         * @summary Search interpretation germline
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchInterpretationGermline(options?: RawAxiosRequestConfig): AxiosPromise<Array<InterpretationGermline>> {
+            return localVarFp.searchInterpretationGermline(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Search interpretation somatic
+         * @summary Search interpretation somatic
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchInterpretationSomatic(options?: RawAxiosRequestConfig): AxiosPromise<Array<InterpretationSomatic>> {
+            return localVarFp.searchInterpretationSomatic(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1113,6 +1260,28 @@ export class InterpretationsApi extends BaseAPI {
      */
     public postInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).postInterpretationSomatic(sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Search interpretation germline
+     * @summary Search interpretation germline
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof InterpretationsApi
+     */
+    public searchInterpretationGermline(options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).searchInterpretationGermline(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Search interpretation somatic
+     * @summary Search interpretation somatic
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof InterpretationsApi
+     */
+    public searchInterpretationSomatic(options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).searchInterpretationSomatic(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
