@@ -38,7 +38,7 @@ function SavedFiltersStarAction() {
           icon={StarIcon}
           iconClassName={
             selectedSavedFilter?.isFavorite()
-              ? "stroke-[--gold-6] fill-[--gold-6]"
+              ? "stroke-gold-500 fill-gold-500"
               : ""
           }
           disabled={!selectedSavedFilter}

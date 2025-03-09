@@ -11,6 +11,7 @@ import stylesheet from "./app.css?url";
 import "@styles/colors.css";
 import "@styles/main.css";
 import { AlertDialogProvider } from "@/components/base/dialog/alert-dialog-provider";
+import { TooltipProvider } from "@/components/base/ui/tooltip";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -36,7 +37,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AlertDialogProvider>{children}</AlertDialogProvider>
+        <TooltipProvider delayDuration={0}>
+          <AlertDialogProvider>{children}</AlertDialogProvider>
+        </TooltipProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

@@ -12,23 +12,21 @@ function SavedFiltersRightActions({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <TooltipProvider>
-      <div className={cn("flex", className)} {...props}>
-        <div
-          className="flex gap-4 items-center"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex gap-1.5 whitespace-nowrap">
-            <SavedFiltersNewAction />
-            <SavedFiltersSaveAction />
-            <SavedFiltersDuplicateAction />
-            <SavedFiltersDeleteAction />
-            <SavedFiltersShareAction />
-          </div>
-          <SavedFiltersSelect />
+    <div className={cn("flex", className)} {...props}>
+      <div
+        className="flex gap-4 items-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex gap-1.5 whitespace-nowrap">
+          <SavedFiltersNewAction />
+          <SavedFiltersSaveAction />
+          <SavedFiltersDuplicateAction />
+          <SavedFiltersDeleteAction />
+          <SavedFiltersShareAction />
         </div>
+        <SavedFiltersSelect />
       </div>
-    </TooltipProvider>
+    </div>
   );
 }
 

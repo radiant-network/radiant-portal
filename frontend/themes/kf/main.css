@@ -6,19 +6,8 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
 
-  --primary: 210 71% 46%;
+  --primary: var(--primary-7);
   --primary-foreground: 210 40% 98%;
-  --primary-50: 217 87% 97%;
-  --primary-100: 217 75% 94%;
-  --primary-200: 212 75% 86%;
-  --primary-300: 210 76% 74%;
-  --primary-400: 210 75% 60%;
-  --primary-500: 210 71% 46%;
-  --primary-600: 212 78% 39%;
-  --primary-700: 213 77% 32%;
-  --primary-800: 212 71% 27%;
-  --primary-900: 214 64% 24%;
-  --primary-950: 215 65% 16%;
 
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
@@ -32,10 +21,10 @@
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
 
-  --info: 210 90% 55%;    
+  --info: var(--blue-7); 
   --warning: 42 85% 45%; 
-  --success: 145 63% 42%;
-  --error: 0 84.2% 60.2%; 
+  --success: var(--green-9); 
+  --error: var(--red-9); 
 
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
@@ -48,10 +37,10 @@
   --radius: 0.5rem;
   
   /* Query Builder */
-  --query-pill-bg-active: var(--cyan-2);
-  --query-bar-bg-active: var(--cyan-1);
-  --query-bar-border-color-active: var(--cyan-3);
-  --query-bar-identifier-active: var(--cyan-6);
+  --query-pill-bg-active: hsl(var(--cyan-2));
+  --query-bar-bg-active: hsl(var(--cyan-1));
+  --query-bar-border-color-active: hsl(var(--cyan-3));
+  --query-bar-identifier-active: hsl(var(--cyan-6));
 }
 
 .dark {

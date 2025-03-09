@@ -21,7 +21,7 @@ const queryBar = tv({
       true: [
         "border-[--query-bar-border-color-active] bg-[--query-bar-bg-active]",
       ],
-      false: ["border-[--gray-5] bg-[--gray-2]"],
+      false: ["border-gray-400 bg-gray-100"],
     },
   },
   defaultVariants: {

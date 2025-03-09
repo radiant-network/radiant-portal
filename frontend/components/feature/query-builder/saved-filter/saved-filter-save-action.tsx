@@ -36,7 +36,7 @@ function SavedFiltersSaveAction() {
             icon={SaveIcon}
             color="orange-400"
             disabled={isDisabled}
-            className={selectedSavedFilter?.isDirty() ? "text-[--gold-6]" : ""}
+            className={selectedSavedFilter?.isDirty() ? "text-gold-500" : ""}
             onClick={handleSave}
           />
         </span>
