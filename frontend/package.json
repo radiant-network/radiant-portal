@@ -10,21 +10,21 @@
     "test": "vite-jest"
   },
   "devDependencies": {
+    "@ferlab/eslint-config": "^2.0.0",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
-    "@ferlab/eslint-config": "^2.0.0",
     "eslint": "^8.57.1",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-prettier": "^5.2.3",
-    "vite-jest": "^0.1.4",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vite-jest": "^0.1.4"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.9.5"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.0.0",
-    "axios": "^1.7.9",
+    "axios": "^1.8.2",
     "date-fns": "^4.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

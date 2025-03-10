@@ -308,7 +308,7 @@ function MultiSelector({
     >
       <div
         className={cn(
-          "flex min-h-10 rounded-md border border-input text-base md:text-sm ring-offset-background focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-ring",
+          "flex min-h-10 rounded-md border border-input text-base md:text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring",
           {
             "px-3 py-2": selected.length !== 0,
             "cursor-text": !disabled && selected.length !== 0,
@@ -339,7 +339,7 @@ function MultiSelector({
                 {option.label}
                 <button
                   className={cn(
-                    "ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:cursor-pointer",
+                    "ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring hover:cursor-pointer",
                     (disabled || option.fixed) && "hidden"
                   )}
                   onKeyDown={(e) => {

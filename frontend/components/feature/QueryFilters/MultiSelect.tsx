@@ -102,7 +102,7 @@ export function MultiSelect({
         <Input
           type="text"
           placeholder="Search ..."
-          className="w-full p-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 mb-4 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           onChange={(e) => updateSearch(e.target.value)}
         />
       )}
@@ -149,7 +149,7 @@ export function MultiSelect({
         </Button>
       )}
 
-      <hr className="my-4 border-gray-300" />
+      <hr className="my-4 border-border" />
 
       <div className="flex align-right justify-end items-center space-x-2">
         <Button

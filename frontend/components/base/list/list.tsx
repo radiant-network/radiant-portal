@@ -5,7 +5,7 @@ const listVariants = tv({
   base: "overflow-scroll",
   variants: {
     bordered: {
-      true: "border",
+      true: "border border-border",
     },
   },
   defaultVariants: {
