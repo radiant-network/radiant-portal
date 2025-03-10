@@ -22,7 +22,7 @@ function SavedFiltersLeftActions({
       )}
       {...props}
     >
-      <div className="text-ellipsis overflow-hidden">
+      <div className="text-ellipsis overflow-hidden text-base">
         {selectedSavedFilter
           ? selectedSavedFilter.raw().title
           : queryBuilder.coreProps.savedFilterDefaultTitle}

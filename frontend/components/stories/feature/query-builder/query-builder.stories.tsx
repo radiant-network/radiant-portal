@@ -21,6 +21,7 @@ import {
   IUserSavedFilter,
 } from "@/components/model/saved-filter";
 import { UserIcon } from "lucide-react";
+import { TooltipProvider } from "@/components/base/ui/tooltip";
 
 const meta = {
   title: "Feature/Query Builder",
@@ -37,9 +38,11 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <AlertDialogProvider>
-        <Story />
-      </AlertDialogProvider>
+      <TooltipProvider delayDuration={0}>
+        <AlertDialogProvider>
+          <Story />
+        </AlertDialogProvider>
+      </TooltipProvider>
     ),
   ],
 } satisfies Meta<typeof QueryBuilder>;

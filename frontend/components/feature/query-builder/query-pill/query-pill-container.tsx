@@ -15,7 +15,7 @@ function QueryPillContainer({
   return (
     <div
       className={cn(
-        "flex items-center rounded-sm p-[2px] bg-[--gray-4] group-data-[query-active=true]/query:bg-[--query-pill-bg-active]",
+        "flex items-center rounded-sm p-[2px] bg-gray-300 group-data-[query-active=true]/query:bg-[--query-pill-bg-active]",
         className
       )}
       {...props}

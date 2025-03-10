@@ -74,8 +74,8 @@ function FilterBuilder({ field }: { field: AggregationConfig }) {
     >
       <AccordionItem value="item-1">
         <AccordionTrigger className="AccordionTrigger">
-          <div className="flex items-center justify-between w-full">
-            <span className="capitalize">{field.key.replace('_', ' ')}</span>
+          <div className="flex items-center justify-between w-full text-base">
+            <span className="capitalize">{field.key.replace("_", " ")}</span>
             {!collapsed && (
               <SearchIcon
                 size={18}
@@ -89,10 +89,10 @@ function FilterBuilder({ field }: { field: AggregationConfig }) {
         <AccordionContent>
           {!data ? (
             <div>Loading...</div>
+          ) : field.type === "multiple" ? (
+            <MultiSelect searchVisible={searchVisible} data={data} />
           ) : (
-            field.type === 'multiple' 
-              ? <MultiSelect searchVisible={searchVisible} data={data} />
-              : <div>Not implemented</div>
+            <div>Not implemented</div>
           )}
         </AccordionContent>
       </AccordionItem>

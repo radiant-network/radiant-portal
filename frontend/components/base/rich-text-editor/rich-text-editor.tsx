@@ -101,7 +101,7 @@ const RichTextEditor = ({
   return (
     <div
       className={cn(
-        "rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+        "bg-white rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
         wrapperClassName
       )}
     >
