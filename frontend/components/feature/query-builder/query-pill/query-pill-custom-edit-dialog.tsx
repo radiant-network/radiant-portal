@@ -155,13 +155,13 @@ function QueryPillCustomEditDialog({
               </div>
               <DialogFooter className="mt-5">
                 <DialogClose asChild>
-                  <Button variant="outline">
+                  <Button variant="outlined">
                     {dict.queryPill.customPill.editDialog.cancel}
                   </Button>
                 </DialogClose>
                 <Button
                   type="submit"
-                  variant="primary"
+                  color="primary"
                   loading={saving}
                   disabled={!hasChanged}
                   onClick={handleSave}

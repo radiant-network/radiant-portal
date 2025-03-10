@@ -18,7 +18,7 @@ export function openDeleteSavedFilterAlert(
       children: dict.savedFilter.deleteDialog.cancel,
     },
     actionProps: {
-      variant: "destructive",
+      color: "destructive",
       onClick: () => savedFilter.delete(),
       children: dict.savedFilter.deleteDialog.ok,
     },

@@ -19,7 +19,7 @@ function QueryToolbarClearAction() {
         children: dict.toolbar.clearAllDialog.cancel,
       },
       actionProps: {
-        variant: "destructive",
+        color: "destructive",
         onClick: () => queryBuilder.clearQueries(),
         children: dict.toolbar.clearAllDialog.ok,
       },

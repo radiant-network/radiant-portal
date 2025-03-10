@@ -22,9 +22,9 @@
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
 
-  --info: var(--blue-7); 
-  --warning: 42 85% 45%; 
-  --success: var(--green-9); 
+  --info: var(--blue-6); 
+  --warning: 42 85% 55%; 
+  --success: var(--green-7); 
   --error: var(--red-9); 
 
   --border: 214.3 31.8% 91.4%;

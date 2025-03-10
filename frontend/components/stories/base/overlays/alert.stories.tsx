@@ -33,7 +33,7 @@ export const Info: Story = {
             },
           });
         }}
-        variant="primary"
+        color="primary"
       >
         Open Alert Dialog
       </Button>
@@ -55,7 +55,7 @@ export const Warning: Story = {
             },
           });
         }}
-        variant="primary"
+        color="primary"
       >
         Open Alert Dialog
       </Button>
@@ -77,7 +77,7 @@ export const Error: Story = {
             },
           });
         }}
-        variant="primary"
+        color="primary"
       >
         Open Alert Dialog
       </Button>
@@ -99,7 +99,7 @@ export const Success: Story = {
             },
           });
         }}
-        variant="primary"
+        color="primary"
       >
         Open Alert Dialog
       </Button>
@@ -128,7 +128,7 @@ export const Async: Story = {
             },
           });
         }}
-        variant="primary"
+        color="primary"
       >
         Open Alert Dialog
       </Button>

@@ -84,11 +84,11 @@ function QueryBarSaveDialog({
             <div className="text-sm">{dict.queryBar.saveDialog.notice}</div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline">
+                <Button variant="outlined">
                   {dict.queryBar.saveDialog.cancel}
                 </Button>
               </DialogClose>
-              <Button type="submit" variant="primary" loading={saving}>
+              <Button type="submit" color="primary" loading={saving}>
                 {dict.queryBar.saveDialog.ok}
               </Button>
             </DialogFooter>

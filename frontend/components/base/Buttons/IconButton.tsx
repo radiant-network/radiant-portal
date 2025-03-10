@@ -4,7 +4,10 @@ import { iconButtonVariants } from "./button.variants";
 import { LucideProps } from "lucide-react";
 import { Spinner } from "../spinner";
 
-export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+export type IconButtonProps = Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "color"
+> &
   VariantProps<typeof iconButtonVariants> & {
     icon: React.ForwardRefExoticComponent<
       Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
@@ -16,13 +19,14 @@ const IconButton = ({
   icon: Icon,
   size,
   variant,
+  color,
   className,
   iconClassName,
   loading = false,
   disabled = false,
   ...props
 }: IconButtonProps) => {
-  const style = iconButtonVariants({ size, variant });
+  const style = iconButtonVariants({ size, variant, color });
 
   return (
     <button

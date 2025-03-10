@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
 import ActionButton from "@/components/base/Buttons/ActionButton";
+import { buttonColors, buttonVariants } from "./utils";
 
 const meta = {
   title: "Base/Buttons/Action Button",
@@ -14,61 +15,30 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Variants: Story = {
   args: {
     children: "Button",
-    variant: "default",
   },
-};
-
-export const Outline: Story = {
-  args: {
-    children: "Button",
-    variant: "outline",
-  },
-};
-
-export const Primary: Story = {
-  args: {
-    children: "Button",
-    variant: "primary",
-  },
-};
-
-export const Secondary: Story = {
-  args: {
-    children: "Button",
-    variant: "secondary",
-  },
-};
-
-export const Ghost: Story = {
-  args: {
-    children: "Button",
-    variant: "ghost",
-  },
-};
-
-export const Destructive: Story = {
-  args: {
-    children: "Button",
-    variant: "destructive",
-  },
-};
-
-export const Loading: Story = {
-  args: {
-    children: "Button",
-    variant: "primary",
-  },
-};
-
-export const Disabled: Story = {
-  args: {
-    children: "Button",
-    variant: "primary",
-    disabled: true,
-  },
+  render: (args) => (
+    <div className="flex flex-col gap-2">
+      {buttonColors.map((color) => {
+        return (
+          <div className="flex gap-2">
+            {buttonVariants.map((variant) => (
+              <ActionButton
+                size="default"
+                color={color}
+                variant={variant}
+                {...args}
+              >
+                {variant}
+              </ActionButton>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  ),
 };
 
 export const Sizes: Story = {
@@ -77,19 +47,19 @@ export const Sizes: Story = {
   },
   render: (args) => (
     <div className="flex gap-2">
-      <ActionButton {...args} size="default" variant="primary">
+      <ActionButton {...args} size="default" color="primary">
         Default
       </ActionButton>
-      <ActionButton {...args} size="xs" variant="primary">
+      <ActionButton {...args} size="xs" color="primary">
         AButton xs
       </ActionButton>
-      <ActionButton {...args} size="sm" variant="primary">
+      <ActionButton {...args} size="sm" color="primary">
         AButton sm
       </ActionButton>
-      <ActionButton {...args} size="md" variant="primary">
+      <ActionButton {...args} size="md" color="primary">
         AButton md
       </ActionButton>
-      <ActionButton {...args} size="lg" variant="primary">
+      <ActionButton {...args} size="lg" color="primary">
         AButton lg
       </ActionButton>
     </div>

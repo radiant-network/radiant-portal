@@ -89,11 +89,11 @@ function SavedFiltersEditDialog({
             />
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline">
+                <Button variant="outlined">
                   {dict.savedFilter.editDialog.cancel}
                 </Button>
               </DialogClose>
-              <Button type="submit" variant="primary">
+              <Button type="submit" color="primary">
                 {dict.savedFilter.editDialog.ok}
               </Button>
             </DialogFooter>
