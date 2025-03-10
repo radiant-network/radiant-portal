@@ -25,6 +25,7 @@ type Occurrence struct {
 	AaChange            string            `json:"aa_change,omitempty"`
 	RsNumber            string            `json:"rsnumber,omitempty"`
 	PickedConsequences  JsonArray[string] `gorm:"type:json" json:"picked_consequences,omitempty"`
+	TranscriptId        string            `json:"transcript_id,omitempty"`
 } // @name Occurrence
 
 var OccurrenceTable = Table{
@@ -109,4 +110,5 @@ var OccurrencesFields = []Field{
 	ManeSelectField,
 	OmimInheritanceCodeField,
 	GnomadV3AfField,
+	TranscriptIdField,
 }
