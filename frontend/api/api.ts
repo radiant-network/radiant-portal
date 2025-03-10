@@ -419,6 +419,12 @@ export interface ListBody {
 export interface Occurrence {
     /**
      * 
+     * @type {string}
+     * @memberof Occurrence
+     */
+    'aa_change'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof Occurrence
      */
@@ -485,16 +491,34 @@ export interface Occurrence {
     'mane_select'?: boolean;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof Occurrence
      */
-    'omim_inheritance_code'?: string;
+    'omim_inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Occurrence
+     */
+    'pc'?: number;
     /**
      * 
      * @type {number}
      * @memberof Occurrence
      */
     'pf'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Occurrence
+     */
+    'picked_consequences'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Occurrence
+     */
+    'rsnumber'?: string;
     /**
      * 
      * @type {number}

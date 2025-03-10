@@ -165,6 +165,8 @@ components:
     Occurrence:
       description: Occurrence represents an occurrence
       properties:
+        aa_change:
+          type: string
         ad_ratio:
           type: number
         af:
@@ -191,9 +193,21 @@ components:
         mane_select:
           type: boolean
         omim_inheritance_code:
-          type: string
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        pc:
+          type: integer
         pf:
           type: number
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        rsnumber:
+          type: string
         seq_id:
           type: integer
         symbol:
