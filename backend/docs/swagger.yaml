@@ -212,6 +212,8 @@ components:
           type: integer
         symbol:
           type: string
+        transcript_id:
+          type: string
         variant_class:
           type: string
         vep_impact:

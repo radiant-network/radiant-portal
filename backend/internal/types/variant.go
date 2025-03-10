@@ -115,3 +115,10 @@ var GnomadV3AfField = Field{
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
+var TranscriptIdField = Field{
+	Name:          "transcript_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         VariantTable,
+}

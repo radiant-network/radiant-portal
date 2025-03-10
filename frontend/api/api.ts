@@ -536,6 +536,12 @@ export interface Occurrence {
      * @type {string}
      * @memberof Occurrence
      */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Occurrence
+     */
     'variant_class'?: string;
     /**
      * 
