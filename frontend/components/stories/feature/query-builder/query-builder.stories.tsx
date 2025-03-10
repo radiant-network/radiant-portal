@@ -116,7 +116,7 @@ function TestingTools({ queryBuilderId }: { queryBuilderId: string }) {
       <div>Testing Tools:</div>
       <div className="flex border p-4 gap-2">
         <Button
-          variant="primary"
+          color="primary"
           size="sm"
           onClick={() =>
             queryBuilderRemote.addQuery(queryBuilderId, generateRandomQuery())
@@ -125,7 +125,7 @@ function TestingTools({ queryBuilderId }: { queryBuilderId: string }) {
           Add query
         </Button>
         <Button
-          variant="primary"
+          color="primary"
           size="sm"
           onClick={() => {
             queryBuilderRemote.updateActiveQueryField(queryBuilderId, {
@@ -137,7 +137,7 @@ function TestingTools({ queryBuilderId }: { queryBuilderId: string }) {
           Add field to active query
         </Button>
         <Button
-          variant="primary"
+          color="primary"
           size="sm"
           onClick={() => {
             queryBuilderRemote.updateActiveQueryField(queryBuilderId, {

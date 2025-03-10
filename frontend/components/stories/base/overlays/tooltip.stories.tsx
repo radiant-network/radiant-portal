@@ -36,7 +36,7 @@ export const Default: Story = {
       <div className="flex justify-center p-24">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="primary">Hover Me</Button>
+            <Button color="primary">Hover Me</Button>
           </TooltipTrigger>
           <TooltipContent {...args} />
         </Tooltip>

@@ -42,12 +42,14 @@ const PaginationLink = ({
   className,
   isActive,
   size = "default",
+  color,
   variant,
   ...props
 }: PaginationLinkProps) => {
   const styles = buttonVariants({
     size,
     variant,
+    color,
   });
 
   return (

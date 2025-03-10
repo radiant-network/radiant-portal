@@ -163,7 +163,7 @@ export function MultiSelect({
           <ActionButton
             size="sm"
             className="h-7"
-            variant="primary"
+            color="primary"
             actions={[]}
             onDefaultAction={apply}
           >

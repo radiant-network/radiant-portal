@@ -16,7 +16,7 @@ interface Action {
 }
 
 interface ActionButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "color">,
     VariantProps<typeof actionButtonVariants> {
   children: React.ReactNode;
   actions: Action[];
@@ -31,9 +31,10 @@ function ActionButton({
   onDefaultAction,
   size,
   variant,
+  color,
   ...btnProps
 }: ActionButtonProps) {
-  const style = actionButtonVariants({ size, variant });
+  const style = actionButtonVariants({ size, variant, color });
 
   return (
     <div className={cn("flex items-center", className)}>

@@ -17,7 +17,7 @@ function QueryToolbarAddAction() {
   return (
     <Button
       size="xs"
-      variant="primary"
+      color="primary"
       disabled={queryBuilder.hasEmptyQuery()}
       onClick={() =>
         queryBuilder.createQuery({

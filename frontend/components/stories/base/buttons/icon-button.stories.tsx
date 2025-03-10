@@ -3,6 +3,7 @@ import { fn } from "@storybook/test";
 
 import IconButton from "@/components/base/Buttons/IconButton";
 import { HeartHandshakeIcon } from "lucide-react";
+import { buttonColors, buttonVariants } from "./utils";
 
 const meta = {
   title: "Base/Buttons/Icon Button",
@@ -15,70 +16,23 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Variants: Story = {
   args: {
     icon: HeartHandshakeIcon,
-    children: "Button",
-    variant: "default",
   },
-};
-
-export const Outline: Story = {
-  args: {
-    icon: HeartHandshakeIcon,
-    children: "Button",
-    variant: "outline",
-  },
-};
-
-export const Primary: Story = {
-  args: {
-    icon: HeartHandshakeIcon,
-    children: "Button",
-    variant: "primary",
-  },
-};
-
-export const Secondary: Story = {
-  args: {
-    icon: HeartHandshakeIcon,
-    children: "Button",
-    variant: "secondary",
-  },
-};
-
-export const Ghost: Story = {
-  args: {
-    icon: HeartHandshakeIcon,
-    children: "Button",
-    variant: "ghost",
-  },
-};
-
-export const Destructive: Story = {
-  args: {
-    icon: HeartHandshakeIcon,
-    children: "Button",
-    variant: "destructive",
-  },
-};
-
-export const Loading: Story = {
-  args: {
-    icon: HeartHandshakeIcon,
-    children: "Button",
-    variant: "primary",
-    loading: true,
-  },
-};
-
-export const Disabled: Story = {
-  args: {
-    icon: HeartHandshakeIcon,
-    children: "Button",
-    variant: "primary",
-    disabled: true,
-  },
+  render: (args) => (
+    <div className="flex flex-col gap-2">
+      {buttonColors.map((color) => {
+        return (
+          <div className="flex gap-2">
+            {buttonVariants.map((variant) => (
+              <IconButton icon={args.icon} color={color} variant={variant} />
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  ),
 };
 
 export const Sizes: Story = {
@@ -87,11 +41,29 @@ export const Sizes: Story = {
   },
   render: (args) => (
     <div className="flex gap-2">
-      <IconButton size="default" icon={args.icon} variant="primary" />
-      <IconButton size="xs" icon={args.icon} variant="primary" />
-      <IconButton size="sm" icon={args.icon} variant="primary" />
-      <IconButton size="md" icon={args.icon} variant="primary" />
-      <IconButton size="lg" icon={args.icon} variant="primary" />
+      <IconButton color="primary" size="default" icon={args.icon} />
+      <IconButton color="primary" size="xs" icon={args.icon} />
+      <IconButton color="primary" size="sm" icon={args.icon} />
+      <IconButton color="primary" size="md" icon={args.icon} />
+      <IconButton color="primary" size="lg" icon={args.icon} />
     </div>
   ),
+};
+
+export const Loading: Story = {
+  args: {
+    icon: HeartHandshakeIcon,
+    children: "Button",
+    loading: true,
+    color: "primary",
+  },
+};
+
+export const Disabled: Story = {
+  args: {
+    icon: HeartHandshakeIcon,
+    children: "Button",
+    disabled: true,
+    color: "primary",
+  },
 };

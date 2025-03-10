@@ -28,7 +28,7 @@ function QueryBarDeleteAction() {
           <PopoverClose asChild>
             <Button
               size="xs"
-              variant="destructive"
+              color="destructive"
               onClick={() => query.delete()}
             >
               {dict.queryBar.deletePopover.ok}
