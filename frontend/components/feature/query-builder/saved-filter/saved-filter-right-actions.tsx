@@ -1,5 +1,4 @@
 import { cn } from "@/components/lib/utils";
-import { TooltipProvider } from "@/components/base/ui/tooltip";
 import SavedFiltersDuplicateAction from "./saved-filter-duplicate-action";
 import SavedFiltersNewAction from "./saved-filter-new-action";
 import SavedFiltersSaveAction from "./saved-filter-save-action";
