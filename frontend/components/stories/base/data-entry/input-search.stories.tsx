@@ -3,17 +3,19 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import { action } from "@storybook/addon-actions";
 
-import { Input } from "@/components/base/ui/input";
+import InputSearch from "@/components/base/input-search";
 
 const meta = {
-  title: "Base/Data Entry/Inputs/Input",
-  component: Input,
+  title: "Base/Data Entry/Inputs/Input Search",
+  component: InputSearch,
   args: {
-    value: "value",
+    value: "Search value",
+    onSearch: fn(),
     onChange: fn(),
     placeholder: "Placeholder",
+    searchButtonProps: {},
   },
-} satisfies Meta<typeof Input>;
+} satisfies Meta<typeof InputSearch>;
 
 export default meta;
 
@@ -24,15 +26,22 @@ export const Default: Story = {
     const [value, setValue] = useState("");
 
     return (
-      <Input
+      <InputSearch
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
           action("onChange")(e);
         }}
+        onSearch={(value) => {
+          action("onSearch")(value);
+        }}
         className="max-w-[300px]"
         placeholder="Placeholder"
         autoFocus
+        searchButtonProps={{
+          color: "primary",
+          variant: "filled",
+        }}
       />
     );
   },

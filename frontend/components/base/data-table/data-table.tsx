@@ -305,7 +305,7 @@ function DataTable({
                   key={header.id}
                   colSpan={header.colSpan}
                   style={{ width: header.getSize() }}
-                  className="border relative"
+                  className="border border-border relative"
                 >
                   <div
                     className={cn(
@@ -354,11 +354,11 @@ function DataTable({
           {/* Loading Skeleton */}
           {loadingStates?.list &&
             new Array(pagination.pageSize).fill(0).map((_, index) => (
-              <TableRow className="border border-gray-100 p-2 font-normal text-left truncate">
+              <TableRow className="border border-border p-2 font-normal text-left truncate">
                 <TableCell
                   key={`skeleton-row-${index}`}
                   colSpan={columnSettings.length}
-                  className="border border-gray-100 p-2 font-normal text-left truncate"
+                  className="border border-border p-2 font-normal text-left truncate"
                 >
                   <Skeleton className="w-full h-[32px]" />
                 </TableCell>
@@ -375,7 +375,7 @@ function DataTable({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className="border border-gray-100 p-2 font-normal text-left truncate"
+                    className="border border-border p-2 font-normal text-left truncate"
                     style={{ width: cell.column.getSize() }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

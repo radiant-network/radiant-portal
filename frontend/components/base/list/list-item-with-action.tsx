@@ -28,7 +28,7 @@ const ListItemAction = ({
 }: ListItemActionProps) => (
   <li
     className={cn(
-      "flex border-b last:border-b-0 relative px-3 py-2 group",
+      "flex border-border border-b last:border-b-0 relative px-3 py-2 group",
       className
     )}
     {...props}

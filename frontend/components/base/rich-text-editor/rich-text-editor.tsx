@@ -29,7 +29,7 @@ const RichTextEditor = ({
     editorProps: {
       attributes: {
         class: cn(
-          "min-h-[80px] w-full rounded-md rounded-tr-none rounded-tl-none border border-input bg-transparent px-3 py-2 border-t-0 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y",
+          "min-h-[80px] w-full rounded-md rounded-tr-none rounded-tl-none border border-border border-input bg-transparent px-3 py-2 border-t-0 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y",
           className
         ),
       },
@@ -101,7 +101,7 @@ const RichTextEditor = ({
   return (
     <div
       className={cn(
-        "bg-white rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+        "bg-white rounded-md focus-within:ring-2 focus-within:ring-ring",
         wrapperClassName
       )}
     >

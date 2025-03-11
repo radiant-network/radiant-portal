@@ -146,7 +146,7 @@ function App() {
   return (
     <div className={styles.appLayout}>
       <SidenavFilters />
-      <main className="flex-1 p-4 h-full">
+      <main className="flex-1 p-4 h-full overflow-hidden">
         <h1 className="text-2xl font-bold">Variant</h1>
         <div className="py-4 space-y-2">
           <QueryBuilder

@@ -2,7 +2,7 @@ import { tv } from "tailwind-variants";
 
 export const baseButtonVariants = tv({
   slots: {
-    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring  disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   },
   variants: {
     color: {
@@ -16,10 +16,10 @@ export const baseButtonVariants = tv({
     variant: {
       filled: "",
       outlined: {
-        base: "border border-solid",
+        base: "border border-border border-solid",
       },
       dashed: {
-        base: "border border-dashed",
+        base: "border border-border border-dashed",
       },
       subtle: "",
       text: "",
@@ -245,7 +245,7 @@ export const baseButtonVariants = tv({
 export const buttonVariants = tv({
   extend: baseButtonVariants,
   slots: {
-    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+    base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-normal ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring  disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   },
   variants: {
     size: {

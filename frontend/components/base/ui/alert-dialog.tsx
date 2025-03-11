@@ -111,17 +111,22 @@ export type AlertDialogActionProps = React.ComponentPropsWithoutRef<
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   AlertDialogActionProps
->(({ className, variant = "filled", color, size, ...props }, ref) => {
-  const style = buttonVariants({ variant, size, color });
+>(
+  (
+    { className, variant = "filled", color = "primary", size, ...props },
+    ref
+  ) => {
+    const style = buttonVariants({ variant, size, color });
 
-  return (
-    <AlertDialogPrimitive.Action
-      ref={ref}
-      className={style.base({ className })}
-      {...props}
-    />
-  );
-});
+    return (
+      <AlertDialogPrimitive.Action
+        ref={ref}
+        className={style.base({ className })}
+        {...props}
+      />
+    );
+  }
+);
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
 export type AlertDialogCancelProps = React.ComponentPropsWithoutRef<
