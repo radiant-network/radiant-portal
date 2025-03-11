@@ -94,6 +94,8 @@ function App() {
     },
   );
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
+  const config = useConfig();
+  const appId = config.variant_entity.app_id;
 
   const { data: list, isLoading: listIsLoading } = useSWR<
     Occurrence[],
@@ -152,7 +154,7 @@ function App() {
         <h1 className="text-2xl font-bold">Variant</h1>
         <div className="py-4 space-y-2">
           <QueryBuilder
-            id="variant"
+            id={appId}
             state={qbState}
             enableCombine
             enableFavorite
