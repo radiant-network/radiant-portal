@@ -24,7 +24,7 @@ import { UsersIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { QueryBuilderState } from "@/components/model/query-builder-core";
 import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
-import SidenavFilters from "./components/layouts/SidenavFilters";
+import { FilterList } from "@/components/feature/QueryFilters/FilterList";
 
 type OccurrencesListInput = {
   seqId: string;
@@ -46,7 +46,7 @@ const DEFAULT_SORTING = [
 async function fetchOccurencesList(input: OccurrencesListInput) {
   const response = await occurrencesApi.listOccurrences(
     input.seqId,
-    input.listBody
+    input.listBody,
   );
   return response.data;
 }
@@ -54,7 +54,7 @@ async function fetchOccurencesList(input: OccurrencesListInput) {
 async function fetchOccurencesCount(input: OccurrenceCountInput) {
   const response = await occurrencesApi.countOccurrences(
     input.seqId,
-    input.countBody
+    input.countBody,
   );
   return response.data;
 }
@@ -91,9 +91,11 @@ function App() {
     fetchOccurencesCount,
     {
       revalidateOnFocus: false,
-    }
+    },
   );
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
+  const config = useConfig();
+  const appId = config.variant_entity.app_id;
 
   const { data: list, isLoading: listIsLoading } = useSWR<
     Occurrence[],
@@ -127,7 +129,7 @@ function App() {
     fetchOccurencesList,
     {
       revalidateOnFocus: false,
-    }
+    },
   );
 
   useEffect(() => {
@@ -145,12 +147,14 @@ function App() {
 
   return (
     <div className={styles.appLayout}>
-      <SidenavFilters />
+      <aside>
+        <FilterList />
+      </aside>
       <main className="flex-1 p-4 h-full overflow-hidden">
         <h1 className="text-2xl font-bold">Variant</h1>
         <div className="py-4 space-y-2">
           <QueryBuilder
-            id="variant"
+            id={appId}
             state={qbState}
             enableCombine
             enableFavorite

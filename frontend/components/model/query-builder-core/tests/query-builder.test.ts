@@ -198,7 +198,7 @@ describe("QueryBuilder Core", () => {
 
   it("should create a new query", () => {
     const newQuery: Omit<ISyntheticSqon, "id"> = {
-      op: BooleanOperators.and,
+      op: BooleanOperators.And,
       content: [],
     };
 
@@ -229,7 +229,7 @@ describe("QueryBuilder Core", () => {
     };
 
     expect(mockOnQueryCreate).toHaveBeenCalledWith(
-      expectedOnCreatedHaveBeenCalledWith
+      expectedOnCreatedHaveBeenCalledWith,
     );
 
     expect(mockOnStateChange).toHaveBeenCalledTimes(1);
@@ -758,7 +758,7 @@ describe("QueryBuilder Core", () => {
       },
     }));
 
-    qb.combineSelectedQueries(BooleanOperators.and);
+    qb.combineSelectedQueries(BooleanOperators.And);
 
     expect(state.selectedQueryIndexes.length).toBe(0);
     expect(state.queries.length).toBe(3);
@@ -772,7 +772,7 @@ describe("QueryBuilder Core", () => {
     expect(mockOnQueryCreate).toHaveBeenCalledTimes(1);
     expect(mockOnQueryCreate).toHaveBeenCalledWith({
       id: mockUUID,
-      op: BooleanOperators.and,
+      op: BooleanOperators.And,
       content: [0, 1],
     });
   });
@@ -1024,16 +1024,16 @@ describe("QueryBuilder Core", () => {
       },
     }));
 
-    qb.changeQueryCombineOperator("1", BooleanOperators.or);
+    qb.changeQueryCombineOperator("1", BooleanOperators.Or);
 
     expect(state.queries.find((q) => q.id === "1")?.op).toBe(
-      BooleanOperators.or
+      BooleanOperators.Or,
     );
 
     const subSqon = state.queries.find((q) => q.id === "1")
       ?.content[0] as ISyntheticSqon;
 
-    expect(subSqon.op).toBe(BooleanOperators.or);
+    expect(subSqon.op).toBe(BooleanOperators.Or);
     expect(mockOnStateChange).toHaveBeenCalledTimes(1);
     expect(mockOnStateChange).toHaveBeenCalledWith({
       activeQueryId: "1",
@@ -1079,7 +1079,7 @@ describe("QueryBuilder Core", () => {
     expect(qb.getSelectedSavedFilter()).toBeTruthy();
     expect(qb.getSelectedSavedFilter()?.getQueries().length).toBe(2);
     expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(
-      defaultQueries
+      defaultQueries,
     );
 
     qb.createSavedFilter();
@@ -1103,7 +1103,7 @@ describe("QueryBuilder Core", () => {
         isDirty: false,
         favorite: false,
         queries: [getDefaultSyntheticSqon()],
-      })
+      }),
     );
   });
 

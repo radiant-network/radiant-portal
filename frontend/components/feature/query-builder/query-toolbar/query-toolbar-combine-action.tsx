@@ -17,16 +17,16 @@ function QueryToolbarCombineAction() {
           {
             label: capitalize(dict.queryPill.operator.and),
             onClick: () =>
-              queryBuilder.combineSelectedQueries(BooleanOperators.and),
+              queryBuilder.combineSelectedQueries(BooleanOperators.And),
           },
           {
             label: capitalize(dict.queryPill.operator.or),
             onClick: () =>
-              queryBuilder.combineSelectedQueries(BooleanOperators.or),
+              queryBuilder.combineSelectedQueries(BooleanOperators.Or),
           },
         ]}
         onDefaultAction={() =>
-          queryBuilder.combineSelectedQueries(BooleanOperators.and)
+          queryBuilder.combineSelectedQueries(BooleanOperators.And)
         }
         size="xs"
         variant="primary"

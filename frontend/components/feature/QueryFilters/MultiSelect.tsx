@@ -1,12 +1,17 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/base/ui/button";
 import { Checkbox } from "@/components/base/ui/checkbox";
 import { Input } from "@/components/base/ui/input";
 import { ActionButton } from "@/components/base/Buttons";
 import { Aggregation } from "@/api/api";
+import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
+import { useConfig } from "@/components/model/applications-config";
+import { IValueFilter, MERGE_VALUES_STRATEGIES } from "@/components/model/sqon";
+import { type Aggregation as AggregationConfig } from "@/components/model/applications-config";
 
 interface IProps {
-  data: Aggregation[];
+  data?: Aggregation[];
+  field: AggregationConfig;
   appliedItems?: string[];
   maxVisibleItems?: number;
   searchVisible?: boolean;
@@ -16,28 +21,67 @@ function searchOptions(search: string, data: any[]) {
   return data.filter((option) => option.key.includes(search));
 }
 
+function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
+  return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
+}
+
 export function MultiSelect({
   data,
+  field,
   maxVisibleItems = 10,
   searchVisible = false,
   appliedItems = [],
 }: IProps) {
-  const [items, setItems] = useState<Aggregation[]>(data);
+  const [items, setItems] = useState<Aggregation[]>(data || []);
   // items that are include in the search
   const [appliedSelectedItems, setAppliedSelectedItems] =
     useState<string[]>(appliedItems);
   // items that are currently checked
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [visibleItemsCount, setVisibleItemsCount] = useState(
-    maxVisibleItems < items.length ? maxVisibleItems : items.length
+    getVisibleItemsCount(items.length, maxVisibleItems),
   );
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
+  const config = useConfig();
+  const appId = config.variant_entity.app_id;
+
+  useEffect(() => {
+    // if page reload and there is item selected in the querybuilder
+    let prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+      .getActiveQuery(appId)
+      // @ts-ignore
+      .content.find((x: IValueFilter) => {
+        return x.content.field === field.key;
+      });
+
+    if (prevSelectedItems) {
+      setSelectedItems(prevSelectedItems.content.value as string[]);
+    } else {
+      // update data from upstream, maybe querybuilder flush the selection
+      setSelectedItems([]);
+    }
+
+    data?.sort((a, b) => {
+      const aSelected = a.key && selectedItems.includes(a.key);
+      const bSelected = b.key && selectedItems.includes(b.key);
+
+      if (aSelected === bSelected) {
+        return b.count! - a.count!; // Then sort by count
+      }
+
+      return aSelected ? -1 : 1;
+    });
+    setItems(data || []);
+    setVisibleItemsCount(
+      getVisibleItemsCount(data?.length || 0, maxVisibleItems),
+    );
+  }, [data, visibleItemsCount]);
 
   // Memoize these functions with useCallback
   //
   const updateSearch = useCallback(
     (search: string) => {
-      const results = searchOptions(search, data);
+      const results = searchOptions(search, data!);
       if (maxVisibleItems > results.length) {
         setVisibleItemsCount(results.length);
       } else if (results.length > maxVisibleItems) {
@@ -45,7 +89,7 @@ export function MultiSelect({
       }
       setItems(results);
     },
-    [visibleItemsCount, data]
+    [visibleItemsCount, data],
   );
 
   const showMore = useCallback(() => {
@@ -81,7 +125,7 @@ export function MultiSelect({
       setHasUnappliedItems(true);
       setSelectedItems(newList);
     },
-    [selectedItems]
+    [selectedItems],
   );
 
   const reset = useCallback(() => {
@@ -92,10 +136,15 @@ export function MultiSelect({
   const apply = useCallback(() => {
     setHasUnappliedItems(false);
     setAppliedSelectedItems(selectedItems);
+    queryBuilderRemote.updateActiveQueryField(appId, {
+      field: field.key,
+      value: [...selectedItems],
+      merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES, // Default APPEND_VALUES
+    });
   }, [selectedItems]);
 
   return items.length === 0 ? (
-    <div>Loading...</div>
+    <div>Fetching...</div>
   ) : (
     <div className="bg-white p-2 w-full max-w-md">
       {searchVisible && (
@@ -136,7 +185,7 @@ export function MultiSelect({
               <div className="">{items[i].key}</div>
               <span className="checkmark"></span>
             </label>
-            <span className="bg-gray-200 px-3 py-1 rounded-md">
+            <span className="bg-gray-200 px-2 py-1 rounded-md font-mono text-xs">
               {items[i].count}
             </span>
           </div>

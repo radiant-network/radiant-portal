@@ -1,6 +1,5 @@
 import {
   BooleanOperators,
-  FieldOperators,
   FilterOperators,
   IMergeOptions,
   IRemoteComponent,
@@ -22,31 +21,31 @@ import {
   TSyntheticSqonContent,
   TSyntheticSqonContentValue,
 } from "../../sqon";
+// import { SqonOpEnum } from "@/api/api";
 import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
 import { QueryBuilderInstance, QueryBuilderState } from "../query-builder";
 import { v4 } from "uuid";
 import merge from "lodash/merge";
 import union from "lodash/union";
-import { queryBuilderRemote } from "../query-builder-remote";
 import { ISavedFilter } from "../../saved-filter";
 
 /**
  * Check if a synthetic sqon is empty.
  */
 export const isEmptySqon = (
-  sqon: ISyntheticSqon | Record<string, never>
+  sqon: ISyntheticSqon | Record<string, never>,
 ): boolean => !Object.keys(sqon).length || isEmpty(sqon?.content);
 
 export const isNotEmptySqon = (
-  sqon: ISyntheticSqon | Record<string, never> | TSyntheticSqonContentValue
+  sqon: ISyntheticSqon | Record<string, never> | TSyntheticSqonContentValue,
 ): boolean => !isEmptySqon(sqon as ISyntheticSqon);
 
 /**
  * Check if a synthetic sqon is a reference to another sqon.
  */
 export const isReference = (
-  sqon: ISyntheticSqon | Record<string, never> | TSyntheticSqonContentValue
+  sqon: ISyntheticSqon | Record<string, never> | TSyntheticSqonContentValue,
 ): boolean => !isNotReference(sqon);
 
 export const isNotReference = (sqon: any): boolean => isNaN(sqon);
@@ -57,7 +56,7 @@ export const isNotReference = (sqon: any): boolean => isNaN(sqon);
 export const isSet = (value: IValueFilter): boolean =>
   value.content.value &&
   value.content.value.some((value) =>
-    value?.toString().startsWith(SET_ID_PREFIX)
+    value?.toString().startsWith(SET_ID_PREFIX),
   );
 
 export const isNotSet = (value: IValueFilter): boolean => !isSet(value);
@@ -79,35 +78,35 @@ export const isRemoteComponent = (value: IValueFilter): boolean =>
  * Operator is either one of the following: 'or', 'and' or 'not'
  */
 export const isBooleanOperator = (
-  sqon: ISyntheticSqon | Record<string, never> | TSyntheticSqonContentValue
+  sqon: ISyntheticSqon | Record<string, never> | TSyntheticSqonContentValue,
 ): boolean =>
   typeof sqon === "object" &&
   isNotEmptySqon(sqon) &&
   "op" in sqon &&
-  sqon.op in BooleanOperators;
+  Object.values(BooleanOperators).includes(sqon.op as BooleanOperators);
 
 /**
  * Check if a synthetic sqon is a field operator
  * Operator is either one of the following: '>', '<', 'between', '>=','<=', 'in', 'not-in' or 'all'
  */
 export const isFieldOperator = (
-  sqon: ISyntheticSqon | Record<string, never> | ISqonGroupFilter
-): boolean =>
-  typeof sqon === "object" && isNotEmptySqon(sqon) && sqon.op in FieldOperators;
+  sqon: ISyntheticSqon | Record<string, never> | ISqonGroupFilter,
+): boolean => true;
+// typeof sqon === "object" && isNotEmptySqon(sqon) && sqon.op in SqonOpEnum;
 
 /**
  * Check if a query filter is a boolean one.
  */
 export const isBooleanFilter = (valueFilter: IValueFilter): boolean =>
   valueFilter.content.value.every((val) =>
-    ["false", "true"].includes(val.toString().toLowerCase())
+    ["false", "true"].includes(val.toString().toLowerCase()),
   );
 
 /**
  * Check if a query filter is a range one.
  */
 export const isRangeFilter = (valueFilter: IValueFilter): boolean =>
-  valueFilter.op === RangeOperators.in
+  valueFilter.op === RangeOperators.In
     ? false
     : valueFilter.op in RangeOperators;
 
@@ -121,7 +120,7 @@ export const isCustomPill = (valueFilter: IValueFilter): boolean =>
  * Generates an empty synthetic sqon
  */
 export const generateEmptyQuery = (
-  sqon: ISyntheticSqon = { content: [], id: v4(), op: BooleanOperators.and }
+  sqon: ISyntheticSqon = { content: [], id: v4(), op: BooleanOperators.And },
 ): ISyntheticSqon => ({
   ...sqon,
   content: [],
@@ -130,12 +129,12 @@ export const generateEmptyQuery = (
 export const getDefaultSyntheticSqon = (id: string = v4()): ISyntheticSqon => ({
   id,
   content: [],
-  op: BooleanOperators.and,
+  op: BooleanOperators.And,
 });
 
 export const removeIgnoredFieldsFromQueryList = (
   sqon: ISyntheticSqon[],
-  fieldsToIgnore: string[] = []
+  fieldsToIgnore: string[] = [],
 ) => {
   const queries = cloneDeep(sqon);
   const newQuery: ISyntheticSqon[] = [];
@@ -147,7 +146,7 @@ export const removeIgnoredFieldsFromQueryList = (
 
 export const removeIgnoredFieldsFromQueryContent = (
   query: ISyntheticSqon,
-  fieldsToIgnore?: string[]
+  fieldsToIgnore?: string[],
 ): ISyntheticSqon => {
   const filteredQuery = query.content.filter((c) => {
     let toKeep = false;
@@ -155,7 +154,7 @@ export const removeIgnoredFieldsFromQueryContent = (
       if ((c as IValueFilter).content) {
         if (
           !fieldsToIgnore?.includes(
-            ((c as IValueFilter).content as IValueContent).field
+            ((c as IValueFilter).content as IValueContent).field,
           )
         ) {
           toKeep = true;
@@ -169,7 +168,7 @@ export const removeIgnoredFieldsFromQueryContent = (
       ) {
         if (
           !fieldsToIgnore?.includes(
-            ((c as IValueFilter).content as IValueContent).field
+            ((c as IValueFilter).content as IValueContent).field,
           )
         ) {
           toKeep = true;
@@ -216,23 +215,23 @@ export const cleanUpQueries = (queries: ISyntheticSqon[]) => {
  */
 export const removeSqonAtIndex = (
   indexToRemove: number,
-  sqonsList: ISyntheticSqon[]
+  sqonsList: ISyntheticSqon[],
 ): Array<ISyntheticSqon> => {
   const getNewContent = (
     indexToRemove: number,
-    content: TSyntheticSqonContent
+    content: TSyntheticSqonContent,
   ) =>
     content
       .filter(
         (content: TSyntheticSqonContentValue | TSqonContentValue) =>
-          content !== indexToRemove
+          content !== indexToRemove,
       )
       .map((s: TSyntheticSqonContentValue | TSqonContentValue) =>
         isReference(s)
           ? typeof s === "number" && s > indexToRemove
             ? (s as number) - 1
             : s
-          : s
+          : s,
       );
 
   const result = sqonsList
@@ -253,7 +252,7 @@ export const removeSqonAtIndex = (
   if (emptyQueries.length) {
     return removeSqonAtIndex(
       result.findIndex((s) => s.id == emptyQueries[0].id),
-      result
+      result,
     );
   }
 
@@ -262,7 +261,7 @@ export const removeSqonAtIndex = (
 
 export const deleteQueryAndSetNext = (
   queryId: string,
-  queryBuilder: QueryBuilderInstance
+  queryBuilder: QueryBuilderInstance,
 ) => {
   const queries = queryBuilder.getRawQueries();
   const activeQueryId = queryBuilder.getState().activeQueryId;
@@ -272,13 +271,13 @@ export const deleteQueryAndSetNext = (
   } else {
     const queryIndex = queryBuilder.getQueryIndex(queryId);
     const updatedQueries = cleanUpQueries(
-      removeSqonAtIndex(queryIndex, queries)
+      removeSqonAtIndex(queryIndex, queries),
     );
 
     if (updatedQueries.length) {
       const nextSelectedIndex = findNextSelectedQuery(
         updatedQueries,
-        queryIndex
+        queryIndex,
       );
       const nextQuery = updatedQueries[nextSelectedIndex];
 
@@ -292,7 +291,7 @@ export const deleteQueryAndSetNext = (
       }
 
       const activeQueryStillExists = updatedQueries.find(
-        (query) => query.id === activeQueryId
+        (query) => query.id === activeQueryId,
       );
 
       const newQueryState: Partial<QueryBuilderState> = {
@@ -317,7 +316,7 @@ export const deleteQueryAndSetNext = (
 
 export const findNextSelectedQuery = (
   queries: ISyntheticSqon[],
-  queryIndex: number
+  queryIndex: number,
 ) => {
   if (queries.length - 1 >= queryIndex) {
     return queryIndex;
@@ -344,7 +343,7 @@ export const findNextSelectedQuery = (
  */
 export const changeCombineOperatorForQuery = (
   operator: TSqonGroupOp,
-  syntheticSqon: ISyntheticSqon
+  syntheticSqon: ISyntheticSqon,
 ): ISyntheticSqon => ({
   ...syntheticSqon,
   content: syntheticSqon.content.map(
@@ -352,14 +351,14 @@ export const changeCombineOperatorForQuery = (
       isBooleanOperator(subContent) &&
       !(subContent as ISqonGroupFilter).skipBooleanOperatorCheck
         ? changeCombineOperatorForQuery(operator, subContent as ISyntheticSqon)
-        : subContent
+        : subContent,
   ) as TSyntheticSqonContent,
   op: operator,
 });
 
 export const removeFieldFromSqon = (
   field: string,
-  sqon: ISyntheticSqon
+  sqon: ISyntheticSqon,
 ): ISyntheticSqon => ({
   ...sqon,
   content: sqon.content.filter(function f(sqon: any): boolean {
@@ -381,7 +380,7 @@ export const deepMergeFieldInQuery = ({
   index,
   isUploadedList,
   merge_strategy = MERGE_VALUES_STRATEGIES.APPEND_VALUES,
-  operator = TermOperators.in,
+  operator = TermOperators.In,
   overrideValuesName,
   remoteComponent,
   value,
@@ -425,7 +424,7 @@ export const deepMergeFieldInQuery = ({
 export const deepMergeSqonValue = (
   sourceSqon: ISyntheticSqon,
   newSqon: IValueFilter,
-  opts: IMergeOptions
+  opts: IMergeOptions,
 ): ISyntheticSqon => {
   const clonedSqons = cloneDeep(sourceSqon);
 
@@ -435,7 +434,7 @@ export const deepMergeSqonValue = (
       operator: MERGE_OPERATOR_STRATEGIES.DEFAULT,
       values: MERGE_VALUES_STRATEGIES.DEFAULT,
     },
-    opts
+    opts,
   );
 
   const found = deeplySetSqonValue(clonedSqons, newSqon, opts);
@@ -461,7 +460,7 @@ export const deepMergeSqonValue = (
 const deeplySetSqonValue = (
   sourceSqon: ISyntheticSqon,
   newSqon: IValueFilter,
-  opts: IMergeOptions
+  opts: IMergeOptions,
 ) => {
   let found = false;
 
@@ -499,7 +498,7 @@ const deeplySetSqonValue = (
         castedValueSqon.content.value = union(
           [],
           castedValueSqon.content.value,
-          newSqon.content.value
+          newSqon.content.value,
         );
       }
 
@@ -515,7 +514,7 @@ const deeplySetSqonValue = (
 export const findSqonValueByField = (
   field: string,
   sqon: ISqonGroupFilter,
-  prevValue: any = undefined
+  prevValue: any = undefined,
 ): any => {
   let value: any = prevValue;
   sqon.content.forEach((content) => {
@@ -539,7 +538,7 @@ export const findSqonValueByField = (
 export const generateWildCardValueFilter = ({
   fields,
   index = "",
-  operator = FilterOperators.filter,
+  operator = FilterOperators.Filter,
   overrideValuesName,
   value,
 }: {
@@ -563,7 +562,7 @@ export const generateWildCardValueFilter = ({
  */
 export const removeContentFromSqon = (
   indexOrField: string | number,
-  syntheticSqon: ISyntheticSqon
+  syntheticSqon: ISyntheticSqon,
 ): ISyntheticSqon => {
   const content = syntheticSqon.content as TSyntheticSqonContent;
 
@@ -600,11 +599,11 @@ export const removeContentFromSqon = (
 
 export const removeQueryFromSqon = (
   id: string,
-  syntheticSqon: ISyntheticSqon
+  syntheticSqon: ISyntheticSqon,
 ): ISyntheticSqon => {
   const content = syntheticSqon.content as TSyntheticSqonContent;
   const contentCleaned = content.filter(
-    (contentValue) => (contentValue as IValueQuery).id !== id
+    (contentValue) => (contentValue as IValueQuery).id !== id,
   );
 
   return {
@@ -624,7 +623,7 @@ export const removeQueryFromSqon = (
  */
 export const isIndexReferencedInSqon = (
   indexReference: number,
-  syntheticSqon: ISyntheticSqon
+  syntheticSqon: ISyntheticSqon,
 ): boolean =>
   isBooleanOperator(syntheticSqon)
     ? syntheticSqon.content.reduce(
@@ -632,15 +631,15 @@ export const isIndexReferencedInSqon = (
           acc ||
           isIndexReferencedInSqon(
             indexReference,
-            contentSqon as ISyntheticSqon
+            contentSqon as ISyntheticSqon,
           ),
-        false
+        false,
       )
     : typeof syntheticSqon === "number" && syntheticSqon === indexReference;
 
 export const updateQueriesWithCustomPill = (
   queries: ISyntheticSqon[],
-  customPill: ISavedFilter
+  customPill: ISavedFilter,
 ): ISyntheticSqon[] => {
   const queriesCloned = cloneDeep(queries);
 
@@ -658,14 +657,14 @@ export const updateQueriesWithCustomPill = (
           return newFilter;
         }
         return filter;
-      }
+      },
     );
     return { ...query, content: newContent };
   });
 };
 
 export const formatQueriesWithPill = (
-  queries: ISyntheticSqon[]
+  queries: ISyntheticSqon[],
 ): ISyntheticSqon[] => {
   const queriesCloned = cloneDeep(queries);
   const formattedQueries = queriesCloned.map((query: ISyntheticSqon) => {
@@ -681,7 +680,7 @@ export const formatQueriesWithPill = (
 
 export const getFilterWithNoSelection = (
   filters: ISyntheticSqon,
-  field: string
+  field: string,
 ) => {
   let fieldIndex = -1;
   const filtered = filters.content.filter((filter: any, index: number) => {
@@ -694,7 +693,7 @@ export const getFilterWithNoSelection = (
     const skipBooleanOperatorCheckField =
       skipBooleanOperatorCheck &&
       filterAsSqonGroupFilter.content.find(
-        (f) => (f.content as IValueContent).field === field
+        (f) => (f.content as IValueContent).field === field,
       );
 
     if (skipBooleanOperatorCheckField || filter.content.field == field) {
@@ -718,7 +717,7 @@ export const getFilterWithNoSelection = (
 export const createInlineFilters = (
   field: string,
   filters: any[], // IFilter<IFilterCount>[],
-  index?: string
+  index?: string,
 ): TSqonContent => {
   console.error("createSQONFromFilters is not implemented");
 
@@ -728,7 +727,7 @@ export const createInlineFilters = (
 export const createSQONFromFilters = (
   filterGroup: any, // IFilterGroup,
   selectedFilters: any[], // IFilter[],
-  index?: string
+  index?: string,
 ): TSyntheticSqonContent => {
   console.error("createSQONFromFilters is not implemented");
 

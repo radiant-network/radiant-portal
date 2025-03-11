@@ -1,7 +1,6 @@
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/base/ui/tooltip";
 import { useQueryBarContext } from "../query-bar/query-bar-context";
@@ -14,7 +13,7 @@ import { useQueryBuilderDictContext } from "../query-builder-context";
 function QueryCombiner() {
   const { query } = useQueryBarContext();
   const dict = useQueryBuilderDictContext();
-  const isAndOperator = query.raw().op === BooleanOperators.and;
+  const isAndOperator = query.raw().op === BooleanOperators.And;
 
   return (
     <div className="px-2" onClick={(e) => e.stopPropagation()}>
@@ -25,7 +24,7 @@ function QueryCombiner() {
             className="text-sm p-0 h-auto font-normal"
             onClick={() =>
               query.changeCombineOperator(
-                isAndOperator ? BooleanOperators.or : BooleanOperators.and
+                isAndOperator ? BooleanOperators.or : BooleanOperators.and,
               )
             }
           >
