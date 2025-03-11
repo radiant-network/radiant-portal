@@ -5,10 +5,9 @@ import { action } from "@storybook/addon-actions";
 
 import MultiSelector from "@/components/base/multi-selector/multi-selector";
 import { MultiSelectorOption } from "@/components/base/multi-selector/multi-selector.types";
-import { Spinner } from "@/components/base/spinner";
 
 const meta = {
-  title: "Base/Data Entry/Multi Selector",
+  title: "Base/Data Entry/Inputs/Multi Selector",
   component: MultiSelector,
   args: {
     value: [],
@@ -76,11 +75,6 @@ export const AsyncSearch: Story = {
           });
         }}
         debounceDelay={300}
-        loadingIndicator={
-          <div className="flex items-center justify-center p-8">
-            <Spinner size={20} />
-          </div>
-        }
         className="max-w-[300px]"
         placeholder="Placeholder"
         commandProps={{

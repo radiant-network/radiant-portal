@@ -22,8 +22,6 @@ export interface MultipleSelectorProps {
   /** manually controlled options */
   options?: MultiSelectorOption[];
   placeholder?: string;
-  /** Loading component. */
-  loadingIndicator?: React.ReactNode;
   /** Empty component. */
   emptyIndicator?: React.ReactNode;
   /** Debounce time for async search. Only work with `onSearch`. */
