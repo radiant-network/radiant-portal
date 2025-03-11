@@ -2,18 +2,18 @@ import { createContext, type ReactNode, useContext } from "react";
 
 export interface Aggregation {
   key: string;
-  type: 'multiple' | 'boolean' | 'range';
+  type: "multiple" | "boolean" | "range";
 }
 
 export type AggregationConfig = Aggregation[];
 
-
 export interface AppsConfig {
-  'aggregations': AggregationConfig;
+  app_id: string;
+  aggregations: AggregationConfig;
 }
 
 export interface PortalConfig {
-  'variant_entity': AppsConfig;
+  variant_entity: AppsConfig;
 }
 
 const ConfigContext = createContext<PortalConfig | undefined>(undefined);
@@ -25,17 +25,14 @@ interface ConfigProviderProps {
 
 export const ConfigProvider = ({ children, config }: ConfigProviderProps) => {
   return (
-    <ConfigContext.Provider value={config}>
-      {children}
-    </ConfigContext.Provider>
+    <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
   );
 };
 
 export const useConfig = (): PortalConfig => {
   const context = useContext(ConfigContext);
   if (!context) {
-    throw new Error('useConfig must be used within a ConfigProvider');
+    throw new Error("useConfig must be used within a ConfigProvider");
   }
   return context;
 };
-

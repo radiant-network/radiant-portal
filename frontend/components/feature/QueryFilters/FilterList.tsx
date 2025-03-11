@@ -1,130 +1,16 @@
-import useSWR from "swr";
-import React from "react";
-
-import { MultiSelect } from "@/components/feature/QueryFilters/MultiSelect";
-import { LoadingOverlay } from "@/components/base/overlays/loading-overlay";
-import {
-  SqonContent,
-  SqonOpEnum,
-  type Aggregation,
-  type AggregationBody,
-} from "@/api/api";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/base/ui/accordion";
-import { occurrencesApi } from "@/utils/api";
-import { SearchIcon } from "lucide-react";
+import { useConfig } from "@/components/model/applications-config";
 import { type Aggregation as AggregationConfig } from "@/components/model/applications-config";
-import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
-// import { ISqonGroupFilter } from "@/components/model/sqon";
+import { FilterAccordion } from "@/components/feature/QueryFilters/FilterAccordion";
 
-type OccurrenceAggregationInput = {
-  seqId: string;
-  aggregationBody: AggregationBody;
-};
+export function FilterList() {
+  const config = useConfig();
+  const fields: AggregationConfig[] = config.variant_entity.aggregations;
 
-const fetcher = (input: OccurrenceAggregationInput): Promise<Aggregation[]> => {
-  return occurrencesApi
-    .aggregateOccurrences(input.seqId, input.aggregationBody)
-    .then((response) => response.data);
-};
-
-function useAggregationBuilder(
-  field: string,
-  size: number = 30,
-  shouldFetch: boolean = false,
-) {
-  let data: OccurrenceAggregationInput | null;
-
-  if (!shouldFetch) {
-    data = null;
-  } else {
-    data = {
-      seqId: "5011",
-      aggregationBody: {
-        field: field,
-        size: size,
-      },
-    };
-  }
-  const activeQuery = queryBuilderRemote.getActiveQuery("variant");
-
-  if (activeQuery && data) {
-    data.aggregationBody.sqon = {
-      content: activeQuery.content as SqonContent,
-      op: activeQuery.op as SqonOpEnum,
-    };
-  }
-
-  return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
-    data,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-    },
-  );
-}
-function FilterBuilder({ field }: { field: AggregationConfig }) {
-  const [collapsed, setCollapsed] = React.useState(true);
-  const [searchVisible, setSearchVisible] = React.useState(false);
-  let { data, isLoading } = useAggregationBuilder(
-    field.key,
-    undefined,
-    !collapsed,
-  );
-
-  function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
-    e.stopPropagation();
-    setSearchVisible(!searchVisible);
-  }
-
-  return (
-    <Accordion
-      type="single"
-      collapsible
-      onValueChange={() => setCollapsed(!collapsed)}
-    >
-      <AccordionItem value="item-1">
-        <AccordionTrigger className="AccordionTrigger">
-          <div className="flex items-center justify-between w-full text-base">
-            <span className="capitalize">{field.key.replace("_", " ")}</span>
-            {!collapsed && (
-              <SearchIcon
-                size={18}
-                className="z-40"
-                aria-hidden
-                onClick={handleSearch}
-              />
-            )}
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <LoadingOverlay loading={isLoading}>
-            {field.type === "multiple" ? (
-              <MultiSelect
-                field={field}
-                searchVisible={searchVisible}
-                data={data}
-              />
-            ) : (
-              <div>Not implemented</div>
-            )}
-          </LoadingOverlay>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-}
-
-export function FilterList({ fields }: { fields: AggregationConfig[] }) {
   return (
     <ul>
       {fields.map((field) => (
         <li key={field.key}>
-          <FilterBuilder field={field} />
+          <FilterAccordion field={field} />
         </li>
       ))}
     </ul>

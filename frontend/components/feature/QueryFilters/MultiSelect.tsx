@@ -5,11 +5,8 @@ import { Input } from "@/components/base/ui/input";
 import { ActionButton } from "@/components/base/Buttons";
 import { Aggregation } from "@/api/api";
 import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
-import {
-  IValueContent,
-  IValueFilter,
-  MERGE_VALUES_STRATEGIES,
-} from "@/components/model/sqon";
+import { useConfig } from "@/components/model/applications-config";
+import { IValueFilter, MERGE_VALUES_STRATEGIES } from "@/components/model/sqon";
 import { type Aggregation as AggregationConfig } from "@/components/model/applications-config";
 
 interface IProps {
@@ -45,11 +42,13 @@ export function MultiSelect({
     getVisibleItemsCount(items.length, maxVisibleItems),
   );
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
+  const config = useConfig();
+  const appId = config.variant_entity.app_id;
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
     let prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
-      .getActiveQuery("variant")
+      .getActiveQuery(appId)
       // @ts-ignore
       .content.find((x: IValueFilter) => {
         return x.content.field === field.key;
@@ -137,17 +136,11 @@ export function MultiSelect({
   const apply = useCallback(() => {
     setHasUnappliedItems(false);
     setAppliedSelectedItems(selectedItems);
-    queryBuilderRemote.updateActiveQueryField("variant", {
+    queryBuilderRemote.updateActiveQueryField(appId, {
       field: field.key,
       value: [...selectedItems],
       merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES, // Default APPEND_VALUES
     });
-    const activeQuery = queryBuilderRemote.getActiveQuery("variant");
-    const sqon = activeQuery;
-    console.group("MultiSelect Apply");
-    console.log("active query: ", queryBuilderRemote.getActiveQuery("variant"));
-    console.log("sqon: ", sqon);
-    console.groupEnd();
   }, [selectedItems]);
 
   return items.length === 0 ? (

@@ -24,7 +24,7 @@ import { UsersIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { QueryBuilderState } from "@/components/model/query-builder-core";
 import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
-import SidenavFilters from "./components/layouts/SidenavFilters";
+import { FilterList } from "@/components/feature/QueryFilters/FilterList";
 
 type OccurrencesListInput = {
   seqId: string;
@@ -145,7 +145,9 @@ function App() {
 
   return (
     <div className={styles.appLayout}>
-      <SidenavFilters state={qbState} />
+      <aside>
+        <FilterList />
+      </aside>
       <main className="flex-1 p-4 h-full overflow-hidden">
         <h1 className="text-2xl font-bold">Variant</h1>
         <div className="py-4 space-y-2">
