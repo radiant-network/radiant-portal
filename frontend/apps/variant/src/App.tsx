@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { QueryBuilderState } from "@/components/model/query-builder-core";
 import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
 import { FilterList } from "@/components/feature/QueryFilters/FilterList";
+import { useConfig } from "@/components/model/applications-config";
 
 type OccurrencesListInput = {
   seqId: string;
@@ -46,7 +47,7 @@ const DEFAULT_SORTING = [
 async function fetchOccurencesList(input: OccurrencesListInput) {
   const response = await occurrencesApi.listOccurrences(
     input.seqId,
-    input.listBody,
+    input.listBody
   );
   return response.data;
 }
@@ -54,7 +55,7 @@ async function fetchOccurencesList(input: OccurrencesListInput) {
 async function fetchOccurencesCount(input: OccurrenceCountInput) {
   const response = await occurrencesApi.countOccurrences(
     input.seqId,
-    input.countBody,
+    input.countBody
   );
   return response.data;
 }
@@ -62,6 +63,7 @@ async function fetchOccurencesCount(input: OccurrenceCountInput) {
 const SEQ_ID = "5011";
 
 function App() {
+  const config = useConfig();
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
     op: "and",
@@ -91,10 +93,10 @@ function App() {
     fetchOccurencesCount,
     {
       revalidateOnFocus: false,
-    },
+    }
   );
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
-  const config = useConfig();
+
   const appId = config.variant_entity.app_id;
 
   const { data: list, isLoading: listIsLoading } = useSWR<
@@ -129,12 +131,11 @@ function App() {
     fetchOccurencesList,
     {
       revalidateOnFocus: false,
-    },
+    }
   );
 
   useEffect(() => {
-    const localQbState =
-      queryBuilderRemote.getLocalQueryBuilderState("variant");
+    const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);
 
     setQbState({
       ...localQbState,
@@ -142,7 +143,7 @@ function App() {
       selectedQueryIndexes: [0],
     });
 
-    setActiveSqon(queryBuilderRemote.getActiveQuery("variant") as Sqon);
+    setActiveSqon(queryBuilderRemote.getActiveQuery(appId) as Sqon);
   }, []);
 
   return (
