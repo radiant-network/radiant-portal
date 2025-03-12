@@ -1,5 +1,5 @@
 import { Command as CommandPrimitive, useCommandState } from "cmdk";
-import { XIcon } from "lucide-react";
+import { Check, XIcon } from "lucide-react";
 import {
   useEffect,
   useCallback,
@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/base/ui/badge";
 import {
   Command,
+  CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandList,
@@ -28,9 +29,9 @@ import {
 import {
   getSelectedOptionByValue,
   isOptionsExist,
-  removePickedOption,
   transToGroupOption,
 } from "./multi-selector.utils";
+import { Skeleton } from "@/components/base/ui/skeleton";
 
 function MultiSelector({
   value,
@@ -41,7 +42,6 @@ function MultiSelector({
   debounceDelay = 500,
   onSearch,
   onSearchSync,
-  loadingIndicator,
   emptyIndicator,
   maxSelected = Number.MAX_SAFE_INTEGER,
   onMaxSelected,
@@ -253,24 +253,17 @@ function MultiSelector({
   };
 
   const EmptyItem = useCallback(() => {
-    if (!emptyIndicator) return undefined;
-
     // For async search that showing emptyIndicator
     if (onSearch && !creatable && Object.keys(options).length === 0) {
-      return (
-        <CommandItem value="-" disabled>
-          {emptyIndicator}
-        </CommandItem>
-      );
+      return <div className="p-2 py-4 text-center text-sm">No data</div>;
     }
 
-    return <CommandEmpty>{emptyIndicator}</CommandEmpty>;
+    return (
+      <CommandEmpty>
+        {emptyIndicator || <div className="text-center text-sm">No data</div>}
+      </CommandEmpty>
+    );
   }, [creatable, emptyIndicator, onSearch, options]);
-
-  const selectables = useMemo<MultiSelectorGroupOption>(
-    () => removePickedOption(options, selected),
-    [options, selected]
-  );
 
   /** Avoid Creatable Selector freezing or lagging when paste a long string. */
   const commandFilter = useCallback(() => {
@@ -358,7 +351,6 @@ function MultiSelector({
               </Badge>
             );
           })}
-          {/* Avoid having the "Search" Icon */}
           <CommandPrimitive.Input
             {...inputProps}
             ref={inputRef}
@@ -412,104 +404,92 @@ function MultiSelector({
           </button>
         </div>
       </div>
-      <div className="relative">
-        {open && (
-          <CommandList
-            className="absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in"
-            onMouseLeave={() => {
-              setOnScrollbar(false);
-            }}
-            onMouseEnter={() => {
-              setOnScrollbar(true);
-            }}
-            onMouseUp={() => {
-              inputRef?.current?.focus();
-            }}
-          >
-            {isLoading ? (
-              <>{loadingIndicator}</>
-            ) : (
-              <>
-                {EmptyItem()}
-                {CreatableItem()}
-                {!selectFirstItem && (
-                  <CommandItem value="-" className="hidden" />
-                )}
-                {Object.entries(selectables).map(([key, dropdowns]) => (
-                  <CommandGroup
-                    key={key}
-                    heading={key}
-                    className="h-full overflow-auto"
-                  >
-                    <>
-                      {dropdowns.map((option) => {
-                        return (
-                          <CommandItem
-                            key={option.value}
-                            value={option.label}
-                            disabled={option.disable}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onSelect={() => {
-                              if (selected.length >= maxSelected) {
-                                onMaxSelected?.(selected.length);
-                                return;
-                              }
-                              setInputValue("");
-                              const newOptions = [...selected, option];
-                              setSelected(newOptions);
-                              onChange?.(newOptions.map((o) => o.value));
-                            }}
-                            className={cn(
-                              "cursor-pointer",
-                              option.disable &&
-                                "cursor-default text-muted-foreground"
-                            )}
-                          >
-                            {option.label}
-                          </CommandItem>
-                        );
-                      })}
-                    </>
-                  </CommandGroup>
-                ))}
-              </>
-            )}
-          </CommandList>
-        )}
+      <div className={cn("relative", open ? "block" : "hidden")}>
+        <CommandList
+          className="absolute top-1 z-10 w-full rounded-md border border-border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95"
+          onMouseLeave={() => {
+            setOnScrollbar(false);
+          }}
+          onMouseEnter={() => {
+            setOnScrollbar(true);
+          }}
+          onMouseUp={() => {
+            inputRef?.current?.focus();
+          }}
+        >
+          {isLoading ? (
+            <div className="p-1">
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : (
+            <>
+              {EmptyItem()}
+              {CreatableItem()}
+              {!selectFirstItem && <CommandItem value="-" className="hidden" />}
+              {Object.entries(options).map(([key, dropdowns]) => (
+                <CommandGroup
+                  key={key}
+                  heading={key}
+                  className="h-full overflow-auto"
+                >
+                  <>
+                    {dropdowns.map((option) => {
+                      const isSelected = selected
+                        .map((s) => s.value)
+                        ?.includes(option.value);
+
+                      return (
+                        <CommandItem
+                          key={option.value}
+                          value={option.label}
+                          disabled={option.disable}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          onSelect={() => {
+                            if (selected.length >= maxSelected) {
+                              onMaxSelected?.(selected.length);
+                              return;
+                            }
+                            setInputValue("");
+
+                            let newOptions: MultiSelectorOption[] = [];
+
+                            if (
+                              selected.find((s) => s.value === option.value)
+                            ) {
+                              newOptions = selected.filter(
+                                (s) => s.value !== option.value
+                              );
+                            } else {
+                              newOptions = [...selected, option];
+                            }
+
+                            setSelected(newOptions);
+                            onChange?.(newOptions.map((o) => o.value));
+                          }}
+                          className={cn(
+                            "cursor-pointer",
+                            option.disable &&
+                              "cursor-default text-muted-foreground"
+                          )}
+                        >
+                          <span className="flex-1">{option.label}</span>
+                          {isSelected ? <Check className="w-4" /> : null}
+                        </CommandItem>
+                      );
+                    })}
+                  </>
+                </CommandGroup>
+              ))}
+            </>
+          )}
+        </CommandList>
       </div>
     </Command>
   );
 }
-
-/**
- * The `CommandEmpty` of shadcn/ui will cause the cmdk empty not rendering correctly.
- * So we create one and copy the `Empty` implementation from `cmdk`.
- *
- * @reference: https://github.com/hsuanyi-chou/shadcn-ui-expansions/issues/34#issuecomment-1949561607
- **/
-const CommandEmpty = forwardRef<
-  HTMLDivElement,
-  ComponentProps<typeof CommandPrimitive.Empty>
->(({ className, ...props }, forwardedRef) => {
-  const render = useCommandState((state) => state.filtered.count === 0);
-
-  if (!render) return null;
-
-  return (
-    <div
-      ref={forwardedRef}
-      className={cn("py-6 text-center text-sm", className)}
-      cmdk-empty=""
-      role="presentation"
-      {...props}
-    />
-  );
-});
-
-CommandEmpty.displayName = "CommandEmpty";
 
 MultiSelector.displayName = "MultipleSelector";
 

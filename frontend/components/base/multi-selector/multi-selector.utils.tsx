@@ -27,22 +27,6 @@ export function transToGroupOption(
   return groupOption;
 }
 
-export function removePickedOption(
-  groupOption: MultiSelectorGroupOption,
-  picked: MultiSelectorOption[]
-) {
-  const cloneOption = JSON.parse(
-    JSON.stringify(groupOption)
-  ) as MultiSelectorGroupOption;
-
-  for (const [key, value] of Object.entries(cloneOption)) {
-    cloneOption[key] = value.filter(
-      (val) => !picked.find((p) => p.value === val.value)
-    );
-  }
-  return cloneOption;
-}
-
 export function getSelectedOptionByValue(
   value: string[],
   options: MultiSelectorOption[]

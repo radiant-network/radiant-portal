@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { type DialogProps } from "@radix-ui/react-dialog";
-import { Command as CommandPrimitive } from "cmdk";
-import { Search } from "lucide-react";
+import { Command as CommandPrimitive, useCommandState } from "cmdk";
+import { Search, XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/base/ui/dialog";
@@ -37,18 +37,31 @@ const CommandDialog = ({ children, ...props }: DialogProps) => {
 
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
+    wrapperClassName?: string;
+    rightAddon?: React.ReactNode;
+  }
+>(({ className, wrapperClassName, rightAddon, disabled, ...props }, ref) => (
+  <div
+    className={cn(
+      "flex h-10 items-center px-3 bg-background rounded-md border border-border enabled:focus-within:ring-2 enabled:focus-within:ring-ring",
+      wrapperClassName,
+      {
+        "cursor-not-allowed opacity-50": disabled,
+      }
+    )}
+    cmdk-input-wrapper=""
+  >
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        "flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+        "flex w-full rounded-md bg-background text-sm outline-none placeholder:text-muted-foreground",
         className
       )}
+      disabled={disabled}
       {...props}
     />
+    {rightAddon}
   </div>
 ));
 
@@ -67,16 +80,30 @@ const CommandList = React.forwardRef<
 
 CommandList.displayName = CommandPrimitive.List.displayName;
 
+/**
+ * The `CommandEmpty` of shadcn/ui will cause the cmdk empty not rendering correctly.
+ * So we create one and copy the `Empty` implementation from `cmdk`.
+ *
+ * @reference: https://github.com/hsuanyi-chou/shadcn-ui-expansions/issues/34#issuecomment-1949561607
+ **/
 const CommandEmpty = React.forwardRef<
-  React.ElementRef<typeof CommandPrimitive.Empty>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
->((props, ref) => (
-  <CommandPrimitive.Empty
-    ref={ref}
-    className="py-6 text-center text-sm"
-    {...props}
-  />
-));
+  HTMLDivElement,
+  React.ComponentProps<typeof CommandPrimitive.Empty>
+>(({ className, ...props }, forwardedRef) => {
+  const render = useCommandState((state) => state.filtered.count === 0);
+
+  if (!render) return null;
+
+  return (
+    <div
+      ref={forwardedRef}
+      className={cn("py-4 text-center text-sm", className)}
+      cmdk-empty=""
+      role="presentation"
+      {...props}
+    />
+  );
+});
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 
