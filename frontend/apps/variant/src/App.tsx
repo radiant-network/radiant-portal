@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { QueryBuilderState } from "@/components/model/query-builder-core";
 import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
 import { FilterList } from "@/components/feature/QueryFilters/FilterList";
+import { useConfig } from "@/components/model/applications-config";
 
 type OccurrencesListInput = {
   seqId: string;
