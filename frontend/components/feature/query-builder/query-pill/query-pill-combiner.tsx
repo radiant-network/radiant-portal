@@ -24,7 +24,7 @@ function QueryCombiner() {
             className="text-sm p-0 h-auto font-normal"
             onClick={() =>
               query.changeCombineOperator(
-                isAndOperator ? BooleanOperators.or : BooleanOperators.and,
+                isAndOperator ? BooleanOperators.Or : BooleanOperators.And
               )
             }
           >
