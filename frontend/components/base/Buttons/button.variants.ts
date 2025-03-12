@@ -24,7 +24,7 @@ export const baseButtonVariants = tv({
       subtle: "",
       text: "",
       link: {
-        base: "underline-offset-4",
+        base: "underline-offset-4 px-0",
       },
     },
   },

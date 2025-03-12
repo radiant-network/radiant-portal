@@ -56,7 +56,7 @@ function SavedFiltersManageDialog({
           </List>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="primary">
+              <Button color="primary">
                 {dict.savedFilter.manageDialog.close}
               </Button>
             </DialogClose>

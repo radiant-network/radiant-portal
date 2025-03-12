@@ -34,7 +34,6 @@ function SavedFiltersSaveAction() {
         <span className="inline-flex">
           <IconButton
             icon={SaveIcon}
-            color="orange-400"
             disabled={isDisabled}
             className={selectedSavedFilter?.isDirty() ? "text-gold-500" : ""}
             onClick={handleSave}
@@ -45,8 +44,8 @@ function SavedFiltersSaveAction() {
         {queryBuilder.isEmpty()
           ? dict.savedFilter.saveTooltip.whenEmpty
           : selectedSavedFilter?.isDirty()
-            ? dict.savedFilter.saveTooltip.whenDirty
-            : dict.savedFilter.saveTooltip.default}
+          ? dict.savedFilter.saveTooltip.whenDirty
+          : dict.savedFilter.saveTooltip.default}
       </TooltipContent>
     </Tooltip>
   );
