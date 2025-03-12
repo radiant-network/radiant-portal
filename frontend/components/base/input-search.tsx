@@ -37,8 +37,6 @@ function InputSearch({
       if (e.key === "Enter") {
         e.preventDefault();
 
-        console.log(input.value);
-
         if (input.value !== "") {
           handleSearch(value as string);
         }
