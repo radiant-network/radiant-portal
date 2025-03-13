@@ -65,12 +65,14 @@ var GenotypeQualityField = Field{
 	Alias:         "genotype_quality",
 	CanBeSelected: true,
 	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Table:         OccurrenceTable,
 }
 var AdRatioField = Field{
 	Name:          "ad_ratio",
 	CanBeSelected: true,
 	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Table:         OccurrenceTable,
 }
 var ChromosomeField = Field{

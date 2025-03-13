@@ -25,7 +25,7 @@ type StarrocksDAO interface {
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
-	if (db == nil) {
+	if db == nil {
 		log.Print("StarrocksRepository: db is nil")
 		return nil
 	}
@@ -71,7 +71,7 @@ func addLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
 
 func addSort(tx *gorm.DB, userQuery types.ListQuery) {
 	for _, sort := range userQuery.SortedFields() {
-		s := fmt.Sprintf("%s.%s %s", sort.Field.Table.Alias, sort.Field.GetAlias(), sort.Order)
+		s := fmt.Sprintf("%s.%s %s", sort.Field.Table.Alias, sort.Field.GetName(), sort.Order)
 		tx = tx.Order(s)
 	}
 }
