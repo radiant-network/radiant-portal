@@ -20,13 +20,17 @@ function TableIndexResult({
 }: TableIndexResultProp) {
   if (loading) return <Skeleton className="h-[24px] w-[250px]" />;
 
-  const result = total;
-  const to = pageSize * pageIndex;
+  let to = pageSize * pageIndex;
   const from = to - pageSize + 1;
+
+  if (to > total) {
+    to = total;
+  }
+
   return (
     <span>
       Results {numberWithCommas(from)} - {numberWithCommas(to)} of{" "}
-      {numberWithCommas(result)}
+      {numberWithCommas(total)}
     </span>
   );
 }

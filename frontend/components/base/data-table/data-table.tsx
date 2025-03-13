@@ -146,6 +146,20 @@ function getNextSortingOrderHeaderTitle(
 }
 
 /**
+ *
+ * @param pagination
+ * @param total
+ */
+function getPageCount(pagination: PaginationState, total: number) {
+  console.log("pagination", pagination); //TODO: to remove
+  console.log("total", total); //TODO: to remove
+
+  console.log("pagecoutn result", Math.ceil(total / pagination.pageSize)); //TODO: to remove
+
+  return Math.ceil(total / pagination.pageSize);
+}
+
+/**
  * Table
  *
  * @issue For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
@@ -235,7 +249,7 @@ function DataTable({
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange,
     onSortingChange: setSorting,
-    pageCount: total / pagination.pageSize,
+    pageCount: getPageCount(pagination, total),
     state: {
       columnOrder,
       columnVisibility,
@@ -407,7 +421,7 @@ function DataTable({
                 ))}
               </TableRow>
               {subComponent && row.getIsExpanded() && (
-                <TableRow key={`${row.id}-sub`}>
+                <TableRow key={`subcomponent-${row.id}`}>
                   <TableCell colSpan={row.getVisibleCells().length}>
                     {subComponent(row.original)}
                   </TableCell>

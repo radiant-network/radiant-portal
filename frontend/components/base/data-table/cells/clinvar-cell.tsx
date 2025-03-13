@@ -11,7 +11,11 @@ function ClinvarCell({ codes = [] }: ClinvarCellProps) {
   return (
     <>
       {codes.map((code) => {
-        return <Badge className="me-2">{code}</Badge>;
+        return (
+          <Badge key={code} className="me-2">
+            {code}
+          </Badge>
+        );
       })}
     </>
   );

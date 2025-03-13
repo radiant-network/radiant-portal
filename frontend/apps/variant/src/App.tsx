@@ -81,7 +81,7 @@ function App() {
     ],
   });
   const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
+    pageIndex: 1,
     pageSize: 10,
   });
   const { data: total, isLoading: totalIsLoading } = useSWR<
@@ -145,9 +145,15 @@ function App() {
       savedFilters: [],
       selectedQueryIndexes: [0],
     });
-
     setActiveSqon(queryBuilderRemote.getResolvedActiveQuery(appId) as Sqon);
   }, []);
+
+  useEffect(() => {
+    setPagination({
+      pageIndex: 0,
+      pageSize: pagination.pageSize,
+    });
+  }, [JSON.stringify(qbState?.queries), qbState?.activeQueryId]);
 
   return (
     <div className={styles.appLayout}>
