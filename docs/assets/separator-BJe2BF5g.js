@@ -1,6 +1,0 @@
-import{c as u}from"./createLucideIcon-DirO1-NP.js";import{j as s}from"./jsx-runtime-D_zvdyIk.js";import{r as l}from"./index-DUAV1Q2A.js";import{P as f}from"./index-aKoabQ1X.js";import{c as v}from"./utils-BNf5BS2b.js";/**
- * @license lucide-react v0.468.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const P=u("ChevronDown",[["path",{d:"m6 9 6 6 6-6",key:"qrunsl"}]]);var h="Separator",n="horizontal",N=["horizontal","vertical"],p=l.forwardRef((r,o)=>{const{decorative:e,orientation:a=n,...t}=r,i=x(a)?a:n,m=e?{role:"none"}:{"aria-orientation":i==="vertical"?i:void 0,role:"separator"};return s.jsx(f.div,{"data-orientation":i,...m,...t,ref:o})});p.displayName=h;function x(r){return N.includes(r)}var c=p;const d=l.forwardRef(({className:r,orientation:o="horizontal",decorative:e=!0,...a},t)=>s.jsx(c,{ref:t,decorative:e,orientation:o,className:v("shrink-0 bg-border",o==="horizontal"?"h-[1px] w-full":"h-full w-[1px]",r),...a}));d.displayName=c.displayName;d.__docgenInfo={description:"",methods:[],props:{orientation:{defaultValue:{value:'"horizontal"',computed:!1},required:!1},decorative:{defaultValue:{value:"true",computed:!1},required:!1}}};export{P as C,d as S};
