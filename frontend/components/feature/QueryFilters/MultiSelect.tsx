@@ -8,6 +8,7 @@ import { queryBuilderRemote } from "@/components/model/query-builder-core/query-
 import { useConfig } from "@/components/model/applications-config";
 import { IValueFilter, MERGE_VALUES_STRATEGIES } from "@/components/model/sqon";
 import { type Aggregation as AggregationConfig } from "@/components/model/applications-config";
+import { numberFormat } from "@/components/lib/number-format";
 
 interface IProps {
   data?: Aggregation[];
@@ -39,7 +40,7 @@ export function MultiSelect({
   // items that are currently checked
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [visibleItemsCount, setVisibleItemsCount] = useState(
-    getVisibleItemsCount(items.length, maxVisibleItems),
+    getVisibleItemsCount(items.length, maxVisibleItems)
   );
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
   const config = useConfig();
@@ -48,7 +49,7 @@ export function MultiSelect({
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
     let prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
-      .getActiveQuery(appId)
+      .getResolvedActiveQuery(appId)
       // @ts-ignore
       .content.find((x: IValueFilter) => {
         return x.content.field === field.key;
@@ -73,7 +74,7 @@ export function MultiSelect({
     });
     setItems(data || []);
     setVisibleItemsCount(
-      getVisibleItemsCount(data?.length || 0, maxVisibleItems),
+      getVisibleItemsCount(data?.length || 0, maxVisibleItems)
     );
   }, [data, visibleItemsCount]);
 
@@ -89,7 +90,7 @@ export function MultiSelect({
       }
       setItems(results);
     },
-    [visibleItemsCount, data],
+    [visibleItemsCount, data]
   );
 
   const showMore = useCallback(() => {
@@ -125,7 +126,7 @@ export function MultiSelect({
       setHasUnappliedItems(true);
       setSelectedItems(newList);
     },
-    [selectedItems],
+    [selectedItems]
   );
 
   const reset = useCallback(() => {
@@ -185,8 +186,8 @@ export function MultiSelect({
               <div className="">{items[i].key}</div>
               <span className="checkmark"></span>
             </label>
-            <span className="bg-gray-200 px-2 py-1 rounded-md font-mono text-xs">
-              {items[i].count}
+            <span className="bg-gray-200 px-2 py-1 rounded-md text-xs">
+              {numberFormat(items[i].count || 0)}
             </span>
           </div>
         </div>

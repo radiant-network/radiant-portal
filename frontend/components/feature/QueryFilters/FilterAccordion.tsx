@@ -36,7 +36,7 @@ function useAggregationBuilder(
   field: string,
   size: number = 30,
   shouldFetch: boolean = false,
-  appId: string,
+  appId: string
 ) {
   let data: OccurrenceAggregationInput | null;
 
@@ -51,7 +51,7 @@ function useAggregationBuilder(
       },
     };
   }
-  const activeQuery = queryBuilderRemote.getActiveQuery(appId);
+  const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
 
   if (activeQuery && data) {
     data.aggregationBody.sqon = {
@@ -65,7 +65,7 @@ function useAggregationBuilder(
     fetcher,
     {
       revalidateOnFocus: false,
-    },
+    }
   );
 }
 export function FilterAccordion({ field }: { field: AggregationConfig }) {
@@ -77,7 +77,7 @@ export function FilterAccordion({ field }: { field: AggregationConfig }) {
     field.key,
     undefined,
     !collapsed,
-    config.variant_entity.app_id,
+    config.variant_entity.app_id
   );
 
   function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
