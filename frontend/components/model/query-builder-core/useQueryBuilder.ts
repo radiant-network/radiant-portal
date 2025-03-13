@@ -14,6 +14,7 @@ import {
 } from "./query-builder-remote";
 import { PartialKeys } from "@/components/lib/utils";
 import { ISyntheticSqon } from "../sqon";
+import { removeIgnoredFieldsFromQueryList } from "./utils/sqon";
 
 export function useQueryBuilder(
   props: PartialKeys<CoreQueryBuilderProps, "state">
@@ -90,13 +91,26 @@ export function useQueryBuilder(
     };
   }, [props.state]);
 
+  props.fieldsToIgnore;
+
+  const mergedState: QueryBuilderState = {
+    ...state,
+    ...props.state,
+  };
+
   queryBuilderRef.current.setCoreProps((prevProps) => ({
     savedFilterDefaultTitle: "Untitled filter",
     ...prevProps,
     ...props,
     state: {
-      ...state,
-      ...props.state,
+      ...mergedState,
+      queries:
+        props.fieldsToIgnore && mergedState.queries
+          ? removeIgnoredFieldsFromQueryList(
+              mergedState.queries,
+              props.fieldsToIgnore
+            )
+          : mergedState.queries,
     },
     onStateChange: (newState) => {
       setState(newState);

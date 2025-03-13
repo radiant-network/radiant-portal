@@ -15,6 +15,7 @@ import {
 } from "../query-builder";
 import { BooleanOperators, ISyntheticSqon, IValueQuery } from "../../sqon";
 import { isEmptySqon } from "../utils/sqon";
+import { SavedFilterTypeEnum } from "../../saved-filter";
 
 const defaultQueries: ISyntheticSqon[] = [
   {
@@ -75,6 +76,7 @@ let state: QueryBuilderState = defaultProps.state;
 
 let mockOnQuerySelectChange: Mock<void, [any]>;
 let mockOnActiveQueryChange: Mock<void, [any]>;
+let mockOnCustomPillSave: Mock<void, [any]>;
 
 describe("Query Manipulation", () => {
   beforeAll(() => {
@@ -91,6 +93,7 @@ describe("Query Manipulation", () => {
     state = defaultProps.state;
     mockOnQuerySelectChange = jest.fn();
     mockOnActiveQueryChange = jest.fn();
+    mockOnCustomPillSave = jest.fn();
 
     qb = createQueryBuilder({
       ...defaultProps,
@@ -99,6 +102,7 @@ describe("Query Manipulation", () => {
       },
       onQuerySelectChange: mockOnQuerySelectChange,
       onActiveQueryChange: mockOnActiveQueryChange,
+      onCustomPillSave: mockOnCustomPillSave,
     });
   });
 
@@ -602,6 +606,50 @@ describe("Query Manipulation", () => {
 
     expect(qb.getQuery("2")?.isReferencedInActiveQuery()).toBe(false);
   });
-});
 
-// TEST saveAsCustomPill
+  it("should save query as custom pill", async () => {
+    const initialQuery: ISyntheticSqon = {
+      id: "1",
+      op: "and",
+      content: [
+        {
+          content: {
+            value: ["something"],
+            field: "field1",
+          },
+          op: "in",
+        },
+      ],
+    };
+
+    qb.setCoreProps((prev) => ({
+      ...prev,
+      state: {
+        activeQueryId: initialQuery.id,
+        queries: [initialQuery],
+        selectedQueryIndexes: [],
+        savedFilters: [],
+      },
+    }));
+
+    const customPillTitle = "Custom pill title";
+
+    await qb.getQuery("1")?.saveAsCustomPill(customPillTitle);
+
+    const updatedQuery = state.queries.find((q) => q.id === initialQuery.id)!;
+    const customPillContent = updatedQuery.content[0] as ISyntheticSqon;
+
+    expect(customPillContent.id).toEqual(mockUUID);
+    expect(customPillContent.op).toEqual(initialQuery.op);
+    expect(customPillContent.content).toEqual(initialQuery.content);
+    expect(customPillContent.title).toEqual(customPillTitle);
+    expect(mockOnCustomPillSave).toHaveBeenCalledTimes(1);
+    expect(mockOnCustomPillSave).toHaveBeenCalledWith({
+      favorite: false,
+      id: mockUUID,
+      queries: [initialQuery],
+      title: customPillTitle,
+      type: SavedFilterTypeEnum.Query,
+    });
+  });
+});
