@@ -148,3 +148,8 @@ export interface IMergeOptions {
   values: MERGE_VALUES_STRATEGIES;
   operator: MERGE_OPERATOR_STRATEGIES;
 }
+
+export type ResolveSyntheticSqonFunc = (
+  syntheticSqon: ISyntheticSqon | TSyntheticSqonContentValue,
+  sqonsList: ISyntheticSqon[]
+) => ISqonGroupFilter;

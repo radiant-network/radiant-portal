@@ -29,7 +29,7 @@ function QueryToolbarCombineAction() {
           queryBuilder.combineSelectedQueries(BooleanOperators.And)
         }
         size="xs"
-        variant="primary"
+        color="primary"
       >
         {dict.toolbar.combine}
       </ActionButton>

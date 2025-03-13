@@ -30,6 +30,7 @@ function QueryBuilder({
   dictionary = defaultDictionary,
   customPillConfig,
   queryPillFacetFilterConfig,
+  resolveSyntheticSqon,
   ...hookProps
 }: QueryBuilderProps) {
   const queryBuilder = useQueryBuilder(hookProps);
@@ -61,6 +62,7 @@ function QueryBuilder({
       dictionary,
       customPillConfig,
       queryPillFacetFilterConfig,
+      resolveSyntheticSqon,
     }),
     [
       queryBuilder,
@@ -75,6 +77,7 @@ function QueryBuilder({
       dictionary,
       customPillConfig,
       queryPillFacetFilterConfig,
+      resolveSyntheticSqon,
     ]
   );
 

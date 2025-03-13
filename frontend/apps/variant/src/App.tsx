@@ -20,12 +20,15 @@ import { IVariantEntity } from "@/variant_type";
 import useSWR from "swr";
 import { occurrencesApi } from "@/utils/api";
 import QueryBuilder from "@/components/feature/query-builder/query-builder";
-import { UsersIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { QueryBuilderState } from "@/components/model/query-builder-core";
+import {
+  QueryBuilderState,
+  resolveSyntheticSqon,
+} from "@/components/model/query-builder-core";
 import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
 import { FilterList } from "@/components/feature/QueryFilters/FilterList";
 import { useConfig } from "@/components/model/applications-config";
+import VariantIcon from "@/components/base/icons/variant-icon";
 
 type OccurrencesListInput = {
   seqId: string;
@@ -143,7 +146,7 @@ function App() {
       selectedQueryIndexes: [0],
     });
 
-    setActiveSqon(queryBuilderRemote.getActiveQuery(appId) as Sqon);
+    setActiveSqon(queryBuilderRemote.getResolvedActiveQuery(appId) as Sqon);
   }, []);
 
   return (
@@ -160,9 +163,21 @@ function App() {
             enableCombine
             enableFavorite
             enableShowHideLabels
-            queryCountIcon={<UsersIcon size={14} />}
-            fetchQueryCount={() => Promise.resolve(15)}
-            onActiveQueryChange={(sqon) => setActiveSqon(sqon as Sqon)}
+            queryCountIcon={<VariantIcon size={14} />}
+            fetchQueryCount={(resolvedSqon) =>
+              fetchOccurencesCount({
+                seqId: SEQ_ID,
+                countBody: {
+                  sqon: resolvedSqon,
+                },
+              }).then((res) => res.count || 0)
+            }
+            resolveSyntheticSqon={resolveSyntheticSqon}
+            onActiveQueryChange={(sqon) =>
+              setActiveSqon(
+                resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon
+              )
+            }
             onStateChange={(state) => {
               setQbState(state);
             }}

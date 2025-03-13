@@ -1,3 +1,4 @@
+import { Sqon } from "@/api/api";
 import { PartialKeys } from "@/components/lib/utils";
 import {
   CoreQueryBuilderProps,
@@ -7,7 +8,13 @@ import {
   ISavedFilter,
   IUserSavedFilter,
 } from "@/components/model/saved-filter";
-import { ISyntheticSqon, IValueFilter } from "@/components/model/sqon";
+import {
+  ISqonGroupFilter,
+  ISyntheticSqon,
+  IValueFilter,
+  ResolveSyntheticSqonFunc,
+  TSyntheticSqonContentValue,
+} from "@/components/model/sqon";
 import { LucideProps } from "lucide-react";
 import { ReactElement, ReactNode } from "react";
 import { DeepPartial } from "react-hook-form";
@@ -97,7 +104,12 @@ type QueryBuilderSharedProps = {
   /**
    * Fetch the query count
    */
-  fetchQueryCount: (sqon: ISyntheticSqon) => Promise<number>;
+  fetchQueryCount: (resolvedSqon: Sqon) => Promise<number>;
+
+  /**
+   * Resolver for sqon
+   */
+  resolveSyntheticSqon: ResolveSyntheticSqonFunc;
 
   /**
    * Custom pill configuration

@@ -229,7 +229,7 @@ describe("QueryBuilder Core", () => {
     };
 
     expect(mockOnQueryCreate).toHaveBeenCalledWith(
-      expectedOnCreatedHaveBeenCalledWith,
+      expectedOnCreatedHaveBeenCalledWith
     );
 
     expect(mockOnStateChange).toHaveBeenCalledTimes(1);
@@ -1027,7 +1027,7 @@ describe("QueryBuilder Core", () => {
     qb.changeQueryCombineOperator("1", BooleanOperators.Or);
 
     expect(state.queries.find((q) => q.id === "1")?.op).toBe(
-      BooleanOperators.Or,
+      BooleanOperators.Or
     );
 
     const subSqon = state.queries.find((q) => q.id === "1")
@@ -1079,7 +1079,7 @@ describe("QueryBuilder Core", () => {
     expect(qb.getSelectedSavedFilter()).toBeTruthy();
     expect(qb.getSelectedSavedFilter()?.getQueries().length).toBe(2);
     expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(
-      defaultQueries,
+      defaultQueries
     );
 
     qb.createSavedFilter();
@@ -1103,7 +1103,7 @@ describe("QueryBuilder Core", () => {
         isDirty: false,
         favorite: false,
         queries: [getDefaultSyntheticSqon()],
-      }),
+      })
     );
   });
 
@@ -1112,8 +1112,18 @@ describe("QueryBuilder Core", () => {
 
     qb.clearQueries();
 
+    const newQuery: Omit<ISyntheticSqon, "id"> = {
+      op: BooleanOperators.And,
+      content: [],
+    };
+
     expect(state.queries.length).toBe(1);
     expect(state.activeQueryId).toBe(mockUUID);
+    expect(mockOnActiveQueryChange).toHaveBeenCalledTimes(1);
+    expect(mockOnActiveQueryChange).toHaveBeenCalledWith({
+      id: mockUUID,
+      ...newQuery,
+    });
   });
 
   it("should be empty valid", () => {

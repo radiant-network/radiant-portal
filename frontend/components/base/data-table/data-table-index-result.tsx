@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/base/ui/skeleton";
-import { numberWithCommas } from "@/components/utils/number-format";
+import { numberWithCommas } from "@/components/lib/number-format";
 
 /**
  * TableIndexResult

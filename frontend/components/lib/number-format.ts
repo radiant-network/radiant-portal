@@ -30,20 +30,20 @@ export function numberFormat(num: number, digits = 0): number | string {
 
   if (BLACK_LIST_LENGTH.includes(num.toString().length)) {
     return num.toLocaleString(locale);
-  } else {
-    VALUE_SYMBOLE_LIST.forEach((si: any, i) => {
-      if (num >= si.value) {
-        index = i;
-        return false;
-      }
-    });
-
-    return (
-      (num / VALUE_SYMBOLE_LIST[index!].value)
-        .toFixed(digits)
-        .replace(NUM_FORMAT_REGEX, "$1") + VALUE_SYMBOLE_LIST[index!].symbol
-    );
   }
+
+  VALUE_SYMBOLE_LIST.forEach((si: any, i) => {
+    if (num >= si.value) {
+      index = i;
+      return false;
+    }
+  });
+
+  return (
+    (num / VALUE_SYMBOLE_LIST[index!].value)
+      .toFixed(digits)
+      .replace(NUM_FORMAT_REGEX, "$1") + VALUE_SYMBOLE_LIST[index!].symbol
+  );
 }
 
 export function numberWithCommas(number: number): string {
