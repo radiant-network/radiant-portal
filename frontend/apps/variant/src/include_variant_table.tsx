@@ -24,30 +24,27 @@ const columns = [
   {
     id: "row_expand",
     cell: RowExpandCell,
-    size: 32,
-    minSize: 24,
+    size: 70,
+    enableResizing: false,
   },
   {
     id: "row_selection",
     header: getTableRowSelectionHeader,
     cell: getTableRowSelectionCell,
-    size: 32,
-    minSize: 24,
+    size: 48,
+    enableResizing: false,
   },
   columnHelper.accessor((row) => row.hgvsg, {
     id: "hgvsg",
     cell: (info) => <LinkCell url="#">{info.getValue()}</LinkCell>,
     header: "Variant",
-    size: 100,
-    minSize: 50,
+    size: 150,
+    minSize: 100,
   }),
   columnHelper.accessor((row) => row.variant_class, {
     id: "variant_class",
     cell: (info) => <VariantClassCell value={info.getValue()} />,
     header: "Type",
-    size: 150,
-    minSize: 100,
-    maxSize: 200,
   }),
   columnHelper.accessor((row) => row.symbol, {
     id: "symbol",
@@ -55,13 +52,11 @@ const columns = [
       return <GeneCell symbol={info.getValue()} />;
     },
     header: "Gene",
-    size: 200,
   }),
   columnHelper.accessor((row) => row.vep_impact, {
     id: "vep_impact",
     cell: (info) => <span>{info.getValue()}</span>,
     header: "VEP",
-    size: 200,
   }),
   columnHelper.accessor((row) => row.mane_select, {
     id: "mane_select",
@@ -69,7 +64,6 @@ const columns = [
       return <ManeCell mane_select={info.getValue()} />;
     },
     header: "MANE",
-    size: 75,
   }),
   columnHelper.accessor((row) => row.omim_inheritance_code, {
     id: "omim_inheritance_code",
@@ -77,7 +71,6 @@ const columns = [
       return <OmimCell codes={info.getValue()} />;
     },
     header: "OMIM",
-    size: 200,
   }),
   columnHelper.accessor((row) => row.clinvar, {
     id: "clinvar",
@@ -88,19 +81,16 @@ const columns = [
     id: "gnomad_v3_af",
     cell: (info) => <NumberCell value={info.getValue()} />,
     header: "gnomAD",
-    size: 200,
   }),
   columnHelper.accessor((row) => row.pf, {
     id: "pf",
     cell: (info) => <NumberCell value={info.getValue()} />,
     header: "Participant frequency",
-    size: 200,
   }),
   columnHelper.accessor((row) => row.genotype_quality, {
     id: "genotype_quality",
     cell: (info) => <NumberCell value={info.getValue()} />,
     header: "Genotype Quality",
-    size: 200,
   }),
   columnHelper.accessor((row) => row.zygosity, {
     id: "zygosity",

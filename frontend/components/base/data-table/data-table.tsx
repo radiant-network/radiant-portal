@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -148,9 +148,13 @@ function getNextSortingOrderHeaderTitle(
 /**
  * Table
  *
- * columns
- * define the mapping between the column and the cell component
- * @see https://tanstack.com/table/latest/docs/guide/column-defs#creating-accessor-columns
+ * @issue For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
+ * @link https://github.com/TanStack/table/issues/4825#issuecomment-1749665597
+ *
+ * @description `columns` define the mapping between the column and the cell component
+ * @link https://tanstack.com/table/latest/docs/guide/column-defs#creating-accessor-columns
+ *
+ * @example
  * [
  *  columnHelper.accessor((row) => row.hgvsg, {
  *   id: "hgvsg",
@@ -160,9 +164,9 @@ function getNextSortingOrderHeaderTitle(
  *   minSize: 50,
  *  })
  * ]
- *
- * columnSettings (saved by user) and defaultColumnSettings
- * manage order, visibility, fixed status of each column
+ * @description `columnSettings` (saved by user) and defaultColumnSettings manage order, visibility,
+ *              fixed status of each column
+ * @example
  *  [{
  *   "key": "{column.id}",
  *   "index": 16,
@@ -170,17 +174,20 @@ function getNextSortingOrderHeaderTitle(
  *   "fixed": {boolean},
  *  }]
  *
- * Row selection
+ * @description add a row selection checkbox for each row
+ * @example
  * [{
  *  id: "row_selection",
  *  header: getTableRowSelectionHeader,
- *  cell: getTableRowSelectionCell
+ *  cell: getTableRowSelectionCell,
+ *  size: 70
  * }]
- *
- * Row Expand for sub component
+ * @description add a `RowExpandCell`, expand a custom subcomponent
+ * @example
  * [{
  *  id: "row_expand",
  *  cell: RowExpandCell
+ *  size: 48,
  * }]
  */
 function DataTable({
@@ -214,28 +221,43 @@ function DataTable({
   // Initialize tanstack table
   const table = useReactTable({
     columns,
-    onColumnVisibilityChange: setColumnVisibility,
-    onColumnOrderChange: setColumnOrder,
-    enableColumnResizing: true,
     columnResizeMode: "onChange",
     columnResizeDirection: "ltr",
     data: data,
+    enableColumnResizing: true,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getRowCanExpand: () => true,
-    getExpandedRowModel: getExpandedRowModel(),
+    isMultiSortEvent: (_e) => true,
+    manualPagination: true,
+    onColumnOrderChange: setColumnOrder,
+    onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange,
     onSortingChange: setSorting,
-    isMultiSortEvent: (_e) => true,
     pageCount: total / pagination.pageSize,
-    manualPagination: true,
     state: {
-      pagination,
-      columnVisibility,
       columnOrder,
+      columnVisibility,
+      pagination,
       sorting,
     },
   });
+
+  /*
+   * Prevent calling of `column.getSize()` on every render
+   * @see https://tanstack.com/table/v8/docs/framework/react/examples/column-resizing-performant
+   */
+  const columnSizeVars = useMemo(() => {
+    const headers = table.getFlatHeaders();
+    const colSizes: { [key: string]: number } = {};
+    for (let i = 0; i < headers.length; i++) {
+      const header = headers[i]!;
+      colSizes[`--header-${header.id}-size`] = header.getSize();
+      colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
+    }
+    return colSizes;
+  }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
 
   function handleVisiblityChange(target: string, checked: boolean) {
     setColumnVisibility({ ...columnVisibility, [target]: checked });
@@ -243,8 +265,7 @@ function DataTable({
 
   // @TODO: shout save column width in user data
   useResizeObserver(table.getState(), (columnId, columnSize) => {
-    console.log(columnId);
-    console.log(columnSize);
+    console.log(`Resize ${columnId} ${columnSize}`);
   });
 
   /**
@@ -271,7 +292,7 @@ function DataTable({
   }, [sorting]);
 
   return (
-    <div className="block min-w-full w-full overflow-x-auto overflow-y-auto">
+    <>
       <div className="w-full flex text-left justify-between mb-4">
         <TableIndexResult
           loading={loadingStates?.total}
@@ -296,7 +317,7 @@ function DataTable({
           }}
         />
       </div>
-      <Table>
+      <Table style={{ ...columnSizeVars }}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -304,79 +325,82 @@ function DataTable({
                 <TableHead
                   key={header.id}
                   colSpan={header.colSpan}
-                  style={{ width: header.getSize() }}
-                  className="border border-border relative"
+                  style={{
+                    width: `calc(var(--header-${header?.id}-size) * 1px)`,
+                  }}
                 >
-                  <div
-                    className={cn(
-                      "flex align-middle gap-2",
-                      header.column.getCanSort() && "cursor-pointer select-none"
-                    )}
-                    onClick={header.column.getToggleSortingHandler()}
-                    title={
-                      header.column.getCanSort()
-                        ? getNextSortingOrderHeaderTitle(
-                            header.column.getNextSortingOrder()
-                          )
-                        : undefined
-                    }
-                  >
-                    {/* Header rendering */}
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-
-                    {/* Sorted Icons */}
-                    {{
-                      asc: <ArrowDownAZ size={16} />,
-                      desc: <ArrowDownZA size={16} />,
-                    }[header.column.getIsSorted() as string] ?? null}
-
-                    {/* Resize Grip */}
+                  <>
                     <div
-                      onDoubleClick={() => header.column.resetSize()}
-                      onMouseDown={header.getResizeHandler()}
-                      onTouchStart={header.getResizeHandler()}
                       className={cn(
-                        "absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50",
-                        table.options.columnResizeDirection,
-                        header.column.getIsResizing() ? "opacity-100" : ""
+                        "flex align-middle gap-2",
+                        header.column.getCanSort() &&
+                          "cursor-pointer select-none"
                       )}
-                    />
-                  </div>
+                      onClick={header.column.getToggleSortingHandler()}
+                      title={
+                        header.column.getCanSort()
+                          ? getNextSortingOrderHeaderTitle(
+                              header.column.getNextSortingOrder()
+                            )
+                          : undefined
+                      }
+                    >
+                      {/* Header rendering */}
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+
+                      {/* Sorted Icons */}
+                      {{
+                        asc: <ArrowDownAZ size={16} />,
+                        desc: <ArrowDownZA size={16} />,
+                      }[header.column.getIsSorted() as string] ?? null}
+                    </div>
+                    {/* Resize Grip */}
+                    {header.column.getCanResize() && (
+                      <div
+                        onDoubleClick={() => header.column.resetSize()}
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        className={cn(
+                          "absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50",
+                          table.options.columnResizeDirection,
+                          header.column.getIsResizing() ? "opacity-100" : ""
+                        )}
+                      />
+                    )}
+                  </>
                 </TableHead>
               ))}
             </TableRow>
           ))}
         </TableHeader>
         <TableBody>
-          {/* Loading Skeleton */}
+          {/* Render skeleton loading */}
           {loadingStates?.list &&
             new Array(pagination.pageSize).fill(0).map((_, index) => (
-              <TableRow className="border border-border p-2 font-normal text-left truncate">
+              <TableRow>
                 <TableCell
                   key={`skeleton-row-${index}`}
                   colSpan={columnSettings.length}
-                  className="border border-border p-2 font-normal text-left truncate"
                 >
                   <Skeleton className="w-full h-[32px]" />
                 </TableCell>
               </TableRow>
             ))}
 
-          {/* Display list */}
+          {/* Render table content */}
           {table.getRowModel().rows.map((row) => (
             <>
-              <TableRow
-                key={row.id}
-                className={row.index % 2 != 0 ? "bg-gray-50" : ""}
-              >
+              <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className="border border-border p-2 font-normal text-left truncate"
-                    style={{ width: cell.column.getSize() }}
+                    style={{
+                      width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
+                    }}
+                    className="overflow-hidden truncate text-nowrap"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
@@ -446,7 +470,7 @@ function DataTable({
           </Pagination>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
