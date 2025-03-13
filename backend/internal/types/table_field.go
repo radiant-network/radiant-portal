@@ -36,6 +36,11 @@ func (f *Field) GetAlias() string {
 	}
 }
 
+// GetName returns the name of the field
+func (f *Field) GetName() string {
+	return f.Name
+}
+
 func (f *Field) IsArray() bool {
 	return f.Type == ArrayType
 }
