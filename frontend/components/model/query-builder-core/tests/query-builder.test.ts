@@ -760,6 +760,12 @@ describe("QueryBuilder Core", () => {
 
     qb.combineSelectedQueries(BooleanOperators.And);
 
+    const createdQuery: ISyntheticSqon = {
+      id: mockUUID,
+      op: BooleanOperators.And,
+      content: [0, 1],
+    };
+
     expect(state.selectedQueryIndexes.length).toBe(0);
     expect(state.queries.length).toBe(3);
     expect(state.activeQueryId).toBe(mockUUID);
@@ -770,11 +776,9 @@ describe("QueryBuilder Core", () => {
     expect(mockOnQuerySelectChange).toHaveBeenCalledTimes(1);
     expect(mockOnQuerySelectChange).toHaveBeenCalledWith([]);
     expect(mockOnQueryCreate).toHaveBeenCalledTimes(1);
-    expect(mockOnQueryCreate).toHaveBeenCalledWith({
-      id: mockUUID,
-      op: BooleanOperators.And,
-      content: [0, 1],
-    });
+    expect(mockOnQueryCreate).toHaveBeenCalledWith(createdQuery);
+    expect(mockOnActiveQueryChange).toHaveBeenCalledTimes(1);
+    expect(mockOnActiveQueryChange).toHaveBeenCalledWith(createdQuery);
   });
 
   it("should update combined query when deleting a query", () => {
