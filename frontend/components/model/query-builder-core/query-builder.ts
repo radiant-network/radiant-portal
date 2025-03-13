@@ -522,6 +522,7 @@ export const createQueryBuilder = (
         queries: cleanUpQueries([...prev.queries, combinedQuery]),
         selectedQueryIndexes,
       }));
+      queryBuilder.coreProps.onActiveQueryChange?.(combinedQuery);
       queryBuilder.coreProps.onQueryCreate?.(combinedQuery);
       queryBuilder.coreProps.onQuerySelectChange?.(selectedQueryIndexes);
     },
