@@ -1,40 +1,35 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
-import { action } from "@storybook/addon-actions";
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
+import { action } from '@storybook/addon-actions';
 
-import QueryBuilder from "@/components/feature/query-builder/query-builder";
-import {
-  defaultDictionary,
-  defaultQueryReferenceColors,
-} from "@/components/feature/query-builder/data";
-import { Button } from "@/components/base/ui/button";
-import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
-import { v4 } from "uuid";
-import { BooleanOperators, ISyntheticSqon } from "@/components/model/sqon";
-import { AlertDialogProvider } from "@/components/base/dialog/alert-dialog-provider";
-import {
-  ISavedFilter,
-  IUserSavedFilter,
-} from "@/components/model/saved-filter";
-import { UserIcon } from "lucide-react";
-import { TooltipProvider } from "@/components/base/ui/tooltip";
-import { SqonOpEnum } from "@/api/api";
+import QueryBuilder from '@/components/feature/query-builder/query-builder';
+import { defaultDictionary, defaultQueryReferenceColors } from '@/components/feature/query-builder/data';
+import { Button } from '@/components/base/ui/button';
+import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { v4 } from 'uuid';
+import { BooleanOperators, ISyntheticSqon } from '@/components/model/sqon';
+import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
+import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
+import { UserIcon } from 'lucide-react';
+import { TooltipProvider } from '@/components/base/ui/tooltip';
+import { SqonOpEnum } from '@/api/api';
 
 const meta = {
-  title: "Feature/Query Builder",
+  title: 'Feature/Query Builder',
   component: QueryBuilder,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
   args: {
-    id: "query-builder-id",
+    id: 'query-builder-id',
     enableCombine: true,
     enableFavorite: true,
     enableShowHideLabels: true,
     initialShowHideLabels: true,
     queryReferenceColors: defaultQueryReferenceColors,
+    resolveSyntheticSqon: fn(),
     dictionary: defaultDictionary,
   },
   decorators: [
-    (Story) => (
+    Story => (
       <TooltipProvider delayDuration={0}>
         <AlertDialogProvider>
           <Story />
@@ -48,14 +43,12 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-const qbId = "query-builder-id";
-const qbCustomPillId = "query-builder-custom-pill-id";
-const qbQueryPillFilterId = "query-builder-query-pill-filter-id";
+const qbId = 'query-builder-id';
+const qbCustomPillId = 'query-builder-custom-pill-id';
+const qbQueryPillFilterId = 'query-builder-query-pill-filter-id';
 
-const randomElement = <T,>(arr: T[]): T =>
-  arr[Math.floor(Math.random() * arr.length)];
-const randomNumber = (min = 1, max = 100): number =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
+const randomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+const randomNumber = (min = 1, max = 100): number => Math.floor(Math.random() * (max - min + 1)) + min;
 const randomString = () => Math.random().toString(36).substring(7);
 
 const numericOperators: SqonOpEnum[] = [
@@ -66,16 +59,14 @@ const numericOperators: SqonOpEnum[] = [
   SqonOpEnum.LessThanOrEqualTo,
 ];
 
-const generateRandomUserSavedFilter = (
-  filter?: ISavedFilter,
-): IUserSavedFilter => ({
+const generateRandomUserSavedFilter = (filter?: ISavedFilter): IUserSavedFilter => ({
   id: v4(),
   title: filter?.title || `Custom Pill ${randomNumber(1, 50)}`,
   queries: [generateRandomQuery()],
   keycloak_id: v4(),
   creation_date: new Date().toISOString(),
   updated_date: new Date().toISOString(),
-  tag: "tag",
+  tag: 'tag',
   favorite: false,
 });
 
@@ -90,7 +81,10 @@ const generateRandomValue = (operator: SqonOpEnum): (string | number)[] => {
 const generateRandomQuery = (id: string = v4()): ISyntheticSqon => {
   const numConditions = randomNumber(1, 3);
   const conditions = Array.from({ length: numConditions }, () => {
-    const op = randomElement(Object.values(SqonOpEnum));
+    const filteredOps = Object.values(SqonOpEnum).filter(
+      op => op !== SqonOpEnum.And && op !== SqonOpEnum.Or && op !== SqonOpEnum.Not,
+    );
+    const op = randomElement(filteredOps);
     return {
       op,
       content: {
@@ -102,7 +96,7 @@ const generateRandomQuery = (id: string = v4()): ISyntheticSqon => {
 
   return {
     id,
-    op: randomElement(["and", "or"] as BooleanOperators[]),
+    op: randomElement(['and', 'or'] as BooleanOperators[]),
     content: conditions as any,
   };
 };
@@ -115,9 +109,7 @@ function TestingTools({ queryBuilderId }: { queryBuilderId: string }) {
         <Button
           color="primary"
           size="sm"
-          onClick={() =>
-            queryBuilderRemote.addQuery(queryBuilderId, generateRandomQuery())
-          }
+          onClick={() => queryBuilderRemote.addQuery(queryBuilderId, generateRandomQuery())}
         >
           Add query
         </Button>
@@ -126,8 +118,8 @@ function TestingTools({ queryBuilderId }: { queryBuilderId: string }) {
           size="sm"
           onClick={() => {
             queryBuilderRemote.updateActiveQueryField(queryBuilderId, {
-              field: "field",
-              value: ["new-value"],
+              field: 'field',
+              value: ['new-value'],
             });
           }}
         >
@@ -138,7 +130,7 @@ function TestingTools({ queryBuilderId }: { queryBuilderId: string }) {
           size="sm"
           onClick={() => {
             queryBuilderRemote.updateActiveQueryField(queryBuilderId, {
-              field: "field",
+              field: 'field',
               value: [],
             });
           }}
@@ -160,11 +152,7 @@ export const Default: Story = {
           id: v4(),
           title: "Olivier's Filter",
           favorite: false,
-          queries: [
-            generateRandomQuery(),
-            generateRandomQuery(),
-            generateRandomQuery(),
-          ],
+          queries: [generateRandomQuery(), generateRandomQuery(), generateRandomQuery()],
         },
         {
           id: v4(),
@@ -176,11 +164,7 @@ export const Default: Story = {
           id: v4(),
           title: "Luc's Filter",
           favorite: false,
-          queries: [
-            generateRandomQuery(),
-            generateRandomQuery(),
-            generateRandomQuery(),
-          ],
+          queries: [generateRandomQuery(), generateRandomQuery(), generateRandomQuery()],
         },
       ],
       selectedQueryIndexes: [],
@@ -199,7 +183,7 @@ export const Default: Story = {
     onSavedFilterSave: fn(),
     onSavedFilterUpdate: fn(),
   },
-  render: (args) => {
+  render: args => {
     return (
       <div className="space-y-6">
         <QueryBuilder {...args} />
@@ -217,10 +201,7 @@ export const CustomPill: Story = {
     queryCountIcon: <UserIcon size={14} />,
     initialState: {
       activeQueryId: customPillActiveQueryId,
-      queries: [
-        generateRandomQuery(customPillActiveQueryId),
-        generateRandomQuery(),
-      ],
+      queries: [generateRandomQuery(customPillActiveQueryId), generateRandomQuery()],
       savedFilters: [],
       selectedQueryIndexes: [],
     },
@@ -231,19 +212,15 @@ export const CustomPill: Story = {
     onQueryDelete: fn(),
     onQuerySelectChange: fn(),
     onQueryUpdate: fn(),
-    onCustomPillSave: (filter) => {
-      action("onCustomPillSave")(filter);
+    onCustomPillSave: filter => {
+      action('onCustomPillSave')(filter);
 
-      return new Promise((resolve) =>
-        setTimeout(() => resolve(generateRandomUserSavedFilter(filter)), 750),
-      );
+      return new Promise(resolve => setTimeout(() => resolve(generateRandomUserSavedFilter(filter)), 750));
     },
-    onCustomPillUpdate: (filter) => {
-      action("onCustomPillUpdate")(filter);
+    onCustomPillUpdate: filter => {
+      action('onCustomPillUpdate')(filter);
 
-      return new Promise((resolve) =>
-        setTimeout(() => resolve(generateRandomUserSavedFilter(filter)), 750),
-      );
+      return new Promise(resolve => setTimeout(() => resolve(generateRandomUserSavedFilter(filter)), 750));
     },
     onSavedFilterCreate: fn(),
     onSavedFilterDelete: fn(),
@@ -251,27 +228,17 @@ export const CustomPill: Story = {
     onSavedFilterUpdate: fn(),
     customPillConfig: {
       enable: true,
-      queryBuilderEditId: "qb-custom-pill-edit-id",
+      queryBuilderEditId: 'qb-custom-pill-edit-id',
       fetchCustomPillById: () =>
-        new Promise((resolve) =>
-          setTimeout(() => resolve(generateRandomUserSavedFilter()), 750),
-        ),
-      validateCustomPillTitle: () =>
-        new Promise((resolve) => setTimeout(() => resolve(true), 750)),
+        new Promise(resolve => setTimeout(() => resolve(generateRandomUserSavedFilter()), 750)),
+      validateCustomPillTitle: () => new Promise(resolve => setTimeout(() => resolve(true), 750)),
       fetchSavedFiltersByCustomPillId: () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve([
-                generateRandomUserSavedFilter(),
-                generateRandomUserSavedFilter(),
-              ]),
-            750,
-          ),
+        new Promise(resolve =>
+          setTimeout(() => resolve([generateRandomUserSavedFilter(), generateRandomUserSavedFilter()]), 750),
         ),
     },
   },
-  render: (args) => {
+  render: args => {
     return <QueryBuilder {...args} />;
   },
 };
@@ -297,14 +264,14 @@ export const QueryPillFilter: Story = {
     onSavedFilterUpdate: fn(),
     queryPillFacetFilterConfig: {
       enable: true,
-      onFacetClick: (filter) => {
-        action("onFacetClick")(filter);
+      onFacetClick: filter => {
+        action('onFacetClick')(filter);
 
         return <div className="italic text-sm">Insert Filter Content</div>;
       },
     },
   },
-  render: (args) => {
+  render: args => {
     return (
       <div className="space-y-6">
         <QueryBuilder {...args} />
