@@ -18,7 +18,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Feature/Query Filters Multi Select',
+  title: 'Feature/Query Filters/Multi Select',
   component: MultiSelectFilter,
   tags: ['autodocs'],
   args: {

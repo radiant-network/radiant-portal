@@ -18,7 +18,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Feature/Query Filters ToggleFilter',
+  title: 'Feature/Query Filters/Toggle Filter',
   component: ToggleFilter,
   tags: ['autodocs'],
   args: {
