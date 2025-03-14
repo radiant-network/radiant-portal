@@ -1,47 +1,37 @@
-import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/base/ui/button";
-import { Checkbox } from "@/components/base/ui/checkbox";
-import { Input } from "@/components/base/ui/input";
-import { ActionButton } from "@/components/base/Buttons";
-import { Aggregation } from "@/api/api";
-import { queryBuilderRemote } from "@/components/model/query-builder-core/query-builder-remote";
-import { useConfig } from "@/components/model/applications-config";
-import { IValueFilter, MERGE_VALUES_STRATEGIES } from "@/components/model/sqon";
-import { type Aggregation as AggregationConfig } from "@/components/model/applications-config";
-import { numberFormat } from "@/components/lib/number-format";
+import { useCallback, useEffect, useState } from 'react';
+import { Button } from '@/components/base/ui/button';
+import { Checkbox } from '@/components/base/ui/checkbox';
+import { Input } from '@/components/base/ui/input';
+import { ActionButton } from '@/components/base/Buttons';
+import { Aggregation } from '@/api/api';
+import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { useConfig } from '@/components/model/applications-config';
+import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
+import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
+import { numberFormat } from '@/components/lib/number-format';
 
 interface IProps {
   data?: Aggregation[];
   field: AggregationConfig;
-  appliedItems?: string[];
   maxVisibleItems?: number;
   searchVisible?: boolean;
 }
 
 function searchOptions(search: string, data: any[]) {
-  return data.filter((option) => option.key.includes(search));
+  return data.filter(option => option.key.toLowerCase().includes(search.toLowerCase()));
 }
 
 function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
-export function MultiSelect({
-  data,
-  field,
-  maxVisibleItems = 10,
-  searchVisible = false,
-  appliedItems = [],
-}: IProps) {
+export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVisible = false }: IProps) {
   const [items, setItems] = useState<Aggregation[]>(data || []);
   // items that are include in the search
-  const [appliedSelectedItems, setAppliedSelectedItems] =
-    useState<string[]>(appliedItems);
+  const [appliedSelectedItems, setAppliedSelectedItems] = useState<string[]>([]);
   // items that are currently checked
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [visibleItemsCount, setVisibleItemsCount] = useState(
-    getVisibleItemsCount(items.length, maxVisibleItems)
-  );
+  const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
   const config = useConfig();
   const appId = config.variant_entity.app_id;
@@ -54,7 +44,6 @@ export function MultiSelect({
       .content.find((x: IValueFilter) => {
         return x.content.field === field.key;
       });
-
     if (prevSelectedItems) {
       setSelectedItems(prevSelectedItems.content.value as string[]);
     } else {
@@ -73,10 +62,8 @@ export function MultiSelect({
       return aSelected ? -1 : 1;
     });
     setItems(data || []);
-    setVisibleItemsCount(
-      getVisibleItemsCount(data?.length || 0, maxVisibleItems)
-    );
-  }, [data, visibleItemsCount]);
+    setVisibleItemsCount(getVisibleItemsCount(data?.length || 0, maxVisibleItems));
+  }, [data]);
 
   // Memoize these functions with useCallback
   //
@@ -90,7 +77,7 @@ export function MultiSelect({
       }
       setItems(results);
     },
-    [visibleItemsCount, data]
+    [items, visibleItemsCount, data],
   );
 
   const showMore = useCallback(() => {
@@ -104,7 +91,7 @@ export function MultiSelect({
       return;
     }
     setHasUnappliedItems(true);
-    setSelectedItems(items.map((f) => f.key!));
+    setSelectedItems(items.map(f => f.key!));
   }, [items, selectedItems]);
 
   const unSelectAll = useCallback(() => {
@@ -118,15 +105,15 @@ export function MultiSelect({
   const itemSelected = useCallback(
     (item: Aggregation) => {
       let newList: string[] = [];
-      if (selectedItems.some((f) => f === item.key)) {
-        newList = selectedItems.filter((f) => f !== item.key);
+      if (selectedItems.some(f => f === item.key)) {
+        newList = selectedItems.filter(f => f !== item.key);
       } else {
         newList = [...selectedItems, item.key!];
       }
       setHasUnappliedItems(true);
       setSelectedItems(newList);
     },
-    [selectedItems]
+    [selectedItems],
   );
 
   const reset = useCallback(() => {
@@ -144,32 +131,22 @@ export function MultiSelect({
     });
   }, [selectedItems]);
 
-  return items.length === 0 ? (
-    <div>Fetching...</div>
-  ) : (
-    <div className="bg-white p-2 w-full max-w-md">
+  return (
+    <div className="p-2 w-full max-w-md">
       {searchVisible && (
         <Input
           type="text"
           placeholder="Search ..."
           className="w-full p-2 mb-4 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onChange={(e) => updateSearch(e.target.value)}
+          onChange={e => updateSearch(e.target.value)}
         />
       )}
 
       <div className="flex justify-between mb-4">
-        <Button
-          className="underline font-semibold"
-          onClick={() => selectAll()}
-          variant="link"
-        >
+        <Button className="underline font-semibold" onClick={() => selectAll()} variant="link">
           All
         </Button>
-        <Button
-          className="underline font-semibold"
-          onClick={() => unSelectAll()}
-          variant="link"
-        >
+        <Button className="underline font-semibold" onClick={() => unSelectAll()} variant="link">
           None
         </Button>
       </div>
@@ -177,18 +154,16 @@ export function MultiSelect({
       {Array.from({ length: visibleItemsCount }, (_, i) => (
         <div className="space-y-3 pt-2" key={items[i].key}>
           <div className="flex justify-between items-center">
-            <label className="flex items-center space-x-2">
+            <label className="flex items-center space-x-2 overflow-hidden">
               <Checkbox
                 className="w-4 h-4"
-                checked={selectedItems.some((f) => f === items[i].key)}
+                checked={selectedItems.some(f => f === items[i].key)}
                 onCheckedChange={() => itemSelected(items[i])}
               />
-              <div className="">{items[i].key}</div>
+              <div className="overflow-hidden text-ellipsis">{items[i].key}</div>
               <span className="checkmark"></span>
             </label>
-            <span className="bg-gray-200 px-2 py-1 rounded-md text-xs">
-              {numberFormat(items[i].count || 0)}
-            </span>
+            <span className="bg-gray-200 px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
           </div>
         </div>
       ))}
@@ -202,21 +177,11 @@ export function MultiSelect({
       <hr className="my-4 border-border" />
 
       <div className="flex align-right justify-end items-center space-x-2">
-        <Button
-          className="text-gray-600"
-          onClick={reset}
-          disabled={!hasUnappliedItems}
-        >
+        <Button className="text-gray-600" onClick={reset} disabled={!hasUnappliedItems}>
           Clear
         </Button>
         <div className="flex space-x-2">
-          <ActionButton
-            size="sm"
-            className="h-7"
-            color="primary"
-            actions={[]}
-            onDefaultAction={apply}
-          >
+          <ActionButton size="sm" className="h-7" color="primary" actions={[]} onDefaultAction={apply}>
             Apply
           </ActionButton>
         </div>
