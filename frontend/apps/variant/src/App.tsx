@@ -13,6 +13,7 @@ import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/quer
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { useConfig } from '@/components/model/applications-config';
+import GermlineVariantPreview from '@/components/feature/preview/germline-variant-preview';
 import VariantIcon from '@/components/base/icons/variant-icon';
 
 type OccurrencesListInput = {
@@ -169,13 +170,7 @@ function App() {
           pagination={pagination}
           onPaginationChange={setPagination}
           onServerSortingChange={setSorting}
-          subComponent={(data: IVariantEntity) => {
-            return (
-              <pre style={{ fontSize: '10px' }}>
-                <code>{JSON.stringify(data, null, 2)}</code>
-              </pre>
-            );
-          }}
+          subComponent={(data: IVariantEntity) => <GermlineVariantPreview data={data} />}
           total={total?.count ?? 0}
         />
       </main>
