@@ -52,7 +52,6 @@ export const Default: Story = {
     ],
   },
   render: args => {
-    console.log('active query : ', queryBuilderRemote.getActiveQuery(config.variant_entity.app_id));
     return (
       <div className="space-y-6">
         <ToggleFilter {...args} />
