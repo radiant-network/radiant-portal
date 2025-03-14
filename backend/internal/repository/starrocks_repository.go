@@ -62,7 +62,11 @@ func addLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
 		} else {
 			l = MaxLimit
 		}
-		tx = tx.Limit(l).Offset(userQuery.Pagination().Offset)
+		if userQuery.Pagination().PageIndex != 0 {
+			tx = tx.Limit(l).Offset(userQuery.Pagination().PageIndex * l)
+		} else {
+			tx = tx.Limit(l).Offset(userQuery.Pagination().Offset)
+		}
 	} else {
 		tx = tx.Limit(MinLimit)
 	}

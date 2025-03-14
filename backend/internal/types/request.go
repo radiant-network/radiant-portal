@@ -91,6 +91,7 @@ type ListBody struct {
 	Sqon           *Sqon      `json:"sqon"`
 	Limit          int        `json:"limit"`
 	Offset         int        `json:"offset"`
+	PageIndex      int        `json:"page_index"`
 	Sort           []SortBody `json:"sort"`
 }
 

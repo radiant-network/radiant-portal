@@ -149,6 +149,8 @@ components:
           type: integer
         offset:
           type: integer
+        page_index:
+          type: integer
         selected_fields:
           items:
             type: string

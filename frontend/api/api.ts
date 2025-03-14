@@ -394,6 +394,12 @@ export interface ListBody {
     'offset'?: number;
     /**
      * 
+     * @type {number}
+     * @memberof ListBody
+     */
+    'page_index'?: number;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof ListBody
      */
