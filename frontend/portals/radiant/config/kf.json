@@ -1,6 +1,6 @@
 {
   "variant_entity": {
-    "app_id": "radiant_entity",
+    "app_id": "variant_entity",
     "aggregations": [
       { "key": "chromosome", "type": "multiple" },
       { "key": "filter", "type": "multiple" },
