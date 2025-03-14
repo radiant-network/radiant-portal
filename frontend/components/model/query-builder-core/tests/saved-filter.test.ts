@@ -68,6 +68,7 @@ let state: QueryBuilderState = defaultProps.state;
 let mockOnFilterCreate: Mock<void, [any]>;
 let mockOnFilterDelete: Mock<{ savedFilterId: string }, [any]>;
 let mockOnFilterUpdate: Mock<void | Promise<IUserSavedFilter>, [any]>;
+let mockOnActiveQueryChange: Mock<void, [any]>;
 
 describe("SavedFilters Manipulation", () => {
   beforeAll(() => {
@@ -86,9 +87,7 @@ describe("SavedFilters Manipulation", () => {
     mockOnFilterCreate = jest.fn();
     mockOnFilterDelete = jest.fn();
     mockOnFilterUpdate = jest.fn();
-    defaultProps.onSavedFilterCreate = mockOnFilterCreate;
-    defaultProps.onSavedFilterDelete = mockOnFilterDelete;
-    defaultProps.onSavedFilterUpdate = mockOnFilterUpdate;
+    mockOnActiveQueryChange = jest.fn();
 
     qb = createQueryBuilder({
       ...defaultProps,
@@ -98,6 +97,7 @@ describe("SavedFilters Manipulation", () => {
       onSavedFilterCreate: mockOnFilterCreate,
       onSavedFilterDelete: mockOnFilterDelete,
       onSavedFilterUpdate: mockOnFilterUpdate,
+      onActiveQueryChange: mockOnActiveQueryChange,
     });
   });
 
@@ -371,6 +371,10 @@ describe("SavedFilters Manipulation", () => {
     expect(state.savedFilters[0].queries).toEqual([getDefaultSyntheticSqon()]);
     expect(mockOnFilterDelete).toHaveBeenCalledTimes(1);
     expect(mockOnFilterDelete).toHaveBeenCalledWith("1");
+    expect(mockOnActiveQueryChange).toHaveBeenCalledTimes(1);
+    expect(mockOnActiveQueryChange).toHaveBeenCalledWith(
+      getDefaultSyntheticSqon()
+    );
   });
 
   it("should select savedfilter", () => {

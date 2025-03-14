@@ -165,6 +165,7 @@ export const createSavedFilter = (
           ],
         }));
 
+        queryBuilder.coreProps.onActiveQueryChange?.(newSavedFilter.queries[0]);
         queryBuilder.coreProps.onSavedFilterCreate?.(newSavedFilter);
       });
     },
