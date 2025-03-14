@@ -126,7 +126,7 @@ function App() {
           "ad_ratio",
         ],
         limit: pagination.pageSize,
-        offset: pagination.pageIndex,
+        page_index: pagination.pageIndex,
         sort: sorting,
         sqon: activeSqon,
       },
