@@ -69,8 +69,9 @@ type SortField struct {
 }
 
 type Pagination struct {
-	Limit  int //Limit the number of results
-	Offset int //Offset the results
+	Limit     int //Limit the number of results
+	Offset    int //Offset the results in case it's an infinite scroll
+	PageIndex int //PageIndex the page index in case there is pagination
 }
 
 func NewListQuery(selected []string, sqon *Sqon, fields []Field, pagination *Pagination, sorted []SortBody) (ListQuery, error) {

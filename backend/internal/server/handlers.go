@@ -57,7 +57,9 @@ func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 			return
 		}
 		var p types.Pagination
-		if body.Limit != 0 && body.Offset != 0 {
+		if body.Limit != 0 && body.PageIndex != 0 {
+			p = types.Pagination{Limit: body.Limit, PageIndex: body.PageIndex}
+		} else if body.Limit != 0 && body.Offset != 0 {
 			p = types.Pagination{Limit: body.Limit, Offset: body.Offset}
 		} else if body.Limit != 0 {
 			p = types.Pagination{Limit: body.Limit, Offset: 0}
@@ -281,7 +283,7 @@ func extractArrayQueryParam(c *gin.Context, key string) []string {
 	values := c.QueryArray(key)
 	if len(values) > 0 {
 		for _, i := range values {
-			if (strings.Contains(i, ",")) {
+			if strings.Contains(i, ",") {
 				idSplit := strings.Split(i, ",")
 				for _, i := range idSplit {
 					all = append(all, i)
@@ -440,7 +442,6 @@ func SearchInterpretationGermline(repo repository.InterpretationsDAO) gin.Handle
 		c.JSON(http.StatusOK, interpretations)
 	}
 }
-
 
 // SearchInterpretationSomatic
 // @Summary Search interpretation somatic

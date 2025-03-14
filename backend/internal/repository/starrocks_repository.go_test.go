@@ -266,6 +266,33 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 	})
 }
 
+func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Specified(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+
+		repo := NewStarrocksRepository(db)
+
+		sortedBody := []types.SortBody{
+			{
+				Field: "pf",
+				Order: "desc",
+			},
+		}
+		pagination := &types.Pagination{
+			Limit:     12,
+			PageIndex: 1,
+		}
+
+		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, pagination, sortedBody)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 12) {
+			assert.EqualValues(t, 1016, occurrences[0].LocusId)
+			assert.EqualValues(t, 1005, occurrences[len(occurrences)-1].LocusId)
+		}
+	})
+}
+
 func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
 
