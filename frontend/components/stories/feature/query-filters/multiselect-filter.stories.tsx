@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
 const config: PortalConfig = {
   variant_entity: {
-    app_id: 'variant_entity',
+    app_id: 'variant_entity_multi_select_filter',
     aggregations: [
       { key: 'chromosome', type: 'multiple' },
       { key: 'filter', type: 'multiple' },
@@ -109,11 +110,12 @@ export const DataAppliedToQueryBuilder: Story = {
     ],
   },
   render: args => {
-    queryBuilderRemote.updateActiveQueryField('variant_entity', {
-      field: 'chromosome',
-      value: ['Option1', 'Option4'],
-    });
-    console.log('querybuild : ', queryBuilderRemote.getActiveQuery('variant_entity'));
+    action('activeQuery')(
+      queryBuilderRemote.updateActiveQueryField(config.variant_entity.app_id, {
+        field: 'chromosome',
+        value: ['Option1', 'Option4'],
+      }),
+    );
     return (
       <div className="space-y-6">
         <MultiSelectFilter {...args} />

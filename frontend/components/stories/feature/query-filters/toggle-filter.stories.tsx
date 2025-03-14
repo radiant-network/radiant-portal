@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { ToggleFilter } from '@/components/feature/query-filters/toggle-filter';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
@@ -74,10 +75,12 @@ export const DataAppliedToQueryBuilder: Story = {
     ],
   },
   render: args => {
-    queryBuilderRemote.updateActiveQueryField('variant_entity', {
-      field: 'chromosome',
-      value: ['true'],
-    });
+    action('activeQuery')(
+      queryBuilderRemote.updateActiveQueryField(config.variant_entity.app_id, {
+        field: 'chromosome',
+        value: ['true'],
+      }),
+    );
     return (
       <div className="space-y-6">
         <ToggleFilter {...args} />
