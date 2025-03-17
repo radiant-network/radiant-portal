@@ -468,3 +468,34 @@ func SearchInterpretationSomatic(repo repository.InterpretationsDAO) gin.Handler
 		c.JSON(http.StatusOK, interpretations)
 	}
 }
+
+// GetSequencing handles retrieving a sequencing by its id
+// @Summary Get a Sequencing
+// @Id getSequencing
+// @Description Retrieve Sequencing data for a given sequence ID
+// @Tags sequencing
+// @Security bearerauth
+// @Param seq_id path string true "Sequence ID"
+// @Produce json
+// @Success 200 {object} types.Sequencing
+// @Failure 500 {object} map[string]string
+// @Router /sequencing/{seq_id} [get]
+func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		sequencing, err := repo.GetSequencing(seqID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		if sequencing == nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		c.JSON(http.StatusOK, sequencing)
+	}
+}

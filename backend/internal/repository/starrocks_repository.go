@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"slices"
@@ -12,6 +13,7 @@ import (
 
 type Occurrence = types.Occurrence
 type Aggregation = types.Aggregation
+type Sequencing = types.Sequencing
 
 type StarrocksRepository struct {
 	db *gorm.DB
@@ -22,6 +24,7 @@ type StarrocksDAO interface {
 	GetOccurrences(seqId int, userFilter types.ListQuery) ([]Occurrence, error)
 	CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error)
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
+	GetSequencing(seqId int) (*Sequencing, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -291,4 +294,18 @@ func (r *StarrocksRepository) AggregateOccurrences(seqId int, userQuery types.Ag
 		return aggregation, fmt.Errorf("error query aggragation: %w", err)
 	}
 	return aggregation, err
+}
+
+func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error) {
+	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId)
+	var sequencing types.Sequencing
+	err := tx.First(&sequencing).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching sequencing: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+	return &sequencing, err
 }

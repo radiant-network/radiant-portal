@@ -111,6 +111,10 @@ func main() {
 	usersGroup := r.Group("/users")
 	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoPostgres.UserSets))
 
+	sequencingGroup := r.Group("/sequencing")
+	sequencingGroup.Use(roleAccessMiddleware)
+	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStarrocks))
+
 	r.Use(gin.Recovery())
 	r.Run(":8090")
 }

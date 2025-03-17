@@ -595,6 +595,43 @@ export interface PubmedCitationDetails {
     'format'?: string;
 }
 /**
+ * Sequencing represents a sequencing
+ * @export
+ * @interface Sequencing
+ */
+export interface Sequencing {
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
+    'analysis_type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
+    'experiment_type'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
+    'patient_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
+    'sample_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
+    'seq_id'?: number;
+}
+/**
  * 
  * @export
  * @interface SortBody
@@ -1603,6 +1640,118 @@ export class OccurrencesApi extends BaseAPI {
      */
     public listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listOccurrences(seqId, listBody, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * SequencingApi - axios parameter creator
+ * @export
+ */
+export const SequencingApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Retrieve Sequencing data for a given sequence ID
+         * @summary Get a Sequencing
+         * @param {string} seqId Sequence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSequencing: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getSequencing', 'seqId', seqId)
+            const localVarPath = `/sequencing/{seq_id}`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SequencingApi - functional programming interface
+ * @export
+ */
+export const SequencingApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SequencingApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Retrieve Sequencing data for a given sequence ID
+         * @summary Get a Sequencing
+         * @param {string} seqId Sequence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSequencing(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sequencing>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSequencing(seqId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SequencingApi.getSequencing']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * SequencingApi - factory interface
+ * @export
+ */
+export const SequencingApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SequencingApiFp(configuration)
+    return {
+        /**
+         * Retrieve Sequencing data for a given sequence ID
+         * @summary Get a Sequencing
+         * @param {string} seqId Sequence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSequencing(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<Sequencing> {
+            return localVarFp.getSequencing(seqId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SequencingApi - object-oriented interface
+ * @export
+ * @class SequencingApi
+ * @extends {BaseAPI}
+ */
+export class SequencingApi extends BaseAPI {
+    /**
+     * Retrieve Sequencing data for a given sequence ID
+     * @summary Get a Sequencing
+     * @param {string} seqId Sequence ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SequencingApi
+     */
+    public getSequencing(seqId: string, options?: RawAxiosRequestConfig) {
+        return SequencingApiFp(this.configuration).getSequencing(seqId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

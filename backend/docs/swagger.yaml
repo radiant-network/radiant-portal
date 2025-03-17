@@ -235,6 +235,20 @@ components:
         format:
           type: string
       type: object
+    Sequencing:
+      description: Sequencing represents a sequencing
+      properties:
+        analysis_type:
+          type: string
+        experiment_type:
+          type: string
+        patient_id:
+          type: integer
+        sample_id:
+          type: integer
+        seq_id:
+          type: integer
+      type: object
     SortBody:
       properties:
         field:
@@ -674,6 +688,37 @@ paths:
       summary: List occurrences
       tags:
       - occurrences
+  /sequencing/{seq_id}:
+    get:
+      description: Retrieve Sequencing data for a given sequence ID
+      operationId: getSequencing
+      parameters:
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sequencing'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get a Sequencing
+      tags:
+      - sequencing
   /status:
     get:
       description: Returns the current status of the API
