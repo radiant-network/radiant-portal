@@ -9,7 +9,7 @@ import {
   Link2Icon,
   UnderlineIcon,
 } from "lucide-react";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/base/ui/separator";
 import { useCallback } from "react";
 import RichTextEditorLevelToggle from "./rich-text-editor-level-toggle";
 

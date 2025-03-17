@@ -1,25 +1,12 @@
-import {
-  CommandGroup,
-  CommandItem,
-  CommandList,
-  CommandInput,
-  CommandEmpty,
-} from "./ui/command";
-import { Command as CommandPrimitive } from "cmdk";
-import {
-  useState,
-  useRef,
-  useCallback,
-  type KeyboardEvent,
-  ReactNode,
-  useEffect,
-} from "react";
-import { Skeleton } from "./ui/skeleton";
-import { cn } from "../lib/utils";
-import { XIcon } from "lucide-react";
-import { useDebounce } from "../hooks/useDebounce";
+import { CommandGroup, CommandItem, CommandList, CommandInput, CommandEmpty } from '@/components/base/ui/command';
+import { Command as CommandPrimitive } from 'cmdk';
+import { useState, useRef, useCallback, type KeyboardEvent, ReactNode, useEffect } from 'react';
+import { Skeleton } from '@/components/base/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { XIcon } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 
-export type Option = Record<"value" | "label", string> & Record<string, string>;
+export type Option = Record<'value' | 'label', string> & Record<string, string>;
 
 type AutoCompleteProps = {
   defaultOptions?: Option[];
@@ -33,11 +20,8 @@ type AutoCompleteProps = {
   debounceDelay?: number;
 };
 
-export function getSelectedOptionByValue(
-  value: string | undefined,
-  options: Option[]
-): Option | undefined {
-  return options.find((option) => value === option.value);
+export function getSelectedOptionByValue(value: string | undefined, options: Option[]): Option | undefined {
+  return options.find(option => value === option.value);
 }
 
 export const AutoComplete = ({
@@ -55,12 +39,10 @@ export const AutoComplete = ({
 
   const [isOpen, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selected, setSelected] = useState<Option | undefined>(
-    getSelectedOptionByValue(value, defaultOptions)
-  );
+  const [selected, setSelected] = useState<Option | undefined>(getSelectedOptionByValue(value, defaultOptions));
   const [options, setOptions] = useState<Option[]>(defaultOptions);
-  const [inputValue, setInputValue] = useState<string>("");
-  const [inputValueSearch, setInputValueSearch] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>('');
+  const [inputValueSearch, setInputValueSearch] = useState<string>('');
   const debouncedSearchTerm = useDebounce(inputValueSearch, debounceDelay);
 
   const handleKeyDown = useCallback(
@@ -76,26 +58,24 @@ export const AutoComplete = ({
       }
 
       // This is not a default behaviour of the <input /> field
-      if (event.key === "Enter" && input.value !== "") {
-        const optionToSelect = options.find(
-          (option) => option.label === input.value
-        );
+      if (event.key === 'Enter' && input.value !== '') {
+        const optionToSelect = options.find(option => option.label === input.value);
         if (optionToSelect) {
           setSelected(optionToSelect);
           onChange?.(optionToSelect.value);
         }
       }
 
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         input.blur();
       }
     },
-    [isOpen, options, onChange]
+    [isOpen, options, onChange],
   );
 
   const handleBlur = useCallback(() => {
     setOpen(false);
-    setInputValue(selected?.label || "");
+    setInputValue(selected?.label || '');
   }, [selected]);
 
   const handleSelectOption = useCallback(
@@ -111,14 +91,14 @@ export const AutoComplete = ({
         inputRef?.current?.blur();
       }, 0);
     },
-    [onChange]
+    [onChange],
   );
 
   useEffect(() => {
     if (value && defaultOptions.length > 0) {
       const selectedOption = getSelectedOptionByValue(value, defaultOptions);
       setSelected(selectedOption);
-      setInputValue(selectedOption?.label || "");
+      setInputValue(selectedOption?.label || '');
     }
   }, [value, defaultOptions]);
 
@@ -142,19 +122,15 @@ export const AutoComplete = ({
   }, [debouncedSearchTerm, open]);
 
   return (
-    <CommandPrimitive
-      onKeyDown={handleKeyDown}
-      className={className}
-      shouldFilter={!onSearch}
-    >
-      <div className="relative">
+    <CommandPrimitive onKeyDown={handleKeyDown} className={className} shouldFilter={!onSearch}>
+      <div className="relative outline-none focus-within:ring-2 focus-within:ring-ring rounded-md">
         <CommandInput
           ref={inputRef}
           value={inputValue}
           onValueChange={
             isLoading
               ? undefined
-              : (value) => {
+              : value => {
                   setInputValue(value);
                   setInputValueSearch(value);
                 }
@@ -163,16 +139,16 @@ export const AutoComplete = ({
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
           disabled={disabled}
-          className="text-base"
+          className="text-sm"
           rightAddon={
             <button
               type="button"
               onClick={() => {
                 setSelected(undefined);
-                setInputValue("");
+                setInputValue('');
                 onChange?.(undefined);
               }}
-              className={cn("h-[26px] p-0", {
+              className={cn('h-[26px] p-0', {
                 hidden: !selected || disabled,
               })}
             >
@@ -184,8 +160,8 @@ export const AutoComplete = ({
       <div className="relative mt-1">
         <div
           className={cn(
-            "animate-in fade-in-0 zoom-in-95 absolute top-0 z-10 w-full rounded-xl bg-popover outline-none shadow-md",
-            isOpen ? "block" : "hidden"
+            'animate-in fade-in-0 zoom-in-95 absolute top-0 z-10 w-full rounded-xl bg-popover outline-none shadow-md',
+            isOpen ? 'block' : 'hidden',
           )}
         >
           <CommandList className="rounded-lg border border-border">
@@ -198,11 +174,11 @@ export const AutoComplete = ({
             ) : null}
             {options.length > 0 && !isLoading ? (
               <CommandGroup>
-                {options.map((option) => (
+                {options.map(option => (
                   <CommandItem
                     key={option.value}
                     value={option.label}
-                    onMouseDown={(event) => {
+                    onMouseDown={event => {
                       event.preventDefault();
                       event.stopPropagation();
                     }}
@@ -215,11 +191,7 @@ export const AutoComplete = ({
               </CommandGroup>
             ) : null}
             {!isLoading && (
-              <CommandEmpty>
-                {emptyIndicator || (
-                  <div className="text-center text-sm">No data</div>
-                )}
-              </CommandEmpty>
+              <CommandEmpty>{emptyIndicator || <div className="text-center text-sm">No data</div>}</CommandEmpty>
             )}
           </CommandList>
         </div>

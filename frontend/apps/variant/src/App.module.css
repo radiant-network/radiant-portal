@@ -5,3 +5,22 @@
     @apply w-1/4 p-6 min-w-[250px];
   }
 }
+
+h1 {
+  @apply text-3xl;
+}
+h2 {
+  @apply text-xl;
+}
+h3 {
+  @apply text-lg;
+}
+h4 {
+  @apply text-base;
+}
+h5 {
+  @apply text-sm;
+}
+h6 {
+  @apply text-sm;
+}

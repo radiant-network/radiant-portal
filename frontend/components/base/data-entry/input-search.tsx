@@ -1,18 +1,20 @@
-import { cn } from "@/lib/utils";
-import { Button, ButtonProps } from "@/components/base/ui/button";
-import { SearchIcon } from "lucide-react";
-import { Input, InputProps } from "@/components/base/ui/input";
-import { useCallback, useRef, useState } from "react";
+import { cn } from '@/lib/utils';
+import { Button, ButtonProps } from '@/components/base/ui/button';
+import { SearchIcon } from 'lucide-react';
+import { Input, InputProps } from '@/components/base/ui/input';
+import { useCallback, useRef, useState } from 'react';
 
 export type InputSearchProps = InputProps & {
-  onSearch: (value: InputProps["value"]) => void | Promise<void>;
-  searchButtonProps?: Omit<ButtonProps, "onClick">;
+  onSearch: (value: string) => void | Promise<void>;
+  searchButtonProps?: Omit<ButtonProps, 'onClick'>;
   ref?: React.Ref<HTMLInputElement>;
+  wrapperClassName?: string;
 };
 
 function InputSearch({
   ref,
   className,
+  wrapperClassName,
   type,
   onSearch,
   searchButtonProps,
@@ -34,38 +36,38 @@ function InputSearch({
 
       if (!input) return;
 
-      if (e.key === "Enter") {
+      if (e.key === 'Enter') {
         e.preventDefault();
 
-        if (input.value !== "") {
+        if (input.value !== '') {
           handleSearch(value as string);
         }
       }
 
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         input.blur();
       }
     },
-    [inputRef.current]
+    [inputRef.current],
   );
 
   return (
-    <div className="flex items-center">
+    <div className={cn('flex items-center w-full', wrapperClassName)}>
       <Input
         type={type}
-        className={cn(className, "rounded-r-none focus:z-[2]")}
+        className={cn('rounded-r-none focus:z-[2]', className)}
         {...props}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           handleKeyDown(e);
           props.onKeyDown?.(e);
         }}
-        onChange={(e) => {
+        onChange={e => {
           setValue(e.target.value);
           props.onChange?.(e);
         }}
-        ref={(iref) => {
+        ref={iref => {
           inputRef.current = iref;
-          if (typeof ref === "function") {
+          if (typeof ref === 'function') {
             ref(iref);
           } else if (ref) {
             ref.current = iref;
@@ -77,10 +79,7 @@ function InputSearch({
         variant="outlined"
         {...searchButtonProps}
         loading={loading || searchButtonProps?.loading}
-        className={cn(
-          "h-10 px-3 rounded-l-none ml-[-1px] hover:z-[2]",
-          searchButtonProps?.className
-        )}
+        className={cn('h-10 px-3 rounded-l-none ml-[-1px] hover:z-[2]', searchButtonProps?.className)}
         onClick={() => handleSearch(value)}
       >
         {!searchButtonProps?.loading && !loading && <SearchIcon />}

@@ -98,7 +98,7 @@ function QueryBuilder({
               <SavedFiltersRightActions className="ml-auto py-4" />
             </AccordionTrigger>
             <AccordionContent className="border-border border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
-              <div className="flex flex-col gap-2 max-h-[30vh] overflow-scroll">
+              <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
                 {queryBuilder.getQueries().map((query) => (
                   <QueryBar key={query.id} query={query} />
                 ))}

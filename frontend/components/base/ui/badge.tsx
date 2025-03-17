@@ -1,39 +1,48 @@
-import * as React from "react";
-import { tv, VariantProps } from "tailwind-variants";
+import { cn } from '@/components/lib/utils';
+import { XIcon } from 'lucide-react';
+import * as React from 'react';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 const badgeVariants = tv({
-  base: "inline-flex items-center rounded-sm border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring",
+  slots: {
+    base: 'inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring',
+    closeIcon: '',
+  },
   variants: {
     variant: {
-      default:
-        "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-      secondary:
-        "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-      destructive:
-        "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-      outline: "text-foreground",
+      default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
+      secondary: 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+      destructive: 'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
+      outline: 'text-foreground',
     },
-    size: {
-      default: "text-xs py-1 px-2",
-      xs: "text-xs py-1 px-2",
-      sm: "text-sm py-1 px-2",
-      md: "text-sm py-1 px-3",
-      lg: "text-base py-1 px-4",
+    defaultVariants: {
+      variant: 'default',
     },
-  },
-  defaultVariants: {
-    variant: "default",
-    size: "default",
   },
 });
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
+  onClose?: () => void;
+  closeIconProps?: React.HTMLAttributes<SVGElement>;
+}
 
-function Badge({ className, variant, size, ...props }: BadgeProps) {
+function Badge({ className, variant, children, closeIconProps, ...props }: BadgeProps) {
+  const styles = badgeVariants({ variant });
+
   return (
-    <div className={badgeVariants({ variant, size, className })} {...props} />
+    <div
+      className={cn(styles.base({ className }), {
+        'pr-1.5': props.onClose,
+      })}
+      {...props}
+    >
+      {children}
+      {props.onClose && (
+        <button onClick={props.onClose} className="ml-1">
+          <XIcon size={12} className={styles.closeIcon()} {...closeIconProps} />
+        </button>
+      )}
+    </div>
   );
 }
 

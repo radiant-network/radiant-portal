@@ -93,7 +93,6 @@ const RichTextEditor = ({
         },
       }),
       Underline,
-      Heading,
     ],
     content: value,
   });
