@@ -50,6 +50,14 @@ func (m *MockRepository) AggregateOccurrences(int, types.AggQuery) ([]types.Aggr
 		nil
 }
 
+func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
+	return &types.Sequencing{
+		SeqId:          1,
+		ExperimentType: "WGS",
+		AnalysisType:   "germline",
+	}, nil
+}
+
 func Test_StatusHandler(t *testing.T) {
 	repoStarrocks := &MockRepository{}
 	repoPostgres := &MockRepository{}
@@ -131,4 +139,17 @@ func Test_OccurrencesAggregateHandler(t *testing.T) {
 	expected := `[{"key": "HET", "count": 2}, {"key": "HOM", "count": 1}]`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetSequencingHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/sequencing/:seq_id", GetSequencing(repo))
+
+	req, _ := http.NewRequest("GET", "/sequencing/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"seq_id":1, "experiment_type":"WGS", "analysis_type": "germline"}`, w.Body.String())
 }

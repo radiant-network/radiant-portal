@@ -311,23 +311,43 @@ func Test_GetUserSet(t *testing.T) {
 	})
 }
 
+func assertGetSequencing(t *testing.T, data string, seqId int, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewStarrocksRepository(db)
+		router := gin.Default()
+		router.GET("/sequencing/:seq_id", server.GetSequencing(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/sequencing/%d", seqId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetSequencing(t *testing.T) {
+	expected := `{"seq_id":1, "experiment_type":"WGS", "analysis_type":"germline"}`
+	assertGetSequencing(t, "simple", 1, expected)
+}
+
 func Test_SearchGermline(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
-	// db + repo
-	pubmedService := &MockExternalClient{}
-	repo := repository.NewPostgresRepository(db, pubmedService).Interpretations
+		// db + repo
+		pubmedService := &MockExternalClient{}
+		repo := repository.NewPostgresRepository(db, pubmedService).Interpretations
 
-	// search empty
-	assertSearchInterpretationGermline(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 0)
+		// search empty
+		assertSearchInterpretationGermline(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 0)
 
-	// add interpretations
-	interpretation1 := &types.InterpretationGermline{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "foo"}}}
-	interpretation2 := &types.InterpretationGermline{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "toto"}}}
-	assertPostInterpretationGermline(t, repo, "seq1", "locus1", "trans1", http.StatusOK, interpretation1, "")
-	assertPostInterpretationGermline(t, repo, "seq2", "locus1", "trans1", http.StatusOK, interpretation2, "")
+		// add interpretations
+		interpretation1 := &types.InterpretationGermline{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "foo"}}}
+		interpretation2 := &types.InterpretationGermline{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "toto"}}}
+		assertPostInterpretationGermline(t, repo, "seq1", "locus1", "trans1", http.StatusOK, interpretation1, "")
+		assertPostInterpretationGermline(t, repo, "seq2", "locus1", "trans1", http.StatusOK, interpretation2, "")
 
-	// search again
-	assertSearchInterpretationGermline(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 2)
+		// search again
+		assertSearchInterpretationGermline(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 2)
 	})
 }
 
@@ -335,7 +355,7 @@ func assertSearchInterpretationGermline(t *testing.T, repo repository.Interpreta
 	router := gin.Default()
 	router.GET("/interpretations/germline", server.SearchInterpretationGermline(repo))
 
-	req, _ := http.NewRequest("GET", "/interpretations/germline?" + queryParams, bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/interpretations/germline?"+queryParams, bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -349,21 +369,21 @@ func assertSearchInterpretationGermline(t *testing.T, repo repository.Interpreta
 
 func Test_SearchSomatic(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
-	// db + repo
-	pubmedService := &MockExternalClient{}
-	repo := repository.NewPostgresRepository(db, pubmedService).Interpretations
+		// db + repo
+		pubmedService := &MockExternalClient{}
+		repo := repository.NewPostgresRepository(db, pubmedService).Interpretations
 
-	// search empty
-	assertSearchInterpretationSomatic(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 0)
+		// search empty
+		assertSearchInterpretationSomatic(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 0)
 
-	// add interpretations
-	interpretation1 := &types.InterpretationSomatic{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "foo"}}}
-	interpretation2 := &types.InterpretationSomatic{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "toto"}}}
-	assertPostInterpretationSomatic(t, repo, "seq1", "locus1", "trans1", http.StatusOK, interpretation1, "")
-	assertPostInterpretationSomatic(t, repo, "seq2", "locus1", "trans1", http.StatusOK, interpretation2, "")
+		// add interpretations
+		interpretation1 := &types.InterpretationSomatic{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "foo"}}}
+		interpretation2 := &types.InterpretationSomatic{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "toto"}}}
+		assertPostInterpretationSomatic(t, repo, "seq1", "locus1", "trans1", http.StatusOK, interpretation1, "")
+		assertPostInterpretationSomatic(t, repo, "seq2", "locus1", "trans1", http.StatusOK, interpretation2, "")
 
-	// search again
-	assertSearchInterpretationSomatic(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 2)
+		// search again
+		assertSearchInterpretationSomatic(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 2)
 	})
 }
 
@@ -371,7 +391,7 @@ func assertSearchInterpretationSomatic(t *testing.T, repo repository.Interpretat
 	router := gin.Default()
 	router.GET("/interpretations/somatic", server.SearchInterpretationSomatic(repo))
 
-	req, _ := http.NewRequest("GET", "/interpretations/somatic?" + queryParams, bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/interpretations/somatic?"+queryParams, bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

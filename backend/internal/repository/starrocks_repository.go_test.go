@@ -600,6 +600,26 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(
 	})
 }
 
+func Test_GetSequencing(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewStarrocksRepository(db)
+		sequencing, err := repo.GetSequencing(1)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, sequencing.SeqId)
+		assert.Equal(t, "WGS", sequencing.ExperimentType)
+		assert.Equal(t, "germline", sequencing.AnalysisType)
+	})
+}
+
+func Test_GetSequencingNotFound(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewStarrocksRepository(db)
+		sequencing, err := repo.GetSequencing(11)
+		assert.NoError(t, err)
+		assert.Nil(t, sequencing)
+	})
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartStarrocksContainer()
 	code := m.Run()
