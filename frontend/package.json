@@ -16,15 +16,15 @@
     "eslint": "^8.57.1",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-prettier": "^5.2.3",
-    "typescript": "^5.7.2",
+    "typescript": "^5.8.2",
     "vite-jest": "^0.1.4"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.9.5"
+    "@rollup/rollup-linux-x64-gnu": "4.35.0"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.0.0",
-    "axios": "^1.8.2",
+    "axios": "^1.8.3",
     "date-fns": "^4.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
