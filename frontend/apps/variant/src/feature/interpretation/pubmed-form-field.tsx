@@ -42,7 +42,7 @@ function PubmedFormField() {
   const pubmeds = getValues().pubmed;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-2.5">
       <FormLabel>PubMed Publication</FormLabel>
       <div className="space-y-2">
         {fields.map((field, index) => {

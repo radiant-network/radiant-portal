@@ -1,18 +1,8 @@
-import { ReactElement } from "react";
-import { IconType } from "./types";
+import { ReactElement } from 'react';
+import { IconType } from './types';
 
-const VariantIcon = ({
-  size = 16,
-  fill = "currentColor",
-  ...props
-}: IconType): ReactElement => (
-  <svg
-    height={size}
-    width={size}
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
+const VariantIcon = ({ size = 16, fill = 'currentColor', ...props }: IconType): ReactElement => (
+  <svg height={size} width={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill={fill} {...props}>
     <path
       fillRule="evenodd"
       clipRule="evenodd"

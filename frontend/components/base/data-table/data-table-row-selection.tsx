@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { CellContext, HeaderContext } from "@tanstack/react-table";
+import { CellContext, HeaderContext } from '@tanstack/react-table';
+import { Checkbox, CheckboxProps } from '../ui/checkbox';
 
 /**
  * Return TableRowSelection for a column header
@@ -14,10 +14,10 @@ import { CellContext, HeaderContext } from "@tanstack/react-table";
  */
 export function getTableRowSelectionHeader({ table }: HeaderContext<any, any>) {
   return (
-    <TableRowSelection
-      checked={table.getIsAllRowsSelected()}
-      indeterminate={table.getIsSomeRowsSelected()}
-      onChange={table.getToggleAllRowsSelectedHandler()}
+    <Checkbox
+      checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+      onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+      aria-label="Select all"
     />
   );
 }
@@ -35,47 +35,12 @@ export function getTableRowSelectionHeader({ table }: HeaderContext<any, any>) {
  */
 export function getTableRowSelectionCell({ row }: CellContext<any, any>) {
   return (
-    <div className="px-1">
-      <TableRowSelection
+    <div className="pl-2">
+      <Checkbox
         checked={row.getIsSelected()}
-        disabled={!row.getCanSelect()}
-        indeterminate={row.getIsSomeSelected()}
-        onChange={row.getToggleSelectedHandler()}
+        onCheckedChange={value => row.toggleSelected(!!value)}
+        aria-label="Select row"
       />
     </div>
-  );
-}
-
-/**
- * Table row select component. Allow row selection
- */
-type TableRowSelectCheckboxProps = {
-  indeterminate: boolean;
-  className?: string;
-  checked: boolean;
-  disabled?: boolean;
-  onChange: (event: unknown) => void;
-};
-
-export function TableRowSelection({
-  indeterminate,
-  className = "",
-  ...rest
-}: TableRowSelectCheckboxProps) {
-  const ref = useRef<HTMLInputElement>(null!);
-
-  useEffect(() => {
-    if (typeof indeterminate === "boolean") {
-      ref.current.indeterminate = !rest.checked && indeterminate;
-    }
-  }, [ref, indeterminate]);
-
-  return (
-    <input
-      type="checkbox"
-      ref={ref}
-      className={className + " cursor-pointer"}
-      {...rest}
-    />
   );
 }

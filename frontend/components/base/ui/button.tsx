@@ -1,11 +1,11 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { buttonVariants } from "../Buttons";
-import { VariantProps } from "tailwind-variants";
-import { Spinner } from "../spinner";
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { buttonVariants } from '../Buttons';
+import { VariantProps } from 'tailwind-variants';
+import { Spinner } from '../spinner';
 
 export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "color">,
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color'>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
@@ -13,35 +13,20 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      className,
-      variant,
-      size,
-      children,
-      asChild = false,
-      loading = false,
-      disabled = false,
-      color,
-      ...props
-    },
-    ref
+    { className, variant, size, children, asChild = false, loading = false, disabled = false, color, ...props },
+    ref,
   ) => {
-    const Comp = asChild ? Slot : "button";
+    const Comp = asChild ? Slot : 'button';
     const style = buttonVariants({ variant, size, color });
 
     return (
-      <Comp
-        ref={ref}
-        className={style.base({ className })}
-        disabled={disabled || loading}
-        {...props}
-      >
+      <Comp ref={ref} className={style.base({ className })} disabled={disabled || loading} {...props}>
         {loading && <Spinner />}
         {children}
       </Comp>
     );
-  }
+  },
 );
-Button.displayName = "Button";
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };
