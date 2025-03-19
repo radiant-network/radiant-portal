@@ -55,7 +55,7 @@ function PubmedFormField() {
               <Input key={`citation-id-${field.id}`} {...register(`pubmed.${index}.citation_id`)} className="hidden" />
               {citation && citationId ? (
                 <div className="flex items-center gap-1">
-                  <div className="border border-border rounded-md p-2 text-sm">{citation}</div>
+                  <div className="border rounded-md p-2 text-sm">{citation}</div>
                   <div>
                     <IconButton
                       icon={XIcon}

@@ -1,22 +1,14 @@
-import { useQueryBuilder } from "../../model/query-builder-core";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/base/ui/accordion";
-import QueryBar from "./query-bar/query-bar";
-import QueryToolbar from "./query-toolbar/query-toolbar";
-import {
-  QueryBuilderContext,
-  QueryBuilderDictContext,
-} from "./query-builder-context";
-import SavedFiltersRightActions from "./saved-filter/saved-filter-right-actions";
-import SavedFiltersLeftActions from "./saved-filter/saved-filter-left-actions";
-import { useCallback, useMemo, useState } from "react";
-import { QueryBuilderContextType, QueryBuilderProps } from "./types";
-import { defaultQueryReferenceColors, defaultDictionary } from "./data";
-import { deepMerge } from "@/components/lib/merge";
+import { useQueryBuilder } from '../../model/query-builder-core';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
+import QueryBar from './query-bar/query-bar';
+import QueryToolbar from './query-toolbar/query-toolbar';
+import { QueryBuilderContext, QueryBuilderDictContext } from './query-builder-context';
+import SavedFiltersRightActions from './saved-filter/saved-filter-right-actions';
+import SavedFiltersLeftActions from './saved-filter/saved-filter-left-actions';
+import { useCallback, useMemo, useState } from 'react';
+import { QueryBuilderContextType, QueryBuilderProps } from './types';
+import { defaultQueryReferenceColors, defaultDictionary } from './data';
+import { deepMerge } from '@/components/lib/merge';
 
 function QueryBuilder({
   className,
@@ -35,17 +27,14 @@ function QueryBuilder({
 }: QueryBuilderProps) {
   const queryBuilder = useQueryBuilder(hookProps);
 
-  const mergeDictionary = useMemo(
-    () => deepMerge(defaultDictionary, dictionary),
-    [dictionary]
-  );
+  const mergeDictionary = useMemo(() => deepMerge(defaultDictionary, dictionary), [dictionary]);
   const [showLabels, toggleLabels] = useState(initialShowHideLabels);
 
   const getQueryReferenceColor = useCallback(
     (refIndex: number) => {
       return queryReferenceColors[refIndex % queryReferenceColors.length];
     },
-    [queryReferenceColors]
+    [queryReferenceColors],
   );
 
   const memoedContextValue = useMemo<QueryBuilderContextType>(
@@ -78,28 +67,24 @@ function QueryBuilder({
       customPillConfig,
       queryPillFacetFilterConfig,
       resolveSyntheticSqon,
-    ]
+    ],
   );
 
   return (
     <QueryBuilderDictContext.Provider value={mergeDictionary}>
       <QueryBuilderContext.Provider value={memoedContextValue}>
-        <Accordion
-          type="multiple"
-          defaultValue={["query-builder"]}
-          className={className}
-        >
+        <Accordion type="multiple" defaultValue={['query-builder']} className={className}>
           <AccordionItem value="query-builder" className="border-none">
             <AccordionTrigger
               asChild
-              className="border border-border py-0 px-5 rounded-t-sm data-[state=closed]:rounded-sm hover:cursor-pointer"
+              className="border py-0 px-5 rounded-t-sm data-[state=closed]:rounded-sm hover:cursor-pointer"
             >
               <SavedFiltersLeftActions className="py-4 pr-4" />
               <SavedFiltersRightActions className="ml-auto py-4" />
             </AccordionTrigger>
-            <AccordionContent className="border-border border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
+            <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4 rounded-b-sm">
               <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
-                {queryBuilder.getQueries().map((query) => (
+                {queryBuilder.getQueries().map(query => (
                   <QueryBar key={query.id} query={query} />
                 ))}
               </div>

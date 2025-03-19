@@ -288,7 +288,8 @@ function MultiSelector({
             return (
               <Badge
                 key={option.value}
-                variant="default"
+                color="primary"
+                variant="filled"
                 data-disabled={disabled || undefined}
                 onClose={() => handleUnselect(option)}
               >
@@ -346,7 +347,7 @@ function MultiSelector({
       </div>
       <div className={cn('relative', open ? 'block' : 'hidden')}>
         <CommandList
-          className="absolute top-1 z-10 w-full rounded-md border border-border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95"
+          className="absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95"
           onMouseLeave={() => {
             setOnScrollbar(false);
           }}

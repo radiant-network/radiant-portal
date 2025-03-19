@@ -1,16 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
 
-import { Button } from "@/components/base/ui/button";
-import { VariantProps } from "tailwind-variants";
-import { baseButtonVariants } from "@/components/base/Buttons";
-import { buttonColors, buttonVariants } from "./utils";
+import { Button } from '@/components/base/ui/button';
+import { buttonColors, buttonVariants } from './utils';
 
 const meta = {
-  title: "Base/Buttons/Button",
+  title: 'Base/Buttons/Button',
   component: Button,
-  tags: ["autodocs"],
-  args: { onClick: fn(), size: "default" },
+  tags: ['autodocs'],
+  args: { onClick: fn(), size: 'default' },
 } satisfies Meta<typeof Button>;
 
 export default meta;
@@ -21,10 +19,10 @@ export const Variants: Story = {
   args: {},
   render: () => (
     <div className="flex flex-col gap-2">
-      {buttonColors.map((color) => {
+      {buttonColors.map(color => {
         return (
           <div className="flex gap-2">
-            {buttonVariants.map((variant) => (
+            {buttonVariants.map(variant => (
               <Button color={color} variant={variant}>
                 {variant}
               </Button>

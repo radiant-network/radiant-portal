@@ -1,11 +1,11 @@
-import React from "react";
-import { tv, VariantProps } from "tailwind-variants";
+import React from 'react';
+import { tv, VariantProps } from 'tailwind-variants';
 
 const listVariants = tv({
-  base: "overflow-scroll",
+  base: 'overflow-scroll',
   variants: {
     bordered: {
-      true: "border border-border",
+      true: 'border',
     },
   },
   defaultVariants: {
@@ -13,8 +13,7 @@ const listVariants = tv({
   },
 });
 
-export type ListProps = React.HTMLAttributes<HTMLUListElement> &
-  VariantProps<typeof listVariants>;
+export type ListProps = React.HTMLAttributes<HTMLUListElement> & VariantProps<typeof listVariants>;
 
 const List = ({ children, bordered, className, ...props }: ListProps) => (
   <ul className={listVariants({ bordered, className })} {...props}>

@@ -16,10 +16,10 @@ export const baseButtonVariants = tv({
     variant: {
       filled: '',
       outlined: {
-        base: 'border border-border border-solid',
+        base: 'border border-solid',
       },
       dashed: {
-        base: 'border border-border border-dashed',
+        base: 'border border-dashed',
       },
       subtle: '',
       text: '',
