@@ -325,18 +325,18 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 		}
 	}
 
-	var output []types.AutoCompleteTerm
-	for _, field := range terms {
-		output = append(output, types.AutoCompleteTerm{
+	output := make([]types.AutoCompleteTerm, len(terms))
+	for i, term := range terms {
+		output[i] = types.AutoCompleteTerm{
 			HighLight: types.Term{
-				ID:   field.ID,
-				Name: field.HighlightedName,
+				ID:   term.ID,
+				Name: term.HighlightedName,
 			},
 			Source: types.Term{
-				ID:   field.ID,
-				Name: field.Name,
+				ID:   term.ID,
+				Name: term.Name,
 			},
-		})
+		}
 	}
 	return output, err
 }

@@ -2,11 +2,7 @@ package types
 
 type AutoCompleteTerm struct {
 	HighLight Term `json:"highlight,omitempty"`
-	Source    Term `json:"_source,omitempty"`
-}
-
-type AutoCompleteTermBody struct {
-	Input string `json:"input,omitempty"`
+	Source    Term `json:"source,omitempty"`
 }
 
 type Term struct {

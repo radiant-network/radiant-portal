@@ -116,10 +116,10 @@ func main() {
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStarrocks))
 
 	mondoGroup := r.Group("/mondo")
-	mondoGroup.POST("/autocomplete", server.MondoTermAutoComplete(repoStarrocks))
+	mondoGroup.GET("/autocomplete", server.GetMondoTermAutoComplete(repoStarrocks))
 
 	hpoGroup := r.Group("/hpo")
-	hpoGroup.POST("/autocomplete", server.HPOTermAutoComplete(repoStarrocks))
+	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoStarrocks))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")

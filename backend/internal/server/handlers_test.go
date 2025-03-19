@@ -170,15 +170,12 @@ func Test_GetSequencingHandler(t *testing.T) {
 func Test_MondoTermAutoCompleteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/mondo/autocomplete", MondoTermAutoComplete(repo))
+	router.GET("/mondo/autocomplete", GetMondoTermAutoComplete(repo))
 
-	body := `{
-			"input": "blood"
-	}`
-	req, _ := http.NewRequest("POST", "/mondo/autocomplete", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("GET", "/mondo/autocomplete?prefix=blood", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `[{"_source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
+	assert.JSONEq(t, `[{"source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
 }

@@ -21,15 +21,10 @@ components:
       type: object
     AutoCompleteTerm:
       properties:
-        _source:
-          $ref: '#/components/schemas/Term'
         highlight:
           $ref: '#/components/schemas/Term'
-      type: object
-    AutoCompleteTermBody:
-      properties:
-        input:
-          type: string
+        source:
+          $ref: '#/components/schemas/Term'
       type: object
     Count:
       description: Count represents count result
@@ -339,17 +334,17 @@ info:
 openapi: 3.1.0
 paths:
   /hpo/autocomplete:
-    post:
+    get:
       description: Retrieve AutoCompleteTerm list of HPO terms matching input string
         with highlighted
       operationId: hpoTermAutoComplete
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AutoCompleteTermBody'
-        description: AutoCompleteTermBody
+      parameters:
+      - description: Prefix
+        in: query
+        name: prefix
         required: true
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -624,17 +619,17 @@ paths:
       tags:
       - interpretations
   /mondo/autocomplete:
-    post:
+    get:
       description: Retrieve AutoCompleteTerm list of mondo terms matching input string
         with highlighted
       operationId: mondoTermAutoComplete
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AutoCompleteTermBody'
-        description: AutoCompleteTermBody
+      parameters:
+      - description: Prefix
+        in: query
+        name: prefix
         required: true
+        schema:
+          type: string
       responses:
         "200":
           content:

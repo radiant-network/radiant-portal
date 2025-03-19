@@ -500,31 +500,21 @@ func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 	}
 }
 
-// MondoTermAutoComplete handles retrieving mondo terms by autocomplete
+// GetMondoTermAutoComplete handles retrieving mondo terms by autocomplete
 // @Summary Get AutoCompleteTerm list of matching input string with highlighted
 // @Id mondoTermAutoComplete
 // @Description Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
 // @Tags mondo
 // @Security bearerauth
-// @Param			message	body		types.AutoCompleteTermBody	true	"AutoCompleteTermBody"
-// @Accept json
+// @Param prefix query string true "Prefix"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteTerm
 // @Failure 500 {object} map[string]string
-// @Router /mondo/autocomplete [post]
-func MondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
+// @Router /mondo/autocomplete [get]
+func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			body types.AutoCompleteTermBody
-		)
-
-		// Bind JSON to the struct
-		if err := c.ShouldBindJSON(&body); err != nil {
-			// Return a 400 Bad Request if validation fails
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		mondoTerms, err := repo.GetTermAutoComplete(types.MondoTable.Name, body.Input)
+		prefix := c.Query("prefix")
+		mondoTerms, err := repo.GetTermAutoComplete(types.MondoTable.Name, prefix)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
@@ -533,31 +523,21 @@ func MondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	}
 }
 
-// HPOTermAutoComplete handles retrieving HPO terms by autocomplete
+// GetHPOTermAutoComplete handles retrieving HPO terms by autocomplete
 // @Summary Get AutoCompleteTerm list of matching input string with highlighted
 // @Id hpoTermAutoComplete
 // @Description Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
 // @Tags hpo
 // @Security bearerauth
-// @Param			message	body		types.AutoCompleteTermBody	true	"AutoCompleteTermBody"
-// @Accept json
+// @Param prefix query string true "Prefix"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteTerm
 // @Failure 500 {object} map[string]string
-// @Router /hpo/autocomplete [post]
-func HPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
+// @Router /hpo/autocomplete [get]
+func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			body types.AutoCompleteTermBody
-		)
-
-		// Bind JSON to the struct
-		if err := c.ShouldBindJSON(&body); err != nil {
-			// Return a 400 Bad Request if validation fails
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		hpoTerms, err := repo.GetTermAutoComplete(types.HPOTable.Name, body.Input)
+		prefix := c.Query("prefix")
+		hpoTerms, err := repo.GetTermAutoComplete(types.HPOTable.Name, prefix)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
