@@ -58,8 +58,8 @@ func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
 	}, nil
 }
 
-func (m *MockRepository) GetTermAutoComplete(string, string) ([]types.AutoCompleteTerm, error) {
-	return []types.AutoCompleteTerm{
+func (m *MockRepository) GetTermAutoComplete(string, string) ([]*types.AutoCompleteTerm, error) {
+	return []*types.AutoCompleteTerm{
 			{Source: types.Term{
 				ID:   "MONDO:0000001",
 				Name: "blood group incompatibility",
