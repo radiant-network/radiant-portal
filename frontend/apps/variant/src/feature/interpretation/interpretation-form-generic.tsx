@@ -4,7 +4,7 @@ import { useFormContext } from 'react-hook-form';
 import { GenericInterpretationSchemaType } from './types';
 import PubmedFormField from './pubmed-form-field';
 
-const InterpretationFormGeneric = () => {
+function InterpretationFormGeneric() {
   const form = useFormContext<GenericInterpretationSchemaType>();
 
   return (
@@ -25,6 +25,6 @@ const InterpretationFormGeneric = () => {
       <PubmedFormField />
     </>
   );
-};
+}
 
 export default InterpretationFormGeneric;

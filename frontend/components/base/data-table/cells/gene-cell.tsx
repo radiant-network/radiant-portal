@@ -1,7 +1,7 @@
-import { PlusIcon } from "lucide-react";
-import { Button } from "@/components/base/ui/button";
-import EmptyCell from "@/components/base/data-table/cells/empty-cell";
-import { cn } from "@/components/lib/utils";
+import { PlusIcon } from 'lucide-react';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import { cn } from '@/components/lib/utils';
+import { IconButton } from '@/components/base/Buttons';
 
 type GeneCellProps = {
   className?: string;
@@ -25,20 +25,17 @@ function GeneCell({ className, symbol }: GeneCellProps) {
   if (!symbol) return <EmptyCell />;
 
   return (
-    <div className={className}>
-      <Button variant="link">
-        <a href={getOmimOrgUrl({ symbol })} target="_blank">
-          {symbol}
-        </a>
-      </Button>
-      <Button
+    <div className={cn('flex items-center gap-1', className)}>
+      <a href={getOmimOrgUrl({ symbol })} className="underline hover:no-underline" target="_blank">
+        {symbol}
+      </a>
+      <IconButton
         size="sm"
+        icon={PlusIcon}
         onClick={() => {
-          console.log("addQuery to be added"); //TODO: to remove
+          console.log('addQuery to be added'); //TODO: to remove
         }}
-      >
-        <PlusIcon />
-      </Button>
+      />
     </div>
   );
 }

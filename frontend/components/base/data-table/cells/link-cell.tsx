@@ -1,5 +1,4 @@
-import { Button } from "@/components/base/ui/button";
-import { cn } from "@/components/lib/utils";
+import { cn } from '@/components/lib/utils';
 
 type ExternalLinkCellProps = {
   className?: string;
@@ -9,14 +8,9 @@ type ExternalLinkCellProps = {
 
 function LinkCell({ className, url, children }: ExternalLinkCellProps) {
   return (
-    <Button
-      variant="link"
-      className={cn("max-w-[300px] overflow-hidden", className)}
-    >
-      <a href={url} className="overflow-hidden text-ellipsis">
-        {children}
-      </a>
-    </Button>
+    <a href={url} className={cn('overflow-hidden text-ellipsis underline hover:no-underline', className)}>
+      {children}
+    </a>
   );
 }
 

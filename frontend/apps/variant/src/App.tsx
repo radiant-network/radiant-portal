@@ -11,9 +11,8 @@ import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/quer
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { useConfig } from '@/components/model/applications-config';
-import GermlineVariantPreview from '@/components/feature/preview/germline-variant-preview';
 import VariantIcon from '@/components/base/icons/variant-icon';
-import { IVariantEntity } from './feature/variant-table/variant-types';
+import VariantTablePreview from './feature/variant-table/variant-table-preview';
 
 type OccurrencesListInput = {
   seqId: string;
@@ -95,6 +94,7 @@ function App() {
           'genotype_quality',
           'zygosity',
           'ad_ratio',
+          'transcript_id',
         ],
         limit: pagination.pageSize,
         page_index: pagination.pageIndex,
@@ -169,7 +169,7 @@ function App() {
           pagination={pagination}
           onPaginationChange={setPagination}
           onServerSortingChange={setSorting}
-          subComponent={(data: IVariantEntity) => <GermlineVariantPreview data={data} />}
+          subComponent={data => <VariantTablePreview occurence={data} />}
           total={total?.count ?? 0}
         />
       </main>

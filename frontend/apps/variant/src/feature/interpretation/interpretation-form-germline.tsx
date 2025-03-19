@@ -8,9 +8,9 @@ import { germlineInterpretationFormSchema, GermlineInterpretationSchemaType } fr
 import { zodResolver } from '@hookform/resolvers/zod';
 import InterpretationFormGeneric from './interpretation-form-generic';
 import { Badge } from '@/components/base/ui/badge';
-import MondoConditionFormField from './mondo-condition-form-field';
+import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
 
-const InterpretationFormGermline = () => {
+function InterpretationFormGermline() {
   const form = useForm<GermlineInterpretationSchemaType>({
     resolver: zodResolver(germlineInterpretationFormSchema),
     defaultValues: {},
@@ -25,7 +25,7 @@ const InterpretationFormGermline = () => {
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <MondoConditionFormField />
+        <MondoAutoCompleteFormField name="condition" label="Mondo condition" placeholder="e.g. muscular dystrophy" />
         <FormField
           control={form.control}
           name="classification"
@@ -159,6 +159,6 @@ const InterpretationFormGermline = () => {
       </form>
     </FormProvider>
   );
-};
+}
 
 export default InterpretationFormGermline;

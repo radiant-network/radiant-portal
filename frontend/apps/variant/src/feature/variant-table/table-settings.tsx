@@ -21,7 +21,7 @@ const columns = [
   {
     id: 'row_expand',
     cell: RowExpandCell,
-    size: 70,
+    size: 42,
     enableResizing: false,
   },
   {

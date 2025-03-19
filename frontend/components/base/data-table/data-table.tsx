@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -11,13 +11,13 @@ import {
   OnChangeFn,
   SortingState,
   SortDirection,
-} from "@tanstack/react-table";
+} from '@tanstack/react-table';
 
-import { ArrowDownAZ, ArrowDownZA } from "lucide-react";
-import { cn } from "@/lib/utils";
-import TableColumnSettings from "@/components/base/data-table/data-table-column-settings";
-import { useResizeObserver } from "@/components/base/data-table/hooks/use-resize-observer";
-import TableIndexResult from "@/components/base/data-table/data-table-index-result";
+import { ArrowDownAZ, ArrowDownZA } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
+import { useResizeObserver } from '@/components/base/data-table/hooks/use-resize-observer';
+import TableIndexResult from '@/components/base/data-table/data-table-index-result';
 import {
   Pagination,
   PaginationContent,
@@ -26,27 +26,13 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/base/ui/pagination";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/base/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/base/ui/select";
-import { SortBody, SortBodyOrderEnum } from "@/api/api";
-import { Skeleton } from "@/components/base/ui/skeleton";
+} from '@/components/base/ui/pagination';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
+import { SortBody, SortBodyOrderEnum } from '@/api/api';
+import { Skeleton } from '@/components/base/ui/skeleton';
 
-export interface TableColumnDef<TData, TValue>
-  extends Omit<ColumnDef<TData, TValue>, "id" | "header"> {
+export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
   id: string;
   header: string;
   subComponent?: string;
@@ -89,9 +75,7 @@ type ColumnVisiblity = {
  * @param settings BaseColumnSettings[]
  * @returns ColumnSettings[]
  */
-export function createColumnSettings(
-  settings: BaseColumnSettings[]
-): ColumnSettings[] {
+export function createColumnSettings(settings: BaseColumnSettings[]): ColumnSettings[] {
   return settings.map((setting, index) => ({
     ...setting,
     index,
@@ -105,11 +89,9 @@ export function createColumnSettings(
  *  column.id: visibility,
  * }
  */
-function deserializeColumnVisibility(
-  settings: ColumnSettings[]
-): ColumnVisiblity {
+function deserializeColumnVisibility(settings: ColumnSettings[]): ColumnVisiblity {
   const result: ColumnVisiblity = {};
-  settings.forEach((setting) => {
+  settings.forEach(setting => {
     result[setting.id] = setting.visible;
   });
   return result;
@@ -121,9 +103,7 @@ function deserializeColumnVisibility(
  * @returns [{ column.id: visibility }]
  */
 function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
-  return settings
-    .sort((a, b) => a.index - b.index)
-    .map((setting) => setting.id);
+  return settings.sort((a, b) => a.index - b.index).map(setting => setting.id);
 }
 
 /**
@@ -131,18 +111,16 @@ function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
  * @param sortingOrder 'asc' | 'desc' | false
  * @returns String
  */
-function getNextSortingOrderHeaderTitle(
-  sortingOrder: SortDirection | boolean
-): string {
-  if (sortingOrder === "asc") {
-    return "Sort ascending";
+function getNextSortingOrderHeaderTitle(sortingOrder: SortDirection | boolean): string {
+  if (sortingOrder === 'asc') {
+    return 'Sort ascending';
   }
 
-  if (sortingOrder === "desc") {
-    return "Sort descending";
+  if (sortingOrder === 'desc') {
+    return 'Sort descending';
   }
 
-  return "Clear sort";
+  return 'Clear sort';
 }
 
 /**
@@ -151,10 +129,10 @@ function getNextSortingOrderHeaderTitle(
  * @param total
  */
 function getPageCount(pagination: PaginationState, total: number) {
-  console.log("pagination", pagination); //TODO: to remove
-  console.log("total", total); //TODO: to remove
+  console.log('pagination', pagination); //TODO: to remove
+  console.log('total', total); //TODO: to remove
 
-  console.log("pagecoutn result", Math.ceil(total / pagination.pageSize)); //TODO: to remove
+  console.log('pagecoutn result', Math.ceil(total / pagination.pageSize)); //TODO: to remove
 
   return Math.ceil(total / pagination.pageSize);
 }
@@ -204,7 +182,7 @@ function getPageCount(pagination: PaginationState, total: number) {
  *  size: 48,
  * }]
  */
-function DataTable({
+function DataTable<T>({
   columns,
   columnSettings,
   data,
@@ -216,34 +194,28 @@ function DataTable({
   onServerSortingChange,
   subComponent,
   total,
-}: TableProps<any>) {
+}: TableProps<T>) {
   // default values
-  const defaultColumnVisibility = deserializeColumnVisibility(
-    defaultColumnSettings
-  );
+  const defaultColumnVisibility = deserializeColumnVisibility(defaultColumnSettings);
   const defaultColumnOrder = deserializeColumnOrder(defaultColumnSettings);
 
   // table interactions
-  const [columnVisibility, setColumnVisibility] = useState(
-    deserializeColumnVisibility(columnSettings)
-  );
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
-    deserializeColumnOrder(columnSettings)
-  );
+  const [columnVisibility, setColumnVisibility] = useState(deserializeColumnVisibility(columnSettings));
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(deserializeColumnOrder(columnSettings));
   const [sorting, setSorting] = useState<SortingState>([]);
 
   // Initialize tanstack table
   const table = useReactTable({
     columns,
-    columnResizeMode: "onChange",
-    columnResizeDirection: "ltr",
+    columnResizeMode: 'onChange',
+    columnResizeDirection: 'ltr',
     data: data,
     enableColumnResizing: true,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getRowCanExpand: () => true,
-    isMultiSortEvent: (_e) => true,
+    isMultiSortEvent: _e => true,
     manualPagination: true,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
@@ -292,10 +264,10 @@ function DataTable({
       onServerSortingChange(defaultServerSorting);
     } else {
       onServerSortingChange(
-        sorting.map((s) => ({
+        sorting.map(s => ({
           field: s.id,
           order: s.desc ? SortBodyOrderEnum.Desc : SortBodyOrderEnum.Asc,
-        }))
+        })),
       );
     }
 
@@ -322,8 +294,7 @@ function DataTable({
           handleOrderChange={setColumnOrder}
           pristine={
             JSON.stringify(defaultColumnOrder) == JSON.stringify(columnOrder) &&
-            JSON.stringify(defaultColumnVisibility) ==
-              JSON.stringify(columnVisibility)
+            JSON.stringify(defaultColumnVisibility) == JSON.stringify(columnVisibility)
           }
           handleReset={() => {
             setColumnOrder(defaultColumnOrder);
@@ -333,9 +304,9 @@ function DataTable({
       </div>
       <Table style={{ ...columnSizeVars }}>
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
+          {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
+              {headerGroup.headers.map(header => (
                 <TableHead
                   key={header.id}
                   colSpan={header.colSpan}
@@ -346,24 +317,18 @@ function DataTable({
                   <>
                     <div
                       className={cn(
-                        "flex align-middle gap-2",
-                        header.column.getCanSort() &&
-                          "cursor-pointer select-none"
+                        'flex align-middle gap-2',
+                        header.column.getCanSort() && 'cursor-pointer select-none',
                       )}
                       onClick={header.column.getToggleSortingHandler()}
                       title={
                         header.column.getCanSort()
-                          ? getNextSortingOrderHeaderTitle(
-                              header.column.getNextSortingOrder()
-                            )
+                          ? getNextSortingOrderHeaderTitle(header.column.getNextSortingOrder())
                           : undefined
                       }
                     >
                       {/* Header rendering */}
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                      {flexRender(header.column.columnDef.header, header.getContext())}
 
                       {/* Sorted Icons */}
                       {{
@@ -378,9 +343,9 @@ function DataTable({
                         onMouseDown={header.getResizeHandler()}
                         onTouchStart={header.getResizeHandler()}
                         className={cn(
-                          "absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50",
+                          'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
                           table.options.columnResizeDirection,
-                          header.column.getIsResizing() ? "opacity-100" : ""
+                          header.column.getIsResizing() ? 'opacity-100' : '',
                         )}
                       />
                     )}
@@ -395,20 +360,17 @@ function DataTable({
           {loadingStates?.list &&
             new Array(pagination.pageSize).fill(0).map((_, index) => (
               <TableRow>
-                <TableCell
-                  key={`skeleton-row-${index}`}
-                  colSpan={columnSettings.length}
-                >
+                <TableCell key={`skeleton-row-${index}`} colSpan={columnSettings.length}>
                   <Skeleton className="w-full h-[32px]" />
                 </TableCell>
               </TableRow>
             ))}
 
           {/* Render table content */}
-          {table.getRowModel().rows.map((row) => (
+          {table.getRowModel().rows.map(row => (
             <>
               <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
+                {row.getVisibleCells().map(cell => (
                   <TableCell
                     key={cell.id}
                     style={{
@@ -422,9 +384,7 @@ function DataTable({
               </TableRow>
               {subComponent && row.getIsExpanded() && (
                 <TableRow key={`subcomponent-${row.id}`}>
-                  <TableCell colSpan={row.getVisibleCells().length}>
-                    {subComponent(row.original)}
-                  </TableCell>
+                  <TableCell colSpan={row.getVisibleCells().length}>{subComponent(row.original)}</TableCell>
                 </TableRow>
               )}
             </>
@@ -436,7 +396,7 @@ function DataTable({
           {/* PageSize select */}
           <Select
             value={String(table.getState().pagination.pageSize)}
-            onValueChange={(value) => {
+            onValueChange={value => {
               table.setPageSize(Number(value));
             }}
           >
@@ -444,7 +404,7 @@ function DataTable({
               <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {[10, 20, 30, 40, 50].map((pageSize) => (
+              {[10, 20, 30, 40, 50].map(pageSize => (
                 <SelectItem value={String(pageSize)}>{pageSize}</SelectItem>
               ))}
             </SelectContent>
@@ -464,9 +424,7 @@ function DataTable({
                 />
               </PaginationItem>
               <PaginationItem>
-                <PaginationLink onClick={() => table.firstPage()}>
-                  1
-                </PaginationLink>
+                <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
               </PaginationItem>
               <PaginationItem>
                 <PaginationEllipsis />
