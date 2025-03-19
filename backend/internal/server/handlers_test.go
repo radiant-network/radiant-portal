@@ -58,6 +58,19 @@ func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
 	}, nil
 }
 
+func (m *MockRepository) GetTermAutoComplete(string, string) ([]types.AutoCompleteTerm, error) {
+	return []types.AutoCompleteTerm{
+			{Source: types.Term{
+				ID:   "MONDO:0000001",
+				Name: "blood group incompatibility",
+			}, HighLight: types.Term{
+				ID:   "MONDO:0000001",
+				Name: "<strong>blood</strong> group incompatibility",
+			}},
+		},
+		nil
+}
+
 func Test_StatusHandler(t *testing.T) {
 	repoStarrocks := &MockRepository{}
 	repoPostgres := &MockRepository{}
@@ -152,4 +165,20 @@ func Test_GetSequencingHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"seq_id":1, "experiment_type":"WGS", "analysis_type": "germline"}`, w.Body.String())
+}
+
+func Test_MondoTermAutoCompleteHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/mondo/autocomplete", MondoTermAutoComplete(repo))
+
+	body := `{
+			"input": "blood"
+	}`
+	req, _ := http.NewRequest("POST", "/mondo/autocomplete", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[{"_source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
 }

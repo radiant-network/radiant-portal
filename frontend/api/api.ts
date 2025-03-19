@@ -68,6 +68,38 @@ export interface AggregationBody {
     'sqon'?: Sqon;
 }
 /**
+ * 
+ * @export
+ * @interface AutoCompleteTerm
+ */
+export interface AutoCompleteTerm {
+    /**
+     * 
+     * @type {Term}
+     * @memberof AutoCompleteTerm
+     */
+    '_source'?: Term;
+    /**
+     * 
+     * @type {Term}
+     * @memberof AutoCompleteTerm
+     */
+    'highlight'?: Term;
+}
+/**
+ * 
+ * @export
+ * @interface AutoCompleteTermBody
+ */
+export interface AutoCompleteTermBody {
+    /**
+     * 
+     * @type {string}
+     * @memberof AutoCompleteTermBody
+     */
+    'input'?: string;
+}
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -703,6 +735,25 @@ export type SqonContent = Array<Sqon> | LeafContent;
 /**
  * 
  * @export
+ * @interface Term
+ */
+export interface Term {
+    /**
+     * 
+     * @type {string}
+     * @memberof Term
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Term
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
  * @interface UserSet
  */
 export interface UserSet {
@@ -749,6 +800,120 @@ export interface UserSet {
      */
     'user_id'?: string;
 }
+
+/**
+ * HpoApi - axios parameter creator
+ * @export
+ */
+export const HpoApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
+         * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {AutoCompleteTermBody} autoCompleteTermBody AutoCompleteTermBody
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        hpoTermAutoComplete: async (autoCompleteTermBody: AutoCompleteTermBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'autoCompleteTermBody' is not null or undefined
+            assertParamExists('hpoTermAutoComplete', 'autoCompleteTermBody', autoCompleteTermBody)
+            const localVarPath = `/hpo/autocomplete`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(autoCompleteTermBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * HpoApi - functional programming interface
+ * @export
+ */
+export const HpoApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = HpoApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
+         * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {AutoCompleteTermBody} autoCompleteTermBody AutoCompleteTermBody
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async hpoTermAutoComplete(autoCompleteTermBody: AutoCompleteTermBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteTerm>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.hpoTermAutoComplete(autoCompleteTermBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['HpoApi.hpoTermAutoComplete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * HpoApi - factory interface
+ * @export
+ */
+export const HpoApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = HpoApiFp(configuration)
+    return {
+        /**
+         * Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
+         * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {AutoCompleteTermBody} autoCompleteTermBody AutoCompleteTermBody
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        hpoTermAutoComplete(autoCompleteTermBody: AutoCompleteTermBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteTerm>> {
+            return localVarFp.hpoTermAutoComplete(autoCompleteTermBody, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * HpoApi - object-oriented interface
+ * @export
+ * @class HpoApi
+ * @extends {BaseAPI}
+ */
+export class HpoApi extends BaseAPI {
+    /**
+     * Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
+     * @summary Get AutoCompleteTerm list of matching input string with highlighted
+     * @param {AutoCompleteTermBody} autoCompleteTermBody AutoCompleteTermBody
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof HpoApi
+     */
+    public hpoTermAutoComplete(autoCompleteTermBody: AutoCompleteTermBody, options?: RawAxiosRequestConfig) {
+        return HpoApiFp(this.configuration).hpoTermAutoComplete(autoCompleteTermBody, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
 
 /**
  * InterpretationsApi - axios parameter creator
@@ -1355,6 +1520,120 @@ export class InterpretationsApi extends BaseAPI {
      */
     public searchInterpretationSomatic(options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).searchInterpretationSomatic(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * MondoApi - axios parameter creator
+ * @export
+ */
+export const MondoApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
+         * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {AutoCompleteTermBody} autoCompleteTermBody AutoCompleteTermBody
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mondoTermAutoComplete: async (autoCompleteTermBody: AutoCompleteTermBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'autoCompleteTermBody' is not null or undefined
+            assertParamExists('mondoTermAutoComplete', 'autoCompleteTermBody', autoCompleteTermBody)
+            const localVarPath = `/mondo/autocomplete`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(autoCompleteTermBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * MondoApi - functional programming interface
+ * @export
+ */
+export const MondoApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = MondoApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
+         * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {AutoCompleteTermBody} autoCompleteTermBody AutoCompleteTermBody
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async mondoTermAutoComplete(autoCompleteTermBody: AutoCompleteTermBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteTerm>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.mondoTermAutoComplete(autoCompleteTermBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MondoApi.mondoTermAutoComplete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * MondoApi - factory interface
+ * @export
+ */
+export const MondoApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = MondoApiFp(configuration)
+    return {
+        /**
+         * Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
+         * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {AutoCompleteTermBody} autoCompleteTermBody AutoCompleteTermBody
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        mondoTermAutoComplete(autoCompleteTermBody: AutoCompleteTermBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteTerm>> {
+            return localVarFp.mondoTermAutoComplete(autoCompleteTermBody, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * MondoApi - object-oriented interface
+ * @export
+ * @class MondoApi
+ * @extends {BaseAPI}
+ */
+export class MondoApi extends BaseAPI {
+    /**
+     * Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
+     * @summary Get AutoCompleteTerm list of matching input string with highlighted
+     * @param {AutoCompleteTermBody} autoCompleteTermBody AutoCompleteTermBody
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MondoApi
+     */
+    public mondoTermAutoComplete(autoCompleteTermBody: AutoCompleteTermBody, options?: RawAxiosRequestConfig) {
+        return MondoApiFp(this.configuration).mondoTermAutoComplete(autoCompleteTermBody, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

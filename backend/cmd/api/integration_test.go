@@ -331,6 +331,27 @@ func Test_GetSequencing(t *testing.T) {
 	assertGetSequencing(t, "simple", 1, expected)
 }
 
+func assertMondoTermAutoComplete(t *testing.T, data string, body string, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewStarrocksRepository(db)
+		router := gin.Default()
+		router.POST("/mondo/autocomplete", server.MondoTermAutoComplete(repo))
+
+		req, _ := http.NewRequest("POST", "/mondo/autocomplete", bytes.NewBuffer([]byte(body)))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_MondoTermAutoComplete(t *testing.T) {
+	body := `{"input": "blood"}`
+	expected := `[{"_source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}, {"_source":{"id":"MONDO:0000002", "name":"blood vessel neoplasm"}, "highlight":{"id":"MONDO:0000002", "name":"<strong>blood</strong> vessel neoplasm"}}]`
+	assertMondoTermAutoComplete(t, "simple", body, expected)
+}
+
 func Test_SearchGermline(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		// db + repo
