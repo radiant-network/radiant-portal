@@ -133,7 +133,7 @@ function InterpretationFormSomatic() {
                     return (
                       <Badge
                         key={option.value}
-                        variant="default"
+                        variant="filled"
                         data-fixed={option.fixed}
                         onClose={onRemove}
                         style={{

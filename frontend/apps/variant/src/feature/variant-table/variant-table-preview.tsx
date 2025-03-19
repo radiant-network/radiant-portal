@@ -12,7 +12,7 @@ type GermlineVariantPreviewProps = {
 
 function VariantTablePreview({ occurence }: GermlineVariantPreviewProps) {
   return (
-    <Card className="border-border">
+    <Card>
       <CardHeader className="p-4">
         <div className="flex items-center gap-8">
           <Button variant="link">

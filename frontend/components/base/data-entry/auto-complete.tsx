@@ -164,7 +164,7 @@ export const AutoComplete = ({
             isOpen ? 'block' : 'hidden',
           )}
         >
-          <CommandList className="rounded-lg border border-border">
+          <CommandList className="rounded-lg border">
             {isLoading ? (
               <CommandPrimitive.Loading>
                 <div className="p-1">

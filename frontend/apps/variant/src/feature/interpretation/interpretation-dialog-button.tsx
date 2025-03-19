@@ -62,10 +62,10 @@ function InterpretationDialogButton({ occurence, ...buttonProps }: Interpretatio
               <InterpretationLastUpdatedBanner />
               <InterpretationVariantHeader occurence={occurence} />
               <div className="grid gap-6 grid-cols-12">
-                <div className="col-span-7 border border-border p-6 bg-gray-100">
+                <div className="col-span-7 border p-6 bg-gray-100">
                   {isSomatic ? <InterpretationFormSomatic /> : <InterpretationFormGermline />}
                 </div>
-                <div className="col-span-5 border border-border py-4 px-6"></div>
+                <div className="col-span-5 border py-4 px-6"></div>
               </div>
             </div>
             <Separator className="mb-6" />
