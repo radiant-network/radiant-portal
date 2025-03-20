@@ -499,3 +499,49 @@ func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 		c.JSON(http.StatusOK, sequencing)
 	}
 }
+
+// GetMondoTermAutoComplete handles retrieving mondo terms by autocomplete
+// @Summary Get AutoCompleteTerm list of matching input string with highlighted
+// @Id mondoTermAutoComplete
+// @Description Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
+// @Tags mondo
+// @Security bearerauth
+// @Param prefix query string true "Prefix"
+// @Produce json
+// @Success 200 {array} types.AutoCompleteTerm
+// @Failure 500 {object} map[string]string
+// @Router /mondo/autocomplete [get]
+func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		mondoTerms, err := repo.GetTermAutoComplete(types.MondoTable.Name, prefix)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		c.JSON(http.StatusOK, mondoTerms)
+	}
+}
+
+// GetHPOTermAutoComplete handles retrieving HPO terms by autocomplete
+// @Summary Get AutoCompleteTerm list of matching input string with highlighted
+// @Id hpoTermAutoComplete
+// @Description Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
+// @Tags hpo
+// @Security bearerauth
+// @Param prefix query string true "Prefix"
+// @Produce json
+// @Success 200 {array} types.AutoCompleteTerm
+// @Failure 500 {object} map[string]string
+// @Router /hpo/autocomplete [get]
+func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		hpoTerms, err := repo.GetTermAutoComplete(types.HPOTable.Name, prefix)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		c.JSON(http.StatusOK, hpoTerms)
+	}
+}

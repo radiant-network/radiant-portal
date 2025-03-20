@@ -115,6 +115,12 @@ func main() {
 	sequencingGroup.Use(roleAccessMiddleware)
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStarrocks))
 
+	mondoGroup := r.Group("/mondo")
+	mondoGroup.GET("/autocomplete", server.GetMondoTermAutoComplete(repoStarrocks))
+
+	hpoGroup := r.Group("/hpo")
+	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoStarrocks))
+
 	r.Use(gin.Recovery())
 	r.Run(":8090")
 }

@@ -25,6 +25,7 @@ type StarrocksDAO interface {
 	CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error)
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 	GetSequencing(seqId int) (*Sequencing, error)
+	GetTermAutoComplete(termsTable string, input string) ([]*types.AutoCompleteTerm, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -308,4 +309,34 @@ func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error
 		}
 	}
 	return &sequencing, err
+}
+
+func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input string) ([]*types.AutoCompleteTerm, error) {
+	selectClause := fmt.Sprintf("id, name, REGEXP_REPLACE(name, '(?i)%s', '<strong>%s</strong>') AS highlighted_name", input, input)
+	whereClause := fmt.Sprintf("name REGEXP '(?i)%s'", input)
+	tx := r.db.Table(termsTable).Select(selectClause).Where(whereClause)
+	var terms []types.TermWithHighLight
+	err := tx.Find(&terms).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching terms: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	output := make([]*types.AutoCompleteTerm, len(terms))
+	for i, term := range terms {
+		output[i] = &types.AutoCompleteTerm{
+			HighLight: types.Term{
+				ID:   term.ID,
+				Name: term.HighlightedName,
+			},
+			Source: types.Term{
+				ID:   term.ID,
+				Name: term.Name,
+			},
+		}
+	}
+	return output, err
 }
