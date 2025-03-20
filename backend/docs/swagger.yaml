@@ -345,6 +345,11 @@ paths:
         required: true
         schema:
           type: string
+      - description: Limit
+        in: query
+        name: limit
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -628,6 +633,11 @@ paths:
         in: query
         name: prefix
         required: true
+        schema:
+          type: string
+      - description: Limit
+        in: query
+        name: limit
         schema:
           type: string
       responses:

@@ -507,6 +507,7 @@ func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Tags mondo
 // @Security bearerauth
 // @Param prefix query string true "Prefix"
+// @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteTerm
 // @Failure 500 {object} map[string]string
@@ -514,7 +515,11 @@ func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
-		mondoTerms, err := repo.GetTermAutoComplete(types.MondoTable.Name, prefix)
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			limit = 25
+		}
+		mondoTerms, err := repo.GetTermAutoComplete(types.MondoTable.Name, prefix, limit)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
@@ -530,6 +535,7 @@ func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Tags hpo
 // @Security bearerauth
 // @Param prefix query string true "Prefix"
+// @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteTerm
 // @Failure 500 {object} map[string]string
@@ -537,7 +543,11 @@ func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
-		hpoTerms, err := repo.GetTermAutoComplete(types.HPOTable.Name, prefix)
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			limit = 25
+		}
+		hpoTerms, err := repo.GetTermAutoComplete(types.HPOTable.Name, prefix, limit)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
