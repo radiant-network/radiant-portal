@@ -3,12 +3,12 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
-	"slices"
-
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/Goldziher/go-utils/sliceutils"
 	"gorm.io/gorm"
+	"log"
+	"regexp"
+	"slices"
 )
 
 type Occurrence = types.Occurrence
@@ -312,9 +312,8 @@ func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error
 }
 
 func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error) {
-	selectClause := fmt.Sprintf("id, name, REGEXP_REPLACE(name, '(?i)%s', '<strong>%s</strong>') AS highlighted_name", input, input)
-	whereClause := fmt.Sprintf("name REGEXP '(?i)%s'", input)
-	tx := r.db.Table(termsTable).Select(selectClause).Where(whereClause).Order("id asc")
+	like := fmt.Sprintf("%%%s%%", input)
+	tx := r.db.Table(termsTable).Select("id, name").Where("LOWER(name) like ?", like).Order("id asc").Limit(limit)
 
 	var terms []types.TermWithHighLight
 	err := tx.Find(&terms).Error
@@ -326,16 +325,17 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 		}
 	}
 
-	output := make([]*types.AutoCompleteTerm, min(limit, len(terms)))
-	for i := 0; i < min(limit, len(terms)); i++ {
+	re := regexp.MustCompile(input)
+	output := make([]*types.AutoCompleteTerm, len(terms))
+	for i, term := range terms {
 		output[i] = &types.AutoCompleteTerm{
 			HighLight: types.Term{
-				ID:   terms[i].ID,
-				Name: terms[i].HighlightedName,
+				ID:   term.ID,
+				Name: re.ReplaceAllString(term.Name, "<strong>"+input+"</strong>"),
 			},
 			Source: types.Term{
-				ID:   terms[i].ID,
-				Name: terms[i].Name,
+				ID:   term.ID,
+				Name: term.Name,
 			},
 		}
 	}
