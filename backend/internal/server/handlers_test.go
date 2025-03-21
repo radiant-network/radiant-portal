@@ -58,7 +58,7 @@ func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
 	}, nil
 }
 
-func (m *MockRepository) GetTermAutoComplete(string, string) ([]*types.AutoCompleteTerm, error) {
+func (m *MockRepository) GetTermAutoComplete(string, string, int) ([]*types.AutoCompleteTerm, error) {
 	return []*types.AutoCompleteTerm{
 			{Source: types.Term{
 				ID:   "MONDO:0000001",
@@ -173,6 +173,32 @@ func Test_MondoTermAutoCompleteHandler(t *testing.T) {
 	router.GET("/mondo/autocomplete", GetMondoTermAutoComplete(repo))
 
 	req, _ := http.NewRequest("GET", "/mondo/autocomplete?prefix=blood", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[{"source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
+}
+
+func Test_MondoTermAutoCompleteHandlerWithLimit(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/mondo/autocomplete", GetMondoTermAutoComplete(repo))
+
+	req, _ := http.NewRequest("GET", "/mondo/autocomplete?prefix=blood&limit=10", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[{"source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
+}
+
+func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/mondo/autocomplete", GetMondoTermAutoComplete(repo))
+
+	req, _ := http.NewRequest("GET", "/mondo/autocomplete?prefix=blood&limit=a", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

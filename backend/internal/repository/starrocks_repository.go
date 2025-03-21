@@ -3,12 +3,12 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
-	"slices"
-
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/Goldziher/go-utils/sliceutils"
 	"gorm.io/gorm"
+	"log"
+	"regexp"
+	"slices"
 )
 
 type Occurrence = types.Occurrence
@@ -25,7 +25,7 @@ type StarrocksDAO interface {
 	CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error)
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 	GetSequencing(seqId int) (*Sequencing, error)
-	GetTermAutoComplete(termsTable string, input string) ([]*types.AutoCompleteTerm, error)
+	GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -311,10 +311,10 @@ func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error
 	return &sequencing, err
 }
 
-func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input string) ([]*types.AutoCompleteTerm, error) {
-	selectClause := fmt.Sprintf("id, name, REGEXP_REPLACE(name, '(?i)%s', '<strong>%s</strong>') AS highlighted_name", input, input)
-	whereClause := fmt.Sprintf("name REGEXP '(?i)%s'", input)
-	tx := r.db.Table(termsTable).Select(selectClause).Where(whereClause)
+func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error) {
+	like := fmt.Sprintf("%%%s%%", input)
+	tx := r.db.Table(termsTable).Select("id, name").Where("LOWER(name) like ?", like).Order("id asc").Limit(limit)
+
 	var terms []types.TermWithHighLight
 	err := tx.Find(&terms).Error
 	if err != nil {
@@ -325,12 +325,13 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 		}
 	}
 
+	re := regexp.MustCompile(input)
 	output := make([]*types.AutoCompleteTerm, len(terms))
 	for i, term := range terms {
 		output[i] = &types.AutoCompleteTerm{
 			HighLight: types.Term{
 				ID:   term.ID,
-				Name: term.HighlightedName,
+				Name: re.ReplaceAllString(term.Name, "<strong>"+input+"</strong>"),
 			},
 			Source: types.Term{
 				ID:   term.ID,
