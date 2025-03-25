@@ -311,11 +311,30 @@ func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error
 	return &sequencing, err
 }
 
+func (r *StarrocksRepository) mapToAutoCompleteTerm(term *types.Term, regex *regexp.Regexp, input string) *types.AutoCompleteTerm {
+	name := ""
+	if len(input) > 0 {
+		name = regex.ReplaceAllString(term.Name, "<strong>"+input+"</strong>")
+	} else {
+		name = term.Name
+	}
+	return &types.AutoCompleteTerm{
+		HighLight: types.Term{
+			ID:   term.ID,
+			Name: name,
+		},
+		Source: types.Term{
+			ID:   term.ID,
+			Name: term.Name,
+		},
+	}
+}
+
 func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error) {
 	like := fmt.Sprintf("%%%s%%", input)
 	tx := r.db.Table(termsTable).Select("id, name").Where("LOWER(name) like ?", like).Order("id asc").Limit(limit)
 
-	var terms []types.TermWithHighLight
+	var terms []types.Term
 	err := tx.Find(&terms).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -328,16 +347,8 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 	re := regexp.MustCompile(input)
 	output := make([]*types.AutoCompleteTerm, len(terms))
 	for i, term := range terms {
-		output[i] = &types.AutoCompleteTerm{
-			HighLight: types.Term{
-				ID:   term.ID,
-				Name: re.ReplaceAllString(term.Name, "<strong>"+input+"</strong>"),
-			},
-			Source: types.Term{
-				ID:   term.ID,
-				Name: term.Name,
-			},
-		}
+		output[i] = r.mapToAutoCompleteTerm(&term, re, input)
 	}
-	return output, err
+
+	return output, nil
 }
