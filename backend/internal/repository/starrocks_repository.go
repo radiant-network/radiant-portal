@@ -350,5 +350,5 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 		output[i] = r.mapToAutoCompleteTerm(&term, re, input)
 	}
 
-	return output, nil
+	return output, err
 }
