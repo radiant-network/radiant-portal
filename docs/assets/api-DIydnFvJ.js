@@ -1,0 +1,1 @@
+const n={Asc:"asc",Desc:"desc"},e={In:"in",And:"and",Or:"or",Not:"not",Between:"between",GreaterThan:">",LessThan:"<",GreaterThanOrEqualTo:">=",LessThanOrEqualTo:"<=",NotIn:"not-in",All:"all"};export{e as S,n as a};
