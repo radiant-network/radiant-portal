@@ -3,10 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
 
-import { AutoComplete } from '@/components/base/data-entry/auto-complete';
+import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
 import { Input } from '@/components/base/ui/input';
 
-const FRAMEWORKS = [
+const FRAMEWORKS: Option[] = [
   {
     value: 'next.js',
     label: 'Next.js',
@@ -92,7 +92,7 @@ export const Async: Story = {
 
             return new Promise(resolve => {
               setTimeout(() => resolve(FRAMEWORKS), 1000);
-            });
+            }) as Promise<Option[]>;
           }}
           debounceDelay={300}
           className="max-w-[300px]"

@@ -3,28 +3,34 @@ import { Command as CommandPrimitive } from 'cmdk';
 import { useState, useRef, useCallback, type KeyboardEvent, ReactNode, useEffect } from 'react';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { XIcon } from 'lucide-react';
+import { Check, XIcon } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 
-export type Option = Record<'value' | 'label', string> & Record<string, string>;
+export type Option = {
+  label: ReactNode;
+  value: string;
+  [name: string]: any;
+};
 
-type AutoCompleteProps = {
-  defaultOptions?: Option[];
+type AutoCompleteProps<T extends Option> = {
+  defaultOptions?: T[];
   emptyIndicator?: ReactNode;
   value?: string;
   onChange?: (value: string | undefined) => void;
-  onSearch?: (value: string) => Promise<Option[]>;
+  onSearch?: (value: string) => Promise<T[]>;
   disabled?: boolean;
   placeholder?: string;
   className?: string;
   debounceDelay?: number;
+  optionLabelProp?: keyof T;
+  optionFilterProp?: keyof T;
 };
 
-export function getSelectedOptionByValue(value: string | undefined, options: Option[]): Option | undefined {
+export function getSelectedOptionByValue<T extends Option>(value: string | undefined, options: T[]): T | undefined {
   return options.find(option => value === option.value);
 }
 
-export const AutoComplete = ({
+export const AutoComplete = <T extends Option>({
   defaultOptions = [],
   placeholder,
   emptyIndicator,
@@ -33,14 +39,16 @@ export const AutoComplete = ({
   disabled,
   debounceDelay = 500,
   onSearch,
+  optionFilterProp = 'label',
+  optionLabelProp = 'label',
   className,
-}: AutoCompleteProps) => {
+}: AutoCompleteProps<T>) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selected, setSelected] = useState<Option | undefined>(getSelectedOptionByValue(value, defaultOptions));
-  const [options, setOptions] = useState<Option[]>(defaultOptions);
+  const [selected, setSelected] = useState<T | undefined>(getSelectedOptionByValue(value, defaultOptions));
+  const [options, setOptions] = useState<T[]>(defaultOptions);
   const [inputValue, setInputValue] = useState<string>('');
   const [inputValueSearch, setInputValueSearch] = useState<string>('');
   const debouncedSearchTerm = useDebounce(inputValueSearch, debounceDelay);
@@ -59,7 +67,7 @@ export const AutoComplete = ({
 
       // This is not a default behaviour of the <input /> field
       if (event.key === 'Enter' && input.value !== '') {
-        const optionToSelect = options.find(option => option.label === input.value);
+        const optionToSelect = options.find(option => option[optionFilterProp] === input.value);
         if (optionToSelect) {
           setSelected(optionToSelect);
           onChange?.(optionToSelect.value);
@@ -75,12 +83,12 @@ export const AutoComplete = ({
 
   const handleBlur = useCallback(() => {
     setOpen(false);
-    setInputValue(selected?.label || '');
+    setInputValue(selected?.[optionLabelProp] || '');
   }, [selected]);
 
   const handleSelectOption = useCallback(
-    (selectedOption: Option) => {
-      setInputValue(selectedOption.label);
+    (selectedOption: T) => {
+      setInputValue(selectedOption[optionLabelProp]);
       setSelected(selectedOption);
 
       onChange?.(selectedOption.value);
@@ -98,7 +106,7 @@ export const AutoComplete = ({
     if (value && defaultOptions.length > 0) {
       const selectedOption = getSelectedOptionByValue(value, defaultOptions);
       setSelected(selectedOption);
-      setInputValue(selectedOption?.label || '');
+      setInputValue(selectedOption?.[optionLabelProp] || '');
     }
   }, [value, defaultOptions]);
 
@@ -121,8 +129,19 @@ export const AutoComplete = ({
     void exec();
   }, [debouncedSearchTerm, open]);
 
+  const filteredOptions = options.filter(option =>
+    option[optionFilterProp].toLowerCase().trim().includes(inputValueSearch.toLowerCase().trim()),
+  );
+
   return (
-    <CommandPrimitive onKeyDown={handleKeyDown} className={className} shouldFilter={!onSearch}>
+    <CommandPrimitive
+      onKeyDown={handleKeyDown}
+      className={className}
+      // purposely not using the filter prop here
+      // because we want to control the visibility of the options
+      // based on the custom optionFilterProp
+      shouldFilter={false}
+    >
       <div className="relative outline-none focus-within:ring-2 focus-within:ring-ring rounded-md">
         <CommandInput
           ref={inputRef}
@@ -172,12 +191,12 @@ export const AutoComplete = ({
                 </div>
               </CommandPrimitive.Loading>
             ) : null}
-            {options.length > 0 && !isLoading ? (
+            {filteredOptions.length > 0 && !isLoading ? (
               <CommandGroup>
-                {options.map(option => (
+                {filteredOptions.map(option => (
                   <CommandItem
                     key={option.value}
-                    value={option.label}
+                    value={option[optionFilterProp]}
                     onMouseDown={event => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -185,7 +204,8 @@ export const AutoComplete = ({
                     onSelect={() => handleSelectOption(option)}
                     className="cursor-pointer"
                   >
-                    {option.label}
+                    <span className="flex-1">{option.label}</span>
+                    {option.value === value ? <Check className="w-4" /> : null}
                   </CommandItem>
                 ))}
               </CommandGroup>

@@ -6,6 +6,9 @@ import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete
 import { SquareArrowOutUpRightIcon } from 'lucide-react';
 import { debounce } from '@/components/hooks/useDebounce';
 import { Button } from '@/components/base/ui/button';
+import { mondoApi } from '@/utils/api';
+import capitalize from 'lodash/capitalize';
+import InterpretationMondoOptionItemLabel from './mondo-option-item-label';
 
 type MondoAutoCompleteFormFieldProps = {
   name: keyof GermlineInterpretationSchemaType | keyof SomaticInterpretationSchemaType;
@@ -18,12 +21,14 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
 
   const handleSearch = useCallback(async (searchValue: string): Promise<Option[]> => {
     if (searchValue) {
-      return [
-        {
-          label: '',
-          value: '',
-        },
-      ];
+      const response = await mondoApi.mondoTermAutoComplete(searchValue);
+
+      return response.data.map(item => ({
+        label: <InterpretationMondoOptionItemLabel mondo={item} />,
+        value: item.source?.id || '',
+        display: capitalize(item.source?.name),
+        filter: `${item.source?.name}${item.source?.id}`,
+      }));
     }
 
     return [];
@@ -69,6 +74,8 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
 
                 return [];
               }}
+              optionFilterProp="filter"
+              optionLabelProp="display"
               {...field}
             />
           </FormControl>
