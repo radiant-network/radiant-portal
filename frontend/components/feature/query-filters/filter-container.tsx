@@ -10,6 +10,8 @@ import { occurrencesApi } from '@/utils/api';
 import { SearchIcon } from 'lucide-react';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { NumericalFilter } from './numerical-filter';
+import { ToggleFilter } from './toggle-filter';
 
 type OccurrenceAggregationInput = {
   seqId: string;
@@ -48,6 +50,27 @@ function useAggregationBuilder(field: string, size: number = 30, shouldFetch: bo
     revalidateOnFocus: false,
   });
 }
+
+function FilterComponent({
+  field,
+  searchVisible,
+  data,
+}: {
+  field: AggregationConfig;
+  searchVisible: boolean;
+  data?: Aggregation[];
+}) {
+  switch (field.type) {
+    case 'multiple':
+      return <MultiSelectFilter field={field} searchVisible={searchVisible} data={data} />;
+    case 'numerical':
+      return <NumericalFilter field={field} />;
+    case 'boolean':
+      return <ToggleFilter field={field} />;
+    default:
+      return <div>Unsupported filter type: {field.type}</div>;
+  }
+}
 export function FilterContainer({ field }: { field: AggregationConfig }) {
   const [collapsed, setCollapsed] = React.useState(true);
   const [searchVisible, setSearchVisible] = React.useState(false);
@@ -71,11 +94,7 @@ export function FilterContainer({ field }: { field: AggregationConfig }) {
         </AccordionTrigger>
         <AccordionContent>
           <LoadingOverlay loading={isLoading}>
-            {field.type === 'multiple' ? (
-              <MultiSelectFilter field={field} searchVisible={searchVisible} data={data} />
-            ) : (
-              <div>Not implemented</div>
-            )}
+            <FilterComponent field={field} searchVisible={searchVisible} data={data} />
           </LoadingOverlay>
         </AccordionContent>
       </AccordionItem>
