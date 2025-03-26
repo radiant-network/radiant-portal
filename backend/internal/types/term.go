@@ -10,11 +10,6 @@ type Term struct {
 	Name string `json:"name,omitempty"`
 }
 
-type TermWithHighLight struct {
-	Term
-	HighlightedName string
-}
-
 var MondoTable = Table{
 	Name:  "mondo_terms",
 	Alias: "mondo",
