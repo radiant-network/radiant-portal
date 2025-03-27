@@ -289,6 +289,23 @@ components:
           - all
           type: string
       type: object
+    Statistics:
+      description: Statistics represents statistics about a column
+      properties:
+        max:
+          description: Max for numeric facet
+          type: number
+        min:
+          description: Min for numeric facet
+          type: number
+      type: object
+    StatisticsBody:
+      properties:
+        field:
+          type: string
+        sqon:
+          $ref: '#/components/schemas/Sqon'
+      type: object
     Term:
       properties:
         id:
@@ -778,6 +795,46 @@ paths:
       security:
       - bearerauth: []
       summary: List occurrences
+      tags:
+      - occurrences
+  /occurrences/{seq_id}/statistics:
+    post:
+      description: Return statistics about a field for a given sequence ID
+      operationId: statisticsOccurrences
+      parameters:
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatisticsBody'
+        description: Statistics Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Statistics'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+      security:
+      - bearerauth: []
+      summary: Statistics of occurrences
       tags:
       - occurrences
   /sequencing/{seq_id}:

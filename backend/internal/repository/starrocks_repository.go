@@ -15,6 +15,7 @@ import (
 type Occurrence = types.Occurrence
 type Aggregation = types.Aggregation
 type Sequencing = types.Sequencing
+type Statistics = types.Statistics
 
 type StarrocksRepository struct {
 	db *gorm.DB
@@ -27,6 +28,7 @@ type StarrocksDAO interface {
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 	GetSequencing(seqId int) (*Sequencing, error)
 	GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error)
+	GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -296,6 +298,45 @@ func (r *StarrocksRepository) AggregateOccurrences(seqId int, userQuery types.Ag
 		return aggregation, fmt.Errorf("error query aggragation: %w", err)
 	}
 	return aggregation, err
+}
+
+func prepareStatQuery(seqId int, userQuery types.StatisticsQuery, r *StarrocksRepository) (*gorm.DB, int, error) {
+	part, err := r.GetPart(seqId)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
+	}
+	tx := addImplicitOccurrencesFilters(seqId, r, part)
+	if userQuery != nil {
+		tx = joinWithVariants(userQuery, tx)
+		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
+			joinClause := "LEFT JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
+			tx = tx.Joins(joinClause)
+			selectedPanelsTables := getDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
+			for _, panelsTable := range selectedPanelsTables {
+				tx = tx.
+					Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
+			}
+		}
+		addWhere(userQuery, tx)
+
+	}
+	return tx, part, nil
+}
+
+func (r *StarrocksRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	tx, _, err := prepareStatQuery(seqId, userQuery, r)
+	var statistics Statistics
+	if err != nil {
+		return &statistics, fmt.Errorf("error during query preparation %w", err)
+	}
+	targetCol := userQuery.GetTargetedField()
+	sel := fmt.Sprintf("MIN(%s.%s) as min, MAX(%s.%s) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
+	err = tx.Select(sel).
+		Find(&statistics).Error
+	if err != nil {
+		return &statistics, fmt.Errorf("error query aggragation: %w", err)
+	}
+	return &statistics, err
 }
 
 func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error) {
