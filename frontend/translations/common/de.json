@@ -1,0 +1,198 @@
+{
+  "common": {
+    "queryBar": {
+      "empty": "Verwenden Sie die Suchwerkzeuge und Facetten auf der linken Seite, um eine Abfrage zu erstellen",
+      "deletePopover": {
+        "title": "Diese Abfrage löschen?",
+        "cancel": "Abbrechen",
+        "ok": "Löschen"
+      },
+      "customPill": {
+        "createTooltip": "Erstellen Sie eine benutzerdefinierte Abfrage",
+        "cannotSaveAsCustomPill": "Benutzerdefinierte Abfragen können keine anderen benutzerdefinierten Abfragen enthalten"
+      },
+      "saveDialog": {
+        "title": "Diese Abfrage speichern",
+        "fields": {
+          "title": {
+            "label": "Abfragename",
+            "placeholder": "Unbenannte Abfrage"
+          }
+        },
+        "notice": "Sie finden Ihre gespeicherten Abfragen in der Seitenleiste unter der Überschrift \"Abfragen\".",
+        "cancel": "Abbrechen",
+        "ok": "Speichern"
+      }
+    },
+    "queryPill": {
+      "operator": {
+        "changeOperatorTo": "Operator ändern zu",
+        "and": "und",
+        "or": "oder"
+      },
+      "customPill": {
+        "editDialog": {
+          "title": "Benutzerdefinierte Abfrage bearbeiten",
+          "cancel": "Abbrechen",
+          "ok": "Speichern"
+        },
+        "cantBeEmptyDialog": {
+          "title": "Abfrage darf nicht leer sein",
+          "description": "Ihre benutzerdefinierte Abfrage muss mindestens ein Kriterium enthalten.",
+          "ok": "Schließen"
+        },
+        "titleExistsDialog": {
+          "title": "Name bereits vergeben",
+          "description": "Eine benutzerdefinierte Abfrage mit diesem Namen existiert bereits. Bitte weisen Sie einen eindeutigen Namen zu.",
+          "ok": "Schließen"
+        },
+        "saveDialog": {
+          "title": "Diese Abfrage bearbeiten?",
+          "confirmationMessage": "Sie sind dabei, die benutzerdefinierte Abfrage \"{title}\" zu bearbeiten, was Ihre Ergebnisse beeinflussen könnte.",
+          "affectedFilters": "Betroffene gespeicherte Filter:",
+          "cancel": "Abbrechen",
+          "ok": "Speichern"
+        }
+      }
+    },
+    "toolbar": {
+      "combine": "Kombinieren",
+      "newQuery": "Neue Abfrage",
+      "clearAll": "Alles löschen",
+      "clearAllDialog": {
+        "title": "Alle Abfragen löschen?",
+        "description": "Sie sind dabei, alle Ihre Abfragen zu löschen. Sie werden für immer verloren sein.",
+        "cancel": "Abbrechen",
+        "ok": "Löschen"
+      },
+      "labels": "Beschriftungen"
+    },
+    "savedFilter": {
+      "deleteTooltip": "Filter löschen",
+      "deleteDialog": {
+        "title": "Diesen Filter dauerhaft löschen?",
+        "description": "Sie sind dabei, diesen Filter und alle zugehörigen Abfragen dauerhaft zu löschen.",
+        "cancel": "Abbrechen",
+        "ok": "Filter löschen"
+      },
+      "duplicateTooltip": "Filter duplizieren",
+      "overwriteDialog": {
+        "title": "Ungespeicherte Änderungen",
+        "description": "Sie sind dabei, einen neuen Filter zu erstellen; alle Änderungen gehen verloren.",
+        "cancel": "Abbrechen",
+        "ok": "Erstellen"
+      },
+      "editDialog": {
+        "title": "Filter bearbeiten",
+        "cancel": "Abbrechen",
+        "ok": "Speichern",
+        "fields": {
+          "title": {
+            "label": "Titel",
+            "placeholder": "Unbenannte Abfrage"
+          }
+        }
+      },
+      "myFilters": "Meine Filter",
+      "manageFilters": "Filter verwalten",
+      "manageDialog": {
+        "title": "Filter verwalten",
+        "close": "Schließen",
+        "lastSaveAt": "Zuletzt gespeichert vor: {lastSaveAt}"
+      },
+      "newFilter": "Neuer Filter",
+      "saveTooltip": {
+        "whenEmpty": "Fügen Sie eine Abfrage hinzu, um zu speichern",
+        "whenDirty": "Änderungen speichern",
+        "default": "Filter speichern"
+      },
+      "shareTooltip": {
+        "whenNotSaved": "Filter speichern, um zu teilen",
+        "default": "Teilen (URL kopieren)"
+      },
+      "favoriteTooltip": {
+        "set": "Als Standardfilter festlegen",
+        "unset": "Standardfilter entfernen"
+      },
+      "discardTooltip": "Ungespeicherte Änderungen verwerfen",
+      "noSavedFilters": "Sie haben keine gespeicherten Filter",
+      "untitledFilter": "Unbenannter Filter"
+    },
+    "components": {
+      "queryPillRemote": "Komponente Query Pill Remote",
+      "emptyCell": "-"
+    },
+    "table": {
+      "sort": {
+        "descending": "Absteigend sortieren",
+        "ascending": "Aufsteigend sortieren"
+      }
+    },
+    "pagination": {
+      "aria": {
+        "previous": "Zur vorherigen Seite gehen",
+        "next": "Zur nächsten Seite gehen",
+        "more": "Weitere Seiten"
+      },
+      "previous": "Zurück",
+      "next": "Weiter"
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "variant": "Variante",
+      "profile": "Profil",
+      "settings": "Einstellungen",
+      "logout": "Abmelden"
+    },
+    "actions": {
+      "selectLanguage": "Sprache auswählen"
+    },
+    "languages": {
+      "en": "Englisch",
+      "fr": "Französisch",
+      "de": "Deutsch",
+      "es": "Spanisch"
+    },
+    "filters": {
+      "labels": {
+        "chromosome": "Chromosom",
+        "filter": "Filter",
+        "zygosity": "Zygosität",
+        "impactscore": "Impact Score",
+        "variantclass": "Variantklasse",
+        "symbol": "Symbol",
+        "pf": "Protein Funktion",
+        "actualInterval": "Aktuelles Intervall",
+        "unit": "Einheit",
+        "selectUnit": "Einheit auswählen",
+        "noData": "Keine Daten",
+        "[fieldKey]": "Feld: {{fieldKey}}"
+      },
+      "operators": {
+        "greaterThan": "Größer als",
+        "lessThan": "Kleiner als",
+        "between": "Zwischen",
+        "greaterThanOrEqual": "Größer oder gleich",
+        "lessThanOrEqual": "Kleiner oder gleich",
+        "in": "In",
+        "selectOperator": "Operator auswählen"
+      },
+      "buttons": {
+        "clear": "Löschen",
+        "apply": "Anwenden",
+        "all": "Alle",
+        "none": "Keine",
+        "showMore": "Mehr anzeigen"
+      },
+      "search": {
+        "placeholder": "Suchen..."
+      },
+      "unsupportedType": "Nicht unterstützter Typ"
+    },
+    "variant": {
+      "classes": {
+        "indel": "Indel"
+      }
+    }
+  }
+}

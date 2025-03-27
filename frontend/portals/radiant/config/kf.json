@@ -9,5 +9,15 @@
       { "key": "variant_class", "type": "multiple" },
       { "key": "symbol", "type": "multiple" }
     ]
+  },
+  "portal": {
+    "name": "KidsFirst",
+    "navigation": {
+      "dashboard": true,
+      "variant": true,
+      "profile": true,
+      "settings": true,
+      "logout": true
+    }
   }
 }

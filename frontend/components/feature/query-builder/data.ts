@@ -1,131 +1,129 @@
 import { ArrayTenOrMore, QueryBuilderDictionary } from "./types";
+import { useI18n } from '@/components/hooks/i18n';
 
-export const defaultDictionary: QueryBuilderDictionary = {
-  queryBar: {
-    empty: "Use the search tools & facets on the left to build a query",
-    deletePopover: {
-      title: "Delete this query?",
-      cancel: "Cancel",
-      ok: "Delete",
-    },
-    customPill: {
-      createTooltip: "Create a custom query",
-      cannotSaveAsCustomPill:
-        "Custom queries cannot include other custom queries",
-    },
-    saveDialog: {
-      title: "Save this query",
-      fields: {
-        title: {
-          label: "Query name",
-          placeholder: "Untitled query",
-        },
+export const useQueryBuilderDictionary = (): QueryBuilderDictionary => {
+  const { t } = useI18n('common');
+
+  return {
+    queryBar: {
+      empty: t('common.queryBar.empty'),
+      deletePopover: {
+        title: t('common.queryBar.deletePopover.title'),
+        cancel: t('common.queryBar.deletePopover.cancel'),
+        ok: t('common.queryBar.deletePopover.ok'),
       },
-      notice:
-        "You will find your saved queries in the sidebar under the “Queries” heading.",
-      cancel: "Cancel",
-      ok: "Save",
-    },
-  },
-  queryPill: {
-    operator: {
-      changeOperatorTo: "Change operator to",
-      and: "and",
-      or: "or",
-    },
-    facet: (key) => key,
-    customPill: {
-      editDialog: {
-        title: "Edit custom query",
-        cancel: "Cancel",
-        ok: "Save",
-      },
-      cantBeEmptyDialog: {
-        title: "Query cannot be empty",
-        description: "Your custom query must contain at least one criteria.",
-        ok: "Close",
-      },
-      titleExistsDialog: {
-        title: "Name already in use",
-        description:
-          "A custom query with this name already exists. Please assign a unique name.",
-        ok: "Close",
+      customPill: {
+        createTooltip: t('common.queryBar.customPill.createTooltip'),
+        cannotSaveAsCustomPill: t('common.queryBar.customPill.cannotSaveAsCustomPill'),
       },
       saveDialog: {
-        title: "Edit this query?",
-        confirmationMessage:
-          'You are about to edit the custom query "{title}", which may affect your results.',
-        affectedFilters: "Affected saved filters:",
-        cancel: "Cancel",
-        ok: "Save",
+        title: t('common.queryBar.saveDialog.title'),
+        fields: {
+          title: {
+            label: t('common.queryBar.saveDialog.fields.title.label'),
+            placeholder: t('common.queryBar.saveDialog.fields.title.placeholder'),
+          },
+        },
+        notice: t('common.queryBar.saveDialog.notice'),
+        cancel: t('common.queryBar.saveDialog.cancel'),
+        ok: t('common.queryBar.saveDialog.ok'),
       },
     },
-  },
-  toolbar: {
-    combine: "Combine",
-    newQuery: "New query",
-    clearAll: "Clear all",
-    clearAllDialog: {
-      title: "Delete all queries?",
-      description:
-        "You are about to delete all your queries. They will be lost forever.",
-      cancel: "Cancel",
-      ok: "Delete",
-    },
-    labels: "Labels",
-  },
-  savedFilter: {
-    deleteTooltip: "Delete filter",
-    deleteDialog: {
-      title: "Permanently delete this filter?",
-      description:
-        "You are about to permanently delete this filter and all of its queries.",
-      cancel: "Cancel",
-      ok: "Delete filter",
-    },
-    duplicateTooltip: "Duplicate filter",
-    overwriteDialog: {
-      title: "Unsaved changes",
-      description:
-        "You are about to create a new filter; all modifications will be lost.",
-      cancel: "Cancel",
-      ok: "Create",
-    },
-    editDialog: {
-      title: "Edit filter",
-      cancel: "Cancel",
-      ok: "Save",
-      fields: {
-        title: {
-          label: "Title",
-          placeholder: "Untitled query",
+    queryPill: {
+      operator: {
+        changeOperatorTo: t('common.queryPill.operator.changeOperatorTo'),
+        and: t('common.queryPill.operator.and'),
+        or: t('common.queryPill.operator.or'),
+      },
+      facet: (key) => key,
+      customPill: {
+        editDialog: {
+          title: t('common.queryPill.customPill.editDialog.title'),
+          cancel: t('common.queryPill.customPill.editDialog.cancel'),
+          ok: t('common.queryPill.customPill.editDialog.ok'),
+        },
+        cantBeEmptyDialog: {
+          title: t('common.queryPill.customPill.cantBeEmptyDialog.title'),
+          description: t('common.queryPill.customPill.cantBeEmptyDialog.description'),
+          ok: t('common.queryPill.customPill.cantBeEmptyDialog.ok'),
+        },
+        titleExistsDialog: {
+          title: t('common.queryPill.customPill.titleExistsDialog.title'),
+          description: t('common.queryPill.customPill.titleExistsDialog.description'),
+          ok: t('common.queryPill.customPill.titleExistsDialog.ok'),
+        },
+        saveDialog: {
+          title: t('common.queryPill.customPill.saveDialog.title'),
+          confirmationMessage: t('common.queryPill.customPill.saveDialog.confirmationMessage') as `${string}{title}${string}`,
+          affectedFilters: t('common.queryPill.customPill.saveDialog.affectedFilters'),
+          cancel: t('common.queryPill.customPill.saveDialog.cancel'),
+          ok: t('common.queryPill.customPill.saveDialog.ok'),
         },
       },
     },
-    myFilters: "My Filters",
-    manageFilters: "Manage filters",
-    manageDialog: {
-      title: "Manage filters",
-      close: "Close",
-      lastSaveAt: "Last saved at: {lastSaveAt} ago",
+    toolbar: {
+      combine: t('common.toolbar.combine'),
+      newQuery: t('common.toolbar.newQuery'),
+      clearAll: t('common.toolbar.clearAll'),
+      clearAllDialog: {
+        title: t('common.toolbar.clearAllDialog.title'),
+        description: t('common.toolbar.clearAllDialog.description'),
+        cancel: t('common.toolbar.clearAllDialog.cancel'),
+        ok: t('common.toolbar.clearAllDialog.ok'),
+      },
+      labels: t('common.toolbar.labels'),
     },
-    newFilter: "New filter",
-    saveTooltip: {
-      whenEmpty: "Add a query to save",
-      whenDirty: "Save changes",
-      default: "Save filter",
+    savedFilter: {
+      deleteTooltip: t('common.savedFilter.deleteTooltip'),
+      deleteDialog: {
+        title: t('common.savedFilter.deleteDialog.title'),
+        description: t('common.savedFilter.deleteDialog.description'),
+        cancel: t('common.savedFilter.deleteDialog.cancel'),
+        ok: t('common.savedFilter.deleteDialog.ok'),
+      },
+      duplicateTooltip: t('common.savedFilter.duplicateTooltip'),
+      overwriteDialog: {
+        title: t('common.savedFilter.overwriteDialog.title'),
+        description: t('common.savedFilter.overwriteDialog.description'),
+        cancel: t('common.savedFilter.overwriteDialog.cancel'),
+        ok: t('common.savedFilter.overwriteDialog.ok'),
+      },
+      editDialog: {
+        title: t('common.savedFilter.editDialog.title'),
+        cancel: t('common.savedFilter.editDialog.cancel'),
+        ok: t('common.savedFilter.editDialog.ok'),
+        fields: {
+          title: {
+            label: t('common.savedFilter.editDialog.fields.title.label'),
+            placeholder: t('common.savedFilter.editDialog.fields.title.placeholder'),
+          },
+        },
+      },
+      myFilters: t('common.savedFilter.myFilters'),
+      manageFilters: t('common.savedFilter.manageFilters'),
+      manageDialog: {
+        title: t('common.savedFilter.manageDialog.title'),
+        close: t('common.savedFilter.manageDialog.close'),
+        lastSaveAt: t('common.savedFilter.manageDialog.lastSaveAt') as `${string}{lastSaveAt}${string}`,
+      },
+      newFilter: t('common.savedFilter.newFilter'),
+      saveTooltip: {
+        whenEmpty: t('common.savedFilter.saveTooltip.whenEmpty'),
+        whenDirty: t('common.savedFilter.saveTooltip.whenDirty'),
+        default: t('common.savedFilter.saveTooltip.default'),
+      },
+      shareTooltip: {
+        whenNotSaved: t('common.savedFilter.shareTooltip.whenNotSaved'),
+        default: t('common.savedFilter.shareTooltip.default'),
+      },
+      favoriteTooltip: {
+        set: t('common.savedFilter.favoriteTooltip.set'),
+        unset: t('common.savedFilter.favoriteTooltip.unset'),
+      },
+      discardTooltip: t('common.savedFilter.discardTooltip'),
+      noSavedFilters: t('common.savedFilter.noSavedFilters'),
     },
-    shareTooltip: {
-      whenNotSaved: "Save filter to share",
-      default: "Share (Copy url)",
-    },
-    favoriteTooltip: {
-      set: "Set as default filter",
-      unset: "Unset default filter",
-    },
-    discardTooltip: "Discard unsaved changes",
-    noSavedFilters: "You have no saved filters",
-  },
+  };
 };
 
 export const defaultQueryReferenceColors: ArrayTenOrMore<string> = [

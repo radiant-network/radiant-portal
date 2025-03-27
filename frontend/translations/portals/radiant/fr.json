@@ -1,0 +1,23 @@
+{
+  "common": {
+    "welcome": "Bienvenue dans le portail Radiant",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "success": "Opération réussie",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "search": {
+      "placeholder": "Rechercher..."
+    },
+    "noResults": "Aucun résultat trouvé",
+    "navigation": {
+      "dashboard": "Tableau de bord",
+      "variant": "Variant",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
+    }
+  }
+}

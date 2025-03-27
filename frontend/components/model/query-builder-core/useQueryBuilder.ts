@@ -15,10 +15,12 @@ import {
 import { PartialKeys } from "@/components/lib/utils";
 import { ISyntheticSqon } from "../sqon";
 import { removeIgnoredFieldsFromQueryList } from "./utils/sqon";
+import { useI18n } from '../../hooks/i18n';
 
 export function useQueryBuilder(
   props: PartialKeys<CoreQueryBuilderProps, "state">
 ): QueryBuilderInstance {
+  const { t } = useI18n('common');
   const defaultProps: CoreQueryBuilderProps = {
     state: {
       ...getDefaultQueryBuilderState(),
@@ -99,7 +101,7 @@ export function useQueryBuilder(
   };
 
   queryBuilderRef.current.setCoreProps((prevProps) => ({
-    savedFilterDefaultTitle: "Untitled filter",
+    savedFilterDefaultTitle: t('common.savedFilter.untitledFilter'),
     ...prevProps,
     ...props,
     state: {

@@ -1,0 +1,23 @@
+{
+  "common": {
+    "welcome": "Welcome to KF Portal",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Operation successful",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": {
+      "placeholder": "Search..."
+    },
+    "noResults": "No results found",
+    "navigation": {
+      "dashboard": "Dashboard",
+      "variant": "Variant",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  }
+}

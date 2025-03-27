@@ -13,6 +13,8 @@ import "@styles/colors.css";
 import "@styles/main.css";
 import { AlertDialogProvider } from "@/components/base/dialog/alert-dialog-provider";
 import { TooltipProvider } from "@/components/base/ui/tooltip";
+import { ConfigProvider, type PortalConfig } from "@/components/model/applications-config";
+declare const __PROJECT__: PortalConfig;
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -38,9 +40,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <TooltipProvider delayDuration={0}>
-          <AlertDialogProvider>{children}</AlertDialogProvider>
-        </TooltipProvider>
+        <ConfigProvider config={__PROJECT__}>
+          <TooltipProvider delayDuration={0}>
+            <AlertDialogProvider>{children}</AlertDialogProvider>
+          </TooltipProvider>
+        </ConfigProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

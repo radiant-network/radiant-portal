@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
+import { useI18n } from '@/components/hooks/i18n';
 
 import RichTextEditor from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
 
@@ -20,12 +21,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: args => {
+    const { t } = useI18n();
     return (
       <RichTextEditor
         value={args.value}
         onChange={action('onChange')}
         onBlur={action('onBlur')}
-        placeholder="Placeholder"
+        placeholder={t('common.editor.placeholder')}
         wrapperClassName="max-w-[500px]"
         autoFocus
       />

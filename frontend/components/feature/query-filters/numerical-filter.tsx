@@ -16,21 +16,24 @@ import GreaterThanOperatorIcon from "@/components/base/icons/greater-than-operat
 import GreaterThanOrEqualOperatorIcon from "@/components/base/icons/greater-than-or-equal-operator-icon";
 import LessThanOperatorIcon from "@/components/base/icons/less-than-operator-icon";
 import LessThanOrEqualOperatorIcon from "@/components/base/icons/less-than-or-equal-operator-icon";
-
-const RANGE_OPERATOR_LABELS: Record<RangeOperators, { display: string; dropdown: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
-  [RangeOperators.GreaterThan]: { display: 'Greater than', dropdown: 'Greater than', icon: GreaterThanOperatorIcon },
-  [RangeOperators.LessThan]: { display: 'Less than', dropdown: 'Less than', icon: LessThanOperatorIcon },
-  [RangeOperators.Between]: { display: 'Between', dropdown: 'Between', icon: ElementOperatorIcon },
-  [RangeOperators.GreaterThanOrEqualTo]: { display: 'Greater than or equal to', dropdown: 'Greater than or equal to', icon: GreaterThanOrEqualOperatorIcon },
-  [RangeOperators.LessThanOrEqualTo]: { display: 'Less than or equal to', dropdown: 'Less than or equal to', icon: LessThanOrEqualOperatorIcon },
-  [RangeOperators.In]: { display: 'In', dropdown: 'In', icon: EqualOperatorIcon },
-};
+import { useI18n } from '@/components/hooks/i18n';
 
 interface IProps {
   field: AggregationConfig;
 }
 
 export function NumericalFilter({ field }: IProps) {
+  const { t } = useI18n();
+  
+  const RANGE_OPERATOR_LABELS: Record<RangeOperators, { display: string; dropdown: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
+    [RangeOperators.GreaterThan]: { display: t('common.filters.operators.greaterThan'), dropdown: t('common.filters.operators.greaterThan'), icon: GreaterThanOperatorIcon },
+    [RangeOperators.LessThan]: { display: t('common.filters.operators.lessThan'), dropdown: t('common.filters.operators.lessThan'), icon: LessThanOperatorIcon },
+    [RangeOperators.Between]: { display: t('common.filters.operators.between'), dropdown: t('common.filters.operators.between'), icon: ElementOperatorIcon },
+    [RangeOperators.GreaterThanOrEqualTo]: { display: t('common.filters.operators.greaterThanOrEqual'), dropdown: t('common.filters.operators.greaterThanOrEqual'), icon: GreaterThanOrEqualOperatorIcon },
+    [RangeOperators.LessThanOrEqualTo]: { display: t('common.filters.operators.lessThanOrEqual'), dropdown: t('common.filters.operators.lessThanOrEqual'), icon: LessThanOrEqualOperatorIcon },
+    [RangeOperators.In]: { display: t('common.filters.operators.in'), dropdown: t('common.filters.operators.in'), icon: EqualOperatorIcon },
+  };
+
   const fieldKey = field.key;
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
   const [numericValue, setNumericValue] = useState<number>(0);
@@ -206,7 +209,7 @@ export function NumericalFilter({ field }: IProps) {
               onValueChange={onRangeValueChanged}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select range operator">
+                <SelectValue placeholder={t('common.filters.operators.selectOperator')}>
                   {RANGE_OPERATOR_LABELS[selectedRange].display}
                 </SelectValue>
               </SelectTrigger>
@@ -259,7 +262,7 @@ export function NumericalFilter({ field }: IProps) {
 
           {hasInterval && (
             <div id={`${fieldKey}_interval`}>
-              <TextMuted>Actual interval : {aggConfig.min} - {aggConfig.max}</TextMuted>
+              <TextMuted>{t('common.filters.labels.actualInterval')} : {aggConfig.min} - {aggConfig.max}</TextMuted>
             </div>
           )}
 
@@ -267,14 +270,14 @@ export function NumericalFilter({ field }: IProps) {
 
         {aggConfig?.rangeTypes && aggConfig.rangeTypes.length > 0 && (
           <div id={`${fieldKey}_range_type_container`}>
-            <Label className="text-sm" id={`${fieldKey}_unit_label`}>Unit</Label>
+            <Label className="text-sm" id={`${fieldKey}_unit_label`}>{t('common.filters.labels.unit')}</Label>
               <Select 
                 defaultValue={selectedUnit || aggConfig.rangeTypes[0].key}
                 onValueChange={onRangeTypeChanged}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select unit">
-                    {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name || 'Select unit'}
+                  <SelectValue placeholder={t('common.filters.labels.selectUnit')}>
+                    {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name || t('common.filters.labels.selectUnit')}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -295,7 +298,7 @@ export function NumericalFilter({ field }: IProps) {
               onCheckedChange={onNoDataChanged}
               id={`${fieldKey}_no_data`}
             />
-            <span>No data</span>
+            <span>{t('common.filters.labels.noData')}</span>
           </label>
         )}
       </div>
@@ -309,7 +312,7 @@ export function NumericalFilter({ field }: IProps) {
           disabled={!hasUnappliedItems}
           id={`${fieldKey}_clear`}
         >
-          Clear
+          {t('common.filters.buttons.clear')}
         </Button>
         <div className="flex space-x-2">
           <Button 
@@ -319,7 +322,7 @@ export function NumericalFilter({ field }: IProps) {
             onClick={apply}
             id={`${fieldKey}_apply`}
           >
-            Apply
+            {t('common.filters.buttons.apply')}
           </Button>
         </div>
       </div>

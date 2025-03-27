@@ -5,27 +5,22 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/base/ui/tooltip";
+import { useI18n } from "@/components/hooks/i18n";
 
 type VariantClassCellProps = {
   value?: string;
 };
 
 function VariantClassCell({ value }: VariantClassCellProps) {
+  const { t } = useI18n();
+  
   if (!value) return <EmptyCell />;
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          {{
-            insertion: "Ins",
-            deletion: "Del",
-            snv: "SNV",
-            null: "ND",
-            indel: "Ind",
-            substitution: "Sub",
-            sequence_alteration: " SeqAlt",
-          }[value.toLowerCase()] ?? null}
+          {t(`common.variant.classes.${value.toLowerCase()}`)}
         </TooltipTrigger>
         <TooltipContent>{value}</TooltipContent>
       </Tooltip>
