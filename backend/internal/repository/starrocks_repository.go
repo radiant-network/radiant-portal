@@ -9,6 +9,7 @@ import (
 	"log"
 	"regexp"
 	"slices"
+	"strings"
 )
 
 type Occurrence = types.Occurrence
@@ -311,16 +312,20 @@ func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error
 	return &sequencing, err
 }
 
-func (r *StarrocksRepository) mapToAutoCompleteTerm(term *types.Term, regex *regexp.Regexp, input string) *types.AutoCompleteTerm {
+func (r *StarrocksRepository) mapToAutoCompleteTerm(term *types.Term, input string) *types.AutoCompleteTerm {
+	regex := regexp.MustCompile("(?i)" + input)
+	id := ""
 	name := ""
 	if len(input) > 0 {
-		name = regex.ReplaceAllString(term.Name, "<strong>"+input+"</strong>")
+		id = regex.ReplaceAllString(term.ID, "<strong>"+strings.ToUpper(input)+"</strong>")
+		name = regex.ReplaceAllString(term.Name, "<strong>"+strings.ToLower(input)+"</strong>")
 	} else {
+		id = term.ID
 		name = term.Name
 	}
 	return &types.AutoCompleteTerm{
 		HighLight: types.Term{
-			ID:   term.ID,
+			ID:   id,
 			Name: name,
 		},
 		Source: types.Term{
@@ -332,7 +337,7 @@ func (r *StarrocksRepository) mapToAutoCompleteTerm(term *types.Term, regex *reg
 
 func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error) {
 	like := fmt.Sprintf("%%%s%%", input)
-	tx := r.db.Table(termsTable).Select("id, name").Where("LOWER(name) like ?", like).Order("id asc").Limit(limit)
+	tx := r.db.Table(termsTable).Select("id, name").Where("LOWER(name) like ? or UPPER(id) like ?", strings.ToLower(like), strings.ToUpper(like)).Order("id asc").Limit(limit)
 
 	var terms []types.Term
 	err := tx.Find(&terms).Error
@@ -344,10 +349,9 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 		}
 	}
 
-	re := regexp.MustCompile(input)
 	output := make([]*types.AutoCompleteTerm, len(terms))
 	for i, term := range terms {
-		output[i] = r.mapToAutoCompleteTerm(&term, re, input)
+		output[i] = r.mapToAutoCompleteTerm(&term, input)
 	}
 
 	return output, err
