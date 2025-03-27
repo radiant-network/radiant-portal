@@ -514,7 +514,7 @@ func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Router /mondo/autocomplete [get]
 func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		prefix := strings.ToLower(c.Query("prefix"))
+		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))
 		if err != nil {
 			limit = 25
@@ -542,7 +542,7 @@ func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Router /hpo/autocomplete [get]
 func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		prefix := strings.ToLower(c.Query("prefix"))
+		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))
 		if err != nil {
 			limit = 25
