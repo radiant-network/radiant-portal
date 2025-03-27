@@ -4,7 +4,6 @@ import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
 
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
-import { Input } from '@/components/base/ui/input';
 
 const FRAMEWORKS: Option[] = [
   {
@@ -46,7 +45,7 @@ const meta = {
   component: AutoComplete,
   args: {
     value: '',
-    defaultOptions: FRAMEWORKS,
+    options: FRAMEWORKS,
     onChange: fn(),
     placeholder: 'Placeholder',
   },
@@ -69,7 +68,7 @@ export const Default: Story = {
         }}
         className="max-w-[300px]"
         placeholder="Placeholder"
-        defaultOptions={FRAMEWORKS}
+        options={FRAMEWORKS}
       />
     );
   },
@@ -78,28 +77,34 @@ export const Default: Story = {
 export const Async: Story = {
   render: () => {
     const [value, setValue] = useState<string | undefined>('');
+    const [loading, setLoading] = useState(false);
+    const [options, setOptions] = useState<Option[]>([]);
+
+    const handleSearch = async (searchValue: string) => {
+      setLoading(true);
+      action('onSearch')(searchValue);
+
+      return new Promise<Option[]>(resolve => {
+        setTimeout(() => resolve(FRAMEWORKS), 1000);
+      })
+        .then(results => setOptions(results))
+        .finally(() => setLoading(false));
+    };
 
     return (
-      <>
-        <AutoComplete
-          value={value}
-          onChange={value => {
-            setValue(value);
-            action('onChange')(value);
-          }}
-          onSearch={async searchValue => {
-            action('onSearch')(searchValue);
-
-            return new Promise(resolve => {
-              setTimeout(() => resolve(FRAMEWORKS), 1000);
-            }) as Promise<Option[]>;
-          }}
-          debounceDelay={300}
-          className="max-w-[300px]"
-          placeholder="Placeholder"
-        />
-        <Input placeholder="Placeholder" />
-      </>
+      <AutoComplete
+        value={value}
+        onChange={value => {
+          setValue(value);
+          action('onChange')(value);
+        }}
+        options={options}
+        loading={loading}
+        onSearch={handleSearch}
+        debounceDelay={300}
+        className="max-w-[300px]"
+        placeholder="Placeholder"
+      />
     );
   },
 };

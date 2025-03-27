@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { GermlineInterpretationSchemaType, SomaticInterpretationSchemaType } from './types';
 import { useFormContext } from 'react-hook-form';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
 import { SquareArrowOutUpRightIcon } from 'lucide-react';
 import { debounce } from '@/components/hooks/useDebounce';
@@ -9,6 +9,7 @@ import { Button } from '@/components/base/ui/button';
 import { mondoApi } from '@/utils/api';
 import capitalize from 'lodash/capitalize';
 import InterpretationMondoOptionItemLabel from './mondo-option-item-label';
+import useSWR from 'swr';
 
 type MondoAutoCompleteFormFieldProps = {
   name: keyof GermlineInterpretationSchemaType | keyof SomaticInterpretationSchemaType;
@@ -18,24 +19,29 @@ type MondoAutoCompleteFormFieldProps = {
 
 function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompleteFormFieldProps) {
   const form = useFormContext();
+  const [options, setOptions] = useState<Option[]>([]);
+  const [searchValue, setSearchValue] = useState<string>('');
 
-  const handleSearch = useCallback(async (searchValue: string): Promise<Option[]> => {
-    if (searchValue) {
-      const response = await mondoApi.mondoTermAutoComplete(searchValue);
-
-      return response.data.map(item => ({
-        label: <InterpretationMondoOptionItemLabel mondo={item} />,
-        value: item.source?.id || '',
-        display: capitalize(item.source?.name),
-        filter: `${item.source?.name}${item.source?.id}`,
-      }));
-    }
-
-    return [];
-  }, []);
+  const mondoSearch = useSWR(
+    searchValue || form.getValues(name),
+    (value: string) => mondoApi.mondoTermAutoComplete(value),
+    {
+      onSuccess: data => {
+        setOptions(
+          data.data.map(item => ({
+            label: <InterpretationMondoOptionItemLabel mondo={item} />,
+            value: item.source?.id || '',
+            display: capitalize(item.source?.name),
+            filter: `${item.source?.name}${item.source?.id}`,
+          })),
+        );
+      },
+      revalidateOnFocus: false,
+    },
+  );
 
   const debouncedSearch = useCallback(
-    debounce(value => handleSearch(value), 500),
+    debounce(value => setSearchValue(value), 500),
     [],
   );
 
@@ -67,19 +73,18 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
           <FormControl>
             <AutoComplete
               placeholder={placeholder}
-              onSearch={async value => {
+              onSearch={value => {
                 if (value.length >= 3) {
-                  return debouncedSearch(value);
+                  debouncedSearch(value);
                 }
-
-                return [];
               }}
+              options={options}
+              loading={mondoSearch.isValidating}
               optionFilterProp="filter"
               optionLabelProp="display"
               {...field}
             />
           </FormControl>
-          <FormMessage />
         </FormItem>
       )}
     />

@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
 import RichTextEditor from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
 import { useFormContext } from 'react-hook-form';
 import { GenericInterpretationSchemaType } from './types';
@@ -18,7 +18,6 @@ function InterpretationFormGeneric() {
             <FormControl>
               <RichTextEditor {...field} />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />

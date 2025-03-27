@@ -13,17 +13,18 @@ export type Option = {
 };
 
 type AutoCompleteProps<T extends Option> = {
-  defaultOptions?: T[];
+  options?: T[];
   emptyIndicator?: ReactNode;
   value?: string;
-  onChange?: (value: string | undefined) => void;
-  onSearch?: (value: string) => Promise<T[]>;
+  onChange?: (value: string) => void;
+  onSearch?: (value: string) => void;
   disabled?: boolean;
   placeholder?: string;
   className?: string;
   debounceDelay?: number;
   optionLabelProp?: keyof T;
   optionFilterProp?: keyof T;
+  loading?: boolean;
 };
 
 export function getSelectedOptionByValue<T extends Option>(value: string | undefined, options: T[]): T | undefined {
@@ -31,7 +32,7 @@ export function getSelectedOptionByValue<T extends Option>(value: string | undef
 }
 
 export const AutoComplete = <T extends Option>({
-  defaultOptions = [],
+  options: arrayOptions = [],
   placeholder,
   emptyIndicator,
   value,
@@ -42,13 +43,12 @@ export const AutoComplete = <T extends Option>({
   optionFilterProp = 'label',
   optionLabelProp = 'label',
   className,
+  loading,
 }: AutoCompleteProps<T>) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selected, setSelected] = useState<T | undefined>(getSelectedOptionByValue(value, defaultOptions));
-  const [options, setOptions] = useState<T[]>(defaultOptions);
+  const [selected, setSelected] = useState<T | undefined>(getSelectedOptionByValue(value, arrayOptions));
   const [inputValue, setInputValue] = useState<string>('');
   const [inputValueSearch, setInputValueSearch] = useState<string>('');
   const debouncedSearchTerm = useDebounce(inputValueSearch, debounceDelay);
@@ -67,7 +67,7 @@ export const AutoComplete = <T extends Option>({
 
       // This is not a default behaviour of the <input /> field
       if (event.key === 'Enter' && input.value !== '') {
-        const optionToSelect = options.find(option => option[optionFilterProp] === input.value);
+        const optionToSelect = arrayOptions.find(option => option[optionFilterProp] === input.value);
         if (optionToSelect) {
           setSelected(optionToSelect);
           onChange?.(optionToSelect.value);
@@ -78,7 +78,7 @@ export const AutoComplete = <T extends Option>({
         input.blur();
       }
     },
-    [isOpen, options, onChange],
+    [isOpen, arrayOptions, onChange],
   );
 
   const handleBlur = useCallback(() => {
@@ -103,33 +103,25 @@ export const AutoComplete = <T extends Option>({
   );
 
   useEffect(() => {
-    if (value && defaultOptions.length > 0) {
-      const selectedOption = getSelectedOptionByValue(value, defaultOptions);
-      setSelected(selectedOption);
-      setInputValue(selectedOption?.[optionLabelProp] || '');
+    if (value && arrayOptions.length > 0) {
+      const selectedOption = getSelectedOptionByValue(value, arrayOptions);
+
+      if (selectedOption) {
+        setSelected(selectedOption);
+        setInputValue(selectedOption[optionLabelProp]);
+      }
     }
-  }, [value, defaultOptions]);
+  }, [value, arrayOptions]);
 
   useEffect(() => {
-    const doSearch = async () => {
-      setIsLoading(true);
-      const res = await onSearch?.(debouncedSearchTerm);
-      setOptions(res || []);
-      setIsLoading(false);
-    };
+    if (!onSearch || !open) return;
 
-    const exec = async () => {
-      if (!onSearch || !open) return;
-
-      if (debouncedSearchTerm) {
-        await doSearch();
-      }
-    };
-
-    void exec();
+    if (debouncedSearchTerm) {
+      onSearch?.(debouncedSearchTerm);
+    }
   }, [debouncedSearchTerm, open]);
 
-  const filteredOptions = options.filter(option =>
+  const filteredOptions = arrayOptions.filter(option =>
     option[optionFilterProp].toLowerCase().trim().includes(inputValueSearch.toLowerCase().trim()),
   );
 
@@ -147,7 +139,7 @@ export const AutoComplete = <T extends Option>({
           ref={inputRef}
           value={inputValue}
           onValueChange={
-            isLoading
+            loading
               ? undefined
               : value => {
                   setInputValue(value);
@@ -165,7 +157,7 @@ export const AutoComplete = <T extends Option>({
               onClick={() => {
                 setSelected(undefined);
                 setInputValue('');
-                onChange?.(undefined);
+                onChange?.('');
               }}
               className={cn('h-[26px] p-0', {
                 hidden: !selected || disabled,
@@ -184,14 +176,14 @@ export const AutoComplete = <T extends Option>({
           )}
         >
           <CommandList className="rounded-lg border">
-            {isLoading ? (
+            {loading ? (
               <CommandPrimitive.Loading>
                 <div className="p-1">
                   <Skeleton className="h-8 w-full" />
                 </div>
               </CommandPrimitive.Loading>
             ) : null}
-            {filteredOptions.length > 0 && !isLoading ? (
+            {filteredOptions.length > 0 && !loading ? (
               <CommandGroup>
                 {filteredOptions.map(option => (
                   <CommandItem
@@ -210,7 +202,7 @@ export const AutoComplete = <T extends Option>({
                 ))}
               </CommandGroup>
             ) : null}
-            {!isLoading && (
+            {!loading && (
               <CommandEmpty>{emptyIndicator || <div className="text-center text-sm">No data</div>}</CommandEmpty>
             )}
           </CommandList>

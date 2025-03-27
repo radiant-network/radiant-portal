@@ -40,7 +40,7 @@ function InputSearch({
         e.preventDefault();
 
         if (input.value !== '') {
-          handleSearch(value as string);
+          handleSearch(input.value);
         }
       }
 
