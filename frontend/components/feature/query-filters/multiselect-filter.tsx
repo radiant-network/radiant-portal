@@ -10,6 +10,7 @@ import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { numberFormat } from '@/components/lib/number-format';
 import { useI18n } from '@/components/hooks/i18n';
+import { Separator } from '@/components/base/ui/separator';
 
 interface IProps {
   data?: Aggregation[];
@@ -139,44 +140,46 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
         <Input
           type="text"
           placeholder={t('common.filters.search.placeholder')}
-          className="w-full p-2 mb-4 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 mb-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => updateSearch(e.target.value)}
         />
       )}
 
-      <div className="flex justify-between mb-4">
-        <Button className="underline font-semibold" onClick={() => selectAll()} variant="link">
+      <div className="flex justify-between">
+        <Button size="sm" onClick={() => selectAll()} variant="link">
           {t('common.filters.buttons.all')}
         </Button>
-        <Button className="underline font-semibold" onClick={() => unSelectAll()} variant="link">
+        <Button size="sm" onClick={() => unSelectAll()} variant="link">
           {t('common.filters.buttons.none')}
         </Button>
       </div>
 
-      {Array.from({ length: visibleItemsCount }, (_, i) => (
-        <div className="space-y-3 pt-2" key={items[i].key}>
-          <div className="flex justify-between items-center">
-            <label className="flex items-center space-x-2 overflow-hidden">
-              <Checkbox
-                className="w-4 h-4"
-                checked={selectedItems.some(f => f === items[i].key)}
-                onCheckedChange={() => itemSelected(items[i])}
-              />
-              <div className="overflow-hidden text-ellipsis">{items[i].key}</div>
-              <span className="checkmark"></span>
-            </label>
-            <span className="bg-gray-200 px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
+      <div>
+        {Array.from({ length: visibleItemsCount }, (_, i) => (
+          <div className="space-y-3 pt-2" key={items[i].key}>
+            <div className="flex justify-between items-center">
+              <label className="flex items-center space-x-2 overflow-hidden">
+                <Checkbox
+                  className="w-4 h-4"
+                  checked={selectedItems.some(f => f === items[i].key)}
+                  onCheckedChange={() => itemSelected(items[i])}
+                />
+                <div className="overflow-hidden text-ellipsis">{items[i].key}</div>
+                <span className="checkmark"></span>
+              </label>
+              <span className="bg-gray-200 px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {items.length > visibleItemsCount && (
-        <Button className="" onClick={showMore} variant="link">
+        <Button className="mt-2" onClick={showMore} size="sm" variant="link">
           {t('common.filters.buttons.showMore')}
         </Button>
       )}
 
-      <hr className="my-4 border-border" />
+      <Separator className="my-2.5" />
 
       <div className="flex align-right justify-end items-center space-x-2">
         <Button className="text-gray-600" onClick={reset} disabled={!hasUnappliedItems}>

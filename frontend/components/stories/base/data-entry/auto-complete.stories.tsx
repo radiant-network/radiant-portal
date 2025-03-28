@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
-import { useI18n } from '@/components/hooks/i18n';
 
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
 
@@ -59,7 +58,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => {
     const [value, setValue] = useState<string | undefined>('nest.js');
-    const { t } = useI18n();
 
     return (
       <AutoComplete

@@ -1,15 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
-import { useI18n } from '@/components/hooks/i18n';
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
 
-import ActionButton from "@/components/base/Buttons/ActionButton";
-import { buttonColors, buttonVariants } from "./utils";
+import ActionButton from '@/components/base/Buttons/ActionButton';
+import { buttonColors, buttonVariants } from './utils';
 
 const meta = {
-  title: "Base/Buttons/Action Button",
+  title: 'Base/Buttons/Action Button',
   component: ActionButton,
-  tags: ["autodocs"],
-  args: { onClick: fn(), size: "default", actions: [], onDefaultAction: fn() },
+  tags: ['autodocs'],
+  args: { onClick: fn(), size: 'default', actions: [], onDefaultAction: fn() },
 } satisfies Meta<typeof ActionButton>;
 
 export default meta;
@@ -18,23 +17,17 @@ type Story = StoryObj<typeof meta>;
 
 export const Variants: Story = {
   args: {
-    children: "Button",
+    children: 'Button',
   },
-  render: (args) => {
-    const { t } = useI18n();
+  render: args => {
     return (
       <div className="flex flex-col gap-2">
-        {buttonColors.map((color) => {
+        {buttonColors.map(color => {
           return (
             <div className="flex gap-2">
-              {buttonVariants.map((variant) => (
-                <ActionButton
-                  size="default"
-                  color={color}
-                  variant={variant}
-                  {...args}
-                >
-                  {t(`common.buttons.variants.${variant}`)}
+              {buttonVariants.map(variant => (
+                <ActionButton size="default" color={color} variant={variant} {...args}>
+                  {variant}
                 </ActionButton>
               ))}
             </div>
@@ -47,26 +40,25 @@ export const Variants: Story = {
 
 export const Sizes: Story = {
   args: {
-    children: "Button",
+    children: 'Button',
   },
-  render: (args) => {
-    const { t } = useI18n();
+  render: args => {
     return (
       <div className="flex gap-2">
         <ActionButton {...args} size="default" color="primary">
-          {t('common.buttons.sizes.default')}
+          Default
         </ActionButton>
         <ActionButton {...args} size="xs" color="primary">
-          {t('common.buttons.sizes.xs')}
+          Extra Small
         </ActionButton>
         <ActionButton {...args} size="sm" color="primary">
-          {t('common.buttons.sizes.sm')}
+          Small
         </ActionButton>
         <ActionButton {...args} size="md" color="primary">
-          {t('common.buttons.sizes.md')}
+          Medium
         </ActionButton>
         <ActionButton {...args} size="lg" color="primary">
-          {t('common.buttons.sizes.lg')}
+          Large
         </ActionButton>
       </div>
     );

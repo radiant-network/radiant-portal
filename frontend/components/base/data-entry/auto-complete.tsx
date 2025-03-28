@@ -134,7 +134,7 @@ export const AutoComplete = <T extends Option>({
       // based on the custom optionFilterProp
       shouldFilter={false}
     >
-      <div className="relative outline-none focus-within:ring-2 focus-within:ring-ring rounded-md">
+      <div className="relative shadow-sm outline-none focus-within:ring-1 focus-within:ring-ring rounded-md">
         <CommandInput
           ref={inputRef}
           value={inputValue}

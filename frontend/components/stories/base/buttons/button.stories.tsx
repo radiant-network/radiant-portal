@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { useI18n } from '@/components/hooks/i18n';
 
 import { Button } from '@/components/base/ui/button';
 import { buttonColors, buttonVariants } from './utils';
@@ -19,7 +18,6 @@ type Story = StoryObj<typeof meta>;
 export const Variants: Story = {
   args: {},
   render: () => {
-    const { t } = useI18n();
     return (
       <div className="flex flex-col gap-2">
         {buttonColors.map(color => {
@@ -27,7 +25,7 @@ export const Variants: Story = {
             <div className="flex gap-2">
               {buttonVariants.map(variant => (
                 <Button color={color} variant={variant}>
-                  {t(`common.buttons.variants.${variant}`)}
+                  {variant}
                 </Button>
               ))}
             </div>
@@ -41,23 +39,22 @@ export const Variants: Story = {
 export const Sizes: Story = {
   args: {},
   render: () => {
-    const { t } = useI18n();
     return (
       <div className="flex gap-2">
         <Button size="default" color="primary">
-          {t('common.buttons.sizes.default')}
+          Default
         </Button>
         <Button size="xs" color="primary">
-          {t('common.buttons.sizes.xs')}
+          Extra Small
         </Button>
         <Button size="sm" color="primary">
-          {t('common.buttons.sizes.sm')}
+          Small
         </Button>
         <Button size="md" color="primary">
-          {t('common.buttons.sizes.md')}
+          Medium
         </Button>
         <Button size="lg" color="primary">
-          {t('common.buttons.sizes.lg')}
+          Large
         </Button>
       </div>
     );

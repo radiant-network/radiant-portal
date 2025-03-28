@@ -19,6 +19,7 @@ import { useInterpretationHelper } from './hook';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 import { Interpretation, InterpretationFormRef } from './types';
+import { Spinner } from '@/components/base/spinner';
 
 type InterpretationDialogButtonProps = ButtonProps & {
   occurence: Occurrence;
@@ -77,53 +78,59 @@ function InterpretationDialogButton({ occurence, ...buttonProps }: Interpretatio
         className="max-w-[calc(100vw-48px)] min-h-[calc(100vh-48px)] w-[1200px]"
         onEscapeKeyDown={e => e.preventDefault()}
       >
-        <div>
-          <DialogHeader>
-            <DialogTitle>Clinical Interpretation</DialogTitle>
-          </DialogHeader>
-          <Separator className="mt-6" />
-          <div className="py-6 overflow-scroll space-y-6 h-[calc(95vh-150px)]">
-            <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
-            <InterpretationVariantHeader occurence={occurence} />
-            <div className="grid gap-6 grid-cols-12">
-              <div className="col-span-7 border p-6 bg-gray-100">
-                {isSomatic ? (
-                  <InterpretationFormSomatic
-                    ref={somaticFormRef}
-                    interpretation={fetchInterpretation.data}
-                    saveInterpretation={interpretation =>
-                      saveInterpretation.trigger({
-                        interpretation,
-                      })
-                    }
-                    onDirtyChange={setIsDirty}
-                  />
-                ) : (
-                  <InterpretationFormGermline
-                    ref={gerlimeFormRef}
-                    interpretation={fetchInterpretation.data}
-                    saveInterpretation={interpretation =>
-                      saveInterpretation.trigger({
-                        interpretation,
-                      })
-                    }
-                    onDirtyChange={setIsDirty}
-                  />
-                )}
-              </div>
-              <div className="col-span-5 border py-4 px-6"></div>
-            </div>
+        {fetchInterpretation.isValidating ? (
+          <div className="flex items-center justify-center">
+            <Spinner size={32} />
           </div>
-          <Separator className="mb-6" />
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button>Cancel</Button>
-            </DialogClose>
-            <Button color="primary" loading={saveInterpretation.isMutating} onClick={handleSave} disabled={!isDirty}>
-              Save
-            </Button>
-          </DialogFooter>
-        </div>
+        ) : (
+          <div>
+            <DialogHeader>
+              <DialogTitle>Clinical Interpretation</DialogTitle>
+            </DialogHeader>
+            <Separator className="mt-6" />
+            <div className="py-6 overflow-scroll space-y-6 h-[calc(95vh-150px)]">
+              <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
+              <InterpretationVariantHeader occurence={occurence} />
+              <div className="grid gap-6 grid-cols-12">
+                <div className="col-span-7 border p-6 bg-gray-100">
+                  {isSomatic ? (
+                    <InterpretationFormSomatic
+                      ref={somaticFormRef}
+                      interpretation={fetchInterpretation.data}
+                      saveInterpretation={interpretation =>
+                        saveInterpretation.trigger({
+                          interpretation,
+                        })
+                      }
+                      onDirtyChange={setIsDirty}
+                    />
+                  ) : (
+                    <InterpretationFormGermline
+                      ref={gerlimeFormRef}
+                      interpretation={fetchInterpretation.data}
+                      saveInterpretation={interpretation =>
+                        saveInterpretation.trigger({
+                          interpretation,
+                        })
+                      }
+                      onDirtyChange={setIsDirty}
+                    />
+                  )}
+                </div>
+                <div className="col-span-5 border py-4 px-6"></div>
+              </div>
+            </div>
+            <Separator className="mb-6" />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button>Cancel</Button>
+              </DialogClose>
+              <Button color="primary" loading={saveInterpretation.isMutating} onClick={handleSave} disabled={!isDirty}>
+                Save
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
