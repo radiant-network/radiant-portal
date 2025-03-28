@@ -1,30 +1,57 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import { classificationCriterias, getClassificationCriteriaColor, getTransmissionModes } from './data';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { germlineInterpretationFormSchema, GermlineInterpretationSchemaType } from './types';
+import { germlineInterpretationFormSchema, GermlineInterpretationSchemaType, InterpretationFormProps } from './types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import InterpretationFormGeneric from './interpretation-form-generic';
 import { Badge } from '@/components/base/ui/badge';
 import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
+import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
+import { useEffect, useImperativeHandle } from 'react';
 
-function InterpretationFormGermline() {
+function InterpretationFormGermline({
+  ref,
+  interpretation,
+  saveInterpretation,
+  onDirtyChange,
+}: InterpretationFormProps<InterpretationGermline>) {
   const form = useForm<GermlineInterpretationSchemaType>({
     resolver: zodResolver(germlineInterpretationFormSchema),
-    defaultValues: {},
+    values: {
+      classification: interpretation?.classification || '',
+      classification_criterias: interpretation?.classification_criterias || [],
+      condition: interpretation?.condition || '',
+      transmission_modes: interpretation?.transmission_modes || [],
+      interpretation: interpretation?.interpretation || '',
+      pubmed: (interpretation?.pubmed || []) as Required<InterpretationPubmed>[],
+    },
     reValidateMode: 'onChange',
     shouldFocusError: false,
   });
 
   function onSubmit(values: GermlineInterpretationSchemaType) {
-    // Save interpretation
+    saveInterpretation(values);
   }
+
+  useEffect(() => {
+    onDirtyChange(form.formState.isDirty);
+  }, [form.formState.isDirty]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      submit: () => form.handleSubmit(onSubmit)(),
+      isDirty: form.formState.isDirty,
+    }),
+    [form, onSubmit, form.formState.isDirty],
+  );
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-6">
         <MondoAutoCompleteFormField name="condition" label="Mondo condition" placeholder="e.g. muscular dystrophy" />
         <FormField
           control={form.control}
@@ -39,7 +66,7 @@ function InterpretationFormGermline() {
                   variant="outline"
                   className="flex-wrap justify-start"
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <ToggleGroupItem
                     value="LA6668-3"
@@ -94,7 +121,6 @@ function InterpretationFormGermline() {
                   </ToggleGroupItem>
                 </ToggleGroup>
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
@@ -133,7 +159,6 @@ function InterpretationFormGermline() {
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
@@ -151,12 +176,11 @@ function InterpretationFormGermline() {
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
         <InterpretationFormGeneric />
-      </form>
+      </div>
     </FormProvider>
   );
 }

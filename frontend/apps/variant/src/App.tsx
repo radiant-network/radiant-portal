@@ -48,18 +48,10 @@ function App() {
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
     op: 'and',
-    content: [
-      {
-        op: 'in',
-        content: {
-          field: 'hgvsg',
-          value: 'chr18:g.3452225del',
-        },
-      },
-    ],
+    content: [],
   });
   const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 1,
+    pageIndex: 0,
     pageSize: 10,
   });
   const { data: total, isLoading: totalIsLoading } = useSWR<Count, any, OccurrenceCountInput>(
@@ -81,6 +73,8 @@ function App() {
       seqId: SEQ_ID,
       listBody: {
         selected_fields: [
+          'seq_id',
+          'locus_id',
           'hgvsg',
           'variant_class',
           'rsnumber',

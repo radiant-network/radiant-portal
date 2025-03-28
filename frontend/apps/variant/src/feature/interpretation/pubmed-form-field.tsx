@@ -8,6 +8,7 @@ import { IconButton } from '@/components/base/Buttons';
 import { PlusIcon, XIcon } from 'lucide-react';
 import InputSearch from '@/components/base/data-entry/input-search';
 import { Button } from '@/components/base/ui/button';
+import useSWR from 'swr';
 
 function PubmedFormField() {
   const { control, register, getValues, setError, clearErrors, setValue, getFieldState } =
@@ -17,27 +18,30 @@ function PubmedFormField() {
     name: 'pubmed',
   });
 
-  const [loading, setLoading] = useState(false);
+  const [pubmedFetchKey, setPubmedFetchKey] = useState<{ value: string; index: number }>();
 
-  const fetchCitation = async (value: string, index: number) => {
-    if (!value) return;
-
-    setLoading(true);
-    try {
-      const { data } = await interpretationApi.getPubmedCitation(value);
-
-      setValue(`pubmed.${index}`, {
-        citation_id: data.id!,
-        citation: data.nlm?.format!,
-      });
-    } catch {
-      setError(`pubmed.${index}.citation`, {
-        message: 'Invalid or unknown PMID',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const pubmedFetch = useSWR(
+    pubmedFetchKey,
+    ({ value }) => interpretationApi.getPubmedCitation(value).then(res => res.data),
+    {
+      onSuccess: data => {
+        if (pubmedFetchKey?.index) {
+          setValue(`pubmed.${pubmedFetchKey.index}`, {
+            citation_id: data.id!.replace('pmid:', ''),
+            citation: data.nlm?.format!,
+          });
+        }
+      },
+      onError: () => {
+        if (pubmedFetchKey?.index) {
+          setError(`pubmed.${pubmedFetchKey.index}.citation`, {
+            message: 'Invalid or unknown PMID',
+          });
+        }
+      },
+      revalidateOnFocus: false,
+    },
+  );
 
   const pubmeds = getValues().pubmed;
 
@@ -51,11 +55,11 @@ function PubmedFormField() {
           const error = getFieldState(`pubmed.${index}.citation`).error;
 
           return (
-            <div>
-              <Input key={`citation-id-${field.id}`} {...register(`pubmed.${index}.citation_id`)} className="hidden" />
+            <div key={`citation-id-${field.id}`}>
+              <Input {...register(`pubmed.${index}.citation_id`)} className="hidden" />
               {citation && citationId ? (
                 <div className="flex items-center gap-1">
-                  <div className="border rounded-md p-2 text-sm">{citation}</div>
+                  <div className="flex-1 border rounded-md p-2 text-sm">{citation}</div>
                   <div>
                     <IconButton
                       icon={XIcon}
@@ -75,11 +79,16 @@ function PubmedFormField() {
                     searchButtonProps={{
                       color: 'primary',
                       variant: 'filled',
-                      loading,
+                      loading: pubmedFetch.isValidating,
                       disabled: !!error,
                     }}
                     autoFocus
-                    onSearch={searchValue => fetchCitation(searchValue, index)}
+                    onSearch={searchValue =>
+                      setPubmedFetchKey({
+                        value: searchValue,
+                        index,
+                      })
+                    }
                     {...register(`pubmed.${index}.citation`, {
                       onChange: () => {
                         if (error) {

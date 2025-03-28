@@ -1,6 +1,6 @@
 import { FormProvider, useForm } from 'react-hook-form';
 import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
-import { somaticInterpretationFormSchema, SomaticInterpretationSchemaType } from './types';
+import { InterpretationFormProps, somaticInterpretationFormSchema, SomaticInterpretationSchemaType } from './types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/ui/toggle-group';
@@ -14,22 +14,44 @@ import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-
 import { Badge } from '@/components/base/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import InterpretationFormGeneric from './interpretation-form-generic';
+import { InterpretationSomatic } from '@/api/api';
+import { useImperativeHandle } from 'react';
 
-function InterpretationFormSomatic() {
+function InterpretationFormSomatic({
+  ref,
+  interpretation,
+  saveInterpretation,
+}: InterpretationFormProps<InterpretationSomatic>) {
   const form = useForm<SomaticInterpretationSchemaType>({
     resolver: zodResolver(somaticInterpretationFormSchema),
-    defaultValues: {},
+    defaultValues: {
+      tumoral_type: interpretation?.tumoral_type,
+      oncogenicity: interpretation?.oncogenicity,
+      oncogenicity_classification_criterias: interpretation?.oncogenicity_classification_criterias,
+      clinical_utility: interpretation?.clinical_utility,
+      interpretation: interpretation?.interpretation,
+      pubmed: interpretation?.pubmed,
+    },
     reValidateMode: 'onChange',
     shouldFocusError: false,
   });
 
   function onSubmit(values: SomaticInterpretationSchemaType) {
-    // Save interpretation
+    saveInterpretation(values);
   }
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      submit: () => form.handleSubmit(onSubmit)(),
+      isDirty: form.formState.isDirty,
+    }),
+    [form, onSubmit],
+  );
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-6">
         <MondoAutoCompleteFormField name="tumoral_type" label="Tumor type" placeholder="Select" />
         <FormField
           control={form.control}
@@ -182,7 +204,7 @@ function InterpretationFormSomatic() {
           )}
         />
         <InterpretationFormGeneric />
-      </form>
+      </div>
     </FormProvider>
   );
 }
