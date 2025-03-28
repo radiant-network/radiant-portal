@@ -7,7 +7,7 @@ import SavedFiltersRightActions from './saved-filter/saved-filter-right-actions'
 import SavedFiltersLeftActions from './saved-filter/saved-filter-left-actions';
 import { useCallback, useMemo, useState } from 'react';
 import { QueryBuilderContextType, QueryBuilderProps } from './types';
-import { defaultQueryReferenceColors, defaultDictionary } from './data';
+import { defaultQueryReferenceColors, useQueryBuilderDictionary } from './data';
 import { deepMerge } from '@/components/lib/merge';
 
 function QueryBuilder({
@@ -19,15 +19,16 @@ function QueryBuilder({
   queryReferenceColors = defaultQueryReferenceColors,
   queryCountIcon,
   fetchQueryCount,
-  dictionary = defaultDictionary,
+  dictionary,
   customPillConfig,
   queryPillFacetFilterConfig,
   resolveSyntheticSqon,
   ...hookProps
 }: QueryBuilderProps) {
   const queryBuilder = useQueryBuilder(hookProps);
+  const defaultDictionary = useQueryBuilderDictionary();
 
-  const mergeDictionary = useMemo(() => deepMerge(defaultDictionary, dictionary), [dictionary]);
+  const mergeDictionary = useMemo(() => deepMerge(defaultDictionary, dictionary || {}), [dictionary, defaultDictionary]);
   const [showLabels, toggleLabels] = useState(initialShowHideLabels);
 
   const getQueryReferenceColor = useCallback(

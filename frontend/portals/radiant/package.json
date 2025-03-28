@@ -9,6 +9,7 @@
     "dev:kf": "THEME=kf vite --port 3000 dev",
     "dev:radiant": "THEME=radiant vite --port 3000 dev",
     "start": "PORT=80 NODE_ENV=production react-router-serve ./build/server/index.js",
+    "start:radiant": "PORT=80 NODE_ENV=production THEME=radiant react-router-serve ./build/server/index.js",
     "start:docker": "PORT=3000 NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
   },

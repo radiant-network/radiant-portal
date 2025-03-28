@@ -3,7 +3,7 @@ import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
 
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
-import { defaultDictionary, defaultQueryReferenceColors } from '@/components/feature/query-builder/data';
+import { defaultQueryReferenceColors } from '@/components/feature/query-builder/data';
 import { Button } from '@/components/base/ui/button';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { v4 } from 'uuid';
@@ -13,6 +13,127 @@ import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter'
 import { UserIcon } from 'lucide-react';
 import { TooltipProvider } from '@/components/base/ui/tooltip';
 import { SqonOpEnum } from '@/api/api';
+
+const mockDictionary = {
+  queryBar: {
+    empty: "Use the search tools & facets on the left to build a query",
+    deletePopover: {
+      title: "Delete this query?",
+      cancel: "Cancel",
+      ok: "Delete",
+    },
+    customPill: {
+      createTooltip: "Create a custom query",
+      cannotSaveAsCustomPill: "Custom queries cannot include other custom queries",
+    },
+    saveDialog: {
+      title: "Save this query",
+      fields: {
+        title: {
+          label: "Query name",
+          placeholder: "Untitled query",
+        },
+      },
+      notice: "You will find your saved queries in the sidebar under the \"Queries\" heading.",
+      cancel: "Cancel",
+      ok: "Save",
+    },
+  },
+  queryPill: {
+    operator: {
+      changeOperatorTo: "Change operator to",
+      and: "and",
+      or: "or",
+    },
+    facet: (key: string) => key,
+    customPill: {
+      editDialog: {
+        title: "Edit custom query",
+        cancel: "Cancel",
+        ok: "Save",
+      },
+      cantBeEmptyDialog: {
+        title: "Query cannot be empty",
+        description: "Your custom query must contain at least one criteria.",
+        ok: "Close",
+      },
+      titleExistsDialog: {
+        title: "Name already in use",
+        description: "A custom query with this name already exists. Please assign a unique name.",
+        ok: "Close",
+      },
+      saveDialog: {
+        title: "Edit this query?",
+        confirmationMessage: `You are about to edit the custom query "{title}", which may affect your results.` as const,
+        affectedFilters: "Affected saved filters:",
+        cancel: "Cancel",
+        ok: "Save",
+      },
+    },
+  },
+  toolbar: {
+    combine: "Combine",
+    newQuery: "New query",
+    clearAll: "Clear all",
+    clearAllDialog: {
+      title: "Delete all queries?",
+      description: "You are about to delete all your queries. They will be lost forever.",
+      cancel: "Cancel",
+      ok: "Delete",
+    },
+    labels: "Labels",
+  },
+  savedFilter: {
+    deleteTooltip: "Delete filter",
+    deleteDialog: {
+      title: "Permanently delete this filter?",
+      description: "You are about to permanently delete this filter and all of its queries.",
+      cancel: "Cancel",
+      ok: "Delete filter",
+    },
+    duplicateTooltip: "Duplicate filter",
+    overwriteDialog: {
+      title: "Unsaved changes",
+      description: "You are about to create a new filter; all modifications will be lost.",
+      cancel: "Cancel",
+      ok: "Create",
+    },
+    editDialog: {
+      title: "Edit filter",
+      cancel: "Cancel",
+      ok: "Save",
+      fields: {
+        title: {
+          label: "Title",
+          placeholder: "Untitled query",
+        },
+      },
+    },
+    myFilters: "My Filters",
+    manageFilters: "Manage filters",
+    manageDialog: {
+      title: "Manage filters",
+      close: "Close",
+      lastSaveAt: `Last saved at: {lastSaveAt} ago` as const,
+    },
+    newFilter: "New filter",
+    saveTooltip: {
+      whenEmpty: "Add a query to save",
+      whenDirty: "Save changes",
+      default: "Save filter",
+    },
+    shareTooltip: {
+      whenNotSaved: "Save filter to share",
+      default: "Share (Copy url)",
+    },
+    favoriteTooltip: {
+      set: "Set as default filter",
+      unset: "Unset default filter",
+    },
+    discardTooltip: "Discard unsaved changes",
+    noSavedFilters: "You have no saved filters",
+  },
+};
 
 const meta = {
   title: 'Feature/Query Builder',
@@ -26,7 +147,7 @@ const meta = {
     initialShowHideLabels: true,
     queryReferenceColors: defaultQueryReferenceColors,
     resolveSyntheticSqon: fn(),
-    dictionary: defaultDictionary,
+    dictionary: mockDictionary,
   },
   decorators: [
     Story => (

@@ -9,6 +9,7 @@ import { useConfig } from '@/components/model/applications-config';
 import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { numberFormat } from '@/components/lib/number-format';
+import { useI18n } from '@/components/hooks/i18n';
 
 interface IProps {
   data?: Aggregation[];
@@ -26,6 +27,7 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
 }
 
 export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVisible = false }: IProps) {
+  const { t } = useI18n();
   const [items, setItems] = useState<Aggregation[]>(data || []);
   // items that are include in the search
   const [appliedSelectedItems, setAppliedSelectedItems] = useState<string[]>([]);
@@ -136,7 +138,7 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
       {searchVisible && (
         <Input
           type="text"
-          placeholder="Search ..."
+          placeholder={t('common.filters.search.placeholder')}
           className="w-full p-2 mb-4 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           onChange={e => updateSearch(e.target.value)}
         />
@@ -144,10 +146,10 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
 
       <div className="flex justify-between mb-4">
         <Button className="underline font-semibold" onClick={() => selectAll()} variant="link">
-          All
+          {t('common.filters.buttons.all')}
         </Button>
         <Button className="underline font-semibold" onClick={() => unSelectAll()} variant="link">
-          None
+          {t('common.filters.buttons.none')}
         </Button>
       </div>
 
@@ -170,7 +172,7 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
 
       {items.length > visibleItemsCount && (
         <Button className="" onClick={showMore} variant="link">
-          Show more
+          {t('common.filters.buttons.showMore')}
         </Button>
       )}
 
@@ -178,11 +180,11 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
 
       <div className="flex align-right justify-end items-center space-x-2">
         <Button className="text-gray-600" onClick={reset} disabled={!hasUnappliedItems}>
-          Clear
+          {t('common.filters.buttons.clear')}
         </Button>
         <div className="flex space-x-2">
           <ActionButton size="sm" className="h-7" color="primary" actions={[]} onDefaultAction={apply}>
-            Apply
+            {t('common.filters.buttons.apply')}
           </ActionButton>
         </div>
       </div>

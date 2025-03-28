@@ -12,13 +12,16 @@ import {
 import { Separator } from "@/components/base/ui/separator";
 import { useCallback } from "react";
 import RichTextEditorLevelToggle from "./rich-text-editor-level-toggle";
+import { useI18n } from "@/components/hooks/i18n";
 
 function RichTextEditorToolbar({ editor }: { editor: Editor }) {
+  const { t } = useI18n();
+  
   const setLink = useCallback(() => {
     if (!editor) return;
 
     const previousUrl = editor.getAttributes("link").href;
-    const url = window.prompt("URL", previousUrl);
+    const url = window.prompt(t('common.editor.toolbar.urlPrompt'), previousUrl);
 
     if (url === null) {
       return;
@@ -26,7 +29,6 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
 
     if (url === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
-
       return;
     }
 
@@ -40,7 +42,7 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
     } catch (e) {
       console.error(e);
     }
-  }, [editor]);
+  }, [editor, t]);
 
   return (
     <div className="border border-input bg-transparent rounded-tr-md rounded-tl-md p-1 flex flex-row items-center gap-1">

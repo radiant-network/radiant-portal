@@ -59,6 +59,16 @@ export interface AppsConfig {
 
 export interface PortalConfig {
   variant_entity: AppsConfig;
+  portal: {
+    name: string;
+    navigation: {
+      dashboard?: boolean;
+      variant?: boolean;
+      profile?: boolean;
+      settings?: boolean;
+      logout?: boolean;
+    };
+  };
 }
 
 const ConfigContext = createContext<PortalConfig | undefined>(undefined);

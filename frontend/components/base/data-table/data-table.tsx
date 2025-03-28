@@ -31,6 +31,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import { Skeleton } from '@/components/base/ui/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
 
 export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
   id: string;
@@ -112,15 +113,17 @@ function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
  * @returns String
  */
 function getNextSortingOrderHeaderTitle(sortingOrder: SortDirection | boolean): string {
+  const { t } = useI18n();
+  
   if (sortingOrder === 'asc') {
-    return 'Sort ascending';
+    return t('common.table.sort.ascending');
   }
 
   if (sortingOrder === 'desc') {
-    return 'Sort descending';
+    return t('common.table.sort.descending');
   }
 
-  return 'Clear sort';
+  return t('common.table.sort.clear');
 }
 
 /**

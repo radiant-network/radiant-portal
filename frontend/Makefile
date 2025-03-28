@@ -52,3 +52,10 @@ $(addprefix docker-dev-, $(subst :, ,$(PORTALS))): docker-dev-%:
 	docker build --target development -t $(DOCKER_IMAGE_PREFIX)-$(PORTAL)-dev -f ./Dockerfile.$(PORTAL).dev .
 	docker run --rm -p $(PORTAL_PORT):3000 --env-file ./portals/radiant/.env.production $(DOCKER_IMAGE_PREFIX)-$(PORTAL)-dev
 
+# Clean node_modules directories
+.PHONY: clean
+clean:
+	@echo "Cleaning node_modules directories..."
+	@find ./ -type d -name "node_modules" -exec rm -rf {} \;
+	@echo "Cleaning package-lock.json files..."
+	@find ./ -type f -name "package-lock.json" -exec rm -f {} \; 

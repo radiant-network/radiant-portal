@@ -7,7 +7,18 @@
       { "key": "zygosity", "type": "multiple" },
       { "key": "impact_score", "type": "multiple" },
       { "key": "variant_class", "type": "multiple" },
-      { "key": "symbol", "type": "multiple" }
+      { "key": "symbol", "type": "multiple" },
+      { "key": "pf", "type": "numerical" }
     ]
+  },
+  "portal": {
+    "name": "Radiant",
+    "navigation": {
+      "dashboard": true,
+      "variant": true,
+      "profile": true,
+      "settings": true,
+      "logout": true
+    }
   }
 }

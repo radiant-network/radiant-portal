@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
+import { useI18n } from '@/components/hooks/i18n';
 
 import InputSearch from '@/components/base/data-entry/input-search';
 
@@ -22,6 +23,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => {
+    const { t } = useI18n();
     return (
       <InputSearch
         onChange={e => action('onChange')(e)}
@@ -29,7 +31,7 @@ export const Default: Story = {
           action('onSearch')(value);
         }}
         className="max-w-[300px]"
-        placeholder="Placeholder"
+        placeholder={t('common.search.placeholder')}
         autoFocus
         searchButtonProps={{
           color: 'primary',

@@ -12,6 +12,7 @@ import { type Aggregation as AggregationConfig } from '@/components/model/applic
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { NumericalFilter } from './numerical-filter';
 import { ToggleFilter } from './toggle-filter';
+import { useI18n } from '@/components/hooks/i18n';
 
 type OccurrenceAggregationInput = {
   seqId: string;
@@ -60,6 +61,8 @@ function FilterComponent({
   searchVisible: boolean;
   data?: Aggregation[];
 }) {
+  const { t } = useI18n();
+  
   switch (field.type) {
     case 'multiple':
       return <MultiSelectFilter field={field} searchVisible={searchVisible} data={data} />;
@@ -68,13 +71,15 @@ function FilterComponent({
     case 'boolean':
       return <ToggleFilter field={field} />;
     default:
-      return <div>Unsupported filter type: {field.type}</div>;
+      return <div>{t('common.filters.unsupportedType', { type: field.type })}</div>;
   }
 }
+
 export function FilterContainer({ field }: { field: AggregationConfig }) {
   const [collapsed, setCollapsed] = React.useState(true);
   const [searchVisible, setSearchVisible] = React.useState(false);
   const config = useConfig();
+  const { t } = useI18n();
 
   let { data, isLoading } = useAggregationBuilder(field.key, undefined, !collapsed, config.variant_entity.app_id);
 
@@ -88,7 +93,9 @@ export function FilterContainer({ field }: { field: AggregationConfig }) {
       <AccordionItem value="item-1">
         <AccordionTrigger className="AccordionTrigger">
           <div className="flex items-center justify-between w-full text-base">
-            <span className="capitalize">{field.key.replace('_', ' ')}</span>
+            <span className="capitalize">
+              {t(`common.filters.labels.${field.key.replace('_', '')}`, { defaultValue: field.key.replace('_', '') })}
+            </span>
             {!collapsed && <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />}
           </div>
         </AccordionTrigger>

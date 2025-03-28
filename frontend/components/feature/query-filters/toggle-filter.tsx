@@ -7,6 +7,7 @@ import { queryBuilderRemote } from '@/components/model/query-builder-core/query-
 import { useConfig } from '@/components/model/applications-config';
 import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
+import { useI18n } from '@/components/hooks/i18n';
 
 interface IProps {
   data?: Aggregation[];
@@ -14,6 +15,7 @@ interface IProps {
 }
 
 export function ToggleFilter({ data, field }: IProps) {
+  const { t } = useI18n();
   const [items, setItems] = useState<Aggregation[]>(data || []);
   // items that are include in the search
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export function ToggleFilter({ data, field }: IProps) {
           <hr className="my-4 border-border" />
           <div className="flex align-right justify-end items-center space-x-2">
             <Button className="text-gray-600" onClick={clear}>
-              Clear
+              {t('common.filters.buttons.clear')}
             </Button>
           </div>
         </>
