@@ -8,6 +8,7 @@ COPY ./api /workspace/api
 COPY ./utils /workspace/utils
 COPY ./components /workspace/components
 COPY ./themes/ /workspace/themes/
+COPY ./translations/ /workspace/translations
 
 FROM node:22-alpine AS workspace-dependencies-env
 WORKDIR /workspace
