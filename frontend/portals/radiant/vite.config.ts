@@ -5,13 +5,13 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 
-import { type AppsConfig } from "../../components/model/applications-config";
+import { type AppsConfig, type PortalConfig } from "../../components/model/applications-config";
 import radiantConfig from "./config/radiant.json";
 import kfConfig from "./config/kf.json";
 
-const configs: Record<string, AppsConfig> = {
-  radiant: radiantConfig as unknown as AppsConfig,
-  kf: kfConfig as unknown as AppsConfig,
+const configs: Record<string, PortalConfig> = {
+  radiant: radiantConfig as PortalConfig,
+  kf: kfConfig as PortalConfig,
 };
 
 const project = process.env.THEME || 'radiant';
