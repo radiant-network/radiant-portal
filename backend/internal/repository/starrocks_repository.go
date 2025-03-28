@@ -245,7 +245,7 @@ func (r *StarrocksRepository) CountOccurrences(seqId int, userQuery types.CountQ
 
 }
 
-func prepareAggQuery(seqId int, userQuery types.AggQuery, r *StarrocksRepository) (*gorm.DB, int, error) {
+func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *StarrocksRepository) (*gorm.DB, int, error) {
 	part, err := r.GetPart(seqId)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
@@ -269,7 +269,7 @@ func prepareAggQuery(seqId int, userQuery types.AggQuery, r *StarrocksRepository
 }
 
 func (r *StarrocksRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	tx, _, err := prepareAggQuery(seqId, userQuery, r)
+	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
 	var aggregation []Aggregation
 	if err != nil {
 		return aggregation, fmt.Errorf("error during query preparation %w", err)
@@ -300,31 +300,8 @@ func (r *StarrocksRepository) AggregateOccurrences(seqId int, userQuery types.Ag
 	return aggregation, err
 }
 
-func prepareStatQuery(seqId int, userQuery types.StatisticsQuery, r *StarrocksRepository) (*gorm.DB, int, error) {
-	part, err := r.GetPart(seqId)
-	if err != nil {
-		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
-	}
-	tx := addImplicitOccurrencesFilters(seqId, r, part)
-	if userQuery != nil {
-		tx = joinWithVariants(userQuery, tx)
-		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-			joinClause := "LEFT JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
-			tx = tx.Joins(joinClause)
-			selectedPanelsTables := getDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
-			for _, panelsTable := range selectedPanelsTables {
-				tx = tx.
-					Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
-			}
-		}
-		addWhere(userQuery, tx)
-
-	}
-	return tx, part, nil
-}
-
 func (r *StarrocksRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	tx, _, err := prepareStatQuery(seqId, userQuery, r)
+	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
 	var statistics Statistics
 	if err != nil {
 		return &statistics, fmt.Errorf("error during query preparation %w", err)
@@ -334,7 +311,7 @@ func (r *StarrocksRepository) GetStatisticsOccurrences(seqId int, userQuery type
 	err = tx.Select(sel).
 		Find(&statistics).Error
 	if err != nil {
-		return &statistics, fmt.Errorf("error query aggragation: %w", err)
+		return &statistics, fmt.Errorf("error query statistics: %w", err)
 	}
 	return &statistics, err
 }
