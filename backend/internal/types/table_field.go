@@ -11,7 +11,8 @@ type Table struct {
 }
 
 const (
-	ArrayType = "array"
+	ArrayType   = "array"
+	NumericType = "numeric"
 )
 
 type Field struct {
@@ -44,6 +45,9 @@ func (f *Field) GetName() string {
 func (f *Field) IsArray() bool {
 	return f.Type == ArrayType
 }
+func (f *Field) IsNumeric() bool {
+	return f.Type == NumericType
+}
 
 // findByAlias returns the field with the given name from the list of fields
 func findByAlias(fields []Field, alias string) *Field {
@@ -53,10 +57,9 @@ func findByAlias(fields []Field, alias string) *Field {
 	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
 		return field.GetAlias() == alias
 	})
-
 }
 
-// findByAlias returns the selectable field with the given name from the list of fields
+// findSelectableByAlias returns the selectable field with the given name from the list of fields
 func findSelectableByAlias(fields []Field, alias string) *Field {
 	if fields == nil {
 		return nil
@@ -64,7 +67,16 @@ func findSelectableByAlias(fields []Field, alias string) *Field {
 	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
 		return field.GetAlias() == alias && field.CanBeSelected
 	})
+}
 
+// findNumericByAlias returns the numeric field with the given name from the list of fields
+func findNumericByAlias(fields []Field, alias string) *Field {
+	if fields == nil {
+		return nil
+	}
+	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
+		return field.GetAlias() == alias && field.IsNumeric()
+	})
 }
 
 // findSelectedFields returns the fields that can be selected from the list of string field names

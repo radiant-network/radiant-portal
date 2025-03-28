@@ -15,6 +15,7 @@ import (
 type Occurrence = types.Occurrence
 type Aggregation = types.Aggregation
 type Sequencing = types.Sequencing
+type Statistics = types.Statistics
 
 type StarrocksRepository struct {
 	db *gorm.DB
@@ -27,6 +28,7 @@ type StarrocksDAO interface {
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 	GetSequencing(seqId int) (*Sequencing, error)
 	GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error)
+	GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -243,7 +245,7 @@ func (r *StarrocksRepository) CountOccurrences(seqId int, userQuery types.CountQ
 
 }
 
-func prepareAggQuery(seqId int, userQuery types.AggQuery, r *StarrocksRepository) (*gorm.DB, int, error) {
+func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *StarrocksRepository) (*gorm.DB, int, error) {
 	part, err := r.GetPart(seqId)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
@@ -267,7 +269,7 @@ func prepareAggQuery(seqId int, userQuery types.AggQuery, r *StarrocksRepository
 }
 
 func (r *StarrocksRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	tx, _, err := prepareAggQuery(seqId, userQuery, r)
+	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
 	var aggregation []Aggregation
 	if err != nil {
 		return aggregation, fmt.Errorf("error during query preparation %w", err)
@@ -296,6 +298,22 @@ func (r *StarrocksRepository) AggregateOccurrences(seqId int, userQuery types.Ag
 		return aggregation, fmt.Errorf("error query aggragation: %w", err)
 	}
 	return aggregation, err
+}
+
+func (r *StarrocksRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
+	var statistics Statistics
+	if err != nil {
+		return &statistics, fmt.Errorf("error during query preparation %w", err)
+	}
+	targetCol := userQuery.GetTargetedField()
+	sel := fmt.Sprintf("MIN(%s.%s) as min, MAX(%s.%s) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
+	err = tx.Select(sel).
+		Find(&statistics).Error
+	if err != nil {
+		return &statistics, fmt.Errorf("error query statistics: %w", err)
+	}
+	return &statistics, err
 }
 
 func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error) {

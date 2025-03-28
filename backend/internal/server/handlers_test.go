@@ -50,6 +50,14 @@ func (m *MockRepository) AggregateOccurrences(int, types.AggQuery) ([]types.Aggr
 		nil
 }
 
+func (m *MockRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*types.Statistics, error) {
+	return &types.Statistics{
+			Min: 0,
+			Max: 100,
+		},
+		nil
+}
+
 func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
 	return &types.Sequencing{
 		SeqId:          1,
@@ -150,6 +158,30 @@ func Test_OccurrencesAggregateHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	expected := `[{"key": "HET", "count": 2}, {"key": "HOM", "count": 1}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_OccurrencesStatisticsHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/occurrences/:seq_id/statistics", OccurrencesStatisticsHandler(repo))
+
+	body := `{
+			"field": "pf",
+			"sqon":{
+				"op":"in",
+				"content":{
+					"field": "filter",
+					"value": "PASS"
+				}
+		    }
+	}`
+	req, _ := http.NewRequest("POST", "/occurrences/1/statistics", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `{"min": 0, "max": 100}`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }

@@ -178,6 +178,52 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	}
 }
 
+// OccurrencesStatisticsHandler handles statistics of occurrences
+// @Summary Statistics of occurrences
+// @Id statisticsOccurrences
+// @Description Return statistics about a field for a given sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param seq_id path string true "Sequence ID"
+// @Param			message	body		types.StatisticsBody	true	"Statistics Body"
+// @Accept json
+// @Produce json
+// @Success 200 {array} types.Statistics
+// @Failure 400 {object} map[string]string
+// @Router /occurrences/{seq_id}/statistics [post]
+func OccurrencesStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body  types.StatisticsBody
+			query types.StatisticsQuery
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		query, err := types.NewStatisticsQuery(body.Field, body.Sqon, types.OccurrencesFields)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		statistics, err := repo.GetStatisticsOccurrences(seqID, query)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		c.JSON(http.StatusOK, statistics)
+	}
+}
+
 func extractInterpretationParams(c *gin.Context) (string, string, string) {
 	sequencingId := c.Param("sequencing_id")
 	locusId := c.Param("locus_id")

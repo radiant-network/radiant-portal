@@ -600,6 +600,25 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(
 	})
 }
 
+func Test_GetStatisticsOccurrences(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+		repo := NewStarrocksRepository(db)
+		query, err := types.NewStatisticsQuery("pf", nil, types.OccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(1, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0.01, statistics.Min)
+		assert.EqualValues(t, 0.29, statistics.Max)
+	})
+}
+
+func Test_GetStatisticsOccurrences_Non_Numeric_Field(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+		_, err := types.NewStatisticsQuery("hgvsg", nil, types.OccurrencesFields)
+		assert.Error(t, err)
+	})
+}
+
 func Test_GetSequencing(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)

@@ -60,6 +60,20 @@ func testAggregation(t *testing.T, data string, body string, expected string) {
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }
+func testStatistics(t *testing.T, data string, body string, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewStarrocksRepository(db)
+		router := gin.Default()
+		router.POST("/occurrences/:seq_id/statistics", server.OccurrencesStatisticsHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/occurrences/1/statistics", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
 
 func Test_OccurrencesList(t *testing.T) {
 	testList(t, "simple", "{}", `[{"locus_id":1000}]`)
@@ -130,6 +144,26 @@ func Test_Aggregation(t *testing.T) {
 		}`
 	expected := `[{"key": "HOM", "count": 1}, {"key": "HET", "count": 2}]`
 	testAggregation(t, "aggregation", body, expected)
+}
+
+func Test_Statistics(t *testing.T) {
+	body := `{
+			"field": "pf",
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op":"in",
+						"content":{
+							"field": "filter",
+							"value": "PASS"
+						}
+					}        
+				]
+			}
+		}`
+	expected := `{"min": 0.01, "max": 0.29}`
+	testStatistics(t, "pagination", body, expected)
 }
 
 func Test_Filter_On_Consequence_Column(t *testing.T) {

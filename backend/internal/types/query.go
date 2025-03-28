@@ -189,3 +189,60 @@ func NewCountQuery(sqon *Sqon, fields []Field) (CountQuery, error) {
 		return &countQuery{}, nil
 	}
 }
+
+type StatisticsQuery interface {
+	Filters() FilterNode
+	GetTargetedField() *Field
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
+}
+
+type statisticsQuery struct {
+	filters        FilterNode //Root node of the filter tree
+	filteredFields []Field    //Fields used in the filters
+	targetedField  *Field     //Field targeted for statistics
+}
+
+func (l *statisticsQuery) Filters() FilterNode {
+	return l.filters
+}
+
+func (l *statisticsQuery) GetTargetedField() *Field {
+	return l.targetedField
+}
+
+func (l *statisticsQuery) HasFieldFromTables(tables ...Table) bool {
+	return slices.Contains(tables, l.targetedField.Table) || (l.filteredFields != nil && sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	}))
+}
+
+func (l *statisticsQuery) GetFieldsFromTables(tables ...Table) []Field {
+	filtered := sliceutils.Filter(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+
+	if slices.Contains(tables, l.targetedField.Table) {
+		return sliceutils.Unique(append(filtered, *l.targetedField))
+	}
+	return sliceutils.Unique(filtered)
+}
+
+func NewStatisticsQuery(field string, sqon *Sqon, fields []Field) (StatisticsQuery, error) {
+	// Define allowed target col
+	target := findNumericByAlias(fields, field)
+	if target != nil {
+		if sqon != nil {
+			root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)
+			if err != nil {
+				return nil, fmt.Errorf("error during build statistics query %w", err)
+			}
+			return &statisticsQuery{filteredFields: visitedFilteredFields, filters: root, targetedField: target}, nil
+
+		} else {
+			return &statisticsQuery{targetedField: target}, nil
+		}
+	} else {
+		return nil, fmt.Errorf("%s is not a numeric field", field)
+	}
+}

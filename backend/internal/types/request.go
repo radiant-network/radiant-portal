@@ -110,4 +110,9 @@ type AggregationBody struct {
 	Size  int
 } // @Name AggregationBody
 
+type StatisticsBody struct {
+	Field string
+	Sqon  *Sqon
+} // @Name StatisticsBody
+
 type ArraySqon []Sqon

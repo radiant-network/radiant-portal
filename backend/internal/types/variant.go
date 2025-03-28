@@ -10,6 +10,7 @@ var PfField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
+	Type:          NumericType,
 	Table:         VariantTable,
 }
 var PcField = Field{
@@ -17,6 +18,7 @@ var PcField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
+	Type:          NumericType,
 	Table:         VariantTable,
 }
 var AfField = Field{
@@ -24,6 +26,7 @@ var AfField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
+	Type:          NumericType,
 	Table:         VariantTable,
 }
 var VariantClassField = Field{
@@ -113,6 +116,7 @@ var GnomadV3AfField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
+	Type:          NumericType,
 	Table:         VariantTable,
 }
 var TranscriptIdField = Field{

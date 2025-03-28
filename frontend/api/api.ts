@@ -720,6 +720,44 @@ export type SqonOpEnum = typeof SqonOpEnum[keyof typeof SqonOpEnum];
 export type SqonContent = Array<Sqon> | LeafContent;
 
 /**
+ * Statistics represents statistics about a column
+ * @export
+ * @interface Statistics
+ */
+export interface Statistics {
+    /**
+     * Max for numeric facet
+     * @type {number}
+     * @memberof Statistics
+     */
+    'max'?: number;
+    /**
+     * Min for numeric facet
+     * @type {number}
+     * @memberof Statistics
+     */
+    'min'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface StatisticsBody
+ */
+export interface StatisticsBody {
+    /**
+     * 
+     * @type {string}
+     * @memberof StatisticsBody
+     */
+    'field'?: string;
+    /**
+     * 
+     * @type {Sqon}
+     * @memberof StatisticsBody
+     */
+    'sqon'?: Sqon;
+}
+/**
  * 
  * @export
  * @interface Term
@@ -1782,6 +1820,50 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Return statistics about a field for a given sequence ID
+         * @summary Statistics of occurrences
+         * @param {string} seqId Sequence ID
+         * @param {StatisticsBody} statisticsBody Statistics Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        statisticsOccurrences: async (seqId: string, statisticsBody: StatisticsBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('statisticsOccurrences', 'seqId', seqId)
+            // verify required parameter 'statisticsBody' is not null or undefined
+            assertParamExists('statisticsOccurrences', 'statisticsBody', statisticsBody)
+            const localVarPath = `/occurrences/{seq_id}/statistics`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(statisticsBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -1834,6 +1916,20 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Return statistics about a field for a given sequence ID
+         * @summary Statistics of occurrences
+         * @param {string} seqId Sequence ID
+         * @param {StatisticsBody} statisticsBody Statistics Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Statistics>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsOccurrences(seqId, statisticsBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -1876,6 +1972,17 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          */
         listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Occurrence>> {
             return localVarFp.listOccurrences(seqId, listBody, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Return statistics about a field for a given sequence ID
+         * @summary Statistics of occurrences
+         * @param {string} seqId Sequence ID
+         * @param {StatisticsBody} statisticsBody Statistics Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Statistics>> {
+            return localVarFp.statisticsOccurrences(seqId, statisticsBody, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1924,6 +2031,19 @@ export class OccurrencesApi extends BaseAPI {
      */
     public listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listOccurrences(seqId, listBody, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Return statistics about a field for a given sequence ID
+     * @summary Statistics of occurrences
+     * @param {string} seqId Sequence ID
+     * @param {StatisticsBody} statisticsBody Statistics Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).statisticsOccurrences(seqId, statisticsBody, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
