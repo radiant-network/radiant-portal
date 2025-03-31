@@ -1,29 +1,23 @@
-import logo from "@assets/logo/header.svg";
-import logoDark from "@assets/logo/header-dark.svg";
-import { LanguageSwitcher } from "@/components/base/language-switcher";
-import { useI18n } from "@/components/hooks/i18n";
-import { NavigationMenu } from '@/components/base/ui/navigation-menu';
-import { useConfig } from "@/components/model/applications-config";
+import logo from '@assets/logo/header.svg';
+import logoDark from '@assets/logo/header-dark.svg';
+import { LanguageSwitcher } from '@/components/base/language-switcher';
+import { useI18n } from '@/components/hooks/i18n';
+import { useConfig } from '@/components/model/applications-config';
 
 interface IProps {
-  languages?: string[];
   userName: string;
   onLogout(): void;
 }
 
-export function MainNav({ languages = [], userName, onLogout }: IProps) {
+export function MainNav({ userName, onLogout }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
 
   return (
-    <header className="h-12 bg-gray-800 text-white flex items-center justify-between px-4 w-full max-w-full">
+    <header className="h-12 bg-gray-900 text-white flex items-center justify-between px-4 w-full max-w-full">
       <div className="flex space-x-3 items-center">
         <img src={logo} alt="Logo" className="h-8 w-auto dark:hidden" />
-        <img
-          src={logoDark}
-          alt="Logo"
-          className="h-8 w-auto hidden dark:block"
-        />
+        <img src={logoDark} alt="Logo" className="h-8 w-auto hidden dark:block" />
 
         {/* <img src={logo} alt="Logo" className="h-8 w-auto" /> */}
         <div className="text-lg font-bold">{config.portal.name}</div>

@@ -286,13 +286,7 @@ function MultiSelector({
             }
 
             return (
-              <Badge
-                key={option.value}
-                color="primary"
-                variant="filled"
-                data-disabled={disabled || undefined}
-                onClose={() => handleUnselect(option)}
-              >
+              <Badge key={option.value} data-disabled={disabled || undefined} onClose={() => handleUnselect(option)}>
                 {option.label}
               </Badge>
             );

@@ -1,14 +1,7 @@
-import { IconButton } from "@/components/base/Buttons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/base/ui/tooltip";
-import { RotateCcw } from "lucide-react";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { RotateCcw } from 'lucide-react';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { Button } from '@/components/base/ui/button';
 
 function SavedFiltersUndoAction() {
   const dict = useQueryBuilderDictContext();
@@ -23,11 +16,15 @@ function SavedFiltersUndoAction() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <IconButton
-          icon={RotateCcw}
+        <Button
+          iconOnly
+          variant="ghost"
+          size="sm"
           disabled={!selectedSavedFilter}
           onClick={() => selectedSavedFilter.discardChanges()}
-        />
+        >
+          <RotateCcw />
+        </Button>
       </TooltipTrigger>
       <TooltipContent>{dict.savedFilter.discardTooltip}</TooltipContent>
     </Tooltip>

@@ -1,10 +1,7 @@
-import { Button } from "@/components/base/ui/button";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
-import { BooleanOperators } from "@/components/model/sqon";
-import { PlusIcon } from "lucide-react";
+import { Button } from '@/components/base/ui/button';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { BooleanOperators } from '@/components/model/sqon';
+import { PlusIcon } from 'lucide-react';
 
 function QueryToolbarAddAction() {
   const dict = useQueryBuilderDictContext();
@@ -17,7 +14,6 @@ function QueryToolbarAddAction() {
   return (
     <Button
       size="xs"
-      color="primary"
       disabled={queryBuilder.hasEmptyQuery()}
       onClick={() =>
         queryBuilder.createQuery({

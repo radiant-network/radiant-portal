@@ -1,7 +1,7 @@
 import { PlusIcon } from 'lucide-react';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { cn } from '@/components/lib/utils';
-import { IconButton } from '@/components/base/Buttons';
+import { Button } from '../../ui/button';
 
 type GeneCellProps = {
   className?: string;
@@ -29,13 +29,16 @@ function GeneCell({ className, symbol }: GeneCellProps) {
       <a href={getOmimOrgUrl({ symbol })} className="underline hover:no-underline" target="_blank">
         {symbol}
       </a>
-      <IconButton
-        size="sm"
-        icon={PlusIcon}
+      <Button
+        size="xs"
+        variant="ghost"
+        iconOnly
         onClick={() => {
           console.log('addQuery to be added'); //TODO: to remove
         }}
-      />
+      >
+        <PlusIcon />
+      </Button>
     </div>
   );
 }

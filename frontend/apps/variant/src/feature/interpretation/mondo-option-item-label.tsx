@@ -5,7 +5,7 @@ function InterpretationMondoOptionItemLabel({ mondo }: { mondo: AutoCompleteTerm
     <div>
       {mondo.highlight?.name ? (
         <span
-          className="capitalize [&>strong]:font-normal [&>strong]:bg-blue-200"
+          className="capitalize [&>strong]:font-normal [&>strong]:bg-primary/35"
           dangerouslySetInnerHTML={{ __html: mondo.highlight.name }}
         />
       ) : (

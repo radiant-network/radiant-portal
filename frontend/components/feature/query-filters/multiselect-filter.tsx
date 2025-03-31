@@ -146,10 +146,10 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
       )}
 
       <div className="flex justify-between">
-        <Button size="sm" onClick={() => selectAll()} variant="link">
+        <Button size="sm" onClick={() => selectAll()} variant="link" className="px-0">
           {t('common.filters.buttons.all')}
         </Button>
-        <Button size="sm" onClick={() => unSelectAll()} variant="link">
+        <Button size="sm" onClick={() => unSelectAll()} variant="link" className="px-0">
           {t('common.filters.buttons.none')}
         </Button>
       </div>
@@ -174,7 +174,7 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
       </div>
 
       {items.length > visibleItemsCount && (
-        <Button className="mt-2" onClick={showMore} size="sm" variant="link">
+        <Button className="mt-2 px-0" onClick={showMore} size="sm" variant="link">
           {t('common.filters.buttons.showMore')}
         </Button>
       )}
@@ -182,11 +182,11 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
       <Separator className="my-2.5" />
 
       <div className="flex align-right justify-end items-center space-x-2">
-        <Button className="text-gray-600" onClick={reset} disabled={!hasUnappliedItems}>
+        <Button size="xs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems}>
           {t('common.filters.buttons.clear')}
         </Button>
         <div className="flex space-x-2">
-          <ActionButton size="sm" className="h-7" color="primary" actions={[]} onDefaultAction={apply}>
+          <ActionButton size="xs" className="h-7" color="primary" actions={[]} onDefaultAction={apply}>
             {t('common.filters.buttons.apply')}
           </ActionButton>
         </div>

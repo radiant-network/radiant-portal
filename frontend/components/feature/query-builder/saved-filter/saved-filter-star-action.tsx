@@ -1,15 +1,8 @@
-import { IconButton } from "@/components/base/Buttons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/base/ui/tooltip";
-import { StarIcon } from "lucide-react";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
-import { SavedFilterTypeEnum } from "@/components/model/saved-filter";
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { StarIcon } from 'lucide-react';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { SavedFilterTypeEnum } from '@/components/model/saved-filter';
+import { Button } from '@/components/base/ui/button';
 
 function SavedFiltersStarAction() {
   const dict = useQueryBuilderDictContext();
@@ -34,16 +27,9 @@ function SavedFiltersStarAction() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <IconButton
-          icon={StarIcon}
-          iconClassName={
-            selectedSavedFilter?.isFavorite()
-              ? "stroke-gold-500 fill-gold-500"
-              : ""
-          }
-          disabled={!selectedSavedFilter}
-          onClick={handleStar}
-        />
+        <Button iconOnly variant="ghost" size="sm" disabled={!selectedSavedFilter} onClick={handleStar}>
+          <StarIcon className={selectedSavedFilter?.isFavorite() ? 'stroke-yellow-500 fill-yellow-500' : ''} />
+        </Button>
       </TooltipTrigger>
       <TooltipContent>
         {selectedSavedFilter?.isFavorite()

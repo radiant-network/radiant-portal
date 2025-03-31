@@ -4,10 +4,9 @@ import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import { cn } from '@/components/lib/utils';
 import RichTextEditorToolbar from './rich-text-editor-toolbar';
-import { RefObject } from 'react';
 
 export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'onChange' | 'onBlur'> & {
-  ref?: RefObject<HTMLDivElement>;
+  ref?: React.Ref<HTMLDivElement>;
   value?: string;
   className?: string;
   wrapperClassName?: string;
@@ -83,7 +82,7 @@ const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, 
       ],
       content: value,
     },
-    [value],
+    [],
   );
 
   return (

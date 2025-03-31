@@ -5,23 +5,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/base/ui/dialog";
-import { Button } from "@/components/base/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormField,
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/base/ui/form";
-import { Input } from "@/components/base/ui/input";
-import { QueryInstance } from "@/components/model/query-builder-core";
-import { useQueryBuilderDictContext } from "../query-builder-context";
-import { useState } from "react";
+} from '@/components/base/ui/dialog';
+import { Button } from '@/components/base/ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { Form, FormField, FormControl, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
+import { Input } from '@/components/base/ui/input';
+import { QueryInstance } from '@/components/model/query-builder-core';
+import { useQueryBuilderDictContext } from '../query-builder-context';
+import { useState } from 'react';
 
 const formSchema = z.object({
   title: z.string(),
@@ -42,7 +35,7 @@ function QueryBarSaveDialog({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     values: {
-      title: "",
+      title: '',
     },
   });
 
@@ -66,16 +59,9 @@ function QueryBarSaveDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {dict.queryBar.saveDialog.fields.title.label}
-                  </FormLabel>
+                  <FormLabel>{dict.queryBar.saveDialog.fields.title.label}</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder={
-                        dict.queryBar.saveDialog.fields.title.placeholder
-                      }
-                      {...field}
-                    />
+                    <Input placeholder={dict.queryBar.saveDialog.fields.title.placeholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -84,9 +70,7 @@ function QueryBarSaveDialog({
             <div className="text-sm">{dict.queryBar.saveDialog.notice}</div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outlined">
-                  {dict.queryBar.saveDialog.cancel}
-                </Button>
+                <Button variant="outline">{dict.queryBar.saveDialog.cancel}</Button>
               </DialogClose>
               <Button type="submit" color="primary" loading={saving}>
                 {dict.queryBar.saveDialog.ok}

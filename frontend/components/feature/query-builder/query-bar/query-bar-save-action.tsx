@@ -1,14 +1,10 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/base/ui/tooltip";
-import { SaveIcon } from "lucide-react";
-import { useQueryBuilderDictContext } from "../query-builder-context";
-import QueryBarSaveDialog from "./query-bar-save-dialog";
-import { useState } from "react";
-import { useQueryBarContext } from "./query-bar-context";
-import { IconButton } from "@/components/base/Buttons";
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { SaveIcon } from 'lucide-react';
+import { useQueryBuilderDictContext } from '../query-builder-context';
+import QueryBarSaveDialog from './query-bar-save-dialog';
+import { useState } from 'react';
+import { useQueryBarContext } from './query-bar-context';
+import { Button } from '@/components/base/ui/button';
 
 function QueryBarSaveAction() {
   const { query } = useQueryBarContext();
@@ -20,11 +16,9 @@ function QueryBarSaveAction() {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <IconButton
-            icon={SaveIcon}
-            onClick={() => setOpen(true)}
-            disabled={query.hasCustomPill()}
-          />
+          <Button iconOnly variant="ghost" size="sm" onClick={() => setOpen(true)} disabled={query.hasCustomPill()}>
+            <SaveIcon />
+          </Button>
         </TooltipTrigger>
         <TooltipContent className="max-w-[200px]">
           {query.hasCustomPill()

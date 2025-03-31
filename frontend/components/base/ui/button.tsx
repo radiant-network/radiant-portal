@@ -5,7 +5,7 @@ import { VariantProps } from 'tailwind-variants';
 import { Spinner } from '../spinner';
 
 export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color'>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
@@ -13,16 +13,16 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { className, variant, size, children, asChild = false, loading = false, disabled = false, color, ...props },
+    { className, variant, size, children, asChild = false, loading = false, disabled = false, iconOnly, ...props },
     ref,
   ) => {
     const Comp = asChild ? Slot : 'button';
-    const style = buttonVariants({ variant, size, color });
+    const style = buttonVariants({ variant, size, iconOnly });
 
     return (
       <Comp ref={ref} className={style.base({ className })} disabled={disabled || loading} {...props}>
         {loading && <Spinner />}
-        {children}
+        {iconOnly && loading ? null : children}
       </Comp>
     );
   },

@@ -114,7 +114,7 @@ function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
  */
 function getNextSortingOrderHeaderTitle(sortingOrder: SortDirection | boolean): string {
   const { t } = useI18n();
-  
+
   if (sortingOrder === 'asc') {
     return t('common.table.sort.ascending');
   }
@@ -282,7 +282,7 @@ function DataTable<T>({
 
   return (
     <>
-      <div className="w-full flex text-left justify-between mb-4">
+      <div className="w-full flex text-left justify-between items-center mb-2">
         <TableIndexResult
           loading={loadingStates?.total}
           pageIndex={table.getState().pagination.pageIndex + 1}

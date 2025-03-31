@@ -4,20 +4,23 @@ import { classificationCriterias, getClassificationCriteriaColor, getTransmissio
 import { FormProvider, useForm } from 'react-hook-form';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { germlineInterpretationFormSchema, GermlineInterpretationSchemaType, InterpretationFormProps } from './types';
+import {
+  germlineInterpretationFormSchema,
+  GermlineInterpretationSchemaType,
+  InterpretationFormProps,
+  InterpretationFormRef,
+} from './types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import InterpretationFormGeneric from './interpretation-form-generic';
 import { Badge } from '@/components/base/ui/badge';
 import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
 import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
-import { useEffect, useImperativeHandle } from 'react';
+import { forwardRef, useEffect, useImperativeHandle } from 'react';
 
-function InterpretationFormGermline({
-  ref,
-  interpretation,
-  saveInterpretation,
-  onDirtyChange,
-}: InterpretationFormProps<InterpretationGermline>) {
+function InterpretationFormGermline(
+  { interpretation, saveInterpretation, onDirtyChange }: InterpretationFormProps<InterpretationGermline>,
+  ref: React.Ref<InterpretationFormRef>,
+) {
   const form = useForm<GermlineInterpretationSchemaType>({
     resolver: zodResolver(germlineInterpretationFormSchema),
     values: {
@@ -79,7 +82,7 @@ function InterpretationFormGermline({
                       <span>
                         <ToggleGroupItem
                           value="LA26332-9"
-                          className="bg-white hover:bg-white data-[state=on]:bg-volcano-100 data-[state=on]:text-volcano-800 border data-[state=on]:border-volcano-300"
+                          className="bg-white hover:bg-white data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 border data-[state=on]:border-yellow-300"
                         >
                           Likely Pathogenic
                         </ToggleGroupItem>
@@ -141,16 +144,15 @@ function InterpretationFormGermline({
                     return (
                       <Badge
                         key={option.value}
-                        variant="filled"
                         data-fixed={option.fixed}
                         onClose={onRemove}
-                        style={{
-                          color: `hsl(var(--${tagColor}-9))`,
-                          backgroundColor: `hsl(var(--${tagColor}-3))`,
-                        }}
-                        closeIconProps={{
-                          style: { color: `hsl(var(--${tagColor}-9))` },
-                        }}
+                        //style={{
+                        //  color: `hsl(var(--${tagColor}-9))`,
+                        //  backgroundColor: `hsl(var(--${tagColor}-3))`,
+                        //}}
+                        //closeIconProps={{
+                        //  style: { color: `hsl(var(--${tagColor}-9))` },
+                        //}}
                       >
                         {option.label}
                       </Badge>
@@ -185,4 +187,6 @@ function InterpretationFormGermline({
   );
 }
 
-export default InterpretationFormGermline;
+export default forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationGermline>>(
+  InterpretationFormGermline,
+);

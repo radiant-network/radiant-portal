@@ -1,14 +1,7 @@
-import { IconButton } from "@/components/base/Buttons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/base/ui/tooltip";
-import { Share2Icon } from "lucide-react";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Share2Icon } from 'lucide-react';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { Button } from '@/components/base/ui/button';
 
 function SavedFiltersShareAction() {
   const dict = useQueryBuilderDictContext();
@@ -24,15 +17,15 @@ function SavedFiltersShareAction() {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="inline-flex">
-          <IconButton
-            icon={Share2Icon}
-            disabled={
-              selectedSavedFilter?.isDirty() ||
-              selectedSavedFilter?.isNew() ||
-              !selectedSavedFilter
-            }
+          <Button
+            iconOnly
+            variant="ghost"
+            size="sm"
+            disabled={selectedSavedFilter?.isDirty() || selectedSavedFilter?.isNew() || !selectedSavedFilter}
             onClick={handleShare}
-          />
+          >
+            <Share2Icon />
+          </Button>
         </span>
       </TooltipTrigger>
       <TooltipContent>

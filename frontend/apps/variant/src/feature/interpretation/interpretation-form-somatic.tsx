@@ -1,6 +1,11 @@
 import { FormProvider, useForm } from 'react-hook-form';
 import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
-import { InterpretationFormProps, somaticInterpretationFormSchema, SomaticInterpretationSchemaType } from './types';
+import {
+  InterpretationFormProps,
+  InterpretationFormRef,
+  somaticInterpretationFormSchema,
+  SomaticInterpretationSchemaType,
+} from './types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/ui/toggle-group';
@@ -15,13 +20,12 @@ import { Badge } from '@/components/base/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import InterpretationFormGeneric from './interpretation-form-generic';
 import { InterpretationSomatic } from '@/api/api';
-import { useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
 
-function InterpretationFormSomatic({
-  ref,
-  interpretation,
-  saveInterpretation,
-}: InterpretationFormProps<InterpretationSomatic>) {
+function InterpretationFormSomatic(
+  { interpretation, saveInterpretation }: InterpretationFormProps<InterpretationSomatic>,
+  ref: React.Ref<InterpretationFormRef>,
+) {
   const form = useForm<SomaticInterpretationSchemaType>({
     resolver: zodResolver(somaticInterpretationFormSchema),
     defaultValues: {
@@ -46,7 +50,7 @@ function InterpretationFormSomatic({
       submit: () => form.handleSubmit(onSubmit)(),
       isDirty: form.formState.isDirty,
     }),
-    [form, onSubmit],
+    [ref, form, onSubmit],
   );
 
   return (
@@ -92,7 +96,7 @@ function InterpretationFormSomatic({
                       <span>
                         <ToggleGroupItem
                           value="LA26332-9"
-                          className="bg-white hover:bg-white data-[state=on]:bg-volcano-100 data-[state=on]:text-volcano-800 border data-[state=on]:border-volcano-300"
+                          className="bg-white hover:bg-white data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 border data-[state=on]:border-yellow-300"
                         >
                           Likely Oncogenic
                         </ToggleGroupItem>
@@ -155,16 +159,15 @@ function InterpretationFormSomatic({
                     return (
                       <Badge
                         key={option.value}
-                        variant="filled"
                         data-fixed={option.fixed}
                         onClose={onRemove}
-                        style={{
-                          color: `hsl(var(--${tagColor}-9))`,
-                          backgroundColor: `hsl(var(--${tagColor}-3))`,
-                        }}
-                        closeIconProps={{
-                          style: { color: `hsl(var(--${tagColor}-9))` },
-                        }}
+                        //style={{
+                        //  color: `hsl(var(--${tagColor}-9))`,
+                        //  backgroundColor: `hsl(var(--${tagColor}-3))`,
+                        //}}
+                        //closeIconProps={{
+                        //  style: { color: `hsl(var(--${tagColor}-9))` },
+                        //}}
                       >
                         {option.label}
                       </Badge>
@@ -209,4 +212,6 @@ function InterpretationFormSomatic({
   );
 }
 
-export default InterpretationFormSomatic;
+export default forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationSomatic>>(
+  InterpretationFormSomatic,
+);

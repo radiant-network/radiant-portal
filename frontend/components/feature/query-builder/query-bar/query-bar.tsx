@@ -1,27 +1,19 @@
-import QueryBarIdentifier from "./query-bar-identifier";
-import QueryBarActions from "./query-bar-actions";
-import {
-  isBooleanOperator,
-  QueryInstance,
-} from "@/components/model/query-builder-core";
-import { QueryBarContext } from "./query-bar-context";
-import QueryBarCount from "./query-bar-count";
-import QueryBarSelector from "./query-bar-selector";
-import { tv } from "tailwind-variants";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
-import QueryPillBoolean from "../query-pill/query-pill-boolean";
+import QueryBarIdentifier from './query-bar-identifier';
+import QueryBarActions from './query-bar-actions';
+import { isBooleanOperator, QueryInstance } from '@/components/model/query-builder-core';
+import { QueryBarContext } from './query-bar-context';
+import QueryBarCount from './query-bar-count';
+import QueryBarSelector from './query-bar-selector';
+import { tv } from 'tailwind-variants';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import QueryPillBoolean from '../query-pill/query-pill-boolean';
 
 const queryBar = tv({
-  base: "flex flex-1 py-2 px-3 border ",
+  base: 'flex flex-1 py-2 px-3 border ',
   variants: {
     active: {
-      true: [
-        "border-[--query-bar-border-color-active] bg-[--query-bar-bg-active]",
-      ],
-      false: ["border-gray-400 bg-gray-100"],
+      true: ['border-primary/75 bg-primary/10'],
+      false: ['border-gray-400 bg-gray-100'],
     },
   },
   defaultVariants: {
@@ -46,19 +38,15 @@ function QueryBar({ query }: QueryBarProps) {
 
   return (
     <QueryBarContext.Provider value={{ query }}>
-      <div
-        data-query-active={active}
-        className="flex group/query"
-        onClick={handleSetAsActive}
-      >
+      <div data-query-active={active} className="flex group/query" onClick={handleSetAsActive}>
         <QueryBarIdentifier />
         {enableCombine && <QueryBarSelector />}
         <div className={queryBar({ active })}>
-          <div className="flex-1">
+          <div className="flex flex-1 items-center justify-between">
             {query.isEmpty() ? (
               <>{dict.queryBar.empty}</>
             ) : (
-              <div className="flex">
+              <>
                 <div className="flex-1">
                   {isBooleanOperator(query.raw()) && (
                     <div className="flex items-center flex-wrap pr-2">
@@ -67,7 +55,7 @@ function QueryBar({ query }: QueryBarProps) {
                   )}
                 </div>
                 <QueryBarCount />
-              </div>
+              </>
             )}
           </div>
         </div>
