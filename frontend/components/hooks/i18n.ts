@@ -32,13 +32,23 @@ const loadTranslations = async (lang: string) => {
   const theme = getCurrentTheme();
   
   try {
-    const [common, portal] = await Promise.all([
+    // Load translations in parallel but handle errors separately
+    const [commonResult, portalResult] = await Promise.allSettled([
       import(`@translations/common/${lang}.json`),
       import(`@translations/portals/${theme}/${lang}.json`)
     ]);
-    return deepMerge(common.default, portal.default);
+
+    // Start with common translations
+    let translations = commonResult.status === 'fulfilled' ? commonResult.value.default : {};
+
+    // Add portal translations if available
+    if (portalResult.status === 'fulfilled') {
+      translations = deepMerge(translations, portalResult.value.default);
+    }
+
+    return translations;
   } catch (error) {
-    console.warn(`Failed to load theme translations for ${theme}, falling back to common translations`);
+    console.warn(`Failed to load translations for ${lang}, falling back to common translations`);
     const common = await import(`@translations/common/${lang}.json`);
     return common.default;
   }
@@ -103,12 +113,20 @@ export const useI18n = (namespace?: string) => {
   const setLanguage = async (lang: string) => {
     if (lang === i18n.language) return;
     
-    // Load translations for the new language
-    const translations = await loadTranslations(lang);
-    i18next.addResourceBundle(lang, 'common', translations, true, true);
-    
-    // Change the language
-    await i18n.changeLanguage(lang);
+    try {
+      // Load translations for the new language
+      const translations = await loadTranslations(lang);
+      
+      // Add translations before changing language to prevent flicker
+      i18next.addResourceBundle(lang, 'common', translations, true, true);
+      
+      // Change the language
+      await i18n.changeLanguage(lang);
+    } catch (error) {
+      console.error('Failed to change language:', error);
+      // Revert to previous language if change fails
+      await i18n.changeLanguage(i18n.language);
+    }
   };
 
   return {
