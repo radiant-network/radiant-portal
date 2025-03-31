@@ -20,7 +20,7 @@ function InputSearch({
   searchButtonProps,
   ...props
 }: InputSearchProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState(props.value);
 
@@ -69,8 +69,8 @@ function InputSearch({
           inputRef.current = iref;
           if (typeof ref === 'function') {
             ref(iref);
-          } else if (ref) {
-            ref.current = iref;
+          } else if (ref && 'current' in ref) {
+            (ref as React.MutableRefObject<HTMLInputElement | null>).current = iref;
           }
         }}
       />
@@ -79,7 +79,7 @@ function InputSearch({
         variant="outlined"
         {...searchButtonProps}
         loading={loading || searchButtonProps?.loading}
-        className={cn('h-10 px-3 rounded-l-none ml-[-1px] hover:z-[2]', searchButtonProps?.className)}
+        className={cn('h-9 px-3 shadow-sm rounded-l-none ml-[-1px] hover:z-[2]', searchButtonProps?.className)}
         onClick={() => handleSearch(value)}
       >
         {!searchButtonProps?.loading && !loading && <SearchIcon />}

@@ -1,6 +1,7 @@
 # Naming Conventions
 
 ## Files and Folders
+
 - Use PascalCase for component files: `UserProfile.tsx`
 - Use PascalCase for component directories: `AllProfile/UserProfile.tsx`
 - Use kebab-case for non-component files: `auth-utils.ts`
@@ -13,8 +14,10 @@
 Source of thruth is the [ferlab code conventions](https://github.com/Ferlab-Ste-Justine/ferlab-ui/tree/master/packages/eslint-config) in eslint. Make sure it is up to date and active in your editor.
 
 ### Components
+
 - Use PascalCase for component names: `UserProfile`, `NavigationBar`
 - Use suffix to indicate component type:
+
   ```tsx
   // Pages
   export default function HomePage() {}
@@ -27,6 +30,7 @@ Source of thruth is the [ferlab code conventions](https://github.com/Ferlab-Ste-
   ```
 
 ### Routes
+
 - Use kebab-case for route paths: `/user-profile`, `/blog-posts`
 - Group related routes in separate files
 - Use descriptive names for route parameters: `userId` instead of `id`
@@ -34,46 +38,44 @@ Source of thruth is the [ferlab code conventions](https://github.com/Ferlab-Ste-
 ## Coding Practices
 
 ### Component Structure
+
 ```tsx
 // Import order
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
 // Local imports
-import { Button } from '@/components/common'
-import { useAuth } from '@/hooks/useAuth'
-import { formatDate } from '@/utils/date'
+import { Button } from '@/components/common';
+import { useAuth } from '@/hooks/useAuth';
+import { formatDate } from '@/utils/date';
 
 // Component definition
 export default function UserProfilePage() {
   // Hooks first
-  const navigate = useNavigate()
-  const { user } = useAuth()
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   // State/refs next
-  const [isEditing, setIsEditing] = React.useState(false)
+  const [isEditing, setIsEditing] = React.useState(false);
 
   // Derived values/computations
-  const fullName = `${user.firstName} ${user.lastName}`
+  const fullName = `${user.firstName} ${user.lastName}`;
 
   // Event handlers
   const handleSubmit = () => {
     // ...
-  }
+  };
 
   // JSX
-  return (
-    <div>
-      {/* JSX content */}
-    </div>
-  )
+  return <div>{/* JSX content */}</div>;
 }
 ```
 
 ### Tailwind CSS Best Practices
 
 1. Component Organization
+
 ```tsx
 // Prefer
 <div className="flex items-center space-x-4 p-4 bg-white rounded-lg shadow-md">
@@ -91,13 +93,15 @@ export default function UserProfilePage() {
 ```
 
 2. Extract Common Patterns
+
 ```tsx
 // styles/common.js
-export const cardStyles = "p-4 bg-white rounded-lg shadow-md"
-export const buttonStyles = "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+export const cardStyles = 'p-4 bg-white rounded-lg shadow-md';
+export const buttonStyles = 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600';
 ```
 
 3. Use Semantic Class Groups
+
 ```tsx
 // Group related utilities
 <button className="
@@ -108,7 +112,7 @@ export const buttonStyles = "px-4 py-2 bg-blue-500 text-white rounded hover:bg-b
   /* Colors use context color names */
   warning-bg primary-text secondary-border
   /* Interactive */
-  hover:bg-main-600 focus:ring-2
+  hover:bg-main-600 focus:ring-1
 ">
 ```
 
@@ -116,7 +120,7 @@ export const buttonStyles = "px-4 py-2 bg-blue-500 text-white rounded hover:bg-b
 
 ```tsx
 // routes/index.tsx
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom';
 
 export const router = createBrowserRouter([
   {
@@ -134,10 +138,11 @@ export const router = createBrowserRouter([
       },
     ],
   },
-])
+]);
 ```
 
 ### Error Handling
+
 - Use error boundaries for route-level error handling
 - Implement consistent error UI components
 - Add proper loading states for async operations
@@ -145,18 +150,19 @@ export const router = createBrowserRouter([
 ```tsx
 // components/common/ErrorBoundary.tsx
 export function RouteErrorBoundary() {
-  const error = useRouteError()
+  const error = useRouteError();
 
   return (
     <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
       <h2 className="text-red-800">Something went wrong</h2>
       <p className="text-red-600">{error.message}</p>
     </div>
-  )
+  );
 }
 ```
 
 ### Performance Considerations
+
 - Lazy load routes using `React.lazy()` and `Suspense`
 - Implement proper loading states
 - Use proper key props for lists
@@ -170,7 +176,7 @@ export function RouteErrorBoundary() {
 
 ```tsx
 // routes/index.tsx
-const DashboardPage = React.lazy(() => import('./pages/DashboardPage'))
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
 
 export const router = createBrowserRouter([
   {
@@ -181,7 +187,7 @@ export const router = createBrowserRouter([
       </Suspense>
     ),
   },
-])
+]);
 ```
 
 ### Testing Guidelines
@@ -196,16 +202,15 @@ export const router = createBrowserRouter([
 describe('UserProfile', () => {
   it('should display user information', () => {
     // ...
-  })
+  });
 
   it('should handle navigation to edit page', () => {
     // ...
-  })
-})
+  });
+});
 ```
 
 Remember these guidelines are meant to be adapted to your specific needs while maintaining consistency across your project. Regular code reviews and team discussions can help refine and evolve these practices over time.
-
 
 #### Links
 
