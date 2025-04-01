@@ -1,12 +1,11 @@
 import { badgeVariants as BaseBadgeVariants } from '@/components/base/ui/badge';
 import { VariantProps } from 'tailwind-variants';
 
-export const badgeColors: VariantProps<typeof BaseBadgeVariants>['color'][] = [
-  'primary',
+export const badgeVariants: VariantProps<typeof BaseBadgeVariants>['variant'][] = [
+  'default',
+  'secondary',
   'destructive',
-  'info',
-  'success',
-  'warning',
+  'outline',
 ];
 
-export const badgeVariants: VariantProps<typeof BaseBadgeVariants>['variant'][] = ['filled', 'outlined'];
+export const badgeSizes: VariantProps<typeof BaseBadgeVariants>['size'][] = ['default', 'sm', 'md'];

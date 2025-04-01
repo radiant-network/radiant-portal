@@ -2,13 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 
 import { Button } from '@/components/base/ui/button';
-import { buttonColors, buttonVariants } from './utils';
+import { buttonSizes, buttonVariants } from './utils';
+import { IdCardIcon } from 'lucide-react';
 
 const meta = {
   title: 'Base/Buttons/Button',
   component: Button,
   tags: ['autodocs'],
-  args: { onClick: fn(), size: 'default' },
+  args: { onClick: fn(), loading: false, disabled: false, iconOnly: false },
 } satisfies Meta<typeof Button>;
 
 export default meta;
@@ -16,46 +17,52 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Variants: Story = {
-  args: {},
-  render: () => {
+  args: {
+    size: 'default',
+  },
+  render: args => {
     return (
-      <div className="flex flex-col gap-2">
-        {buttonColors.map(color => {
-          return (
-            <div className="flex gap-2">
-              {buttonVariants.map(variant => (
-                <Button color={color} variant={variant}>
-                  {variant}
-                </Button>
-              ))}
-            </div>
-          );
-        })}
+      <div className="flex flex-col items-start gap-2">
+        {buttonVariants.map(variant => (
+          <Button variant={variant} {...args}>
+            {variant}
+          </Button>
+        ))}
+      </div>
+    );
+  },
+};
+
+export const IconOnly: Story = {
+  args: {
+    size: 'default',
+    iconOnly: true,
+  },
+  render: args => {
+    return (
+      <div className="flex flex-col items-start gap-2">
+        {buttonVariants.map(variant => (
+          <Button variant={variant} {...args}>
+            <IdCardIcon />
+          </Button>
+        ))}
       </div>
     );
   },
 };
 
 export const Sizes: Story = {
-  args: {},
-  render: () => {
+  args: {
+    variant: 'default',
+  },
+  render: args => {
     return (
-      <div className="flex gap-2">
-        <Button size="default" color="primary">
-          Default
-        </Button>
-        <Button size="xs" color="primary">
-          Extra Small
-        </Button>
-        <Button size="sm" color="primary">
-          Small
-        </Button>
-        <Button size="md" color="primary">
-          Medium
-        </Button>
-        <Button size="lg" color="primary">
-          Large
-        </Button>
+      <div className="flex flex-col items-start gap-2">
+        {buttonSizes.map(size => (
+          <Button size={size} {...args}>
+            Button {size}
+          </Button>
+        ))}
       </div>
     );
   },

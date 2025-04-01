@@ -1,14 +1,11 @@
 import { CellContext } from '@tanstack/react-table';
 import { MinusIcon, PlusIcon } from 'lucide-react';
-import { IconButton } from '@/components/base/Buttons';
 
 function RowExpandCell({ row }: CellContext<any, any>) {
   return (
-    <IconButton
-      className="cursor-pointer"
-      icon={row.getIsExpanded() ? MinusIcon : PlusIcon}
-      onClick={row.getToggleExpandedHandler()}
-    />
+    <button className="flex w-full items-center justify-center cursor-pointer" onClick={row.getToggleExpandedHandler()}>
+      {row.getIsExpanded() ? <MinusIcon size={16} /> : <PlusIcon size={16} />}
+    </button>
   );
 }
 

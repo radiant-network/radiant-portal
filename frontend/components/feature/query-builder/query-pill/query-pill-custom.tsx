@@ -1,12 +1,12 @@
-import QueryPillContainer from "./query-pill-container";
-import QueryPillValuesContainer from "./query-pill-values-container";
-import { useQueryBarContext } from "../query-bar/query-bar-context";
-import { IValueQuery } from "@/components/model/sqon";
-import { IconButton } from "@/components/base/Buttons";
-import { PencilLineIcon } from "lucide-react";
-import { useState } from "react";
-import { ISavedFilter } from "@/components/model/saved-filter";
-import QueryPillCustomEditDialog from "./query-pill-custom-edit-dialog";
+import QueryPillContainer from './query-pill-container';
+import QueryPillValuesContainer from './query-pill-values-container';
+import { useQueryBarContext } from '../query-bar/query-bar-context';
+import { IValueQuery } from '@/components/model/sqon';
+import { PencilLineIcon } from 'lucide-react';
+import { useState } from 'react';
+import { ISavedFilter } from '@/components/model/saved-filter';
+import QueryPillCustomEditDialog from './query-pill-custom-edit-dialog';
+import { Button } from '@/components/base/ui/button';
 
 export type QueryPillCustomProps = {
   valueQuery: IValueQuery;
@@ -27,25 +27,16 @@ function QueryPillCustom({ valueQuery }: QueryPillCustomProps) {
 
   return (
     <>
-      <QueryPillContainer
-        onRemovePill={() => query.removePillById(valueQuery.id)}
-      >
+      <QueryPillContainer onRemovePill={() => query.removePillById(valueQuery.id)}>
         <QueryPillValuesContainer className="pr-1" classNameContent="space-x-1">
           <span>{valueQuery.title}</span>
-          <IconButton
-            icon={PencilLineIcon}
-            size="xs"
-            className="size-auto p-[2px]"
-            onClick={() => setEditModalOpen(true)}
-          />
+          <Button iconOnly size="xs" className="size-auto p-[2px]" onClick={() => setEditModalOpen(true)}>
+            <PencilLineIcon />
+          </Button>
         </QueryPillValuesContainer>
       </QueryPillContainer>
       {editModalOpen && (
-        <QueryPillCustomEditDialog
-          open={editModalOpen}
-          onOpenChange={setEditModalOpen}
-          queryPill={queryPill}
-        />
+        <QueryPillCustomEditDialog open={editModalOpen} onOpenChange={setEditModalOpen} queryPill={queryPill} />
       )}
     </>
   );

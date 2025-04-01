@@ -1,12 +1,8 @@
-import { Outlet, useLoaderData, useNavigate } from "react-router";
-import {
-  authenticateRequest,
-  getSessionUser,
-  requireAuth,
-} from "~/utils/auth.server";
-import type { Route } from "../+types/root";
-import { MainNav } from "@/components/feature/main_navigation";
-import type { IAuthUser } from "~/utils/auth.types";
+import { Outlet, useLoaderData, useNavigate } from 'react-router';
+import { authenticateRequest, getSessionUser, requireAuth } from '~/utils/auth.server';
+import type { Route } from '../+types/root';
+import { MainNav } from '@/components/feature/main-navigation';
+import type { IAuthUser } from '~/utils/auth.types';
 
 export async function loader({ request }: Route.LoaderArgs) {
   if (await requireAuth(request)) {
@@ -22,10 +18,7 @@ const ProtectedLayout = () => {
 
   return (
     <div>
-      <MainNav
-        userName={data.preferred_username}
-        onLogout={() => navigate("/auth/logout")}
-      />
+      <MainNav userName={data.preferred_username} onLogout={() => navigate('/auth/logout')} />
       <Outlet />
     </div>
   );

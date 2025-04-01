@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react';
-import { IconButton } from '../Buttons';
 import { Edit2Icon, Share2Icon, TrashIcon } from 'lucide-react';
 import { cn } from '@/components/lib/utils';
 import ConditionalWrapper from '../conditional-wrapper';
+import { Button } from '../ui/button';
 
 export type ListItemActionProps = Omit<React.LiHTMLAttributes<HTMLLIElement>, 'onClick'> & {
   title: ReactNode;
@@ -37,10 +37,22 @@ const ListItemAction = ({
       </ConditionalWrapper>
       <div className="text-xs">{description}</div>
     </div>
-    <div className="hidden items-start group-hover:flex gap-1 ml-2">
-      {onShare && <IconButton size="xs" icon={Share2Icon} onClick={onShare} />}
-      {onEdit && <IconButton size="xs" icon={Edit2Icon} onClick={onEdit} />}
-      {onDelete && <IconButton size="xs" icon={TrashIcon} onClick={onDelete} />}
+    <div className="hidden items-start group-hover:flex ml-2">
+      {onShare && (
+        <Button iconOnly variant="ghost" size="xs" onClick={onShare}>
+          <Share2Icon />
+        </Button>
+      )}
+      {onEdit && (
+        <Button iconOnly variant="ghost" size="xs" onClick={onEdit}>
+          <Edit2Icon />
+        </Button>
+      )}
+      {onDelete && (
+        <Button iconOnly variant="ghost" size="xs" onClick={onDelete}>
+          <TrashIcon />
+        </Button>
+      )}
     </div>
   </li>
 );

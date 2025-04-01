@@ -5,7 +5,7 @@ import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useF
 
 import { cn } from '@/lib/utils';
 import { Label } from '@/base/ui/label';
-import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from './hover-card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card';
 import { InfoIcon } from 'lucide-react';
 
 const Form = FormProvider;

@@ -1,15 +1,8 @@
-import { IconButton } from "@/components/base/Buttons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/base/ui/tooltip";
-import { CopyIcon } from "lucide-react";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
-import { openOverwriteSavedFilterAlert } from "../alerts";
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { CopyIcon } from 'lucide-react';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { openOverwriteSavedFilterAlert } from '../alerts';
+import { Button } from '@/components/base/ui/button';
 
 function SavedFiltersDuplicateAction() {
   const dict = useQueryBuilderDictContext();
@@ -29,11 +22,15 @@ function SavedFiltersDuplicateAction() {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="inline-flex">
-          <IconButton
-            icon={CopyIcon}
+          <Button
+            iconOnly
+            variant="ghost"
+            size="sm"
             disabled={selectedSavedFilter?.isNew() || !selectedSavedFilter}
             onClick={handleDuplicate}
-          />
+          >
+            <CopyIcon />
+          </Button>
         </span>
       </TooltipTrigger>
       <TooltipContent>{dict.savedFilter.duplicateTooltip}</TooltipContent>

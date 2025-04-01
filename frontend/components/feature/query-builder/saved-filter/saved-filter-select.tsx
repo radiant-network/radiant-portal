@@ -1,23 +1,10 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectSeparator,
-  SelectTrigger,
-} from "@/components/base/ui/select";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
-import { FolderIcon } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Button } from "@/components/base/ui/button";
-import SavedFiltersManageDialog from "./saved-filter-manage-dialog";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/base/ui/tooltip";
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from '@/components/base/ui/select';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { FolderIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Button } from '@/components/base/ui/button';
+import SavedFiltersManageDialog from './saved-filter-manage-dialog';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/base/ui/tooltip';
 
 function SavedFiltersSelect() {
   const dict = useQueryBuilderDictContext();
@@ -41,9 +28,7 @@ function SavedFiltersSelect() {
       <Select
         key={+selectKey}
         value={selectedSavedFilter?.id}
-        onValueChange={(savedFilterId) =>
-          savedFilters.find((filter) => filter.id === savedFilterId)?.select()
-        }
+        onValueChange={savedFilterId => savedFilters.find(filter => filter.id === savedFilterId)?.select()}
         open={open}
         onOpenChange={setOpen}
         disabled={savedFilters.length === 0}
@@ -59,25 +44,18 @@ function SavedFiltersSelect() {
           <TooltipContent>{dict.savedFilter.noSavedFilters}</TooltipContent>
         </Tooltip>
         <SelectContent>
-          {savedFilters.map((filter) => (
+          {savedFilters.map(filter => (
             <SelectItem key={filter.id} value={filter.id}>
               {filter.raw().title}
             </SelectItem>
           ))}
           <SelectSeparator />
-          <Button
-            size="sm"
-            className="w-full pl-2 justify-start"
-            onClick={handleManageAction}
-          >
+          <Button size="sm" variant="ghost" className="w-full pl-2 justify-start" onClick={handleManageAction}>
             {dict.savedFilter.manageFilters}
           </Button>
         </SelectContent>
       </Select>
-      <SavedFiltersManageDialog
-        open={openManage}
-        onOpenChange={setOpenManage}
-      />
+      <SavedFiltersManageDialog open={openManage} onOpenChange={setOpenManage} />
     </>
   );
 }

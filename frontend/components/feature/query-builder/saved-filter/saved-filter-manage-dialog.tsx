@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 import {
   Dialog,
   DialogClose,
@@ -6,28 +6,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/base/ui/dialog";
-import { Button } from "@/components/base/ui/button";
-import {
-  useQueryBuilderContext,
-  useQueryBuilderDictContext,
-} from "../query-builder-context";
-import List from "@/components/base/list/list";
-import ListItemAction from "@/components/base/list/list-item-with-action";
-import { SavedFilterInstance } from "@/components/model/query-builder-core";
-import SavedFiltersEditDialog from "./saved-filter-edit-dialog";
-import { frCA } from "date-fns/locale/fr-CA";
-import { formatDistance } from "date-fns";
-import { ISavedFilter } from "@/components/model/saved-filter";
-import { openDeleteSavedFilterAlert } from "../alerts";
+} from '@/components/base/ui/dialog';
+import { Button } from '@/components/base/ui/button';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import List from '@/components/base/list/list';
+import ListItemAction from '@/components/base/list/list-item-with-action';
+import { SavedFilterInstance } from '@/components/model/query-builder-core';
+import SavedFiltersEditDialog from './saved-filter-edit-dialog';
+import { frCA } from 'date-fns/locale/fr-CA';
+import { formatDistance } from 'date-fns';
+import { ISavedFilter } from '@/components/model/saved-filter';
+import { openDeleteSavedFilterAlert } from '../alerts';
 
-function SavedFiltersManageDialog({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
+function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
@@ -47,18 +38,13 @@ function SavedFiltersManageDialog({
             <DialogTitle>{dict.savedFilter.manageDialog.title}</DialogTitle>
           </DialogHeader>
           <List bordered className="max-h-[250px]">
-            {savedFilters.map((savedFilter) => (
-              <SavedFilterListItem
-                key={savedFilter.id}
-                savedFilter={savedFilter}
-              />
+            {savedFilters.map(savedFilter => (
+              <SavedFilterListItem key={savedFilter.id} savedFilter={savedFilter} />
             ))}
           </List>
           <DialogFooter>
             <DialogClose asChild>
-              <Button color="primary">
-                {dict.savedFilter.manageDialog.close}
-              </Button>
+              <Button>{dict.savedFilter.manageDialog.close}</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
@@ -67,14 +53,9 @@ function SavedFiltersManageDialog({
   );
 }
 
-const SavedFilterListItem = ({
-  savedFilter,
-}: {
-  savedFilter: SavedFilterInstance;
-}) => {
+const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilterInstance }) => {
   const dict = useQueryBuilderDictContext();
 
-  const [openDelete, setOpenDelete] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
 
   const getLastSaveAtDisplay = useCallback(() => {
@@ -83,24 +64,14 @@ const SavedFilterListItem = ({
     };
 
     if (!savedFilterObj.updated_date) {
-      return dict.savedFilter.manageDialog.lastSaveAt.replace(
-        "{lastSaveAt}",
-        "n/a"
-      );
+      return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', 'n/a');
     }
 
-    const lastSaveAt = formatDistance(
-      new Date(),
-      new Date(savedFilterObj.updated_date),
-      {
-        locale: frCA,
-      }
-    );
+    const lastSaveAt = formatDistance(new Date(), new Date(savedFilterObj.updated_date), {
+      locale: frCA,
+    });
 
-    return dict.savedFilter.manageDialog.lastSaveAt.replace(
-      "{lastSaveAt}",
-      lastSaveAt
-    );
+    return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', lastSaveAt);
   }, [savedFilter.raw()]);
 
   return (
@@ -113,11 +84,7 @@ const SavedFilterListItem = ({
         onEdit={() => setOpenEdit(true)}
         onDelete={() => openDeleteSavedFilterAlert(savedFilter, dict)}
       />
-      <SavedFiltersEditDialog
-        open={openEdit}
-        onOpenChange={setOpenEdit}
-        savedFilter={savedFilter}
-      />
+      <SavedFiltersEditDialog open={openEdit} onOpenChange={setOpenEdit} savedFilter={savedFilter} />
     </>
   );
 };

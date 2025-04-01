@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { interpretationApi } from '@/utils/api';
 import { FormLabel, FormMessage } from '@/components/base/ui/form';
 import { Input } from '@/components/base/ui/input';
-import { IconButton } from '@/components/base/Buttons';
 import { PlusIcon, XIcon } from 'lucide-react';
 import InputSearch from '@/components/base/data-entry/input-search';
 import { Button } from '@/components/base/ui/button';
@@ -25,7 +24,7 @@ function PubmedFormField() {
     ({ value }) => interpretationApi.getPubmedCitation(value).then(res => res.data),
     {
       onSuccess: data => {
-        if (pubmedFetchKey?.index) {
+        if (pubmedFetchKey?.index !== undefined) {
           setValue(`pubmed.${pubmedFetchKey.index}`, {
             citation_id: data.id!.replace('pmid:', ''),
             citation: data.nlm?.format!,
@@ -59,17 +58,18 @@ function PubmedFormField() {
               <Input {...register(`pubmed.${index}.citation_id`)} className="hidden" />
               {citation && citationId ? (
                 <div className="flex items-center gap-1">
-                  <div className="flex-1 border rounded-md p-2 text-sm">{citation}</div>
+                  <div className="flex-1 border border-input rounded-md p-2 text-sm">{citation}</div>
                   <div>
-                    <IconButton
-                      icon={XIcon}
-                      size="md"
+                    <Button
+                      iconOnly
                       variant="link"
                       onClick={e => {
                         e.preventDefault();
                         remove(index);
                       }}
-                    />
+                    >
+                      <XIcon />
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -77,8 +77,6 @@ function PubmedFormField() {
                   <InputSearch
                     key={`citation-${field.id}`}
                     searchButtonProps={{
-                      color: 'primary',
-                      variant: 'filled',
                       loading: pubmedFetch.isValidating,
                       disabled: !!error,
                     }}

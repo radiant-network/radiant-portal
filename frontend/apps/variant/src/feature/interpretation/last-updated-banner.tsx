@@ -11,7 +11,7 @@ function InterpretationLastUpdatedBanner({ interpretation }: InterpretationLastU
   if (!interpretation?.updated_by_name || !interpretation.updated_at) return null;
 
   return (
-    <Alert variant="info" className="flex gap-2 items-center">
+    <Alert className="flex gap-2 items-center">
       <div>
         <InfoIcon size={16} />
       </div>

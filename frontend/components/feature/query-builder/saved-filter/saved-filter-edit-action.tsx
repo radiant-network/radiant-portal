@@ -1,8 +1,8 @@
-import { useState } from "react";
-import SavedFiltersEditDialog from "./saved-filter-edit-dialog";
-import { IconButton } from "@/components/base/Buttons";
-import { PencilLineIcon } from "lucide-react";
-import { useQueryBuilderContext } from "../query-builder-context";
+import { useState } from 'react';
+import SavedFiltersEditDialog from './saved-filter-edit-dialog';
+import { PencilLineIcon } from 'lucide-react';
+import { useQueryBuilderContext } from '../query-builder-context';
+import { Button } from '@/components/base/ui/button';
 
 function SavedFiltersEditAction() {
   const { queryBuilder } = useQueryBuilderContext();
@@ -13,12 +13,10 @@ function SavedFiltersEditAction() {
 
   return (
     <>
-      <IconButton icon={PencilLineIcon} onClick={() => setOpen(true)} />
-      <SavedFiltersEditDialog
-        open={open}
-        onOpenChange={setOpen}
-        savedFilter={selectedSavedFilter}
-      />
+      <Button iconOnly variant="ghost" size="sm" onClick={() => setOpen(true)}>
+        <PencilLineIcon />
+      </Button>
+      <SavedFiltersEditDialog open={open} onOpenChange={setOpen} savedFilter={selectedSavedFilter} />
     </>
   );
 }

@@ -1,13 +1,8 @@
-import { VariantProps } from "tailwind-variants";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import { MoreHorizontalIcon } from "lucide-react";
-import { actionButtonVariants } from "./button.variants";
+import { VariantProps } from 'tailwind-variants';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import { MoreHorizontalIcon } from 'lucide-react';
+import { actionButtonVariants } from './button.variants';
 
 // Define types for the props
 interface Action {
@@ -16,7 +11,7 @@ interface Action {
 }
 
 interface ActionButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "color">,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof actionButtonVariants> {
   children: React.ReactNode;
   actions: Action[];
@@ -31,29 +26,21 @@ function ActionButton({
   onDefaultAction,
   size,
   variant,
-  color,
   ...btnProps
 }: ActionButtonProps) {
-  const style = actionButtonVariants({ size, variant, color });
+  const style = actionButtonVariants({ size, variant });
 
   return (
-    <div className={cn("flex items-center", className)}>
+    <div className={cn('flex items-center', className)}>
       {/* Default Action Button */}
-      <button
-        onClick={onDefaultAction}
-        className={cn(style.base(), "rounded-r-none")}
-        {...btnProps}
-      >
+      <button onClick={onDefaultAction} className={cn(style.base(), 'rounded-r-none')} {...btnProps}>
         {children}
       </button>
 
       {/* Dropdown Button */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild disabled={btnProps.disabled}>
-          <button
-            className={cn(style.base(), style.actionsButton())}
-            {...btnProps}
-          >
+          <button className={cn(style.base(), style.actionsButton())} {...btnProps}>
             <MoreHorizontalIcon />
           </button>
         </DropdownMenuTrigger>

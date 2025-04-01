@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { ZodSchema } from '@/components/lib/zod';
 import { InterpretationGermline, InterpretationSomatic, InterpretationPubmed } from '@/api/api';
-import { RefObject } from 'react';
 
 export interface InterpretationFormRef {
   submit: () => void;
@@ -11,7 +10,6 @@ export interface InterpretationFormRef {
 export type Interpretation = InterpretationSomatic | InterpretationGermline;
 
 export type InterpretationFormProps<T> = {
-  ref: RefObject<InterpretationFormRef | null>;
   interpretation: T | undefined;
   saveInterpretation: (data: T) => void;
   onDirtyChange: (isDirty: boolean) => void;

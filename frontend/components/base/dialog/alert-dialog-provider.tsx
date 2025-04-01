@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useCallback,
-  useEffect,
-} from "react";
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,9 +9,9 @@ import {
   AlertDialogHeader,
   AlertDialogIcon,
   AlertDialogTitle,
-} from "../ui/alert-dialog";
-import { alertDialog, OpenAlertDialogProps } from "./alert-dialog-store";
-import { Spinner } from "../spinner";
+} from '../ui/alert-dialog';
+import { alertDialog, OpenAlertDialogProps } from './alert-dialog-store';
+import { Spinner } from '../spinner';
 
 export type AlertDialogProps = OpenAlertDialogProps & {
   isOpen: boolean;
@@ -29,14 +22,11 @@ interface AlertDialogContextType {
   close: () => void;
 }
 
-const AlertDialogContext = createContext<AlertDialogContextType | undefined>(
-  undefined
-);
+const AlertDialogContext = createContext<AlertDialogContextType | undefined>(undefined);
 
 export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
-  const [activeAlertDialog, setActiveAlertDialog] =
-    useState<AlertDialogProps | null>();
+  const [activeAlertDialog, setActiveAlertDialog] = useState<AlertDialogProps | null>();
 
   useEffect(
     () =>
@@ -44,20 +34,20 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
         open,
         close,
       }),
-    []
+    [],
   );
 
   const open = useCallback(
     (props: OpenAlertDialogProps) => {
       setActiveAlertDialog({ ...props, isOpen: true });
     },
-    [setActiveAlertDialog]
+    [setActiveAlertDialog],
   );
 
   const close = useCallback(() => {
     if (alertDialog) {
-      setActiveAlertDialog((prev) => ({
-        type: "info",
+      setActiveAlertDialog(prev => ({
+        type: 'info',
         ...prev!,
         isOpen: false,
       }));
@@ -74,7 +64,7 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
       {activeAlertDialog && (
         <AlertDialog
           open={activeAlertDialog.isOpen}
-          onOpenChange={(open) => {
+          onOpenChange={open => {
             if (!open) {
               close();
             }
@@ -82,19 +72,18 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
         >
           <AlertDialogContent>
             <div className="flex gap-3">
-              <AlertDialogIcon type={activeAlertDialog.type || "info"} />
+              <AlertDialogIcon type={activeAlertDialog.type || 'info'} />
               <AlertDialogHeader className="flex">
                 <AlertDialogTitle>{activeAlertDialog.title}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {activeAlertDialog.description}
-                </AlertDialogDescription>
+                <AlertDialogDescription>{activeAlertDialog.description}</AlertDialogDescription>
               </AlertDialogHeader>
             </div>
             <AlertDialogFooter>
               {activeAlertDialog.hideCancel ? null : (
                 <AlertDialogCancel
                   {...activeAlertDialog.cancelProps}
-                  children={activeAlertDialog.cancelProps?.children || "Cancel"}
+                  variant="outline"
+                  children={activeAlertDialog.cancelProps?.children || 'Cancel'}
                 />
               )}
               <AlertDialogAction
@@ -106,7 +95,7 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
                     {activeAlertDialog.actionProps.children}
                   </>
                 }
-                onClick={async (e) => {
+                onClick={async e => {
                   e.preventDefault();
                   setLoading(true);
                   await activeAlertDialog?.actionProps?.onClick?.(e);
@@ -125,9 +114,7 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
 export const useAlertDialog = () => {
   const context = useContext(AlertDialogContext);
   if (!context) {
-    throw new Error(
-      "useAlertDialog must be used within a AlertDialogContext.Provider"
-    );
+    throw new Error('useAlertDialog must be used within a AlertDialogContext.Provider');
   }
   return context;
 };

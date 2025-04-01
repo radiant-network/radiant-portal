@@ -77,8 +77,8 @@ export type AlertDialogActionProps = React.ComponentPropsWithoutRef<typeof Alert
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   AlertDialogActionProps
->(({ className, variant = 'filled', color = 'primary', size, ...props }, ref) => {
-  const style = buttonVariants({ variant, size, color });
+>(({ className, variant = 'default', size, ...props }, ref) => {
+  const style = buttonVariants({ variant, size });
 
   return <AlertDialogPrimitive.Action ref={ref} className={style.base({ className })} {...props} />;
 });
@@ -90,8 +90,8 @@ export type AlertDialogCancelProps = React.ComponentPropsWithoutRef<typeof Alert
 const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
   AlertDialogCancelProps
->(({ className, variant = 'outlined', color = 'default', size, ...props }, ref) => {
-  const style = buttonVariants({ variant, size, color });
+>(({ className, variant = 'outline', size, ...props }, ref) => {
+  const style = buttonVariants({ variant, size });
 
   return <AlertDialogPrimitive.Cancel ref={ref} className={cn(style.base(), 'mt-2 sm:mt-0', className)} {...props} />;
 });
@@ -102,13 +102,13 @@ export type AlertDialogType = 'success' | 'info' | 'warning' | 'error';
 const AlertDialogIcon = ({ type }: { type: AlertDialogType }) => {
   switch (type) {
     case 'info':
-      return <InfoIcon className="stroke-info" />;
+      return <InfoIcon />; // TODO add info color
     case 'warning':
-      return <CircleAlertIcon className="stroke-warning" />;
+      return <CircleAlertIcon />; // TODO add warning color
     case 'error':
-      return <CircleXIcon className="stroke-error" />;
+      return <CircleXIcon className="stroke-destructive" />;
     case 'success':
-      return <CircleCheckIcon className="stroke-success" />;
+      return <CircleCheckIcon />; // TODO add success color
     default:
       return null;
   }

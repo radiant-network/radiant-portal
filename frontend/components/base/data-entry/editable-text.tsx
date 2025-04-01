@@ -1,7 +1,7 @@
 import { LucideProps, PencilLineIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { Input } from '@/components/base/ui/input';
-import { IconButton } from '@/components/base/Buttons';
+import { Button } from '../ui/button';
 
 export type EditableTextProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> & {
   icon?: React.ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>>;
@@ -11,6 +11,7 @@ export type EditableTextProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'chil
 
 const EditableText = ({ children, icon = PencilLineIcon, onChangeText, ...props }: EditableTextProps) => {
   const [edit, setEdit] = useState(false);
+  const Icon = icon;
 
   return (
     <div {...props}>
@@ -33,7 +34,9 @@ const EditableText = ({ children, icon = PencilLineIcon, onChangeText, ...props 
       ) : (
         <div className="flex items-center gap-2">
           <span>{children}</span>
-          <IconButton icon={icon} onClick={() => setEdit(true)} />
+          <Button iconOnly onClick={() => setEdit(true)}>
+            <Icon />
+          </Button>
         </div>
       )}
     </div>

@@ -15,7 +15,7 @@ function VariantTablePreview({ occurence }: GermlineVariantPreviewProps) {
     <Card>
       <CardHeader className="p-4">
         <div className="flex items-center gap-8">
-          <Button variant="link">
+          <Button variant="link" className="px-0">
             <a href="#" className="flex text-lg gap-2 font-medium items-center justify-center outline-none">
               <span className="max-w-72 overflow-hidden text-ellipsis">{occurence.hgvsg}</span>
               <SquareArrowOutUpRightIcon />

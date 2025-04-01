@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -8,28 +8,24 @@ import {
   useSensors,
   DragEndEvent,
   UniqueIdentifier,
-} from "@dnd-kit/core";
+} from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import {
-  ColumnSettings,
-  TableColumnDef,
-} from "@/components/base/data-table/data-table";
-import { ColumnOrderState } from "@tanstack/react-table";
-import { Button } from "@/base/ui/button";
-import { SettingsIcon } from "lucide-react";
-import TableSortableColumnSetting from "@/components/base/data-table/data-table-sortable-column-setting";
-import IconButton from "@/components/base/Buttons/IconButton";
+} from '@dnd-kit/sortable';
+import { ColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { ColumnOrderState } from '@tanstack/react-table';
+import { Button } from '@/base/ui/button';
+import { SettingsIcon } from 'lucide-react';
+import TableSortableColumnSetting from '@/components/base/data-table/data-table-sortable-column-setting';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuPortal,
   DropdownMenuTrigger,
-} from "@/components/base/ui/dropdown-menu";
+} from '@/components/base/ui/dropdown-menu';
 
 /**
  * Read user config to return column order (in asc)
@@ -39,15 +35,15 @@ import {
 function deserializeColumnFixed(settings: ColumnSettings[]): string[] {
   return settings
     .sort((a, b) => a.index - b.index)
-    .filter((setting) => setting.fixed === true)
-    .map((setting) => setting.id);
+    .filter(setting => setting.fixed === true)
+    .map(setting => setting.id);
 }
 
 /**
  * @returns list of all columns id that are not fixed
  */
 function deserializeColumns(columns: TableColumnDef<any, any>[]) {
-  return columns.map((column) => column.id);
+  return columns.map(column => column.id);
 }
 
 /**
@@ -76,25 +72,19 @@ function TableColumnSettings({
   handleOrderChange,
 }: TableColumnSettingsProps<any>) {
   const fixedColumns = deserializeColumnFixed(defaultSettings);
-  const [items, setItems] = useState<UniqueIdentifier[]>(
-    deserializeColumns(columns)
-  );
+  const [items, setItems] = useState<UniqueIdentifier[]>(deserializeColumns(columns));
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
     if (active.id !== over.id) {
-      setItems((items) => {
-        return arrayMove(
-          items,
-          items.indexOf(active.id),
-          items.indexOf(over.id)
-        );
+      setItems(items => {
+        return arrayMove(items, items.indexOf(active.id), items.indexOf(over.id));
       });
     }
   }
@@ -107,21 +97,16 @@ function TableColumnSettings({
     <span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <IconButton icon={SettingsIcon} />
+          <Button iconOnly variant="ghost">
+            <SettingsIcon />
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuPortal>
           <DropdownMenuContent className="min-w-[220px] bg-white p-[5px] shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] will-change-[opacity,transform] data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade data-[side=right]:animate-slideLeftAndFade data-[side=top]:animate-slideDownAndFade">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={items}
-                strategy={verticalListSortingStrategy}
-              >
-                {items.map((id) => {
-                  const column = columns.find((column) => column.id === id);
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={items} strategy={verticalListSortingStrategy}>
+                {items.map(id => {
+                  const column = columns.find(column => column.id === id);
                   if (!column) return null;
                   if (fixedColumns.includes(column.id)) return;
                   return (
@@ -136,9 +121,10 @@ function TableColumnSettings({
                 })}
               </SortableContext>
             </DndContext>
-
             <Button
               disabled={pristine}
+              variant="ghost"
+              className="mt-2"
               onClick={() => {
                 setItems(deserializeColumns(columns));
                 handleReset();
