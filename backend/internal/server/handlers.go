@@ -188,7 +188,7 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Param			message	body		types.StatisticsBody	true	"Statistics Body"
 // @Accept json
 // @Produce json
-// @Success 200 {array} types.Statistics
+// @Success 200 {object} types.Statistics
 // @Failure 400 {object} map[string]string
 // @Router /occurrences/{seq_id}/statistics [post]
 func OccurrencesStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
