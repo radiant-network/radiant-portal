@@ -1924,7 +1924,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Statistics>>> {
+        async statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsOccurrences(seqId, statisticsBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -1981,7 +1981,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Statistics>> {
+        statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
             return localVarFp.statisticsOccurrences(seqId, statisticsBody, options).then((request) => request(axios, basePath));
         },
     };
