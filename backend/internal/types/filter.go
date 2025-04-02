@@ -3,9 +3,10 @@ package types
 import (
 	"errors"
 	"fmt"
-	"github.com/Goldziher/go-utils/sliceutils"
 	"slices"
 	"strings"
+
+	"github.com/Goldziher/go-utils/sliceutils"
 )
 
 type FilterNode interface {
@@ -218,7 +219,7 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 		}
 
 		_, isMultipleValue := sqon.Content.Leaf().Value.([]interface{})
-		if sqon.Op != "in" && sqon.Op != "not-in" && sqon.Op != "all" && isMultipleValue {
+		if sqon.Op != "in" && sqon.Op != "not-in" && sqon.Op != "all" && sqon.Op != "between" && isMultipleValue {
 			return nil, nil, fmt.Errorf("operation %s must have exactly one value: %s", sqon.Op, sqon.Content.Leaf().Field)
 		}
 
