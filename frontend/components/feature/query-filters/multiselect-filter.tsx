@@ -11,9 +11,9 @@ import { type Aggregation as AggregationConfig } from '@/components/model/applic
 import { numberFormat } from '@/components/lib/number-format';
 import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
+import { useAggregationBuilder } from './use-aggregation-builder';
 
 interface IProps {
-  data?: Aggregation[];
   field: AggregationConfig;
   maxVisibleItems?: number;
   searchVisible?: boolean;
@@ -27,17 +27,21 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
-export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVisible = false }: IProps) {
+export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible = false }: IProps) {
   const { t } = useI18n();
-  const [items, setItems] = useState<Aggregation[]>(data || []);
+  const config = useConfig();
+  const appId = config.variant_entity.app_id;
+  
+  // Use the hook directly instead of receiving data as a prop
+  const { data: aggregationData, isLoading } = useAggregationBuilder(field.key, undefined, true, appId);
+  
+  const [items, setItems] = useState<Aggregation[]>(aggregationData || []);
   // items that are include in the search
   const [appliedSelectedItems, setAppliedSelectedItems] = useState<string[]>([]);
   // items that are currently checked
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
-  const config = useConfig();
-  const appId = config.variant_entity.app_id;
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
@@ -54,7 +58,7 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
       setSelectedItems([]);
     }
 
-    data?.sort((a, b) => {
+    aggregationData?.sort((a, b) => {
       const aSelected = a.key && selectedItems.includes(a.key);
       const bSelected = b.key && selectedItems.includes(b.key);
 
@@ -64,15 +68,15 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
 
       return aSelected ? -1 : 1;
     });
-    setItems(data || []);
-    setVisibleItemsCount(getVisibleItemsCount(data?.length || 0, maxVisibleItems));
-  }, [data]);
+    setItems(aggregationData || []);
+    setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));
+  }, [aggregationData]);
 
   // Memoize these functions with useCallback
   //
   const updateSearch = useCallback(
     (search: string) => {
-      const results = searchOptions(search, data!);
+      const results = searchOptions(search, aggregationData!);
       if (maxVisibleItems > results.length) {
         setVisibleItemsCount(results.length);
       } else if (results.length > maxVisibleItems) {
@@ -80,7 +84,7 @@ export function MultiSelectFilter({ data, field, maxVisibleItems = 10, searchVis
       }
       setItems(results);
     },
-    [items, visibleItemsCount, data],
+    [items, visibleItemsCount, aggregationData],
   );
 
   const showMore = useCallback(() => {
