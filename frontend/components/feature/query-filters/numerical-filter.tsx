@@ -389,11 +389,11 @@ export function NumericalFilter({ field }: IProps) {
       <hr className="my-4 border-border" id={`${fieldKey}_divider`} />
 
       <div className="flex align-right justify-end items-center space-x-2">
-        <Button size="sm" className="text-gray-400 h-7" onClick={reset} disabled={!hasUnappliedItems} id={`${fieldKey}_clear`}>
+        <Button size="xs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems} id={`${fieldKey}_clear`}>
           {t('common.filters.buttons.clear')}
         </Button>
         <div className="flex space-x-2">
-          <Button size="sm" className="h-7" color="primary" onClick={apply} id={`${fieldKey}_apply`}>
+          <Button size="xs" className="h-7" color="primary" onClick={apply} id={`${fieldKey}_apply`}>
             {t('common.filters.buttons.apply')}
           </Button>
         </div>
