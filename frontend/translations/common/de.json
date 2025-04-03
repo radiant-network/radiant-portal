@@ -191,7 +191,10 @@
     },
     "variant": {
       "classes": {
-        "indel": "Indel"
+        "indel": "Indel",
+        "insertion": "Insertion",
+        "snv": "SNV",
+        "deletion": "Streichung"
       }
     }
   }
