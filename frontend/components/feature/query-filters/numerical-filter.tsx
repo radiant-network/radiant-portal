@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/base/ui/button';
-import { Aggregation, SqonOpEnum } from '@/api/api';
+import { SqonOpEnum, type Statistics, type StatisticsBody, type SqonContent } from '@/api/api';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { IFilterRangeConfig, useConfig } from '@/components/model/applications-config';
 import { IValueFilter, MERGE_VALUES_STRATEGIES, RangeOperators, TSqonContentValue } from '@/components/model/sqon';
@@ -10,13 +10,52 @@ import { Input } from '@/components/base/ui/input';
 import { Checkbox } from '@/components/base/ui/checkbox';
 import { TextMuted } from '@/components/base/typography/text-muted';
 import { Label } from '@/components/base/ui/label';
-import ElementOperatorIcon from "@/components/base/icons/element-operator-icon";
-import EqualOperatorIcon from "@/components/base/icons/equal-operator-icon";
-import GreaterThanOperatorIcon from "@/components/base/icons/greater-than-operator-icon";
-import GreaterThanOrEqualOperatorIcon from "@/components/base/icons/greater-than-or-equal-operator-icon";
-import LessThanOperatorIcon from "@/components/base/icons/less-than-operator-icon";
-import LessThanOrEqualOperatorIcon from "@/components/base/icons/less-than-or-equal-operator-icon";
+import ElementOperatorIcon from '@/components/base/icons/element-operator-icon';
+import EqualOperatorIcon from '@/components/base/icons/equal-operator-icon';
+import GreaterThanOperatorIcon from '@/components/base/icons/greater-than-operator-icon';
+import GreaterThanOrEqualOperatorIcon from '@/components/base/icons/greater-than-or-equal-operator-icon';
+import LessThanOperatorIcon from '@/components/base/icons/less-than-operator-icon';
+import LessThanOrEqualOperatorIcon from '@/components/base/icons/less-than-or-equal-operator-icon';
 import { useI18n } from '@/components/hooks/i18n';
+import useSWR from 'swr';
+import { occurrencesApi } from '@/utils/api';
+
+type OccurrenceStatisticsInput = {
+  seqId: string;
+  statisticsBody: StatisticsBody;
+};
+
+const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics> => {
+  return occurrencesApi.statisticsOccurrences(input.seqId, input.statisticsBody).then(response => response.data);
+};
+
+function useStatisticsBuilder(field: string, shouldFetch: boolean = false, appId: string) {
+  let data: OccurrenceStatisticsInput | null;
+
+  if (!shouldFetch) {
+    data = null;
+  } else {
+    data = {
+      seqId: '5011',
+      statisticsBody: {
+        field: field,
+      },
+    };
+  }
+
+  const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
+
+  if (activeQuery && data) {
+    data.statisticsBody.sqon = {
+      content: activeQuery.content as SqonContent,
+      op: activeQuery.op as SqonOpEnum,
+    };
+  }
+
+  return useSWR<Statistics, any, OccurrenceStatisticsInput | null>(data, statisticsFetcher, {
+    revalidateOnFocus: false,
+  });
+}
 
 interface IProps {
   field: AggregationConfig;
@@ -24,45 +63,78 @@ interface IProps {
 
 export function NumericalFilter({ field }: IProps) {
   const { t } = useI18n();
-  
-  const RANGE_OPERATOR_LABELS: Record<RangeOperators, { display: string; dropdown: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
-    [RangeOperators.GreaterThan]: { display: t('common.filters.operators.greaterThan'), dropdown: t('common.filters.operators.greaterThan'), icon: GreaterThanOperatorIcon },
-    [RangeOperators.LessThan]: { display: t('common.filters.operators.lessThan'), dropdown: t('common.filters.operators.lessThan'), icon: LessThanOperatorIcon },
-    [RangeOperators.Between]: { display: t('common.filters.operators.between'), dropdown: t('common.filters.operators.between'), icon: ElementOperatorIcon },
-    [RangeOperators.GreaterThanOrEqualTo]: { display: t('common.filters.operators.greaterThanOrEqual'), dropdown: t('common.filters.operators.greaterThanOrEqual'), icon: GreaterThanOrEqualOperatorIcon },
-    [RangeOperators.LessThanOrEqualTo]: { display: t('common.filters.operators.lessThanOrEqual'), dropdown: t('common.filters.operators.lessThanOrEqual'), icon: LessThanOrEqualOperatorIcon },
-    [RangeOperators.In]: { display: t('common.filters.operators.in'), dropdown: t('common.filters.operators.in'), icon: EqualOperatorIcon },
+  const config = useConfig();
+  const appId = config.variant_entity.app_id;
+  const fieldKey = field.key;
+  const RANGE_OPERATOR_LABELS: Record<
+    RangeOperators,
+    { display: string; dropdown: string; icon: React.ComponentType<{ size?: number; className?: string }> }
+  > = {
+    [RangeOperators.GreaterThan]: {
+      display: t('common.filters.operators.greaterThan'),
+      dropdown: t('common.filters.operators.greaterThan'),
+      icon: GreaterThanOperatorIcon,
+    },
+    [RangeOperators.LessThan]: {
+      display: t('common.filters.operators.lessThan'),
+      dropdown: t('common.filters.operators.lessThan'),
+      icon: LessThanOperatorIcon,
+    },
+    [RangeOperators.Between]: {
+      display: t('common.filters.operators.between'),
+      dropdown: t('common.filters.operators.between'),
+      icon: ElementOperatorIcon,
+    },
+    [RangeOperators.GreaterThanOrEqualTo]: {
+      display: t('common.filters.operators.greaterThanOrEqual'),
+      dropdown: t('common.filters.operators.greaterThanOrEqual'),
+      icon: GreaterThanOrEqualOperatorIcon,
+    },
+    [RangeOperators.LessThanOrEqualTo]: {
+      display: t('common.filters.operators.lessThanOrEqual'),
+      dropdown: t('common.filters.operators.lessThanOrEqual'),
+      icon: LessThanOrEqualOperatorIcon,
+    },
+    [RangeOperators.In]: {
+      display: t('common.filters.operators.in'),
+      dropdown: t('common.filters.operators.in'),
+      icon: EqualOperatorIcon,
+    },
   };
 
-  const fieldKey = field.key;
+  // Fetch statistics for min/max values
+  const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, true, appId);
+
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
-  const [numericValue, setNumericValue] = useState<number>(0);
-  const [maxValue, setMaxValue] = useState<number>(0);
-  const [minValue, setMinValue] = useState<number>(0);
+  const [numericValue, setNumericValue] = useState<string>('0');
+  const [maxValue, setMaxValue] = useState<string>('0');
+  const [minValue, setMinValue] = useState<string>('0');
   const [hasNoData, setHasNoData] = useState<boolean>(false);
   // Initialize selectedUnit as undefined rather than defaulting to any value
   const [selectedUnit, setSelectedUnit] = useState<string | undefined>();
 
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
 
-  const config = useConfig();
   const aggregations = config.variant_entity.aggregations;
   const aggConfig = aggregations.find(agg => agg.key === fieldKey)?.defaults as IFilterRangeConfig;
-  const appId = config.variant_entity.app_id;
-  const noDataInputOption = field.type === 'numerical';
-  const hasInterval = (aggConfig?.intervalDecimal !== undefined
-    && aggConfig?.max !== undefined
-    && aggConfig?.min !== undefined);
+  const noDataInputOption = field.type === 'numerical' && aggConfig?.noDataInputOption;
+  const hasInterval =
+    (aggConfig?.intervalDecimal !== undefined && (aggConfig?.max !== undefined || aggConfig?.min !== undefined)) ||
+    (statistics && (statistics.min !== undefined || statistics.max !== undefined));
 
-  useEffect(() => {
+  // Determine min/max values with precedence: aggConfig first, then statistics
+  const inputMin = aggConfig?.min ?? statistics?.min ?? 0;
+  const inputMax = aggConfig?.max ?? statistics?.max ?? 100;
+
+  const initializeForm = useCallback(() => {
     const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
     if (!activeQuery?.content) return;
 
     // Find the main numeric field filter
     const numericFilter = activeQuery.content.find((x: TSqonContentValue) => {
-      return ('content' in x && 'field' in x.content) ? x.content.field === fieldKey : false;
+      return 'content' in x && 'field' in x.content ? x.content.field === fieldKey : false;
     }) as IValueFilter | undefined;
-    
+
     // Find the unit field filter if it exists
     const unitFilter = activeQuery.content.find((x: TSqonContentValue) => {
       if ('content' in x && 'field' in x.content) {
@@ -73,7 +145,7 @@ export function NumericalFilter({ field }: IProps) {
 
     if (numericFilter) {
       const values = numericFilter.content.value;
-      
+
       // Check for __missing__ value
       if (values.includes('__missing__')) {
         setHasNoData(true);
@@ -83,41 +155,56 @@ export function NumericalFilter({ field }: IProps) {
       // Handle numeric values
       if (values.length === 2) {
         setSelectedRange(RangeOperators.Between);
-        setMinValue(Number(values[0]));
-        setMaxValue(Number(values[1]));
+        const minValue = Number(values[0]).toFixed(3);
+        const maxValue = Number(values[1]).toFixed(3);
+        setMinValue(minValue);
+        setMaxValue(maxValue);
+      } else {
+        // Single value case
+        setNumericValue(values[0] as string);
       }
 
-      // Set the operator if it's not already set by defaultOperator
       if (numericFilter.op && !aggConfig?.defaultOperator) {
         setSelectedRange(numericFilter.op as RangeOperators);
       }
     } else {
-      // Reset values if no filter exists, but use defaults from config if available
+      // Reset values if no filter exists
+      setHasNoData(false);
+
+      // Use defaults from config if available
       if (aggConfig?.defaultMin !== undefined) {
-        setMinValue(aggConfig.defaultMin);
+        setMinValue(aggConfig.defaultMin.toString());
+        setNumericValue(aggConfig.defaultMin.toString());
+      } else if (statistics?.min !== undefined) {
+        setMinValue(Number(statistics.min.toFixed(3)).toString());
+        setNumericValue(Number(statistics.min.toFixed(3)).toString());
       }
 
       if (aggConfig?.defaultMax !== undefined) {
-        setMaxValue(aggConfig.defaultMax);
-      }     
+        setMaxValue(aggConfig.defaultMax.toString());
+      } else if (statistics?.max !== undefined) {
+        setMaxValue(Number(statistics.max.toFixed(3)).toString());
+      }
 
       if (aggConfig?.defaultOperator) {
         setSelectedRange(aggConfig.defaultOperator);
       }
-      
-      setHasNoData(false);
     }
 
     // Handle unit if it exists
-    if (unitFilter) {
-      const unitValue = unitFilter.content.value[0];
-      setSelectedUnit(unitValue as string);
-    } else if (aggConfig?.rangeTypes?.length) {
-      // Only set first range type as default if no defaultUnit specified
-      console.log('aggConfig.rangeTypes', aggConfig.rangeTypes);
-      setSelectedUnit(aggConfig.rangeTypes[0].key);
-    }
-  }, [appId, fieldKey, aggConfig]);
+    setSelectedUnit(
+      unitFilter
+        ? (unitFilter.content.value[0] as string)
+        : aggConfig?.rangeTypes?.length
+          ? aggConfig.rangeTypes[0].key
+          : undefined,
+    );
+  }, [appId, fieldKey, aggConfig, statistics]);
+
+  // Update min/max values when statistics are loaded
+  useEffect(() => {
+    initializeForm();
+  }, [initializeForm]);
 
   const onRangeValueChanged = useCallback((value: string) => {
     setSelectedRange(value as RangeOperators);
@@ -136,17 +223,8 @@ export function NumericalFilter({ field }: IProps) {
 
   const reset = useCallback(() => {
     setHasUnappliedItems(false);
-    setHasNoData(false);
-    
-    // Use default values from config if available
-    if (aggConfig?.defaultMin !== undefined) {
-      setMinValue(aggConfig.defaultMin);
-      setNumericValue(aggConfig.defaultMin);
-    }    
-    if (aggConfig?.defaultMax !== undefined) {
-      setMaxValue(aggConfig.defaultMax);
-    }
-  }, [aggConfig]);
+    initializeForm();
+  }, [initializeForm]);
 
   const apply = useCallback(() => {
     setHasUnappliedItems(false);
@@ -163,15 +241,17 @@ export function NumericalFilter({ field }: IProps) {
 
     // Handle numeric values
     let values: number[] = [];
-    values = selectedRange === RangeOperators.Between 
-      ? [parseFloat(minValue.toString()), parseFloat(maxValue.toString())]
-      : [parseFloat(numericValue.toString())];
+    values =
+      selectedRange === RangeOperators.Between
+        ? [parseFloat(minValue.toString()), parseFloat(maxValue.toString())]
+        : [parseFloat(numericValue.toString())];
 
     // Update the main field with numeric values
     queryBuilderRemote.updateActiveQueryField(appId, {
       field: fieldKey,
       value: values,
       merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
+      operator: selectedRange,
     });
 
     // If a unit is selected, update the unit field
@@ -184,120 +264,123 @@ export function NumericalFilter({ field }: IProps) {
     }
   }, [appId, fieldKey, selectedRange, numericValue, minValue, maxValue, hasNoData, selectedUnit]);
 
-  const RangeChoices = Object.entries(RangeOperators).map(([key, op]) => {
-    if (op in RANGE_OPERATOR_LABELS) {
-      const Icon = RANGE_OPERATOR_LABELS[op as RangeOperators].icon;
-      return (
-        <SelectItem key={op} value={op}>
-          <div className="flex items-center gap-2">
-            <Icon size={16} />
-            <span>{RANGE_OPERATOR_LABELS[op as RangeOperators].dropdown}</span>
-          </div>
-        </SelectItem>
-      );
-    }
-    return null;
-  }).filter(Boolean);
+  const RangeChoices = Object.entries(RangeOperators)
+    .map(([key, op]) => {
+      if (op in RANGE_OPERATOR_LABELS) {
+        const Icon = RANGE_OPERATOR_LABELS[op as RangeOperators].icon;
+        return (
+          <SelectItem key={op} value={op}>
+            <div className="flex items-center gap-2">
+              <Icon size={16} />
+              <span>{RANGE_OPERATOR_LABELS[op as RangeOperators].dropdown}</span>
+            </div>
+          </SelectItem>
+        );
+      }
+      return null;
+    })
+    .filter(Boolean);
 
   return (
     <div className="p-2 w-full max-w-md" id={`${fieldKey}_container`}>
       <div className="space-y-3 pt-2">
         <div className="flex flex-col gap-3">
           <div id={`${fieldKey}_operator`}>
-            <Select 
-              defaultValue={`${SqonOpEnum.GreaterThan}`} 
-              onValueChange={onRangeValueChanged}
-            >
+            <Select defaultValue={`${SqonOpEnum.GreaterThan}`} onValueChange={onRangeValueChanged}>
               <SelectTrigger>
                 <SelectValue placeholder={t('common.filters.operators.selectOperator')}>
                   {RANGE_OPERATOR_LABELS[selectedRange].display}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent>
-                {RangeChoices}
-              </SelectContent>
+              <SelectContent>{RangeChoices}</SelectContent>
             </Select>
           </div>
 
           {selectedRange === RangeOperators.Between ? (
             <div className="flex gap-2 flex-row">
-              <Input 
-                type="number"
-                className="w-half" 
+              <Input
+                className="w-half"
                 value={minValue}
-                onChange={(e) => {
-                  setMinValue(Number(e.target.value));
+                onChange={e => {
+                  const value = e.target.value;
+                  console.log('value', value);
+                  if (isNaN(Number(value))) return;
+                  setMinValue(value);
                   setHasUnappliedItems(true);
                 }}
-                min={aggConfig?.min}
-                max={aggConfig?.max}
+                min={inputMin}
+                max={inputMax}
                 id={`${fieldKey}_min`}
                 data-testid={`${fieldKey}_min`}
               />
-              <Input 
-                type="number"
-                className="w-half" 
+              <Input
+                className="w-half"
                 value={maxValue}
-                onChange={(e) => {
-                  setMaxValue(Number(e.target.value));
+                onChange={e => {
+                  const value = e.target.value;
+                  if (isNaN(Number(value))) return;
+                  setMaxValue(value);
                   setHasUnappliedItems(true);
                 }}
-                min={aggConfig?.min}
-                max={aggConfig?.max}
+                min={inputMin}
+                max={inputMax}
                 id={`${fieldKey}_max`}
                 data-testid={`${fieldKey}_max`}
               />
-            </div>) :
-            <Input 
-              type="number"
-              className="w-full" 
+            </div>
+          ) : (
+            <Input
+              className="w-full"
               value={numericValue}
-              onChange={(e) => setNumericValue(Number(e.target.value))}
-              min={aggConfig?.min}
-              max={aggConfig?.max}
+              onChange={e => {
+                const value = e.target.value;
+                if (isNaN(Number(value))) return;
+                setNumericValue(value);
+                setHasUnappliedItems(true);
+              }}
+              min={inputMin}
+              max={inputMax}
               id={`${fieldKey}_value`}
               data-testid={`${fieldKey}_value`}
             />
-          }
+          )}
 
           {hasInterval && (
             <div id={`${fieldKey}_interval`}>
-              <TextMuted>{t('common.filters.labels.actualInterval')} : {aggConfig.min} - {aggConfig.max}</TextMuted>
+              <TextMuted>
+                {t('common.filters.labels.actualInterval')} : {statistics?.min?.toFixed(3)} -{' '}
+                {statistics?.max?.toFixed(3)}
+              </TextMuted>
             </div>
           )}
-
         </div>
 
         {aggConfig?.rangeTypes && aggConfig.rangeTypes.length > 0 && (
           <div id={`${fieldKey}_range_type_container`}>
-            <Label className="text-sm" id={`${fieldKey}_unit_label`}>{t('common.filters.labels.unit')}</Label>
-              <Select 
-                defaultValue={selectedUnit || aggConfig.rangeTypes[0].key}
-                onValueChange={onRangeTypeChanged}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('common.filters.labels.selectUnit')}>
-                    {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name || t('common.filters.labels.selectUnit')}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {aggConfig.rangeTypes.map((type) => (
-                    <SelectItem key={type.key} value={type.key}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Label className="text-sm" id={`${fieldKey}_unit_label`}>
+              {t('common.filters.labels.unit')}
+            </Label>
+            <Select defaultValue={selectedUnit || aggConfig.rangeTypes[0].key} onValueChange={onRangeTypeChanged}>
+              <SelectTrigger>
+                <SelectValue placeholder={t('common.filters.labels.selectUnit')}>
+                  {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name ||
+                    t('common.filters.labels.selectUnit')}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {aggConfig.rangeTypes.map(type => (
+                  <SelectItem key={type.key} value={type.key}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
 
-        {noDataInputOption && (
+        {noDataInputOption && !hasInterval && (
           <label className="flex items-center space-x-2 overflow-hidden" id={`${fieldKey}_no_data_label`}>
-            <Checkbox
-              checked={hasNoData}
-              onCheckedChange={onNoDataChanged}
-              id={`${fieldKey}_no_data`}
-            />
+            <Checkbox checked={hasNoData} onCheckedChange={onNoDataChanged} id={`${fieldKey}_no_data`} />
             <span>{t('common.filters.labels.noData')}</span>
           </label>
         )}
@@ -306,22 +389,11 @@ export function NumericalFilter({ field }: IProps) {
       <hr className="my-4 border-border" id={`${fieldKey}_divider`} />
 
       <div className="flex align-right justify-end items-center space-x-2">
-        <Button 
-          className="text-gray-600" 
-          onClick={reset} 
-          disabled={!hasUnappliedItems}
-          id={`${fieldKey}_clear`}
-        >
+        <Button size="sm" className="text-gray-400 h-7" onClick={reset} disabled={!hasUnappliedItems} id={`${fieldKey}_clear`}>
           {t('common.filters.buttons.clear')}
         </Button>
         <div className="flex space-x-2">
-          <Button 
-            size="sm" 
-            className="h-7" 
-            color="primary" 
-            onClick={apply}
-            id={`${fieldKey}_apply`}
-          >
+          <Button size="sm" className="h-7" color="primary" onClick={apply} id={`${fieldKey}_apply`}>
             {t('common.filters.buttons.apply')}
           </Button>
         </div>

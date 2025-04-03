@@ -132,11 +132,6 @@ function getNextSortingOrderHeaderTitle(sortingOrder: SortDirection | boolean): 
  * @param total
  */
 function getPageCount(pagination: PaginationState, total: number) {
-  console.log('pagination', pagination); //TODO: to remove
-  console.log('total', total); //TODO: to remove
-
-  console.log('pagecoutn result', Math.ceil(total / pagination.pageSize)); //TODO: to remove
-
   return Math.ceil(total / pagination.pageSize);
 }
 
