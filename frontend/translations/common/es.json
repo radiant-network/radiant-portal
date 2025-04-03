@@ -191,7 +191,10 @@
     },
     "variant": {
       "classes": {
-        "indel": "Indel"
+        "indel": "Indel",
+        "insertion": "Inserción",
+        "snv": "SNV",
+        "deletion": "Supresión"
       }
     }
   }
