@@ -76,12 +76,12 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 }
 
 func Test_OccurrencesList(t *testing.T) {
-	testList(t, "simple", "{}", `[{"locus_id":1000}]`)
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "clinvar":["Benign", "Pathogenic"], "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "pf":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
 }
 
 func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
 	body := `{
-			"selected_fields":[
+			"additional_fields":[
 				"seq_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class"
 			],
 			"sqon":{
@@ -92,7 +92,7 @@ func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *tes
 				}
 		}
 		}`
-	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "hgvsg":"hgvsg1", "locus_id":1000, "pf":0.99, "pc":3, "seq_id":1, "variant_class":"class1", "zygosity":"HET"}]`
+	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "pc":3, "pf":0.99, "picked_consequences": null, "seq_id":1, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
 
 }
@@ -103,9 +103,6 @@ func Test_OccurrencesCount(t *testing.T) {
 }
 func Test_OccurrencesCount_Return_Expected_Count_When_Sqon_Specified(t *testing.T) {
 	body := `{
-			"selected_fields":[
-				"seq_id","locus_id","filter","zygosity","pf","af","hgvsg","ad_ratio","variant_class"
-			],
 			"sqon":{
 				"op":"in",
 				"content":{
@@ -168,7 +165,7 @@ func Test_Statistics(t *testing.T) {
 
 func Test_Filter_On_Consequence_Column(t *testing.T) {
 	body := `{
-			"selected_fields":[
+			"additional_fields":[
 				"seq_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class"
 			],
 			"sqon": {
@@ -186,7 +183,7 @@ func Test_Filter_On_Consequence_Column(t *testing.T) {
 			},
 			"size": 10
 		}`
-	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "hgvsg":"hgvsg1", "locus_id":1000, "pf":0.99, "pc":3, "seq_id":1, "variant_class":"class1", "zygosity":"HET"}]`
+	expected := `[{"ad_ratio":1, "af":0.01, "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "pc":3, "pf":0.99, "picked_consequences": null, "seq_id":1, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
 }
 

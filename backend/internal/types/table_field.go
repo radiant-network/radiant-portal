@@ -59,6 +59,16 @@ func findByAlias(fields []Field, alias string) *Field {
 	})
 }
 
+// findFilterByAlias returns the filter field with the given name from the list of fields
+func findFilterByAlias(fields []Field, alias string) *Field {
+	if fields == nil {
+		return nil
+	}
+	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
+		return field.GetAlias() == alias && field.CanBeFiltered
+	})
+}
+
 // findSelectableByAlias returns the selectable field with the given name from the list of fields
 func findSelectableByAlias(fields []Field, alias string) *Field {
 	if fields == nil {
@@ -66,6 +76,16 @@ func findSelectableByAlias(fields []Field, alias string) *Field {
 	}
 	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
 		return field.GetAlias() == alias && field.CanBeSelected
+	})
+}
+
+// findAggregableByAlias returns the aggregable field with the given name from the list of fields
+func findAggregableByAlias(fields []Field, alias string) *Field {
+	if fields == nil {
+		return nil
+	}
+	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
+		return field.GetAlias() == alias && field.CanBeAggregated
 	})
 }
 
@@ -80,9 +100,12 @@ func findNumericByAlias(fields []Field, alias string) *Field {
 }
 
 // findSelectedFields returns the fields that can be selected from the list of string field names
-func findSelectedFields(fields []Field, selected []string) []Field {
+func findSelectedFields(fields []Field, additional []string, defaultFields []Field) []Field {
 	var selectedFields []Field
-	for _, s := range selected {
+	for _, s := range defaultFields {
+		selectedFields = append(selectedFields, s)
+	}
+	for _, s := range additional {
 		field := findSelectableByAlias(fields, s)
 		if field != nil {
 			selectedFields = append(selectedFields, *field)
@@ -92,9 +115,9 @@ func findSelectedFields(fields []Field, selected []string) []Field {
 }
 
 func findAggregatedField(fields []Field, aggregated string) (Field, error) {
-	fieldByName := findByAlias(fields, aggregated)
+	fieldByName := findAggregableByAlias(fields, aggregated)
 
-	if fieldByName != nil && fieldByName.CanBeAggregated {
+	if fieldByName != nil {
 		return *fieldByName, nil
 	} else {
 		return Field{}, fmt.Errorf("%s can not be aggregated", aggregated)
@@ -104,6 +127,11 @@ func findAggregatedField(fields []Field, aggregated string) (Field, error) {
 // findSortedFields returns the fields that can be sorted from the list of SortBody
 func findSortedFields(fields []Field, sorted []SortBody) []SortField {
 	var sortedFields []SortField
+	if len(sorted) == 0 {
+		sortedFields = append(sortedFields, SortField{Field: ImpactScoreField, Order: "desc"})
+		sortedFields = append(sortedFields, SortField{Field: LocusIdField, Order: "asc"})
+		return sortedFields
+	}
 	for _, sort := range sorted {
 		field := findByAlias(fields, sort.Field)
 		if field != nil && field.CanBeSorted && (sort.Order == "asc" || sort.Order == "desc") {

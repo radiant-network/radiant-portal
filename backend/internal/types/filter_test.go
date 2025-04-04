@@ -30,6 +30,7 @@ var DepartmentTable = Table{
 var departmentNameField = Field{Name: "department_name", CanBeSelected: true, CanBeFiltered: true, CanBeAggregated: true, DefaultOp: "default", Table: DepartmentTable}
 var allDepartmentFields = []Field{departmentNameField}
 var allFields = sliceutils.Merge(allDepartmentFields, allEmpoyeeFields)
+var defaultFields = sliceutils.Merge(allEmpoyeeFields)
 
 func Test_SqonToFilter_Return_Expected_Filters(t *testing.T) {
 	t.Parallel()

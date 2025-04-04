@@ -66,7 +66,7 @@ func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 		} else {
 			p = types.Pagination{Limit: 10, Offset: 0}
 		}
-		query, err := types.NewListQuery(body.SelectedFields, body.Sqon, types.OccurrencesFields, &p, body.Sort)
+		query, err := types.NewListQuery(body.AdditionalFields, body.Sqon, types.OccurrencesFields, types.OccurrencesDefaultFields, &p, body.Sort)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

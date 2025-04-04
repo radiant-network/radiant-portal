@@ -3,20 +3,20 @@ package types
 // Occurrence represents an occurrence
 // @Description Occurrence represents an occurrence
 type Occurrence struct {
-	SeqId               int               `json:"seq_id,omitempty"`
+	SeqId               int               `json:"seq_id" validate:"required"`
 	Chromosome          string            `json:"chromosome,omitempty"`
-	LocusId             int64             `json:"locus_id,omitempty"`
-	GenotypeQuality     int32             `json:"genotype_quality,omitempty"`
+	LocusId             int64             `json:"locus_id" validate:"required"`
+	GenotypeQuality     int32             `json:"genotype_quality" validate:"required"`
 	Filter              string            `json:"filter,omitempty"`
-	Zygosity            string            `json:"zygosity,omitempty"`
-	Pf                  float64           `json:"pf,omitempty"`
+	Zygosity            string            `json:"zygosity" validate:"required"`
+	Pf                  float64           `json:"pf" validate:"required"`
 	Pc                  int               `json:"pc,omitempty"`
 	Af                  float64           `json:"af,omitempty"`
-	GnomadV3Af          float64           `json:"gnomad_v3_af,omitempty"`
-	Hgvsg               string            `json:"hgvsg,omitempty"`
+	GnomadV3Af          float64           `json:"gnomad_v3_af" validate:"required"`
+	Hgvsg               string            `json:"hgvsg" validate:"required"`
 	OmimInheritanceCode JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
-	AdRatio             float64           `json:"ad_ratio,omitempty"`
-	VariantClass        string            `json:"variant_class,omitempty"`
+	AdRatio             float64           `json:"ad_ratio" validate:"required"`
+	VariantClass        string            `json:"variant_class" validate:"required"`
 	VepImpact           string            `json:"vep_impact,omitempty"`
 	Symbol              string            `json:"symbol,omitempty"`
 	Clinvar             JsonArray[string] `gorm:"type:json" json:"clinvar,omitempty"`
@@ -24,8 +24,9 @@ type Occurrence struct {
 	Canonical           bool              `json:"canonical,omitempty"`
 	AaChange            string            `json:"aa_change,omitempty"`
 	RsNumber            string            `json:"rsnumber,omitempty"`
-	PickedConsequences  JsonArray[string] `gorm:"type:json" json:"picked_consequences,omitempty"`
+	PickedConsequences  JsonArray[string] `gorm:"type:json" json:"picked_consequences" validate:"required"`
 	TranscriptId        string            `json:"transcript_id,omitempty"`
+	ImpactScore         string            `json:"impact_score,omitempty"`
 } // @name Occurrence
 
 var OccurrenceTable = Table{
@@ -101,6 +102,7 @@ var OccurrencesFields = []Field{
 	ConsequenceIdField,
 	SymbolFilterField,
 	ImpactScoreField,
+	ImpactScoreFilterField,
 	SiftPredField,
 	OmimGenePanelField,
 	HpoGenePanelField,
@@ -113,4 +115,22 @@ var OccurrencesFields = []Field{
 	OmimInheritanceCodeField,
 	GnomadV3AfField,
 	TranscriptIdField,
+}
+
+var OccurrencesDefaultFields = []Field{
+	SeqIdField,
+	LocusIdField,
+	HgvsgField,
+	VariantClassField,
+	GnomadV3AfField,
+	PfField,
+	GenotypeQualityField,
+	ZygosityField,
+	AdRatioField,
+	ConsequenceField,
+	AaChangeField,
+	ClinvarField,
+	ManeSelectField,
+	VepImpactField,
+	SymbolField,
 }

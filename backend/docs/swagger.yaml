@@ -152,17 +152,17 @@ components:
     ListBody:
       description: Body of a list request
       properties:
+        additional_fields:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         limit:
           type: integer
         offset:
           type: integer
         page_index:
           type: integer
-        selected_fields:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
         sort:
           items:
             $ref: '#/components/schemas/SortBody'
@@ -197,6 +197,8 @@ components:
           type: number
         hgvsg:
           type: string
+        impact_score:
+          type: string
         locus_id:
           type: integer
         mane_select:
@@ -229,6 +231,17 @@ components:
           type: string
         zygosity:
           type: string
+      required:
+      - ad_ratio
+      - genotype_quality
+      - gnomad_v3_af
+      - hgvsg
+      - locus_id
+      - pf
+      - picked_consequences
+      - seq_id
+      - variant_class
+      - zygosity
       type: object
     PubmedCitation:
       properties:

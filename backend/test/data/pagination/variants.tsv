@@ -1,31 +1,31 @@
-locus_id	pf	pc	af	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	mane_select	canonical
-1000	0.01	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1001	0.02	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1002	0.03	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1003	0.04	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1004	0.05	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1005	0.06	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1006	0.07	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1007	0.08	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1008	0.09	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1009	0.10	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1010	0.11	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1011	0.12	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1012	0.13	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1013	0.14	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1014	0.15	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1015	0.16	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1016	0.17	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1017	0.18	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1018	0.19	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1019	0.20	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1020	0.21	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1021	0.22	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1022	0.23	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1023	0.24	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1024	0.25	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1025	0.26	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1026	0.27	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1027	0.28	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-1028	0.29	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
-2000	0.99	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+locus_id	impact_score	pf	pc	af	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	mane_select	canonical
+1000	4	0.01	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1001	4	0.02	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1002	4	0.03	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1003	4	0.04	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1004	4	0.05	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1005	4	0.06	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1006	4	0.07	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1007	4	0.08	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1008	4	0.09	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1009	4	0.10	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1010	4	0.11	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1011	4	0.12	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1012	4	0.13	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1013	4	0.14	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1014	4	0.15	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1015	4	0.16	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1016	4	0.17	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1017	4	0.18	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1018	4	0.19	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1019	4	0.20	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1020	4	0.21	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1021	4	0.22	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1022	4	0.23	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1023	4	0.24	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1024	4	0.25	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1025	4	0.26	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1026	4	0.27	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1027	4	0.28	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+1028	4	0.29	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true
+2000	4	0.99	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true

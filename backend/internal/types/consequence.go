@@ -51,10 +51,11 @@ var SymbolFilterField = Field{
 	Table:           ConsequenceFilterTable,
 }
 
-var ImpactScoreField = Field{
+var ImpactScoreFilterField = Field{
 	Name:            "impact_score",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
+	CanBeSelected:   false,
 	Table:           ConsequenceFilterTable,
 }
 

@@ -74,10 +74,10 @@ type Pagination struct {
 	PageIndex int //PageIndex the page index in case there is pagination
 }
 
-func NewListQuery(selected []string, sqon *Sqon, fields []Field, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
+func NewListQuery(additional []string, sqon *Sqon, fields []Field, defaultFields []Field, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
 
 	// Define allowed selectedCols
-	selectedFields := findSelectedFields(fields, selected)
+	selectedFields := findSelectedFields(fields, additional, defaultFields)
 
 	// Define allowed sortedCols
 	sortedField := findSortedFields(fields, sorted)

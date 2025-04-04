@@ -3,13 +3,14 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
-	"github.com/Goldziher/go-utils/sliceutils"
-	"gorm.io/gorm"
 	"log"
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
+	"github.com/Goldziher/go-utils/sliceutils"
+	"gorm.io/gorm"
 )
 
 type Occurrence = types.Occurrence
@@ -97,11 +98,8 @@ func addImplicitOccurrencesFilters(seqId int, r *StarrocksRepository, part int) 
 	tx := r.db.Table("occurrences o").Where("o.seq_id = ? and o.part=? and has_alt", seqId, part)
 	return tx
 }
-func joinWithVariants(userQuery types.Query, tx *gorm.DB) *gorm.DB {
-	if userQuery.HasFieldFromTables(types.VariantTable) {
-		tx = tx.Joins("JOIN variants v ON v.locus_id=o.locus_id")
-	}
-	return tx
+func joinWithVariants(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("JOIN variants v ON v.locus_id=o.locus_id")
 }
 func (r *StarrocksRepository) GetPart(seqId int) (int, error) { //TODO cache
 	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
@@ -124,27 +122,20 @@ func (r *StarrocksRepository) GetOccurrences(seqId int, userQuery types.ListQuer
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 
-	if columns == nil {
-		columns = []string{"o.locus_id"}
-	}
 	addLimitAndSort(tx, userQuery)
-	if userQuery.HasFieldFromTables(types.VariantTable) {
-		// we build a TOP-N query like :
-		// SELECT o.locus_id, o.quality, o.ad_ratio, ...., v.variant_class, v.hgvsg... FROM occurrences o, variants v
-		// WHERE o.locus_id in (
-		//	SELECT o.locus_id FROM occurrences JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
-		// ) AND o.seq_id=? AND o.part=? AND v.locus_id=o.locus_id ORDER BY ad_ratio DESC
-		tx = tx.Select("o.locus_id")
-		tx = r.db.Table("occurrences o, variants v").
-			Select(columns).
-			Where("o.seq_id = ? and part=? and v.locus_id = o.locus_id and o.locus_id in (?)", seqId, part, tx)
+	// we build a TOP-N query like :
+	// SELECT o.locus_id, o.quality, o.ad_ratio, ...., v.variant_class, v.hgvsg... FROM occurrences o, variants v
+	// WHERE o.locus_id in (
+	//	SELECT o.locus_id FROM occurrences JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
+	// ) AND o.seq_id=? AND o.part=? AND v.locus_id=o.locus_id ORDER BY ad_ratio DESC
+	tx = tx.Select("o.locus_id")
+	tx = r.db.Table("occurrences o, variants v").
+		Select(columns).
+		Where("o.seq_id = ? and part=? and v.locus_id = o.locus_id and o.locus_id in (?)", seqId, part, tx)
 
-		addSort(tx, userQuery) //We re-apply the sort on the outer query
+	addSort(tx, userQuery) //We re-apply the sort on the outer query
 
-		err = tx.Find(&occurrences).Error
-	} else {
-		err = tx.Select(columns).Find(&occurrences).Error
-	}
+	err = tx.Find(&occurrences).Error
 	if err != nil {
 		err = fmt.Errorf("error fetching occurrences: %w", err)
 		return nil, err
@@ -161,7 +152,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *StarrocksRepos
 	}
 	tx := addImplicitOccurrencesFilters(seqId, r, part)
 	if userQuery != nil {
-		tx = joinWithVariants(userQuery, tx)
+		tx = joinWithVariants(tx)
 
 		if userQuery.Filters() != nil && (userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...)) {
 			if userQuery.HasFieldFromTables(types.GenePanelsTables...) {
@@ -252,7 +243,7 @@ func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *StarrocksR
 	}
 	tx := addImplicitOccurrencesFilters(seqId, r, part)
 	if userQuery != nil {
-		tx = joinWithVariants(userQuery, tx)
+		tx = joinWithVariants(tx)
 		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 			joinClause := "LEFT JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
 			tx = tx.Joins(joinClause)

@@ -16,6 +16,10 @@ var allFields = sliceutils.Map(types.OccurrencesFields, func(value types.Field, 
 	return value.Name
 })
 
+var defaultFieldsForTest = []types.Field{
+	types.LocusIdField,
+}
+
 func Test_CheckDatabaseConnection_Return_up(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
@@ -28,7 +32,7 @@ func Test_CheckDatabaseConnection_Return_up(t *testing.T) {
 func Test_GetOccurrences(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
-		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, nil, nil)
+		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -52,7 +56,7 @@ func Test_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
 		repo := NewStarrocksRepository(db)
 		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "filter"}
 
-		query, err := types.NewListQuery(selectedFields, nil, types.OccurrencesFields, nil, nil)
+		query, err := types.NewListQuery(selectedFields, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -69,7 +73,7 @@ func Test_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t *testing.T) 
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewStarrocksRepository(db)
-		query, err := types.NewListQuery(nil, nil, types.OccurrencesFields, nil, nil)
+		query, err := types.NewListQuery(nil, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -89,7 +93,7 @@ func Test_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
 		}
-		query, err := types.NewListQuery(selectedFields, nil, types.OccurrencesFields, nil, sort)
+		query, err := types.NewListQuery(selectedFields, nil, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -143,7 +147,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 			},
 			Op: "in",
 		}
-		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, nil, nil)
+		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -178,7 +182,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 		}
 		selectedFields := []string{"locus_id", "clinvar"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -209,7 +213,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *test
 		}
 		selectedFields := []string{"locus_id", "clinvar"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -231,7 +235,7 @@ func Test_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(t *testing.T)
 			Limit:  5,
 			Offset: 0,
 		}
-		query, err := types.NewListQuery(nil, nil, types.OccurrencesFields, pagination, nil)
+		query, err := types.NewListQuery(nil, nil, types.OccurrencesFields, defaultFieldsForTest, pagination, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -255,7 +259,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 			Offset: 5,
 		}
 
-		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, pagination, sortedBody)
+		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, defaultFieldsForTest, pagination, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -282,7 +286,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Sp
 			PageIndex: 1,
 		}
 
-		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, pagination, sortedBody)
+		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, defaultFieldsForTest, pagination, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -312,7 +316,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 			},
 		}
 
-		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, nil, sortedBody)
+		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -341,7 +345,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 			},
 		}
 
-		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, nil, sortedBody)
+		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -492,7 +496,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel(t *testing.
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -520,7 +524,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -548,7 +552,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_An
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, nil, sort)
+		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)

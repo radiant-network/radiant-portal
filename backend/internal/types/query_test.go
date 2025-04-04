@@ -95,7 +95,7 @@ func Test_NewAggregationQuery_Return_Empty_Filter_If_Empty_Or(t *testing.T) {
 func TestListQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_SelectedList(t *testing.T) {
 	t.Parallel()
 	fields := []string{"age", "salary", "department_name"}
-	query, err := NewListQuery(fields, nil, allFields, nil, nil)
+	query, err := NewListQuery(fields, nil, allFields, defaultFields, nil, nil)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(DepartmentTable))
 	}
@@ -104,7 +104,7 @@ func TestListQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_SelectedL
 func TestListQuery_HasFieldFromTables_Return_False_If_Not_Contains_Field_In_SelectedList(t *testing.T) {
 	t.Parallel()
 	fields := []string{"age", "salary"}
-	query, err := NewListQuery(fields, nil, allFields, nil, nil)
+	query, err := NewListQuery(fields, nil, allFields, defaultFields, nil, nil)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}
@@ -119,7 +119,7 @@ func TestListQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFiel
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewListQuery(fields, &sqon, allFields, nil, nil)
+	query, err := NewListQuery(fields, &sqon, allFields, defaultFields, nil, nil)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(EmployeeTable, DepartmentTable))
 	}
@@ -134,7 +134,7 @@ func TestListQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_Filer
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewListQuery(fields, &sqon, allFields, nil, nil)
+	query, err := NewListQuery(fields, &sqon, allFields, defaultFields, nil, nil)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}

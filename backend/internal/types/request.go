@@ -87,12 +87,12 @@ func (s *Sqon) UnmarshalJSON(data []byte) error {
 // @Description Body of a list request
 // @Name ListBody
 type ListBody struct {
-	SelectedFields []string   `json:"selected_fields"`
-	Sqon           *Sqon      `json:"sqon"`
-	Limit          int        `json:"limit"`
-	Offset         int        `json:"offset"`
-	PageIndex      int        `json:"page_index"`
-	Sort           []SortBody `json:"sort"`
+	AdditionalFields []string   `json:"additional_fields"`
+	Sqon             *Sqon      `json:"sqon"`
+	Limit            int        `json:"limit"`
+	Offset           int        `json:"offset"`
+	PageIndex        int        `json:"page_index"`
+	Sort             []SortBody `json:"sort"`
 }
 
 type SortBody struct {
