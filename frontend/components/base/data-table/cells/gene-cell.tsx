@@ -33,6 +33,7 @@ function GeneCell({ className, symbol }: GeneCellProps) {
         size="xs"
         variant="ghost"
         iconOnly
+        className="size-5"
         onClick={() => {
           console.log('addQuery to be added'); //TODO: to remove
         }}

@@ -29,6 +29,7 @@ const columns = [
     header: getTableRowSelectionHeader,
     cell: getTableRowSelectionCell,
     size: 48,
+    maxSize: 48,
     enableResizing: false,
   },
   columnHelper.accessor(row => row.hgvsg, {

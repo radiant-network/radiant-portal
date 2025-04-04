@@ -72,22 +72,14 @@ function App() {
     {
       seqId: SEQ_ID,
       listBody: {
-        selected_fields: [
-          'seq_id',
-          'locus_id',
-          'hgvsg',
-          'variant_class',
+        additional_fields: [
           'rsnumber',
           'symbol',
           'vep_impact',
           'mane_select',
           'omim_inheritance_code',
           'clinvar',
-          'gnomad_v3_af',
           'pf',
-          'genotype_quality',
-          'zygosity',
-          'ad_ratio',
           'transcript_id',
         ],
         limit: pagination.pageSize,
