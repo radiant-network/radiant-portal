@@ -8,7 +8,7 @@ function QueryBarIdentifier() {
 
   return (
     <div
-      className="w-1 rounded-s-sm bg-gray-500 group-data-[query-active=true]/query:bg-primary"
+      className="w-1 rounded-s-sm bg-muted-foreground group-data-[query-active=true]/query:bg-primary"
       style={refColor ? { backgroundColor: refColor } : {}}
     />
   );

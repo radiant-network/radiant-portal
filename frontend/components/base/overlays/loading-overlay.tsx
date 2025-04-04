@@ -1,5 +1,5 @@
-import { type ReactNode } from "react";
-import { Loader2 } from "lucide-react";
+import { type ReactNode } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface LoadingOverlayProps {
   loading: boolean;
@@ -11,7 +11,7 @@ export function LoadingOverlay({ loading, children }: LoadingOverlayProps) {
     <div className="relative">
       {children}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sx">
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sx">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       )}

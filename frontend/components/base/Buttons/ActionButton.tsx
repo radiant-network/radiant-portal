@@ -45,7 +45,7 @@ function ActionButton({
           </button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="bg-white">
+        <DropdownMenuContent>
           {actions.map((action, index) => (
             <DropdownMenuItem key={index} onClick={action.onClick}>
               {action.label}

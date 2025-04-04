@@ -9,9 +9,10 @@ function QueryBarSelector() {
       <div
         className="
       flex gap-2 items-center py-2 px-4 border-l border-t border-b 
-      border-gray-400 bg-gray-100
+      border-muted-foreground/20 bg-muted/35 text-muted-foreground
       group-data-[query-active=true]/query:border-primary/75
       group-data-[query-active=true]/query:bg-primary/10
+      group-data-[query-active=true]/query:text-foreground
       "
       >
         <Checkbox

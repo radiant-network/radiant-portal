@@ -13,7 +13,7 @@ const queryBar = tv({
   variants: {
     active: {
       true: ['border-primary/75 bg-primary/10'],
-      false: ['border-gray-400 bg-gray-100'],
+      false: ['border-muted-foreground/20 bg-muted/35 text-muted-foreground'],
     },
   },
   defaultVariants: {
