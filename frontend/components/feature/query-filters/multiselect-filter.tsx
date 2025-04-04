@@ -13,6 +13,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
 import { useAggregationBuilder } from './use-aggregation-builder';
 import { XCircle, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Skeleton } from '@/components/base/ui/skeleton';
 
 interface IProps {
   field: AggregationConfig;
@@ -32,10 +33,10 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
   const { t } = useI18n();
   const config = useConfig();
   const appId = config.variant_entity.app_id;
-  
+
   // Use the hook directly instead of receiving data as a prop
   const { data: aggregationData, isLoading } = useAggregationBuilder(field.key, undefined, true, appId);
-  
+
   const [items, setItems] = useState<Aggregation[]>(aggregationData || []);
   // items that are include in the search
   const [appliedSelectedItems, setAppliedSelectedItems] = useState<string[]>([]);
@@ -129,16 +130,19 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
     setSelectedItems([...appliedSelectedItems]);
   }, [appliedSelectedItems]);
 
-  const applyWithOperator = useCallback((operator?: TermOperators) => {
-    setHasUnappliedItems(false);
-    setAppliedSelectedItems(selectedItems);
-    queryBuilderRemote.updateActiveQueryField(appId, {
-      field: field.key,
-      value: [...selectedItems],
-      merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
-      operator: operator,
-    });
-  }, [selectedItems, appId, field.key]);
+  const applyWithOperator = useCallback(
+    (operator?: TermOperators) => {
+      setHasUnappliedItems(false);
+      setAppliedSelectedItems(selectedItems);
+      queryBuilderRemote.updateActiveQueryField(appId, {
+        field: field.key,
+        value: [...selectedItems],
+        merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
+        operator: operator,
+      });
+    },
+    [selectedItems, appId, field.key],
+  );
 
   const apply = useCallback(() => {
     applyWithOperator(TermOperators.In);
@@ -177,25 +181,34 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
       </div>
 
       <div>
-        {Array.from({ length: visibleItemsCount }, (_, i) => (
-          <div className="space-y-3 pt-2" key={items[i].key}>
-            <div className="flex justify-between items-center">
-              <label className="flex items-center space-x-2 overflow-hidden">
-                <Checkbox
-                  className="w-4 h-4"
-                  checked={selectedItems.some(f => f === items[i].key)}
-                  onCheckedChange={() => itemSelected(items[i])}
-                />
-                <div className="overflow-hidden text-ellipsis">{items[i].key}</div>
-                <span className="checkmark"></span>
-              </label>
-              <span className="bg-gray-200 px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
-            </div>
-          </div>
-        ))}
+        {isLoading
+          ? // Loading skeleton state
+            Array.from({ length: 3 }, (_, i) => (
+              <div className="flex justify-between items-center py-2 space-x-2" key={`skeleton-${i}`}>
+                <Skeleton className="w-full h-6 rounded" />
+                <Skeleton className="h-6 w-12 rounded-md" />
+              </div>
+            ))
+          : // Actual content
+            Array.from({ length: visibleItemsCount }, (_, i) => (
+              <div className="space-y-3 pt-2" key={items[i].key}>
+                <div className="flex justify-between items-center">
+                  <label className="flex items-center space-x-2 overflow-hidden">
+                    <Checkbox
+                      className="w-4 h-4"
+                      checked={selectedItems.some(f => f === items[i].key)}
+                      onCheckedChange={() => itemSelected(items[i])}
+                    />
+                    <div className="overflow-hidden text-ellipsis">{items[i].key}</div>
+                    <span className="checkmark"></span>
+                  </label>
+                  <span className="bg-gray-200 px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
+                </div>
+              </div>
+            ))}
       </div>
 
-      {items.length > visibleItemsCount && (
+      {!isLoading && items.length > visibleItemsCount && (
         <Button className="mt-2 px-0" onClick={showMore} size="sm" variant="link">
           {t('common.filters.buttons.showMore')}
         </Button>
@@ -204,29 +217,30 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
       <Separator className="my-4 border-border" id={`${field.key}_divider`} />
 
       <div className="flex align-right justify-end items-center space-x-2">
-        <Button size="xs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems}>
+        <Button size="xs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems || isLoading}>
           {t('common.filters.buttons.clear')}
         </Button>
         <div className="flex space-x-2">
-          <ActionButton 
-            size="xs" 
-            className="h-7" 
-            color="primary" 
+          <ActionButton
+            size="xs"
+            className="h-7"
+            color="primary"
             actions={[
               {
                 label: t('common.filters.buttons.someNotIn'),
-                onClick: applySomeNotIn
+                onClick: applySomeNotIn,
               },
               {
                 label: t('common.filters.buttons.all'),
-                onClick: applyAll
+                onClick: applyAll,
               },
               {
                 label: t('common.filters.buttons.notIn'),
-                onClick: applyNotIn
+                onClick: applyNotIn,
               },
-            ]} 
+            ]}
             onDefaultAction={apply}
+            disabled={isLoading}
           >
             {t('common.filters.buttons.apply')}
           </ActionButton>

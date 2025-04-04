@@ -19,6 +19,7 @@ import LessThanOrEqualOperatorIcon from '@/components/base/icons/less-than-or-eq
 import { useI18n } from '@/components/hooks/i18n';
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
+import { Skeleton } from '@/components/base/ui/skeleton';
 
 type OccurrenceStatisticsInput = {
   seqId: string;
@@ -357,24 +358,33 @@ export function NumericalFilter({ field }: IProps) {
 
         {aggConfig?.rangeTypes && aggConfig.rangeTypes.length > 0 && (
           <div id={`${fieldKey}_range_type_container`}>
-            <Label className="text-sm" id={`${fieldKey}_unit_label`}>
-              {t('common.filters.labels.unit')}
-            </Label>
-            <Select defaultValue={selectedUnit || aggConfig.rangeTypes[0].key} onValueChange={onRangeTypeChanged}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('common.filters.labels.selectUnit')}>
-                  {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name ||
-                    t('common.filters.labels.selectUnit')}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {aggConfig.rangeTypes.map(type => (
-                  <SelectItem key={type.key} value={type.key}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isLoadingStats ? (
+              <>
+                <Skeleton className="h-5 w-16 mb-1" id={`${fieldKey}_unit_label_skeleton`} />
+                <Skeleton className="h-9 w-full" id={`${fieldKey}_select_skeleton`} />
+              </>
+            ) : (
+              <>
+                <Label className="text-sm" id={`${fieldKey}_unit_label`}>
+                  {t('common.filters.labels.unit')}
+                </Label>
+                <Select defaultValue={selectedUnit || aggConfig.rangeTypes[0].key} onValueChange={onRangeTypeChanged}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('common.filters.labels.selectUnit')}>
+                      {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name ||
+                        t('common.filters.labels.selectUnit')}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {aggConfig.rangeTypes.map(type => (
+                      <SelectItem key={type.key} value={type.key}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
           </div>
         )}
 
