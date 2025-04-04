@@ -3,6 +3,8 @@ import logoDark from '@assets/logo/header-dark.svg';
 import { LanguageSwitcher } from '@/components/base/language-switcher';
 import { useI18n } from '@/components/hooks/i18n';
 import { useConfig } from '@/components/model/applications-config';
+import { ThemeToggle } from '@/components/feature/theme-toggle/theme-toggle';
+import { Button } from '@/components/base/ui/button';
 
 interface IProps {
   userName: string;
@@ -14,7 +16,7 @@ export function MainNav({ userName, onLogout }: IProps) {
   const config = useConfig();
 
   return (
-    <header className="h-12 bg-gray-900 text-white flex items-center justify-between px-4 w-full max-w-full">
+    <header className="h-12 flex border-b bg-accent/50 items-center justify-between px-4 w-full max-w-full">
       <div className="flex space-x-3 items-center">
         <img src={logo} alt="Logo" className="h-8 w-auto dark:hidden" />
         <img src={logoDark} alt="Logo" className="h-8 w-auto hidden dark:block" />
@@ -22,30 +24,22 @@ export function MainNav({ userName, onLogout }: IProps) {
         {/* <img src={logo} alt="Logo" className="h-8 w-auto" /> */}
         <div className="text-lg font-bold">{config.portal.name}</div>
         <nav>
-          <a href="#" className="px-4 py-2 hover:bg-gray-700">
-            {t('common.navigation.dashboard')}
-          </a>
-          <a href="#" className="px-4 py-2 hover:bg-gray-700">
-            {t('common.navigation.variant')}
-          </a>
+          <Button variant="ghost">
+            <a href="#">{t('common.navigation.dashboard')}</a>
+          </Button>
+          <Button variant="ghost">
+            <a href="#">{t('common.navigation.variant')}</a>
+          </Button>
         </nav>
       </div>
       <div className="flex items-center space-x-4">
-        <div className="relative">
-          <button className="py-2 px-3">{userName}</button>
-          <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded shadow hidden group-hover:block">
-            <a href="#" className="block px-4 py-2 hover:bg-gray-200">
-              {t('common.navigation.profile')}
-            </a>
-            <a href="#" className="block px-4 py-2 hover:bg-gray-200">
-              {t('common.navigation.settings')}
-            </a>
-          </div>
-        </div>
+        <button className="py-2 px-3">{userName}</button>
 
         <LanguageSwitcher />
 
-        <button className="text-white py-2 px-3 " onClick={onLogout}>
+        <ThemeToggle />
+
+        <button className="py-2 px-3 " onClick={onLogout}>
           {t('common.navigation.logout')}
         </button>
       </div>

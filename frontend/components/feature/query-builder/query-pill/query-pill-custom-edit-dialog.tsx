@@ -120,8 +120,8 @@ function QueryPillCustomEditDialog({
           <aside className="flex flex-col min-w-48 bg-primary">
             <span className="italic">TODO Insert filters</span>
           </aside>
-          <div className="w-full bg-gray-100">
-            <div className="flex flex-col bg-white gap-6 p-6">
+          <div className="w-full">
+            <div className="flex flex-col gap-6 p-6">
               <DialogHeader>
                 <DialogTitle>{dict.queryPill.customPill.editDialog.title}</DialogTitle>
               </DialogHeader>
@@ -136,7 +136,7 @@ function QueryPillCustomEditDialog({
               </div>
               <DialogFooter className="mt-5">
                 <DialogClose asChild>
-                  <Button variant="outlined">{dict.queryPill.customPill.editDialog.cancel}</Button>
+                  <Button variant="outline">{dict.queryPill.customPill.editDialog.cancel}</Button>
                 </DialogClose>
                 <Button type="submit" color="primary" loading={saving} disabled={!hasChanged} onClick={handleSave}>
                   {dict.queryPill.customPill.editDialog.ok}

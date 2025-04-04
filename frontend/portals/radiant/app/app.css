@@ -4,7 +4,8 @@
 
 html,
 body {
-  @apply bg-white;
+  @apply bg-background;
+  @apply text-foreground;
 
   @media (prefers-color-scheme: light) {
     color-scheme: light;

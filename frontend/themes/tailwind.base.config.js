@@ -7,6 +7,9 @@ module.exports = {
         ...theme('colors'),
         DEFAULT: theme('colors.border'),
       }),
+      borderRadius: {
+        DEFAULT: 'var(--radius)',
+      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

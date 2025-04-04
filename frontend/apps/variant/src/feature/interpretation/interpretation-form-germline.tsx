@@ -73,7 +73,7 @@ function InterpretationFormGermline(
                 >
                   <ToggleGroupItem
                     value="LA6668-3"
-                    className="bg-white hover:bg-white data-[state=on]:bg-red-100 data-[state=on]:text-red-800 border data-[state=on]:border-red-200"
+                    className=" data-[state=on]:bg-red-100 data-[state=on]:text-red-800 border data-[state=on]:border-red-200"
                   >
                     Pathogenic
                   </ToggleGroupItem>
@@ -82,7 +82,7 @@ function InterpretationFormGermline(
                       <span>
                         <ToggleGroupItem
                           value="LA26332-9"
-                          className="bg-white hover:bg-white data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 border data-[state=on]:border-yellow-300"
+                          className=" data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 border data-[state=on]:border-yellow-300"
                         >
                           Likely Pathogenic
                         </ToggleGroupItem>
@@ -95,7 +95,7 @@ function InterpretationFormGermline(
                       <span>
                         <ToggleGroupItem
                           value="LA26333-7"
-                          className="bg-white hover:bg-white data-[state=on]:bg-orange-100 data-[state=on]:text-orange-900 border data-[state=on]:border-orange-300"
+                          className=" data-[state=on]:bg-orange-100 data-[state=on]:text-orange-900 border data-[state=on]:border-orange-300"
                         >
                           VUS
                         </ToggleGroupItem>
@@ -108,7 +108,7 @@ function InterpretationFormGermline(
                       <span>
                         <ToggleGroupItem
                           value="LA26334-5"
-                          className="bg-white hover:bg-white data-[state=on]:bg-lime-100 data-[state=on]:text-lime-900 border data-[state=on]:border-lime-300"
+                          className=" data-[state=on]:bg-lime-100 data-[state=on]:text-lime-900 border data-[state=on]:border-lime-300"
                         >
                           Likely Benign
                         </ToggleGroupItem>
@@ -118,7 +118,7 @@ function InterpretationFormGermline(
                   </Tooltip>
                   <ToggleGroupItem
                     value="LA6675-8"
-                    className="bg-white hover:bg-white data-[state=on]:bg-green-100 data-[state=on]:text-green-800 border data-[state=on]:border-green-300"
+                    className=" data-[state=on]:bg-green-100 data-[state=on]:text-green-800 border data-[state=on]:border-green-300"
                   >
                     Benign
                   </ToggleGroupItem>

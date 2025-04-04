@@ -10,9 +10,10 @@ function QueryBarActions() {
     <div
       className="
       flex items-center p-2 border-r border-t border-b 
-      border-gray-400 bg-gray-100
+      border-muted-foreground/20 bg-muted/35 text-muted-foreground
       group-data-[query-active=true]/query:border-primary/75
-      group-data-[query-active=true]/query:bg-primary/10"
+      group-data-[query-active=true]/query:bg-primary/10
+      group-data-[query-active=true]/query:text-foreground"
       onClick={e => e.stopPropagation()}
     >
       {customPillConfig?.enable && <QueryBarSaveAction />}
