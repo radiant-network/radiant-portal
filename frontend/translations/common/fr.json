@@ -166,7 +166,8 @@
         "unit": "Unité",
         "selectUnit": "Sélectionner une unité",
         "noData": "Pas de données",
-        "[fieldKey]": "Champ : {{fieldKey}}"
+        "[fieldKey]": "Champ : {{fieldKey}}",
+        "noValuesFound": "Aucune valeur trouvée"
       },
       "operators": {
         "greaterThan": "Plus grand que",
@@ -189,6 +190,7 @@
       "search": {
         "placeholder": "Rechercher..."
       },
+      "noValuesFound": "Aucune valeur trouvée",
       "unsupportedType": "Type non pris en charge"
     },
     "variant": {

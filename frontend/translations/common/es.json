@@ -189,7 +189,8 @@
       "search": {
         "placeholder": "Buscar..."
       },
-      "unsupportedType": "Tipo no compatible"
+      "noValuesFound": "No se encontraron valores",
+      "unsupportedType": "Tipo no soportado"
     },
     "variant": {
       "classes": {
