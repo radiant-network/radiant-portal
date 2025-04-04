@@ -6,12 +6,13 @@ import { ActionButton } from '@/components/base/Buttons';
 import { Aggregation } from '@/api/api';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { useConfig } from '@/components/model/applications-config';
-import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
+import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/model/sqon';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { numberFormat } from '@/components/lib/number-format';
 import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
 import { useAggregationBuilder } from './use-aggregation-builder';
+import { XCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface IProps {
   field: AggregationConfig;
@@ -128,15 +129,32 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
     setSelectedItems([...appliedSelectedItems]);
   }, [appliedSelectedItems]);
 
-  const apply = useCallback(() => {
+  const applyWithOperator = useCallback((operator?: TermOperators) => {
     setHasUnappliedItems(false);
     setAppliedSelectedItems(selectedItems);
     queryBuilderRemote.updateActiveQueryField(appId, {
       field: field.key,
       value: [...selectedItems],
-      merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES, // Default APPEND_VALUES
+      merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
+      operator: operator,
     });
-  }, [selectedItems]);
+  }, [selectedItems, appId, field.key]);
+
+  const apply = useCallback(() => {
+    applyWithOperator(TermOperators.In);
+  }, [applyWithOperator]);
+
+  const applyNotIn = useCallback(() => {
+    applyWithOperator(TermOperators.NotIn);
+  }, [applyWithOperator]);
+
+  const applyAll = useCallback(() => {
+    applyWithOperator(TermOperators.All);
+  }, [applyWithOperator]);
+
+  const applySomeNotIn = useCallback(() => {
+    applyWithOperator(TermOperators.SomeNotIn);
+  }, [applyWithOperator]);
 
   return (
     <div className="p-2 w-full max-w-md">
@@ -183,14 +201,33 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
         </Button>
       )}
 
-      <Separator className="my-2.5" />
+      <Separator className="my-4 border-border" id={`${field.key}_divider`} />
 
       <div className="flex align-right justify-end items-center space-x-2">
         <Button size="xs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems}>
           {t('common.filters.buttons.clear')}
         </Button>
         <div className="flex space-x-2">
-          <ActionButton size="xs" className="h-7" color="primary" actions={[]} onDefaultAction={apply}>
+          <ActionButton 
+            size="xs" 
+            className="h-7" 
+            color="primary" 
+            actions={[
+              {
+                label: t('common.filters.buttons.someNotIn'),
+                onClick: applySomeNotIn
+              },
+              {
+                label: t('common.filters.buttons.all'),
+                onClick: applyAll
+              },
+              {
+                label: t('common.filters.buttons.notIn'),
+                onClick: applyNotIn
+              },
+            ]} 
+            onDefaultAction={apply}
+          >
             {t('common.filters.buttons.apply')}
           </ActionButton>
         </div>

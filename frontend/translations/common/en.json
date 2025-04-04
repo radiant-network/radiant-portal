@@ -180,9 +180,11 @@
       "buttons": {
         "clear": "Clear",
         "apply": "Apply",
-        "all": "All",
-        "none": "None",
-        "showMore": "Show more"
+        "all": "All of",
+        "none": "None of",
+        "showMore": "Show more",
+        "someNotIn": "Any of",
+        "notIn": "None of"
       },
       "search": {
         "placeholder": "Search..."

@@ -180,9 +180,11 @@
       "buttons": {
         "clear": "Effacer",
         "apply": "Appliquer",
-        "all": "Tous",
-        "none": "Aucun",
-        "showMore": "Afficher plus"
+        "all": "Tous les",
+        "none": "Aucun des",
+        "showMore": "Afficher plus",
+        "someNotIn": "Certains des",
+        "notIn": "Aucun des"
       },
       "search": {
         "placeholder": "Rechercher..."

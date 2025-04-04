@@ -1,6 +1,4 @@
 import React from 'react';
-
-import { useConfig } from '@/components/model/applications-config';
 import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { SearchIcon } from 'lucide-react';
@@ -31,9 +29,8 @@ function FilterComponent({
 }
 
 export function FilterContainer({ field }: { field: AggregationConfig }) {
-  const [collapsed, setCollapsed] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
   const [searchVisible, setSearchVisible] = React.useState(false);
-  const config = useConfig();
   const { t } = useI18n();
 
   function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
@@ -42,14 +39,18 @@ export function FilterContainer({ field }: { field: AggregationConfig }) {
   }
 
   return (
-    <Accordion type="single" collapsible onValueChange={() => setCollapsed(!collapsed)}>
-      <AccordionItem value="item-1">
+    <Accordion 
+      type="single" 
+      collapsible 
+      onValueChange={(value) => setIsOpen(!!value)}
+      >
+      <AccordionItem value={field.key}>
         <AccordionTrigger className="AccordionTrigger">
           <div className="flex items-center justify-between w-full text-base">
             <span className="capitalize">
               {t(`common.filters.labels.${field.key.replace('_', '')}`, { defaultValue: field.key.replace('_', '') })}
             </span>
-            {!collapsed && <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />}
+            {isOpen && field.type === 'multiple' && <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />}
           </div>
         </AccordionTrigger>
         <AccordionContent>
