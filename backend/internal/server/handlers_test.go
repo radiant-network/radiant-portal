@@ -34,6 +34,8 @@ func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrenc
 			RsNumber:           "rs111111111",
 			AaChange:           "p.Arg19His",
 			PickedConsequences: []string{"splice acceptor"},
+			GenotypeQuality:    1,
+			GnomadV3Af:         0.1,
 		},
 	}, nil
 }
@@ -98,7 +100,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 	router := gin.Default()
 	router.POST("/occurrences/:seq_id/list", OccurrencesListHandler(repo))
 	body := `{
-			"selected_fields":[
+			"additional_fields":[
 				"seq_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
 			]
 	}`
@@ -120,7 +122,9 @@ func Test_OccurrencesListHandler(t *testing.T) {
         "variant_class": "class1",
 		"rsnumber": "rs111111111",
 		"aa_change": "p.Arg19His",
-		"picked_consequences": ["splice acceptor"]
+		"picked_consequences": ["splice acceptor"],
+		"genotype_quality": 1,
+		"gnomad_v3_af":0.1
     }]`, w.Body.String())
 }
 

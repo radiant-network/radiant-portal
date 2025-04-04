@@ -126,3 +126,11 @@ var TranscriptIdField = Field{
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
+
+var ImpactScoreField = Field{
+	Name:          "impact_score",
+	CanBeSelected: true,
+	CanBeFiltered: false,
+	CanBeSorted:   true,
+	Table:         VariantTable,
+}

@@ -197,7 +197,7 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 		if sqon.Content.Leaf().Value == nil {
 			return nil, nil, fmt.Errorf("value must be defined: %s", sqon.Content.Leaf().Field)
 		}
-		meta := findByAlias(fields, sqon.Content.Leaf().Field)
+		meta := findFilterByAlias(fields, sqon.Content.Leaf().Field)
 
 		if meta == nil || !meta.CanBeFiltered {
 			return nil, nil, fmt.Errorf("unauthorized or unknown field: %s", sqon.Content.Leaf().Field)

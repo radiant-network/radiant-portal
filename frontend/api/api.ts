@@ -401,6 +401,12 @@ export interface LeafContent {
 export interface ListBody {
     /**
      * 
+     * @type {Array<string>}
+     * @memberof ListBody
+     */
+    'additional_fields'?: Array<string>;
+    /**
+     * 
      * @type {number}
      * @memberof ListBody
      */
@@ -417,12 +423,6 @@ export interface ListBody {
      * @memberof ListBody
      */
     'page_index'?: number;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ListBody
-     */
-    'selected_fields'?: Array<string>;
     /**
      * 
      * @type {Array<SortBody>}
@@ -453,7 +453,7 @@ export interface Occurrence {
      * @type {number}
      * @memberof Occurrence
      */
-    'ad_ratio'?: number;
+    'ad_ratio': number;
     /**
      * 
      * @type {number}
@@ -489,25 +489,31 @@ export interface Occurrence {
      * @type {number}
      * @memberof Occurrence
      */
-    'genotype_quality'?: number;
+    'genotype_quality': number;
     /**
      * 
      * @type {number}
      * @memberof Occurrence
      */
-    'gnomad_v3_af'?: number;
+    'gnomad_v3_af': number;
     /**
      * 
      * @type {string}
      * @memberof Occurrence
      */
-    'hgvsg'?: string;
+    'hgvsg': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Occurrence
+     */
+    'impact_score'?: string;
     /**
      * 
      * @type {number}
      * @memberof Occurrence
      */
-    'locus_id'?: number;
+    'locus_id': number;
     /**
      * 
      * @type {boolean}
@@ -531,13 +537,13 @@ export interface Occurrence {
      * @type {number}
      * @memberof Occurrence
      */
-    'pf'?: number;
+    'pf': number;
     /**
      * 
      * @type {Array<string>}
      * @memberof Occurrence
      */
-    'picked_consequences'?: Array<string>;
+    'picked_consequences': Array<string>;
     /**
      * 
      * @type {string}
@@ -549,7 +555,7 @@ export interface Occurrence {
      * @type {number}
      * @memberof Occurrence
      */
-    'seq_id'?: number;
+    'seq_id': number;
     /**
      * 
      * @type {string}
@@ -567,7 +573,7 @@ export interface Occurrence {
      * @type {string}
      * @memberof Occurrence
      */
-    'variant_class'?: string;
+    'variant_class': string;
     /**
      * 
      * @type {string}
@@ -579,7 +585,7 @@ export interface Occurrence {
      * @type {string}
      * @memberof Occurrence
      */
-    'zygosity'?: string;
+    'zygosity': string;
 }
 /**
  * 

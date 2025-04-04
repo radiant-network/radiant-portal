@@ -2,6 +2,7 @@
 CREATE TABLE `variants`
 (
     `locus_id`               bigint,
+    `impact_score`           int(11) NULL,
     `af`                     decimal(7, 6),
     `pf`                     decimal(7, 6),
     `gnomad_v3_af`           decimal(7, 6),
