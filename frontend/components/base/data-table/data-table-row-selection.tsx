@@ -1,5 +1,5 @@
 import { CellContext, HeaderContext } from '@tanstack/react-table';
-import { Checkbox, CheckboxProps } from '../ui/checkbox';
+import { Checkbox } from '../ui/checkbox';
 
 /**
  * Return TableRowSelection for a column header
@@ -8,17 +8,17 @@ import { Checkbox, CheckboxProps } from '../ui/checkbox';
  *  id: "row_selection",
  *  header: getTableRowSelectionHeader,
  *  cell: getTableRowSelectionCell,
- *  size: 32,
- *  minSize: 24,
  * }
  */
 export function getTableRowSelectionHeader({ table }: HeaderContext<any, any>) {
   return (
-    <Checkbox
-      checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-      onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-      aria-label="Select all"
-    />
+    <div className="flex items-center justify-center">
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    </div>
   );
 }
 
@@ -29,13 +29,11 @@ export function getTableRowSelectionHeader({ table }: HeaderContext<any, any>) {
  *  id: "row_selection",
  *  header: getTableRowSelectionHeader,
  *  cell: getTableRowSelectionCell,
- *  size: 32,
- *  minSize: 24,
  * }
  */
 export function getTableRowSelectionCell({ row }: CellContext<any, any>) {
   return (
-    <div className="pl-2">
+    <div className="flex items-center justify-center">
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={value => row.toggleSelected(!!value)}
