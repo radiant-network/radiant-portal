@@ -12,7 +12,6 @@ import { numberFormat } from '@/components/lib/number-format';
 import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
 import { useAggregationBuilder } from './use-aggregation-builder';
-import { XCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/base/ui/skeleton';
 
 interface IProps {
@@ -181,31 +180,35 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
       </div>
 
       <div>
-        {isLoading
-          ? // Loading skeleton state
-            Array.from({ length: 3 }, (_, i) => (
-              <div className="flex justify-between items-center py-2 space-x-2" key={`skeleton-${i}`}>
-                <Skeleton className="w-full h-6 rounded" />
-                <Skeleton className="h-6 w-12 rounded-md" />
+        {isLoading ? (
+          // Loading skeleton state
+          Array.from({ length: 3 }, (_, i) => (
+            <div className="flex justify-between items-center py-2 space-x-2" key={`skeleton-${i}`}>
+              <Skeleton className="w-full h-6 rounded" />
+              <Skeleton className="h-6 w-12 rounded-md" />
+            </div>
+          ))
+        ) : items.length === 0 ? (
+          <div className="text-muted-foreground text-center py-4">{t('common.filters.noValuesFound')}</div>
+        ) : (
+          // Actual content
+          Array.from({ length: visibleItemsCount }, (_, i) => (
+            <div className="space-y-3 pt-2" key={items[i].key}>
+              <div className="flex justify-between items-center">
+                <label className="flex items-center space-x-2 overflow-hidden">
+                  <Checkbox
+                    className="w-4 h-4"
+                    checked={selectedItems.some(f => f === items[i].key)}
+                    onCheckedChange={() => itemSelected(items[i])}
+                  />
+                  <div className="overflow-hidden text-ellipsis">{items[i].key}</div>
+                  <span className="checkmark"></span>
+                </label>
+                <span className="bg-accent px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
               </div>
-            ))
-          : // Actual content
-            Array.from({ length: visibleItemsCount }, (_, i) => (
-              <div className="space-y-3 pt-2" key={items[i].key}>
-                <div className="flex justify-between items-center">
-                  <label className="flex items-center space-x-2 overflow-hidden">
-                    <Checkbox
-                      className="w-4 h-4"
-                      checked={selectedItems.some(f => f === items[i].key)}
-                      onCheckedChange={() => itemSelected(items[i])}
-                    />
-                    <div className="overflow-hidden text-ellipsis">{items[i].key}</div>
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="bg-accent px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
-                </div>
-              </div>
-            ))}
+            </div>
+          ))
+        )}
       </div>
 
       {!isLoading && items.length > visibleItemsCount && (

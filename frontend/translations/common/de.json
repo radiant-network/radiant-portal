@@ -189,6 +189,7 @@
       "search": {
         "placeholder": "Suchen..."
       },
+      "noValuesFound": "Keine Werte gefunden",
       "unsupportedType": "Nicht unterstützter Typ"
     },
     "variant": {
