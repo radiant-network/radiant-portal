@@ -1,18 +1,13 @@
-import { IValueFilter } from "@/components/model/sqon";
-import { SqonOpEnum } from "@/api/api";
-import { useState } from "react";
-import take from "lodash/take";
-import IntersectionOperator from "../operator/operator-intersection";
-import UnionOperator from "../operator/operator-union";
-import { ChevronRight, ChevronLeft } from "lucide-react";
-import QueryPillValuesContainer, {
-  QueryPillValuesContainerProps,
-} from "./query-pill-values-container";
+import { IValueFilter } from '@/components/model/sqon';
+import { SqonOpEnum } from '@/api/api';
+import { useState } from 'react';
+import take from 'lodash/take';
+import IntersectionOperator from '../operator/operator-intersection';
+import UnionOperator from '../operator/operator-union';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
+import QueryPillValuesContainer, { QueryPillValuesContainerProps } from './query-pill-values-container';
 
-export type QueryPillValuesProps = Exclude<
-  QueryPillValuesContainerProps,
-  "canExpand"
-> & {
+export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canExpand'> & {
   valueFilter: IValueFilter;
 };
 
@@ -20,9 +15,7 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
 
   const canExpand = valueFilter.content.value.length > 3;
-  const values = expanded
-    ? valueFilter.content.value
-    : take(valueFilter.content.value, 3);
+  const values = expanded ? valueFilter.content.value : take(valueFilter.content.value, 3);
 
   return (
     <QueryPillValuesContainer canExpand={canExpand} {...props}>
@@ -48,7 +41,7 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
           {expanded ? (
             <ChevronLeft
               size={16}
-              onClick={(e) => {
+              onClick={e => {
                 e.preventDefault();
                 setExpanded(false);
               }}
@@ -56,7 +49,7 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
           ) : (
             <ChevronRight
               size={16}
-              onClick={(e) => {
+              onClick={e => {
                 e.preventDefault();
                 setExpanded(true);
               }}
