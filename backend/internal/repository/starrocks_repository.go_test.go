@@ -121,7 +121,7 @@ func Test_CountOccurrences_Return_Count_That_Match_Filters(t *testing.T) {
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "filter",
-				Value: "PASS",
+				Value: []interface{}{"PASS"},
 			},
 
 			Op: "in",
@@ -143,7 +143,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "filter",
-				Value: "PASS",
+				Value: []interface{}{"PASS"},
 			},
 			Op: "in",
 		}
@@ -172,7 +172,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "clinvar",
-				Value: "Pathogenic",
+				Value: []interface{}{"Pathogenic"},
 			},
 
 			Op: "in",
@@ -304,7 +304,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "impact_score",
-				Value: 2,
+				Value: []interface{}{2},
 			},
 
 			Op: ">",
@@ -333,8 +333,8 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
-				{Op: ">", Content: &types.LeafContent{Field: "impact_score", Value: 2}},
-				{Op: ">", Content: &types.LeafContent{Field: "genotype_quality", Value: 50}},
+				{Op: ">", Content: &types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
+				{Op: ">", Content: &types.LeafContent{Field: "genotype_quality", Value: []interface{}{50}}},
 			},
 			Op: "and",
 		}
@@ -377,7 +377,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 		sqon := &types.Sqon{
 			Content: types.LeafContent{
 				Field: "filter",
-				Value: "PASS",
+				Value: []interface{}{"PASS"},
 			},
 			Op: "in",
 		}
@@ -399,8 +399,8 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
-				{Op: "in", Content: &types.LeafContent{Field: "filter", Value: "PASS"}},
-				{Op: "in", Content: &types.LeafContent{Field: "zygosity", Value: "HOM"}},
+				{Op: "in", Content: &types.LeafContent{Field: "filter", Value: []interface{}{"PASS"}}},
+				{Op: "in", Content: &types.LeafContent{Field: "zygosity", Value: []interface{}{"HOM"}}},
 			},
 			Op: "and",
 		}
@@ -459,8 +459,8 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Scor
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
-				{Op: "in", Content: types.LeafContent{Field: "filter", Value: "PASS"}},
-				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: 2}},
+				{Op: "in", Content: types.LeafContent{Field: "filter", Value: []interface{}{"PASS"}}},
+				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
 			},
 			Op: "and",
 		}
@@ -514,7 +514,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
-				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: 2}},
+				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
 				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
 			},
 			Op: "and",
@@ -541,7 +541,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_An
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
-				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: 2}},
+				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
 				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
 				{Op: "in", Content: types.LeafContent{Field: "hpo_gene_panel", Value: []interface{}{"hpo_panel1"}}},
 			},
@@ -568,7 +568,7 @@ func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_pane
 		repo := NewStarrocksRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
-				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: 2}},
+				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
 				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
 				{Op: "in", Content: types.LeafContent{Field: "hpo_gene_panel", Value: []interface{}{"hpo_panel1"}}},
 			},

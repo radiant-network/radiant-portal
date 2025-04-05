@@ -152,7 +152,7 @@ func Test_OccurrencesAggregateHandler(t *testing.T) {
 				"op":"in",
 				"content":{
 					"field": "filter",
-					"value": "PASS"
+					"value": ["PASS"]
 				}
 		    },
 			"size": 10
@@ -177,7 +177,7 @@ func Test_OccurrencesStatisticsHandler(t *testing.T) {
 				"op":"in",
 				"content":{
 					"field": "filter",
-					"value": "PASS"
+					"value": ["PASS"]
 				}
 		    }
 	}`

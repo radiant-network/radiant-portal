@@ -39,7 +39,7 @@ func Test_SqonToFilter_Return_Expected_Filters(t *testing.T) {
 		Op: "and",
 		Content: SqonArray{
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
-			{Op: ">", Content: LeafContent{Field: "salary", Value: 50000}}},
+			{Op: ">", Content: LeafContent{Field: "salary", Value: []interface{}{50000}}}},
 	}
 
 	ast, fields, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
@@ -110,12 +110,12 @@ func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_A_Single_Value(t *tes
 	t.Parallel()
 	sqon := Sqon{
 		Op:      "between",
-		Content: LeafContent{Field: "age", Value: 30},
+		Content: LeafContent{Field: "age", Value: []interface{}{30}},
 	}
 
 	_, _, err := sqonToFilter(&sqon, allEmpoyeeFields, nil)
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "value should be an array of 2 elements when operation is 'between'")
+	assert.ErrorContains(t, err, "value array should contain exactly 2 elements when operation is 'between'")
 }
 
 func Test_SqonToFilter_Return_Error_When_Between_Filter_Is_An_Array_With_One_Element(t *testing.T) {
@@ -193,7 +193,7 @@ func Test_SqonToFilter_Return_Expected_Filters_When_Sqon_Is_Complex(t *testing.T
 				Op: "and",
 				Content: SqonArray{
 					{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{10, 20}}},
-					{Op: ">=", Content: LeafContent{Field: "salary", Value: 50000}},
+					{Op: ">=", Content: LeafContent{Field: "salary", Value: []interface{}{50000}}},
 				},
 			},
 			{Op: "in", Content: LeafContent{Field: "hobbies", Value: []interface{}{"soccer", "hiking"}}},

@@ -29,8 +29,8 @@ func (SqonArray) IsLeaf() bool { return false }
 
 // LeafContent represents a leaf condition.
 type LeafContent struct {
-	Field string      `json:"field"`
-	Value interface{} `json:"value"`
+	Field string        `json:"field"`
+	Value []interface{} `json:"value"`
 }
 
 func (LeafContent) IsLeaf() bool { return true }

@@ -27,14 +27,14 @@ func Test_Unmarshall_SQON_Return_Expected_Struct(t *testing.T) {
       {
         "content": {
           "field": "analysis.first_published_at",
-          "value": 1640926800000
+          "value": [1640926800000]
         },
         "op": ">="
       },
       {
         "content": {
           "field": "analysis.first_published_at",
-          "value": 1672549199999
+          "value": [1672549199999]
         },
         "op": "<="
       },
