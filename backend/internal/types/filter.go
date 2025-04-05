@@ -194,7 +194,7 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 		return nil, nil, nil
 
 	case "in", "not-in", "<", ">", "<=", ">=", "between", "all":
-		if sqon.Content.Leaf().Value == nil {
+		if sqon.Content.Leaf().Value == nil || (sqon.Content.Leaf().Value != nil && len(sqon.Content.Leaf().Value) == 0) {
 			return nil, nil, fmt.Errorf("value must be defined: %s", sqon.Content.Leaf().Field)
 		}
 		meta := findFilterByAlias(fields, sqon.Content.Leaf().Field)
@@ -209,18 +209,22 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 		}
 
 		if sqon.Op == "between" {
-			values, ok := sqon.Content.Leaf().Value.([]interface{})
-			if !ok {
-				return nil, nil, fmt.Errorf("value should be an array of 2 elements when operation is 'between': %s", sqon.Content.Leaf().Field)
-			}
-			if len(values) != 2 {
+			if len(sqon.Content.Leaf().Value) != 2 {
 				return nil, nil, fmt.Errorf("value array should contain exactly 2 elements when operation is 'between': %s", sqon.Content.Leaf().Field)
 			}
 		}
 
-		_, isMultipleValue := sqon.Content.Leaf().Value.([]interface{})
+		isMultipleValue := len(sqon.Content.Leaf().Value) > 1
 		if sqon.Op != "in" && sqon.Op != "not-in" && sqon.Op != "all" && sqon.Op != "between" && isMultipleValue {
 			return nil, nil, fmt.Errorf("operation %s must have exactly one value: %s", sqon.Op, sqon.Content.Leaf().Field)
+		}
+
+		if sqon.Op == "<" || sqon.Op == ">" || sqon.Op == "<=" || sqon.Op == ">=" {
+			return &ComparisonNode{
+				Operator: sqon.Op,
+				Value:    sqon.Content.Leaf().Value[0],
+				Field:    *meta,
+			}, []Field{*meta}, nil
 		}
 
 		return &ComparisonNode{

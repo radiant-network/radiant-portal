@@ -88,7 +88,7 @@ func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *tes
 				"op":"in",
 				"content":{
 					"field": "filter",
-					"value": "PASS"
+					"value": ["PASS"]
 				}
 		}
 		}`
@@ -107,7 +107,7 @@ func Test_OccurrencesCount_Return_Expected_Count_When_Sqon_Specified(t *testing.
 				"op":"in",
 				"content":{
 					"field": "filter",
-					"value": "PASS"
+					"value": ["PASS"]
 				}
 		    }
 		}`
@@ -124,14 +124,14 @@ func Test_Aggregation(t *testing.T) {
 						"op":"in",
 						"content":{
 							"field": "filter",
-							"value": "PASS"
+							"value": ["PASS"]
 						}
 					},
 					{
 						"op": "in",
 						"content":{
 							"field": "zygosity",
-							"value": "HOM"
+							"value": ["HOM"]
 						}
 					}            
 		
@@ -153,7 +153,7 @@ func Test_Statistics(t *testing.T) {
 						"op":"in",
 						"content":{
 							"field": "filter",
-							"value": "PASS"
+							"value": ["PASS"]
 						}
 					}        
 				]
@@ -175,7 +175,7 @@ func Test_Filter_On_Consequence_Column(t *testing.T) {
 						"op": "in",
 						"content": {
 							"field": "impact_score",
-							"value": "3"
+							"value": ["3"]
 						}
 					}            
 		

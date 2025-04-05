@@ -147,7 +147,10 @@ components:
       properties:
         field:
           type: string
-        value: {}
+        value:
+          items: {}
+          type: array
+          uniqueItems: false
       type: object
     ListBody:
       description: Body of a list request

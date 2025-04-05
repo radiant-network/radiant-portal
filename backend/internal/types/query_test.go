@@ -12,7 +12,7 @@ func Test_NewAggregationQuery_Return_Error_When_Aggregate_Field_Is_Unknown(t *te
 		Op: "and",
 		Content: SqonArray{
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
-			{Op: ">", Content: LeafContent{Field: "salary", Value: 50000}},
+			{Op: ">", Content: LeafContent{Field: "salary", Value: []interface{}{50000}}},
 		},
 	}
 
@@ -31,7 +31,7 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Or(t *testing.
 		Op: "or",
 		Content: SqonArray{
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
-			{Op: ">", Content: LeafContent{Field: "salary", Value: 50000}},
+			{Op: ">", Content: LeafContent{Field: "salary", Value: []interface{}{50000}}},
 		},
 	}
 

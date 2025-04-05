@@ -388,10 +388,10 @@ export interface LeafContent {
     'field'?: string;
     /**
      * 
-     * @type {any}
+     * @type {Array<any>}
      * @memberof LeafContent
      */
-    'value'?: any;
+    'value'?: Array<any>;
 }
 /**
  * Body of a list request
