@@ -35,8 +35,8 @@ const config: PortalConfig = {
           rangeTypes: [
             { key: 'year', name: 'Year' },
             { key: 'month', name: 'Month' },
-            { key: 'day', name: 'Day' }
-          ]
+            { key: 'day', name: 'Day' },
+          ],
         },
       },
     ],
@@ -48,8 +48,8 @@ const meta = {
   component: NumericalFilter,
   tags: ['autodocs'],
   args: {
-    field: { 
-      key: 'impact_score', 
+    field: {
+      key: 'impact_score',
       type: 'numerical',
       defaults: {
         min: 0,
@@ -58,7 +58,7 @@ const meta = {
         defaultMax: 100,
         intervalDecimal: 2,
         defaultOperator: RangeOperators.GreaterThan,
-      }
+      },
     },
   },
   decorators: [
@@ -134,8 +134,8 @@ export const NoDataToggleHidden: Story = {
 
 export const RangeFilterWithInterval: Story = {
   args: {
-    field: { 
-      key: 'age', 
+    field: {
+      key: 'age',
       type: 'numerical',
       defaults: {
         min: 0,
@@ -144,7 +144,7 @@ export const RangeFilterWithInterval: Story = {
         defaultMax: 120,
         intervalDecimal: 0,
         defaultOperator: RangeOperators.Between,
-      }
+      },
     },
   },
   render: args => {
@@ -163,7 +163,8 @@ export const RangeFilterWithInterval: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'A numerical filter with range constraints. Note: Shows ">" operator by default due to global config override.',
+        story:
+          'A numerical filter with range constraints. Note: Shows ">" operator by default due to global config override.',
       },
     },
   },
@@ -171,8 +172,8 @@ export const RangeFilterWithInterval: Story = {
 
 export const RangeFilterWithRangeTypes: Story = {
   args: {
-    field: { 
-      key: 'age', 
+    field: {
+      key: 'age',
       type: 'numerical',
       defaults: {
         min: 0,
@@ -184,9 +185,9 @@ export const RangeFilterWithRangeTypes: Story = {
         rangeTypes: [
           { key: 'year', name: 'Year' },
           { key: 'month', name: 'Month' },
-          { key: 'day', name: 'Day' }
-        ]
-      }
+          { key: 'day', name: 'Day' },
+        ],
+      },
     },
   },
   render: args => {
@@ -232,7 +233,8 @@ export const RangeFilterWithRangeTypes: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'A numerical filter with range type options (Year, Month, Day) and unit selection. Tests validate range operator changes, unit selection, no data visibility, and clear functionality.',
+        story:
+          'A numerical filter with range type options (Year, Month, Day) and unit selection. Tests validate range operator changes, unit selection, no data visibility, and clear functionality.',
       },
     },
   },

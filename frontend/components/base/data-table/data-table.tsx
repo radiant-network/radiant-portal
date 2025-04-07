@@ -386,7 +386,7 @@ function DataTable<T>({
           ))}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-end space-x-2 py-4 mt-4">
+      <div className="flex items-center justify-end space-x-2 py-4">
         <div>
           {/* PageSize select */}
           <Select

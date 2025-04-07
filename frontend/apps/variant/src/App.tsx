@@ -13,6 +13,7 @@ import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { useConfig } from '@/components/model/applications-config';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import VariantTablePreview from './feature/variant-table/variant-table-preview';
+import { FilterComponent, FilterContainer } from '@/components/feature/query-filters/filter-container';
 
 type OccurrencesListInput = {
   seqId: string;
@@ -139,6 +140,16 @@ function App() {
             onActiveQueryChange={sqon => setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)}
             onStateChange={state => {
               setQbState(state);
+            }}
+            queryPillFacetFilterConfig={{
+              enable: true,
+              blacklistedFacets: ['locus_id'],
+              onFacetClick: filter => (
+                <FilterComponent
+                  field={config.variant_entity.aggregations.find(f => f.key === filter.content.field)!}
+                  searchVisible={true}
+                />
+              ),
             }}
           />
         </div>

@@ -7,15 +7,9 @@ import { NumericalFilter } from './numerical-filter';
 import { ToggleFilter } from './toggle-filter';
 import { useI18n } from '@/components/hooks/i18n';
 
-function FilterComponent({
-  field,
-  searchVisible,
-}: {
-  field: AggregationConfig;
-  searchVisible: boolean;
-}) {
+export function FilterComponent({ field, searchVisible }: { field: AggregationConfig; searchVisible: boolean }) {
   const { t } = useI18n();
-  
+
   switch (field.type) {
     case 'multiple':
       return <MultiSelectFilter field={field} searchVisible={searchVisible} />;
@@ -38,19 +32,16 @@ export function FilterContainer({ field }: { field: AggregationConfig }) {
     setSearchVisible(!searchVisible);
   }
   return (
-    <Accordion 
-      type="single" 
-      collapsible 
-      value={openItem}
-      onValueChange={setOpenItem}
-      >
+    <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem}>
       <AccordionItem key={field.key} value={field.key}>
         <AccordionTrigger className="AccordionTrigger">
           <div className="flex items-center justify-between w-full text-base">
             <span className="capitalize">
               {t(`common.filters.labels.${field.key.replace('_', '')}`, { defaultValue: field.key.replace('_', '') })}
             </span>
-            { openItem === field.key && field.type === 'multiple' && <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />}
+            {openItem === field.key && field.type === 'multiple' && (
+              <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
+            )}
           </div>
         </AccordionTrigger>
         <AccordionContent>
