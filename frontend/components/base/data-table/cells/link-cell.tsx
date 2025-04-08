@@ -1,16 +1,25 @@
+import { Link } from 'react-router';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { cn } from '@/components/lib/utils';
 
-type ExternalLinkCellProps = {
+type LinkCellProps = {
   className?: string;
   url: string;
   children?: any;
 };
 
-function LinkCell({ className, url, children }: ExternalLinkCellProps) {
+function LinkCell({ className, url, children }: LinkCellProps) {
   return (
-    <a href={url} className={cn('overflow-hidden text-ellipsis underline hover:no-underline', className)}>
-      {children}
-    </a>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link to={url} className={cn('overflow-hidden text-ellipsis underline hover:no-underline', className)}>
+            {children}
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent>{children}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

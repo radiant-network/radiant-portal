@@ -5,6 +5,7 @@ import { TableColumnDef } from '@/components/base/data-table/data-table';
 import { GripVerticalIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
+import { useI18n } from '@/components/hooks/i18n';
 
 /**
  * SortableColumnSetting
@@ -18,6 +19,7 @@ type SortableColumnSetting<TData> = {
   handleCheckboxChange: (target: string, checked: boolean) => void;
 };
 function TableSortableColumnSetting({ id, column, checked, handleCheckboxChange }: SortableColumnSetting<any>) {
+  const { t } = useI18n();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -35,7 +37,7 @@ function TableSortableColumnSetting({ id, column, checked, handleCheckboxChange 
           handleCheckboxChange(column.id, !!value);
         }}
       />
-      <label className="flex pl-[4px] text-[15px] leading-none">{column.header}</label>
+      <label className="flex pl-[4px] text-[15px] leading-none">{t(`common.variant.headers.${column.id}`)}</label>
     </div>
   );
 }
