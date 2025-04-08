@@ -32,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
+import { TFunction } from 'i18next';
 
 export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
   id: string;
@@ -109,12 +110,15 @@ function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
 
 /**
  * Use header.column.getNextSortingOrder() to display the next action on sort
+ *
+ * @param t
  * @param sortingOrder 'asc' | 'desc' | false
  * @returns String
  */
-function getNextSortingOrderHeaderTitle(sortingOrder: SortDirection | boolean): string {
-  const { t } = useI18n();
-
+function getNextSortingOrderHeaderTitle(
+  t: TFunction<string, undefined>,
+  sortingOrder: SortDirection | boolean,
+): string {
   if (sortingOrder === 'asc') {
     return t('common.table.sort.ascending');
   }
@@ -193,6 +197,8 @@ function DataTable<T>({
   subComponent,
   total,
 }: TableProps<T>) {
+  const { t } = useI18n();
+
   // default values
   const defaultColumnVisibility = deserializeColumnVisibility(defaultColumnSettings);
   const defaultColumnOrder = deserializeColumnOrder(defaultColumnSettings);
@@ -318,7 +324,7 @@ function DataTable<T>({
                       onClick={header.column.getToggleSortingHandler()}
                       title={
                         header.column.getCanSort()
-                          ? getNextSortingOrderHeaderTitle(header.column.getNextSortingOrder())
+                          ? getNextSortingOrderHeaderTitle(t, header.column.getNextSortingOrder())
                           : undefined
                       }
                     >
