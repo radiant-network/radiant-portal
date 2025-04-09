@@ -183,7 +183,8 @@
         "apply": "Appliquer",
         "all": "Tous les",
         "none": "Aucun des",
-        "showMore": "Afficher plus",
+        "showMore": "{{count}} de plus",
+        "showLess": "Moins",
         "someNotIn": "Certains des",
         "notIn": "Aucun des"
       },

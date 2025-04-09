@@ -182,7 +182,8 @@
         "apply": "Apply",
         "all": "All of",
         "none": "None of",
-        "showMore": "Show more",
+        "showMore": "{{count}} more",
+        "showLess": "Less",
         "someNotIn": "Any of",
         "notIn": "None of"
       },

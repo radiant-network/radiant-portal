@@ -182,7 +182,8 @@
         "apply": "Anwenden",
         "all": "Alle von",
         "none": "Keine von",
-        "showMore": "Mehr anzeigen",
+        "showMore": "{{count}} mehr",
+        "showLess": "Weniger anzeigen",
         "someNotIn": "Einige von",
         "notIn": "Keine von"
       },
