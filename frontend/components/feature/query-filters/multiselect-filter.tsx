@@ -156,7 +156,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
   }, [applyWithOperator]);
 
   const applySomeNotIn = useCallback(() => {
-    applyWithOperator(TermOperators.SomeNotIn);
+    applyWithOperator(TermOperators.In);
   }, [applyWithOperator]);
 
   return (
