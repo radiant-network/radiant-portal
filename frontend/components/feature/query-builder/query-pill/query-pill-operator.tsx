@@ -4,6 +4,7 @@ import GreaterThanOperatorIcon from "@/components/base/icons/greater-than-operat
 import GreaterThanOrEqualOperatorIcon from "@/components/base/icons/greater-than-or-equal-operator-icon";
 import LessThanOperatorIcon from "@/components/base/icons/less-than-operator-icon";
 import LessThanOrEqualOperatorIcon from "@/components/base/icons/less-than-or-equal-operator-icon";
+import NotInOperatorIcon from "@/components/base/icons/not-in-operator-icon";
 import { SqonOpEnum } from "@/api/api";
 
 export type QueryPillOperatorProps = {
@@ -27,6 +28,7 @@ function QueryPillOperator({ type, size, className }: QueryPillOperatorProps) {
     case SqonOpEnum.Between:
       return <ElementOperatorIcon size={size} className={className} />;
     case SqonOpEnum.NotIn:
+      return <NotInOperatorIcon size={size} className={className} />;
     default:
       return <EqualOperatorIcon size={size} className={className} />;
   }
