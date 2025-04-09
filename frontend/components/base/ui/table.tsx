@@ -5,7 +5,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 
 const tableVariants = tv({
   slots: {
-    base: 'rounded w-full caption-bottom table-fixed [&>tbody>tr>td]:px-2 [&>thead>tr>th]:px-2 [&>thead>tr>th]:h-10',
+    base: 'rounded w-full border-separate border-spacing-0 caption-bottom table-fixed [&>tbody>tr>td]:px-2 [&>thead>tr>th]:px-2 [&>thead>tr>th]:h-10 [&>tfoot>tr>td]:px-2 [&>tfoot>tr>td]:h-10',
   },
   variants: {
     size: {
@@ -39,20 +39,18 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(({ className, size,
 Table.displayName = 'Table';
 
 const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
-  ({ className, ...props }, ref) => <thead ref={ref} className={cn('[&_tr]:border-b', className)} {...props} />,
+  ({ className, ...props }, ref) => <thead ref={ref} className={className} {...props} />,
 );
 TableHeader.displayName = 'TableHeader';
 
 const TableBody = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
-  ({ className, ...props }, ref) => (
-    <tbody ref={ref} className={cn('[&_tr:last-child]:border-0', className)} {...props} />
-  ),
+  ({ className, ...props }, ref) => <tbody ref={ref} className={className} {...props} />,
 );
 TableBody.displayName = 'TableBody';
 
 const TableFooter = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <tfoot ref={ref} className={cn('border-t bg-muted/50 font-medium [&>tr]:last:border-b-0', className)} {...props} />
+    <tfoot ref={ref} className={cn('[&_td]:border-t bg-muted/50 font-medium', className)} {...props} />
   ),
 );
 TableFooter.displayName = 'TableFooter';
@@ -61,7 +59,10 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
   ({ className, ...props }, ref) => (
     <tr
       ref={ref}
-      className={cn('border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted', className)}
+      className={cn(
+        'transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted [&>td]:border-b [&>th]:border-b [&>td]:last:border-b-0',
+        className,
+      )}
       {...props}
     />
   ),

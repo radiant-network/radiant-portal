@@ -172,19 +172,16 @@ function getPageCount(pagination: PaginationState, total: number) {
  * @param extra
  * @returns
  */
-function getColumnPinningExtraCN(column: Column<any>, isHeader: boolean = false): string {
+function getColumnPinningExtraCN(column: Column<any>): string {
   const isPinned = column.getIsPinned();
   if (!isPinned) return '';
   const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
   const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
 
   return cn(
-    isPinned && 'sticky z-10 bg-white',
-    !isHeader && 'shadow-[inset_0_1px_0_rgba(0,0,0,0.1)]',
-    isLastLeftPinnedColumn && !isHeader && '!shadow-[inset_-1px_1px_rgba(0,0,0,0.1)]',
-    isFirstRightPinnedColumn && !isHeader && '!shadow-[inset_1px_1px_rgba(0,0,0,0.1)]',
-    isLastLeftPinnedColumn && isHeader && '!shadow-[inset_-1px_0_rgba(0,0,0,0.1)]',
-    isFirstRightPinnedColumn && isHeader && '!shadow-[inset_1px_0_rgba(0,0,0,0.1)]',
+    isPinned && 'sticky z-10 bg-background',
+    isLastLeftPinnedColumn && 'border-r',
+    isFirstRightPinnedColumn && 'border-l',
   );
 }
 
@@ -393,7 +390,7 @@ function DataTable<T>({
                 <TableHead
                   key={header.id}
                   colSpan={header.colSpan}
-                  className={cn(getColumnPinningExtraCN(header.column, true))}
+                  className={cn(getColumnPinningExtraCN(header.column))}
                   style={{
                     width: `calc(var(--header-${header?.id}-size) * 1px)`,
                     ...getCommonPinningStyles(header.column),
