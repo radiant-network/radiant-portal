@@ -442,8 +442,8 @@ function DataTable<T>({
           {/* Render skeleton loading */}
           {loadingStates?.list &&
             new Array(pagination.pageSize).fill(0).map((_, index) => (
-              <TableRow key={`skeleton-${index}`}>
-                <TableCell key={`skeleton-row-${index}`} colSpan={columnSettings.length}>
+              <TableRow key={`skeleton-row-${index}`}>
+                <TableCell colSpan={columnSettings.length}>
                   <Skeleton className="w-full h-[32px]" />
                 </TableCell>
               </TableRow>
@@ -490,7 +490,9 @@ function DataTable<T>({
             </SelectTrigger>
             <SelectContent>
               {[10, 20, 30, 40, 50].map(pageSize => (
-                <SelectItem key={pageSize} value={String(pageSize)}>{pageSize}</SelectItem>
+                <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
+                  {pageSize}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

@@ -1,6 +1,6 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { Badge } from '@/components/base/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
@@ -19,16 +19,14 @@ function OmimCell({ codes = [] }: OmimCellProps) {
     <>
       {codes.map(code => {
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Badge key={code} className={cn('me-2')}>
-                  {code}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>{t(`common.variant.omim.${code}`)}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip key={code}>
+            <TooltipTrigger>
+              <Badge key={code} className={cn('me-2')}>
+                {code}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>{t(`common.variant.omim.${code}`)}</TooltipContent>
+          </Tooltip>
         );
       })}
     </>

@@ -13,7 +13,7 @@ type ManePillProps = {
 
 function ManePill({ children }: ManePillProps) {
   return (
-    <span className="inline-flex items-center justify-center w-6 h-6 me-1 text-xs text-white bg-primary rounded-full">
+    <span className="inline-flex items-center justify-center w-6 h-6 me-1 text-xs text-primary-foreground bg-primary rounded-full">
       {children}
     </span>
   );
@@ -33,14 +33,12 @@ function ManeCell({ canonical, mane_select, mane_plus }: ManeCellProps) {
       {pills
         .filter(({ condition }) => condition)
         .map(({ label, tooltip }, index) => (
-          <TooltipProvider key={index}>
-            <Tooltip>
-              <TooltipTrigger>
-                <ManePill>{label}</ManePill>
-              </TooltipTrigger>
-              <TooltipContent>{tooltip}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip key={index}>
+            <TooltipTrigger>
+              <ManePill>{label}</ManePill>
+            </TooltipTrigger>
+            <TooltipContent>{tooltip}</TooltipContent>
+          </Tooltip>
         ))}
     </>
   );

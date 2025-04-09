@@ -22,21 +22,21 @@ import { Interpretation, InterpretationFormRef } from './types';
 import { Spinner } from '@/components/base/spinner';
 
 type InterpretationDialogButtonProps = ButtonProps & {
-  occurence: Occurrence;
+  occurrence: Occurrence;
 };
 
 // Temporary flag to switch between somatic and germline interpretation forms
 // In the future, this should be determined based on the occurrence type or other criteria
 const isSomatic = false;
 
-function InterpretationDialogButton({ occurence, ...buttonProps }: InterpretationDialogButtonProps) {
+function InterpretationDialogButton({ occurrence, ...buttonProps }: InterpretationDialogButtonProps) {
   const [open, setOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const gerlimeFormRef = useRef<InterpretationFormRef>(null);
   const somaticFormRef = useRef<InterpretationFormRef>(null);
-  const { fetch, save } = useInterpretationHelper(occurence, isSomatic);
+  const { fetch, save } = useInterpretationHelper(occurrence, isSomatic);
 
-  const uniqueKey = `interpretation-${occurence.seq_id}-${occurence.locus_id}-${occurence.transcript_id}`;
+  const uniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
 
   const fetchInterpretation = useSWR<Interpretation>(uniqueKey, fetch, {
     revalidateOnFocus: false,
@@ -90,7 +90,7 @@ function InterpretationDialogButton({ occurence, ...buttonProps }: Interpretatio
             <Separator className="mt-6" />
             <div className="py-6 overflow-scroll space-y-6 h-[calc(95vh-150px)]">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
-              <InterpretationVariantHeader occurence={occurence} />
+              <InterpretationVariantHeader occurrence={occurrence} />
               <div className="grid gap-6 grid-cols-12">
                 <div className="col-span-7 border p-6 bg-muted">
                   {isSomatic ? (

@@ -3,7 +3,6 @@ import React from 'react';
 import SavedFiltersEditAction from './saved-filter-edit-action';
 import SavedFiltersUndoAction from './saved-filter-undo-action';
 import SavedFiltersStarAction from './saved-filter-star-action';
-import { TooltipProvider } from '@/components/base/ui/tooltip';
 import { useQueryBuilderContext } from '../query-builder-context';
 
 function SavedFiltersLeftActions({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
@@ -19,13 +18,11 @@ function SavedFiltersLeftActions({ className, ...props }: React.HTMLAttributes<H
       <div className="text-ellipsis overflow-hidden text-base">
         {selectedSavedFilter ? selectedSavedFilter.raw().title : queryBuilder.coreProps.savedFilterDefaultTitle}
       </div>
-      <TooltipProvider>
-        <div className="flex items-center" onClick={e => e.stopPropagation()}>
-          <SavedFiltersEditAction />
-          <SavedFiltersStarAction />
-          <SavedFiltersUndoAction />
-        </div>
-      </TooltipProvider>
+      <div className="flex items-center" onClick={e => e.stopPropagation()}>
+        <SavedFiltersEditAction />
+        <SavedFiltersStarAction />
+        <SavedFiltersUndoAction />
+      </div>
     </div>
   );
 }
