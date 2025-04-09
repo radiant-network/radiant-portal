@@ -454,6 +454,26 @@ func assertSearchInterpretationSomatic(t *testing.T, repo repository.Interpretat
 	}
 }
 
+func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId int, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewStarrocksRepository(db)
+		router := gin.Default()
+		router.GET("/occurrences/:seq_id/:locus_id/expended", server.GetExpendedOccurrence(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/%d/%d/expended", seqId, locusId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetExpendedOccurrence(t *testing.T) {
+	expected := `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "locus_id":1000, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`
+	assertGetExpendedOccurrence(t, "simple", 1, 1000, expected)
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartAllContainers()
 	code := m.Run()

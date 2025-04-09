@@ -17,6 +17,7 @@ type Occurrence = types.Occurrence
 type Aggregation = types.Aggregation
 type Sequencing = types.Sequencing
 type Statistics = types.Statistics
+type ExpendedOccurrence = types.ExpendedOccurrence
 
 type StarrocksRepository struct {
 	db *gorm.DB
@@ -30,6 +31,7 @@ type StarrocksDAO interface {
 	GetSequencing(seqId int) (*Sequencing, error)
 	GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error)
 	GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
+	GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -364,4 +366,20 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 	}
 
 	return output, err
+}
+
+func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error) {
+	tx := r.db.Table(types.ConsequenceTable.Name).Select("locus_id, gnomad_pli, gnomad_loeuf, spliceai_ds, spliceai_type, sift_score, sift_pred, fathmm_score, fathmm_pred, cadd_score, cadd_phred, revel_score").Where("locus_id = ? and picked = true", locusId)
+
+	var expendedOccurrence ExpendedOccurrence
+	err := tx.First(&expendedOccurrence).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching expended occurrence: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	return &expendedOccurrence, err
 }

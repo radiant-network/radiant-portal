@@ -601,3 +601,36 @@ func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 		c.JSON(http.StatusOK, hpoTerms)
 	}
 }
+
+// GetExpendedOccurrence handles retrieving expended information about occurrence
+// @Summary Get a ExpendedOccurrence
+// @Id getExpendedOccurrence
+// @Description Retrieve ExpendedOccurrence data for a given locus ID
+// @Tags occurrence
+// @Security bearerauth
+// @Param seq_id path string true "Sequence ID"
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {object} types.ExpendedOccurrence
+// @Failure 500 {object} map[string]string
+// @Router /occurrence/{seq_id}/{locus_id}/expended [get]
+func GetExpendedOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
+		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
+		if errSeq != nil || errLocus != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		expendedOccurrence, err := repo.GetExpendedOccurrence(seqId, locusId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+		if expendedOccurrence == nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		c.JSON(http.StatusOK, expendedOccurrence)
+	}
+}

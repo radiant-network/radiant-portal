@@ -38,6 +38,38 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
+    ExpendedOccurrence:
+      properties:
+        cadd_phred:
+          type: number
+        cadd_score:
+          type: number
+        fathmm_pred:
+          type: string
+        fathmm_score:
+          type: number
+        gnomad_loeuf:
+          type: number
+        gnomad_pli:
+          type: number
+        locus_id:
+          type: integer
+        revel_score:
+          type: number
+        sift_pred:
+          type: string
+        sift_score:
+          type: number
+        spliceai_ds:
+          type: number
+        spliceai_type:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      required:
+      - locus_id
+      type: object
     InterpretationGermline:
       properties:
         classification:
@@ -695,6 +727,43 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
+  /occurrence/{seq_id}/{locus_id}/expended:
+    get:
+      description: Retrieve ExpendedOccurrence data for a given locus ID
+      operationId: getExpendedOccurrence
+      parameters:
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpendedOccurrence'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get a ExpendedOccurrence
+      tags:
+      - occurrence
   /occurrences/{seq_id}/aggregate:
     post:
       description: Aggregate occurrences for a given sequence ID

@@ -94,6 +94,7 @@ func main() {
 	occurrencesGroup.POST("/:seq_id/list", server.OccurrencesListHandler(repoStarrocks))
 	occurrencesGroup.POST("/:seq_id/aggregate", server.OccurrencesAggregateHandler(repoStarrocks))
 	occurrencesGroup.POST("/:seq_id/statistics", server.OccurrencesStatisticsHandler(repoStarrocks))
+	occurrencesGroup.GET("/:seq_id/:locus_id/expended", server.GetExpendedOccurrence(repoStarrocks))
 
 	interpretationsGroup := r.Group("/interpretations")
 	interpretationsGroup.Use(roleAccessMiddleware)

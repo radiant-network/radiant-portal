@@ -679,6 +679,17 @@ func Test_GetTermAutoCompleteNoResult(t *testing.T) {
 	})
 }
 
+func Test_GetExpendedOccurrence(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewStarrocksRepository(db)
+		expendedOccurrence, err := repo.GetExpendedOccurrence(1, 1000)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1000), expendedOccurrence.LocusId)
+		assert.Equal(t, float32(0.1), expendedOccurrence.SiftScore)
+		assert.Equal(t, "T", expendedOccurrence.SiftPred)
+	})
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartStarrocksContainer()
 	code := m.Run()

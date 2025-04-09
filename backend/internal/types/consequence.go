@@ -36,6 +36,11 @@ var ConsequenceFilterTable = Table{
 	Alias: "cf",
 }
 
+var ConsequenceTable = Table{
+	Name:  "consequences",
+	Alias: "c",
+}
+
 var ConsequenceIdField = Field{
 	Name:            "consequence_id",
 	CanBeFiltered:   true,

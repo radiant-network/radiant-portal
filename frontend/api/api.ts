@@ -115,6 +115,85 @@ export interface CountBody {
 /**
  * 
  * @export
+ * @interface ExpendedOccurrence
+ */
+export interface ExpendedOccurrence {
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'cadd_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'fathmm_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'locus_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'sift_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpendedOccurrence
+     */
+    'spliceai_type'?: Array<string>;
+}
+/**
+ * 
+ * @export
  * @interface InterpretationGermline
  */
 export interface InterpretationGermline {
@@ -1683,6 +1762,125 @@ export class MondoApi extends BaseAPI {
      */
     public mondoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return MondoApiFp(this.configuration).mondoTermAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * OccurrenceApi - axios parameter creator
+ * @export
+ */
+export const OccurrenceApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Retrieve ExpendedOccurrence data for a given locus ID
+         * @summary Get a ExpendedOccurrence
+         * @param {string} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpendedOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getExpendedOccurrence', 'seqId', seqId)
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getExpendedOccurrence', 'locusId', locusId)
+            const localVarPath = `/occurrence/{seq_id}/{locus_id}/expended`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * OccurrenceApi - functional programming interface
+ * @export
+ */
+export const OccurrenceApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = OccurrenceApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Retrieve ExpendedOccurrence data for a given locus ID
+         * @summary Get a ExpendedOccurrence
+         * @param {string} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpendedOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpendedOccurrence(seqId, locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceApi.getExpendedOccurrence']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * OccurrenceApi - factory interface
+ * @export
+ */
+export const OccurrenceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = OccurrenceApiFp(configuration)
+    return {
+        /**
+         * Retrieve ExpendedOccurrence data for a given locus ID
+         * @summary Get a ExpendedOccurrence
+         * @param {string} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpendedOccurrence> {
+            return localVarFp.getExpendedOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * OccurrenceApi - object-oriented interface
+ * @export
+ * @class OccurrenceApi
+ * @extends {BaseAPI}
+ */
+export class OccurrenceApi extends BaseAPI {
+    /**
+     * Retrieve ExpendedOccurrence data for a given locus ID
+     * @summary Get a ExpendedOccurrence
+     * @param {string} seqId Sequence ID
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceApi
+     */
+    public getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceApiFp(this.configuration).getExpendedOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

@@ -29,6 +29,21 @@ type Occurrence struct {
 	ImpactScore         string            `json:"impact_score,omitempty"`
 } // @name Occurrence
 
+type ExpendedOccurrence = struct {
+	LocusId      int64             `json:"locus_id" validate:"required"`
+	SiftPred     string            `json:"sift_pred,omitempty"`
+	SiftScore    float32           `json:"sift_score,omitempty"`
+	FathmmPred   string            `json:"fathmm_pred,omitempty"`
+	FathmmScore  float32           `json:"fathmm_score,omitempty"`
+	RevelScore   float64           `json:"revel_score,omitempty"`
+	CaddScore    float64           `json:"cadd_score,omitempty"`
+	CaddPhred    float64           `json:"cadd_phred,omitempty"`
+	SpliceaiDs   float32           `json:"spliceai_ds,omitempty"`
+	SpliceaiType JsonArray[string] `gorm:"type:json" json:"spliceai_type,omitempty"`
+	GnomadPli    float64           `json:"gnomad_pli,omitempty"`
+	GnomadLoeuf  float32           `json:"gnomad_loeuf,omitempty"`
+} // @name ExpendedOccurrence
+
 var OccurrenceTable = Table{
 	Name:  "occurrences",
 	Alias: "o",

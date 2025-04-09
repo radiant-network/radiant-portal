@@ -81,6 +81,23 @@ func (m *MockRepository) GetTermAutoComplete(string, string, int) ([]*types.Auto
 		nil
 }
 
+func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurrence, error) {
+	return &types.ExpendedOccurrence{
+		LocusId:      1000,
+		SiftPred:     "T",
+		SiftScore:    0.1,
+		FathmmPred:   "T",
+		FathmmScore:  0.1,
+		RevelScore:   0.1,
+		CaddScore:    0.1,
+		CaddPhred:    0.1,
+		SpliceaiDs:   0.1,
+		SpliceaiType: []string{"AG"},
+		GnomadPli:    0.1,
+		GnomadLoeuf:  0.1,
+	}, nil
+}
+
 func Test_StatusHandler(t *testing.T) {
 	repoStarrocks := &MockRepository{}
 	repoPostgres := &MockRepository{}
@@ -240,4 +257,17 @@ func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{"source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
+}
+
+func Test_GetExpendedOccurrence(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/:seq_id/:locus_id/expended", GetExpendedOccurrence(repo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/1/1000/expended", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "locus_id":1000, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
 }
