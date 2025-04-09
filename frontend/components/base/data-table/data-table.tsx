@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useState } from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -11,6 +11,9 @@ import {
   OnChangeFn,
   SortingState,
   SortDirection,
+  Column,
+  ColumnPinningPosition,
+  ColumnPinningState,
 } from '@tanstack/react-table';
 
 import { ArrowDownAZ, ArrowDownZA } from 'lucide-react';
@@ -62,6 +65,7 @@ export interface BaseColumnSettings {
   visible: boolean;
   fixed?: boolean;
   size?: number;
+  pinningPosition?: ColumnPinningPosition;
 }
 
 export interface ColumnSettings extends BaseColumnSettings {
@@ -85,7 +89,7 @@ export function createColumnSettings(settings: BaseColumnSettings[]): ColumnSett
 }
 
 /**
- * Read user config to produce an object with column visibility value
+ * Read a settings config to produce an object with column visibility value
  * @param settings
  * @returns {
  *  column.id: visibility,
@@ -100,7 +104,7 @@ function deserializeColumnVisibility(settings: ColumnSettings[]): ColumnVisiblit
 }
 
 /**
- * Read user config to return column order (in asc)
+ * Read a settings config to return column order (in asc)
  * @param settings
  * @returns [{ column.id: visibility }]
  */
@@ -109,9 +113,29 @@ function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
 }
 
 /**
+ * Read a settings config to return isPinned value
+ * @param settings
+ * @returns
+ */
+function deserializeColumnPinning(settings: ColumnSettings[]): ColumnPinningState {
+  const result: { left: string[]; right: string[] } = {
+    left: [],
+    right: [],
+  };
+  settings.forEach(setting => {
+    if (setting.pinningPosition == 'left') {
+      result.left.push(setting.id);
+    } else if (setting.pinningPosition == 'right') {
+      result.right.push(setting.id);
+    }
+  });
+  return result;
+}
+
+/**
  * Use header.column.getNextSortingOrder() to display the next action on sort
  *
- * @param t
+ * @param t TFunction<string, undefined>,
  * @param sortingOrder 'asc' | 'desc' | false
  * @returns String
  */
@@ -131,12 +155,54 @@ function getNextSortingOrderHeaderTitle(
 }
 
 /**
- *
  * @param pagination
  * @param total
  */
 function getPageCount(pagination: PaginationState, total: number) {
   return Math.ceil(total / pagination.pageSize);
+}
+
+/**
+ * Return all extra tailwind class depending on column's context
+ *
+ * @fixme Tailwind or shadcn prevent us for using border. shadow-inset are used for the moment
+ *        but this solution will not works when changing theme.
+ *
+ * @param column
+ * @param extra
+ * @returns
+ */
+function getColumnPinningExtraCN(column: Column<any>, isHeader: boolean = false): string {
+  const isPinned = column.getIsPinned();
+  if (!isPinned) return '';
+  const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
+  const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
+
+  return cn(
+    isPinned && 'sticky z-10 bg-white',
+    !isHeader && 'shadow-[inset_0_1px_0_rgba(0,0,0,0.1)]',
+    isLastLeftPinnedColumn && !isHeader && '!shadow-[inset_-1px_1px_rgba(0,0,0,0.1)]',
+    isFirstRightPinnedColumn && !isHeader && '!shadow-[inset_1px_1px_rgba(0,0,0,0.1)]',
+    isLastLeftPinnedColumn && isHeader && '!shadow-[inset_-1px_0_rgba(0,0,0,0.1)]',
+    isFirstRightPinnedColumn && isHeader && '!shadow-[inset_1px_0_rgba(0,0,0,0.1)]',
+  );
+}
+
+/**
+ * Return the needed style to pin a column.
+ * @see https://tanstack.com/table/v8/docs/framework/react/examples/column-pinning-sticky?panel=code
+ * @param column
+ * @returns
+ */
+function getCommonPinningStyles(column: Column<any>): CSSProperties {
+  const isPinned = column.getIsPinned();
+  if (!isPinned) return {};
+
+  return {
+    left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
+    right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+    width: column.getSize(),
+  };
 }
 
 /**
@@ -200,12 +266,28 @@ function DataTable<T>({
   const { t } = useI18n();
 
   // default values
-  const defaultColumnVisibility = deserializeColumnVisibility(defaultColumnSettings);
-  const defaultColumnOrder = deserializeColumnOrder(defaultColumnSettings);
+  const defaultTableState = useMemo(
+    () => ({
+      columnVisibility: deserializeColumnVisibility(defaultColumnSettings) ?? [],
+      columnOrder: deserializeColumnOrder(defaultColumnSettings) ?? [],
+      columnPinning: deserializeColumnPinning(defaultColumnSettings) ?? [],
+    }),
+    [defaultColumnSettings],
+  );
+
+  const userTableState = useMemo(
+    () => ({
+      columnVisiblity: deserializeColumnVisibility(columnSettings) ?? [],
+      columnOrder: deserializeColumnOrder(columnSettings) ?? [],
+      columnPinning: deserializeColumnPinning(columnSettings) ?? [],
+    }),
+    [columnSettings],
+  );
 
   // table interactions
-  const [columnVisibility, setColumnVisibility] = useState(deserializeColumnVisibility(columnSettings));
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(deserializeColumnOrder(columnSettings));
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(userTableState.columnVisiblity);
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(userTableState.columnOrder);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(userTableState.columnPinning);
   const [sorting, setSorting] = useState<SortingState>([]);
 
   // Initialize tanstack table
@@ -229,6 +311,7 @@ function DataTable<T>({
     state: {
       columnOrder,
       columnVisibility,
+      columnPinning,
       pagination,
       sorting,
     },
@@ -248,10 +331,6 @@ function DataTable<T>({
     }
     return colSizes;
   }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
-
-  function handleVisiblityChange(target: string, checked: boolean) {
-    setColumnVisibility({ ...columnVisibility, [target]: checked });
-  }
 
   // @TODO: shout save column width in user data
   useResizeObserver(table.getState(), (columnId, columnSize) => {
@@ -294,15 +373,15 @@ function DataTable<T>({
           columns={columns}
           defaultSettings={defaultColumnSettings}
           visiblitySettings={columnVisibility}
-          handleVisiblityChange={handleVisiblityChange}
+          handleVisiblityChange={(target: string, checked: boolean) => {
+            setColumnVisibility({ ...columnVisibility, [target]: checked });
+          }}
           handleOrderChange={setColumnOrder}
-          pristine={
-            JSON.stringify(defaultColumnOrder) == JSON.stringify(columnOrder) &&
-            JSON.stringify(defaultColumnVisibility) == JSON.stringify(columnVisibility)
-          }
+          pristine={JSON.stringify(defaultTableState) == JSON.stringify(userTableState)}
           handleReset={() => {
-            setColumnOrder(defaultColumnOrder);
-            setColumnVisibility(defaultColumnVisibility);
+            setColumnOrder(defaultTableState.columnOrder);
+            setColumnVisibility(defaultTableState.columnVisibility);
+            setColumnPinning(defaultTableState.columnPinning);
           }}
         />
       </div>
@@ -314,13 +393,18 @@ function DataTable<T>({
                 <TableHead
                   key={header.id}
                   colSpan={header.colSpan}
+                  className={cn(getColumnPinningExtraCN(header.column, true))}
                   style={{
                     width: `calc(var(--header-${header?.id}-size) * 1px)`,
+                    ...getCommonPinningStyles(header.column),
                   }}
                 >
                   <>
                     <div
-                      className={cn(header.column.getCanSort() && 'cursor-pointer select-none')}
+                      className={cn(
+                        'flex align-middle gap-2',
+                        header.column.getCanSort() && 'cursor-pointer select-none',
+                      )}
                       onClick={header.column.getToggleSortingHandler()}
                       title={
                         header.column.getCanSort()
@@ -337,6 +421,7 @@ function DataTable<T>({
                         desc: <ArrowDownZA size={16} />,
                       }[header.column.getIsSorted() as string] ?? null}
                     </div>
+
                     {/* Resize Grip */}
                     {header.column.getCanResize() && (
                       <div
@@ -368,28 +453,30 @@ function DataTable<T>({
             ))}
 
           {/* Render table content */}
-          {table.getRowModel().rows.map(row => (
-            <>
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <TableCell
-                    key={cell.id}
-                    style={{
-                      width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
-                    }}
-                    className="overflow-hidden truncate text-nowrap"
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-              {subComponent && row.getIsExpanded() && (
-                <TableRow key={`subcomponent-${row.id}`}>
-                  <TableCell colSpan={row.getVisibleCells().length}>{subComponent(row.original)}</TableCell>
+          {!loadingStates?.list &&
+            table.getRowModel().rows.map(row => (
+              <>
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn('overflow-hidden truncate text-nowrap', getColumnPinningExtraCN(cell.column))}
+                      style={{
+                        width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
+                        ...getCommonPinningStyles(cell.column),
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
-            </>
-          ))}
+                {subComponent && row.getIsExpanded() && (
+                  <TableRow key={`subcomponent-${row.id}`}>
+                    <TableCell colSpan={row.getVisibleCells().length}>{subComponent(row.original)}</TableCell>
+                  </TableRow>
+                )}
+              </>
+            ))}
         </TableBody>
       </Table>
       <div className="flex items-center justify-end space-x-2 py-4">

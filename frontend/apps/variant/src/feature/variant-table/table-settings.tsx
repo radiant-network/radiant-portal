@@ -1,124 +1,148 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createColumnHelper, HeaderContext } from '@tanstack/react-table';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import {
-  getTableRowSelectionCell,
-  getTableRowSelectionHeader,
-} from '@/components/base/data-table/data-table-row-selection';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import RowSelectionCell from '@/components/base/data-table/cells/table-row-selection-cell';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
+import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import LinkCell from '@/components/base/data-table/cells/link-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
+import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
+import MostDeleteriousConsequenceCell, {
+  Impact,
+} from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
-import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import VariantClassCell from '@/components/base/data-table/cells/variant-class-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { Occurrence } from '@/api/api';
+import { TFunction } from 'i18next';
 
 const columnHelper = createColumnHelper<Occurrence>();
 
-const columns = [
-  {
-    id: 'row_expand',
-    cell: RowExpandCell,
-    size: 48,
-    enableResizing: false,
-  },
-  {
-    id: 'row_selection',
-    header: getTableRowSelectionHeader,
-    cell: getTableRowSelectionCell,
-    size: 48,
-    maxSize: 48,
-    enableResizing: false,
-  },
-  columnHelper.accessor(row => row.hgvsg, {
-    id: 'hgvsg',
-    cell: info => <LinkCell url="#">{info.getValue()}</LinkCell>,
-    header: 'Variant',
-    size: 150,
-    minSize: 100,
-  }),
-  columnHelper.accessor(row => row.variant_class, {
-    id: 'variant_class',
-    cell: info => <VariantClassCell value={info.getValue()} />,
-    header: 'Type',
-  }),
-  columnHelper.accessor(row => row.symbol, {
-    id: 'symbol',
-    cell: info => {
-      return <GeneCell symbol={info.getValue()} />;
+function getVariantColumns(t: TFunction<string, undefined>) {
+  return [
+    {
+      id: 'rowExpand',
+      cell: RowExpandCell,
+      size: 48,
+      enableResizing: false,
     },
-    header: 'Gene',
-  }),
-  columnHelper.accessor(row => row.vep_impact, {
-    id: 'vep_impact',
-    cell: info => <span>{info.getValue()}</span>,
-    header: 'VEP',
-  }),
-  columnHelper.accessor(row => row.mane_select, {
-    id: 'mane_select',
-    cell: info => {
-      return <ManeCell mane_select={info.getValue()} />;
+    {
+      id: 'rowSelection',
+      header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+      cell: info => <RowSelectionCell row={info.row} />,
+      size: 48,
+      maxSize: 48,
+      enableResizing: false,
     },
-    header: 'MANE',
-  }),
-  columnHelper.accessor(row => row.omim_inheritance_code, {
-    id: 'omim_inheritance_code',
-    cell: info => {
-      return <OmimCell codes={info.getValue()} />;
-    },
-    header: 'OMIM',
-  }),
-  columnHelper.accessor(row => row.clinvar, {
-    id: 'clinvar',
-    cell: info => <ClinvarCell codes={info.getValue()} />,
-    header: 'ClinVar',
-  }),
-  columnHelper.accessor(row => row.gnomad_v3_af, {
-    id: 'gnomad_v3_af',
-    cell: info => <NumberCell value={info.getValue()} />,
-    header: 'gnomAD',
-  }),
-  columnHelper.accessor(row => row.pf, {
-    id: 'pf',
-    cell: info => <NumberCell value={info.getValue()} />,
-    header: 'Participant frequency',
-  }),
-  columnHelper.accessor(row => row.genotype_quality, {
-    id: 'genotype_quality',
-    cell: info => <NumberCell value={info.getValue()} />,
-    header: 'Genotype Quality',
-  }),
-  columnHelper.accessor(row => row.zygosity, {
-    id: 'zygosity',
-    cell: info => <ZygosityCell value={info.getValue()} />,
-    header: 'Zygosity',
-  }),
-  columnHelper.accessor(row => row.ad_ratio, {
-    id: 'ad_ratio',
-    cell: info => <NumberCell value={info.getValue()} />,
-    header: 'Ad Ratio',
-  }),
-] as TableColumnDef<Occurrence, any>[];
+    columnHelper.accessor(row => row.hgvsg, {
+      id: 'hgvsg',
+      cell: info => <LinkCell url="#">{info.getValue()}</LinkCell>,
+      header: t('common.variant.headers.hgvsg'),
+      size: 150,
+      minSize: 100,
+    }),
+    columnHelper.accessor(row => row.variant_class, {
+      id: 'variantClass',
+      cell: info => <VariantClassCell value={info.getValue()} />,
+      header: t('common.variant.headers.variantClass'),
+    }),
+    columnHelper.accessor(row => row.symbol, {
+      id: 'symbol',
+      cell: info => <GeneCell symbol={info.getValue()} />,
+      header: t('common.variant.headers.symbol'),
+    }),
+    columnHelper.accessor(row => row, {
+      id: 'mostDeleteriousConsequence',
+      cell: info => (
+        <MostDeleteriousConsequenceCell
+          vepImpact={info.getValue().vep_impact as Impact}
+          consequences={info.getValue().picked_consequences}
+          aaChange={info.getValue().aa_change}
+        />
+      ),
+      header: () => (
+        <TooltipsHeader tooltips={t('common.variant.headers.mostDeleteriousConsequenceTooltips')}>
+          {t('common.variant.headers.mostDeleteriousConsequence')}
+        </TooltipsHeader>
+      ),
+      size: 225,
+    }),
+    columnHelper.accessor(row => row.mane_select, {
+      id: 'maneSelect',
+      cell: info => <ManeCell mane_select={info.getValue()} />,
+      header: t('common.variant.headers.maneSelect'),
+    }),
+    columnHelper.accessor(row => row.omim_inheritance_code, {
+      id: 'omimInheritanceCode',
+      cell: info => <OmimCell codes={info.getValue()} />,
+      header: () => (
+        <TooltipsHeader tooltips={t('common.variant.headers.omimInheritanceCodeTooltips')}>
+          {t('common.variant.headers.omimInheritanceCode')}
+        </TooltipsHeader>
+      ),
+    }),
+    columnHelper.accessor(row => row.clinvar, {
+      id: 'clinVar',
+      cell: info => <ClinvarCell codes={info.getValue()} />,
+      header: t('common.variant.headers.clinVar'),
+    }),
+    columnHelper.accessor(row => row.gnomad_v3_af, {
+      id: 'gnomadv3AF',
+      cell: info => <GnomadCell value={info.getValue()} />,
+      header: () => (
+        <TooltipsHeader tooltips={t('common.variant.headers.gnomadv3AFTooltips')}>
+          {t('common.variant.headers.gnomadv3AF')}
+        </TooltipsHeader>
+      ),
+    }),
+    columnHelper.accessor(row => row.pf, {
+      id: 'pf',
+      cell: info => <ParticipantFrequencyCell value={info.getValue()} />,
+      header: t('common.variant.headers.pf'),
+    }),
+    columnHelper.accessor(row => row.genotype_quality, {
+      id: 'genotypeQuality',
+      cell: info => <NumberCell value={info.getValue()} />,
+      header: t('common.variant.headers.genotypeQuality'),
+    }),
+    columnHelper.accessor(row => row.zygosity, {
+      id: 'zygosity',
+      cell: info => <ZygosityCell value={info.getValue()} />,
+      header: t('common.variant.headers.zygosity'),
+    }),
+    columnHelper.accessor(row => row.ad_ratio, {
+      id: 'adRatio',
+      cell: info => <NumberCell value={info.getValue()} />,
+      header: t('common.variant.headers.adRatio'),
+    }),
+  ] as TableColumnDef<Occurrence, any>[];
+}
 
 const defaultSettings = createColumnSettings([
   {
-    id: 'row_expand',
+    id: 'rowExpand',
     visible: true,
     fixed: true,
+    pinningPosition: 'left',
   },
   {
-    id: 'row_selection',
+    id: 'rowSelection',
     visible: true,
     fixed: true,
+    pinningPosition: 'left',
   },
   {
     id: 'hgvsg',
     visible: true,
+    fixed: true,
+    pinningPosition: 'left',
   },
   {
-    id: 'variant_class',
+    id: 'variantClass',
     visible: true,
   },
   {
@@ -126,82 +150,23 @@ const defaultSettings = createColumnSettings([
     visible: true,
   },
   {
-    id: 'vep_impact',
+    id: 'mostDeleteriousConsequence',
     visible: true,
   },
   {
-    id: 'mane_select',
+    id: 'maneSelect',
     visible: true,
   },
   {
-    id: 'omim_inheritance_code',
+    id: 'omimInheritanceCode',
     visible: true,
   },
   {
-    id: 'clinvar',
+    id: 'clinVar',
     visible: true,
   },
   {
-    id: 'gnomad_v3_af',
-    visible: true,
-  },
-  {
-    id: 'pf',
-    visible: true,
-  },
-  {
-    id: 'genotype_quality',
-    visible: true,
-  },
-  {
-    id: 'zygosity',
-    visible: true,
-  },
-  {
-    id: 'ad_ratio',
-    visible: true,
-  },
-]);
-
-const userSettings = createColumnSettings([
-  {
-    id: 'row_expand',
-    visible: true,
-  },
-  {
-    id: 'row_selection',
-    visible: true,
-  },
-  {
-    id: 'hgvsg',
-    visible: true,
-  },
-  {
-    id: 'variant_class',
-    visible: true,
-  },
-  {
-    id: 'symbol',
-    visible: true,
-  },
-  {
-    id: 'vep_impact',
-    visible: true,
-  },
-  {
-    id: 'mane_select',
-    visible: true,
-  },
-  {
-    id: 'omim_inheritance_code',
-    visible: true,
-  },
-  {
-    id: 'clinvar',
-    visible: true,
-  },
-  {
-    id: 'gnomad_v3_af',
+    id: 'gnomadv3AF',
     visible: true,
   },
   {
@@ -209,7 +174,7 @@ const userSettings = createColumnSettings([
     visible: true,
   },
   {
-    id: 'genotype_quality',
+    id: 'genotypeQuality',
     visible: true,
   },
   {
@@ -217,9 +182,9 @@ const userSettings = createColumnSettings([
     visible: true,
   },
   {
-    id: 'ad_ratio',
+    id: 'adRatio',
     visible: true,
   },
 ]);
 
-export { columns, userSettings, defaultSettings };
+export { getVariantColumns, defaultSettings };

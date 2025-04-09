@@ -193,6 +193,41 @@
       "unsupportedType": "Unsupported type"
     },
     "variant": {
+      "headers": {
+        "adRatio": "Ad ratio",
+        "clinVar": "ClinVar",
+        "hgvsg": "Variant",
+        "genotypeQuality": "Genotype quality",
+        "gnomadv3AF": "gnomAD",
+        "gnomadv3AFTooltips": "gnomAD Genome 3.1.2 (allele Frequency)",
+        "maneSelect": "MANE",
+        "mostDeleteriousConsequence": "Consequence",
+        "mostDeleteriousConsequenceTooltips": "Most deleterious consequence annotated using VEP",
+        "pf": "Participant frequency",
+        "omimInheritanceCode": "OMIM",
+        "omimInheritanceCodeTooltips": "MIM inheritance modes",
+        "symbol": "Gene",
+        "variantClass": "Type",
+        "zygosity": "Zygosity"
+      },
+      "omim": {
+        "AD": "Autosomal Dominant",
+        "AR": "Autosomal Recessive",
+        "DD": "Digenic Dominant",
+        "DR": "Digenic Recessive",
+        "IC": "Isolated Cases",
+        "Mi": "Mitochondrial",
+        "Mu": "Multifactorial",
+        "NA": "Not Applicable",
+        "NRT": "No Reported Transmission",
+        "null": "-",
+        "SMo": "Somatic Mosaicism",
+        "Smu": "Somatic Mutation",
+        "XL": "X-Linked",
+        "XLD": "X-Linked Dominant",
+        "XLR": "X-Linked Recessive",
+        "YL": "Y-Linked"
+      },
       "classes": {
         "indel": "Indel",
         "insertion": "Insertion",

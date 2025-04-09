@@ -194,6 +194,41 @@
       "unsupportedType": "Type non pris en charge"
     },
     "variant": {
+      "headers": {
+        "adRatio": "Ratio Ad",
+        "clinVar": "ClinVar",
+        "hgvsg": "Variant",
+        "genotypeQuality": "Qualité du génotype",
+        "gnomadv3AF": "gnomAD",
+        "gnomadv3AFTooltips": "gnomAD Génome 3.1.2 (fréquence allélique)",
+        "maneSelect": "MANE",
+        "mostDeleteriousConsequence": "Conséquence",
+        "mostDeleteriousConsequenceTooltips": "Conséquence la plus délétère annotée avec VEP",
+        "pf": "Fréquence des participants",
+        "omimInheritanceCode": "OMIM",
+        "omimInheritanceCodeTooltips": "Modes d'héritage MIM",
+        "symbol": "Gène",
+        "variantClass": "Type",
+        "zygosity": "Zygosité"
+      },
+      "omim": {
+        "AD": "Dominant Autosomique",
+        "AR": "Récessif Autosomique",
+        "DD": "Dominant Dygénique",
+        "DR": "Récessif Dygénique",
+        "IC": "Cas Isolés",
+        "Mi": "Mitochondrial",
+        "Mu": "Multifactoriel",
+        "NA": "Non Applicable",
+        "NRT": "Aucune Transmission Signalée",
+        "null": "-",
+        "SMo": "Mosaïcisme Somatique",
+        "Smu": "Mutation Somatique",
+        "XL": "Lié à l'X",
+        "XLD": "Dominant Lié à l'X",
+        "XLR": "Récessif Lié à l'X",
+        "YL": "Lié à l'Y"
+      },
       "classes": {
         "indel": "Indel",
         "insertion": "Insertion",

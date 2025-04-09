@@ -1,7 +1,8 @@
-import EmptyCell from "@/components/base/data-table/cells/empty-cell";
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 
 type NumberCellProps = {
   value?: number;
+  format?: string;
 };
 
 function NumberCell({ value }: NumberCellProps) {

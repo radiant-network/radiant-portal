@@ -2,7 +2,7 @@ import styles from './App.module.css';
 import { Count, CountBody, ListBody, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
-import { columns, defaultSettings, userSettings } from '@/feature/variant-table/table-settings';
+import { getVariantColumns, defaultSettings } from '@/feature/variant-table/table-settings';
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
@@ -13,7 +13,8 @@ import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { useConfig } from '@/components/model/applications-config';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import VariantTablePreview from './feature/variant-table/variant-table-preview';
-import { FilterComponent, FilterContainer } from '@/components/feature/query-filters/filter-container';
+import { FilterComponent } from '@/components/feature/query-filters/filter-container';
+import { useI18n } from '@/components/hooks/i18n';
 
 type OccurrencesListInput = {
   seqId: string;
@@ -46,6 +47,7 @@ const SEQ_ID = '5011';
 
 function App() {
   const config = useConfig();
+  const { t } = useI18n();
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
     op: 'and',
@@ -154,8 +156,8 @@ function App() {
           />
         </div>
         <DataTable
-          columns={columns}
-          columnSettings={userSettings}
+          columns={getVariantColumns(t)}
+          columnSettings={defaultSettings}
           data={list ?? []}
           defaultColumnSettings={defaultSettings}
           defaultServerSorting={DEFAULT_SORTING}
