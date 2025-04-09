@@ -89,10 +89,12 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
   );
 
   const showMore = useCallback(() => {
-    let count = visibleItemsCount + maxVisibleItems;
-    setHasUnappliedItems(true);
-    setVisibleItemsCount(count > items.length ? items.length : count);
+    setVisibleItemsCount(items.length);
   }, [visibleItemsCount, items]);
+
+  const showLess = useCallback(() => {
+    setVisibleItemsCount(maxVisibleItems);
+  }, [visibleItemsCount]);
 
   const selectAll = useCallback(() => {
     if (selectedItems.length === items.length) {
@@ -213,7 +215,12 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
 
       {!isLoading && items.length > visibleItemsCount && (
         <Button className="mt-2 px-0" onClick={showMore} size="sm" variant="link">
-          {t('common.filters.buttons.showMore')}
+          {t('common.filters.buttons.showMore', { count: items.length - maxVisibleItems })}
+        </Button>
+      )}
+      {!isLoading && visibleItemsCount > maxVisibleItems  && (
+        <Button className="mt-2 px-0" onClick={showLess} size="sm" variant="link">
+          {t('common.filters.buttons.showLess')}
         </Button>
       )}
 
