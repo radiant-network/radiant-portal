@@ -1,12 +1,9 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createColumnHelper, HeaderContext } from '@tanstack/react-table';
 import DataTable from '@/components/base/data-table/data-table';
 import type { Meta, StoryObj } from '@storybook/react';
-
+import RowSelectionCell from '@/components/base/data-table/cells/table-row-selection-cell';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import {
-  getTableRowSelectionCell,
-  getTableRowSelectionHeader,
-} from '@/components/base/data-table/data-table-row-selection';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import LinkCell from '@/components/base/data-table/cells/link-cell';
@@ -142,8 +139,8 @@ const columns = [
   },
   {
     id: 'row_selection',
-    header: getTableRowSelectionHeader,
-    cell: getTableRowSelectionCell,
+    header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+    cell: info => <RowSelectionCell row={info.row} />,
     size: 48,
     enableResizing: false,
   },

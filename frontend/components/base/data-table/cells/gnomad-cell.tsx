@@ -17,8 +17,8 @@ function GnomadCell({ value }: NumberCellProps) {
   const scientificNotation = toExponentialNotation(value);
 
   return (
-    <span className="flex items-center">
-      {value < GNOMAD_THRESHOLD && <DotIcon className="text-red-500" size={32} />}
+    <span className="flex gap-2 items-center">
+      {value < GNOMAD_THRESHOLD && <DotIcon className="text-red-500" size={8} strokeWidth={20} />}
       {scientificNotation ? scientificNotation : value}
     </span>
   );
