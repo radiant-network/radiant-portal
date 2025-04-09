@@ -369,7 +369,8 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 }
 
 func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error) {
-	tx := r.db.Table(types.ConsequenceTable.Name).Select("locus_id, gnomad_pli, gnomad_loeuf, spliceai_ds, spliceai_type, sift_score, sift_pred, fathmm_score, fathmm_pred, cadd_score, cadd_phred, revel_score").Where("locus_id = ? and picked = true", locusId)
+	consequenceTable := fmt.Sprintf("%s %s", types.ConsequenceTable.Name, types.ConsequenceTable.Alias)
+	tx := r.db.Table(consequenceTable).Joins("INNER JOIN variants v ON v.locus_id=c.locus_id AND c.picked = true AND c.locus_id = ?", locusId).Select("c.locus_id, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.sift_score, c.sift_pred, c.fathmm_score, c.fathmm_pred, c.cadd_score, c.cadd_phred, c.revel_score, v.gnomad_v3_af")
 
 	var expendedOccurrence ExpendedOccurrence
 	err := tx.First(&expendedOccurrence).Error

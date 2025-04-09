@@ -52,6 +52,8 @@ components:
           type: number
         gnomad_pli:
           type: number
+        gnomad_v3_af:
+          type: number
         locus_id:
           type: integer
         revel_score:
@@ -68,6 +70,7 @@ components:
           type: array
           uniqueItems: false
       required:
+      - gnomad_v3_af
       - locus_id
       type: object
     InterpretationGermline:

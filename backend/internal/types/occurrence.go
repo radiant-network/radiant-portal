@@ -42,6 +42,7 @@ type ExpendedOccurrence = struct {
 	SpliceaiType JsonArray[string] `gorm:"type:json" json:"spliceai_type,omitempty"`
 	GnomadPli    float64           `json:"gnomad_pli,omitempty"`
 	GnomadLoeuf  float32           `json:"gnomad_loeuf,omitempty"`
+	GnomadV3Af   float64           `json:"gnomad_v3_af" validate:"required"`
 } // @name ExpendedOccurrence
 
 var OccurrenceTable = Table{
