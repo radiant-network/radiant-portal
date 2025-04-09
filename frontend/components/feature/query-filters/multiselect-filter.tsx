@@ -201,7 +201,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
                     checked={selectedItems.some(f => f === items[i].key)}
                     onCheckedChange={() => itemSelected(items[i])}
                   />
-                  <div className="overflow-hidden text-ellipsis">{items[i].key}</div>
+                  <div className="overflow-hidden text-ellipsis text-sm">{items[i].key}</div>
                   <span className="checkmark"></span>
                 </label>
                 <span className="bg-accent px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
