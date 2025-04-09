@@ -470,7 +470,7 @@ func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId i
 }
 
 func Test_GetExpendedOccurrence(t *testing.T) {
-	expected := `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "locus_id":1000, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`
+	expected := `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "locus_id":1000, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`
 	assertGetExpendedOccurrence(t, "simple", 1, 1000, expected)
 }
 

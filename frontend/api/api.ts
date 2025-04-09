@@ -159,6 +159,12 @@ export interface ExpendedOccurrence {
      * @type {number}
      * @memberof ExpendedOccurrence
      */
+    'gnomad_v3_af': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
     'locus_id': number;
     /**
      * 
