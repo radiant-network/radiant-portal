@@ -40,6 +40,10 @@ components:
       type: object
     ExpendedOccurrence:
       properties:
+        ad_alt:
+          type: integer
+        ad_total:
+          type: integer
         cadd_phred:
           type: number
         cadd_score:
@@ -48,6 +52,10 @@ components:
           type: string
         fathmm_score:
           type: number
+        filter:
+          type: string
+        genotype_quality:
+          type: integer
         gnomad_loeuf:
           type: number
         gnomad_pli:
@@ -56,6 +64,8 @@ components:
           type: number
         locus_id:
           type: integer
+        qd:
+          type: number
         revel_score:
           type: number
         sift_pred:
@@ -70,6 +80,7 @@ components:
           type: array
           uniqueItems: false
       required:
+      - genotype_quality
       - gnomad_v3_af
       - locus_id
       type: object

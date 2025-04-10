@@ -123,6 +123,18 @@ export interface ExpendedOccurrence {
      * @type {number}
      * @memberof ExpendedOccurrence
      */
+    'ad_alt'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'ad_total'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
     'cadd_phred'?: number;
     /**
      * 
@@ -142,6 +154,18 @@ export interface ExpendedOccurrence {
      * @memberof ExpendedOccurrence
      */
     'fathmm_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'filter'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'genotype_quality': number;
     /**
      * 
      * @type {number}
@@ -166,6 +190,12 @@ export interface ExpendedOccurrence {
      * @memberof ExpendedOccurrence
      */
     'locus_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'qd'?: number;
     /**
      * 
      * @type {number}
