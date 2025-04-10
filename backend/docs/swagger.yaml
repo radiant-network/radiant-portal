@@ -730,7 +730,7 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
-  /occurrence/{seq_id}/{locus_id}/expended:
+  /occurrences/{seq_id}/{locus_id}/expended:
     get:
       description: Retrieve ExpendedOccurrence data for a given locus ID
       operationId: getExpendedOccurrence
