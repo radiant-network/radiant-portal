@@ -1774,125 +1774,6 @@ export class MondoApi extends BaseAPI {
 
 
 /**
- * OccurrenceApi - axios parameter creator
- * @export
- */
-export const OccurrenceApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a ExpendedOccurrence
-         * @param {string} seqId Sequence ID
-         * @param {string} locusId Locus ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getExpendedOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getExpendedOccurrence', 'seqId', seqId)
-            // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getExpendedOccurrence', 'locusId', locusId)
-            const localVarPath = `/occurrence/{seq_id}/{locus_id}/expended`
-                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
-                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * OccurrenceApi - functional programming interface
- * @export
- */
-export const OccurrenceApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = OccurrenceApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a ExpendedOccurrence
-         * @param {string} seqId Sequence ID
-         * @param {string} locusId Locus ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpendedOccurrence>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpendedOccurrence(seqId, locusId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrenceApi.getExpendedOccurrence']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * OccurrenceApi - factory interface
- * @export
- */
-export const OccurrenceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = OccurrenceApiFp(configuration)
-    return {
-        /**
-         * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a ExpendedOccurrence
-         * @param {string} seqId Sequence ID
-         * @param {string} locusId Locus ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpendedOccurrence> {
-            return localVarFp.getExpendedOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * OccurrenceApi - object-oriented interface
- * @export
- * @class OccurrenceApi
- * @extends {BaseAPI}
- */
-export class OccurrenceApi extends BaseAPI {
-    /**
-     * Retrieve ExpendedOccurrence data for a given locus ID
-     * @summary Get a ExpendedOccurrence
-     * @param {string} seqId Sequence ID
-     * @param {string} locusId Locus ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof OccurrenceApi
-     */
-    public getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
-        return OccurrenceApiFp(this.configuration).getExpendedOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-
-/**
  * OccurrencesApi - axios parameter creator
  * @export
  */
@@ -1980,6 +1861,48 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(countBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve ExpendedOccurrence data for a given locus ID
+         * @summary Get a ExpendedOccurrence
+         * @param {string} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpendedOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getExpendedOccurrence', 'seqId', seqId)
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getExpendedOccurrence', 'locusId', locusId)
+            const localVarPath = `/occurrence/{seq_id}/{locus_id}/expended`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2113,6 +2036,20 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve ExpendedOccurrence data for a given locus ID
+         * @summary Get a ExpendedOccurrence
+         * @param {string} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpendedOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpendedOccurrence(seqId, locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpendedOccurrence']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * List occurrences for a given sequence ID
          * @summary List occurrences
          * @param {string} seqId Sequence ID
@@ -2173,6 +2110,17 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.countOccurrences(seqId, countBody, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve ExpendedOccurrence data for a given locus ID
+         * @summary Get a ExpendedOccurrence
+         * @param {string} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpendedOccurrence> {
+            return localVarFp.getExpendedOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * List occurrences for a given sequence ID
          * @summary List occurrences
          * @param {string} seqId Sequence ID
@@ -2228,6 +2176,19 @@ export class OccurrencesApi extends BaseAPI {
      */
     public countOccurrences(seqId: string, countBody: CountBody, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).countOccurrences(seqId, countBody, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve ExpendedOccurrence data for a given locus ID
+     * @summary Get a ExpendedOccurrence
+     * @param {string} seqId Sequence ID
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getExpendedOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

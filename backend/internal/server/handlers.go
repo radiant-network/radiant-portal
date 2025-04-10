@@ -606,7 +606,7 @@ func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Summary Get a ExpendedOccurrence
 // @Id getExpendedOccurrence
 // @Description Retrieve ExpendedOccurrence data for a given locus ID
-// @Tags occurrence
+// @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
 // @Param locus_id path string true "Locus ID"
