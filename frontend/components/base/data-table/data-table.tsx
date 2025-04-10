@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect, useMemo, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useState, Fragment } from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -442,7 +442,7 @@ function DataTable<T>({
           {/* Render skeleton loading */}
           {loadingStates?.list &&
             new Array(pagination.pageSize).fill(0).map((_, index) => (
-              <TableRow>
+              <TableRow key={`skeleton-${index}`}>
                 <TableCell key={`skeleton-row-${index}`} colSpan={columnSettings.length}>
                   <Skeleton className="w-full h-[32px]" />
                 </TableCell>
@@ -452,8 +452,8 @@ function DataTable<T>({
           {/* Render table content */}
           {!loadingStates?.list &&
             table.getRowModel().rows.map(row => (
-              <>
-                <TableRow key={row.id}>
+              <Fragment key={row.id}>
+                <TableRow key={`row-${row.id}`}>
                   {row.getVisibleCells().map(cell => (
                     <TableCell
                       key={cell.id}
@@ -472,7 +472,7 @@ function DataTable<T>({
                     <TableCell colSpan={row.getVisibleCells().length}>{subComponent(row.original)}</TableCell>
                   </TableRow>
                 )}
-              </>
+              </Fragment>
             ))}
         </TableBody>
       </Table>
@@ -490,7 +490,7 @@ function DataTable<T>({
             </SelectTrigger>
             <SelectContent>
               {[10, 20, 30, 40, 50].map(pageSize => (
-                <SelectItem value={String(pageSize)}>{pageSize}</SelectItem>
+                <SelectItem key={pageSize} value={String(pageSize)}>{pageSize}</SelectItem>
               ))}
             </SelectContent>
           </Select>
