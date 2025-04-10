@@ -96,6 +96,8 @@ func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurre
 		GnomadPli:    0.1,
 		GnomadLoeuf:  0.1,
 		GnomadV3Af:   0.01,
+		Filter:       "PASS",
+		Gq:           100,
 	}, nil
 }
 
@@ -270,5 +272,5 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "locus_id":1000, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
+	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "locus_id":1000, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
 }

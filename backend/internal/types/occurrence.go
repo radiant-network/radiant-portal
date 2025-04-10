@@ -43,6 +43,11 @@ type ExpendedOccurrence = struct {
 	GnomadPli    float64           `json:"gnomad_pli,omitempty"`
 	GnomadLoeuf  float32           `json:"gnomad_loeuf,omitempty"`
 	GnomadV3Af   float64           `json:"gnomad_v3_af" validate:"required"`
+	Gq           int32             `json:"genotype_quality" validate:"required"`
+	Filter       string            `json:"filter,omitempty"`
+	AdAlt        int32             `json:"ad_alt,omitempty"`
+	AdTotal      int32             `json:"ad_total,omitempty"`
+	InfoQd       float32           `json:"qd,omitempty"`
 } // @name ExpendedOccurrence
 
 var OccurrenceTable = Table{
