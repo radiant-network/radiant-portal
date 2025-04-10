@@ -766,7 +766,7 @@ paths:
       - bearerauth: []
       summary: Get a ExpendedOccurrence
       tags:
-      - occurrence
+      - occurrences
   /occurrences/{seq_id}/aggregate:
     post:
       description: Aggregate occurrences for a given sequence ID
