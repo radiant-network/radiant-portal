@@ -613,7 +613,7 @@ func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Produce json
 // @Success 200 {object} types.ExpendedOccurrence
 // @Failure 500 {object} map[string]string
-// @Router /occurrence/{seq_id}/{locus_id}/expended [get]
+// @Router /occurrences/{seq_id}/{locus_id}/expended [get]
 func GetExpendedOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))

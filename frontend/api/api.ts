@@ -1880,7 +1880,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('getExpendedOccurrence', 'seqId', seqId)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getExpendedOccurrence', 'locusId', locusId)
-            const localVarPath = `/occurrence/{seq_id}/{locus_id}/expended`
+            const localVarPath = `/occurrences/{seq_id}/{locus_id}/expended`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
