@@ -10,7 +10,7 @@ module.exports = {
       borderRadius: {
         DEFAULT: 'var(--radius)',
       },
-      colors: {
+      colors: ({ theme }) => ({
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -41,17 +41,45 @@ module.exports = {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
-        success: {
-          DEFAULT: 'hsl(var(--success))',
+        red: {
+          DEFAULT: 'hsl(var(--red))',
+          foreground: 'hsl(var(--red-foreground))',
         },
-        warning: {
-          DEFAULT: 'hsl(var(--warning))',
+        orange: {
+          DEFAULT: 'hsl(var(--orange))',
+          foreground: 'hsl(var(--orange-foreground))',
         },
-        info: {
-          DEFAULT: 'hsl(var(--info))',
+        yellow: {
+          DEFAULT: 'hsl(var(--yellow))',
+          foreground: 'hsl(var(--yellow-foreground))',
         },
-        error: {
-          DEFAULT: 'hsl(var(--error))',
+        lime: {
+          DEFAULT: 'hsl(var(--lime))',
+          foreground: 'hsl(var(--lime-foreground))',
+        },
+        green: {
+          DEFAULT: 'hsl(var(--green))',
+          foreground: 'hsl(var(--green-foreground))',
+        },
+        cyan: {
+          DEFAULT: 'hsl(var(--cyan))',
+          foreground: 'hsl(var(--cyan-foreground))',
+        },
+        blue: {
+          DEFAULT: 'hsl(var(--blue))',
+          foreground: 'hsl(var(--blue-foreground))',
+        },
+        violet: {
+          DEFAULT: 'hsl(var(--violet))',
+          foreground: 'hsl(var(--violet-foreground))',
+        },
+        fuchsia: {
+          DEFAULT: 'hsl(var(--fuchsia))',
+          foreground: 'hsl(var(--fuchsia-foreground))',
+        },
+        slate: {
+          DEFAULT: 'hsl(var(--slate))',
+          foreground: 'hsl(var(--slate-foreground))',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -63,7 +91,7 @@ module.exports = {
           4: 'hsl(var(--chart-4))',
           5: 'hsl(var(--chart-5))',
         },
-      },
+      }),
       keyframes: {
         'accordion-down': {
           from: {
