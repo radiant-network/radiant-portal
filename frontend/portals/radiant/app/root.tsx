@@ -2,7 +2,7 @@ import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration }
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
-import '@styles/colors.css';
+import '@styles/common.css';
 import '@styles/main.css';
 import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
 import { TooltipProvider } from '@/components/base/ui/tooltip';
