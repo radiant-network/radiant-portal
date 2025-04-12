@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Badge } from '@/components/base/ui/badge';
 import { fn } from '@storybook/test';
-import { badgeSizes, badgeVariants } from './utils';
+import { badgeVariants } from './utils';
+import { User } from 'lucide-react';
 
 const meta = {
   title: 'Base/Data Display/Badge',
@@ -15,9 +16,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Variants: Story = {
-  args: {
-    size: 'default',
-  },
+  args: {},
   render: args => (
     <div className="flex flex-col items-start gap-2">
       {badgeVariants.map(variant => (
@@ -34,22 +33,44 @@ export const Closable: Story = {
     children: 'Badge',
     onClose: fn(),
   },
-  render: args => <Badge {...args} />,
+  render: args => (
+    <div className="flex flex-col items-start gap-2">
+      {badgeVariants.map(variant => (
+        <Badge variant={variant} {...args}>
+          {variant}
+        </Badge>
+      ))}
+    </div>
+  ),
 };
 
-export const Sizes: Story = {
+export const Clickable: Story = {
   args: {
-    variant: 'default',
+    children: 'Badge',
+    onClick: fn(),
   },
-  render: args => {
-    return (
-      <div className="flex flex-col items-start gap-2">
-        {badgeSizes.map(size => (
-          <Badge size={size} {...args}>
-            Badge {size}
-          </Badge>
-        ))}
-      </div>
-    );
+  render: args => (
+    <div className="flex flex-col items-start gap-2">
+      {badgeVariants.map(variant => (
+        <Badge variant={variant} {...args}>
+          {variant}
+        </Badge>
+      ))}
+    </div>
+  ),
+};
+
+export const WithIcon: Story = {
+  args: {
+    children: 'Badge',
   },
+  render: args => (
+    <div className="flex flex-col items-start gap-2">
+      {badgeVariants.map(variant => (
+        <Badge variant={variant} {...args}>
+          {variant} <User />
+        </Badge>
+      ))}
+    </div>
+  ),
 };
