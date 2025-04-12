@@ -1,4 +1,8 @@
 {
+  "admin": {
+    "appId": "admin",
+    "adminCode": "admin"
+  },
   "variant_entity": {
     "app_id": "variant_entity",
     "aggregations": [

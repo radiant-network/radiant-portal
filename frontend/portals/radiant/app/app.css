@@ -6,7 +6,10 @@ html,
 body {
   @apply bg-background;
   @apply text-foreground;
-  min-height: 100vh;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 
   @media (prefers-color-scheme: light) {
     color-scheme: light;

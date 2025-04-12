@@ -12,11 +12,18 @@ import {
 
 interface LanguageSwitcherProps {
   className?: string;
+  placement?: 'top' | 'bottom';
 }
 
-export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
+export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ 
+  className, 
+  placement = 'bottom' 
+}) => {  
   const { currentLanguage, setLanguage, languages, t } = useI18n();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Map placement to direction
+  const direction = placement === 'top' ? 'up' : 'down';
 
   const handleLanguageChange = async (lang: string) => {
     setIsLoading(true);
@@ -28,7 +35,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className })
   };
 
   return (
-    <NavigationMenu>
+    <NavigationMenu className={className} direction={direction}>
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger className="bg-transparent p-2">
