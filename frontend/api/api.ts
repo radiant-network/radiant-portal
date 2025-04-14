@@ -120,6 +120,12 @@ export interface CountBody {
 export interface ExpendedOccurrence {
     /**
      * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'aa_change'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof ExpendedOccurrence
      */
@@ -142,6 +148,18 @@ export interface ExpendedOccurrence {
      * @memberof ExpendedOccurrence
      */
     'cadd_score'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpendedOccurrence
+     */
+    'canonical'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'coding_dna_change'?: string;
     /**
      * 
      * @type {string}
@@ -186,10 +204,28 @@ export interface ExpendedOccurrence {
     'gnomad_v3_af': number;
     /**
      * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'hgvsg': string;
+    /**
+     * 
      * @type {number}
      * @memberof ExpendedOccurrence
      */
     'locus_id': number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpendedOccurrence
+     */
+    'mane_select'?: boolean;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpendedOccurrence
+     */
+    'picked_consequences': Array<string>;
     /**
      * 
      * @type {number}
@@ -202,6 +238,12 @@ export interface ExpendedOccurrence {
      * @memberof ExpendedOccurrence
      */
     'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'rsnumber'?: string;
     /**
      * 
      * @type {string}
@@ -226,6 +268,12 @@ export interface ExpendedOccurrence {
      * @memberof ExpendedOccurrence
      */
     'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'symbol'?: string;
 }
 /**
  * 

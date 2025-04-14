@@ -30,24 +30,32 @@ type Occurrence struct {
 } // @name Occurrence
 
 type ExpendedOccurrence = struct {
-	LocusId      int64             `json:"locus_id" validate:"required"`
-	SiftPred     string            `json:"sift_pred,omitempty"`
-	SiftScore    float32           `json:"sift_score,omitempty"`
-	FathmmPred   string            `json:"fathmm_pred,omitempty"`
-	FathmmScore  float32           `json:"fathmm_score,omitempty"`
-	RevelScore   float64           `json:"revel_score,omitempty"`
-	CaddScore    float64           `json:"cadd_score,omitempty"`
-	CaddPhred    float64           `json:"cadd_phred,omitempty"`
-	SpliceaiDs   float32           `json:"spliceai_ds,omitempty"`
-	SpliceaiType JsonArray[string] `gorm:"type:json" json:"spliceai_type,omitempty"`
-	GnomadPli    float64           `json:"gnomad_pli,omitempty"`
-	GnomadLoeuf  float32           `json:"gnomad_loeuf,omitempty"`
-	GnomadV3Af   float64           `json:"gnomad_v3_af" validate:"required"`
-	Gq           int32             `json:"genotype_quality" validate:"required"`
-	Filter       string            `json:"filter,omitempty"`
-	AdAlt        int32             `json:"ad_alt,omitempty"`
-	AdTotal      int32             `json:"ad_total,omitempty"`
-	InfoQd       float32           `json:"qd,omitempty"`
+	LocusId         int64             `json:"locus_id" validate:"required"`
+	Hgvsg           string            `json:"hgvsg" validate:"required"`
+	Symbol          string            `json:"symbol,omitempty"`
+	SiftPred        string            `json:"sift_pred,omitempty"`
+	SiftScore       float32           `json:"sift_score,omitempty"`
+	FathmmPred      string            `json:"fathmm_pred,omitempty"`
+	FathmmScore     float32           `json:"fathmm_score,omitempty"`
+	RevelScore      float64           `json:"revel_score,omitempty"`
+	CaddScore       float64           `json:"cadd_score,omitempty"`
+	CaddPhred       float64           `json:"cadd_phred,omitempty"`
+	SpliceaiDs      float32           `json:"spliceai_ds,omitempty"`
+	SpliceaiType    JsonArray[string] `gorm:"type:json" json:"spliceai_type,omitempty"`
+	GnomadPli       float64           `json:"gnomad_pli,omitempty"`
+	GnomadLoeuf     float32           `json:"gnomad_loeuf,omitempty"`
+	GnomadV3Af      float64           `json:"gnomad_v3_af" validate:"required"`
+	Gq              int32             `json:"genotype_quality" validate:"required"`
+	Filter          string            `json:"filter,omitempty"`
+	AdAlt           int32             `json:"ad_alt,omitempty"`
+	AdTotal         int32             `json:"ad_total,omitempty"`
+	InfoQd          float32           `json:"qd,omitempty"`
+	ManeSelect      bool              `json:"mane_select,omitempty"`
+	Canonical       bool              `json:"canonical,omitempty"`
+	AaChange        string            `json:"aa_change,omitempty"`
+	Rsnumber        string            `json:"rsnumber,omitempty"`
+	CodingDnaChange string            `json:"coding_dna_change,omitempty"`
+	Consequence     JsonArray[string] `gorm:"type:json" json:"picked_consequences" validate:"required"`
 } // @name ExpendedOccurrence
 
 var OccurrenceTable = Table{
@@ -133,6 +141,7 @@ var OccurrencesFields = []Field{
 	VepImpactField,
 	SymbolField,
 	ManeSelectField,
+	CanonicalField,
 	OmimInheritanceCodeField,
 	GnomadV3AfField,
 	TranscriptIdField,
