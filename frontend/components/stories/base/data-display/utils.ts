@@ -6,6 +6,14 @@ export const badgeVariants: VariantProps<typeof BaseBadgeVariants>['variant'][] 
   'secondary',
   'destructive',
   'outline',
+  'red',
+  'orange',
+  'yellow',
+  'lime',
+  'green',
+  'cyan',
+  'blue',
+  'violet',
+  'fuchsia',
+  'slate',
 ];
-
-export const badgeSizes: VariantProps<typeof BaseBadgeVariants>['size'][] = ['default', 'sm', 'md'];
