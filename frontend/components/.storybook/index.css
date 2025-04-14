@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  @apply bg-background;
+  @apply text-foreground;
+}
+
 h1 {
   @apply text-3xl;
 }
@@ -20,4 +26,3 @@ h5 {
 h6 {
   @apply text-sm;
 }
-  

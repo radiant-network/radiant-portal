@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/base/ui/button';
 import { Checkbox } from '@/components/base/ui/checkbox';
 import { Input } from '@/components/base/ui/input';
-import { ActionButton } from '@/components/base/Buttons';
+import { ActionButton } from '@/components/base/buttons';
 import { Aggregation } from '@/api/api';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { useConfig } from '@/components/model/applications-config';
@@ -218,7 +218,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible =
           {t('common.filters.buttons.showMore', { count: items.length - maxVisibleItems })}
         </Button>
       )}
-      {!isLoading && visibleItemsCount > maxVisibleItems  && (
+      {!isLoading && visibleItemsCount > maxVisibleItems && (
         <Button className="mt-2 px-0" onClick={showLess} size="sm" variant="link">
           {t('common.filters.buttons.showLess')}
         </Button>
