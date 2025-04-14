@@ -40,6 +40,8 @@ components:
       type: object
     ExpendedOccurrence:
       properties:
+        aa_change:
+          type: string
         ad_alt:
           type: integer
         ad_total:
@@ -48,6 +50,10 @@ components:
           type: number
         cadd_score:
           type: number
+        canonical:
+          type: boolean
+        coding_dna_change:
+          type: string
         fathmm_pred:
           type: string
         fathmm_score:
@@ -62,12 +68,23 @@ components:
           type: number
         gnomad_v3_af:
           type: number
+        hgvsg:
+          type: string
         locus_id:
           type: integer
+        mane_select:
+          type: boolean
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         qd:
           type: number
         revel_score:
           type: number
+        rsnumber:
+          type: string
         sift_pred:
           type: string
         sift_score:
@@ -79,10 +96,14 @@ components:
             type: string
           type: array
           uniqueItems: false
+        symbol:
+          type: string
       required:
       - genotype_quality
       - gnomad_v3_af
+      - hgvsg
       - locus_id
+      - picked_consequences
       type: object
     InterpretationGermline:
       properties:

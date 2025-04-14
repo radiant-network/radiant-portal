@@ -84,6 +84,7 @@ func (m *MockRepository) GetTermAutoComplete(string, string, int) ([]*types.Auto
 func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurrence, error) {
 	return &types.ExpendedOccurrence{
 		LocusId:      1000,
+		Hgvsg:        "hgvsg1",
 		SiftPred:     "T",
 		SiftScore:    0.1,
 		FathmmPred:   "T",
@@ -98,6 +99,7 @@ func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurre
 		GnomadV3Af:   0.01,
 		Filter:       "PASS",
 		Gq:           100,
+		Consequence:  []string{"splice acceptor"},
 	}, nil
 }
 
@@ -272,5 +274,5 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "locus_id":1000, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
+	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "hgvsg":"hgvsg1", "locus_id":1000, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
 }
