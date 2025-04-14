@@ -1,5 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 
 export type BackLinkProps = React.HTMLAttributes<HTMLDivElement>;
 

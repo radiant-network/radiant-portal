@@ -1,4 +1,4 @@
-import { baseButtonVariants, buttonVariants as buttonVar } from '@/components/base/Buttons';
+import { baseButtonVariants, buttonVariants as buttonVar } from '@/components/base/buttons';
 import { VariantProps } from 'tailwind-variants';
 
 export const buttonVariants: VariantProps<typeof baseButtonVariants>['variant'][] = [

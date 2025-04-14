@@ -276,7 +276,7 @@ const defaultSettings = createColumnSettings([
 ]);
 
 const meta = {
-  title: 'Base/Data Display/Data Table',
+  title: 'Data Display/Data Table',
   component: DataTable,
   args: {
     columns: columns as any,

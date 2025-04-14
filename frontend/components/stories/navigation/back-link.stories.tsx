@@ -1,10 +1,9 @@
-import BackLink from '@/components/base/back-link';
+import BackLink from '@/components/base/navigation/back-link';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {
-  title: 'Base/Navigation/BackLink',
+  title: 'Navigation/BackLink',
   component: BackLink,
-  tags: ['autodocs'],
   args: {},
 } satisfies Meta<typeof BackLink>;
 
@@ -12,7 +11,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Variants: Story = {
+export const Default: Story = {
   args: {},
   render: () => {
     return <BackLink>Back</BackLink>;

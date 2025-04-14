@@ -5,7 +5,7 @@ import { action } from '@storybook/addon-actions';
 import { Input } from '@/components/base/ui/input';
 
 const meta = {
-  title: 'Base/Data Entry/Inputs/Input',
+  title: 'Data Entry/Inputs/Input',
   component: Input,
   args: {
     value: 'Input value',

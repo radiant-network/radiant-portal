@@ -6,7 +6,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import RichTextEditor from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
 
 const meta = {
-  title: 'Base/Data Entry/RichText Editor',
+  title: 'Data Entry/RichText Editor',
   component: RichTextEditor,
   args: {
     value: '<h3>Hello</h3>',

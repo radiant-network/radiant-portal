@@ -139,7 +139,6 @@ const mockDictionary = {
 const meta = {
   title: 'Feature/Query Builder',
   component: QueryBuilder,
-  tags: ['autodocs'],
   args: {
     id: 'query-builder-id',
     enableCombine: true,

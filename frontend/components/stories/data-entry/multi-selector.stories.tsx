@@ -7,7 +7,7 @@ import MultiSelector from '@/components/base/data-entry/multi-selector/multi-sel
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 
 const meta = {
-  title: 'Base/Data Entry/Inputs/Multi Selector',
+  title: 'Data Entry/Inputs/Multi Selector',
   component: MultiSelector,
   args: {
     value: [],

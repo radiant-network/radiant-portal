@@ -5,9 +5,8 @@ import { badgeVariants } from './utils';
 import { User } from 'lucide-react';
 
 const meta = {
-  title: 'Base/Data Display/Badge',
+  title: 'Data Display/Badge',
   component: Badge,
-  tags: ['autodocs'],
   args: {},
 } satisfies Meta<typeof Badge>;
 

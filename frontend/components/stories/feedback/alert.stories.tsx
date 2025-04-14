@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
 
 const meta = {
-  title: 'Base/Overlays/Alert',
+  title: 'Feedback/Alert',
   component: Button,
   decorators: [
     Story => (

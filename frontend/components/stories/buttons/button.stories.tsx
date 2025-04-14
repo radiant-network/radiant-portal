@@ -6,9 +6,8 @@ import { buttonSizes, buttonVariants } from './utils';
 import { IdCardIcon } from 'lucide-react';
 
 const meta = {
-  title: 'Base/Buttons/Button',
+  title: 'Buttons/Button',
   component: Button,
-  tags: ['autodocs'],
   args: { onClick: fn(), loading: false, disabled: false, iconOnly: false },
 } satisfies Meta<typeof Button>;
 

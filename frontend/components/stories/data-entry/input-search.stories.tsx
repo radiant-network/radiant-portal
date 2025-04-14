@@ -5,7 +5,7 @@ import { action } from '@storybook/addon-actions';
 import InputSearch from '@/components/base/data-entry/input-search';
 
 const meta = {
-  title: 'Base/Data Entry/Inputs/Input Search',
+  title: 'Data Entry/Inputs/Input Search',
   component: InputSearch,
   args: {
     value: 'Search value',

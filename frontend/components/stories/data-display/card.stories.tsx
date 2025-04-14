@@ -6,9 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {
-  title: 'Base/Data Display/Card',
+  title: 'Data Display/Card',
   component: Card,
-  tags: ['autodocs'],
   args: {},
 } satisfies Meta<typeof Card>;
 
@@ -49,7 +48,7 @@ export const Default: Story = {
         </form>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outlined">Cancel</Button>
+        <Button variant="outline">Cancel</Button>
         <Button color="primary">Deploy</Button>
       </CardFooter>
     </Card>

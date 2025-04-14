@@ -1,24 +1,18 @@
-import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from '@storybook/react';
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/base/ui/tooltip";
-import { Button } from "@/components/base/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Button } from '@/components/base/ui/button';
 
 const meta = {
-  title: "Base/Overlays/Tooltip",
+  title: 'Feedback/Tooltip',
   component: TooltipContent,
   args: {
-    children: "Tooltip Content",
+    children: 'Tooltip Content',
     sideOffset: 8,
-    side: "top",
+    side: 'top',
   },
   decorators: [
-    (Story) => (
+    Story => (
       <TooltipProvider delayDuration={0}>
         <Story />
       </TooltipProvider>
@@ -31,7 +25,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: (args) => {
+  render: args => {
     return (
       <div className="flex justify-center p-24">
         <Tooltip>

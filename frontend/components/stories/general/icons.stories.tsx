@@ -11,7 +11,7 @@ import NotInOperatorIcon from '@/components/base/icons/not-in-operator-icon';
 import { IconType } from '@/components/base/icons/types';
 
 const meta = {
-  title: 'Base/General/Icons',
+  title: 'General/Icons',
   component: ElementOperatorIcon,
   args: {
     size: 24,

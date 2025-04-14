@@ -41,7 +41,7 @@ const FRAMEWORKS: Option[] = [
 ];
 
 const meta = {
-  title: 'Base/Data Entry/Inputs/Auto Complete',
+  title: 'Data Entry/Inputs/Auto Complete',
   component: AutoComplete,
   args: {
     value: '',

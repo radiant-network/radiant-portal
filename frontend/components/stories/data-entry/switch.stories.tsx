@@ -5,8 +5,7 @@ import { fn } from '@storybook/test';
 import { Switch } from '@/components/base/ui/switch';
 
 const meta = {
-  title: 'Base/Data Entry/Switch',
-  tags: ['autodocs'],
+  title: 'Data Entry/Switch',
   args: {
     size: 'default',
     checked: false,

@@ -1,13 +1,12 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
 
-import List from "@/components/base/list/list";
-import ListItemWithAction from "@/components/base/list/list-item-with-action";
+import List from '@/components/base/list/list';
+import ListItemWithAction from '@/components/base/list/list-item-with-action';
 
 const meta = {
-  title: "Base/Data Display/ListItem with action",
+  title: 'Data Display/ListItem with action',
   component: ListItemWithAction,
-  tags: ["autodocs"],
   args: {
     onEdit: fn(),
     onDelete: fn(),
@@ -22,10 +21,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    title: "Title",
-    description: "Description",
+    title: 'Title',
+    description: 'Description',
   },
-  render: (args) => (
+  render: args => (
     <div className="max-w-[450px]">
       <List bordered>
         <ListItemWithAction {...args} />

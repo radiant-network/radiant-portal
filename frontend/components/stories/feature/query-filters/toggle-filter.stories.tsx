@@ -21,7 +21,7 @@ const config: PortalConfig = {
 const meta = {
   title: 'Feature/Query Filters/Toggle Filter',
   component: ToggleFilter,
-  tags: ['autodocs'],
+
   args: {
     data: [],
     field: { key: 'chromosome', type: 'boolean' },
