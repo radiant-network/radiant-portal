@@ -103,6 +103,13 @@ var ManeSelectField = Field{
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
+var CanonicalField = Field{
+	Name:          "canonical",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         VariantTable,
+}
 var OmimInheritanceCodeField = Field{
 	Name:          "omim_inheritance_code",
 	CanBeSelected: true,
