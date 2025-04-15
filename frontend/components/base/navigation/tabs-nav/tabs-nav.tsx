@@ -49,7 +49,7 @@ export function TabsNavItem({ ref, value, disabled = false, className, children,
         props.onClick?.(e);
       }}
     >
-      <div className="px-3 py-2 text-muted-foreground rounded group-data-[disabled=false]:hover:bg-accent group-data-[active=true]:text-accent-foreground group-data-[disabled=false]:hover:text-accent-foreground transition-all duration-300">
+      <div className="px-3 py-2 text-muted-foreground rounded hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none">
         {children}
       </div>
     </div>
