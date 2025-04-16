@@ -199,6 +199,8 @@ func (m *MockExternalClient) GetCitationById(id string) (*types.PubmedCitation, 
 		}, nil
 	} else if id == "2" {
 		return nil, fmt.Errorf("error")
+	} else if id == "3" {
+		return &types.PubmedCitation{ID: "3"}, nil
 	}
 	return nil, nil
 }
@@ -229,6 +231,17 @@ func Test_GetInterpretationGermline(t *testing.T) {
 	})
 }
 
+func Test_GetInterpretationGermlineWithPartialContent(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		pubmedService := &MockExternalClient{}
+		repo := repository.NewPostgresRepository(db, pubmedService)
+		interpretation := &types.InterpretationGermline{}
+		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
+		assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		assertGetInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusPartialContent, "")
+	})
+}
+
 func assertGetInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	router := gin.Default()
 	router.GET("/interpretations/germline/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationGermline(repo))
@@ -238,7 +251,9 @@ func assertGetInterpretationGermline(t *testing.T, repo repository.Interpretatio
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, status, w.Code)
-	assert.JSONEq(t, expected, w.Body.String())
+	if (expected != "") {
+		assert.JSONEq(t, expected, w.Body.String())
+	}
 }
 
 func assertPostInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationGermline, expected string) *types.InterpretationGermline {
@@ -288,6 +303,17 @@ func Test_GetInterpretationsomatic(t *testing.T) {
 	})
 }
 
+func Test_GetInterpretationSomaticWithPartialContent(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		pubmedService := &MockExternalClient{}
+		repo := repository.NewPostgresRepository(db, pubmedService)
+		interpretation := &types.InterpretationSomatic{}
+		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
+		assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		assertGetInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusPartialContent, "")
+	})
+}
+
 func assertGetInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	router := gin.Default()
 	router.GET("/interpretations/somatic/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationSomatic(repo))
@@ -297,7 +323,9 @@ func assertGetInterpretationSomatic(t *testing.T, repo repository.Interpretation
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, status, w.Code)
-	assert.JSONEq(t, expected, w.Body.String())
+	if expected != "" {
+		assert.JSONEq(t, expected, w.Body.String())
+	}
 }
 
 func assertPostInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationSomatic, expected string) *types.InterpretationSomatic {

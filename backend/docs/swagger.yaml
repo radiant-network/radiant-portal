@@ -532,6 +532,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/InterpretationGermline'
           description: OK
+        "206":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationGermline'
+          description: Partial Content
         "404":
           content:
             application/json:
@@ -612,6 +618,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PubmedCitation'
           description: OK
+        "206":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PubmedCitation'
+          description: Partial Content
         "404":
           content:
             application/json:
@@ -673,6 +685,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/InterpretationSomatic'
           description: OK
+        "206":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationSomatic'
+          description: Partial Content
         "404":
           content:
             application/json:
