@@ -16,6 +16,7 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, `../themes/${process.env.THEME}/assets`),
       '@styles/common.css': path.resolve(__dirname, `../themes/common.css`),
       '@styles': path.resolve(__dirname, `../themes/${process.env.THEME}`),
+      '@translations': path.resolve(__dirname, '../translations'),
     },
   },
   plugins: [react()],

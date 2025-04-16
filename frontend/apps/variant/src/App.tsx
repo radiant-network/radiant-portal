@@ -6,7 +6,7 @@ import { getVariantColumns, defaultSettings } from '@/feature/variant-table/tabl
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
