@@ -25,7 +25,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Variants: Story = {
+export const Default: Story = {
   args: {},
   render: () => {
     return (
