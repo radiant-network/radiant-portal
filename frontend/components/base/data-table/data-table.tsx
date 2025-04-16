@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect, useMemo, useState, Fragment } from 'react';
+import { CSSProperties, useEffect, useMemo, useState, Fragment, useRef } from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -262,6 +262,27 @@ function DataTable<T>({
 }: TableProps<T>) {
   const { t } = useI18n();
 
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const observer = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        const newWidth = entry.contentRect.width;
+        setContainerWidth(newWidth);
+      }
+    });
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   // default values
   const defaultTableState = useMemo(
     () => ({
@@ -382,7 +403,7 @@ function DataTable<T>({
           }}
         />
       </div>
-      <Table style={{ ...columnSizeVars }}>
+      <Table containerRef={containerRef} style={{ ...columnSizeVars }}>
         <TableHeader>
           {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id}>
@@ -469,7 +490,11 @@ function DataTable<T>({
                 </TableRow>
                 {subComponent && row.getIsExpanded() && (
                   <TableRow key={`subcomponent-${row.id}`}>
-                    <TableCell colSpan={row.getVisibleCells().length}>{subComponent(row.original)}</TableCell>
+                    <TableCell colSpan={row.getVisibleCells().length}>
+                      <div className="sticky overflow-hidden left-2" style={{ width: containerWidth - 16 }}>
+                        {subComponent(row.original)}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 )}
               </Fragment>

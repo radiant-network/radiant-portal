@@ -25,13 +25,16 @@ const tableVariants = tv({
   },
 });
 
-export type TableProps = React.HTMLAttributes<HTMLTableElement> & VariantProps<typeof tableVariants>;
+export type TableProps = React.HTMLAttributes<HTMLTableElement> &
+  VariantProps<typeof tableVariants> & {
+    containerRef?: React.RefObject<HTMLDivElement>;
+  };
 
-const Table = React.forwardRef<HTMLTableElement, TableProps>(({ className, size, ...props }, ref) => {
+const Table = React.forwardRef<HTMLTableElement, TableProps>(({ containerRef, className, size, ...props }, ref) => {
   const styles = tableVariants({ size });
 
   return (
-    <div className="rounded relative w-full border overflow-auto">
+    <div ref={containerRef} className="rounded relative w-full border overflow-auto">
       <table ref={ref} className={styles.base({ className })} {...props} />
     </div>
   );
