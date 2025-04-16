@@ -372,7 +372,7 @@ func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*Ex
 	tx := r.db.Table("occurrences o")
 	tx = tx.Joins("JOIN consequences c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.picked = true", seqId, locusId)
 	tx = tx.Joins("JOIN variants v ON o.locus_id=v.locus_id")
-	tx = tx.Select("c.locus_id, v.hgvsg, v.symbol, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.sift_score, c.sift_pred, c.fathmm_score, c.fathmm_pred, c.cadd_score, c.cadd_phred, c.revel_score, v.gnomad_v3_af, o.filter, o.gq, o.ad_alt, o.ad_total, o.info_qd, v.canonical, v.mane_select, v.rsnumber, v.aa_change, c.coding_dna_change, v.consequence")
+	tx = tx.Select("c.locus_id, v.hgvsg, v.symbol, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.sift_score, c.sift_pred, c.fathmm_score, c.fathmm_pred, c.cadd_score, c.cadd_phred, c.revel_score, v.gnomad_v3_af, o.filter, o.gq, o.ad_alt, o.ad_total, o.info_qd, v.canonical, v.mane_select, v.rsnumber, v.aa_change, c.coding_dna_change, v.consequence, v.vep_impact")
 
 	var expendedOccurrence ExpendedOccurrence
 	err := tx.First(&expendedOccurrence).Error

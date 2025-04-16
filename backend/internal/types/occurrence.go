@@ -17,7 +17,7 @@ type Occurrence struct {
 	OmimInheritanceCode JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
 	AdRatio             float64           `json:"ad_ratio" validate:"required"`
 	VariantClass        string            `json:"variant_class" validate:"required"`
-	VepImpact           string            `json:"vep_impact,omitempty"`
+	VepImpact           string            `json:"vep_impact,omitempty" enums:"MODIFIER,LOW,MODERATE,HIGH"`
 	Symbol              string            `json:"symbol,omitempty"`
 	Clinvar             JsonArray[string] `gorm:"type:json" json:"clinvar,omitempty"`
 	ManeSelect          bool              `json:"mane_select,omitempty"`
@@ -56,6 +56,7 @@ type ExpendedOccurrence = struct {
 	Rsnumber        string            `json:"rsnumber,omitempty"`
 	CodingDnaChange string            `json:"coding_dna_change,omitempty"`
 	Consequence     JsonArray[string] `gorm:"type:json" json:"picked_consequences" validate:"required"`
+	VepImpact       string            `json:"vep_impact,omitempty" enums:"MODIFIER,LOW,MODERATE,HIGH"`
 } // @name ExpendedOccurrence
 
 var OccurrenceTable = Table{

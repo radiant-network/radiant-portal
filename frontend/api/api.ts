@@ -274,7 +274,23 @@ export interface ExpendedOccurrence {
      * @memberof ExpendedOccurrence
      */
     'symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'vep_impact'?: ExpendedOccurrenceVepImpactEnum;
 }
+
+export const ExpendedOccurrenceVepImpactEnum = {
+    Modifier: 'MODIFIER',
+    Low: 'LOW',
+    Moderate: 'MODERATE',
+    High: 'HIGH'
+} as const;
+
+export type ExpendedOccurrenceVepImpactEnum = typeof ExpendedOccurrenceVepImpactEnum[keyof typeof ExpendedOccurrenceVepImpactEnum];
+
 /**
  * 
  * @export
@@ -742,7 +758,7 @@ export interface Occurrence {
      * @type {string}
      * @memberof Occurrence
      */
-    'vep_impact'?: string;
+    'vep_impact'?: OccurrenceVepImpactEnum;
     /**
      * 
      * @type {string}
@@ -750,6 +766,16 @@ export interface Occurrence {
      */
     'zygosity': string;
 }
+
+export const OccurrenceVepImpactEnum = {
+    Modifier: 'MODIFIER',
+    Low: 'LOW',
+    Moderate: 'MODERATE',
+    High: 'HIGH'
+} as const;
+
+export type OccurrenceVepImpactEnum = typeof OccurrenceVepImpactEnum[keyof typeof OccurrenceVepImpactEnum];
+
 /**
  * 
  * @export

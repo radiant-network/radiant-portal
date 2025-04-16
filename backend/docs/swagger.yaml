@@ -98,6 +98,13 @@ components:
           uniqueItems: false
         symbol:
           type: string
+        vep_impact:
+          enum:
+          - MODIFIER
+          - LOW
+          - MODERATE
+          - HIGH
+          type: string
       required:
       - genotype_quality
       - gnomad_v3_af
@@ -298,6 +305,11 @@ components:
         variant_class:
           type: string
         vep_impact:
+          enum:
+          - MODIFIER
+          - LOW
+          - MODERATE
+          - HIGH
           type: string
         zygosity:
           type: string
