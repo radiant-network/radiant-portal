@@ -1,18 +1,10 @@
 import { Button } from '@/components/base/ui/button';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import type { Meta, StoryObj } from '@storybook/react';
-import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
 
 const meta = {
   title: 'Feedback/Alert',
   component: Button,
-  decorators: [
-    Story => (
-      <AlertDialogProvider>
-        <Story />
-      </AlertDialogProvider>
-    ),
-  ],
 } satisfies Meta<typeof Button>;
 
 export default meta;

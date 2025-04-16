@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { Button } from '@/components/base/ui/button';
 
 const meta = {
@@ -11,13 +10,6 @@ const meta = {
     sideOffset: 8,
     side: 'top',
   },
-  decorators: [
-    Story => (
-      <TooltipProvider delayDuration={0}>
-        <Story />
-      </TooltipProvider>
-    ),
-  ],
 } satisfies Meta<typeof TooltipContent>;
 
 export default meta;
