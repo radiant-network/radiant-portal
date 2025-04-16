@@ -1,5 +1,5 @@
-import EmptyCell from "@/components/base/data-table/cells/empty-cell";
-import { Badge } from "@/components/base/ui/badge";
+import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
+import { Badge } from '@/components/base/ui/badge';
 
 type ClinvarCellProps = {
   codes?: string[];
@@ -10,7 +10,7 @@ function ClinvarCell({ codes = [] }: ClinvarCellProps) {
 
   return (
     <>
-      {codes.map((code) => {
+      {codes.map(code => {
         return (
           <Badge key={code} className="me-2">
             {code}

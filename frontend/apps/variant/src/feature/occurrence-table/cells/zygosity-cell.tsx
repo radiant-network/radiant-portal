@@ -1,4 +1,4 @@
-import EmptyCell from "@/components/base/data-table/cells/empty-cell";
+import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
 
 type ZygosityCellProps = {
   value?: string;
@@ -10,8 +10,8 @@ function ZygosityCell({ value }: ZygosityCellProps) {
   return (
     <span>
       {{
-        HEM: "1",
-        HET: "0/1",
+        HEM: '1',
+        HET: '0/1',
       }[value] ?? null}
     </span>
   );

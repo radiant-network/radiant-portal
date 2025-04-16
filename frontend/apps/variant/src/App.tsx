@@ -2,7 +2,7 @@ import styles from './App.module.css';
 import { Count, CountBody, ListBody, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
-import { getVariantColumns, defaultSettings } from '@/feature/variant-table/table-settings';
+import { getVariantColumns, defaultSettings } from '@/feature/occurrence-table/table-settings';
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
@@ -12,7 +12,7 @@ import { queryBuilderRemote } from '@/components/model/query-builder-core/query-
 import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { useConfig } from '@/components/model/applications-config';
 import VariantIcon from '@/components/base/icons/variant-icon';
-import VariantTablePreview from './feature/variant-table/variant-table-preview';
+import OccurrenceExpend from '@/feature/occurrence-table/occurrence-expend';
 import { FilterComponent } from '@/components/feature/query-filters/filter-container';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -168,7 +168,7 @@ function App() {
           pagination={pagination}
           onPaginationChange={setPagination}
           onServerSortingChange={setSorting}
-          subComponent={data => <VariantTablePreview occurrence={data} />}
+          subComponent={data => <OccurrenceExpend occurrence={data} />}
           total={total?.count ?? 0}
         />
       </main>

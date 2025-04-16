@@ -1,4 +1,4 @@
-import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import TranscriptCanonicalIcon from '@/components/base/icons/transcript-canonical-icon';
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
@@ -14,9 +14,17 @@ function ManeCell({ canonical, mane_select, mane_plus }: ManeCellProps) {
   if (!canonical && !mane_select && !mane_plus) return <EmptyCell />;
 
   const pills = [
-    { condition: canonical, icon: <TranscriptCanonicalIcon />, tooltip: 'Canonical' },
-    { condition: mane_select, icon: <TranscriptManeSelectIcon />, tooltip: 'Mane Select' },
-    { condition: mane_plus, icon: <TranscriptManePlusIcon />, tooltip: 'Mane Plus' },
+    {
+      condition: canonical,
+      icon: <TranscriptCanonicalIcon className="text-primary" size={18} />,
+      tooltip: 'Canonical',
+    },
+    {
+      condition: mane_select,
+      icon: <TranscriptManeSelectIcon className="text-primary" size={18} />,
+      tooltip: 'Mane Select',
+    },
+    { condition: mane_plus, icon: <TranscriptManePlusIcon className="text-primary" size={18} />, tooltip: 'Mane Plus' },
   ];
 
   return (

@@ -1,22 +1,20 @@
 import { createColumnHelper, HeaderContext } from '@tanstack/react-table';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
-import RowSelectionCell from '@/components/base/data-table/cells/table-row-selection-cell';
+import RowExpandCell from '@/feature/occurrence-table/cells/row-expand-cell';
+import RowSelectionCell from '@/feature/occurrence-table/cells/table-row-selection-cell';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
-import GeneCell from '@/components/base/data-table/cells/gene-cell';
-import LinkCell from '@/components/base/data-table/cells/link-cell';
-import ManeCell from '@/components/base/data-table/cells/mane-cell';
-import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
-import MostDeleteriousConsequenceCell, {
-  Impact,
-} from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
-import OmimCell from '@/components/base/data-table/cells/omim-cell';
-import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
-import NumberCell from '@/components/base/data-table/cells/number-cell';
-import VariantClassCell from '@/components/base/data-table/cells/variant-class-cell';
-import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
+import GeneCell from '@/feature/occurrence-table/cells/gene-cell';
+import LinkCell from '@/feature/occurrence-table/cells/link-cell';
+import ManeCell from '@/feature/occurrence-table/cells/mane-cell';
+import ClinvarCell from '@/feature/occurrence-table/cells/clinvar-cell';
+import ParticipantFrequencyCell from '@/feature/occurrence-table/cells/participant-frequency-cell';
+import MostDeleteriousConsequenceCell from '@/feature/occurrence-table/cells/most-deleterious-consequence-cell';
+import OmimCell from '@/feature/occurrence-table/cells/omim-cell';
+import GnomadCell from '@/feature/occurrence-table/cells/gnomad-cell';
+import NumberCell from '@/feature/occurrence-table/cells/number-cell';
+import VariantClassCell from '@/feature/occurrence-table/cells/variant-class-cell';
+import ZygosityCell from '@/feature/occurrence-table/cells/zygosity-cell';
 import { Occurrence } from '@/api/api';
 import { TFunction } from 'i18next';
 
@@ -59,7 +57,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'mostDeleteriousConsequence',
       cell: info => (
         <MostDeleteriousConsequenceCell
-          vepImpact={info.getValue().vep_impact as Impact}
+          vepImpact={info.getValue().vep_impact}
           consequences={info.getValue().picked_consequences}
           aaChange={info.getValue().aa_change}
         />

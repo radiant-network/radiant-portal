@@ -1,4 +1,4 @@
-import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
 import { canQuotientBeComputed } from '@/components/lib/number-format';
 
 type NumberCellProps = {

@@ -1,37 +1,14 @@
-import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import { getImpactBadge } from '../utils';
+import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
 import { cn } from '@/components/lib/utils';
-import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
-import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
-import ShapeCircleIcon from '@/components/base/icons/shape-circle-icon';
-import ShapeTriangleDownIcon from '@/components/base/icons/shape-triangle-down-icon';
-
-export enum Impact {
-  High = 'HIGH',
-  Moderate = 'MODERATE',
-  Low = 'LOW',
-  Modifier = 'MODIFIER',
-}
+import { useI18n } from '@/components/hooks/i18n';
+import { OccurrenceVepImpactEnum } from '@/api/api';
 
 type MostDeleteriousConsequenceCellProps = {
-  vepImpact?: Impact;
+  vepImpact?: OccurrenceVepImpactEnum;
   consequences?: string[];
   aaChange?: string;
 };
-
-function getImpactBadge(impact: Impact) {
-  switch (impact) {
-    case Impact.High:
-      return <ShapeTriangleUpIcon size={10} className="text-red" />;
-    case Impact.Low:
-      return <ShapeTriangleDownIcon size={10} className="text-green" />;
-    case Impact.Moderate:
-      return <ShapeDiamondIcon size={10} className="text-yellow" />;
-    case Impact.Modifier:
-      return <ShapeCircleIcon size={10} className="text-slate" />;
-    default:
-      return;
-  }
-}
 
 /**
  * Only show the most deleterious consequence out of all the consequences for the variant
@@ -46,11 +23,13 @@ function getImpactBadge(impact: Impact) {
  * @fixme aa_change is empty in api at the moment
  */
 function MostDeleteriousConsequenceCell({ vepImpact, consequences, aaChange }: MostDeleteriousConsequenceCellProps) {
+  const { t } = useI18n();
+
   if (vepImpact === undefined || consequences === undefined) return <EmptyCell />;
 
   return (
     <div className={cn('flex items-center gap-2')}>
-      {getImpactBadge(vepImpact)} {consequences[0]}
+      {getImpactBadge(vepImpact)} {t(`consequences.${consequences[0]}`)}
       {aaChange && ` - ${aaChange}`}
     </div>
   );
