@@ -14,7 +14,18 @@ import NumberCell from '@/components/base/data-table/cells/number-cell';
 import VariantClassCell from '@/components/base/data-table/cells/variant-class-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { Occurrence, SortBodyOrderEnum } from '@/api/api';
-import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+
+const config: PortalConfig = {
+  variant_entity: {
+    app_id: 'variant_entity_multi_select_filter',
+    aggregations: [],
+  },
+  portal: {
+    name: '',
+    navigation: {},
+  },
+};
 
 const columnHelper = createColumnHelper<Occurrence>();
 
@@ -309,6 +320,13 @@ const meta = {
     },
     total: 10,
   },
+  decorators: [
+    Story => (
+      <ConfigProvider config={config}>
+        <Story />
+      </ConfigProvider>
+    ),
+  ],
 } satisfies Meta<typeof DataTable>;
 
 export default meta;

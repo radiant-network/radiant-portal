@@ -3,6 +3,7 @@ import type { Preview } from '@storybook/react';
 import { withThemeByClassName } from '@storybook/addon-themes';
 import { TooltipProvider } from '../base/ui/tooltip';
 import { AlertDialogProvider } from '../base/dialog/alert-dialog-provider';
+import { I18nProvider } from '../hooks/I18nProvider';
 import './index.css';
 import '@styles/common.css';
 import '@styles/main.css';
@@ -25,11 +26,13 @@ const preview: Preview = {
       defaultTheme: 'light',
     }),
     Story => (
-      <TooltipProvider delayDuration={0}>
-        <AlertDialogProvider>
-          <Story />
-        </AlertDialogProvider>
-      </TooltipProvider>
+      <I18nProvider>
+        <TooltipProvider delayDuration={0}>
+          <AlertDialogProvider>
+            <Story />
+          </AlertDialogProvider>
+        </TooltipProvider>
+      </I18nProvider>
     ),
   ],
 };

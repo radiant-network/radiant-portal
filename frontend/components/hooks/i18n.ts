@@ -10,15 +10,15 @@ import { useTranslation } from 'react-i18next';
  */
 const deepMerge = <T extends Record<string, any>>(target: T, source: T): T => {
   const result = { ...target };
-  
+
   for (const key in source) {
     if (source[key] && typeof source[key] === 'object') {
-      result[key] = deepMerge(result[key] || {} as T[typeof key], source[key]);
+      result[key] = deepMerge(result[key] || ({} as T[typeof key]), source[key]);
     } else {
       result[key] = source[key];
     }
   }
-  
+
   return result;
 };
 
@@ -30,12 +30,12 @@ const getCurrentTheme = () => {
 // Load translations based on theme
 const loadTranslations = async (lang: string) => {
   const theme = getCurrentTheme();
-  
+
   try {
     // Load translations in parallel but handle errors separately
     const [commonResult, portalResult] = await Promise.allSettled([
       import(`@translations/common/${lang}.json`),
-      import(`@translations/portals/${theme}/${lang}.json`)
+      import(`@translations/portals/${theme}/${lang}.json`),
     ]);
 
     // Start with common translations
@@ -61,11 +61,11 @@ i18next
     fallbackLng: 'en',
     debug: import.meta.env.DEV,
     supportedLngs: ['en', 'fr', 'de', 'es'],
-    
+
     // Namespaces for different translation layers
     ns: ['common', 'portal'],
     defaultNS: 'common',
-    
+
     // Language detection configuration
     detection: {
       order: ['querystring', 'cookie', 'localStorage', 'navigator'],
@@ -74,12 +74,12 @@ i18next
       lookupCookie: 'i18next',
       lookupLocalStorage: 'i18nextLng',
     },
-    
+
     // Interpolation configuration
     interpolation: {
       escapeValue: false,
     },
-    
+
     // Initialize with empty resources
     resources: {
       en: {
@@ -103,7 +103,7 @@ i18next
 
 // Load initial language
 const initialLang = i18next.language;
-loadTranslations(initialLang).then((translations) => {
+loadTranslations(initialLang).then(translations => {
   i18next.addResourceBundle(initialLang, 'common', translations, true, true);
 });
 
@@ -112,14 +112,14 @@ export const useI18n = (namespace?: string) => {
 
   const setLanguage = async (lang: string) => {
     if (lang === i18n.language) return;
-    
+
     try {
       // Load translations for the new language
       const translations = await loadTranslations(lang);
-      
+
       // Add translations before changing language to prevent flicker
       i18next.addResourceBundle(lang, 'common', translations, true, true);
-      
+
       // Change the language
       await i18n.changeLanguage(lang);
     } catch (error) {
@@ -138,4 +138,4 @@ export const useI18n = (namespace?: string) => {
   };
 };
 
-export { i18next as i18n }; 
+export { i18next as i18n };
