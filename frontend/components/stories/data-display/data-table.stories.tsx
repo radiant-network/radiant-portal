@@ -14,6 +14,7 @@ import NumberCell from '@/components/base/data-table/cells/number-cell';
 import VariantClassCell from '@/components/base/data-table/cells/variant-class-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { Occurrence, SortBodyOrderEnum } from '@/api/api';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
 
 const columnHelper = createColumnHelper<Occurrence>();
 

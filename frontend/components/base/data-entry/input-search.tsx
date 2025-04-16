@@ -75,8 +75,8 @@ function InputSearch({
         }}
       />
       <Button
-        color="default"
         {...searchButtonProps}
+        variant="default"
         loading={loading || searchButtonProps?.loading}
         className={cn('h-9 px-3 shadow-sm rounded-l-none ml-[-1px] hover:z-[2]', searchButtonProps?.className)}
         onClick={() => handleSearch(value)}

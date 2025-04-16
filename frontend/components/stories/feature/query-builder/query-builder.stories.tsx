@@ -1,17 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
-
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
 import { defaultQueryReferenceColors } from '@/components/feature/query-builder/data';
 import { Button } from '@/components/base/ui/button';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { v4 } from 'uuid';
 import { BooleanOperators, ISyntheticSqon } from '@/components/model/sqon';
-import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
 import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
 import { UserIcon } from 'lucide-react';
-import { TooltipProvider } from '@/components/base/ui/tooltip';
 import { SqonOpEnum } from '@/api/api';
 
 const mockDictionary = {
@@ -149,15 +146,6 @@ const meta = {
     resolveSyntheticSqon: fn(),
     dictionary: mockDictionary,
   },
-  decorators: [
-    Story => (
-      <TooltipProvider delayDuration={0}>
-        <AlertDialogProvider>
-          <Story />
-        </AlertDialogProvider>
-      </TooltipProvider>
-    ),
-  ],
 } satisfies Meta<typeof QueryBuilder>;
 
 export default meta;
