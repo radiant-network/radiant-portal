@@ -5,8 +5,8 @@ export default function ClassificationSection() {
   const { t } = useI18n();
 
   return (
-    <DetailSection title={t('occurrenceDetailSections.classifications.title')}>
-      <DetailItem title={t('occurrenceDetailSections.classifications.clinvar')} value="-" />
+    <DetailSection title={t('occurrenceExpend.classifications.title')}>
+      <DetailItem title={t('occurrenceExpend.classifications.clinvar')} value="-" />
     </DetailSection>
   );
 }

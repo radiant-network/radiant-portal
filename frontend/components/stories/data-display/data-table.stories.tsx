@@ -1,20 +1,21 @@
 import { createColumnHelper, HeaderContext } from '@tanstack/react-table';
-import DataTable from '@/components/base/data-table/data-table';
 import type { Meta, StoryObj } from '@storybook/react';
-import RowSelectionCell from '@/components/base/data-table/cells/table-row-selection-cell';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
-import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
-import GeneCell from '@/components/base/data-table/cells/gene-cell';
-import LinkCell from '@/components/base/data-table/cells/link-cell';
-import ManeCell from '@/components/base/data-table/cells/mane-cell';
-import OmimCell from '@/components/base/data-table/cells/omim-cell';
-import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
-import NumberCell from '@/components/base/data-table/cells/number-cell';
-import VariantClassCell from '@/components/base/data-table/cells/variant-class-cell';
-import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
+import DataTable, { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
 import { Occurrence, SortBodyOrderEnum } from '@/api/api';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+
+// Purposely used absolute paths since variant app is not a dependency of the components library
+import RowExpandCell from '../../../apps/variant/src/feature/occurrence-table/cells/row-expand-cell';
+import GeneCell from '../../../apps/variant/src/feature/occurrence-table/cells/gene-cell';
+import LinkCell from '../../../apps/variant/src/feature/occurrence-table/cells/link-cell';
+import ManeCell from '../../../apps/variant/src/feature/occurrence-table/cells/mane-cell';
+import OmimCell from '../../../apps/variant/src/feature/occurrence-table/cells/omim-cell';
+import ClinvarCell from '../../../apps/variant/src/feature/occurrence-table/cells/clinvar-cell';
+import NumberCell from '../../../apps/variant/src/feature/occurrence-table/cells/number-cell';
+import VariantClassCell from '../../../apps/variant/src/feature/occurrence-table/cells/variant-class-cell';
+import ZygosityCell from '../../../apps/variant/src/feature/occurrence-table/cells/zygosity-cell';
+import RowSelectionCell from '../../../apps/variant/src/feature/occurrence-table/cells/table-row-selection-cell';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -231,15 +232,18 @@ const defaultSettings = createColumnSettings([
     id: 'row_expand',
     visible: true,
     fixed: true,
+    pinningPosition: 'left',
   },
   {
     id: 'row_selection',
     visible: true,
     fixed: true,
+    pinningPosition: 'left',
   },
   {
     id: 'hgvsg',
     visible: true,
+    pinningPosition: 'left',
   },
   {
     id: 'variant_class',

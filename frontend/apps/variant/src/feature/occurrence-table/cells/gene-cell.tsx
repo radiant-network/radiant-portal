@@ -1,7 +1,7 @@
 import { PlusIcon } from 'lucide-react';
-import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
 import { cn } from '@/components/lib/utils';
-import { Button } from '../../ui/button';
+import { Button } from '@/components/base/ui/button';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { useConfig } from '@/components/model/applications-config';
 import { MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';

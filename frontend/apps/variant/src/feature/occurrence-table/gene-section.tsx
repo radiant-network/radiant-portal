@@ -10,13 +10,13 @@ export default function GeneSection({ data }: GeneSectionProps) {
   const { t } = useI18n();
 
   return (
-    <DetailSection title={t('occurrenceDetailSections.gene.title')}>
+    <DetailSection title={t('occurrenceExpend.gene.title')}>
       <DetailItem
-        title={t('occurrenceDetailSections.gene.pli')}
+        title={t('occurrenceExpend.gene.pli')}
         value={data.gnomad_pli ? (data.gnomad_pli < 0.001 ? data.gnomad_pli.toExponential(2) : data.gnomad_pli) : '-'}
       />
       <DetailItem
-        title={t('occurrenceDetailSections.gene.loeuf')}
+        title={t('occurrenceExpend.gene.loeuf')}
         value={
           data.gnomad_loeuf
             ? data.gnomad_loeuf < 0.001
@@ -25,7 +25,7 @@ export default function GeneSection({ data }: GeneSectionProps) {
             : '-'
         }
       />
-      <DetailItem title={t('occurrenceDetailSections.gene.spliceAi')} value="-" />
+      <DetailItem title={t('occurrenceExpend.gene.spliceAi')} value="-" />
     </DetailSection>
   );
 }

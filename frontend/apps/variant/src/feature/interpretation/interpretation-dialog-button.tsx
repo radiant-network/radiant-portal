@@ -20,6 +20,7 @@ import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 import { Interpretation, InterpretationFormRef } from './types';
 import { Spinner } from '@/components/base/spinner';
+import { useI18n } from '@/components/hooks/i18n';
 
 type InterpretationDialogButtonProps = ButtonProps & {
   occurrence: Occurrence;
@@ -30,6 +31,7 @@ type InterpretationDialogButtonProps = ButtonProps & {
 const isSomatic = false;
 
 function InterpretationDialogButton({ occurrence, ...buttonProps }: InterpretationDialogButtonProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const gerlimeFormRef = useRef<InterpretationFormRef>(null);
@@ -72,7 +74,7 @@ function InterpretationDialogButton({ occurrence, ...buttonProps }: Interpretati
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Button color="primary" onClick={handleOpen} {...buttonProps}>
-        <Edit2Icon /> Interpret
+        <Edit2Icon /> {t('occurrenceExpend.actions.interpret')}
       </Button>
       <DialogContent
         className="max-w-[calc(100vw-48px)] min-h-[calc(100vh-48px)] w-[1200px]"

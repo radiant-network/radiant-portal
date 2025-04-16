@@ -238,7 +238,12 @@
       }
     }
   },
-  "occurrenceDetailSections": {
+  "occurrenceExpend": {
+    "actions": {
+      "downloadReport": "Download report",
+      "openIGV": "Open IGV",
+      "interpret": "Interpret"
+    },
     "classifications": {
       "title": "Classifications",
       "clinvar": "ClinVar"
@@ -256,7 +261,7 @@
     },
     "frequencies": {
       "title": "Frequencies",
-      "rqdm": "RQDM",
+      "myOrganization": "My Organization",
       "gnomad": "gnomAD"
     },
     "functionalScores": {
@@ -291,5 +296,46 @@
       "genotypeQuality": "Genotype Quality",
       "filter": "Filter"
     }
+  },
+  "consequences": {
+    "transcript_ablation": "Transcript Ablation",
+    "splice_acceptor": "Splice Acceptor",
+    "splice_donor": "Splice Donor",
+    "stop_gained": "Stop Gained",
+    "frameshift": "Frameshift",
+    "stop_lost": "Stop Lost",
+    "start_lost": "Start Lost",
+    "transcript_amplification": "Transcript Amplification",
+    "inframe_insertion": "Inframe Insertion",
+    "inframe_deletion": "Inframe Deletion",
+    "missense": "Missense",
+    "protein_altering": "Protein Altering",
+    "splice_region": "Splice Region",
+    "splice_donor_5th_base": "Splice Donor 5th Base",
+    "splice_donor_region": "Splice Donor Region",
+    "splice_polypyrimidine_tract": "Splice Polypyrimidine Tract",
+    "incomplete_terminal_codon": "Incomplete Terminal Codon",
+    "start_retained": "Start Retained",
+    "stop_retained": "Stop Retained",
+    "synonymous": "Synonymous",
+    "coding_sequence": "Coding Sequence",
+    "mature_miRNA": "Mature MiRna",
+    "5_prime_UTR": "5 Prime Utr",
+    "3_prime_UTR": "3 Prime Utr",
+    "non_coding_transcript_exon": "Non Coding Transcript Exon",
+    "intron": "Intron",
+    "NMD_transcript": "Nmd Transcript",
+    "non_coding_transcript": "Non Coding Transcript",
+    "upstream gene": "Upstream Gene",
+    "downstream gene": "Downstream Gene",
+    "TFBS_ablation": "Tfbs Ablation",
+    "TFBS_amplification": "Tfbs Amplification",
+    "TF_binding_site": "Tf Binding Site",
+    "regulatory_region_ablation": "Regulatory Region Ablation",
+    "regulatory_region_amplification": "Regulatory Region Amplification",
+    "feature_elongation": "Feature Elongation",
+    "regulatory_region": "Regulatory Region",
+    "feature_truncation": "Feature Truncation",
+    "intergenic": "Intergenic"
   }
 }

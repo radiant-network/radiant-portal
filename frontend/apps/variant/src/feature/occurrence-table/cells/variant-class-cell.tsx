@@ -1,4 +1,4 @@
-import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 

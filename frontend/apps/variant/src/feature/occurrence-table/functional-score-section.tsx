@@ -10,26 +10,26 @@ export default function FunctionalScoreSection({ data }: FunctionalScoreSectionP
   const { t } = useI18n();
 
   return (
-    <DetailSection title={t('occurrenceDetailSections.functionalScores.title')}>
+    <DetailSection title={t('occurrenceExpend.functionalScores.title')}>
       <DetailItem
-        title={t('occurrenceDetailSections.functionalScores.sift')}
+        title={t('occurrenceExpend.functionalScores.sift')}
         value={data.sift_pred ? `${data.sift_pred} (${data.sift_score})` : '-'}
       />
       <DetailItem
-        title={t('occurrenceDetailSections.functionalScores.revel')}
+        title={t('occurrenceExpend.functionalScores.revel')}
         value={data.revel_score ? data.revel_score.toExponential(2) : '-'}
       />
       {/* TODO: Following sections should be visible only for Germline */}
       <DetailItem
-        title={t('occurrenceDetailSections.functionalScores.fathmm')}
+        title={t('occurrenceExpend.functionalScores.fathmm')}
         value={data.fathmm_pred ? `${data.fathmm_pred} (${data.fathmm_score})` : '-'}
       />
       <DetailItem
-        title={t('occurrenceDetailSections.functionalScores.caddRaw')}
+        title={t('occurrenceExpend.functionalScores.caddRaw')}
         value={data.cadd_score ? data.cadd_score.toExponential(2) : '-'}
       />
       <DetailItem
-        title={t('occurrenceDetailSections.functionalScores.caddPhred')}
+        title={t('occurrenceExpend.functionalScores.caddPhred')}
         value={data.cadd_phred ? data.cadd_phred.toExponential(2) : '-'}
       />
     </DetailSection>
