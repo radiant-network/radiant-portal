@@ -10,16 +10,14 @@ type LinkCellProps = {
 
 function LinkCell({ className, url, children }: LinkCellProps) {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link to={url} className={cn('overflow-hidden text-ellipsis underline hover:no-underline', className)}>
-            {children}
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent>{children}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Link to={url} className={cn('overflow-hidden text-ellipsis underline hover:no-underline', className)}>
+          {children}
+        </Link>
+      </TooltipTrigger>
+      <TooltipContent>{children}</TooltipContent>
+    </Tooltip>
   );
 }
 

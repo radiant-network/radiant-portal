@@ -1,5 +1,6 @@
 {
   "common": {
+    "noDataAvailable": "No data available",
     "queryBar": {
       "empty": "Use the search tools & facets on the left to build a query",
       "deletePopover": {
@@ -235,6 +236,60 @@
         "snv": "SNV",
         "deletion": "Deletion"
       }
+    }
+  },
+  "occurrenceDetailSections": {
+    "classifications": {
+      "title": "Classifications",
+      "clinvar": "ClinVar"
+    },
+    "predictions": {
+      "title": "Predictions",
+      "franklin": "Franklin",
+      "exomiser": "Exomiser"
+    },
+    "gene": {
+      "title": "Gene",
+      "pli": "pLi",
+      "loeuf": "LOEUF",
+      "spliceAi": "SpliceAI"
+    },
+    "frequencies": {
+      "title": "Frequencies",
+      "rqdm": "RQDM",
+      "gnomad": "gnomAD"
+    },
+    "functionalScores": {
+      "title": "Functional Scores",
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "fathmm": "FATHMM",
+      "caddRaw": "CADD (raw)",
+      "caddPhred": "CADD (phred)"
+    },
+    "zygosity": {
+      "title": "Zygosity",
+      "zygosity": "Zygosity",
+      "compoundHet": "Compound Het.",
+      "potentialCompoundHet": "PotentialCompound Het.",
+      "inheritance": "Inheritance",
+      "parentalOrigin": "Parental Origin"
+    },
+    "clinicalAssociation": {
+      "title": "Clinical Associations (OMIM)"
+    },
+    "family": {
+      "title": "Family",
+      "motherGenotype": "Mother's Genotype",
+      "fatherGenotype": "Father's Genotype"
+    },
+    "metrics": {
+      "title": "Metrics",
+      "qualityDepth": "Quality Depth",
+      "alleleDepthAlt": "Allele Depth ALT",
+      "totalDepthAltRef": "Total Depth ALT + REF",
+      "genotypeQuality": "Genotype Quality",
+      "filter": "Filter"
     }
   }
 }

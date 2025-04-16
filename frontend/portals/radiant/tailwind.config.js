@@ -7,7 +7,7 @@ module.exports = {
     './app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}',
     '../../apps/variant/src/**/*.{html,js,ts,tsx,jsx}',
     '../../components/**/*.{html,js,ts,tsx,jsx}',
-    '!../../components/node_modules/**/*'
+    '!../../components/node_modules/**/*',
   ],
   fontFamily: {
     sans: [

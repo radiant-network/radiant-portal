@@ -6,7 +6,7 @@ import { getVariantColumns, defaultSettings } from '@/feature/variant-table/tabl
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
@@ -33,12 +33,12 @@ const DEFAULT_SORTING = [
   },
 ];
 
-async function fetchOccurencesList(input: OccurrencesListInput) {
+async function fetchOccurrencesList(input: OccurrencesListInput) {
   const response = await occurrencesApi.listOccurrences(input.seqId, input.listBody);
   return response.data;
 }
 
-async function fetchOccurencesCount(input: OccurrenceCountInput) {
+async function fetchOccurrencesCount(input: OccurrenceCountInput) {
   const response = await occurrencesApi.countOccurrences(input.seqId, input.countBody);
   return response.data;
 }
@@ -62,7 +62,7 @@ function App() {
       seqId: SEQ_ID,
       countBody: { sqon: activeSqon },
     },
-    fetchOccurencesCount,
+    fetchOccurrencesCount,
     {
       revalidateOnFocus: false,
     },
@@ -91,7 +91,7 @@ function App() {
         sqon: activeSqon,
       },
     },
-    fetchOccurencesList,
+    fetchOccurrencesList,
     {
       revalidateOnFocus: false,
     },
@@ -131,7 +131,7 @@ function App() {
             enableShowHideLabels
             queryCountIcon={<VariantIcon size={14} />}
             fetchQueryCount={resolvedSqon =>
-              fetchOccurencesCount({
+              fetchOccurrencesCount({
                 seqId: SEQ_ID,
                 countBody: {
                   sqon: resolvedSqon,
@@ -168,7 +168,7 @@ function App() {
           pagination={pagination}
           onPaginationChange={setPagination}
           onServerSortingChange={setSorting}
-          subComponent={data => <VariantTablePreview occurence={data} />}
+          subComponent={data => <VariantTablePreview occurrence={data} />}
           total={total?.count ?? 0}
         />
       </main>

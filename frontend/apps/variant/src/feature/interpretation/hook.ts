@@ -4,26 +4,26 @@ import { useCallback } from 'react';
 import { MutationFetcher } from 'swr/mutation';
 import { Interpretation } from './types';
 
-export function useInterpretationHelper(occurence: Occurrence, isSomatic: boolean) {
+export function useInterpretationHelper(occurrence: Occurrence, isSomatic: boolean) {
   const fetch = useCallback(async () => {
     if (isSomatic) {
       return interpretationApi
         .getInterpretationSomatic(
-          occurence.seq_id!.toString(),
-          occurence.locus_id!.toString(),
-          occurence.transcript_id!,
+          occurrence.seq_id!.toString(),
+          occurrence.locus_id!.toString(),
+          occurrence.transcript_id!,
         )
         .then(response => response.data);
     } else {
       return interpretationApi
         .getInterpretationGermline(
-          occurence.seq_id!.toString(),
-          occurence.locus_id!.toString(),
-          occurence.transcript_id!,
+          occurrence.seq_id!.toString(),
+          occurrence.locus_id!.toString(),
+          occurrence.transcript_id!,
         )
         .then(response => response.data);
     }
-  }, [isSomatic, occurence.seq_id, occurence.locus_id, occurence.transcript_id]);
+  }, [isSomatic, occurrence.seq_id, occurrence.locus_id, occurrence.transcript_id]);
 
   const save: MutationFetcher<
     Interpretation,
@@ -36,24 +36,24 @@ export function useInterpretationHelper(occurence: Occurrence, isSomatic: boolea
       if (isSomatic) {
         return interpretationApi
           .postInterpretationSomatic(
-            occurence.seq_id!.toString(),
-            occurence.locus_id!.toString(),
-            occurence.transcript_id!,
+            occurrence.seq_id!.toString(),
+            occurrence.locus_id!.toString(),
+            occurrence.transcript_id!,
             options.arg as InterpretationSomatic,
           )
           .then(response => response.data);
       } else {
         return interpretationApi
           .postInterpretationGermline(
-            occurence.seq_id!.toString(),
-            occurence.locus_id!.toString(),
-            occurence.transcript_id!,
+            occurrence.seq_id!.toString(),
+            occurrence.locus_id!.toString(),
+            occurrence.transcript_id!,
             options.arg.interpretation as InterpretationGermline,
           )
           .then(response => response.data);
       }
     },
-    [isSomatic, occurence.seq_id, occurence.locus_id, occurence.transcript_id],
+    [isSomatic, occurrence.seq_id, occurrence.locus_id, occurrence.transcript_id],
   );
 
   return {
