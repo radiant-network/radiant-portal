@@ -1,0 +1,37 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
+
+import List from '@/components/base/list/list';
+import ListItemWithAction from '@/components/base/list/list-item-with-action';
+
+const meta = {
+  title: 'Data Display/ListItem with action',
+  component: ListItemWithAction,
+  args: {
+    onEdit: fn(),
+    onDelete: fn(),
+    onShare: fn(),
+    onClick: fn(),
+  },
+} satisfies Meta<typeof ListItemWithAction>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    title: 'Title',
+    description: 'Description',
+  },
+  render: args => (
+    <div className="max-w-[450px]">
+      <List bordered>
+        <ListItemWithAction {...args} />
+        <ListItemWithAction {...args} />
+        <ListItemWithAction {...args} />
+        <ListItemWithAction {...args} />
+      </List>
+    </div>
+  ),
+};

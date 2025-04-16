@@ -10,6 +10,9 @@ module.exports = {
       borderRadius: {
         DEFAULT: 'var(--radius)',
       },
+      maxWidth: {
+        '8xl': '90rem', // 8xl -> 1440px
+      },
       colors: ({ theme }) => ({
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

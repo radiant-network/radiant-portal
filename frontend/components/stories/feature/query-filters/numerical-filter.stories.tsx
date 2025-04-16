@@ -46,7 +46,7 @@ const config: PortalConfig = {
 const meta = {
   title: 'Feature/Query Filters/Numerical Filter',
   component: NumericalFilter,
-  tags: ['autodocs'],
+
   args: {
     field: {
       key: 'impact_score',

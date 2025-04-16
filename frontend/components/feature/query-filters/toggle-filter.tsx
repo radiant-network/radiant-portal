@@ -82,7 +82,7 @@ export function ToggleFilter({ data, field }: IProps) {
                 />
                 <Label htmlFor={item.key}>{item.key}</Label>
               </div>
-              <span className="bg-gray-200 px-2 py-1 rounded-md font-mono text-xs">{item.count}</span>
+              <span className="bg-accent px-2 py-1 rounded-md font-mono text-xs">{item.count}</span>
             </div>
           </div>
         ))}
