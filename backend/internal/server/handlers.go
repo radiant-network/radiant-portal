@@ -255,6 +255,17 @@ func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.I
 	}
 }
 
+func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
+	status := http.StatusOK
+	for _, pubmed := range interpretation.Pubmed {
+		if pubmed.Citation == "" {
+			status = http.StatusPartialContent
+			break
+		}
+	}
+	return status
+}
+
 // GetInterpretationGermline
 // @Summary Get interpretation germline
 // @Id GetInterpretationGermline
@@ -266,6 +277,7 @@ func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.I
 // @Param transcript_id path string true "Transcript ID"
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
+// @Success 206 {object} types.InterpretationGermline
 // @Failure 404 {object} map[string]string
 // @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
@@ -280,7 +292,7 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
-		c.JSON(http.StatusOK, interpretation)
+		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
 	}
 }
 
@@ -353,6 +365,7 @@ func extractArrayQueryParam(c *gin.Context, key string) []string {
 // @Param transcript_id path string true "Transcript ID"
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
+// @Success 206 {object} types.InterpretationSomatic
 // @Failure 404 {object} map[string]string
 // @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
@@ -367,7 +380,7 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFun
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
-		c.JSON(http.StatusOK, interpretation)
+		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
 	}
 }
 
@@ -418,6 +431,7 @@ func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFu
 // @Param citation_id path string true "Citation ID"
 // @Produce json
 // @Success 200 {object} types.PubmedCitation
+// @Success 206 {object} types.PubmedCitation
 // @Failure 404 {object} map[string]string
 // @Router /interpretations/pubmed/{citation_id} [get]
 func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc {
@@ -432,7 +446,11 @@ func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc 
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
-		c.JSON(http.StatusOK, citation)
+		status := http.StatusOK
+		if citation.Nlm.Format == "" {
+			status = http.StatusPartialContent
+		}
+		c.JSON(status, citation)
 	}
 }
 

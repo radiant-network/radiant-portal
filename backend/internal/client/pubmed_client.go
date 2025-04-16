@@ -54,7 +54,11 @@ func (client * PubmedClient) GetCitationById(id string) (*types.PubmedCitation, 
 	if res.StatusCode != http.StatusOK {
 		err = fmt.Errorf("Error while fetching citation from pubmed: %d %s", res.StatusCode, string(data));
 		log.Print(err)
-		return nil, err
+		if res.StatusCode == http.StatusTooManyRequests {
+			return &types.PubmedCitation{ID: id}, nil
+		} else {
+			return nil, err
+		}
 	}
 	citation = &types.PubmedCitation{}
 	if err := json.Unmarshal(data, citation); err != nil {
