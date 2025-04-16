@@ -1,6 +1,6 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { toExponentialNotation } from '@/components/lib/number-format';
-import { DotIcon } from 'lucide-react';
+import ShapeCircleIcon from '@/components/base/icons/shape-circle-icon';
 
 const GNOMAD_THRESHOLD = 0.01;
 
@@ -18,7 +18,7 @@ function GnomadCell({ value }: NumberCellProps) {
 
   return (
     <span className="flex gap-2 items-center">
-      {value < GNOMAD_THRESHOLD && <DotIcon className="text-red-500" size={8} strokeWidth={20} />}
+      {value < GNOMAD_THRESHOLD && <ShapeCircleIcon className="text-red-500" size={10} />}
       {scientificNotation ? scientificNotation : value}
     </span>
   );

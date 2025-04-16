@@ -1,9 +1,9 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import HighBadgeIcon from '@/components/base/icons/high-badge-icon';
-import LowBadgeIcon from '@/components/base/icons/low-badge-icon';
-import ModerateBadgeIcon from '@/components/base/icons/moderate-badge-icon';
-import ModifierBadgeIcon from '@/components/base/icons/modifier-badge-icon';
 import { cn } from '@/components/lib/utils';
+import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
+import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
+import ShapeCircleIcon from '@/components/base/icons/shape-circle-icon';
+import ShapeTriangleDownIcon from '@/components/base/icons/shape-triangle-down-icon';
 
 export enum Impact {
   High = 'HIGH',
@@ -21,13 +21,13 @@ type MostDeleteriousConsequenceCellProps = {
 function getImpactBadge(impact: Impact) {
   switch (impact) {
     case Impact.High:
-      return <HighBadgeIcon className="text-red-500" />;
+      return <ShapeTriangleUpIcon size={10} className="text-red" />;
     case Impact.Low:
-      return <LowBadgeIcon className="text-green-500" />;
+      return <ShapeTriangleDownIcon size={10} className="text-green" />;
     case Impact.Moderate:
-      return <ModerateBadgeIcon className="text-yellow-500" />;
+      return <ShapeDiamondIcon size={10} className="text-yellow" />;
     case Impact.Modifier:
-      return <ModifierBadgeIcon className="text-gray-500" />;
+      return <ShapeCircleIcon size={10} className="text-slate" />;
     default:
       return;
   }
