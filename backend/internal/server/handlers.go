@@ -41,7 +41,7 @@ func StatusHandler(repoStarrocks repository.StarrocksDAO, repoPostgres repositor
 // @Accept json
 // @Produce json
 // @Success 200 {array} types.Occurrence
-// @Failure 400 {object} map[string]string
+// @Failure 400,404,500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/list [post]
 func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -53,7 +53,7 @@ func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 		// Bind JSON to the struct
 		if err := c.ShouldBindJSON(&body); err != nil {
 			// Return a 400 Bad Request if validation fails
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 		var p types.Pagination
@@ -68,17 +68,17 @@ func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 		}
 		query, err := types.NewListQuery(body.AdditionalFields, body.Sqon, types.OccurrencesFields, types.OccurrencesDefaultFields, &p, body.Sort)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "seq_id")
 			return
 		}
 		occurrences, err := repo.GetOccurrences(seqID, query)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 
@@ -97,7 +97,7 @@ func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.Count
-// @Failure 400 {object} map[string]string
+// @Failure 400,404,500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/count [post]
 func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -109,22 +109,22 @@ func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 		// Bind JSON to the struct
 		if err := c.ShouldBindJSON(&body); err != nil {
 			// Return a 400 Bad Request if validation fails
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 		query, err := types.NewCountQuery(body.Sqon, types.OccurrencesFields)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "seq_id")
 			return
 		}
 		count, err := repo.CountOccurrences(seqID, query)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		countResponse := types.Count{count}
@@ -143,7 +143,7 @@ func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {array} types.Aggregation
-// @Failure 400 {object} map[string]string
+// @Failure 400,404,500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/aggregate [post]
 func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -155,23 +155,23 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 		// Bind JSON to the struct
 		if err := c.ShouldBindJSON(&body); err != nil {
 			// Return a 400 Bad Request if validation fails
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 
 		query, err := types.NewAggregationQuery(body.Field, body.Sqon, types.OccurrencesFields)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "seq_id")
 			return
 		}
 		aggregation, err := repo.AggregateOccurrences(seqID, query)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, aggregation)
@@ -189,7 +189,7 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.Statistics
-// @Failure 400 {object} map[string]string
+// @Failure 400,404,500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/statistics [post]
 func OccurrencesStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -201,23 +201,23 @@ func OccurrencesStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc 
 		// Bind JSON to the struct
 		if err := c.ShouldBindJSON(&body); err != nil {
 			// Return a 400 Bad Request if validation fails
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 
 		query, err := types.NewStatisticsQuery(body.Field, body.Sqon, types.OccurrencesFields)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "seq_id")
 			return
 		}
 		statistics, err := repo.GetStatisticsOccurrences(seqID, query)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, statistics)
@@ -278,18 +278,18 @@ func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
 // @Success 206 {object} types.InterpretationGermline
-// @Failure 404 {object} map[string]string
+// @Failure 404,500 {object} types.ApiError
 // @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 		interpretation, err := repo.FirstGermline(sequencingId, locusId, transcriptId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		if interpretation == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "interpretation")
 			return
 		}
 		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
@@ -309,7 +309,7 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
-// @Failure 400 {object} map[string]string
+// @Failure 400,500 {object} types.ApiError
 // @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -318,7 +318,7 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 		err := c.BindJSON(interpretation)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 
@@ -327,7 +327,7 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 		err = repo.CreateOrUpdateGermline(interpretation)
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 
@@ -366,18 +366,18 @@ func extractArrayQueryParam(c *gin.Context, key string) []string {
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
 // @Success 206 {object} types.InterpretationSomatic
-// @Failure 404 {object} map[string]string
+// @Failure 404,500 {object} types.ApiError
 // @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 		interpretation, err := repo.FirstSomatic(sequencingId, locusId, transcriptId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		if interpretation == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "interpretation")
 			return
 		}
 		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
@@ -397,7 +397,7 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFun
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
-// @Failure 400 {object} map[string]string
+// @Failure 400,500 {object} types.ApiError
 // @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -405,7 +405,7 @@ func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFu
 		err := c.BindJSON(interpretation)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 
@@ -414,7 +414,7 @@ func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFu
 		err = repo.CreateOrUpdateSomatic(interpretation)
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleValidationError(c, err)
 			return
 		}
 
@@ -432,18 +432,18 @@ func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFu
 // @Produce json
 // @Success 200 {object} types.PubmedCitation
 // @Success 206 {object} types.PubmedCitation
-// @Failure 404 {object} map[string]string
+// @Failure 404,500 {object} types.ApiError
 // @Router /interpretations/pubmed/{citation_id} [get]
 func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("citation_id")
 		citation, err := pubmedClient.GetCitationById(id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		if citation == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "citation")
 			return
 		}
 		status := http.StatusOK
@@ -463,18 +463,18 @@ func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc 
 // @Param user_set_id path string true "UserSet ID"
 // @Produce json
 // @Success 200 {object} types.UserSet
-// @Failure 404 {object} map[string]string
+// @Failure 404,500 {object} types.ApiError
 // @Router /users/sets/{user_set_id} [get]
 func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userSetId := extractUserSetParams(c)
 		userSet, err := repo.GetUserSet(userSetId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		if userSet == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "user")
 			return
 		}
 		c.JSON(http.StatusOK, userSet)
@@ -491,7 +491,7 @@ func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
 // @Query patient_id path string true "Patient ID"
 // @Query variant_hash path string true "Variant Hash"
 // @Produce json
-// @Success 200 {object} []types.InterpretationGermline
+// @Failure 500 {object} types.ApiError
 // @Router /interpretations/germline [get]
 func SearchInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -500,7 +500,7 @@ func SearchInterpretationGermline(repo repository.InterpretationsDAO) gin.Handle
 		variantHashIds := extractArrayQueryParam(c, "variant_hash")
 		interpretations, err := repo.SearchGermline(analysisIds, patientIds, variantHashIds)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, interpretations)
@@ -518,6 +518,7 @@ func SearchInterpretationGermline(repo repository.InterpretationsDAO) gin.Handle
 // @Query variant_hash path string true "Variant Hash"
 // @Produce json
 // @Success 200 {object} []types.InterpretationSomatic
+// @Failure 500 {object} types.ApiError
 // @Router /interpretations/somatic [get]
 func SearchInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -526,7 +527,7 @@ func SearchInterpretationSomatic(repo repository.InterpretationsDAO) gin.Handler
 		variantHashIds := extractArrayQueryParam(c, "variant_hash")
 		interpretations, err := repo.SearchSomatic(analysisIds, patientIds, variantHashIds)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, interpretations)
@@ -542,22 +543,22 @@ func SearchInterpretationSomatic(repo repository.InterpretationsDAO) gin.Handler
 // @Param seq_id path string true "Sequence ID"
 // @Produce json
 // @Success 200 {object} types.Sequencing
-// @Failure 500 {object} map[string]string
+// @Failure 404,500 {object} types.ApiError
 // @Router /sequencing/{seq_id} [get]
 func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "seq_id")
 			return
 		}
 		sequencing, err := repo.GetSequencing(seqID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		if sequencing == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "sequencing")
 			return
 		}
 		c.JSON(http.StatusOK, sequencing)
@@ -574,7 +575,7 @@ func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteTerm
-// @Failure 500 {object} map[string]string
+// @Failure 500 {object} types.ApiError
 // @Router /mondo/autocomplete [get]
 func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -585,7 +586,7 @@ func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 		}
 		mondoTerms, err := repo.GetTermAutoComplete(types.MondoTable.Name, prefix, limit)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, mondoTerms)
@@ -602,7 +603,7 @@ func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteTerm
-// @Failure 500 {object} map[string]string
+// @Failure 500 {object} types.ApiError
 // @Router /hpo/autocomplete [get]
 func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -613,7 +614,7 @@ func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 		}
 		hpoTerms, err := repo.GetTermAutoComplete(types.HPOTable.Name, prefix, limit)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, hpoTerms)
@@ -630,23 +631,27 @@ func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.ExpendedOccurrence
-// @Failure 500 {object} map[string]string
+// @Failure 404,500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/{locus_id}/expended [get]
 func GetExpendedOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
+		if errSeq != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
 		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
-		if errSeq != nil || errLocus != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		if errLocus != nil {
+			HandleNotFoundError(c, "locus_id")
 			return
 		}
 		expendedOccurrence, err := repo.GetExpendedOccurrence(seqId, locusId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			HandleError(c, err)
 			return
 		}
 		if expendedOccurrence == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			HandleNotFoundError(c, "occurrence")
 			return
 		}
 		c.JSON(http.StatusOK, expendedOccurrence)

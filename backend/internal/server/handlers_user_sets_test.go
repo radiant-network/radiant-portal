@@ -49,9 +49,9 @@ func Test_GetUserSet_ok(t *testing.T) {
 }
 
 func Test_GetUserSet_error(t *testing.T) {
-	assertGetUserSet(t, "set2", http.StatusInternalServerError, `{"error":"internal server error"}`)
+	assertGetUserSet(t, "set2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error", "detail":"error"}`)
 }
 
 func Test_GetUserSet_notFound(t *testing.T) {
-	assertGetUserSet(t, "set3", http.StatusNotFound, `{"error":"not found"}`)
+	assertGetUserSet(t, "set3", http.StatusNotFound, `{"status": 404, "message":"user not found"}`)
 }

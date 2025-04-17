@@ -14,7 +14,7 @@ import (
 )
 
 func (m *MockRepository) GetCitationById(id string) (*types.PubmedCitation, error) {
-	if id == "1" { 
+	if id == "1" {
 		return &types.PubmedCitation{
 			ID: "1",
 			Nlm: types.PubmedCitationDetails{
@@ -23,24 +23,24 @@ func (m *MockRepository) GetCitationById(id string) (*types.PubmedCitation, erro
 		}, nil
 	} else if id == "2" {
 		return nil, fmt.Errorf("error")
-	} 
+	}
 	return nil, nil
 }
 
-func (m *MockRepository) FirstGermline(sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error){
+func (m *MockRepository) FirstGermline(sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error) {
 	var uniqueId = fmt.Sprintf("%s-%s-%s", sequencingId, locusId, transcriptId)
 	if uniqueId == "seq1-locus1-trans1" {
 		return &types.InterpretationGermline{
-		InterpretationCommon: types.InterpretationCommon{
-			ID: uniqueId,
-			SequencingId: sequencingId,
-			LocusId: locusId,
-			TranscriptId: transcriptId,
-		},
+			InterpretationCommon: types.InterpretationCommon{
+				ID:           uniqueId,
+				SequencingId: sequencingId,
+				LocusId:      locusId,
+				TranscriptId: transcriptId,
+			},
 		}, nil
 	} else if uniqueId == "seq1-locus1-trans2" {
 		return nil, fmt.Errorf("error")
-	} 
+	}
 	return nil, nil
 }
 func (m *MockRepository) CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error {
@@ -55,16 +55,16 @@ func (m *MockRepository) FirstSomatic(sequencingId string, locusId string, trans
 	var uniqueId = fmt.Sprintf("%s-%s-%s", sequencingId, locusId, transcriptId)
 	if uniqueId == "seq1-locus1-trans1" {
 		return &types.InterpretationSomatic{
-		InterpretationCommon: types.InterpretationCommon{
-			ID: uniqueId,
-			SequencingId: sequencingId,
-			LocusId: locusId,
-			TranscriptId: transcriptId,
-		},
+			InterpretationCommon: types.InterpretationCommon{
+				ID:           uniqueId,
+				SequencingId: sequencingId,
+				LocusId:      locusId,
+				TranscriptId: transcriptId,
+			},
 		}, nil
 	} else if uniqueId == "seq1-locus1-trans2" {
 		return nil, fmt.Errorf("error")
-	} 
+	}
 	return nil, nil
 }
 func (m *MockRepository) CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error {
@@ -100,11 +100,11 @@ func Test_GetInterpretationGermline_ok(t *testing.T) {
 }
 
 func Test_GetInterpretationGermline_error(t *testing.T) {
-	assertGetInterpretationGermline(t, "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"error":"internal server error"}`)
+	assertGetInterpretationGermline(t, "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status":500, "message":"Internal Server Error", "detail":"error"}`)
 }
 
 func Test_GetInterpretationGermline_notFound(t *testing.T) {
-	assertGetInterpretationGermline(t,"seq1", "locus1", "trans3", http.StatusNotFound, `{"error":"not found"}`)
+	assertGetInterpretationGermline(t, "seq1", "locus1", "trans3", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 }
 
 func assertPostInterpretationGermline(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
@@ -137,7 +137,7 @@ func Test_PostInterpretationGermline_error(t *testing.T) {
 	body := `{
 				"id":"uuid2"
 			}`
-	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusBadRequest, body, `{"error":"pubmed citation not found"}`)
+	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusBadRequest, body, `{"status": 400, "message":"pubmed citation not found"}`)
 }
 
 func assertGetInterpretationSomatic(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, expected string) {
@@ -158,11 +158,11 @@ func Test_GetInterpretationSomatic_ok(t *testing.T) {
 }
 
 func Test_GetInterpretationSomatic_error(t *testing.T) {
-	assertGetInterpretationSomatic(t, "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"error":"internal server error"}`)
+	assertGetInterpretationSomatic(t, "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error", "detail": "error"}`)
 }
 
 func Test_GetInterpretationSomatic_notFound(t *testing.T) {
-	assertGetInterpretationSomatic(t,"seq1", "locus1", "trans3", http.StatusNotFound, `{"error":"not found"}`)
+	assertGetInterpretationSomatic(t, "seq1", "locus1", "trans3", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 }
 
 func assertPostInterpretationSomatic(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
@@ -195,9 +195,8 @@ func Test_PostInterpretationSomatic_error(t *testing.T) {
 	body := `{
 				"id":"uuid2"
 			}`
-	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusBadRequest, body, `{"error":"pubmed citation not found"}`)
+	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusBadRequest, body, `{"status": 400, "message":"pubmed citation not found"}`)
 }
-
 
 func assertGetPubmedCitation(t *testing.T, id string, status int, expected string) {
 	repo := &MockRepository{}
@@ -217,9 +216,9 @@ func Test_GetPubmedCitation_ok(t *testing.T) {
 }
 
 func Test_GetPubmedCitation_error(t *testing.T) {
-	assertGetPubmedCitation(t, "2", http.StatusInternalServerError, `{"error":"internal server error"}`)
+	assertGetPubmedCitation(t, "2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error", "detail": "error"}`)
 }
 
 func Test_GetPubmedCitation_notFound(t *testing.T) {
-	assertGetPubmedCitation(t, "3", http.StatusNotFound, `{"error":"not found"}`)
+	assertGetPubmedCitation(t, "3", http.StatusNotFound, `{"status": 404, "message":"citation not found"}`)
 }
