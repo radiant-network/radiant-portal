@@ -57,7 +57,13 @@ export interface AppsConfig {
   aggregations: AggregationConfig;
 }
 
+export interface AppsAdminConfig {
+  appId: string;
+  adminCode: string;
+}
+
 export interface PortalConfig {
+  admin: AppsAdminConfig;
   variant_entity: AppsConfig;
   portal: {
     name: string;
