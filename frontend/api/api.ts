@@ -68,6 +68,31 @@ export interface AggregationBody {
     'sqon'?: Sqon;
 }
 /**
+ * ApiError represents an error
+ * @export
+ * @interface ApiError
+ */
+export interface ApiError {
+    /**
+     * 
+     * @type {any}
+     * @memberof ApiError
+     */
+    'detail'?: any;
+    /**
+     * 
+     * @type {string}
+     * @memberof ApiError
+     */
+    'message': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ApiError
+     */
+    'status': number;
+}
+/**
  * 
  * @export
  * @interface AutoCompleteTerm
@@ -1543,7 +1568,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async searchInterpretationGermline(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InterpretationGermline>>> {
+        async searchInterpretationGermline(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.searchInterpretationGermline(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.searchInterpretationGermline']?.[localVarOperationServerIndex]?.url;
@@ -1637,7 +1662,7 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchInterpretationGermline(options?: RawAxiosRequestConfig): AxiosPromise<Array<InterpretationGermline>> {
+        searchInterpretationGermline(options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.searchInterpretationGermline(options).then((request) => request(axios, basePath));
         },
         /**
