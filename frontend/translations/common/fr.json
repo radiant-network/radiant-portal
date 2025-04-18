@@ -237,5 +237,125 @@
         "deletion": "Effacement"
       }
     }
+  },
+  "occurrenceExpend": {
+    "actions": {
+      "downloadReport": "Télécharger le rapport",
+      "openIGV": "Ouvrir IGV",
+      "interpret": "Interpréter"
+    },
+    "classifications": {
+      "title": "Classifications",
+      "clinvar": "ClinVar"
+    },
+    "predictions": {
+      "title": "Prédictions",
+      "franklin": "Franklin",
+      "exomiser": "Exomiser"
+    },
+    "gene": {
+      "title": "Gène",
+      "pli": "pLi",
+      "loeuf": "LOEUF",
+      "spliceAi": "SpliceAI"
+    },
+    "frequencies": {
+      "title": "Fréquences",
+      "myOrganization": "Mon Organisation",
+      "gnomad": "gnomAD"
+    },
+    "functionalScores": {
+      "title": "Scores Fonctionnels",
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "fathmm": "FATHMM",
+      "caddRaw": "CADD (brut)",
+      "caddPhred": "CADD (phred)"
+    },
+    "zygosity": {
+      "title": "Zygosité",
+      "zygosity": "Zygosité",
+      "compoundHet": "Hétérozygote Composite",
+      "potentialCompoundHet": "Hétérozygote Composite Potentiel",
+      "inheritance": "Héritabilité",
+      "parentalOrigin": "Origine Parentale"
+    },
+    "clinicalAssociation": {
+      "title": "Associations Cliniques (OMIM)"
+    },
+    "family": {
+      "title": "Famille",
+      "motherGenotype": "Génotype de la Mère",
+      "fatherGenotype": "Génotype du Père"
+    },
+    "metrics": {
+      "title": "Métriques",
+      "qualityDepth": "Profondeur de Qualité",
+      "alleleDepthAlt": "Profondeur de l'Allèle ALT",
+      "totalDepthAltRef": "Profondeur Totale ALT + REF",
+      "genotypeQuality": "Qualité du Génotype",
+      "filter": "Filtre"
+    }
+  },
+  "consequences": {
+    "transcript_ablation": "Transcript Ablation",
+    "splice_acceptor": "Splice Acceptor",
+    "splice_donor": "Splice Donor",
+    "stop_gained": "Stop Gained",
+    "frameshift": "Frameshift",
+    "stop_lost": "Stop Lost",
+    "start_lost": "Start Lost",
+    "transcript_amplification": "Transcript Amplification",
+    "inframe_insertion": "Inframe Insertion",
+    "inframe_deletion": "Inframe Deletion",
+    "missense": "Missense",
+    "protein_altering": "Protein Altering",
+    "splice_region": "Splice Region",
+    "splice_donor_5th_base": "Splice Donor 5th Base",
+    "splice_donor_region": "Splice Donor Region",
+    "splice_polypyrimidine_tract": "Splice Polypyrimidine Tract",
+    "incomplete_terminal_codon": "Incomplete Terminal Codon",
+    "start_retained": "Start Retained",
+    "stop_retained": "Stop Retained",
+    "synonymous": "Synonymous",
+    "coding_sequence": "Coding Sequence",
+    "mature_miRNA": "Mature MiRna",
+    "5_prime_UTR": "5 Prime Utr",
+    "3_prime_UTR": "3 Prime Utr",
+    "non_coding_transcript_exon": "Non Coding Transcript Exon",
+    "intron": "Intron",
+    "NMD_transcript": "Nmd Transcript",
+    "non_coding_transcript": "Non Coding Transcript",
+    "upstream gene": "Upstream Gene",
+    "downstream gene": "Downstream Gene",
+    "TFBS_ablation": "Tfbs Ablation",
+    "TFBS_amplification": "Tfbs Amplification",
+    "TF_binding_site": "Tf Binding Site",
+    "regulatory_region_ablation": "Regulatory Region Ablation",
+    "regulatory_region_amplification": "Regulatory Region Amplification",
+    "feature_elongation": "Feature Elongation",
+    "regulatory_region": "Regulatory Region",
+    "feature_truncation": "Feature Truncation",
+    "intergenic": "Intergenic"
+  },
+  "mainNavbar": {
+    "userDetails": {
+      "profile": "Profil",
+      "signOut": "Se déconnecter"
+    },
+    "links": {
+      "dashboard": "Tableau de bord",
+      "studies": "Études",
+      "dataExploration": "Exploration des données",
+      "variants": "Variantes",
+      "analysis": "Analyse"
+    },
+    "actions": {
+      "community": "Communauté",
+      "resources": "Ressources",
+      "website": "Site web",
+      "documentation": "Documentation",
+      "contact": "Contact"
+    }
   }
 }

@@ -337,5 +337,25 @@
     "regulatory_region": "Regulatory Region",
     "feature_truncation": "Feature Truncation",
     "intergenic": "Intergenic"
+  },
+  "mainNavbar": {
+    "userDetails": {
+      "profile": "Profile",
+      "signOut": "Sign out"
+    },
+    "links": {
+      "dashboard": "Dashboard",
+      "studies": "Studies",
+      "dataExploration": "Data Exploration",
+      "variants": "Variants",
+      "analysis": "Analysis"
+    },
+    "actions": {
+      "community": "Community",
+      "resources": "Resources",
+      "website": "Website",
+      "documentation": "Documentation",
+      "contact": "Contact"
+    }
   }
 }

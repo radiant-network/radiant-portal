@@ -41,27 +41,36 @@ const BetaFeatureContext = createContext<BetaFeatureContextType | undefined>(und
 export const BetaFeatureProvider = ({ children }: { children: ReactNode }) => {
   const [features, setFeatures] = useState<BetaFeatures>(() => {
     if (typeof window === 'undefined') {
-      return Object.entries(defaultFeatureDefinitions).reduce((acc, [key, def]) => ({
-        ...acc,
-        [key]: def.defaultValue,
-      }), {});
+      return Object.entries(defaultFeatureDefinitions).reduce(
+        (acc, [key, def]) => ({
+          ...acc,
+          [key]: def.defaultValue,
+        }),
+        {},
+      );
     }
-    
+
     const savedFeatures = localStorage.getItem('betaFeatures');
     if (savedFeatures) {
       try {
         return JSON.parse(savedFeatures);
       } catch {
-        return Object.entries(defaultFeatureDefinitions).reduce((acc, [key, def]) => ({
-          ...acc,
-          [key]: def.defaultValue,
-        }), {});
+        return Object.entries(defaultFeatureDefinitions).reduce(
+          (acc, [key, def]) => ({
+            ...acc,
+            [key]: def.defaultValue,
+          }),
+          {},
+        );
       }
     }
-    return Object.entries(defaultFeatureDefinitions).reduce((acc, [key, def]) => ({
-      ...acc,
-      [key]: def.defaultValue,
-    }), {});
+    return Object.entries(defaultFeatureDefinitions).reduce(
+      (acc, [key, def]) => ({
+        ...acc,
+        [key]: def.defaultValue,
+      }),
+      {},
+    );
   });
 
   useEffect(() => {
