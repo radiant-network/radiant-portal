@@ -64,7 +64,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
           <MobileNavbar isOpen={isOpen} logo={logo} onBurgerClick={() => setIsOpen(!isOpen)} />
           {isOpen && (
             <div className="flex flex-col md:hidden bg-background h-[calc(100vh_-_56px)]">
-              <div className="flex flex-col flex-grow overflow-scroll">
+              <div className="flex flex-col flex-grow overflow-x-auto">
                 <div className="p-2 flex flex-col">
                   {links.map(link => (
                     <MainNavbarItem key={link.title} {...link} />
