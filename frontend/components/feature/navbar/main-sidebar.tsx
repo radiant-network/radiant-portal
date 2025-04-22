@@ -23,9 +23,10 @@ import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
 type MainSidebarProps = BaseMainNavbarProps & {
+  placement?: 'left' | 'right';
   betaSuperMode: boolean;
   onBetaSuperModeChange: (value: boolean) => void;
-  placement?: 'left' | 'right';
+  onBetaSheetOpen: () => void;
 };
 
 function MainSidebar({
@@ -36,6 +37,7 @@ function MainSidebar({
   onLogoutClick,
   betaSuperMode,
   onBetaSuperModeChange,
+  onBetaSheetOpen,
   placement,
 }: MainSidebarProps) {
   const { t } = useI18n();
@@ -69,23 +71,20 @@ function MainSidebar({
               </SidebarMenuItem>
             ))}
             {betaSuperMode && (
-              <BetaFeaturesSheet
-                trigger={
-                  <SidebarMenuItem key="beta">
-                    <SidebarMenuButton
-                      tooltip="Beta"
-                      asChild
-                      variant="default"
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:text-destructive-foreground active:bg-destructive/90 active:text-destructive-foreground"
-                    >
-                      <div>
-                        <CircleAlert />
-                        <span>Beta</span>
-                      </div>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                }
-              />
+              <SidebarMenuItem key="beta">
+                <SidebarMenuButton
+                  tooltip="Beta"
+                  asChild
+                  variant="default"
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:text-destructive-foreground active:bg-destructive/90 active:text-destructive-foreground"
+                  onClick={onBetaSheetOpen}
+                >
+                  <div>
+                    <CircleAlert />
+                    <span>Beta</span>
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             )}
           </SidebarMenu>
         </SidebarGroup>

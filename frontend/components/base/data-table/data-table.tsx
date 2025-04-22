@@ -441,7 +441,7 @@ function DataTable<T>({
                   <>
                     <div
                       className={cn(
-                        'flex align-middle gap-2',
+                        'flex items-center gap-2',
                         header.column.getCanSort() && 'cursor-pointer select-none',
                       )}
                       onClick={header.column.getToggleSortingHandler()}
