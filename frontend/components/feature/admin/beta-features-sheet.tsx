@@ -8,18 +8,16 @@ import {
   SheetTrigger,
 } from '@/components/base/ui/sheet';
 import BetaFeatures from './beta-features';
-import { CircleAlert } from 'lucide-react';
-
 interface BetaFeaturesSheetProps {
   className?: string;
-  layout?: 'normal' | 'compact';
+  trigger?: React.ReactNode;
 }
 
-export function BetaFeaturesSheet({ className, layout = 'normal' }: BetaFeaturesSheetProps) {
+export function BetaFeaturesSheet({ className, trigger }: BetaFeaturesSheetProps) {
   return (
     <Sheet>
-      <SheetTrigger className={`flex items-center space-x-1 text-destructive ${className}`}>
-          {layout === 'normal' ? <><CircleAlert /> Beta</> : (<CircleAlert />)}
+      <SheetTrigger className={`flex items-center space-x-1 text-destructive ${className}`} asChild>
+        {trigger}
       </SheetTrigger>
       <SheetContent side="right" className={`w-[400px] sm:w-[340px] ${className}`}>
         <SheetHeader>

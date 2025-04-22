@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useConfig } from '@/components/model/applications-config';
 import { Button } from '@/components/base/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
@@ -19,22 +19,20 @@ function BetaFeatures() {
     }
   };
 
-  const renderFeature = (key: string, definition: typeof featureDefinitions[string]) => {
+  const renderFeature = (key: string, definition: (typeof featureDefinitions)[string]) => {
     const value = features[key];
-    
+
     if (definition.options) {
       return (
         <div key={key} className="mb-4">
           <label className="block mb-2">{definition.label}</label>
-          {definition.description && (
-            <p className="text-sm text-gray-500 mb-2">{definition.description}</p>
-          )}
-          <Select value={value as string} onValueChange={(newValue) => setFeature(key, newValue)}>
+          {definition.description && <p className="text-sm text-gray-500 mb-2">{definition.description}</p>}
+          <Select value={value as string} onValueChange={newValue => setFeature(key, newValue)}>
             <SelectTrigger className="w-[240px]">
               <SelectValue placeholder={`Select ${definition.label}`} />
             </SelectTrigger>
             <SelectContent>
-              {definition.options.map((option) => (
+              {definition.options.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -47,15 +45,10 @@ function BetaFeatures() {
       return (
         <div key={key} className="mb-4">
           <div className="flex items-center space-x-2">
-            <Switch
-              checked={value as boolean}
-              onCheckedChange={(checked) => setFeature(key, checked)}
-            />
+            <Switch checked={value as boolean} onCheckedChange={checked => setFeature(key, checked)} />
             <div>
               <label className="block">{definition.label}</label>
-              {definition.description && (
-                <p className="text-sm text-gray-500">{definition.description}</p>
-              )}
+              {definition.description && <p className="text-sm text-gray-500">{definition.description}</p>}
             </div>
           </div>
         </div>
@@ -80,9 +73,7 @@ function BetaFeatures() {
 
   return (
     <section className="mt-6">
-      {Object.entries(featureDefinitions).map(([key, definition]) => 
-        renderFeature(key, definition)
-      )}
+      {Object.entries(featureDefinitions).map(([key, definition]) => renderFeature(key, definition))}
     </section>
   );
 }

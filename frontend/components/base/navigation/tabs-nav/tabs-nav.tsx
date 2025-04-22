@@ -1,5 +1,5 @@
 import { cn } from '@/components/lib/utils';
-import React from 'react';
+import React, { act } from 'react';
 import { TabsNavContext, useTabsNavContext } from './tabs-nav-context';
 
 export type TabsNavProps<T> = React.HTMLAttributes<HTMLDivElement> & {
@@ -29,14 +29,19 @@ export type TabsNavItemProps = React.HTMLAttributes<HTMLDivElement> & {
 
 export function TabsNavItem({ ref, value, disabled = false, className, children, ...props }: TabsNavItemProps) {
   const tabsContext = useTabsNavContext();
+  const active = tabsContext.value === value;
 
   return (
     <div
       ref={ref}
-      data-active={tabsContext.value === value}
+      data-active={active}
       data-disabled={disabled}
       className={cn(
-        'group pt-1.5 pb-1 mb-[-1px] data-[active=true]:border-b-2 data-[active=true]:border-primary data-[disabled=true]:opacity-50 hover:cursor-pointer data-[disabled=true]:cursor-not-allowed',
+        'group pt-1.5 pb-1 mb-[-1px] hover:cursor-pointer',
+        {
+          'border-b-2 border-primary': active,
+          'opacity-50 hover:cursor-not-allowed': disabled,
+        },
         className,
       )}
       {...props}

@@ -94,6 +94,20 @@ module.exports = {
           4: 'hsl(var(--chart-4))',
           5: 'hsl(var(--chart-5))',
         },
+        sidebar: {
+          background: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+        },
+        'sidebar-primary': {
+          DEFAULT: 'hsl(var(--sidebar-primary))',
+          foreground: 'hsl(var(--sidebar-primary-foreground))',
+        },
+        'sidebar-accent': {
+          DEFAULT: 'hsl(var(--sidebar-accent))',
+          foreground: 'hsl(var(--sidebar-accent-foreground))',
+        },
+        'sidebar-border': 'hsl(var(--sidebar-border))',
+        'sidebar-ring': 'hsl(var(--sidebar-ring))',
       }),
       keyframes: {
         'accordion-down': {
