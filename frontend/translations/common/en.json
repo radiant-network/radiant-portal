@@ -124,6 +124,10 @@
       "emptyCell": "-"
     },
     "table": {
+      "fullscreen": {
+        "maximize": "Toggle to full screen",
+        "minimize": "Exit full screen"
+      },
       "sort": {
         "descending": "Sort Descending",
         "ascending": "Sort Ascending"

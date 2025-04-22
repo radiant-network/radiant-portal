@@ -123,6 +123,10 @@
       "emptyCell": "-"
     },
     "table": {
+      "fullscreen": {
+        "maximize": "Passer en plein écran",
+        "minimize": "Quitter le plein écran"
+      },
       "sort": {
         "descending": "Trier en ordre décroissant",
         "ascending": "Trier en ordre croissant"

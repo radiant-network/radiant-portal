@@ -16,7 +16,7 @@ import {
   ColumnPinningState,
 } from '@tanstack/react-table';
 
-import { ArrowDownAZ, ArrowDownZA } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownZA, Maximize, Minimize } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
 import { useResizeObserver } from '@/components/base/data-table/hooks/use-resize-observer';
@@ -36,6 +36,8 @@ import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 import { TFunction } from 'i18next';
+import { Button } from '@/components/base/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
   id: string;
@@ -262,27 +264,6 @@ function DataTable<T>({
 }: TableProps<T>) {
   const { t } = useI18n();
 
-  const containerRef = useRef(null);
-  const [containerWidth, setContainerWidth] = useState<number>(0);
-
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) return;
-
-    const observer = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        const newWidth = entry.contentRect.width;
-        setContainerWidth(newWidth);
-      }
-    });
-
-    observer.observe(element);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   // default values
   const defaultTableState = useMemo(
     () => ({
@@ -292,7 +273,6 @@ function DataTable<T>({
     }),
     [defaultColumnSettings],
   );
-
   const userTableState = useMemo(
     () => ({
       columnVisiblity: deserializeColumnVisibility(columnSettings) ?? [],
@@ -302,11 +282,16 @@ function DataTable<T>({
     [columnSettings],
   );
 
+  // container width
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+
   // table interactions
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(userTableState.columnVisiblity);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(userTableState.columnOrder);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(userTableState.columnPinning);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   // Initialize tanstack table
   const table = useReactTable({
@@ -350,10 +335,31 @@ function DataTable<T>({
     return colSizes;
   }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
 
-  // @TODO: shout save column width in user data
+  /** @todo shout save column width in user data  */
   useResizeObserver(table.getState(), (columnId, columnSize) => {
     console.log(`Resize ${columnId} ${columnSize}`);
   });
+
+  /**
+   * Fix scrolling when a subcomponent is open
+   */
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const observer = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        const newWidth = entry.contentRect.width;
+        setContainerWidth(newWidth);
+      }
+    });
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   /**
    * Sorting useEffect
@@ -379,7 +385,7 @@ function DataTable<T>({
   }, [sorting]);
 
   return (
-    <>
+    <div className={cn('w-full', { 'absolute top-0 right-0 bottom-0 left-0 bg-white z-50 p-4': isFullscreen })}>
       <div className="w-full flex text-left justify-between items-center mb-2">
         <TableIndexResult
           loading={loadingStates?.total}
@@ -387,21 +393,36 @@ function DataTable<T>({
           pageSize={table.getState().pagination.pageSize}
           total={total}
         />
-        <TableColumnSettings
-          columns={columns}
-          defaultSettings={defaultColumnSettings}
-          visiblitySettings={columnVisibility}
-          handleVisiblityChange={(target: string, checked: boolean) => {
-            setColumnVisibility({ ...columnVisibility, [target]: checked });
-          }}
-          handleOrderChange={setColumnOrder}
-          pristine={JSON.stringify(defaultTableState) == JSON.stringify(userTableState)}
-          handleReset={() => {
-            setColumnOrder(defaultTableState.columnOrder);
-            setColumnVisibility(defaultTableState.columnVisibility);
-            setColumnPinning(defaultTableState.columnPinning);
-          }}
-        />
+
+        <div>
+          {/* columns order and visibility */}
+          <TableColumnSettings
+            columns={columns}
+            defaultSettings={defaultColumnSettings}
+            visiblitySettings={columnVisibility}
+            handleVisiblityChange={(target: string, checked: boolean) => {
+              setColumnVisibility({ ...columnVisibility, [target]: checked });
+            }}
+            handleOrderChange={setColumnOrder}
+            pristine={JSON.stringify(defaultTableState) == JSON.stringify(userTableState)}
+            handleReset={() => {
+              setColumnOrder(defaultTableState.columnOrder);
+              setColumnVisibility(defaultTableState.columnVisibility);
+              setColumnPinning(defaultTableState.columnPinning);
+            }}
+          />
+          {/* fullscreen toggle */}
+          <Tooltip>
+            <TooltipTrigger>
+              <Button variant="ghost" iconOnly onClick={() => setIsFullscreen(!isFullscreen)}>
+                {isFullscreen ? <Minimize /> : <Maximize />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isFullscreen ? t('common.table.fullscreen.minimize') : t('common.table.fullscreen.maximize')}
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
       <Table containerRef={containerRef} style={{ ...columnSizeVars }}>
         <TableHeader>
@@ -554,7 +575,7 @@ function DataTable<T>({
           </Pagination>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
