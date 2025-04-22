@@ -5,20 +5,17 @@ import {
   SheetHeader,
   SheetFooter,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/base/ui/sheet';
 import BetaFeatures from './beta-features';
 interface BetaFeaturesSheetProps {
   className?: string;
-  trigger?: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function BetaFeaturesSheet({ className, trigger }: BetaFeaturesSheetProps) {
+export function BetaFeaturesSheet({ className, open, onOpenChange }: BetaFeaturesSheetProps) {
   return (
-    <Sheet>
-      <SheetTrigger className={`flex items-center space-x-1 text-destructive ${className}`} asChild>
-        {trigger}
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className={`w-[400px] sm:w-[340px] ${className}`}>
         <SheetHeader>
           <SheetTitle>Admin - Beta Features</SheetTitle>
