@@ -5,17 +5,46 @@
   },
   "variant_entity": {
     "app_id": "variant_entity",
-    "aggregations": [
-      { "key": "chromosome", "type": "multiple" },
-      { "key": "filter", "type": "multiple" },
-      { "key": "zygosity", "type": "multiple" },
-      { "key": "impact_score", "type": "multiple" },
-      { "key": "variant_class", "type": "multiple" },
-      { "key": "symbol", "type": "multiple" }
-    ]
+    "aggregations": {
+      "organization": {
+        "items": [
+          { "key": "study_code", "type": "multiple" }
+        ]
+      },
+      "variant": {
+        "items": [
+          { "key": "variant_class", "type": "multiple" },
+          { "key": "consequence", "type": "multiple" },
+          { "key": "variant_external_reference", "type": "multiple" },
+          { "key": "chromosome", "type": "multiple" },
+          { "key": "start", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["between"] } },
+          { "key": "zygosity", "type": "multiple" },
+          { "key": "transmission", "type": "multiple" },
+          { "key": "impact_score", "type": "multiple" }
+        ]
+      },
+      "gene": {
+        "items": [
+          { "key": "symbol", "type": "multiple" }
+        ]
+      },
+      "frequency": {
+        "items": [
+          { "key": "pf", "type": "numerical" }
+        ]
+      },
+      "pathogenicity": {
+        "items": []
+      },
+      "occurrence": {
+        "items": [
+          { "key": "filter", "type": "multiple" }
+        ]
+      }
+    }
   },
   "portal": {
-    "name": "KidsFirst",
+    "name": "Radiant",
     "navigation": {
       "dashboard": true,
       "variant": true,

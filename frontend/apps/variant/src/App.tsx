@@ -7,15 +7,17 @@ import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
 import { useEffect, useState } from 'react';
+import { SidebarProvider } from '@/components/base/ui/sidebar';
 import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
+import { SidebarGroups } from '@/components/feature/query-filters/sidebar-groups';
 import { useConfig } from '@/components/model/applications-config';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import OccurrenceExpend from '@/feature/occurrence-table/occurrence-expend';
 import { FilterComponent } from '@/components/feature/query-filters/filter-container';
 import { useI18n } from '@/components/hooks/i18n';
-
+import { X } from 'lucide-react';
 type OccurrencesListInput = {
   seqId: string;
   listBody: ListBody;
@@ -68,7 +70,9 @@ function App() {
     },
   );
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
-
+  const [open, setOpen] = useState(true)
+  const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | undefined>(undefined);
+  
   const appId = config.variant_entity.app_id;
 
   const { data: list, isLoading: listIsLoading } = useSWR<Occurrence[], any, OccurrencesListInput>(
@@ -116,11 +120,44 @@ function App() {
   }, [JSON.stringify(qbState?.queries), qbState?.activeQueryId]);
 
   return (
-    <div className={styles.appLayout}>
-      <aside>
-        <FilterList />
+    <div className={`${styles.appLayout} flex h-screen overflow-hidden`}>
+      <aside className="h-full flex-shrink-0">
+        <SidebarProvider 
+          open={open} 
+          onOpenChange={setOpen} 
+          className="h-full flex flex-row"
+          style={{ 
+            "--sidebar-width": open ? "150px" : "58px", 
+            "--sidebar-width-icon": "58px" 
+          } as React.CSSProperties}
+        >
+          <div className='mr-3 [&>*]:h-full z-10'>
+            <SidebarGroups 
+              selectedItemId={selectedSidebarItem}
+              onItemSelect={setSelectedSidebarItem}
+            />
+          </div>
+            <div 
+              className={`
+                overflow-auto pt-4 mt-0 mb-0 m-2 border-r pr-4
+                transition-[width] duration-300 ease-in-out
+                ${selectedSidebarItem ? 'w-[280px] opacity-100 relative' : 'w-0 opacity-0'}
+              `}
+            >
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={() => setSelectedSidebarItem(null)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <FilterList groupKey={selectedSidebarItem} />
+            </div>
+        </SidebarProvider>
       </aside>
-      <main className="flex-1 p-4 h-full overflow-hidden">
+      <main className="flex-1 flex-shrink-1 p-4 overflow-auto">
         <h1 className="text-2xl font-bold">Variant</h1>
         <div className="py-4 space-y-2">
           <QueryBuilder
@@ -148,7 +185,7 @@ function App() {
               blacklistedFacets: ['locus_id'],
               onFacetClick: filter => (
                 <FilterComponent
-                  field={config.variant_entity.aggregations.find(f => f.key === filter.content.field)!}
+                  field={ Object.values(config.variant_entity.aggregations).flatMap(f => f.items).find(f => f.key === filter.content.field)!}
                   searchVisible={true}
                 />
               ),

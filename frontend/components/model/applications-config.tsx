@@ -50,7 +50,13 @@ export interface Aggregation {
   intervalDecimal?: { [key: string]: number };
 }
 
-export type AggregationConfig = Aggregation[];
+export interface AggregationGroup {
+  items: Aggregation[];
+}
+
+export type AggregationConfig = {
+  [key: string]: AggregationGroup;
+};
 
 export interface AppsConfig {
   app_id: string;

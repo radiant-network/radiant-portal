@@ -170,8 +170,14 @@
         "unit": "Unité",
         "selectUnit": "Sélectionner une unité",
         "noData": "Pas de données",
+        "study_id": "ID de l'étude",
         "[fieldKey]": "Champ : {{fieldKey}}",
-        "noValuesFound": "Aucune valeur trouvée"
+        "noValuesFound": "Aucune valeur trouvée",
+        "studycode": "Code d'étude",
+        "consequence": "Conséquence",
+        "variantexternal_reference": "Référence externe du variant",
+        "start": "Position de début",
+        "transmission": "Transmission"
       },
       "operators": {
         "greaterThan": "Plus grand que",
@@ -325,7 +331,7 @@
     "coding_sequence": "Coding Sequence",
     "mature_miRNA": "Mature MiRna",
     "5_prime_UTR": "5 Prime Utr",
-    "3_prime_UTR": "3 Prime Utr",
+    "3_prime_UTR": "3 Prime UTR",
     "non_coding_transcript_exon": "Non Coding Transcript Exon",
     "intron": "Intron",
     "NMD_transcript": "Nmd Transcript",
@@ -360,6 +366,20 @@
       "website": "Site web",
       "documentation": "Documentation",
       "contact": "Contact"
+    }
+  },
+  "queryFilters": {
+    "sidebarPanel": {
+      "organization": "Organisation",
+      "filters": {
+        "variant": "Variant",
+        "gene": "Gène",
+        "frequency": "Fréquence",
+        "pathogenicity": "Pathogénicité",
+        "occurence": "Occurrence",
+        "organization": "Organisation",
+        "occurrence": "Occurrence"
+      }
     }
   }
 }

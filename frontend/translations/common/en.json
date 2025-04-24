@@ -171,7 +171,13 @@
         "unit": "Unit",
         "selectUnit": "Select unit",
         "noData": "No data",
-        "[fieldKey]": "Field: {{fieldKey}}"
+        "study_id": "Study ID",
+        "[fieldKey]": "Field: {{fieldKey}}",
+        "studycode": "Study Code",
+        "consequence": "Consequence",
+        "variantexternal_reference": "Variant External Reference",
+        "start": "Start Position",
+        "transmission": "Transmission"
       },
       "operators": {
         "greaterThan": "Greater than",
@@ -325,7 +331,7 @@
     "coding_sequence": "Coding Sequence",
     "mature_miRNA": "Mature MiRna",
     "5_prime_UTR": "5 Prime Utr",
-    "3_prime_UTR": "3 Prime Utr",
+    "3_prime_UTR": "3 Prime UTR",
     "non_coding_transcript_exon": "Non Coding Transcript Exon",
     "intron": "Intron",
     "NMD_transcript": "Nmd Transcript",
@@ -360,6 +366,20 @@
       "website": "Website",
       "documentation": "Documentation",
       "contact": "Contact"
+    }
+  },
+  "queryFilters": {
+    "sidebarPanel": {
+      "organization": "RQDM Panel",
+      "filters": {
+        "variant": "Variant",
+        "gene": "Gene",
+        "frequency": "Frequency",
+        "pathogenicity": "Pathogenicity",
+        "occurence": "Occurence",
+        "organization": "Organization",
+        "occurrence": "Occurrence"
+      }
     }
   }
 }
