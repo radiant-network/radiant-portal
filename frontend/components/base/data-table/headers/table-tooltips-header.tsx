@@ -8,7 +8,7 @@ type TooltipsHeaderProps = {
 function TooltipsHeader({ tooltips, children }: TooltipsHeaderProps) {
   return (
     <Tooltip>
-      <TooltipTrigger>{children}</TooltipTrigger>
+      <TooltipTrigger className="underline decoration-dotted underline-offset-4">{children}</TooltipTrigger>
       <TooltipContent>{tooltips}</TooltipContent>
     </Tooltip>
   );
