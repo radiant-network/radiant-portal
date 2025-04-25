@@ -1077,7 +1077,7 @@ export interface UserSet {
  */
 export interface VariantOverview {
     /**
-     * 
+     * TODO
      * @type {string}
      * @memberof VariantOverview
      */
@@ -1113,13 +1113,13 @@ export interface VariantOverview {
      */
     'dann_score'?: number;
     /**
-     * 
+     * TODO
      * @type {number}
      * @memberof VariantOverview
      */
     'exon_rank'?: number;
     /**
-     * 
+     * TODO
      * @type {number}
      * @memberof VariantOverview
      */
@@ -1209,7 +1209,7 @@ export interface VariantOverview {
      */
     'picked_consequences': Array<string>;
     /**
-     * 
+     * TODO
      * @type {number}
      * @memberof VariantOverview
      */
@@ -1227,7 +1227,7 @@ export interface VariantOverview {
      */
     'polyphen2_hvar_score'?: number;
     /**
-     * 
+     * TODO
      * @type {string}
      * @memberof VariantOverview
      */
@@ -1257,7 +1257,7 @@ export interface VariantOverview {
      */
     'sift_score'?: number;
     /**
-     * 
+     * TODO
      * @type {Array<string>}
      * @memberof VariantOverview
      */
