@@ -1,5 +1,44 @@
 package types
 
+type VariantOverview = struct {
+	Hgvsg                 string                 `json:"hgvsg" validate:"required"`
+	AssemblyVersion       string                 `json:"assembly_version,omitempty"`        //TODO
+	Source                JsonArray[string]      `gorm:"type:json" json:"source,omitempty"` //TODO
+	Symbol                string                 `json:"symbol,omitempty"`
+	Consequence           JsonArray[string]      `gorm:"type:json" json:"picked_consequences" validate:"required"`
+	ClinvarInterpretation JsonArray[string]      `gorm:"type:json" json:"clinvar,omitempty"`
+	Pc                    int                    `json:"pc,omitempty"`
+	Pn                    int                    `json:"pn,omitempty"` //TODO
+	Pf                    float64                `json:"pf" validate:"required"`
+	GnomadV3Af            float64                `json:"gnomad_v3_af" validate:"required"`
+	TranscriptId          string                 `json:"transcript_id,omitempty"`
+	RefseqMrnaId          string                 `json:"refseq_mrna_id,omitempty"` //TODO
+	ExonRank              int                    `json:"exon_rank,omitempty"`      //TODO
+	ExonTotal             int                    `json:"exon_total,omitempty"`     //TODO
+	CodingDnaChange       string                 `json:"coding_dna_change,omitempty"`
+	RsNumber              string                 `json:"rsnumber,omitempty"`
+	SiftPred              string                 `json:"sift_pred,omitempty"`
+	SiftScore             float32                `json:"sift_score,omitempty"`
+	RevelScore            float32                `json:"revel_score,omitempty"`
+	GnomadLoeuf           float32                `json:"gnomad_loeuf,omitempty"`
+	SpliceaiDs            float32                `json:"spliceai_ds,omitempty"`
+	SpliceaiType          JsonArray[string]      `gorm:"type:json" json:"spliceai_type,omitempty"`
+	OmimConditions        JsonArray[OmimGeneSet] `gorm:"type:json" json:"omim_conditions,omitempty"`
+	LocusFull             string                 `json:"locus" validate:"required"`
+	FathmmPred            string                 `json:"fathmm_pred,omitempty"`
+	FathmmScore           float32                `json:"fathmm_score,omitempty"`
+	CaddScore             float32                `json:"cadd_score,omitempty"`
+	CaddPhred             float32                `json:"cadd_phred,omitempty"`
+	DannScore             float32                `json:"dann_score,omitempty"`
+	LrtPred               string                 `json:"lrt_pred,omitempty"`
+	LrtScore              float32                `json:"lrt_score,omitempty"`
+	Polyphen2HvarPred     string                 `json:"polyphen2_hvar_pred,omitempty"`
+	Polyphen2HvarScore    float32                `json:"polyphen2_hvar_score,omitempty"`
+	PhyloP17wayPrimate    float32                `json:"phyloP17way_primate,omitempty"`
+	GnomadPli             float64                `json:"gnomad_pli,omitempty"`
+	// TODO clinvar id
+} // @name VariantOverview
+
 var VariantTable = Table{
 	Name:  "variants",
 	Alias: "v",

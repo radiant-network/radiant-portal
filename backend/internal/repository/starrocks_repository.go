@@ -18,6 +18,8 @@ type Aggregation = types.Aggregation
 type Sequencing = types.Sequencing
 type Statistics = types.Statistics
 type ExpendedOccurrence = types.ExpendedOccurrence
+type VariantOverview = types.VariantOverview
+type OmimGeneSet = types.OmimGeneSet
 
 type StarrocksRepository struct {
 	db *gorm.DB
@@ -32,6 +34,7 @@ type StarrocksDAO interface {
 	GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error)
 	GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
 	GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error)
+	GetVariantOverview(locusId int) (*VariantOverview, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -385,4 +388,36 @@ func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*Ex
 	}
 
 	return &expendedOccurrence, err
+}
+
+func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview, error) {
+	tx := r.db.Table("variants v")
+	tx = tx.Joins("JOIN consequences c ON v.locus_id=c.locus_id AND v.locus_id = ? AND c.picked = true", locusId)
+	tx = tx.Select("v.hgvsg, v.symbol, v.consequence, v.clinvar_interpretation, v.pc, v.pf, v.gnomad_v3_af, v.transcript_id, c.coding_dna_change, v.rsnumber, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus_full, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli")
+
+	var variantOverview VariantOverview
+	err := tx.First(&variantOverview).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching variant overview: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	txOmim := r.db.Table("omim_gene_set_flat omgsf")
+	txOmim = txOmim.Select("omgsf.phenotype_omim_id, omgsf.phenotype_name, omgsf.phenotype_inheritance_code")
+	txOmim = txOmim.Where("omgsf.phenotype_omim_id is not null and omgsf.symbol = ?", variantOverview.Symbol)
+
+	var omimConditions []OmimGeneSet
+	errOmim := txOmim.Find(&omimConditions).Error
+	if errOmim != nil {
+		if !errors.Is(errOmim, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching omim conditions: %w", errOmim)
+		} else {
+			return &variantOverview, errOmim
+		}
+	}
+	variantOverview.OmimConditions = omimConditions
+	return &variantOverview, nil
 }

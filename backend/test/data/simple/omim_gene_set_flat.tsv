@@ -1,0 +1,6 @@
+symbol	omim_gene_id	phenotype_name	phenotype_omim_id	phenotype_inheritance_code	phenotype_inheritance
+BRAF	164757	Noonan syndrome 7	613706	["AD"]	["Autosomal dominant"]
+TP53	191170	Basal cell carcinoma 7	614740	["AD"]	["Autosomal dominant"]
+BRAF	164757	LEOPARD syndrome 3	613707	["AD"]	["Autosomal dominant"]
+TP53	191170	Osteosarcoma	259500	["Smu"]	["Somatic mutation"]
+TML1	603769	Leukemia/lymphoma, T-cell	603769	null	null

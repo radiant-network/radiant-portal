@@ -804,6 +804,31 @@ export type OccurrenceVepImpactEnum = typeof OccurrenceVepImpactEnum[keyof typeo
 /**
  * 
  * @export
+ * @interface OmimGeneSet
+ */
+export interface OmimGeneSet {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof OmimGeneSet
+     */
+    'inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof OmimGeneSet
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OmimGeneSet
+     */
+    'omim_id'?: string;
+}
+/**
+ * 
+ * @export
  * @interface PubmedCitation
  */
 export interface PubmedCitation {
@@ -1044,6 +1069,223 @@ export interface UserSet {
      * @memberof UserSet
      */
     'user_id'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface VariantOverview
+ */
+export interface VariantOverview {
+    /**
+     * TODO
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'assembly_version'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'cadd_score'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantOverview
+     */
+    'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'coding_dna_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'dann_score'?: number;
+    /**
+     * TODO
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'exon_rank'?: number;
+    /**
+     * TODO
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'exon_total'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'fathmm_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'gnomad_v3_af': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'hgvsg': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'lrt_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'lrt_score'?: number;
+    /**
+     * 
+     * @type {Array<OmimGeneSet>}
+     * @memberof VariantOverview
+     */
+    'omim_conditions'?: Array<OmimGeneSet>;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'pc'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'pf': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'phyloP17way_primate'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantOverview
+     */
+    'picked_consequences': Array<string>;
+    /**
+     * TODO
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'pn'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'polyphen2_hvar_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'polyphen2_hvar_score'?: number;
+    /**
+     * TODO
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'refseq_mrna_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'rsnumber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'sift_score'?: number;
+    /**
+     * TODO
+     * @type {Array<string>}
+     * @memberof VariantOverview
+     */
+    'source'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantOverview
+     */
+    'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'transcript_id'?: string;
 }
 
 /**
@@ -2669,6 +2911,118 @@ export class UserSetsApi extends BaseAPI {
      */
     public getUserSet(userSetId: string, options?: RawAxiosRequestConfig) {
         return UserSetsApiFp(this.configuration).getUserSet(userSetId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * VariantApi - axios parameter creator
+ * @export
+ */
+export const VariantApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Retrieve Variant Overview data for a given locus
+         * @summary Get a VariantOverview
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVariantOverview: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getVariantOverview', 'locusId', locusId)
+            const localVarPath = `/variants/{locus_id}/overview`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * VariantApi - functional programming interface
+ * @export
+ */
+export const VariantApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = VariantApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Retrieve Variant Overview data for a given locus
+         * @summary Get a VariantOverview
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getVariantOverview(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantOverview>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getVariantOverview(locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getVariantOverview']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * VariantApi - factory interface
+ * @export
+ */
+export const VariantApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = VariantApiFp(configuration)
+    return {
+        /**
+         * Retrieve Variant Overview data for a given locus
+         * @summary Get a VariantOverview
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVariantOverview(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantOverview> {
+            return localVarFp.getVariantOverview(locusId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * VariantApi - object-oriented interface
+ * @export
+ * @class VariantApi
+ * @extends {BaseAPI}
+ */
+export class VariantApi extends BaseAPI {
+    /**
+     * Retrieve Variant Overview data for a given locus
+     * @summary Get a VariantOverview
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public getVariantOverview(locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getVariantOverview(locusId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

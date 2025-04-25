@@ -337,6 +337,18 @@ components:
       - variant_class
       - zygosity
       type: object
+    OmimGeneSet:
+      properties:
+        inheritance_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+        omim_id:
+          type: string
+      type: object
     PubmedCitation:
       properties:
         id:
@@ -440,6 +452,106 @@ components:
         user_id:
           type: string
       type: object
+    VariantOverview:
+      properties:
+        assembly_version:
+          description: TODO
+          type: string
+        cadd_phred:
+          type: number
+        cadd_score:
+          type: number
+        clinvar:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        coding_dna_change:
+          type: string
+        dann_score:
+          type: number
+        exon_rank:
+          description: TODO
+          type: integer
+        exon_total:
+          description: TODO
+          type: integer
+        fathmm_pred:
+          type: string
+        fathmm_score:
+          type: number
+        gnomad_loeuf:
+          type: number
+        gnomad_pli:
+          type: number
+        gnomad_v3_af:
+          type: number
+        hgvsg:
+          type: string
+        locus:
+          type: string
+        lrt_pred:
+          type: string
+        lrt_score:
+          type: number
+        omim_conditions:
+          items:
+            $ref: '#/components/schemas/OmimGeneSet'
+          type: array
+          uniqueItems: false
+        pc:
+          type: integer
+        pf:
+          type: number
+        phyloP17way_primate:
+          type: number
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        pn:
+          description: TODO
+          type: integer
+        polyphen2_hvar_pred:
+          type: string
+        polyphen2_hvar_score:
+          type: number
+        refseq_mrna_id:
+          description: TODO
+          type: string
+        revel_score:
+          type: number
+        rsnumber:
+          type: string
+        sift_pred:
+          type: string
+        sift_score:
+          type: number
+        source:
+          description: TODO
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        spliceai_ds:
+          type: number
+        spliceai_type:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        symbol:
+          type: string
+        transcript_id:
+          type: string
+      required:
+      - gnomad_v3_af
+      - hgvsg
+      - locus
+      - pf
+      - picked_consequences
+      type: object
   securitySchemes:
     bearerauth:
       bearerFormat: JWT
@@ -499,6 +611,14 @@ paths:
       description: Search interpretation germline
       operationId: SearchInterpretationGermline
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InterpretationGermline'
+                type: array
+          description: OK
         "500":
           content:
             application/json:
@@ -557,7 +677,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Not Found
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Get interpretation germline
@@ -610,7 +730,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Create or Update interpretation germline
@@ -651,7 +771,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Not Found
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Get pubmed citation by ID
@@ -728,7 +848,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Not Found
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Get interpretation somatic
@@ -781,7 +901,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Create or Update interpretation somatic
@@ -859,7 +979,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Not Found
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Get a ExpendedOccurrence
@@ -903,13 +1023,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Not Found
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Aggregate occurrences
@@ -951,13 +1071,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Not Found
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Count occurrences
@@ -1001,13 +1121,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Not Found
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: List occurrences
@@ -1049,13 +1169,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Not Found
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Bad Request
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Statistics of occurrences
@@ -1090,7 +1210,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Not Found
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Get a Sequencing
@@ -1140,11 +1260,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Not Found
+          description: Internal Server Error
       security:
       - bearerauth: []
       summary: Get user set by id
       tags:
       - user_sets
+  /variants/{locus_id}/overview:
+    get:
+      description: Retrieve Variant Overview data for a given locus
+      operationId: getVariantOverview
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantOverview'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get a VariantOverview
+      tags:
+      - variant
 servers:
 - url: /

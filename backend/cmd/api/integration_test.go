@@ -76,7 +76,7 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 }
 
 func Test_OccurrencesList(t *testing.T) {
-	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "clinvar":["Benign", "Pathogenic"], "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "pf":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "clinvar":["Benign", "Pathogenic"], "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "pf":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
 }
 
 func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
@@ -251,7 +251,7 @@ func assertGetInterpretationGermline(t *testing.T, repo repository.Interpretatio
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, status, w.Code)
-	if (expected != "") {
+	if expected != "" {
 		assert.JSONEq(t, expected, w.Body.String())
 	}
 }
@@ -498,8 +498,28 @@ func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId i
 }
 
 func Test_GetExpendedOccurrence(t *testing.T) {
-	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "canonical":true, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"symbol1", "vep_impact":"impact1"}`
+	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "canonical":true, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "vep_impact":"impact1"}`
 	assertGetExpendedOccurrence(t, "simple", 1, 1000, expected)
+}
+
+func assertGetVariantOverview(t *testing.T, data string, locusId int, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewStarrocksRepository(db)
+		router := gin.Default()
+		router.GET("/variants/:locus_id/overview", server.GetVariantOverview(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/overview", locusId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetVariantOverview(t *testing.T) {
+	expected := `{"cadd_phred":0.1, "cadd_score":0.1, "clinvar": ["Benign", "Pathogenic"], "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus":"locus1", "omim_conditions": [{"inheritance_code": ["AD"], "name": "Noonan syndrome 7", "omim_id": "613706"}, {"inheritance_code": ["AD"], "name":"LEOPARD syndrome 3", "omim_id":"613707"}], "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF"}`
+	assertGetVariantOverview(t, "simple", 1000, expected)
 }
 
 func TestMain(m *testing.M) {

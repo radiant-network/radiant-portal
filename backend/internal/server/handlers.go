@@ -41,7 +41,9 @@ func StatusHandler(repoStarrocks repository.StarrocksDAO, repoPostgres repositor
 // @Accept json
 // @Produce json
 // @Success 200 {array} types.Occurrence
-// @Failure 400,404,500 {object} types.ApiError
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/list [post]
 func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -97,7 +99,9 @@ func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.Count
-// @Failure 400,404,500 {object} types.ApiError
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/count [post]
 func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -143,7 +147,9 @@ func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {array} types.Aggregation
-// @Failure 400,404,500 {object} types.ApiError
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/aggregate [post]
 func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -189,7 +195,9 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.Statistics
-// @Failure 400,404,500 {object} types.ApiError
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/statistics [post]
 func OccurrencesStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -278,7 +286,8 @@ func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
 // @Success 206 {object} types.InterpretationGermline
-// @Failure 404,500 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -309,7 +318,8 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
-// @Failure 400,500 {object} types.ApiError
+// @Failure 400 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -366,7 +376,8 @@ func extractArrayQueryParam(c *gin.Context, key string) []string {
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
 // @Success 206 {object} types.InterpretationSomatic
-// @Failure 404,500 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -397,7 +408,8 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFun
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
-// @Failure 400,500 {object} types.ApiError
+// @Failure 400 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -432,7 +444,8 @@ func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFu
 // @Produce json
 // @Success 200 {object} types.PubmedCitation
 // @Success 206 {object} types.PubmedCitation
-// @Failure 404,500 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /interpretations/pubmed/{citation_id} [get]
 func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -463,7 +476,8 @@ func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc 
 // @Param user_set_id path string true "UserSet ID"
 // @Produce json
 // @Success 200 {object} types.UserSet
-// @Failure 404,500 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /users/sets/{user_set_id} [get]
 func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -491,6 +505,7 @@ func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
 // @Query patient_id path string true "Patient ID"
 // @Query variant_hash path string true "Variant Hash"
 // @Produce json
+// @Success 200 {object} []types.InterpretationGermline
 // @Failure 500 {object} types.ApiError
 // @Router /interpretations/germline [get]
 func SearchInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
@@ -543,7 +558,8 @@ func SearchInterpretationSomatic(repo repository.InterpretationsDAO) gin.Handler
 // @Param seq_id path string true "Sequence ID"
 // @Produce json
 // @Success 200 {object} types.Sequencing
-// @Failure 404,500 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /sequencing/{seq_id} [get]
 func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -631,7 +647,8 @@ func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.ExpendedOccurrence
-// @Failure 404,500 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
 // @Router /occurrences/{seq_id}/{locus_id}/expended [get]
 func GetExpendedOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -655,5 +672,37 @@ func GetExpendedOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, expendedOccurrence)
+	}
+}
+
+// GetVariantOverview handles retrieving a variant overview by its locus
+// @Summary Get a VariantOverview
+// @Id getVariantOverview
+// @Description Retrieve Variant Overview data for a given locus
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {object} types.VariantOverview
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/{locus_id}/overview [get]
+func GetVariantOverview(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		variantOverview, err := repo.GetVariantOverview(locusID)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if variantOverview == nil {
+			HandleNotFoundError(c, "variant")
+			return
+		}
+		c.JSON(http.StatusOK, variantOverview)
 	}
 }
