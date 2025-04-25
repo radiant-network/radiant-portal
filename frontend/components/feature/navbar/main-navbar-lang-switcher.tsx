@@ -29,7 +29,7 @@ function NavbarLangSwitcher({ className }: NavbarLangSwitcherProps) {
       loading={isLoading}
       onClick={() => handleLanguageChange(currentLanguage === 'en' ? 'fr' : 'en')}
     >
-      {currentLanguage.toUpperCase()}
+      {currentLanguage === 'en' ? 'FR' : 'EN'}
     </Button>
   );
 }

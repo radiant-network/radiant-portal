@@ -413,7 +413,7 @@ function DataTable<T>({
           />
           {/* fullscreen toggle */}
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <Button variant="ghost" iconOnly onClick={() => setIsFullscreen(!isFullscreen)}>
                 {isFullscreen ? <Minimize /> : <Maximize />}
               </Button>

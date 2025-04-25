@@ -8,7 +8,6 @@ import { TooltipProvider } from '@/components/base/ui/tooltip';
 import ThemeProvider from '@/components/feature/theme-toggle/theme-provider';
 import { ConfigProvider, type PortalConfig } from '@/components/model/applications-config';
 import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
-import { SidebarProvider } from '@/components/base/ui/sidebar';
 declare const __PROJECT__: PortalConfig;
 
 export const links: Route.LinksFunction = () => [
