@@ -657,3 +657,34 @@ func GetExpendedOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
 		c.JSON(http.StatusOK, expendedOccurrence)
 	}
 }
+
+// GetVariantOverview handles retrieving a variant overview by its locus
+// @Summary Get a VariantOverview
+// @Id getVariantOverview
+// @Description Retrieve Variant Overview data for a given locus
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {object} types.VariantOverview
+// @Failure 404,500 {object} types.ApiError
+// @Router /variants/{locus_id}/overview [get]
+func GetVariantOverview(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		variantOverview, err := repo.GetVariantOverview(locusID)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if variantOverview == nil {
+			HandleNotFoundError(c, "variant")
+			return
+		}
+		c.JSON(http.StatusOK, variantOverview)
+	}
+}

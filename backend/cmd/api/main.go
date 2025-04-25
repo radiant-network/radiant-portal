@@ -123,6 +123,9 @@ func main() {
 	hpoGroup := r.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoStarrocks))
 
+	variantGroup := r.Group("/variants")
+	variantGroup.GET("/:locus_id/overview", server.GetVariantOverview(repoStarrocks))
+
 	r.Use(gin.Recovery())
 	r.Run(":8090")
 }

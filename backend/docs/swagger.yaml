@@ -337,6 +337,18 @@ components:
       - variant_class
       - zygosity
       type: object
+    OmimGeneSet:
+      properties:
+        inheritance_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+        omim_id:
+          type: string
+      type: object
     PubmedCitation:
       properties:
         id:
@@ -439,6 +451,100 @@ components:
           type: string
         user_id:
           type: string
+      type: object
+    VariantOverview:
+      properties:
+        assembly_version:
+          type: string
+        cadd_phred:
+          type: number
+        cadd_score:
+          type: number
+        clinvar:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        coding_dna_change:
+          type: string
+        dann_score:
+          type: number
+        exon_rank:
+          type: integer
+        exon_total:
+          type: integer
+        fathmm_pred:
+          type: string
+        fathmm_score:
+          type: number
+        gnomad_loeuf:
+          type: number
+        gnomad_pli:
+          type: number
+        gnomad_v3_af:
+          type: number
+        hgvsg:
+          type: string
+        locus:
+          type: string
+        lrt_pred:
+          type: string
+        lrt_score:
+          type: number
+        omim_conditions:
+          items:
+            $ref: '#/components/schemas/OmimGeneSet'
+          type: array
+          uniqueItems: false
+        pc:
+          type: integer
+        pf:
+          type: number
+        phyloP17way_primate:
+          type: number
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        pn:
+          type: integer
+        polyphen2_hvar_pred:
+          type: string
+        polyphen2_hvar_score:
+          type: number
+        refseq_mrna_id:
+          type: string
+        revel_score:
+          type: number
+        rsnumber:
+          type: string
+        sift_pred:
+          type: string
+        sift_score:
+          type: number
+        source:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        spliceai_ds:
+          type: number
+        spliceai_type:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        symbol:
+          type: string
+        transcript_id:
+          type: string
+      required:
+      - gnomad_v3_af
+      - hgvsg
+      - locus
+      - pf
+      - picked_consequences
       type: object
   securitySchemes:
     bearerauth:
@@ -1146,5 +1252,40 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
+  /variants/{locus_id}/overview:
+    get:
+      description: Retrieve Variant Overview data for a given locus
+      operationId: getVariantOverview
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantOverview'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+      security:
+      - bearerauth: []
+      summary: Get a VariantOverview
+      tags:
+      - variant
 servers:
 - url: /
