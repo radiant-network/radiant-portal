@@ -1,10 +1,18 @@
 import { useConfig } from '@/components/model/applications-config';
-import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { FilterContainer } from '@/components/feature/query-filters/filter-container';
 
-export function FilterList() {
+interface FilterListProps {
+  groupKey?: string;
+}
+
+export function FilterList({ groupKey }: FilterListProps) {
   const config = useConfig();
-  const fields: AggregationConfig[] = config.variant_entity.aggregations;
+  const aggregations = config.variant_entity.aggregations;
+  
+  // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
+  const fields = groupKey 
+    ? aggregations[groupKey]?.items || []
+    : Object.values(aggregations).flatMap(group => group.items);
 
   return (
     <ul>

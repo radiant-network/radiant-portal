@@ -2,7 +2,7 @@
   @apply flex flex-1;
 
   aside {
-    @apply w-[300px] p-4;
+    @apply w-auto min-w-fit;
   }
 }
 

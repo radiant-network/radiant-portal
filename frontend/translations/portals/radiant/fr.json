@@ -19,5 +19,17 @@
       "settings": "Paramètres",
       "logout": "Déconnexion"
     }
+  },
+  "queryFilters": {
+    "sidebarPanel": {
+      "title": "Panel RQDM",
+      "filters": {
+        "variant": "Variant",
+        "gene": "Gène",
+        "frequency": "Fréquence",
+        "pathogenicity": "Pathogénicité",
+        "occurence": "Occurrence"
+      }
+    }
   }
 }

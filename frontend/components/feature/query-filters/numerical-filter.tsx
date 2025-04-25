@@ -117,7 +117,7 @@ export function NumericalFilter({ field }: IProps) {
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
 
   const aggregations = config.variant_entity.aggregations;
-  const aggConfig = aggregations.find(agg => agg.key === fieldKey)?.defaults as IFilterRangeConfig;
+  const aggConfig = Object.values(aggregations).flatMap(f => f.items).find(agg => agg.key === fieldKey)?.defaults as IFilterRangeConfig;
   const noDataInputOption = field.type === 'numerical' && aggConfig?.noDataInputOption;
   const hasInterval =
     (aggConfig?.intervalDecimal !== undefined && (aggConfig?.max !== undefined || aggConfig?.min !== undefined)) ||

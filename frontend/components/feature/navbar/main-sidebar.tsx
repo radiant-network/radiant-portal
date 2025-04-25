@@ -18,7 +18,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronRight, CircleAlert, LogOutIcon, PanelLeftClose, PanelLeftOpen, UserIcon } from 'lucide-react';
 import { AvatarUserDetails } from './main-navbar-user-avatar';
 import { Button } from '@/components/base/ui/button';
-import BetaFeaturesSheet from '../admin/beta-features-sheet';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
