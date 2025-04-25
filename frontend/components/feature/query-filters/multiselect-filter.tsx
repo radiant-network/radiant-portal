@@ -28,7 +28,7 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
-export function MultiSelectFilter({ field, maxVisibleItems = 10, searchVisible = false }: IProps) {
+export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = false }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
   const appId = config.variant_entity.app_id;

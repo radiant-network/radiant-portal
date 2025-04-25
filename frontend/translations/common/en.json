@@ -193,7 +193,7 @@
         "apply": "Apply",
         "all": "All of",
         "none": "None of",
-        "showMore": "{{count}} more",
+        "showMore": "{{count}} More",
         "showLess": "Less",
         "someNotIn": "Any of",
         "notIn": "None of"
