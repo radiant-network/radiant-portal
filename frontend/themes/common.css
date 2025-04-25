@@ -31,6 +31,8 @@
 }
 
 .dark {
+  color-scheme: dark;
+  
   --red: 0 74% 42%;
   --red-foreground: 0 91% 71%;
 

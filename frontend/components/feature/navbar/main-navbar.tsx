@@ -96,7 +96,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
             >
               {logo}
             </div>
-            <div className="flex flex-1 gap-1 items-center overflow-scroll">
+            <div className="flex flex-1 gap-1 items-center">
               {links.map(link => (
                 <MainNavbarItem key={link.title} {...link} />
               ))}
