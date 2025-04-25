@@ -55,8 +55,8 @@ const loadTranslations = async (lang: string) => {
 };
 
 i18next
-  .use(LanguageDetector)
   .use(initReactI18next)
+  .use(LanguageDetector)
   .init({
     fallbackLng: 'en',
     debug: import.meta.env.DEV,

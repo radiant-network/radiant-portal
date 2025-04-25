@@ -19,6 +19,7 @@ import {
   MailIcon,
 } from 'lucide-react';
 import { useI18n } from '@/components/hooks/i18n';
+import { Suspense } from 'react';
 
 export async function loader({ request }: Route.LoaderArgs) {
   if (await requireAuth(request)) {
@@ -42,7 +43,7 @@ const layoutVariants = tv({
   },
 });
 
-const ProtectedLayout = () => {
+const _ProtectedLayout = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const data = useLoaderData<IAuthUser>();
@@ -115,4 +116,10 @@ const ProtectedLayout = () => {
   );
 };
 
-export default ProtectedLayout;
+export default function ProtectedLayout() {
+  return (
+    <Suspense>
+      <_ProtectedLayout />
+    </Suspense>
+  );
+}
