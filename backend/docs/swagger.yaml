@@ -455,7 +455,6 @@ components:
     VariantOverview:
       properties:
         assembly_version:
-          description: TODO
           type: string
         cadd_phred:
           type: number
@@ -466,6 +465,8 @@ components:
             type: string
           type: array
           uniqueItems: false
+        clinvar_id:
+          type: string
         coding_dna_change:
           type: string
         dann_score:
@@ -529,7 +530,6 @@ components:
         sift_score:
           type: number
         source:
-          description: TODO
           items:
             type: string
           type: array
