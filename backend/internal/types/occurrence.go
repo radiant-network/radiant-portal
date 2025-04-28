@@ -146,6 +146,10 @@ var OccurrencesFields = []Field{
 	GnomadV3AfField,
 	TranscriptIdField,
 
+	// Genes
+	GnomadPliField,
+	GnomadLoeufField,
+
 	// Predictions
 	CaddScoreField,
 	CaddPhredField,

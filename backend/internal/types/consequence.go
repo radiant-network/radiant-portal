@@ -130,3 +130,19 @@ var SiftPredField = Field{
 	CanBeAggregated: true,
 	Table:           ConsequenceFilterTable,
 }
+
+var GnomadPliField = Field{
+	Name:            "gnomad_pli",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           ConsequenceFilterTable,
+}
+
+var GnomadLoeufField = Field{
+	Name:            "gnomad_loeuf",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           ConsequenceFilterTable,
+}
