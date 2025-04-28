@@ -27,6 +27,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       cell: RowExpandCell,
       size: 48,
       enableResizing: false,
+      enablePinning: false,
     },
     {
       id: 'rowSelection',
@@ -34,6 +35,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       cell: info => <RowSelectionCell row={info.row} />,
       size: 48,
       maxSize: 48,
+      enablePinning: false,
       enableResizing: false,
     },
     columnHelper.accessor(row => row.hgvsg, {
@@ -136,7 +138,6 @@ const defaultSettings = createColumnSettings([
   {
     id: 'hgvsg',
     visible: true,
-    fixed: true,
     pinningPosition: 'left',
   },
   {

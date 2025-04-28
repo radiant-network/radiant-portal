@@ -1,0 +1,121 @@
+import { ArrowDownAZ, ArrowDownUp, ArrowUpZA, Pin, PinIcon, PinOff } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useI18n } from '@/components/hooks/i18n';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+} from '@/components/base/ui/dropdown-menu';
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
+import { TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Tooltip } from '@radix-ui/react-tooltip';
+import { Button } from '@/components/base/ui/button';
+import { TFunction } from 'i18next';
+import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
+
+const PIN_COLUMN_ACTIONS: {
+  key: string;
+  position: ColumnPinningPosition;
+  icon: React.ReactNode;
+}[] = [
+  {
+    key: 'common.table.pin.left',
+    position: 'left',
+    icon: <PinIcon className="rotate-90" />,
+  },
+  {
+    key: 'common.table.pin.right',
+    position: 'right',
+    icon: <PinIcon className="ransform -rotate-90" />,
+  },
+  {
+    key: 'common.table.pin.unpin',
+    position: false,
+    icon: <PinOff />,
+  },
+];
+
+/**
+ * Use header.column.getNextSortingOrder() to display the next action on sort
+ *
+ * @param t TFunction<string, undefined>,
+ * @param sortingOrder 'asc' | 'desc' | false
+ * @returns String
+ */
+function getNextSortingOrderHeaderTitle(
+  t: TFunction<string, undefined>,
+  sortingOrder: SortDirection | boolean,
+): string {
+  if (sortingOrder === 'asc') {
+    return t('common.table.sort.ascending');
+  }
+
+  if (sortingOrder === 'desc') {
+    return t('common.table.sort.descending');
+  }
+
+  return t('common.table.sort.clear');
+}
+
+/**
+ * TableHeaderActions
+ * Display a list of actions a header can do
+ * - Pin (left, right, false)
+ * - Sort (asc, desc)
+ */
+type TableHeaderActionsProps<TData> = {
+  header: Header<TData, unknown>;
+};
+function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
+  const { t } = useI18n();
+  return (
+    <>
+      {/* Pin/Unpin column */}
+      {header.column.getCanPin() && (
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Pin className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuContent>
+              {PIN_COLUMN_ACTIONS.map(pinAction => (
+                <DropdownMenuItem
+                  key={`${header.column.id}-${pinAction.key}`}
+                  onClick={() => {
+                    header.column.pin(pinAction.position);
+                  }}
+                  disabled={header.column.getIsPinned() === pinAction.position}
+                >
+                  {pinAction.icon}
+                  {t(pinAction.key)}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
+        </DropdownMenu>
+      )}
+
+      {/* Sorted Icons */}
+      {header.column.getCanSort() && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" iconOnly onClick={header.column.getToggleSortingHandler()}>
+              {{
+                asc: <ArrowDownAZ size={16} />,
+                desc: <ArrowUpZA size={16} />,
+              }[header.column.getIsSorted() as string] ?? <ArrowDownUp />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {header.column.getCanSort()
+              ? getNextSortingOrderHeaderTitle(t, header.column.getNextSortingOrder())
+              : undefined}
+          </TooltipContent>
+        </Tooltip>
+      )}
+    </>
+  );
+}
+
+export default TableHeaderActions;

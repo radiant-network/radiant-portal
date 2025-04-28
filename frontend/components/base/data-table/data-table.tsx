@@ -16,7 +16,7 @@ import {
   ColumnPinningState,
 } from '@tanstack/react-table';
 
-import { ArrowDownAZ, ArrowDownZA, Maximize, Minimize } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownUp, ArrowDownZA, ArrowUpZA, Maximize, Minimize, Pin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
 import { useResizeObserver } from '@/components/base/data-table/hooks/use-resize-observer';
@@ -38,6 +38,14 @@ import { useI18n } from '@/components/hooks/i18n';
 import { TFunction } from 'i18next';
 import { Button } from '@/components/base/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuTrigger,
+} from '@/components/base/ui/dropdown-menu';
+import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
 
 export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
   id: string;
@@ -132,28 +140,6 @@ function deserializeColumnPinning(settings: ColumnSettings[]): ColumnPinningStat
     }
   });
   return result;
-}
-
-/**
- * Use header.column.getNextSortingOrder() to display the next action on sort
- *
- * @param t TFunction<string, undefined>,
- * @param sortingOrder 'asc' | 'desc' | false
- * @returns String
- */
-function getNextSortingOrderHeaderTitle(
-  t: TFunction<string, undefined>,
-  sortingOrder: SortDirection | boolean,
-): string {
-  if (sortingOrder === 'asc') {
-    return t('common.table.sort.ascending');
-  }
-
-  if (sortingOrder === 'desc') {
-    return t('common.table.sort.descending');
-  }
-
-  return t('common.table.sort.clear');
 }
 
 /**
@@ -262,6 +248,7 @@ function DataTable<T>({
   subComponent,
   total,
 }: TableProps<T>) {
+  // translations
   const { t } = useI18n();
 
   // default values
@@ -287,6 +274,7 @@ function DataTable<T>({
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   // table interactions
+  const [focusedHeaderId, setFocusedHeaderId] = useState<string>('');
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(userTableState.columnVisiblity);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(userTableState.columnOrder);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(userTableState.columnPinning);
@@ -310,6 +298,7 @@ function DataTable<T>({
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange,
     onSortingChange: setSorting,
+    onColumnPinningChange: setColumnPinning,
     pageCount: getPageCount(pagination, total),
     state: {
       columnOrder,
@@ -433,32 +422,19 @@ function DataTable<T>({
                   key={header.id}
                   colSpan={header.colSpan}
                   className={cn(getColumnPinningExtraCN(header.column))}
+                  onMouseEnter={() => setFocusedHeaderId(header.column.id)}
                   style={{
                     width: `calc(var(--header-${header?.id}-size) * 1px)`,
                     ...getCommonPinningStyles(header.column),
                   }}
                 >
                   <>
-                    <div
-                      className={cn(
-                        'flex items-center gap-2',
-                        header.column.getCanSort() && 'cursor-pointer select-none',
-                      )}
-                      onClick={header.column.getToggleSortingHandler()}
-                      title={
-                        header.column.getCanSort()
-                          ? getNextSortingOrderHeaderTitle(t, header.column.getNextSortingOrder())
-                          : undefined
-                      }
-                    >
+                    <div className="flex items-center gap-2">
                       {/* Header rendering */}
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      <div className="flex-1">{flexRender(header.column.columnDef.header, header.getContext())}</div>
 
-                      {/* Sorted Icons */}
-                      {{
-                        asc: <ArrowDownAZ size={16} />,
-                        desc: <ArrowDownZA size={16} />,
-                      }[header.column.getIsSorted() as string] ?? null}
+                      {/* Table Header Actions */}
+                      {focusedHeaderId === header.column.id && <TableHeaderActions header={header} />}
                     </div>
 
                     {/* Resize Grip */}
@@ -500,6 +476,7 @@ function DataTable<T>({
                     <TableCell
                       key={cell.id}
                       className={cn('overflow-hidden truncate text-nowrap', getColumnPinningExtraCN(cell.column))}
+                      onMouseEnter={() => setFocusedHeaderId(cell.column.id)}
                       style={{
                         width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
                         ...getCommonPinningStyles(cell.column),
