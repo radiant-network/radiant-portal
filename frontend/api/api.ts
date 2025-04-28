@@ -1077,7 +1077,7 @@ export interface UserSet {
  */
 export interface VariantOverview {
     /**
-     * TODO
+     * 
      * @type {string}
      * @memberof VariantOverview
      */
@@ -1100,6 +1100,12 @@ export interface VariantOverview {
      * @memberof VariantOverview
      */
     'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'clinvar_id'?: string;
     /**
      * 
      * @type {string}
@@ -1257,7 +1263,7 @@ export interface VariantOverview {
      */
     'sift_score'?: number;
     /**
-     * TODO
+     * 
      * @type {Array<string>}
      * @memberof VariantOverview
      */
@@ -1810,7 +1816,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async searchInterpretationGermline(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async searchInterpretationGermline(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InterpretationGermline>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.searchInterpretationGermline(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.searchInterpretationGermline']?.[localVarOperationServerIndex]?.url;
@@ -1904,7 +1910,7 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchInterpretationGermline(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        searchInterpretationGermline(options?: RawAxiosRequestConfig): AxiosPromise<Array<InterpretationGermline>> {
             return localVarFp.searchInterpretationGermline(options).then((request) => request(axios, basePath));
         },
         /**

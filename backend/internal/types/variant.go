@@ -2,8 +2,8 @@ package types
 
 type VariantOverview = struct {
 	Hgvsg                 string                 `json:"hgvsg" validate:"required"`
-	AssemblyVersion       string                 `json:"assembly_version,omitempty"`        //TODO
-	Source                JsonArray[string]      `gorm:"type:json" json:"source,omitempty"` //TODO
+	AssemblyVersion       string                 `json:"assembly_version,omitempty"`
+	Source                JsonArray[string]      `gorm:"type:json" json:"source,omitempty"`
 	Symbol                string                 `json:"symbol,omitempty"`
 	Consequence           JsonArray[string]      `gorm:"type:json" json:"picked_consequences" validate:"required"`
 	ClinvarInterpretation JsonArray[string]      `gorm:"type:json" json:"clinvar,omitempty"`
@@ -36,7 +36,7 @@ type VariantOverview = struct {
 	Polyphen2HvarScore    float32                `json:"polyphen2_hvar_score,omitempty"`
 	PhyloP17wayPrimate    float32                `json:"phyloP17way_primate,omitempty"`
 	GnomadPli             float64                `json:"gnomad_pli,omitempty"`
-	// TODO clinvar id
+	ClinvarId             string                 `json:"clinvar_id,omitempty"`
 } // @name VariantOverview
 
 var VariantTable = Table{

@@ -393,7 +393,8 @@ func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*Ex
 func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview, error) {
 	tx := r.db.Table("variants v")
 	tx = tx.Joins("JOIN consequences c ON v.locus_id=c.locus_id AND v.locus_id = ? AND c.picked = true", locusId)
-	tx = tx.Select("v.hgvsg, v.symbol, v.consequence, v.clinvar_interpretation, v.pc, v.pf, v.gnomad_v3_af, v.transcript_id, c.coding_dna_change, v.rsnumber, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus_full, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli")
+	tx = tx.Joins("LEFT JOIN clinvar cl ON cl.chromosome = v.chromosome AND cl.start = v.start AND cl.reference = v.reference AND cl.alternate = v.alternate")
+	tx = tx.Select("v.hgvsg, v.symbol, v.consequence, v.clinvar_interpretation, v.pc, v.pf, v.gnomad_v3_af, v.transcript_id, c.coding_dna_change, v.rsnumber, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus_full, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli, cl.name as clinvar_id")
 
 	var variantOverview VariantOverview
 	err := tx.First(&variantOverview).Error
@@ -404,6 +405,9 @@ func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview,
 			return nil, nil
 		}
 	}
+
+	variantOverview.AssemblyVersion = "GRCh38"
+	variantOverview.Source = []string{"WGS"}
 
 	txOmim := r.db.Table("omim_gene_set_flat omgsf")
 	txOmim = txOmim.Select("omgsf.phenotype_omim_id, omgsf.phenotype_name, omgsf.phenotype_inheritance_code")

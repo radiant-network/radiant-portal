@@ -699,6 +699,7 @@ func Test_GetVariantOverview(t *testing.T) {
 		assert.Equal(t, float32(0.1), variantOverview.SiftScore)
 		assert.Equal(t, "T", variantOverview.SiftPred)
 		assert.Equal(t, 2, len(variantOverview.OmimConditions))
+		assert.Equal(t, "111111", variantOverview.ClinvarId)
 	})
 }
 
