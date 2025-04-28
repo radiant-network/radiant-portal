@@ -128,9 +128,15 @@
         "maximize": "Toggle to full screen",
         "minimize": "Exit full screen"
       },
+      "pin": {
+        "left": "Pin Left",
+        "right": "Pin Right",
+        "unpin": "Unpin"
+      },
       "sort": {
         "descending": "Sort Descending",
-        "ascending": "Sort Ascending"
+        "ascending": "Sort Ascending",
+        "clear": "Clear"
       }
     },
     "pagination": {

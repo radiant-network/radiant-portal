@@ -12,13 +12,13 @@ import { useI18n } from '@/components/hooks/i18n';
  * - Checkbox manage columns visibility
  * - Drag'n drop manage columns order
  */
-type SortableColumnSetting<TData> = {
+type SortableColumnSettingProps<TData> = {
   id: UniqueIdentifier;
   column: TableColumnDef<TData, any>;
   checked: boolean;
   handleCheckboxChange: (target: string, checked: boolean) => void;
 };
-function TableSortableColumnSetting({ id, column, checked, handleCheckboxChange }: SortableColumnSetting<any>) {
+function TableSortableColumnSetting({ id, column, checked, handleCheckboxChange }: SortableColumnSettingProps<any>) {
   const { t } = useI18n();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = {
