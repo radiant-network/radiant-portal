@@ -64,6 +64,66 @@ var ImpactScoreFilterField = Field{
 	Table:           ConsequenceFilterTable,
 }
 
+var CaddScoreField = Field{
+	Name:            "cadd_score",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           ConsequenceFilterTable,
+}
+
+var CaddPhredField = Field{
+	Name:            "cadd_phred",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           ConsequenceFilterTable,
+}
+
+var DannScoreField = Field{
+	Name:            "dann_score",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           ConsequenceFilterTable,
+}
+
+var FathmmPredField = Field{
+	Name:            "fathmm_pred",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           ConsequenceFilterTable,
+}
+
+var LrtPredField = Field{
+	Name:            "lrt_pred",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           ConsequenceFilterTable,
+}
+var Polyphen2HvarPredField = Field{
+	Name:            "polyphen2_hvar_pred",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           ConsequenceFilterTable,
+}
+
+var SpliceaiDsField = Field{
+	Name:            "spliceai_ds",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           ConsequenceFilterTable,
+}
+
+var RevelScoreField = Field{
+	Name:            "revel_score",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           ConsequenceFilterTable,
+}
+
 var SiftPredField = Field{
 	Name:            "sift_pred",
 	CanBeFiltered:   true,

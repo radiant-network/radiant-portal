@@ -133,7 +133,6 @@ var OccurrencesFields = []Field{
 	SymbolFilterField,
 	ImpactScoreField,
 	ImpactScoreFilterField,
-	SiftPredField,
 	OmimGenePanelField,
 	HpoGenePanelField,
 	RsNumberField,
@@ -146,6 +145,17 @@ var OccurrencesFields = []Field{
 	OmimInheritanceCodeField,
 	GnomadV3AfField,
 	TranscriptIdField,
+
+	// Predictions
+	CaddScoreField,
+	CaddPhredField,
+	DannScoreField,
+	FathmmPredField,
+	LrtPredField,
+	Polyphen2HvarPredField,
+	RevelScoreField,
+	SpliceaiDsField,
+	SiftPredField,
 }
 
 var OccurrencesDefaultFields = []Field{
