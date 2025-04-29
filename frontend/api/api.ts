@@ -675,7 +675,7 @@ export interface Occurrence {
      * @type {string}
      * @memberof Occurrence
      */
-    'chromosome'?: string;
+    'chromosome': string;
     /**
      * 
      * @type {Array<string>}
@@ -760,6 +760,12 @@ export interface Occurrence {
      * @memberof Occurrence
      */
     'seq_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Occurrence
+     */
+    'start': number;
     /**
      * 
      * @type {string}
