@@ -1,4 +1,4 @@
-import { Droplet } from "lucide-react"
+import { Droplet } from 'lucide-react';
 
 import {
   Sidebar,
@@ -9,16 +9,16 @@ import {
   SidebarMenuItem,
   useSidebar,
   SidebarTrigger,
-} from "@/components/base/ui/sidebar"
-import { useI18n } from "@/components/hooks/i18n"
-import { useConfig } from "@/components/model/applications-config"
-import { useState } from "react"
-import VariantIcon from "@/components/base/icons/variant-icon"
-import GeneIcon from "@/components/base/icons/gene-icon"
-import FrequencyIcon from "@/components/base/icons/frequency-icon"
-import PathogenicityIcon from "@/components/base/icons/pathogenicity-icon"
-import OccurenceIcon from "@/components/base/icons/occurence-icon"
-import { tv } from "tailwind-variants"
+} from '@/components/base/ui/sidebar';
+import { useI18n } from '@/components/hooks/i18n';
+import { useConfig } from '@/components/model/applications-config';
+import { useState } from 'react';
+import VariantIcon from '@/components/base/icons/variant-icon';
+import GeneIcon from '@/components/base/icons/gene-icon';
+import FrequencyIcon from '@/components/base/icons/frequency-icon';
+import PathogenicityIcon from '@/components/base/icons/pathogenicity-icon';
+import OccurenceIcon from '@/components/base/icons/occurence-icon';
+import { tv } from 'tailwind-variants';
 
 // Icon mapping for different aggregation groups
 const iconMap = {
@@ -28,22 +28,22 @@ const iconMap = {
   pathogenicity: PathogenicityIcon,
   frequency: FrequencyIcon,
   occurrence: OccurenceIcon,
-}
+};
 
 const buttonVariants = tv({
   base: 'h-8 text-md text-secondary dark:text-foreground px-2',
   variants: {
     open: {
-      true: 'w-full', 
-      false: 'w-8 justify-center'
+      true: 'w-full',
+      false: 'w-8 justify-center',
     },
     selected: {
-      true: 'bg-accent text-accent-foreground'
+      true: 'bg-accent text-accent-foreground',
     },
     smallOpen: {
       true: 'ml-1',
-      false: 'ml-0'
-    }
+      false: 'ml-0',
+    },
   },
   defaultVariants: {
     selected: false,
@@ -73,16 +73,16 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
   };
 
   // Get aggregation groups from config
-  const aggregationGroups = config.variant_entity.aggregations;
+  const aggregationGroups = config.variant_exploration.aggregations;
 
   return (
     <Sidebar
       variant="sidebar"
       collapsible="icon"
-      className={"!static flex flex-col w-full bg-primary dark:bg-secondary h-[100%]"}
+      className={'!static flex flex-col w-full bg-primary dark:bg-secondary h-[100%]'}
     >
       <SidebarContent className="[&_svg]:!size-6">
-        <SidebarGroup className='flex-1 pr-3'>
+        <SidebarGroup className="flex-1 pr-3">
           <SidebarMenu>
             <SidebarTrigger className={buttonVariants({ open: false, selected: false, smallOpen: open })} />
             {Object.entries(aggregationGroups).map(([id]) => {
@@ -91,18 +91,19 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
                 <SidebarMenuItem key={id}>
                   <SidebarMenuButton
                     asChild
-                    className={buttonVariants({ open, selected: (selectedItemId === id) })}
-                    onClick={(e) => {
+                    className={buttonVariants({ open, selected: selectedItemId === id })}
+                    onClick={e => {
                       e.preventDefault();
                       handleItemClick(id);
                     }}
                   >
                     <div>
                       <Icon />
-                      {open && <span className="ml-2">
-                        {t(`queryFilters.sidebarPanel.filters.${id}`, id.charAt(0).toUpperCase() + id.slice(1))}
+                      {open && (
+                        <span className="ml-2">
+                          {t(`queryFilters.sidebarPanel.filters.${id}`, id.charAt(0).toUpperCase() + id.slice(1))}
                         </span>
-                      }
+                      )}
                     </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -112,5 +113,5 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

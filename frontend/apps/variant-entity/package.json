@@ -1,18 +1,18 @@
 {
-  "name": "variant",
+  "name": "variant-entity",
   "private": true,
   "version": "0.0.0",
-  "main": "./dist/variant.umd.js",
+  "main": "./dist/variant-entity.umd.js",
   "files": [
     "dist"
   ],
-  "module": "./dist/variant.es.js",
-  "types": "./dist/variant.d.ts",
+  "module": "./dist/variant-entity.es.js",
+  "types": "./dist/variant-entity.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/variant.es.js",
-      "types": "./dist/variant.d.ts",
-      "require": "./dist/variant.umd.js"
+      "import": "./dist/variant-entity.es.js",
+      "types": "./dist/variant-entity.d.ts",
+      "require": "./dist/variant-entity.umd.js"
     }
   },
   "scripts": {

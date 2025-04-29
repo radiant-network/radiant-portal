@@ -5,8 +5,8 @@ import { MultiSelectFilter } from '@/components/feature/query-filters/multiselec
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
 const config: PortalConfig = {
-  variant_entity: {
-    app_id: 'variant_entity_multi_select_filter',
+  variant_exploration: {
+    app_id: 'variant_exploration_multi_select_filter',
     aggregations: [
       { key: 'chromosome', type: 'multiple' },
       { key: 'filter', type: 'multiple' },
@@ -110,7 +110,7 @@ export const DataAppliedToQueryBuilder: Story = {
   },
   render: args => {
     action('activeQuery')(
-      queryBuilderRemote.updateActiveQueryField(config.variant_entity.app_id, {
+      queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
         field: 'chromosome',
         value: ['Option1', 'Option4'],
       }),

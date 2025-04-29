@@ -5,7 +5,7 @@ module.exports = {
   ...baseTailwindConfig,
   content: [
     './app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}',
-    '../../apps/variant/src/**/*.{html,js,ts,tsx,jsx}',
+    '../../apps/**/src/**/*.{html,js,ts,tsx,jsx}',
     '../../components/**/*.{html,js,ts,tsx,jsx}',
     '!../../components/node_modules/**/*',
   ],

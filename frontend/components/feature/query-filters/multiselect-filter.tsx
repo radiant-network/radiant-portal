@@ -31,7 +31,7 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
 export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = false }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
-  const appId = config.variant_entity.app_id;
+  const appId = config.variant_exploration.app_id;
 
   // Use the hook directly instead of receiving data as a prop
   const { data: aggregationData, isLoading } = useAggregationBuilder(field.key, undefined, true, appId);

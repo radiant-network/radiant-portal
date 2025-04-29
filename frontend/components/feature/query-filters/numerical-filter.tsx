@@ -65,7 +65,7 @@ interface IProps {
 export function NumericalFilter({ field }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
-  const appId = config.variant_entity.app_id;
+  const appId = config.variant_exploration.app_id;
   const fieldKey = field.key;
   const RANGE_OPERATOR_LABELS: Record<
     RangeOperators,
@@ -116,8 +116,10 @@ export function NumericalFilter({ field }: IProps) {
 
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
 
-  const aggregations = config.variant_entity.aggregations;
-  const aggConfig = Object.values(aggregations).flatMap(f => f.items).find(agg => agg.key === fieldKey)?.defaults as IFilterRangeConfig;
+  const aggregations = config.variant_exploration.aggregations;
+  const aggConfig = Object.values(aggregations)
+    .flatMap(f => f.items)
+    .find(agg => agg.key === fieldKey)?.defaults as IFilterRangeConfig;
   const noDataInputOption = field.type === 'numerical' && aggConfig?.noDataInputOption;
   const hasInterval =
     (aggConfig?.intervalDecimal !== undefined && (aggConfig?.max !== undefined || aggConfig?.min !== undefined)) ||

@@ -6,13 +6,13 @@ import { Switch } from '@/components/base/ui/switch';
 import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
 
 function BetaFeatures() {
-  const { adminCode } = useConfig().admin;
+  const { admin_code } = useConfig().admin;
   const [codeEntered, setCodeEntered] = useState(true);
   const [inputCode, setInputCode] = useState('');
   const { features, setFeature, featureDefinitions } = useBetaFeatures();
 
   const handleCodeSubmit = () => {
-    if (inputCode === adminCode) {
+    if (inputCode === admin_code) {
       setCodeEntered(true);
     } else {
       alert('Invalid code');

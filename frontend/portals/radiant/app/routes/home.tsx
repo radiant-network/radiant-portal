@@ -1,15 +1,7 @@
-import Variant from 'variant/App';
-import type { Route } from './+types/home';
-import { logout, requireAuth } from '~/utils/auth.server';
-
-export async function loader({ request }: Route.LoaderArgs) {
-  if (await requireAuth(request)) {
-    return logout(request);
-  }
-}
+import VariantExploration from 'variant-exploration/App';
 
 const Home = () => {
-  return <Variant />;
+  return <VariantExploration />;
 };
 
 export default Home;
