@@ -1,4 +1,4 @@
-import TabsNav, { TabsNavItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
@@ -25,9 +25,20 @@ export const Default: Story = {
 
     return (
       <TabsNav value={value} onValueChange={setValue}>
-        <TabsNavItem value={Tabs.Tab1}>Tab 1</TabsNavItem>
-        <TabsNavItem value={Tabs.Tab2}>Tab 2</TabsNavItem>
-        <TabsNavItem value={Tabs.Tab3}>Tab 3</TabsNavItem>
+        <TabsList>
+          <TabsListItem value={Tabs.Tab1}>Tab 1</TabsListItem>
+          <TabsListItem value={Tabs.Tab2}>Tab 2</TabsListItem>
+          <TabsListItem value={Tabs.Tab3}>Tab 3</TabsListItem>
+        </TabsList>
+        <TabsContent value={Tabs.Tab1}>
+          <p>Content for Tab 1</p>
+        </TabsContent>
+        <TabsContent value={Tabs.Tab2}>
+          <p>Content for Tab 2</p>
+        </TabsContent>
+        <TabsContent value={Tabs.Tab3}>
+          <p>Content for Tab 3</p>
+        </TabsContent>
       </TabsNav>
     );
   },
@@ -40,13 +51,24 @@ export const Disabled: Story = {
 
     return (
       <TabsNav value={value} onValueChange={setValue}>
-        <TabsNavItem value={Tabs.Tab1}>Tab 1</TabsNavItem>
-        <TabsNavItem value={Tabs.Tab2} disabled>
-          Tab 2
-        </TabsNavItem>
-        <TabsNavItem value={Tabs.Tab3} disabled>
-          Tab 3
-        </TabsNavItem>
+        <TabsList>
+          <TabsListItem value={Tabs.Tab1}>Tab 1</TabsListItem>
+          <TabsListItem value={Tabs.Tab2} disabled>
+            Tab 2
+          </TabsListItem>
+          <TabsListItem value={Tabs.Tab3} disabled>
+            Tab 3
+          </TabsListItem>
+        </TabsList>
+        <TabsContent value={Tabs.Tab1}>
+          <p>Content for Tab 1</p>
+        </TabsContent>
+        <TabsContent value={Tabs.Tab2}>
+          <p>Content for Tab 2</p>
+        </TabsContent>
+        <TabsContent value={Tabs.Tab3}>
+          <p>Content for Tab 3</p>
+        </TabsContent>
       </TabsNav>
     );
   },

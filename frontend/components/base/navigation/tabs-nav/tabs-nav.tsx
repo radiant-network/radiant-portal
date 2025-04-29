@@ -1,6 +1,7 @@
 import { cn } from '@/components/lib/utils';
-import React, { act } from 'react';
+import React from 'react';
 import { TabsNavContext, useTabsNavContext } from './tabs-nav-context';
+import Lazy from '@/components/base/lazy';
 
 export type TabsNavProps<T> = React.HTMLAttributes<HTMLDivElement> & {
   ref?: React.Ref<HTMLDivElement>;
@@ -16,18 +17,26 @@ export default function TabsNav<T>({ ref, value, onValueChange, className, ...pr
         onValueChange,
       }}
     >
-      <div ref={ref} className={cn('flex border-b overflow-x-auto', className)} {...props} />
+      <div ref={ref} {...props} />
     </TabsNavContext.Provider>
   );
 }
 
-export type TabsNavItemProps = React.HTMLAttributes<HTMLDivElement> & {
-  value: string;
+export type TabsListProps = React.HTMLAttributes<HTMLDivElement> & {
+  ref?: React.Ref<HTMLDivElement>;
+};
+
+export function TabsList({ ref, className, ...props }: TabsListProps) {
+  return <div ref={ref} className={cn('flex border-b overflow-x-auto', className)} {...props} />;
+}
+
+export type TabsListItemProps<T> = React.HTMLAttributes<HTMLDivElement> & {
+  value: T;
   disabled?: boolean;
   ref?: React.Ref<HTMLDivElement>;
 };
 
-export function TabsNavItem({ ref, value, disabled = false, className, children, ...props }: TabsNavItemProps) {
+export function TabsListItem<T>({ ref, value, disabled = false, className, children, ...props }: TabsListItemProps<T>) {
   const tabsContext = useTabsNavContext();
   const active = tabsContext.value === value;
 
@@ -58,5 +67,34 @@ export function TabsNavItem({ ref, value, disabled = false, className, children,
         {children}
       </div>
     </div>
+  );
+}
+
+export type TabsContentProps<T> = React.HTMLAttributes<HTMLDivElement> & {
+  value: T;
+  ref?: React.Ref<HTMLDivElement>;
+};
+
+export function TabsContent<T>({ ref, value, children, className, ...props }: TabsContentProps<T>) {
+  const tabsContext = useTabsNavContext();
+  const active = tabsContext.value === value;
+
+  return (
+    <Lazy visible={active}>
+      <div
+        ref={ref}
+        className={cn(
+          'py-3',
+          {
+            flex: active,
+            hidden: !active,
+          },
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    </Lazy>
   );
 }
