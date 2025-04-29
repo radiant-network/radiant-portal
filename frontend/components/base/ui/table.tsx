@@ -34,7 +34,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(({ containerRef, cl
   const styles = tableVariants({ size });
 
   return (
-    <div ref={containerRef} className="rounded relative w-full border overflow-auto">
+    <div ref={containerRef} className="rounded relative w-full border overflow-auto max-h-[calc(100vh-120px)]">
       <table ref={ref} className={styles.base({ className })} {...props} />
     </div>
   );

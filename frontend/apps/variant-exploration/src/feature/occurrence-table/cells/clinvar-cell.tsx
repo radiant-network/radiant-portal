@@ -1,4 +1,4 @@
-import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { Badge } from '@/components/base/ui/badge';
 
 type ClinvarCellProps = {

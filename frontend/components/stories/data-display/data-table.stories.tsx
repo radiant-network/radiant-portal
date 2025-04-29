@@ -1,21 +1,17 @@
-import { createColumnHelper, HeaderContext } from '@tanstack/react-table';
 import type { Meta, StoryObj } from '@storybook/react';
-import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
-import DataTable, { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
+import { BrowserRouter } from 'react-router-dom';
+import DataTable from '@/components/base/data-table/data-table';
 import { Occurrence, SortBodyOrderEnum } from '@/api/api';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
+import {
+  getVariantColumns,
+  defaultSettings,
+} from '../../../apps/variant-exploration/src/feature/occurrence-table/table-settings';
+import OccurrenceExpend from '../../../apps/variant-exploration/src/feature/occurrence-table/occurrence-expend';
+
 // Purposely used absolute paths since variant app is not a dependency of the components library
-import RowExpandCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/row-expand-cell';
-import GeneCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/gene-cell';
-import LinkCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/link-cell';
-import ManeCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/mane-cell';
-import OmimCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/omim-cell';
-import ClinvarCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/clinvar-cell';
-import NumberCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/number-cell';
-import VariantClassCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/variant-class-cell';
-import ZygosityCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/zygosity-cell';
-import RowSelectionCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/table-row-selection-cell';
+import { useI18n } from '@/components/hooks/i18n';
 
 const config: PortalConfig = {
   variant_exploration: {
@@ -27,8 +23,6 @@ const config: PortalConfig = {
     navigation: {},
   },
 };
-
-const columnHelper = createColumnHelper<Occurrence>();
 
 const data = [
   {
@@ -141,161 +135,13 @@ const data = [
     symbol: 'MGMT',
     mane_select: true,
   },
-];
-
-const columns = [
-  {
-    id: 'row_expand',
-    cell: RowExpandCell,
-    size: 48,
-    enableResizing: false,
-  },
-  {
-    id: 'row_selection',
-    header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
-    cell: info => <RowSelectionCell row={info.row} />,
-    size: 48,
-    enableResizing: false,
-  },
-  columnHelper.accessor(row => row.hgvsg, {
-    id: 'hgvsg',
-    cell: info => <LinkCell url="#">{info.getValue()}</LinkCell>,
-    header: 'Variant',
-    size: 150,
-    minSize: 100,
-  }),
-  columnHelper.accessor(row => row.variant_class, {
-    id: 'variant_class',
-    cell: info => <VariantClassCell value={info.getValue()} />,
-    header: 'Type',
-  }),
-  columnHelper.accessor(row => row.symbol, {
-    id: 'symbol',
-    cell: info => {
-      return <GeneCell symbol={info.getValue()} />;
-    },
-    header: 'Gene',
-  }),
-  columnHelper.accessor(row => row.vep_impact, {
-    id: 'vep_impact',
-    cell: info => <span>{info.getValue()}</span>,
-    header: 'VEP',
-  }),
-  columnHelper.accessor(row => row.mane_select, {
-    id: 'mane_select',
-    cell: info => {
-      return <ManeCell mane_select={info.getValue()} />;
-    },
-    header: 'MANE',
-  }),
-  columnHelper.accessor(row => row.omim_inheritance_code, {
-    id: 'omim_inheritance_code',
-    cell: info => {
-      return <OmimCell codes={info.getValue()} />;
-    },
-    header: 'OMIM',
-  }),
-  columnHelper.accessor(row => row.clinvar, {
-    id: 'clinvar',
-    cell: info => <ClinvarCell codes={info.getValue()} />,
-    header: 'ClinVar',
-  }),
-  columnHelper.accessor(row => row.gnomad_v3_af, {
-    id: 'gnomad_v3_af',
-    cell: info => <NumberCell value={info.getValue()} />,
-    header: 'gnomAD',
-  }),
-  columnHelper.accessor(row => row.pf, {
-    id: 'pf',
-    cell: info => <NumberCell value={info.getValue()} />,
-    header: 'Participant frequency',
-  }),
-  columnHelper.accessor(row => row.genotype_quality, {
-    id: 'genotype_quality',
-    cell: info => <NumberCell value={info.getValue()} />,
-    header: 'Genotype Quality',
-  }),
-  columnHelper.accessor(row => row.zygosity, {
-    id: 'zygosity',
-    cell: info => <ZygosityCell value={info.getValue()} />,
-    header: 'Zygosity',
-  }),
-  columnHelper.accessor(row => row.ad_ratio, {
-    id: 'ad_ratio',
-    cell: info => <NumberCell value={info.getValue()} />,
-    header: 'Ad Ratio',
-  }),
-] as TableColumnDef<Occurrence, any>[];
-
-const defaultSettings = createColumnSettings([
-  {
-    id: 'row_expand',
-    visible: true,
-    fixed: true,
-    pinningPosition: 'left',
-  },
-  {
-    id: 'row_selection',
-    visible: true,
-    fixed: true,
-    pinningPosition: 'left',
-  },
-  {
-    id: 'hgvsg',
-    visible: true,
-    pinningPosition: 'left',
-  },
-  {
-    id: 'variant_class',
-    visible: true,
-  },
-  {
-    id: 'symbol',
-    visible: true,
-  },
-  {
-    id: 'vep_impact',
-    visible: true,
-  },
-  {
-    id: 'mane_select',
-    visible: true,
-  },
-  {
-    id: 'omim_inheritance_code',
-    visible: true,
-  },
-  {
-    id: 'clinvar',
-    visible: true,
-  },
-  {
-    id: 'gnomad_v3_af',
-    visible: true,
-  },
-  {
-    id: 'pf',
-    visible: true,
-  },
-  {
-    id: 'genotype_quality',
-    visible: true,
-  },
-  {
-    id: 'zygosity',
-    visible: true,
-  },
-  {
-    id: 'ad_ratio',
-    visible: true,
-  },
-]);
+] as Occurrence[];
 
 const meta = {
   title: 'Data Display/Data Table',
   component: DataTable,
   args: {
-    columns: columns as any,
+    columns: [],
     columnSettings: defaultSettings,
     data,
     defaultColumnSettings: defaultSettings,
@@ -315,20 +161,15 @@ const meta = {
     },
     onPaginationChange: () => {},
     onServerSortingChange: sorting => {},
-    subComponent: data => {
-      return (
-        <pre style={{ fontSize: '10px' }}>
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      );
-    },
     total: 10,
   },
   decorators: [
     Story => (
-      <ConfigProvider config={config}>
-        <Story />
-      </ConfigProvider>
+      <BrowserRouter>
+        <ConfigProvider config={config}>
+          <Story />
+        </ConfigProvider>
+      </BrowserRouter>
     ),
   ],
 } satisfies Meta<typeof DataTable>;
@@ -337,9 +178,23 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {},
-  render: args => <DataTable {...args} />,
+export const VariantOccurence: Story = {
+  render: args => {
+    const { t } = useI18n();
+
+    return (
+      <DataTable
+        {...args}
+        pagination={{
+          pageIndex: 0,
+          pageSize: 50,
+        }}
+        data={[...data, ...data, ...data, ...data, ...data]}
+        columns={getVariantColumns(t)}
+        subComponent={occurence => <div>this is a sub component</div>}
+      />
+    );
+  },
 };
 
 export const Loading: Story = {

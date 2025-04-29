@@ -197,6 +197,7 @@ function App() {
           />
         </div>
         <DataTable
+          id="variant-occurence"
           columns={getVariantColumns(t)}
           columnSettings={defaultSettings}
           data={list ?? []}
@@ -209,7 +210,7 @@ function App() {
           pagination={pagination}
           onPaginationChange={setPagination}
           onServerSortingChange={setSorting}
-          subComponent={data => <OccurrenceExpend occurrence={data} />}
+          subComponent={(data: Occurrence) => <OccurrenceExpend occurrence={data} />}
           total={total?.count ?? 0}
         />
       </main>

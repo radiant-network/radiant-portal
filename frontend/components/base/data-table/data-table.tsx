@@ -10,13 +10,14 @@ import {
   getExpandedRowModel,
   OnChangeFn,
   SortingState,
-  SortDirection,
   Column,
   ColumnPinningPosition,
   ColumnPinningState,
+  RowPinningState,
+  Row,
 } from '@tanstack/react-table';
 
-import { ArrowDownAZ, ArrowDownUp, ArrowDownZA, ArrowUpZA, Maximize, Minimize, Pin } from 'lucide-react';
+import { Maximize, Minimize } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
 import { useResizeObserver } from '@/components/base/data-table/hooks/use-resize-observer';
@@ -35,16 +36,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
-import { TFunction } from 'i18next';
 import { Button } from '@/components/base/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuTrigger,
-} from '@/components/base/ui/dropdown-menu';
+
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
 
 export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
@@ -53,7 +47,17 @@ export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TVa
   subComponent?: string;
 }
 
+/**
+ * Static value for header and row height
+ * @note must be update is design change
+ */
+const HEADER_HEIGHT = 43;
+const ROW_HEIGHT = 53;
+
+type SubComponentProp<TData> = (data: TData) => React.JSX.Element;
+
 type TableProps<TData> = {
+  id: string;
   columns: TableColumnDef<TData, any>[];
   columnSettings: ColumnSettings[];
   data: TData[];
@@ -66,7 +70,7 @@ type TableProps<TData> = {
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
   onServerSortingChange: (sorting: SortBody[]) => void;
-  subComponent?: (data: TData) => React.JSX.Element;
+  subComponent?: SubComponentProp<TData>;
   total: number;
 };
 
@@ -84,6 +88,13 @@ export interface ColumnSettings extends BaseColumnSettings {
 
 type ColumnVisiblity = {
   [id: string]: boolean;
+};
+
+type TableCacheProps<TData> = {
+  rowPinning: {
+    top: TData[];
+    bottom: TData[];
+  };
 };
 
 /**
@@ -151,14 +162,8 @@ function getPageCount(pagination: PaginationState, total: number) {
 }
 
 /**
- * Return all extra tailwind class depending on column's context
+ * Return the needed tailwind class to pin a column. Must be applied to <TableCell />
  *
- * @fixme Tailwind or shadcn prevent us for using border. shadow-inset are used for the moment
- *        but this solution will not works when changing theme.
- *
- * @param column
- * @param extra
- * @returns
  */
 function getColumnPinningExtraCN(column: Column<any>): string {
   const isPinned = column.getIsPinned();
@@ -166,20 +171,18 @@ function getColumnPinningExtraCN(column: Column<any>): string {
   const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
   const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
 
-  return cn(
-    isPinned && 'sticky z-10 bg-background',
-    isLastLeftPinnedColumn && 'border-r',
-    isFirstRightPinnedColumn && 'border-l',
-  );
+  return cn({
+    'sticky z-10 bg-background': isPinned,
+    'border-r': isLastLeftPinnedColumn,
+    'border-l': isFirstRightPinnedColumn,
+  });
 }
 
 /**
- * Return the needed style to pin a column.
+ * Return the needed style to pin a column. Must be applied to <TableCell />
  * @see https://tanstack.com/table/v8/docs/framework/react/examples/column-pinning-sticky?panel=code
- * @param column
- * @returns
  */
-function getCommonPinningStyles(column: Column<any>): CSSProperties {
+function getColumnPinningExtraStyles(column: Column<any>): CSSProperties {
   const isPinned = column.getIsPinned();
   if (!isPinned) return {};
 
@@ -187,6 +190,91 @@ function getCommonPinningStyles(column: Column<any>): CSSProperties {
     left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
     right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
     width: column.getSize(),
+  };
+}
+
+/**
+ * Return the needed tailwind class to pin a row. Must be applied to <TableRow />
+ */
+function getRowPinningExtraCN(row: Row<any>): string {
+  const isPinned = row.getIsPinned();
+  if (!isPinned) return '';
+
+  return cn({ 'sticky z-20 bg-background bg-gray-100': isPinned });
+}
+
+/**
+ * Return the needed style to pin a row. Must be applied to <TableRow />
+ * @see https://tanstack.com/table/v8/docs/framework/react/examples/row-pinning
+ */
+function getRowPinningExtraStyles(row: Row<any>): CSSProperties {
+  const isPinned = row.getIsPinned();
+  if (!isPinned) return {};
+
+  return {
+    top: `${row.getPinnedIndex() * ROW_HEIGHT + HEADER_HEIGHT}px`,
+  };
+}
+
+/**
+ * Return the needed tailwind class to pin a row. Must be applied to <TableCell />
+ */
+function getRowPinningCellExtraCN(row: Row<any>): string {
+  const isPinned = row.getIsPinned();
+  if (!isPinned) return '';
+
+  return cn({ 'bg-gray-100': isPinned });
+}
+
+/**
+ * Reusable flex row function
+ * Used to render top, centered or bottom rows
+ */
+function getRowFlexRender({
+  subComponent,
+  containerWidth,
+}: {
+  subComponent?: SubComponentProp<any>;
+  containerWidth: number;
+}) {
+  return function (row: Row<any>) {
+    return (
+      <Fragment key={row.id}>
+        <TableRow
+          key={`row-${row.id}`}
+          className={cn(getRowPinningExtraCN(row))}
+          style={{
+            ...getRowPinningExtraStyles(row),
+          }}
+        >
+          {row.getVisibleCells().map(cell => (
+            <TableCell
+              key={cell.id}
+              className={cn(
+                'overflow-hidden truncate text-nowrap',
+                getColumnPinningExtraCN(cell.column),
+                getRowPinningCellExtraCN(cell.row),
+              )}
+              style={{
+                width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
+                ...getColumnPinningExtraStyles(cell.column),
+              }}
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          ))}
+        </TableRow>
+        {subComponent && row.getIsExpanded() && (
+          <TableRow key={`subcomponent-${row.id}`}>
+            <TableCell colSpan={row.getVisibleCells().length}>
+              <div className="sticky overflow-hidden left-2" style={{ width: containerWidth - 16 }}>
+                {subComponent(row.original)}
+              </div>
+            </TableCell>
+          </TableRow>
+        )}
+      </Fragment>
+    );
   };
 }
 
@@ -222,20 +310,35 @@ function getCommonPinningStyles(column: Column<any>): CSSProperties {
  * @description add a row selection checkbox for each row
  * @example
  * [{
- *  id: "row_selection",
- *  header: getTableRowSelectionHeader,
- *  cell: getTableRowSelectionCell,
- *  size: 70
+ *  id: "pinRow",
+ *  cell: PinRowCell,
+ *  size: 52,
+ *  enableResizing: false,
+ *  enablePinning: false,
+ * }]*
+ * @description add a row selection checkbox for each row
+ * @example
+ * [{
+ *  id: "rowSelection",
+ *  header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+ *  cell: info => <RowSelectionCell row={info.row} />,
+ *  size: 48,
+ *  maxSize: 48,
+ *  enableResizing: false,
+ *  enablePinning: false,
  * }]
  * @description add a `RowExpandCell`, expand a custom subcomponent
  * @example
  * [{
- *  id: "row_expand",
+ *  id: "rowExpand",
  *  cell: RowExpandCell
  *  size: 48,
+ *  enableResizing: false,
+ *  enablePinning: false,
  * }]
  */
 function DataTable<T>({
+  id,
   columns,
   columnSettings,
   data,
@@ -274,7 +377,10 @@ function DataTable<T>({
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   // table interactions
-  const [focusedHeaderId, setFocusedHeaderId] = useState<string>('');
+  const [rowPinning, setRowPinning] = useState<RowPinningState>({
+    top: [],
+    bottom: [],
+  });
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(userTableState.columnVisiblity);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(userTableState.columnOrder);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(userTableState.columnPinning);
@@ -294,20 +400,27 @@ function DataTable<T>({
     getRowCanExpand: () => true,
     isMultiSortEvent: _e => true,
     manualPagination: true,
+    onColumnPinningChange: setColumnPinning,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange,
+    onRowPinningChange: setRowPinning,
     onSortingChange: setSorting,
-    onColumnPinningChange: setColumnPinning,
     pageCount: getPageCount(pagination, total),
     state: {
       columnOrder,
       columnVisibility,
       columnPinning,
       pagination,
+      rowPinning,
       sorting,
     },
   });
+
+  // Cache our row flexRender method
+  const rowFlexRender = useMemo(() => {
+    return getRowFlexRender({ subComponent, containerWidth });
+  }, [subComponent, containerWidth]);
 
   /*
    * Prevent calling of `column.getSize()` on every render
@@ -374,7 +487,11 @@ function DataTable<T>({
   }, [sorting]);
 
   return (
-    <div className={cn('w-full', { 'absolute top-0 right-0 bottom-0 left-0 bg-white z-50 p-4': isFullscreen })}>
+    <div
+      className={cn('w-full', {
+        'absolute top-0 right-0 bottom-0 left-0 bg-white z-50 p-4 overflow-y-scroll': isFullscreen,
+      })}
+    >
       <div className="w-full flex text-left justify-between items-center mb-2">
         <TableIndexResult
           loading={loadingStates?.total}
@@ -413,19 +530,17 @@ function DataTable<T>({
           </Tooltip>
         </div>
       </div>
-      <Table containerRef={containerRef} style={{ ...columnSizeVars }}>
-        <TableHeader>
+      <Table id={id} containerRef={containerRef} style={{ ...columnSizeVars }}>
+        <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
           {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map(header => (
                 <TableHead
                   key={header.id}
-                  colSpan={header.colSpan}
-                  className={cn(getColumnPinningExtraCN(header.column))}
-                  onMouseEnter={() => setFocusedHeaderId(header.column.id)}
+                  className={cn('group', getColumnPinningExtraCN(header.column))}
                   style={{
                     width: `calc(var(--header-${header?.id}-size) * 1px)`,
-                    ...getCommonPinningStyles(header.column),
+                    ...getColumnPinningExtraStyles(header.column),
                   }}
                 >
                   <>
@@ -433,8 +548,8 @@ function DataTable<T>({
                       {/* Header rendering */}
                       <div className="flex-1">{flexRender(header.column.columnDef.header, header.getContext())}</div>
 
-                      {/* Table Header Actions */}
-                      {focusedHeaderId === header.column.id && <TableHeaderActions header={header} />}
+                      {/* Table Header Actions, only display on hover */}
+                      <TableHeaderActions header={header} />
                     </div>
 
                     {/* Resize Grip */}
@@ -467,36 +582,11 @@ function DataTable<T>({
               </TableRow>
             ))}
 
+          {/* Render pinned rows */}
+          {!loadingStates?.list && table.getTopRows().map(rowFlexRender)}
+
           {/* Render table content */}
-          {!loadingStates?.list &&
-            table.getRowModel().rows.map(row => (
-              <Fragment key={row.id}>
-                <TableRow key={`row-${row.id}`}>
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn('overflow-hidden truncate text-nowrap', getColumnPinningExtraCN(cell.column))}
-                      onMouseEnter={() => setFocusedHeaderId(cell.column.id)}
-                      style={{
-                        width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
-                        ...getCommonPinningStyles(cell.column),
-                      }}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-                {subComponent && row.getIsExpanded() && (
-                  <TableRow key={`subcomponent-${row.id}`}>
-                    <TableCell colSpan={row.getVisibleCells().length}>
-                      <div className="sticky overflow-hidden left-2" style={{ width: containerWidth - 16 }}>
-                        {subComponent(row.original)}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </Fragment>
-            ))}
+          {!loadingStates?.list && table.getCenterRows().map(rowFlexRender)}
         </TableBody>
       </Table>
       <div className="flex items-center justify-end space-x-2 py-4">
