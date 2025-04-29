@@ -115,19 +115,26 @@ var ChromosomeField = Field{
 	Table:           OccurrenceTable,
 }
 
+var StartField = Field{
+	Name:            "start",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           OccurrenceTable,
+}
+
 var OccurrencesFields = []Field{
 	SeqIdField,
 	LocusIdField,
 	FilterField,
-	ZygosityField,
 	GenotypeQualityField,
 	AdRatioField,
 	PfField,
 	PcField,
 	AfField,
-	VariantClassField,
 	HgvsgField,
-	ChromosomeField,
 	ClinvarField,
 	ConsequenceIdField,
 	SymbolFilterField,
@@ -138,7 +145,6 @@ var OccurrencesFields = []Field{
 	RsNumberField,
 	AaChangeField,
 	ConsequenceField,
-	VepImpactField,
 	SymbolField,
 	ManeSelectField,
 	CanonicalField,
@@ -146,7 +152,14 @@ var OccurrencesFields = []Field{
 	GnomadV3AfField,
 	TranscriptIdField,
 
+	// Variants
+	VariantClassField,
+	ChromosomeField,
+	StartField,
+	ZygosityField,
+
 	// Genes
+	VepImpactField,
 	GnomadPliField,
 	GnomadLoeufField,
 

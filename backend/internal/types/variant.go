@@ -122,11 +122,12 @@ var ConsequenceField = Field{
 	Table:           VariantTable,
 }
 var VepImpactField = Field{
-	Name:          "vep_impact",
-	CanBeSelected: true,
-	CanBeFiltered: false,
-	CanBeSorted:   true,
-	Table:         VariantTable,
+	Name:            "vep_impact",
+	CanBeSelected:   true,
+	CanBeFiltered:   false,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           VariantTable,
 }
 var SymbolField = Field{
 	Name:          "symbol",
@@ -158,12 +159,13 @@ var OmimInheritanceCodeField = Field{
 	Table:         VariantTable,
 }
 var GnomadV3AfField = Field{
-	Name:          "gnomad_v3_af",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Type:          NumericType,
-	Table:         VariantTable,
+	Name:            "gnomad_v3_af",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Type:            NumericType,
+	Table:           VariantTable,
 }
 var TranscriptIdField = Field{
 	Name:          "transcript_id",
