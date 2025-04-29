@@ -9,7 +9,7 @@ export type TabsNavProps<T> = React.HTMLAttributes<HTMLDivElement> & {
   onValueChange?: (value: T) => void;
 };
 
-export default function TabsNav<T>({ ref, value, onValueChange, className, ...props }: TabsNavProps<T>) {
+export default function TabsNav<T>({ ref, value, onValueChange, ...props }: TabsNavProps<T>) {
   return (
     <TabsNavContext.Provider
       value={{
@@ -86,7 +86,6 @@ export function TabsContent<T>({ ref, value, children, className, ...props }: Ta
         className={cn(
           'py-3',
           {
-            flex: active,
             hidden: !active,
           },
           className,
