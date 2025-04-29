@@ -310,6 +310,8 @@ components:
           type: string
         seq_id:
           type: integer
+        start:
+          type: integer
         symbol:
           type: string
         transcript_id:
@@ -327,6 +329,7 @@ components:
           type: string
       required:
       - ad_ratio
+      - chromosome
       - genotype_quality
       - gnomad_v3_af
       - hgvsg
@@ -334,6 +337,7 @@ components:
       - pf
       - picked_consequences
       - seq_id
+      - start
       - variant_class
       - zygosity
       type: object

@@ -4,7 +4,8 @@ package types
 // @Description Occurrence represents an occurrence
 type Occurrence struct {
 	SeqId               int               `json:"seq_id" validate:"required"`
-	Chromosome          string            `json:"chromosome,omitempty"`
+	Chromosome          string            `json:"chromosome" validate:"required"`
+	Start               int64             `json:"start" validate:"required"`
 	LocusId             int64             `json:"locus_id" validate:"required"`
 	GenotypeQuality     int32             `json:"genotype_quality" validate:"required"`
 	Filter              string            `json:"filter,omitempty"`
@@ -191,4 +192,6 @@ var OccurrencesDefaultFields = []Field{
 	ManeSelectField,
 	VepImpactField,
 	SymbolField,
+	ChromosomeField,
+	StartField,
 }

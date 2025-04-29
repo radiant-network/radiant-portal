@@ -36,6 +36,8 @@ func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrenc
 			PickedConsequences: []string{"splice acceptor"},
 			GenotypeQuality:    1,
 			GnomadV3Af:         0.1,
+			Chromosome:         "1",
+			Start:              1,
 		},
 	}, nil
 }
@@ -162,6 +164,8 @@ func Test_OccurrencesListHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{
         "seq_id": 1,
+		"chromosome": "1",
+		"start": 1,
         "locus_id": 1000,
         "filter": "PASS",
         "zygosity": "HET",
