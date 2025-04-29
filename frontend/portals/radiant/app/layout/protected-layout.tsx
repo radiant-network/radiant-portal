@@ -1,4 +1,4 @@
-import { Outlet, useLoaderData, useNavigate } from 'react-router';
+import { Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
 import { authenticateRequest, getSessionUser, requireAuth } from '~/utils/auth.server';
 import type { Route } from '../+types/root';
 import type { IAuthUser } from '~/utils/auth.types';
@@ -45,6 +45,7 @@ const layoutVariants = tv({
 
 const _ProtectedLayout = () => {
   const { t } = useI18n();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
   const data = useLoaderData<IAuthUser>();
   const { features } = useBetaFeatures();
@@ -66,12 +67,10 @@ const _ProtectedLayout = () => {
               icon: <BookOpenTextIcon />,
             },
             {
-              title: t('mainNavbar.links.dataExploration'),
-              icon: <TelescopeIcon />,
-            },
-            {
               title: t('mainNavbar.links.variants'),
               icon: <AudioWaveformIcon />,
+              onClick: () => navigate('/'),
+              active: pathname === '/',
             },
             {
               title: t('mainNavbar.links.analysis'),

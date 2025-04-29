@@ -7,8 +7,8 @@ import { RangeOperators } from '@/components/model/sqon';
 import { expect, userEvent, within } from '@storybook/test';
 
 const config: PortalConfig = {
-  variant_entity: {
-    app_id: 'variant_entity_toggle_filter',
+  variant_exploration: {
+    app_id: 'variant_exploration_toggle_filter',
     aggregations: [
       {
         key: 'impact_score',
@@ -100,7 +100,7 @@ export const Default: Story = {
 export const NoDataToggle: Story = {
   render: args => {
     action('activeQuery')(
-      queryBuilderRemote.updateActiveQueryField(config.variant_entity.app_id, {
+      queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
         field: 'impact_score',
         value: [],
       }),
@@ -149,7 +149,7 @@ export const RangeFilterWithInterval: Story = {
   },
   render: args => {
     action('activeQuery')(
-      queryBuilderRemote.updateActiveQueryField(config.variant_entity.app_id, {
+      queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
         field: 'age',
         value: [],
       }),
@@ -192,7 +192,7 @@ export const RangeFilterWithRangeTypes: Story = {
   },
   render: args => {
     action('activeQuery')(
-      queryBuilderRemote.updateActiveQueryField(config.variant_entity.app_id, {
+      queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
         field: 'age_unit',
         value: [],
       }),

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import useIsMobile from '@/components/hooks/use-is-mobile';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/ui/collapsible';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,

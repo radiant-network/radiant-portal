@@ -1,15 +1,13 @@
 {
   "admin": {
-    "appId": "admin",
-    "adminCode": "admin"
+    "app_id": "admin",
+    "admin_code": "admin"
   },
-  "variant_entity": {
-    "app_id": "variant_entity",
+  "variant_exploration": {
+    "app_id": "variant_exploration",
     "aggregations": {
       "organization": {
-        "items": [
-          { "key": "study_code", "type": "multiple" }
-        ]
+        "items": [{ "key": "study_code", "type": "multiple" }]
       },
       "variant": {
         "items": [
@@ -24,24 +22,21 @@
         ]
       },
       "gene": {
-        "items": [
-          { "key": "symbol", "type": "multiple" }
-        ]
+        "items": [{ "key": "symbol", "type": "multiple" }]
       },
       "frequency": {
-        "items": [
-          { "key": "pf", "type": "numerical" }
-        ]
+        "items": [{ "key": "pf", "type": "numerical" }]
       },
       "pathogenicity": {
         "items": []
       },
       "occurrence": {
-        "items": [
-          { "key": "filter", "type": "multiple" }
-        ]
+        "items": [{ "key": "filter", "type": "multiple" }]
       }
     }
+  },
+  "variant_entity": {
+    "app_id": "variant_entity"
   },
   "portal": {
     "name": "Radiant",

@@ -70,10 +70,10 @@ function App() {
     },
   );
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
-  const [open, setOpen] = useState(true)
-  const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | undefined>(undefined);
-  
-  const appId = config.variant_entity.app_id;
+  const [open, setOpen] = useState(true);
+  const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
+
+  const appId = config.variant_exploration.app_id;
 
   const { data: list, isLoading: listIsLoading } = useSWR<Occurrence[], any, OccurrencesListInput>(
     {
@@ -122,28 +122,28 @@ function App() {
   return (
     <div className={`${styles.appLayout} flex h-screen overflow-hidden`}>
       <aside className="h-full flex-shrink-0">
-        <SidebarProvider 
-          open={open} 
-          onOpenChange={setOpen} 
+        <SidebarProvider
+          open={open}
+          onOpenChange={setOpen}
           className="h-full flex flex-row"
-          style={{ 
-            "--sidebar-width": open ? "150px" : "58px", 
-            "--sidebar-width-icon": "58px" 
-          } as React.CSSProperties}
+          style={
+            {
+              '--sidebar-width': open ? '150px' : '58px',
+              '--sidebar-width-icon': '58px',
+            } as React.CSSProperties
+          }
         >
-          <div className='mr-3 [&>*]:h-full z-10'>
-            <SidebarGroups 
-              selectedItemId={selectedSidebarItem}
-              onItemSelect={setSelectedSidebarItem}
-            />
+          <div className="[&>*]:h-full z-10">
+            <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
           </div>
-            <div 
-              className={`
-                overflow-auto pt-4 mt-0 mb-0 m-2 border-r pr-4
+          <div
+            className={`
+                overflow-auto mb-0 border-r
                 transition-[width] duration-300 ease-in-out
-                ${selectedSidebarItem ? 'w-[280px] opacity-100 relative' : 'w-0 opacity-0'}
+                ${selectedSidebarItem ? 'w-[280px]  p-4 opacity-100 relative' : 'w-0 opacity-0'}
               `}
-            >
+          >
+            <div className="whitespace-nowrap">
               <div className="flex justify-end mb-4">
                 <button
                   onClick={() => setSelectedSidebarItem(null)}
@@ -152,9 +152,9 @@ function App() {
                   <X size={16} />
                 </button>
               </div>
-
               <FilterList groupKey={selectedSidebarItem} />
             </div>
+          </div>
         </SidebarProvider>
       </aside>
       <main className="flex-1 flex-shrink-1 p-4 overflow-auto">
@@ -185,7 +185,11 @@ function App() {
               blacklistedFacets: ['locus_id'],
               onFacetClick: filter => (
                 <FilterComponent
-                  field={ Object.values(config.variant_entity.aggregations).flatMap(f => f.items).find(f => f.key === filter.content.field)!}
+                  field={
+                    Object.values(config.variant_exploration.aggregations)
+                      .flatMap(f => f.items)
+                      .find(f => f.key === filter.content.field)!
+                  }
                   searchVisible={true}
                 />
               ),

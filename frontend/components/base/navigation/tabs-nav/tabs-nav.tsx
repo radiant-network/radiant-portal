@@ -16,7 +16,7 @@ export default function TabsNav<T>({ ref, value, onValueChange, className, ...pr
         onValueChange,
       }}
     >
-      <div ref={ref} className={cn('flex border-b px-3', className)} {...props} />
+      <div ref={ref} className={cn('flex border-b overflow-x-auto', className)} {...props} />
     </TabsNavContext.Provider>
   );
 }
@@ -54,7 +54,7 @@ export function TabsNavItem({ ref, value, disabled = false, className, children,
         props.onClick?.(e);
       }}
     >
-      <div className="px-3 py-2 text-muted-foreground rounded hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none">
+      <div className="px-3 py-2 text-sm text-muted-foreground rounded hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none">
         {children}
       </div>
     </div>

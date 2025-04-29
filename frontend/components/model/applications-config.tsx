@@ -1,5 +1,5 @@
-import { createContext, type ReactNode, useContext } from "react";
-import { RangeOperators } from "@/components/model/sqon";
+import { createContext, type ReactNode, useContext } from 'react';
+import { RangeOperators } from '@/components/model/sqon';
 
 export interface IFilterRangeTypes {
   key: string;
@@ -44,7 +44,7 @@ export type TFilterGroupConfig = IFilterRangeConfig | IFilterTextInputConfig | I
 
 export interface Aggregation {
   key: string;
-  type: "multiple" | "boolean" | "numerical";
+  type: 'multiple' | 'boolean' | 'numerical';
   defaults?: TFilterGroupConfig;
   tooltips?: string[];
   intervalDecimal?: { [key: string]: number };
@@ -58,19 +58,22 @@ export type AggregationConfig = {
   [key: string]: AggregationGroup;
 };
 
-export interface AppsConfig {
+export interface BaseAppsConfig {
   app_id: string;
+}
+
+export interface AppsConfig extends BaseAppsConfig {
   aggregations: AggregationConfig;
 }
 
-export interface AppsAdminConfig {
-  appId: string;
-  adminCode: string;
+export interface AppsAdminConfig extends BaseAppsConfig {
+  admin_code: string;
 }
 
 export interface PortalConfig {
   admin: AppsAdminConfig;
-  variant_entity: AppsConfig;
+  variant_exploration: AppsConfig;
+  variant_entity: BaseAppsConfig;
   portal: {
     name: string;
     navigation: {
@@ -91,15 +94,13 @@ interface ConfigProviderProps {
 }
 
 export const ConfigProvider = ({ children, config }: ConfigProviderProps) => {
-  return (
-    <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
-  );
+  return <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>;
 };
 
 export const useConfig = (): PortalConfig => {
   const context = useContext(ConfigContext);
   if (!context) {
-    throw new Error("useConfig must be used within a ConfigProvider");
+    throw new Error('useConfig must be used within a ConfigProvider');
   }
   return context;
 };

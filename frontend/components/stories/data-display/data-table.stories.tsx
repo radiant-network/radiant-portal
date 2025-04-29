@@ -6,20 +6,20 @@ import { Occurrence, SortBodyOrderEnum } from '@/api/api';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
 // Purposely used absolute paths since variant app is not a dependency of the components library
-import RowExpandCell from '../../../apps/variant/src/feature/occurrence-table/cells/row-expand-cell';
-import GeneCell from '../../../apps/variant/src/feature/occurrence-table/cells/gene-cell';
-import LinkCell from '../../../apps/variant/src/feature/occurrence-table/cells/link-cell';
-import ManeCell from '../../../apps/variant/src/feature/occurrence-table/cells/mane-cell';
-import OmimCell from '../../../apps/variant/src/feature/occurrence-table/cells/omim-cell';
-import ClinvarCell from '../../../apps/variant/src/feature/occurrence-table/cells/clinvar-cell';
-import NumberCell from '../../../apps/variant/src/feature/occurrence-table/cells/number-cell';
-import VariantClassCell from '../../../apps/variant/src/feature/occurrence-table/cells/variant-class-cell';
-import ZygosityCell from '../../../apps/variant/src/feature/occurrence-table/cells/zygosity-cell';
-import RowSelectionCell from '../../../apps/variant/src/feature/occurrence-table/cells/table-row-selection-cell';
+import RowExpandCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/row-expand-cell';
+import GeneCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/gene-cell';
+import LinkCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/link-cell';
+import ManeCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/mane-cell';
+import OmimCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/omim-cell';
+import ClinvarCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/clinvar-cell';
+import NumberCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/number-cell';
+import VariantClassCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/variant-class-cell';
+import ZygosityCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/zygosity-cell';
+import RowSelectionCell from '../../../apps/variant-exploration/src/feature/occurrence-table/cells/table-row-selection-cell';
 
 const config: PortalConfig = {
-  variant_entity: {
-    app_id: 'variant_entity_multi_select_filter',
+  variant_exploration: {
+    app_id: 'variant_exploration_multi_select_filter',
     aggregations: [],
   },
   portal: {

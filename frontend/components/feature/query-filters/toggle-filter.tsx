@@ -20,7 +20,7 @@ export function ToggleFilter({ data, field }: IProps) {
   // items that are include in the search
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const config = useConfig();
-  const appId = config.variant_entity.app_id;
+  const appId = config.variant_exploration.app_id;
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder

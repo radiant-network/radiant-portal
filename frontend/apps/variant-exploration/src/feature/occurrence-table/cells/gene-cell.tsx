@@ -32,7 +32,7 @@ function getOmimOrgUrl({ omimGeneId, symbol }: GetOmimOrgUrlProps): string {
  */
 function GeneCell({ className, symbol }: GeneCellProps) {
   const config = useConfig();
-  const appId = config.variant_entity.app_id;
+  const appId = config.variant_exploration.app_id;
 
   if (!symbol) return <EmptyCell />;
 

@@ -1,11 +1,5 @@
 {
-  "include": [
-    "**/*",
-    "**/.server/**/*",
-    "**/.client/**/*",
-    ".react-router/types/**/*",
-    "app/types/**/*"
-  ],
+  "include": ["**/*", "**/.server/**/*", "**/.client/**/*", ".react-router/types/**/*", "app/types/**/*"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["node", "vite/client"],
@@ -24,7 +18,8 @@
       "@/lib/*": ["../../components/lib/*"],
       "@/hooks/*": ["../../components/hooks/*"],
       "@assets/*": ["../../themes/radiant/assets/*"],
-      "variant/*": ["../../apps/variant/src/*"],
+      "variant-exploration/*": ["../../apps/variant-exploration/src/*"],
+      "variant-entity/*": ["../../apps/variant-entity/src/*"],
       "~/*": ["./app/*"],
       "react": ["./node_modules/@types/react"]
     },

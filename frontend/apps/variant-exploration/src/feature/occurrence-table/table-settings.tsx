@@ -40,7 +40,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     },
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
-      cell: info => <LinkCell url="#">{info.getValue()}</LinkCell>,
+      cell: info => <LinkCell url={`/variants/entity/${info.row.original.locus_id}`}>{info.getValue()}</LinkCell>,
       header: t('common.variant.headers.hgvsg'),
       size: 150,
       minSize: 100,
