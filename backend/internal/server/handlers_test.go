@@ -103,9 +103,16 @@ func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurre
 	}, nil
 }
 
+func (m *MockRepository) GetVariantHeader(int) (*types.VariantHeader, error) {
+	return &types.VariantHeader{
+		Hgvsg:           "hgvsg1",
+		AssemblyVersion: "GRCh38",
+		Source:          []string{"WGS"},
+	}, nil
+}
+
 func (m *MockRepository) GetVariantOverview(int) (*types.VariantOverview, error) {
 	return &types.VariantOverview{
-		Hgvsg:        "hgvsg1",
 		LocusFull:    "locus1",
 		Pf:           0.99,
 		Pc:           3,
@@ -299,6 +306,19 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "hgvsg":"hgvsg1", "locus_id":1000, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
 }
 
+func Test_GetVariantHeader(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/:locus_id/header", GetVariantHeader(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/1000/header", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"hgvsg":"hgvsg1", "assembly_version": "GRCh38", "source": ["WGS"]}`, w.Body.String())
+}
+
 func Test_GetVariantOverview(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -309,5 +329,5 @@ func Test_GetVariantOverview(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "hgvsg":"hgvsg1", "locus":"locus1", "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
+	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "locus":"locus1", "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
 }

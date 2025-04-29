@@ -502,6 +502,26 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 	assertGetExpendedOccurrence(t, "simple", 1, 1000, expected)
 }
 
+func assertGetVariantHeader(t *testing.T, data string, locusId int, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewStarrocksRepository(db)
+		router := gin.Default()
+		router.GET("/variants/:locus_id/header", server.GetVariantHeader(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/header", locusId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetVariantHeader(t *testing.T) {
+	expected := `{"hgvsg":"hgvsg1", "assembly_version": "GRCh38", "source": ["WGS"]}`
+	assertGetVariantHeader(t, "simple", 1000, expected)
+}
+
 func assertGetVariantOverview(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
@@ -518,7 +538,7 @@ func assertGetVariantOverview(t *testing.T, data string, locusId int, expected s
 }
 
 func Test_GetVariantOverview(t *testing.T) {
-	expected := `{"assembly_version":"GRCh38", "cadd_phred":0.1, "cadd_score":0.1, "clinvar": ["Benign", "Pathogenic"], "clinvar_id":"111111", "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus":"locus1", "omim_conditions": [{"inheritance_code": ["AD"], "name": "Noonan syndrome 7", "omim_id": "613706"}, {"inheritance_code": ["AD"], "name":"LEOPARD syndrome 3", "omim_id":"613707"}], "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "source":["WGS"], "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF"}`
+	expected := `{"cadd_phred":0.1, "cadd_score":0.1, "clinvar": ["Benign", "Pathogenic"], "clinvar_id":"111111", "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "locus":"locus1", "omim_conditions": [{"inheritance_code": ["AD"], "name": "Noonan syndrome 7", "omim_id": "613706"}, {"inheritance_code": ["AD"], "name":"LEOPARD syndrome 3", "omim_id":"613707"}], "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF"}`
 	assertGetVariantOverview(t, "simple", 1000, expected)
 }
 
