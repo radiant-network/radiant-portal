@@ -1,9 +1,12 @@
 package types
 
+type VariantHeader = struct {
+	Hgvsg           string            `json:"hgvsg" validate:"required"`
+	AssemblyVersion string            `json:"assembly_version,omitempty"`
+	Source          JsonArray[string] `gorm:"type:json" json:"source,omitempty"`
+} // @name VariantOverview
+
 type VariantOverview = struct {
-	Hgvsg                 string                 `json:"hgvsg" validate:"required"`
-	AssemblyVersion       string                 `json:"assembly_version,omitempty"`
-	Source                JsonArray[string]      `gorm:"type:json" json:"source,omitempty"`
 	Symbol                string                 `json:"symbol,omitempty"`
 	Consequence           JsonArray[string]      `gorm:"type:json" json:"picked_consequences" validate:"required"`
 	ClinvarInterpretation JsonArray[string]      `gorm:"type:json" json:"clinvar,omitempty"`

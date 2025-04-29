@@ -675,6 +675,38 @@ func GetExpendedOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
 	}
 }
 
+// GetVariantHeader handles retrieving a variant header by its locus
+// @Summary Get a VariantHeader
+// @Id getVariantHeader
+// @Description Retrieve Variant Header data for a given locus
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {object} types.VariantHeader
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/{locus_id}/header [get]
+func GetVariantHeader(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		variantHeader, err := repo.GetVariantHeader(locusID)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if variantHeader == nil {
+			HandleNotFoundError(c, "variant")
+			return
+		}
+		c.JSON(http.StatusOK, variantHeader)
+	}
+}
+
 // GetVariantOverview handles retrieving a variant overview by its locus
 // @Summary Get a VariantOverview
 // @Id getVariantOverview

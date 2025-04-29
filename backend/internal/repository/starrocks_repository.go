@@ -18,6 +18,7 @@ type Aggregation = types.Aggregation
 type Sequencing = types.Sequencing
 type Statistics = types.Statistics
 type ExpendedOccurrence = types.ExpendedOccurrence
+type VariantHeader = types.VariantHeader
 type VariantOverview = types.VariantOverview
 type OmimGeneSet = types.OmimGeneSet
 
@@ -34,6 +35,7 @@ type StarrocksDAO interface {
 	GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error)
 	GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
 	GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error)
+	GetVariantHeader(locusId int) (*VariantHeader, error)
 	GetVariantOverview(locusId int) (*VariantOverview, error)
 }
 
@@ -390,11 +392,32 @@ func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*Ex
 	return &expendedOccurrence, err
 }
 
+func (r *StarrocksRepository) GetVariantHeader(locusId int) (*VariantHeader, error) {
+	tx := r.db.Table("variants v")
+	tx = tx.Where("v.locus_id = ?", locusId)
+	tx = tx.Select("v.hgvsg")
+
+	var variantHeader VariantHeader
+	err := tx.First(&variantHeader).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching variant header: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	variantHeader.AssemblyVersion = "GRCh38"
+	variantHeader.Source = []string{"WGS"}
+
+	return &variantHeader, nil
+}
+
 func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview, error) {
 	tx := r.db.Table("variants v")
 	tx = tx.Joins("JOIN consequences c ON v.locus_id=c.locus_id AND v.locus_id = ? AND c.picked = true", locusId)
 	tx = tx.Joins("LEFT JOIN clinvar cl ON cl.chromosome = v.chromosome AND cl.start = v.start AND cl.reference = v.reference AND cl.alternate = v.alternate")
-	tx = tx.Select("v.hgvsg, v.symbol, v.consequence, v.clinvar_interpretation, v.pc, v.pf, v.gnomad_v3_af, v.transcript_id, c.coding_dna_change, v.rsnumber, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus_full, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli, cl.name as clinvar_id")
+	tx = tx.Select("v.symbol, v.consequence, v.clinvar_interpretation, v.pc, v.pf, v.gnomad_v3_af, v.transcript_id, c.coding_dna_change, v.rsnumber, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus_full, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli, cl.name as clinvar_id")
 
 	var variantOverview VariantOverview
 	err := tx.First(&variantOverview).Error
@@ -405,9 +428,6 @@ func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview,
 			return nil, nil
 		}
 	}
-
-	variantOverview.AssemblyVersion = "GRCh38"
-	variantOverview.Source = []string{"WGS"}
 
 	txOmim := r.db.Table("omim_gene_set_flat omgsf")
 	txOmim = txOmim.Select("omgsf.phenotype_omim_id, omgsf.phenotype_name, omgsf.phenotype_inheritance_code")

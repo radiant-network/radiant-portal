@@ -690,12 +690,23 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 	})
 }
 
+func Test_GetVariantHeader(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewStarrocksRepository(db)
+		variantHeader, err := repo.GetVariantHeader(1000)
+		assert.NoError(t, err)
+		assert.Equal(t, "hgvsg1", variantHeader.Hgvsg)
+		assert.Equal(t, "GRCh38", variantHeader.AssemblyVersion)
+		assert.Equal(t, 1, len(variantHeader.Source))
+	})
+}
+
 func Test_GetVariantOverview(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		variantOverview, err := repo.GetVariantOverview(1000)
 		assert.NoError(t, err)
-		assert.Equal(t, "hgvsg1", variantOverview.Hgvsg)
+		assert.Equal(t, "locus1", variantOverview.LocusFull)
 		assert.Equal(t, float32(0.1), variantOverview.SiftScore)
 		assert.Equal(t, "T", variantOverview.SiftPred)
 		assert.Equal(t, 2, len(variantOverview.OmimConditions))

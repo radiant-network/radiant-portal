@@ -452,10 +452,22 @@ components:
         user_id:
           type: string
       type: object
-    VariantOverview:
+    VariantHeader:
       properties:
         assembly_version:
           type: string
+        hgvsg:
+          type: string
+        source:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      required:
+      - hgvsg
+      type: object
+    VariantOverview:
+      properties:
         cadd_phred:
           type: number
         cadd_score:
@@ -487,8 +499,6 @@ components:
           type: number
         gnomad_v3_af:
           type: number
-        hgvsg:
-          type: string
         locus:
           type: string
         lrt_pred:
@@ -529,11 +539,6 @@ components:
           type: string
         sift_score:
           type: number
-        source:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
         spliceai_ds:
           type: number
         spliceai_type:
@@ -547,7 +552,6 @@ components:
           type: string
       required:
       - gnomad_v3_af
-      - hgvsg
       - locus
       - pf
       - picked_consequences
@@ -1266,6 +1270,41 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
+  /variants/{locus_id}/header:
+    get:
+      description: Retrieve Variant Header data for a given locus
+      operationId: getVariantHeader
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantHeader'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get a VariantHeader
+      tags:
+      - variant
   /variants/{locus_id}/overview:
     get:
       description: Retrieve Variant Overview data for a given locus

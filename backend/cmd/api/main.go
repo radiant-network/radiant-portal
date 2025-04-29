@@ -124,6 +124,7 @@ func main() {
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoStarrocks))
 
 	variantGroup := r.Group("/variants")
+	variantGroup.GET("/:locus_id/header", server.GetVariantHeader(repoStarrocks))
 	variantGroup.GET("/:locus_id/overview", server.GetVariantOverview(repoStarrocks))
 
 	r.Use(gin.Recovery())
