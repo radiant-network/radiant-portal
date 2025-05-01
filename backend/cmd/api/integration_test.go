@@ -538,7 +538,7 @@ func assertGetVariantOverview(t *testing.T, data string, locusId int, expected s
 }
 
 func Test_GetVariantOverview(t *testing.T) {
-	expected := `{"cadd_phred":0.1, "cadd_score":0.1, "clinvar": ["Benign", "Pathogenic"], "clinvar_id":"111111", "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "locus":"locus1", "omim_conditions": [{"inheritance_code": ["AD"], "name": "Noonan syndrome 7", "omim_id": "613706"}, {"inheritance_code": ["AD"], "name":"LEOPARD syndrome 3", "omim_id":"613707"}], "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF"}`
+	expected := `{"cadd_phred":0.1, "cadd_score":0.1, "canonical":true, "clinvar": ["Benign", "Pathogenic"], "clinvar_id":"111111", "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "locus":"locus1", "mane_select":true, "omim_conditions": [{"inheritance_code": ["AD"], "name": "Noonan syndrome 7", "omim_id": "613706"}, {"inheritance_code": ["AD"], "name":"LEOPARD syndrome 3", "omim_id":"613707"}], "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF"}`
 	assertGetVariantOverview(t, "simple", 1000, expected)
 }
 

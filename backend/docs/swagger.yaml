@@ -476,6 +476,8 @@ components:
           type: number
         cadd_score:
           type: number
+        canonical:
+          type: boolean
         clinvar:
           items:
             type: string
@@ -509,6 +511,8 @@ components:
           type: string
         lrt_score:
           type: number
+        mane_select:
+          type: boolean
         omim_conditions:
           items:
             $ref: '#/components/schemas/OmimGeneSet'

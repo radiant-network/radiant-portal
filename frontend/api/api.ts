@@ -1121,6 +1121,12 @@ export interface VariantOverview {
     'cadd_score'?: number;
     /**
      * 
+     * @type {boolean}
+     * @memberof VariantOverview
+     */
+    'canonical'?: boolean;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof VariantOverview
      */
@@ -1203,6 +1209,12 @@ export interface VariantOverview {
      * @memberof VariantOverview
      */
     'lrt_score'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VariantOverview
+     */
+    'mane_select'?: boolean;
     /**
      * 
      * @type {Array<OmimGeneSet>}

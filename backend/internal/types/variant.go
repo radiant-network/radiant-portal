@@ -14,6 +14,8 @@ type VariantOverview = struct {
 	Pn                    int                    `json:"pn,omitempty"` //TODO
 	Pf                    float64                `json:"pf" validate:"required"`
 	GnomadV3Af            float64                `json:"gnomad_v3_af" validate:"required"`
+	Canonical             bool                   `json:"canonical,omitempty"`
+	ManeSelect            bool                   `json:"mane_select,omitempty"`
 	TranscriptId          string                 `json:"transcript_id,omitempty"`
 	RefseqMrnaId          string                 `json:"refseq_mrna_id,omitempty"` //TODO
 	ExonRank              int                    `json:"exon_rank,omitempty"`      //TODO
