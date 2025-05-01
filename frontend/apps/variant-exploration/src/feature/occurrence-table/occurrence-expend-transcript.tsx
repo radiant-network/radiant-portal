@@ -2,7 +2,7 @@ import { Occurrence } from '@/api/api';
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import { getImpactBadge } from './utils';
+import ImpactIcon from '@/components/feature/variant/impact-icon';
 
 type OccurrenceExpendTranscriptProps = {
   occurrence: Occurrence;
@@ -34,7 +34,7 @@ export default function OccurrenceExpendTranscript({ occurrence }: OccurrenceExp
       {occurrence.picked_consequences && occurrence.vep_impact && (
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
-            {getImpactBadge(occurrence.vep_impact)}
+            <ImpactIcon value={occurrence.vep_impact} />
             {t(`consequences.${occurrence.picked_consequences[0]}`)}
           </div>{' '}
           {occurrence.aa_change && ` - ${occurrence.aa_change}`}

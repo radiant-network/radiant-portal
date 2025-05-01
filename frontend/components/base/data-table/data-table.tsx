@@ -577,7 +577,7 @@ function DataTable<T>({
             new Array(pagination.pageSize).fill(0).map((_, index) => (
               <TableRow key={`skeleton-row-${index}`}>
                 <TableCell colSpan={columnSettings.length}>
-                  <Skeleton className="w-full h-[32px]" />
+                  <Skeleton className="w-full h-[20px]" />
                 </TableCell>
               </TableRow>
             ))}

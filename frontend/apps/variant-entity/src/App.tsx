@@ -2,26 +2,46 @@ import { useCallback, useEffect, useState } from 'react';
 import BackLink from '@/components/base/navigation/back-link';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Badge } from '@/components/base/ui/badge';
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import OverviewTab from './components/overview-tab';
 import EvidenceTab from './components/evidence-tab';
 import FrequencyTab from './components/frequency-tab';
 import ConditionsTab from './components/conditions-tab';
 import TranscriptsTab from './components/transcripts-tab';
 import CasesTab from './components/cases-tab';
+import { VariantEntityTabs } from './types';
+import { variantsApi } from '@/utils/api';
+import { VariantHeader } from '@/api/api';
+import useSWR from 'swr';
+import { Skeleton } from '@/components/base/ui/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
 
-export enum VariantEntityTabs {
-  Overview = 'overview',
-  Evidence = 'evidence',
-  Frequency = 'frequency',
-  Conditions = 'conditions',
-  Transcripts = 'transcripts',
-  Cases = 'cases',
+type VariantHeaderInput = {
+  key: string;
+  locusId: string;
+};
+
+async function fetchVariantHeader(input: VariantHeaderInput) {
+  const response = await variantsApi.getVariantHeader(input.locusId);
+  return response.data;
 }
 
 export default function App() {
+  const { t } = useI18n();
   const location = useLocation();
+  const params = useParams<{ locusId: string }>();
   const [activeTab, setActiveTab] = useState<VariantEntityTabs>(VariantEntityTabs.Overview);
+
+  const { data, isLoading } = useSWR<VariantHeader, any, VariantHeaderInput>(
+    {
+      key: 'variant-header',
+      locusId: params.locusId!,
+    },
+    fetchVariantHeader,
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   useEffect(() => {
     // To handle initial load
@@ -39,24 +59,29 @@ export default function App() {
   }, []);
 
   return (
-    <main className="bg-muted h-full">
+    <main className="bg-muted h-screen overflow-auto">
       <div className="flex flex-col gap-4 bg-background pt-6 px-6">
         <Link to="/">
-          <BackLink>Variants</BackLink>
+          <BackLink>{t('variantEntity.header.variants')}</BackLink>
         </Link>
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">chr7:1212342453234</h1>
-          <Badge>Germline</Badge>
-        </div>
+        {isLoading ? (
+          <Skeleton className="w-96 h-8" />
+        ) : (
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">{data?.hgvsg}</h1>
+            {data?.assembly_version && <Badge variant="outline">{data.assembly_version}</Badge>}
+            <Badge>{t('variantEntity.header.germline')}</Badge>
+          </div>
+        )}
       </div>
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-6 px-6 bg-background">
-          <TabsListItem value={VariantEntityTabs.Overview}>Overview</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Evidence}>Evidence</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Frequency}>Frequency</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Conditions}>Conditions</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Transcripts}>Transcripts</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Cases}>Cases</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Overview}>{t('variantEntity.overview.title')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Evidence}>{t('variantEntity.evidence.title')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Frequency}>{t('variantEntity.frequency.title')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Conditions}>{t('variantEntity.conditions.title')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Transcripts}>{t('variantEntity.transcripts.title')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Cases}>{t('variantEntity.cases.title')}</TabsListItem>
         </TabsList>
         <div className="px-6">
           <TabsContent value={VariantEntityTabs.Overview} className="py-6">
