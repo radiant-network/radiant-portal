@@ -13,6 +13,8 @@ import { Tooltip } from '@radix-ui/react-tooltip';
 import { Button } from '@/components/base/ui/button';
 import { TFunction } from 'i18next';
 import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
+import { boolean } from 'zod';
+import { useState } from 'react';
 
 const PIN_COLUMN_ACTIONS: {
   key: string;
@@ -69,12 +71,20 @@ type TableHeaderActionsProps<TData> = {
 };
 function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
   const { t } = useI18n();
+
+  // use to keep DropdownMenuTrigger visible when used
+  const [isPinningDropdownActive, setIsPinningDropdownActive] = useState<boolean>(false);
+
   return (
     <>
       {/* Pin/Unpin column */}
       {header.column.getCanPin() && (
-        <DropdownMenu>
-          <DropdownMenuTrigger>
+        <DropdownMenu onOpenChange={open => setIsPinningDropdownActive(open)}>
+          <DropdownMenuTrigger
+            className={cn({
+              'opacity-0 group-hover:opacity-100': !isPinningDropdownActive,
+            })}
+          >
             <Pin className="size-4" />
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
@@ -100,7 +110,14 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
       {header.column.getCanSort() && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" iconOnly onClick={header.column.getToggleSortingHandler()}>
+            <Button
+              variant="ghost"
+              iconOnly
+              className={cn({
+                'opacity-0 group-hover:opacity-100': !header.column.getIsSorted(),
+              })}
+              onClick={header.column.getToggleSortingHandler()}
+            >
               {{
                 asc: <ArrowDownAZ size={16} />,
                 desc: <ArrowUpZA size={16} />,

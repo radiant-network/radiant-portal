@@ -1,4 +1,4 @@
-import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { toExponentialNotation } from '@/components/lib/number-format';
 import ShapeCircleIcon from '@/components/base/icons/shape-circle-icon';
 

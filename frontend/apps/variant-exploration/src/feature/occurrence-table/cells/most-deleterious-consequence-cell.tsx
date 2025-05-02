@@ -1,5 +1,5 @@
 import { getImpactBadge } from '../utils';
-import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { cn } from '@/components/lib/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { OccurrenceVepImpactEnum } from '@/api/api';

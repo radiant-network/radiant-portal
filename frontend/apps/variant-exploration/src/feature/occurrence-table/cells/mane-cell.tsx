@@ -1,4 +1,4 @@
-import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import TranscriptCanonicalIcon from '@/components/base/icons/transcript-canonical-icon';
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';

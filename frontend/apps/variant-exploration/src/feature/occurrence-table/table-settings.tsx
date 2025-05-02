@@ -1,8 +1,9 @@
 import { createColumnHelper, HeaderContext } from '@tanstack/react-table';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import RowExpandCell from '@/feature/occurrence-table/cells/row-expand-cell';
-import RowSelectionCell from '@/feature/occurrence-table/cells/table-row-selection-cell';
+import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
+import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import GeneCell from '@/feature/occurrence-table/cells/gene-cell';
 import LinkCell from '@/feature/occurrence-table/cells/link-cell';
@@ -23,9 +24,16 @@ const columnHelper = createColumnHelper<Occurrence>();
 function getVariantColumns(t: TFunction<string, undefined>) {
   return [
     {
+      id: 'pinRow',
+      cell: PinRowCell,
+      size: 52,
+      enableResizing: false,
+      enablePinning: false,
+    },
+    {
       id: 'rowExpand',
       cell: RowExpandCell,
-      size: 48,
+      size: 52,
       enableResizing: false,
       enablePinning: false,
     },
@@ -123,6 +131,12 @@ function getVariantColumns(t: TFunction<string, undefined>) {
 }
 
 const defaultSettings = createColumnSettings([
+  {
+    id: 'pinRow',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'left',
+  },
   {
     id: 'rowExpand',
     visible: true,

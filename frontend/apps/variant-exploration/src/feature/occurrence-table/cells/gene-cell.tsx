@@ -1,5 +1,5 @@
 import { PlusIcon } from 'lucide-react';
-import EmptyCell from '@/feature/occurrence-table/cells/empty-cell';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { cn } from '@/components/lib/utils';
 import { Button } from '@/components/base/ui/button';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
