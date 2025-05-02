@@ -376,15 +376,16 @@
   },
   "queryFilters": {
     "sidebarPanel": {
+      "collapse": "Collapse",
+      "expand": "Expand",
       "organization": "RQDM Panel",
       "filters": {
         "variant": "Variant",
         "gene": "Gene",
         "frequency": "Frequency",
         "pathogenicity": "Pathogenicity",
-        "occurence": "Occurence",
-        "organization": "Organization",
-        "occurrence": "Occurrence"
+        "occurrence": "Occurrence",
+        "organization": "My Organization"
       }
     }
   }

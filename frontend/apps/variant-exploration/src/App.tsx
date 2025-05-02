@@ -125,22 +125,15 @@ function App() {
         <SidebarProvider
           open={open}
           onOpenChange={setOpen}
-          className="h-full flex flex-row"
-          style={
-            {
-              '--sidebar-width': open ? '150px' : '58px',
-              '--sidebar-width-icon': '58px',
-            } as React.CSSProperties
-          }
-        >
-          <div className="[&>*]:h-full z-10">
+          className="h-full flex flex-row">
+          <div className="z-10">
             <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
           </div>
           <div
             className={`
                 overflow-auto mb-0 border-r
                 transition-[width] duration-300 ease-in-out
-                ${selectedSidebarItem ? 'w-[280px]  p-4 opacity-100 relative' : 'w-0 opacity-0'}
+                ${selectedSidebarItem ? 'w-[280px] p-4 opacity-100 relative' : 'w-0 opacity-0'}
               `}
           >
             <div className="whitespace-nowrap">

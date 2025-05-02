@@ -1,4 +1,4 @@
-import { Droplet } from 'lucide-react';
+import { Droplet, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 import {
   Sidebar,
@@ -19,6 +19,8 @@ import FrequencyIcon from '@/components/base/icons/frequency-icon';
 import PathogenicityIcon from '@/components/base/icons/pathogenicity-icon';
 import OccurenceIcon from '@/components/base/icons/occurence-icon';
 import { tv } from 'tailwind-variants';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Button } from '@/components/base/ui/button';
 
 // Icon mapping for different aggregation groups
 const iconMap = {
@@ -31,23 +33,14 @@ const iconMap = {
 };
 
 const buttonVariants = tv({
-  base: 'h-8 text-md text-secondary dark:text-foreground px-2',
+  base: 'text-md text-secondary dark:text-foreground',
   variants: {
-    open: {
-      true: 'w-full',
-      false: 'w-8 justify-center',
-    },
     selected: {
       true: 'bg-accent text-accent-foreground',
-    },
-    smallOpen: {
-      true: 'ml-1',
-      false: 'ml-0',
     },
   },
   defaultVariants: {
     selected: false,
-    smallCollapsed: false,
   },
 });
 interface SidebarGroupsProps {
@@ -58,7 +51,7 @@ interface SidebarGroupsProps {
 export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedItemId }: SidebarGroupsProps) {
   const { t } = useI18n();
   const config = useConfig();
-  const { open } = useSidebar();
+  const { open, toggleSidebar } = useSidebar();
   const [internalSelectedItemId, setInternalSelectedItemId] = useState<string | null>(null);
 
   // Use external state if provided, otherwise use internal state
@@ -79,31 +72,38 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
     <Sidebar
       variant="sidebar"
       collapsible="icon"
-      className={'!static flex flex-col w-full bg-primary dark:bg-secondary h-[100%]'}
+      className={'!static flex flex-col w-full bg-primary dark:bg-secondary '}
     >
-      <SidebarContent className="[&_svg]:!size-6">
-        <SidebarGroup className="flex-1 pr-3">
+      <SidebarContent>
+        <SidebarGroup className="[&_svg]:!size-5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button iconOnly onClick={() => toggleSidebar()} className={`${buttonVariants()} pl-2 pr-2`} size="sm" variant="ghost">
+                {open ? <PanelLeftClose /> : <PanelLeftOpen />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="center">
+              {open ? t('queryFilters.sidebarPanel.collapse') : t('queryFilters.sidebarPanel.expand')}
+            </TooltipContent>
+          </Tooltip>
           <SidebarMenu>
-            <SidebarTrigger className={buttonVariants({ open: false, selected: false, smallOpen: open })} />
             {Object.entries(aggregationGroups).map(([id]) => {
               const Icon = iconMap[id as keyof typeof iconMap];
+              const label = t(`queryFilters.sidebarPanel.filters.${id}`, id.charAt(0).toUpperCase() + id.slice(1));
               return (
                 <SidebarMenuItem key={id}>
                   <SidebarMenuButton
                     asChild
-                    className={buttonVariants({ open, selected: selectedItemId === id })}
+                    className={buttonVariants({ selected: selectedItemId === id })}
                     onClick={e => {
                       e.preventDefault();
                       handleItemClick(id);
                     }}
+                    tooltip={label}
                   >
                     <div>
                       <Icon />
-                      {open && (
-                        <span className="ml-2">
-                          {t(`queryFilters.sidebarPanel.filters.${id}`, id.charAt(0).toUpperCase() + id.slice(1))}
-                        </span>
-                      )}
+                      <span>{label}</span>
                     </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
