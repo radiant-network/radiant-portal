@@ -105,11 +105,11 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
                       e.preventDefault();
                       handleItemClick(id);
                     }}
-                    tooltip={!open ? label : undefined}
+                    tooltip={label}
                   >
                     <div>
                       <Icon />
-                      {open && <span className="ml-2">{label}</span>}
+                      <span className="ml-2">{label}</span>
                     </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
