@@ -8,7 +8,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-  SidebarTrigger,
 } from '@/components/base/ui/sidebar';
 import { useI18n } from '@/components/hooks/i18n';
 import { useConfig } from '@/components/model/applications-config';
@@ -33,7 +32,7 @@ const iconMap = {
 };
 
 const buttonVariants = tv({
-  base: 'text-md text-secondary dark:text-foreground',
+  base: 'text-secondary dark:text-foreground',
   variants: {
     selected: {
       true: 'bg-accent text-accent-foreground',
@@ -75,10 +74,16 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
       className={'!static flex flex-col w-full bg-primary dark:bg-secondary '}
     >
       <SidebarContent>
-        <SidebarGroup className="[&_svg]:!size-5">
+        <SidebarGroup>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button iconOnly onClick={() => toggleSidebar()} className={`${buttonVariants()} pl-2 pr-2`} size="sm" variant="ghost">
+              <Button
+                iconOnly
+                onClick={() => toggleSidebar()}
+                className={buttonVariants({ className: 'mb-1' })}
+                size="sm"
+                variant="ghost"
+              >
                 {open ? <PanelLeftClose /> : <PanelLeftOpen />}
               </Button>
             </TooltipTrigger>

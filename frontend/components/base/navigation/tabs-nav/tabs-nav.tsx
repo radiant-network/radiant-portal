@@ -26,8 +26,19 @@ export type TabsListProps = React.HTMLAttributes<HTMLDivElement> & {
   ref?: React.Ref<HTMLDivElement>;
 };
 
-export function TabsList({ ref, className, ...props }: TabsListProps) {
-  return <div ref={ref} className={cn('flex border-b overflow-x-auto', className)} {...props} />;
+export function TabsList({ ref, className, children, ...props }: TabsListProps) {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        'relative before:border-b before:border-border before:absolute before:left-0 before:right-0 before:bottom-0',
+        className,
+      )}
+      {...props}
+    >
+      <div className="flex overflow-x-auto">{children}</div>
+    </div>
+  );
 }
 
 export type TabsListItemProps<T> = React.HTMLAttributes<HTMLDivElement> & {
@@ -46,7 +57,7 @@ export function TabsListItem<T>({ ref, value, disabled = false, className, child
       data-active={active}
       data-disabled={disabled}
       className={cn(
-        'group pt-1.5 pb-1 mb-[-1px] hover:cursor-pointer',
+        'z-[1] group pt-1.5 pb-1 hover:cursor-pointer',
         {
           'border-b-2 border-primary': active,
           'opacity-50 hover:cursor-not-allowed': disabled,

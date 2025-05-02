@@ -323,6 +323,71 @@
       "filter": "Filtre"
     }
   },
+  "variantEntity": {
+    "header": {
+      "variants": "Variants",
+      "germline": "Germline"
+    },
+    "overview": {
+      "title": "Overview",
+      "myOrganization": "My Organization",
+      "details": "Details",
+      "radiant": "Radiant",
+      "consequence": "Consequence",
+      "clinVar": "ClinVar",
+      "participants": "Participants",
+      "gnomAD": "gnomAD",
+      "canonicalTranscript": "Canonical Transcript",
+      "exon": "Exon",
+      "mostDeleteriousConsequenceNotice": "This transcript was selected because it represents the most deleterious consequence.",
+      "viewAllTranscripts": "View all transcripts",
+      "predictionScores": "Prediction Scores",
+      "viewAll": "View all",
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "loeuf": "LOEUF",
+      "spliceAI": "SpliceAI",
+      "associatedConditionsOmim": "Associated Conditions (OMIM)",
+      "externalReferences": "External References",
+      "dbSNP": "dbSNP"
+    },
+    "evidence": {
+      "title": "Evidence"
+    },
+    "frequency": {
+      "title": "Frequency"
+    },
+    "conditions": {
+      "title": "Conditions"
+    },
+    "transcripts": {
+      "title": "Transcripts"
+    },
+    "cases": {
+      "title": "Cases"
+    }
+  },
+  "clinVars": {
+    "other": "Other",
+    "association_not_found": "Association not found",
+    "uncertain_significance": "Uncertain significance",
+    "likely_benign": "Likely benign",
+    "likely_pathogenic": "Likely pathogenic",
+    "_low_penetrance": "Low penetrance",
+    "low_penetrance": "Low penetrance",
+    "risk_factor": "Risk factor",
+    "association": "Association",
+    "uncertain_risk_allele": "Uncertain risk allele",
+    "pathogenic": "Pathogenic",
+    "protective": "Protective",
+    "conflicting_interpretations_of_pathogenicity": "Conflicting interpretations of pathogenicity",
+    "not_provided": "Not provided",
+    "established_risk_allele": "Established risk allele",
+    "likely_risk_allele": "Likely risk allele",
+    "drug_response": "Drug response",
+    "benign": "Benign",
+    "confers_sensitivity": "Confers sensitivity"
+  },
   "consequences": {
     "transcript_ablation": "Transcript Ablation",
     "splice_acceptor": "Splice Acceptor",

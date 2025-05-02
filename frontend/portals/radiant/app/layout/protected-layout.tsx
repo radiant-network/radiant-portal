@@ -107,9 +107,7 @@ const _ProtectedLayout = () => {
           userDetails={data}
           onLogoutClick={() => navigate('/auth/logout')}
         />
-        <div className="flex-1 overflow-auto">
-          <Outlet />
-        </div>
+        <Outlet />
       </div>
     </SidebarProvider>
   );

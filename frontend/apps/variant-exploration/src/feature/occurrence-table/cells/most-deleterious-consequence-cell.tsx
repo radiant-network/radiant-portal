@@ -1,11 +1,11 @@
-import { getImpactBadge } from '../utils';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { cn } from '@/components/lib/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { OccurrenceVepImpactEnum } from '@/api/api';
+import { VepImpact } from '@/api/api';
+import ImpactIcon from '@/components/feature/variant/impact-icon';
 
 type MostDeleteriousConsequenceCellProps = {
-  vepImpact?: OccurrenceVepImpactEnum;
+  vepImpact?: VepImpact;
   consequences?: string[];
   aaChange?: string;
 };
@@ -29,7 +29,7 @@ function MostDeleteriousConsequenceCell({ vepImpact, consequences, aaChange }: M
 
   return (
     <div className={cn('flex items-center gap-2')}>
-      {getImpactBadge(vepImpact)} {t(`consequences.${consequences[0]}`)}
+      <ImpactIcon value={vepImpact} /> {t(`consequences.${consequences[0]}`)}
       {aaChange && ` - ${aaChange}`}
     </div>
   );
