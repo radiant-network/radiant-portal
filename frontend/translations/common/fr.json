@@ -1,5 +1,6 @@
 {
   "common": {
+    "noDataAvailable": "Aucune donnée disponible",
     "queryBar": {
       "empty": "Utilisez les outils de recherche et les facettes à gauche pour construire une requête",
       "deletePopover": {
@@ -248,6 +249,21 @@
       }
     }
   },
+  "queryFilters": {
+    "sidebarPanel": {
+      "collapse": "Réduire",
+      "expand": "Développer",
+      "organization": "RQDM Panel",
+      "filters": {
+        "variant": "Variant",
+        "gene": "Gène",
+        "frequency": "Fréquence",
+        "pathogenicity": "Pathogénicité",
+        "occurrence": "Occurrence",
+        "organization": "Mon Organisation"
+      }
+    }
+  },
   "occurrenceExpend": {
     "actions": {
       "downloadReport": "Télécharger le rapport",
@@ -366,20 +382,6 @@
       "website": "Site web",
       "documentation": "Documentation",
       "contact": "Contact"
-    }
-  },
-  "queryFilters": {
-    "sidebarPanel": {
-      "organization": "Organisation",
-      "filters": {
-        "variant": "Variant",
-        "gene": "Gène",
-        "frequency": "Fréquence",
-        "pathogenicity": "Pathogénicité",
-        "occurence": "Occurrence",
-        "organization": "Organisation",
-        "occurrence": "Occurrence"
-      }
     }
   }
 }

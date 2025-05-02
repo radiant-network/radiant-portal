@@ -60,7 +60,7 @@ i18next
   .init({
     fallbackLng: 'en',
     debug: import.meta.env.DEV,
-    supportedLngs: ['en', 'fr', 'de', 'es'],
+    supportedLngs: ['en', 'fr'],
 
     // Namespaces for different translation layers
     ns: ['common', 'portal'],
@@ -89,15 +89,7 @@ i18next
       fr: {
         common: {},
         portal: {},
-      },
-      de: {
-        common: {},
-        portal: {},
-      },
-      es: {
-        common: {},
-        portal: {},
-      },
+      }
     },
   });
 
@@ -134,7 +126,7 @@ export const useI18n = (namespace?: string) => {
     i18n,
     currentLanguage: i18n.language,
     setLanguage,
-    languages: ['en', 'fr', 'de', 'es'],
+    languages: ['en', 'fr'],
   };
 };
 

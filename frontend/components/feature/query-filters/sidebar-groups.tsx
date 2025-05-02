@@ -19,6 +19,7 @@ import FrequencyIcon from '@/components/base/icons/frequency-icon';
 import PathogenicityIcon from '@/components/base/icons/pathogenicity-icon';
 import OccurenceIcon from '@/components/base/icons/occurence-icon';
 import { tv } from 'tailwind-variants';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 // Icon mapping for different aggregation groups
 const iconMap = {
@@ -84,9 +85,17 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
       <SidebarContent className="[&_svg]:!size-6">
         <SidebarGroup className="flex-1 pr-3">
           <SidebarMenu>
-            <SidebarTrigger className={buttonVariants({ open: false, selected: false, smallOpen: open })} />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SidebarTrigger className={buttonVariants({ open: false, selected: false, smallOpen: open })} />
+              </TooltipTrigger>
+              <TooltipContent side="right" align="center">
+                {open ? t('queryFilters.sidebarPanel.collapse') : t('queryFilters.sidebarPanel.expand')}
+              </TooltipContent>
+            </Tooltip>
             {Object.entries(aggregationGroups).map(([id]) => {
               const Icon = iconMap[id as keyof typeof iconMap];
+              const label = t(`queryFilters.sidebarPanel.filters.${id}`, id.charAt(0).toUpperCase() + id.slice(1));
               return (
                 <SidebarMenuItem key={id}>
                   <SidebarMenuButton
@@ -96,14 +105,11 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
                       e.preventDefault();
                       handleItemClick(id);
                     }}
+                    tooltip={!open ? label : undefined}
                   >
                     <div>
                       <Icon />
-                      {open && (
-                        <span className="ml-2">
-                          {t(`queryFilters.sidebarPanel.filters.${id}`, id.charAt(0).toUpperCase() + id.slice(1))}
-                        </span>
-                      )}
+                      {open && <span className="ml-2">{label}</span>}
                     </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
