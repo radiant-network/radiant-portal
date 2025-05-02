@@ -52,7 +52,7 @@ export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TVa
  * @note must be update is design change
  */
 const HEADER_HEIGHT = 43;
-const ROW_HEIGHT = 53;
+const ROW_HEIGHT = 45;
 
 type SubComponentProp<TData> = (data: TData) => React.JSX.Element;
 
@@ -399,6 +399,7 @@ function DataTable<T>({
     getPaginationRowModel: getPaginationRowModel(),
     getRowCanExpand: () => true,
     isMultiSortEvent: _e => true,
+    keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
     manualPagination: true,
     onColumnPinningChange: setColumnPinning,
     onColumnOrderChange: setColumnOrder,
