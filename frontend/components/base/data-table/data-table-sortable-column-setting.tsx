@@ -37,7 +37,7 @@ function TableSortableColumnSetting({ id, column, checked, handleCheckboxChange 
           handleCheckboxChange(column.id, !!value);
         }}
       />
-      <label className="flex pl-[4px] text-[15px] leading-none">{t(`common.variant.headers.${column.id}`)}</label>
+      <label className="flex pl-[4px] text-[15px] leading-none">{t(`variant.headers.${column.id}`)}</label>
     </div>
   );
 }

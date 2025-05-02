@@ -29,7 +29,7 @@ function MostDeleteriousConsequenceCell({ vepImpact, consequences, aaChange }: M
 
   return (
     <div className={cn('flex items-center gap-2')}>
-      <ImpactIcon value={vepImpact} /> {t(`consequences.${consequences[0]}`)}
+      <ImpactIcon value={vepImpact} /> {t(`variant.consequences.${consequences[0]}`)}
       {aaChange && ` - ${aaChange}`}
     </div>
   );
