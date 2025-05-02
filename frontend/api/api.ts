@@ -301,20 +301,12 @@ export interface ExpendedOccurrence {
     'symbol'?: string;
     /**
      * 
-     * @type {string}
+     * @type {VepImpact}
      * @memberof ExpendedOccurrence
      */
-    'vep_impact'?: ExpendedOccurrenceVepImpactEnum;
+    'vep_impact'?: VepImpact;
 }
 
-export const ExpendedOccurrenceVepImpactEnum = {
-    Modifier: 'MODIFIER',
-    Low: 'LOW',
-    Moderate: 'MODERATE',
-    High: 'HIGH'
-} as const;
-
-export type ExpendedOccurrenceVepImpactEnum = typeof ExpendedOccurrenceVepImpactEnum[keyof typeof ExpendedOccurrenceVepImpactEnum];
 
 /**
  * 
@@ -786,10 +778,10 @@ export interface Occurrence {
     'variant_class': string;
     /**
      * 
-     * @type {string}
+     * @type {VepImpact}
      * @memberof Occurrence
      */
-    'vep_impact'?: OccurrenceVepImpactEnum;
+    'vep_impact'?: VepImpact;
     /**
      * 
      * @type {string}
@@ -798,14 +790,6 @@ export interface Occurrence {
     'zygosity': string;
 }
 
-export const OccurrenceVepImpactEnum = {
-    Modifier: 'MODIFIER',
-    Low: 'LOW',
-    Moderate: 'MODERATE',
-    High: 'HIGH'
-} as const;
-
-export type OccurrenceVepImpactEnum = typeof OccurrenceVepImpactEnum[keyof typeof OccurrenceVepImpactEnum];
 
 /**
  * 
@@ -1109,6 +1093,12 @@ export interface VariantHeader {
 export interface VariantOverview {
     /**
      * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'aa_change'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof VariantOverview
      */
@@ -1317,7 +1307,31 @@ export interface VariantOverview {
      * @memberof VariantOverview
      */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof VariantOverview
+     */
+    'vep_impact'?: VepImpact;
 }
+
+
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const VepImpact = {
+    MODIFIER: 'MODIFIER',
+    LOW: 'LOW',
+    MODERATE: 'MODERATE',
+    HIGH: 'HIGH'
+} as const;
+
+export type VepImpact = typeof VepImpact[keyof typeof VepImpact];
+
+
 
 /**
  * HpoApi - axios parameter creator
