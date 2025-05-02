@@ -37,7 +37,7 @@ export function FilterContainer({ field }: { field: AggregationConfig }) {
         <AccordionTrigger className="AccordionTrigger">
           <div className="flex items-center justify-between w-full text-base">
             <span className="capitalize">
-              {t(`common.filters.labels.${field.key.replace('_', '')}`, { defaultValue: field.key.replace('_', '') })}
+              {t(`common.filters.labels.${field.key}`, { defaultValue: field.key })}
             </span>
             {openItem === field.key && field.type === 'multiple' && (
               <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
