@@ -111,12 +111,7 @@ components:
         symbol:
           type: string
         vep_impact:
-          enum:
-          - MODIFIER
-          - LOW
-          - MODERATE
-          - HIGH
-          type: string
+          $ref: '#/components/schemas/VepImpact'
       required:
       - genotype_quality
       - gnomad_v3_af
@@ -319,12 +314,7 @@ components:
         variant_class:
           type: string
         vep_impact:
-          enum:
-          - MODIFIER
-          - LOW
-          - MODERATE
-          - HIGH
-          type: string
+          $ref: '#/components/schemas/VepImpact'
         zygosity:
           type: string
       required:
@@ -472,6 +462,8 @@ components:
       type: object
     VariantOverview:
       properties:
+        aa_change:
+          type: string
         cadd_phred:
           type: number
         cadd_score:
@@ -558,12 +550,26 @@ components:
           type: string
         transcript_id:
           type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
       required:
       - gnomad_v3_af
       - locus
       - pf
       - picked_consequences
       type: object
+    VepImpact:
+      enum:
+      - MODIFIER
+      - LOW
+      - MODERATE
+      - HIGH
+      type: string
+      x-enum-varnames:
+      - MODIFIER
+      - LOW
+      - MODERATE
+      - HIGH
   securitySchemes:
     bearerauth:
       bearerFormat: JWT

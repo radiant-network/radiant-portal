@@ -42,6 +42,8 @@ type VariantOverview = struct {
 	PhyloP17wayPrimate    float32                `json:"phyloP17way_primate,omitempty"`
 	GnomadPli             float64                `json:"gnomad_pli,omitempty"`
 	ClinvarId             string                 `json:"clinvar_id,omitempty"`
+	AaChange              string                 `json:"aa_change,omitempty"`
+	VepImpact             VepImpact              `json:"vep_impact,omitempty" enums:"MODIFIER,LOW,MODERATE,HIGH"`
 } // @name VariantOverview
 
 var VariantTable = Table{
