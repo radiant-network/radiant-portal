@@ -26,14 +26,14 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     {
       id: 'pinRow',
       cell: PinRowCell,
-      size: 52,
+      size: 40,
       enableResizing: false,
       enablePinning: false,
     },
     {
       id: 'rowExpand',
       cell: RowExpandCell,
-      size: 52,
+      size: 40,
       enableResizing: false,
       enablePinning: false,
     },

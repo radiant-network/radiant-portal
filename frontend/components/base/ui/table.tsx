@@ -10,7 +10,7 @@ const tableVariants = tv({
   variants: {
     size: {
       default: {
-        base: 'text-sm [&>tbody>tr>td]:py-1',
+        base: 'text-sm [&>tbody>tr>td]:py-2',
       },
       md: {
         base: 'text-base [&>tbody>tr>td]:py-4',
