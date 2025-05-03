@@ -12,23 +12,39 @@
       "variant": {
         "items": [
           { "key": "variant_class", "type": "multiple" },
-          { "key": "consequence", "type": "multiple" },
-          { "key": "variant_external_reference", "type": "multiple" },
           { "key": "chromosome", "type": "multiple" },
-          { "key": "start", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["between"] } },
+          { "key": "consequence", "type": "multiple" },
           { "key": "zygosity", "type": "multiple" },
-          { "key": "transmission", "type": "multiple" },
           { "key": "impact_score", "type": "multiple" }
         ]
       },
       "gene": {
-        "items": [{ "key": "symbol", "type": "multiple" }]
+        "items": [
+          { "key": "symbol", "type": "multiple" },
+          { "key": "gnomad_pli", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
+          { "key": "gnomad_loeuf", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } }
+        ]
       },
       "frequency": {
-        "items": [{ "key": "pf", "type": "numerical" }]
+        "items": [
+          { "key": "pf", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } },
+          { "key": "gnomad_v3", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } }
+        ]
       },
       "pathogenicity": {
-        "items": []
+        "items": [
+          { "key": "clinvar_interpretation", "type": "multiple" },
+          { "key": "vep_impact", "type": "multiple" },
+          { "key": "cadd_score", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
+          { "key": "cadd_phred", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
+          { "key": "dann_score", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
+          { "key": "fathmm_pred", "type": "multiple" },
+          { "key": "lrt_pred", "type": "multiple" },
+          { "key": "polyphen2_hvar_pred", "type": "multiple" },
+          { "key": "revel_score", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
+          { "key": "spliceai_ds", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
+          { "key": "sift_pred", "type": "multiple" }
+        ]
       },
       "occurrence": {
         "items": [{ "key": "filter", "type": "multiple" }]
