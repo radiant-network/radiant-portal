@@ -49,19 +49,19 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
       cell: info => <LinkCell url={`/variants/entity/${info.row.original.locus_id}`}>{info.getValue()}</LinkCell>,
-      header: t('common.variant.headers.hgvsg'),
+      header: t('variant.headers.hgvsg'),
       size: 150,
       minSize: 100,
     }),
     columnHelper.accessor(row => row.variant_class, {
       id: 'variantClass',
       cell: info => <VariantClassCell value={info.getValue()} />,
-      header: t('common.variant.headers.variantClass'),
+      header: t('variant.headers.variantClass'),
     }),
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
       cell: info => <GeneCell symbol={info.getValue()} />,
-      header: t('common.variant.headers.symbol'),
+      header: t('variant.headers.symbol'),
     }),
     columnHelper.accessor(row => row, {
       id: 'mostDeleteriousConsequence',
@@ -73,8 +73,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         />
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('common.variant.headers.mostDeleteriousConsequenceTooltips')}>
-          {t('common.variant.headers.mostDeleteriousConsequence')}
+        <TooltipsHeader tooltips={t('variant.headers.mostDeleteriousConsequenceTooltips')}>
+          {t('variant.headers.mostDeleteriousConsequence')}
         </TooltipsHeader>
       ),
       size: 225,
@@ -82,50 +82,50 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.mane_select, {
       id: 'maneSelect',
       cell: info => <ManeCell mane_select={info.getValue()} />,
-      header: t('common.variant.headers.maneSelect'),
+      header: t('variant.headers.maneSelect'),
     }),
     columnHelper.accessor(row => row.omim_inheritance_code, {
       id: 'omimInheritanceCode',
       cell: info => <OmimCell codes={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('common.variant.headers.omimInheritanceCodeTooltips')}>
-          {t('common.variant.headers.omimInheritanceCode')}
+        <TooltipsHeader tooltips={t('variant.headers.omimInheritanceCodeTooltips')}>
+          {t('variant.headers.omimInheritanceCode')}
         </TooltipsHeader>
       ),
     }),
     columnHelper.accessor(row => row.clinvar, {
       id: 'clinVar',
       cell: info => <ClinvarCell codes={info.getValue()} />,
-      header: t('common.variant.headers.clinVar'),
+      header: t('variant.headers.clinVar'),
     }),
     columnHelper.accessor(row => row.gnomad_v3_af, {
       id: 'gnomadv3AF',
       cell: info => <GnomadCell value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('common.variant.headers.gnomadv3AFTooltips')}>
-          {t('common.variant.headers.gnomadv3AF')}
+        <TooltipsHeader tooltips={t('variant.headers.gnomadv3AFTooltips')}>
+          {t('variant.headers.gnomadv3AF')}
         </TooltipsHeader>
       ),
     }),
     columnHelper.accessor(row => row.pf, {
       id: 'pf',
       cell: info => <ParticipantFrequencyCell value={info.getValue()} />,
-      header: t('common.variant.headers.pf'),
+      header: t('variant.headers.pf'),
     }),
     columnHelper.accessor(row => row.genotype_quality, {
       id: 'genotypeQuality',
       cell: info => <NumberCell value={info.getValue()} />,
-      header: t('common.variant.headers.genotypeQuality'),
+      header: t('variant.headers.genotypeQuality'),
     }),
     columnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
       cell: info => <ZygosityCell value={info.getValue()} />,
-      header: t('common.variant.headers.zygosity'),
+      header: t('variant.headers.zygosity'),
     }),
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'adRatio',
       cell: info => <NumberCell value={info.getValue()} />,
-      header: t('common.variant.headers.adRatio'),
+      header: t('variant.headers.adRatio'),
     }),
   ] as TableColumnDef<Occurrence, any>[];
 }

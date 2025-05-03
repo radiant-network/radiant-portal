@@ -1,5 +1,5 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 type VariantClassCellProps = {
@@ -13,7 +13,7 @@ function VariantClassCell({ value }: VariantClassCellProps) {
 
   return (
     <Tooltip>
-      <TooltipTrigger>{t(`common.variant.classes.${value.toLowerCase()}`)}</TooltipTrigger>
+      <TooltipTrigger>{t(`variant.classes.${value.toLowerCase()}`)}</TooltipTrigger>
       <TooltipContent>{value}</TooltipContent>
     </Tooltip>
   );

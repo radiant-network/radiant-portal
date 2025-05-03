@@ -34,7 +34,7 @@ function ClinVarBadge({ value, ...props }: ClinVarBadgeProps) {
 
   return (
     <Badge variant={ClinVarValueMap[normalizedValue] || 'slate'} {...props}>
-      {t(`clinVars.${normalizedValue}`)}
+      {t(`variant.clinVars.${normalizedValue}`)}
     </Badge>
   );
 }

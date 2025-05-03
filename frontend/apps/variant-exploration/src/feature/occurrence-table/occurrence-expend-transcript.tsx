@@ -35,7 +35,7 @@ export default function OccurrenceExpendTranscript({ occurrence }: OccurrenceExp
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <ImpactIcon value={occurrence.vep_impact} />
-            {t(`consequences.${occurrence.picked_consequences[0]}`)}
+            {t(`variant.consequences.${occurrence.picked_consequences[0]}`)}
           </div>{' '}
           {occurrence.aa_change && ` - ${occurrence.aa_change}`}
         </div>

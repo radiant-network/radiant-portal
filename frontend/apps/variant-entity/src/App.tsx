@@ -3,7 +3,7 @@ import BackLink from '@/components/base/navigation/back-link';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Badge } from '@/components/base/ui/badge';
 import { Link, useLocation, useParams } from 'react-router';
-import OverviewTab from './components/overview-tab';
+import OverviewTab from './components/overview/overview-tab';
 import EvidenceTab from './components/evidence-tab';
 import FrequencyTab from './components/frequency-tab';
 import ConditionsTab from './components/conditions-tab';

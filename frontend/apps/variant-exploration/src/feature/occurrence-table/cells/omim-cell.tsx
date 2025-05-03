@@ -25,7 +25,7 @@ function OmimCell({ codes = [] }: OmimCellProps) {
                 {code}
               </Badge>
             </TooltipTrigger>
-            <TooltipContent>{t(`common.variant.omim.${code}`)}</TooltipContent>
+            <TooltipContent>{t(`variant.omim.${code}`)}</TooltipContent>
           </Tooltip>
         );
       })}
