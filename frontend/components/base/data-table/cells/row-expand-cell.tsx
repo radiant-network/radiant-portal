@@ -1,12 +1,19 @@
 import { Button } from '@/components/base/ui/button';
 import { CellContext } from '@tanstack/react-table';
-import { MinusIcon, PlusIcon } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 function RowExpandCell({ row }: CellContext<any, any>) {
   return (
-    <Button iconOnly variant="ghost" onClick={row.getToggleExpandedHandler()}>
-      {row.getIsExpanded() ? <MinusIcon size={16} /> : <PlusIcon size={16} />}
-    </Button>
+    <div className="flex items-center justify-center">
+      <Button
+        iconOnly
+        variant="ghost"
+        onClick={row.getToggleExpandedHandler()}
+        className="text-muted-foreground size-6"
+      >
+        {row.getIsExpanded() ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+      </Button>
+    </div>
   );
 }
 

@@ -200,7 +200,7 @@ function getRowPinningExtraCN(row: Row<any>): string {
   const isPinned = row.getIsPinned();
   if (!isPinned) return '';
 
-  return cn({ 'sticky z-20 bg-background bg-gray-100': isPinned });
+  return cn({ 'sticky z-20 bg-background bg-muted': isPinned });
 }
 
 /**
@@ -223,7 +223,7 @@ function getRowPinningCellExtraCN(row: Row<any>): string {
   const isPinned = row.getIsPinned();
   if (!isPinned) return '';
 
-  return cn({ 'bg-gray-100': isPinned });
+  return cn({ 'bg-muted': isPinned });
 }
 
 /**
