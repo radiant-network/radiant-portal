@@ -254,6 +254,7 @@
       "adRatio": "Ratio Ad",
       "clinVar": "ClinVar",
       "hgvsg": "Variant",
+      "clinicalInterpretation": "Interprétation Clinique",
       "genotypeQuality": "Qualité du génotype",
       "gnomadv3AF": "gnomAD",
       "gnomadv3AFTooltips": "gnomAD Génome 3.1.2 (fréquence allélique)",
@@ -272,6 +273,9 @@
       "AL": "Acceptor Loss",
       "DG": "Donor Gain",
       "DL": "Donor Loss"
+    },
+    "interpretation": {
+      "tooltips": "Ouvrir l'interprétation clinique"
     },
     "omim": {
       "AD": "Dominant Autosomique",
