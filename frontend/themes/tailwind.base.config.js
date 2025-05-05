@@ -109,6 +109,9 @@ module.exports = {
         'sidebar-border': 'hsl(var(--sidebar-border))',
         'sidebar-ring': 'hsl(var(--sidebar-ring))',
       }),
+      cursor: {
+        default: 'pointer',
+      },
       keyframes: {
         'accordion-down': {
           from: {
