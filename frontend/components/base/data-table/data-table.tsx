@@ -52,7 +52,7 @@ export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TVa
  * @note must be update is design change
  */
 const HEADER_HEIGHT = 43;
-const ROW_HEIGHT = 45;
+const ROW_HEIGHT = 41;
 
 type SubComponentProp<TData> = (data: TData) => React.JSX.Element;
 
