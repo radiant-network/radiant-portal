@@ -56,8 +56,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           <ZapIcon size={16} />
         </TooltipsHeader>
       ),
-      size: 64,
-      minSize: 64,
+      size: 40,
+      enablePinning: false,
       enableResizing: false,
       enableSorting: false,
     }),
