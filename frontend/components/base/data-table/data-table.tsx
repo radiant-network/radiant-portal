@@ -90,13 +90,6 @@ type ColumnVisiblity = {
   [id: string]: boolean;
 };
 
-type TableCacheProps<TData> = {
-  rowPinning: {
-    top: TData[];
-    bottom: TData[];
-  };
-};
-
 /**
  * Automate index create for column settings
  * @param settings BaseColumnSettings[]

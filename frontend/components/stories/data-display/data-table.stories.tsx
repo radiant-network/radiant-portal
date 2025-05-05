@@ -36,6 +36,8 @@ const data = [
     vep_impact: 'MODIFIER',
     symbol: 'ATP1B1',
     mane_select: true,
+    seq_id: 1,
+    locus_id: 1,
   },
   {
     genotype_quality: 54,
@@ -47,6 +49,8 @@ const data = [
     variant_class: 'insertion',
     vep_impact: 'MODIFIER',
     symbol: 'ADAMTSL1',
+    seq_id: 2,
+    locus_id: 2,
   },
   {
     genotype_quality: 38,
@@ -58,6 +62,8 @@ const data = [
     vep_impact: 'MODIFIER',
     symbol: 'WIF1',
     mane_select: true,
+    seq_id: 3,
+    locus_id: 3,
   },
   {
     genotype_quality: 50,
@@ -69,6 +75,8 @@ const data = [
     variant_class: 'SNV',
     vep_impact: 'MODIFIER',
     symbol: 'PKN2-AS1',
+    seq_id: 4,
+    locus_id: 4,
   },
   {
     genotype_quality: 7,
@@ -78,6 +86,8 @@ const data = [
     ad_ratio: 1,
     variant_class: 'insertion',
     vep_impact: 'MODIFIER',
+    seq_id: 5,
+    locus_id: 5,
   },
   {
     genotype_quality: 36,
@@ -90,6 +100,8 @@ const data = [
     vep_impact: 'MODIFIER',
     symbol: 'PLXDC2',
     mane_select: true,
+    seq_id: 6,
+    locus_id: 6,
   },
   {
     genotype_quality: 27,
@@ -100,6 +112,8 @@ const data = [
     ad_ratio: 1,
     variant_class: 'insertion',
     vep_impact: 'MODIFIER',
+    seq_id: 7,
+    locus_id: 7,
   },
   {
     genotype_quality: 50,
@@ -111,6 +125,8 @@ const data = [
     vep_impact: 'MODIFIER',
     symbol: 'GALNTL6',
     mane_select: true,
+    seq_id: 8,
+    locus_id: 8,
   },
   {
     genotype_quality: 50,
@@ -122,6 +138,8 @@ const data = [
     vep_impact: 'MODIFIER',
     symbol: 'FAT3',
     mane_select: true,
+    seq_id: 9,
+    locus_id: 9,
   },
   {
     genotype_quality: 50,
@@ -134,6 +152,8 @@ const data = [
     vep_impact: 'MODIFIER',
     symbol: 'MGMT',
     mane_select: true,
+    seq_id: 10,
+    locus_id: 10,
   },
 ] as Occurrence[];
 
@@ -141,6 +161,7 @@ const meta = {
   title: 'Data Display/Data Table',
   component: DataTable,
   args: {
+    id: 'variant',
     columns: [],
     columnSettings: defaultSettings,
     data,
@@ -191,7 +212,7 @@ export const VariantOccurence: Story = {
         }}
         data={[...data, ...data, ...data, ...data, ...data]}
         columns={getVariantColumns(t)}
-        subComponent={occurence => <div>this is a sub component</div>}
+        subComponent={occurence => <OccurrenceExpend occurrence={occurence} />}
       />
     );
   },
