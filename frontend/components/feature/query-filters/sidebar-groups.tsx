@@ -16,7 +16,7 @@ import VariantIcon from '@/components/base/icons/variant-icon';
 import GeneIcon from '@/components/base/icons/gene-icon';
 import FrequencyIcon from '@/components/base/icons/frequency-icon';
 import PathogenicityIcon from '@/components/base/icons/pathogenicity-icon';
-import OccurenceIcon from '@/components/base/icons/occurence-icon';
+import OccurrenceIcon from '@/components/base/icons/occurrence-icon';
 import { tv } from 'tailwind-variants';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { Button } from '@/components/base/ui/button';
@@ -28,7 +28,7 @@ const iconMap = {
   gene: GeneIcon,
   pathogenicity: PathogenicityIcon,
   frequency: FrequencyIcon,
-  occurrence: OccurenceIcon,
+  occurrence: OccurrenceIcon,
 };
 
 const buttonVariants = tv({

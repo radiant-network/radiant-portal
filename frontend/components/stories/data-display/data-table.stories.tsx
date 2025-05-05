@@ -199,7 +199,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const VariantOccurence: Story = {
+export const VariantOccurrence: Story = {
   render: args => {
     const { t } = useI18n();
 
@@ -212,7 +212,7 @@ export const VariantOccurence: Story = {
         }}
         data={[...data, ...data, ...data, ...data, ...data]}
         columns={getVariantColumns(t)}
-        subComponent={occurence => <OccurrenceExpend occurrence={occurence} />}
+        subComponent={occurrence => <OccurrenceExpend occurrence={occurrence} />}
       />
     );
   },

@@ -28,7 +28,7 @@
         "gene": "Gene",
         "frequency": "Frequency",
         "pathogenicity": "Pathogenicity",
-        "occurence": "Occurence"
+        "occurrence": "Occurrence"
       }
     }
   }

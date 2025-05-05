@@ -18,6 +18,8 @@ import VariantClassCell from '@/feature/occurrence-table/cells/variant-class-cel
 import ZygosityCell from '@/feature/occurrence-table/cells/zygosity-cell';
 import { Occurrence } from '@/api/api';
 import { TFunction } from 'i18next';
+import InterpretationCell from '@/feature/occurrence-table/cells/interpretation-cell';
+import { ZapIcon } from 'lucide-react';
 
 const columnHelper = createColumnHelper<Occurrence>();
 
@@ -41,11 +43,24 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'rowSelection',
       header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
       cell: info => <RowSelectionCell row={info.row} />,
-      size: 48,
-      maxSize: 48,
+      size: 40,
+      maxSize: 40,
       enablePinning: false,
       enableResizing: false,
     },
+    columnHelper.accessor(row => row, {
+      id: 'interpretation',
+      cell: info => <InterpretationCell occurrence={info.getValue()} />,
+      header: () => (
+        <TooltipsHeader tooltips={t('variant.headers.clinicalInterpretation')} iconOnly>
+          <ZapIcon size={16} />
+        </TooltipsHeader>
+      ),
+      size: 64,
+      minSize: 64,
+      enableResizing: false,
+      enableSorting: false,
+    }),
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
       cell: info => <LinkCell url={`/variants/entity/${info.row.original.locus_id}`}>{info.getValue()}</LinkCell>,
@@ -147,6 +162,11 @@ const defaultSettings = createColumnSettings([
     id: 'rowSelection',
     visible: true,
     fixed: true,
+    pinningPosition: 'left',
+  },
+  {
+    id: 'interpretation',
+    visible: true,
     pinningPosition: 'left',
   },
   {

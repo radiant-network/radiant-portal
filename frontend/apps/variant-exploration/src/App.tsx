@@ -122,10 +122,7 @@ function App() {
   return (
     <div className={`${styles.appLayout} flex h-screen overflow-hidden`}>
       <aside className="h-full flex-shrink-0">
-        <SidebarProvider
-          open={open}
-          onOpenChange={setOpen}
-          className="h-full flex flex-row">
+        <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
           <div className="z-10">
             <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
           </div>
@@ -190,7 +187,7 @@ function App() {
           />
         </div>
         <DataTable
-          id="variant-occurence"
+          id="variant-occurrence"
           columns={getVariantColumns(t)}
           columnSettings={defaultSettings}
           data={list ?? []}
