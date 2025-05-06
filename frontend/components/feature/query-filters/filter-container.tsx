@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { SearchIcon } from 'lucide-react';
@@ -7,7 +7,13 @@ import { NumericalFilter } from './numerical-filter';
 import { ToggleFilter } from './toggle-filter';
 import { useI18n } from '@/components/hooks/i18n';
 
-export function FilterComponent({ field, aggregation, searchVisible }: { field: AggregationConfig; aggregation: AggregationConfig["key"]; searchVisible: boolean }) {
+type FilterComponentProps = {
+  field: AggregationConfig;
+  aggregation: AggregationConfig['key'];
+  searchVisible: boolean;
+};
+
+export function FilterComponent({ field, aggregation, searchVisible }: FilterComponentProps) {
   const { t } = useI18n();
 
   switch (field.type) {
@@ -22,24 +28,32 @@ export function FilterComponent({ field, aggregation, searchVisible }: { field: 
   }
 }
 
-export function FilterContainer({ field, aggregation }: { field: AggregationConfig; aggregation: AggregationConfig["key"] }) {
+type FilterContainerProps = {
+  field: AggregationConfig;
+  aggregation: AggregationConfig['key'];
+  isOpen?: boolean;
+};
+
+export function FilterContainer({ field, isOpen, aggregation }: FilterContainerProps) {
+  const { t } = useI18n();
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const [searchVisible, setSearchVisible] = React.useState(false);
-  const { t } = useI18n();
+
+  useEffect(() => {
+    setOpenItem(isOpen ? field.key : undefined);
+  }, [isOpen]);
 
   function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
     e.stopPropagation();
     setSearchVisible(!searchVisible);
   }
-  
+
   return (
     <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem}>
       <AccordionItem key={field.key} value={field.key}>
         <AccordionTrigger className="AccordionTrigger">
           <div className="flex items-center justify-between w-full text-base">
-            <span className="capitalize">
-              {t(`common.filters.labels.${field.key}`, { defaultValue: field.key })}
-            </span>
+            <span className="capitalize">{t(`common.filters.labels.${field.key}`, { defaultValue: field.key })}</span>
             {openItem === field.key && field.type === 'multiple' && (
               <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
             )}

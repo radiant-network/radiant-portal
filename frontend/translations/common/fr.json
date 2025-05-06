@@ -155,7 +155,9 @@
       "logout": "Déconnexion"
     },
     "actions": {
-      "selectLanguage": "Sélectionner une langue"
+      "selectLanguage": "Choisir une langue",
+      "collapseAll": "Réduire tout",
+      "expandAll": "Développer tout"
     },
     "languages": {
       "en": "Anglais",
