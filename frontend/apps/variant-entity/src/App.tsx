@@ -7,7 +7,7 @@ import OverviewTab from './components/overview/overview-tab';
 import EvidenceTab from './components/evidence-tab';
 import FrequencyTab from './components/frequency-tab';
 import ConditionsTab from './components/conditions-tab';
-import TranscriptsTab from './components/transcripts-tab';
+import TranscriptsTab from './components/transcripts/transcripts-tab';
 import CasesTab from './components/cases-tab';
 import { VariantEntityTabs } from './types';
 import { variantsApi } from '@/utils/api';
@@ -59,7 +59,7 @@ export default function App() {
   }, []);
 
   return (
-    <main className="bg-muted h-screen overflow-auto">
+    <main className="bg-muted/40 h-screen overflow-auto">
       <div className="flex flex-col gap-4 bg-background pt-6 px-6">
         <Link to="/">
           <BackLink>{t('variantEntity.header.variants')}</BackLink>

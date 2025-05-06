@@ -389,12 +389,27 @@
       "feature_truncation": "Feature Truncation",
       "intergenic": "Intergenic"
     },
+    "predictions": {
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "loeuf": "LOEUF",
+      "spliceAI": "SpliceAI",
+      "fathmm": "FATHMM",
+      "caddRaw": "CADD (raw)",
+      "caddPhred": "CADD (phred)",
+      "dann": "DANN",
+      "lrt": "LRT",
+      "polyphen2hvar": "PolyPhen-2 HVAR",
+      "phylop17way": "PhyloP17Way",
+      "pli": "pLi"
+    },
     "classes": {
       "indel": "Indel",
       "insertion": "Insertion",
       "snv": "SNV",
       "deletion": "Effacement"
-    }
+    },
+    "canonicalTranscript": "Canonical Transcript"
   },
   "occurrenceExpend": {
     "actions": {
@@ -469,24 +484,11 @@
       "clinVar": "ClinVar",
       "participants": "Participants",
       "gnomAD": "gnomAD",
-      "canonicalTranscript": "Canonical Transcript",
       "exon": "Exon",
       "mostDeleteriousConsequenceNotice": "This transcript was selected because it represents the most deleterious consequence.",
       "viewAllTranscripts": "View all transcripts",
       "predictionScores": "Prediction Scores",
       "viewAll": "View all",
-      "sift": "SIFT",
-      "revel": "REVEL",
-      "loeuf": "LOEUF",
-      "spliceAI": "SpliceAI",
-      "fathmm": "FATHMM",
-      "caddRaw": "CADD (raw)",
-      "caddPhred": "CADD (phred)",
-      "dann": "DANN",
-      "lrt": "LRT",
-      "polyphen2hvar": "PolyPhen-2 HVAR",
-      "phylop17way": "PhyloP17Way",
-      "pli": "pLi",
       "associatedConditionsOmim": "Associated Conditions (OMIM)",
       "externalReferences": "External References",
       "dbSNP": "dbSNP"
@@ -501,7 +503,8 @@
       "title": "Conditions"
     },
     "transcripts": {
-      "title": "Transcripts"
+      "title": "Transcripts",
+      "aminoAcidSubstitution": "Amino Acid Substitution"
     },
     "cases": {
       "title": "Cases"

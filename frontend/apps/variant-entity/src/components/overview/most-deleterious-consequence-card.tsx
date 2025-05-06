@@ -91,14 +91,14 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 target="_blank"
                 rel="noreferrer"
               >
-                <div>{data?.transcript_id}</div>
+                {data?.transcript_id}
               </a>
               {data.canonical && (
                 <Tooltip>
                   <TooltipTrigger>
                     <TranscriptCanonicalIcon size={16} className="text-primary" />
                   </TooltipTrigger>
-                  <TooltipContent>{t('variantEntity.overview.canonicalTranscript')}</TooltipContent>
+                  <TooltipContent>{t('variant.canonicalTranscript')}</TooltipContent>
                 </Tooltip>
               )}
             </div>
