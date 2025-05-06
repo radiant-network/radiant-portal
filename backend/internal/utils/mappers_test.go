@@ -3,6 +3,7 @@ package utils
 import (
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
+	"sort"
 	"testing"
 )
 
@@ -93,6 +94,10 @@ func Test_ConsequencesToVariantConsequences(t *testing.T) {
 	consequences := []types.Consequence{consequence1, consequence2, consequence3, consequence4, consequence5}
 
 	variantConsequences := ConsequencesToVariantConsequences(consequences)
+
+	sort.Slice(variantConsequences, func(i, j int) bool {
+		return variantConsequences[i].Symbol < variantConsequences[j].Symbol
+	})
 
 	assert.Equal(t, 3, len(variantConsequences))
 	assert.Equal(t, "AAA", variantConsequences[0].Symbol)
