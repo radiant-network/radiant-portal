@@ -6,6 +6,7 @@ import IntersectionOperator from '../operator/operator-intersection';
 import UnionOperator from '../operator/operator-union';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import QueryPillValuesContainer, { QueryPillValuesContainerProps } from './query-pill-values-container';
+import { useI18n } from '@/components/hooks/i18n';
 
 export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canExpand'> & {
   valueFilter: IValueFilter;
@@ -13,6 +14,7 @@ export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canEx
 
 function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useI18n('common');
 
   const canExpand = valueFilter.content.value.length > 3;
   const values = expanded ? valueFilter.content.value : take(valueFilter.content.value, 3);
@@ -26,7 +28,7 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
       ) : (
         values.map((val, i) => (
           <div key={`${val}-${i}`}>
-            <span>{val}</span>
+            <span>{t(`common.filters.labels.${valueFilter.content.field}_value.${val}`, { defaultValue: String(val) })}</span>
             {values.length - 1 > i &&
               (valueFilter.op === SqonOpEnum.All ? (
                 <IntersectionOperator className="px-1" />

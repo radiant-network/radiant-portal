@@ -29,7 +29,7 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
-export function MultiSelectFilter({ field, aggregation, maxVisibleItems = 5, searchVisible = false }: IProps) {
+export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = false }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
   const appId = config.variant_exploration.app_id;
@@ -205,7 +205,7 @@ export function MultiSelectFilter({ field, aggregation, maxVisibleItems = 5, sea
                     onCheckedChange={() => itemSelected(items[i])}
                   />
                   <div className="overflow-hidden text-ellipsis text-sm">
-                    {t(`common.filters.labels.${aggregation}.${field.key}.${items[i].key}`, { defaultValue: items[i].key })}
+                    {t(`common.filters.labels.${field.key}_value.${items[i].key}`, { defaultValue: items[i].key })}
                   </div>
                   <span className="checkmark"></span>
                 </label>
