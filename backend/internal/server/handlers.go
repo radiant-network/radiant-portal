@@ -740,14 +740,14 @@ func GetVariantOverview(repo repository.StarrocksDAO) gin.HandlerFunc {
 }
 
 // GetVariantConsequences handles retrieving a variant consequences by its locus
-// @Summary Get a VariantConsequences
+// @Summary Get list of VariantConsequences
 // @Id getVariantConsequences
 // @Description Retrieve Variant Consequences for a given locus
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
 // @Produce json
-// @Success 200 {array} types.Consequence
+// @Success 200 {array} types.VariantConsequence
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/{locus_id}/consequences [get]

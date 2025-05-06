@@ -112,201 +112,6 @@ export interface AutoCompleteTerm {
     'source'?: Term;
 }
 /**
- * 
- * @export
- * @interface Consequence
- */
-export interface Consequence {
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'aa_change'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'biotype'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'cadd_phred'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'cadd_score'?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Consequence
-     */
-    'canonical'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'coding_dna_change'?: string;
-    /**
-     * TODO
-     * @type {Array<string>}
-     * @memberof Consequence
-     */
-    'consequence'?: Array<string>;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'dann_score'?: number;
-    /**
-     * TODO
-     * @type {number}
-     * @memberof Consequence
-     */
-    'exon_rank'?: number;
-    /**
-     * TODO
-     * @type {number}
-     * @memberof Consequence
-     */
-    'exon_total'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'fathmm_pred'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'fathmm_score'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'gnomad_loeuf'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'gnomad_pli'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'lrt_pred'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'lrt_score'?: number;
-    /**
-     * TODO
-     * @type {boolean}
-     * @memberof Consequence
-     */
-    'mane_plus'?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Consequence
-     */
-    'mane_select'?: boolean;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'phyloP17way_primate'?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Consequence
-     */
-    'picked'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'polyphen2_hvar_pred'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'polyphen2_hvar_score'?: number;
-    /**
-     * TODO
-     * @type {string}
-     * @memberof Consequence
-     */
-    'refseq_mrna_id'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'revel_score'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'sift_pred'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'sift_score'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Consequence
-     */
-    'spliceai_ds'?: number;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Consequence
-     */
-    'spliceai_type'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'symbol'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Consequence
-     */
-    'transcript_id'?: string;
-    /**
-     * 
-     * @type {VepImpact}
-     * @memberof Consequence
-     */
-    'vep_impact'?: VepImpact;
-}
-
-
-/**
  * Count represents count result
  * @export
  * @interface Count
@@ -1209,6 +1014,159 @@ export interface Term {
 /**
  * 
  * @export
+ * @interface Transcript
+ */
+export interface Transcript {
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'cadd_score'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Transcript
+     */
+    'canonical'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
+    'coding_dna_change'?: string;
+    /**
+     * TODO
+     * @type {Array<string>}
+     * @memberof Transcript
+     */
+    'consequence'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'dann_score'?: number;
+    /**
+     * TODO
+     * @type {number}
+     * @memberof Transcript
+     */
+    'exon_rank'?: number;
+    /**
+     * TODO
+     * @type {number}
+     * @memberof Transcript
+     */
+    'exon_total'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
+    'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'fathmm_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
+    'lrt_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'lrt_score'?: number;
+    /**
+     * TODO
+     * @type {boolean}
+     * @memberof Transcript
+     */
+    'mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Transcript
+     */
+    'mane_select'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'phyloP17way_primate'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
+    'polyphen2_hvar_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'polyphen2_hvar_score'?: number;
+    /**
+     * TODO
+     * @type {string}
+     * @memberof Transcript
+     */
+    'refseq_mrna_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
+    'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
+    'sift_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof Transcript
+     */
+    'vep_impact'?: VepImpact;
+}
+
+
+/**
+ * 
+ * @export
  * @interface UserSet
  */
 export interface UserSet {
@@ -1254,6 +1212,61 @@ export interface UserSet {
      * @memberof UserSet
      */
     'user_id'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface VariantConsequence
+ */
+export interface VariantConsequence {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantConsequence
+     */
+    'biotype'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantConsequence
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantConsequence
+     */
+    'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VariantConsequence
+     */
+    'picked'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantConsequence
+     */
+    'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantConsequence
+     */
+    'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantConsequence
+     */
+    'symbol'?: string;
+    /**
+     * 
+     * @type {Array<Transcript>}
+     * @memberof VariantConsequence
+     */
+    'transcripts'?: Array<Transcript>;
 }
 /**
  * 
@@ -3164,7 +3177,7 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * Retrieve Variant Consequences for a given locus
-         * @summary Get a VariantConsequences
+         * @summary Get list of VariantConsequences
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3288,12 +3301,12 @@ export const VariantApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Retrieve Variant Consequences for a given locus
-         * @summary Get a VariantConsequences
+         * @summary Get list of VariantConsequences
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Consequence>>> {
+        async getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantConsequence>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getVariantConsequences(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getVariantConsequences']?.[localVarOperationServerIndex]?.url;
@@ -3337,12 +3350,12 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
     return {
         /**
          * Retrieve Variant Consequences for a given locus
-         * @summary Get a VariantConsequences
+         * @summary Get list of VariantConsequences
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Consequence>> {
+        getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantConsequence>> {
             return localVarFp.getVariantConsequences(locusId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3377,7 +3390,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
 export class VariantApi extends BaseAPI {
     /**
      * Retrieve Variant Consequences for a given locus
-     * @summary Get a VariantConsequences
+     * @summary Get list of VariantConsequences
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
