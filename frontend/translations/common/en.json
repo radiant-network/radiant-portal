@@ -197,7 +197,35 @@
         "polyphen2_hvar_pred": "PolyPhen-2 HVAR",
         "revel_score": "REVEL",
         "spliceai_ds": "SpliceAI",
-        "sift_pred": "SIFT"
+        "sift_pred": "SIFT",
+        "pathogenicity": {
+          "sift_pred": {
+            "T": "Tolerated",
+            "D": "Damaging"
+          },
+          "polyphen2_hvar_pred": {
+            "B": "Benign",
+            "D": "Damaging",
+            "P": "Possibly Damaging"
+          },
+          "fathmm_pred": {
+            "T": "Tolerated",
+            "D": "Damaging"
+          },
+          "lrt_pred": {
+            "N": "Neutral",
+            "D": "Deleterious",
+            "U": "Unknown"
+          }
+        },
+        "variant": {
+          "zygosity": {
+            "het": "Heterozygote",
+            "wt": "Wild Type",
+            "hom": "Homozygote",
+            "unk": "Unknown"
+          }
+        }
       },
       "operators": {
         "greaterThan": "Greater than",

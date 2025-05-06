@@ -18,7 +18,7 @@ export function FilterList({ groupKey }: FilterListProps) {
     <ul>
       {fields.map(field => (
         <li key={field.key}>
-          <FilterContainer field={field} />
+          <FilterContainer field={field} aggregation={groupKey!} />
         </li>
       ))}
     </ul>
