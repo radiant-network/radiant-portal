@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/base/ui/skeleton';
 
 interface IProps {
   field: AggregationConfig;
+  aggregation: AggregationConfig;
   maxVisibleItems?: number;
   searchVisible?: boolean;
 }
@@ -28,7 +29,7 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
-export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = false }: IProps) {
+export function MultiSelectFilter({ field, aggregation, maxVisibleItems = 5, searchVisible = false }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
   const appId = config.variant_exploration.app_id;
@@ -203,7 +204,9 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
                     checked={selectedItems.some(f => f === items[i].key)}
                     onCheckedChange={() => itemSelected(items[i])}
                   />
-                  <div className="overflow-hidden text-ellipsis text-sm">{items[i].key}</div>
+                  <div className="overflow-hidden text-ellipsis text-sm">
+                    {t(`common.filters.labels.${aggregation}.${field.key}.${items[i].key}`, { defaultValue: items[i].key })}
+                  </div>
                   <span className="checkmark"></span>
                 </label>
                 <span className="bg-accent px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>

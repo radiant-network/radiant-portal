@@ -206,7 +206,35 @@
         "revel_score": "REVEL",
         "revelscore": "REVEL",
         "spliceai_ds": "SpliceAI",
-        "sift_pred": "SIFT"
+        "sift_pred": "SIFT",
+        "pathogenicity": {
+          "sift": {
+            "T": "Toléré",
+            "D": "Délétère"
+          },
+          "hvar": {
+            "B": "Bénin",
+            "D": "Délétère",
+            "P": "Potentiellement délétère"
+          },
+          "fathmm": {
+            "T": "Toléré",
+            "D": "Délétère"
+          },
+          "lrt": {
+            "N": "Neutre",
+            "D": "Délétère",
+            "U": "Inconnu"
+          }
+        },
+        "variant": {
+          "zygosity": {
+            "het": "Hétérozygote",
+            "wt": "Type sauvage",
+            "hom": "Homozygote",
+            "unk": "Inconnu"
+          }
+        }
       },
       "operators": {
         "greaterThan": "Plus grand que",

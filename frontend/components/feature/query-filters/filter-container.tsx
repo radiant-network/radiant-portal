@@ -7,12 +7,12 @@ import { NumericalFilter } from './numerical-filter';
 import { ToggleFilter } from './toggle-filter';
 import { useI18n } from '@/components/hooks/i18n';
 
-export function FilterComponent({ field, searchVisible }: { field: AggregationConfig; searchVisible: boolean }) {
+export function FilterComponent({ field, aggregation, searchVisible }: { field: AggregationConfig; aggregation: AggregationConfig["key"]; searchVisible: boolean }) {
   const { t } = useI18n();
 
   switch (field.type) {
     case 'multiple':
-      return <MultiSelectFilter field={field} searchVisible={searchVisible} />;
+      return <MultiSelectFilter field={field} aggregation={aggregation} searchVisible={searchVisible} />;
     case 'numerical':
       return <NumericalFilter field={field} />;
     case 'boolean':
@@ -22,7 +22,7 @@ export function FilterComponent({ field, searchVisible }: { field: AggregationCo
   }
 }
 
-export function FilterContainer({ field }: { field: AggregationConfig }) {
+export function FilterContainer({ field, aggregation }: { field: AggregationConfig; aggregation: AggregationConfig["key"] }) {
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const [searchVisible, setSearchVisible] = React.useState(false);
   const { t } = useI18n();
@@ -31,6 +31,7 @@ export function FilterContainer({ field }: { field: AggregationConfig }) {
     e.stopPropagation();
     setSearchVisible(!searchVisible);
   }
+  
   return (
     <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem}>
       <AccordionItem key={field.key} value={field.key}>
@@ -45,7 +46,7 @@ export function FilterContainer({ field }: { field: AggregationConfig }) {
           </div>
         </AccordionTrigger>
         <AccordionContent>
-          <FilterComponent field={field} searchVisible={searchVisible} />
+          <FilterComponent field={field} aggregation={aggregation} searchVisible={searchVisible} />
         </AccordionContent>
       </AccordionItem>
     </Accordion>
