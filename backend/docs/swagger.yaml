@@ -38,6 +38,82 @@ components:
         source:
           $ref: '#/components/schemas/Term'
       type: object
+    Consequence:
+      properties:
+        aa_change:
+          type: string
+        biotype:
+          type: string
+        cadd_phred:
+          type: number
+        cadd_score:
+          type: number
+        canonical:
+          type: boolean
+        coding_dna_change:
+          type: string
+        consequence:
+          description: TODO
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        dann_score:
+          type: number
+        exon_rank:
+          description: TODO
+          type: integer
+        exon_total:
+          description: TODO
+          type: integer
+        fathmm_pred:
+          type: string
+        fathmm_score:
+          type: number
+        gnomad_loeuf:
+          type: number
+        gnomad_pli:
+          type: number
+        lrt_pred:
+          type: string
+        lrt_score:
+          type: number
+        mane_plus:
+          description: TODO
+          type: boolean
+        mane_select:
+          type: boolean
+        phyloP17way_primate:
+          type: number
+        picked:
+          type: boolean
+        polyphen2_hvar_pred:
+          type: string
+        polyphen2_hvar_score:
+          type: number
+        refseq_mrna_id:
+          description: TODO
+          type: string
+        revel_score:
+          type: number
+        sift_pred:
+          type: string
+        sift_score:
+          type: number
+        spliceai_ds:
+          type: number
+        spliceai_type:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        symbol:
+          type: string
+        transcript_id:
+          type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
+      type: object
     Count:
       description: Count represents count result
       properties:
@@ -559,6 +635,7 @@ components:
       - picked_consequences
       type: object
     VepImpact:
+      description: TODO
       enum:
       - MODIFIER
       - LOW
@@ -1284,6 +1361,43 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
+  /variants/{locus_id}/consequences:
+    get:
+      description: Retrieve Variant Consequences for a given locus
+      operationId: getVariantConsequences
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Consequence'
+                type: array
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get a VariantConsequences
+      tags:
+      - variant
   /variants/{locus_id}/header:
     get:
       description: Retrieve Variant Header data for a given locus

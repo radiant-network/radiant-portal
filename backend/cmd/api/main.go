@@ -126,6 +126,7 @@ func main() {
 	variantGroup := r.Group("/variants")
 	variantGroup.GET("/:locus_id/header", server.GetVariantHeader(repoStarrocks))
 	variantGroup.GET("/:locus_id/overview", server.GetVariantOverview(repoStarrocks))
+	variantGroup.GET("/:locus_id/consequences", server.GetVariantConsequences(repoStarrocks))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")

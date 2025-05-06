@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/utils"
 	"log"
 	"regexp"
 	"slices"
@@ -21,6 +22,9 @@ type ExpendedOccurrence = types.ExpendedOccurrence
 type VariantHeader = types.VariantHeader
 type VariantOverview = types.VariantOverview
 type OmimGeneSet = types.OmimGeneSet
+type VariantConsequence = types.VariantConsequence
+type Consequence = types.Consequence
+type Transcript = types.Transcript
 
 type StarrocksRepository struct {
 	db *gorm.DB
@@ -37,6 +41,7 @@ type StarrocksDAO interface {
 	GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error)
 	GetVariantHeader(locusId int) (*VariantHeader, error)
 	GetVariantOverview(locusId int) (*VariantOverview, error)
+	GetVariantConsequences(locusId int) (*[]VariantConsequence, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -444,4 +449,26 @@ func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview,
 	}
 	variantOverview.OmimConditions = omimConditions
 	return &variantOverview, nil
+}
+
+func (r *StarrocksRepository) GetVariantConsequences(locusId int) (*[]VariantConsequence, error) {
+	tx := r.db.Table("consequences c")
+	tx = tx.Joins(" LEFT JOIN biotype_dict b on c.biotype_id = b.biotype_id")
+	tx = tx.Select("c.picked, c.symbol, b.biotype, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.ensembl_transcript_id, c.canonical, c.mane_select, c.coding_dna_change, c.aa_change, c.sift_pred, c.sift_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.revel_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate")
+	tx = tx.Where("c.locus_id = ?", locusId)
+	tx = tx.Order("c.picked desc, c.symbol asc")
+
+	var consequences []Consequence
+	err := tx.Find(&consequences).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching variant consequences: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	variantConsequences := utils.ConsequencesToVariantConsequences(consequences)
+
+	return &variantConsequences, nil
 }

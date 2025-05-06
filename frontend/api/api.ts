@@ -112,6 +112,201 @@ export interface AutoCompleteTerm {
     'source'?: Term;
 }
 /**
+ * 
+ * @export
+ * @interface Consequence
+ */
+export interface Consequence {
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'biotype'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'cadd_score'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Consequence
+     */
+    'canonical'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'coding_dna_change'?: string;
+    /**
+     * TODO
+     * @type {Array<string>}
+     * @memberof Consequence
+     */
+    'consequence'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'dann_score'?: number;
+    /**
+     * TODO
+     * @type {number}
+     * @memberof Consequence
+     */
+    'exon_rank'?: number;
+    /**
+     * TODO
+     * @type {number}
+     * @memberof Consequence
+     */
+    'exon_total'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'fathmm_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'lrt_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'lrt_score'?: number;
+    /**
+     * TODO
+     * @type {boolean}
+     * @memberof Consequence
+     */
+    'mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Consequence
+     */
+    'mane_select'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'phyloP17way_primate'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Consequence
+     */
+    'picked'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'polyphen2_hvar_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'polyphen2_hvar_score'?: number;
+    /**
+     * TODO
+     * @type {string}
+     * @memberof Consequence
+     */
+    'refseq_mrna_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'sift_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Consequence
+     */
+    'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Consequence
+     */
+    'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Consequence
+     */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof Consequence
+     */
+    'vep_impact'?: VepImpact;
+}
+
+
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -1317,7 +1512,7 @@ export interface VariantOverview {
 
 
 /**
- * 
+ * TODO
  * @export
  * @enum {string}
  */
@@ -2968,6 +3163,44 @@ export class UserSetsApi extends BaseAPI {
 export const VariantApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Retrieve Variant Consequences for a given locus
+         * @summary Get a VariantConsequences
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVariantConsequences: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getVariantConsequences', 'locusId', locusId)
+            const localVarPath = `/variants/{locus_id}/consequences`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve Variant Header data for a given locus
          * @summary Get a VariantHeader
          * @param {string} locusId Locus ID
@@ -3054,6 +3287,19 @@ export const VariantApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VariantApiAxiosParamCreator(configuration)
     return {
         /**
+         * Retrieve Variant Consequences for a given locus
+         * @summary Get a VariantConsequences
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Consequence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getVariantConsequences(locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getVariantConsequences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve Variant Header data for a given locus
          * @summary Get a VariantHeader
          * @param {string} locusId Locus ID
@@ -3090,6 +3336,16 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = VariantApiFp(configuration)
     return {
         /**
+         * Retrieve Variant Consequences for a given locus
+         * @summary Get a VariantConsequences
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Consequence>> {
+            return localVarFp.getVariantConsequences(locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve Variant Header data for a given locus
          * @summary Get a VariantHeader
          * @param {string} locusId Locus ID
@@ -3119,6 +3375,18 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class VariantApi extends BaseAPI {
+    /**
+     * Retrieve Variant Consequences for a given locus
+     * @summary Get a VariantConsequences
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getVariantConsequences(locusId, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Retrieve Variant Header data for a given locus
      * @summary Get a VariantHeader

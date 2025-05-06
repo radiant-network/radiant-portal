@@ -4,7 +4,7 @@ CREATE TABLE `consequences`
     `ensembl_transcript_id`   int NULL COMMENT "",
     `consequence_id`          tinyint(4) NOT NULL COMMENT "",
     `symbol`                  varchar(20) NULL COMMENT "",
-    `biotype_id`              varchar(50) NULL COMMENT "",
+    `biotype_id`              tinyint(50) NULL COMMENT "",
     `gnomad_pli`              decimal(6, 5) NULL COMMENT "",
     `gnomad_loeuf`            decimal(6, 5) NULL COMMENT "",
     `spliceai_ds`             decimal(6, 5) NULL COMMENT "",

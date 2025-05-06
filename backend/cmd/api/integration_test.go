@@ -542,6 +542,26 @@ func Test_GetVariantOverview(t *testing.T) {
 	assertGetVariantOverview(t, "simple", 1000, expected)
 }
 
+func assertGetVariantConsequences(t *testing.T, data string, locusId int, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewStarrocksRepository(db)
+		router := gin.Default()
+		router.GET("/variants/:locus_id/consequences", server.GetVariantConsequences(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/consequences", locusId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetVariantConsequences(t *testing.T) {
+	expected := `[{"biotype":"IG_C_gene", "gnomad_loeuf":0.1, "gnomad_pli":0.1, "picked":true, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "transcripts":[{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1}]}, {"biotype":"IG_C_pseudogene", "gnomad_loeuf":0.1, "gnomad_pli":0.1, "spliceai_ds":0.2, "spliceai_type":["AT"], "symbol":"BRAC", "transcripts":[{"cadd_phred":0.2, "cadd_score":0.2, "fathmm_pred":"T", "fathmm_score":0.2, "revel_score":0.2, "sift_pred":"T", "sift_score":0.2}]}]`
+	assertGetVariantConsequences(t, "simple", 1000, expected)
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartAllContainers()
 	code := m.Run()
