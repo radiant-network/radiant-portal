@@ -1,5 +1,7 @@
 {
   "common": {
+    "seeMore": "Voir plus",
+    "seeLess": "Voir moins",
     "noDataAvailable": "Aucune donnée disponible",
     "queryBar": {
       "empty": "Utilisez les outils de recherche et les facettes à gauche pour construire une requête",
