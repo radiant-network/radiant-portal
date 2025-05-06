@@ -714,6 +714,15 @@ func Test_GetVariantOverview(t *testing.T) {
 	})
 }
 
+func Test_GetVariantConsequences(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewStarrocksRepository(db)
+		variantConsequences, err := repo.GetVariantConsequences(1000)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(*variantConsequences))
+	})
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartStarrocksContainer()
 	code := m.Run()

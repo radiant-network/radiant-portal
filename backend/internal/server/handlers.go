@@ -738,3 +738,35 @@ func GetVariantOverview(repo repository.StarrocksDAO) gin.HandlerFunc {
 		c.JSON(http.StatusOK, variantOverview)
 	}
 }
+
+// GetVariantConsequences handles retrieving a variant consequences by its locus
+// @Summary Get a VariantConsequences
+// @Id getVariantConsequences
+// @Description Retrieve Variant Consequences for a given locus
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {array} types.Consequence
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/{locus_id}/consequences [get]
+func GetVariantConsequences(repo repository.StarrocksDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		variantConsequences, err := repo.GetVariantConsequences(locusID)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if variantConsequences == nil {
+			HandleNotFoundError(c, "variant")
+			return
+		}
+		c.JSON(http.StatusOK, variantConsequences)
+	}
+}
