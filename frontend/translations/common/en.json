@@ -156,7 +156,9 @@
       "logout": "Logout"
     },
     "actions": {
-      "selectLanguage": "Select language"
+      "selectLanguage": "Select language",
+      "collapseAll": "Collapse all",
+      "expandAll": "Expand all"
     },
     "languages": {
       "en": "English",
