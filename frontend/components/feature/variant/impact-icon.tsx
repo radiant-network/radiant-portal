@@ -14,13 +14,13 @@ interface ImpactIconProps {
 function ImpactIcon({ value, size = 10, className }: ImpactIconProps) {
   switch (value) {
     case VepImpact.HIGH:
-      return <ShapeTriangleUpIcon size={size} className={cn('text-red shrink-0', className)} />;
+      return <ShapeTriangleUpIcon size={size} className={cn('text-red-600 shrink-0', className)} />;
     case VepImpact.LOW:
-      return <ShapeTriangleDownIcon size={size} className={cn('text-green shrink-0', className)} />;
+      return <ShapeTriangleDownIcon size={size} className={cn('text-green-600 shrink-0', className)} />;
     case VepImpact.MODERATE:
-      return <ShapeDiamondIcon size={size} className={cn('text-yellow shrink-0', className)} />;
+      return <ShapeDiamondIcon size={size} className={cn('text-amber-500 shrink-0', className)} />;
     case VepImpact.MODIFIER:
-      return <ShapeCircleIcon size={size} className={cn('text-slate shrink-0', className)} />;
+      return <ShapeCircleIcon size={size} className={cn('text-slate-400 shrink-0', className)} />;
     default:
       return;
   }
