@@ -7,15 +7,13 @@
     "app_id": "variant_exploration",
     "aggregations": {
       "organization": {
-        "items": [{ "key": "study_code", "type": "multiple" }]
+        "items": []
       },
       "variant": {
         "items": [
           { "key": "variant_class", "type": "multiple" },
           { "key": "chromosome", "type": "multiple" },
-          { "key": "consequence", "type": "multiple" },
-          { "key": "zygosity", "type": "multiple" },
-          { "key": "impact_score", "type": "multiple" }
+          { "key": "zygosity", "type": "multiple" }
         ]
       },
       "gene": {
@@ -23,12 +21,6 @@
           { "key": "symbol", "type": "multiple" },
           { "key": "gnomad_pli", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
           { "key": "gnomad_loeuf", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } }
-        ]
-      },
-      "frequency": {
-        "items": [
-          { "key": "pf", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } },
-          { "key": "gnomad_v3", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } }
         ]
       },
       "pathogenicity": {
@@ -46,8 +38,14 @@
           { "key": "sift_pred", "type": "multiple" }
         ]
       },
+      "frequency": {
+        "items": [
+          { "key": "pf", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } },
+          { "key": "gnomad_v3_af", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } }
+        ]
+      },
       "occurrence": {
-        "items": [{ "key": "filter", "type": "multiple" }]
+        "items": []
       }
     }
   },

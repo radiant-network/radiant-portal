@@ -1,7 +1,5 @@
 {
   "common": {
-    "seeMore": "See more",
-    "seeLess": "See less",
     "noDataAvailable": "No data available",
     "queryBar": {
       "empty": "Use the search tools & facets on the left to build a query",
@@ -158,9 +156,7 @@
       "logout": "Logout"
     },
     "actions": {
-      "selectLanguage": "Select language",
-      "collapseAll": "Collapse all",
-      "expandAll": "Expand all"
+      "selectLanguage": "Select language"
     },
     "languages": {
       "en": "English",
@@ -173,9 +169,9 @@
         "chromosome": "Chromosome",
         "filter": "Filter",
         "impact_score": "Impact Score",
-        "variant_class": "Variant Class",
+        "variant_class": "Variant Type",
         "symbol": "Symbol",
-        "pf": "Protein Function",
+        "pf": "Patient Frequency ",
         "actualInterval": "Actual interval",
         "unit": "Unit",
         "selectUnit": "Select unit",
@@ -189,7 +185,7 @@
         "transmission": "Transmission",
         "gnomad_pli": "gnomAD pLI",
         "gnomad_loeuf": "gnomAD LOEUF",
-        "gnomad_v3": "gnomAD v3",
+        "gnomad_v3_af": "gnomAD Genome 3.1.2",
         "clinvar_interpretation": "ClinVar",
         "vep_impact": "VEP",
         "cadd_score": "CADD (Raw)",
@@ -367,27 +363,12 @@
       "feature_truncation": "Feature Truncation",
       "intergenic": "Intergenic"
     },
-    "predictions": {
-      "sift": "SIFT",
-      "revel": "REVEL",
-      "loeuf": "LOEUF",
-      "spliceAI": "SpliceAI",
-      "fathmm": "FATHMM",
-      "caddRaw": "CADD (raw)",
-      "caddPhred": "CADD (phred)",
-      "dann": "DANN",
-      "lrt": "LRT",
-      "polyphen2hvar": "PolyPhen-2 HVAR",
-      "phylop17way": "PhyloP17Way",
-      "pli": "pLi"
-    },
     "classes": {
       "indel": "Indel",
       "insertion": "Insertion",
       "snv": "SNV",
       "deletion": "Deletion"
-    },
-    "canonicalTranscript": "Canonical Transcript"
+    }
   },
   "occurrenceExpend": {
     "actions": {
@@ -462,11 +443,24 @@
       "clinVar": "ClinVar",
       "participants": "Participants",
       "gnomAD": "gnomAD",
+      "canonicalTranscript": "Canonical Transcript",
       "exon": "Exon",
       "mostDeleteriousConsequenceNotice": "This transcript was selected because it represents the most deleterious consequence.",
       "viewAllTranscripts": "View all transcripts",
       "predictionScores": "Prediction Scores",
       "viewAll": "View all",
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "loeuf": "LOEUF",
+      "spliceAI": "SpliceAI",
+      "fathmm": "FATHMM",
+      "caddRaw": "CADD (raw)",
+      "caddPhred": "CADD (phred)",
+      "dann": "DANN",
+      "lrt": "LRT",
+      "polyphen2hvar": "PolyPhen-2 HVAR",
+      "phylop17way": "PhyloP17Way",
+      "pli": "pLi",
       "associatedConditionsOmim": "Associated Conditions (OMIM)",
       "externalReferences": "External References",
       "dbSNP": "dbSNP"
@@ -481,8 +475,7 @@
       "title": "Conditions"
     },
     "transcripts": {
-      "title": "Transcripts",
-      "aminoAcidSubstitution": "Amino Acid Substitution"
+      "title": "Transcripts"
     },
     "cases": {
       "title": "Cases"
