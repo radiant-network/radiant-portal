@@ -19,29 +19,71 @@
       "gene": {
         "items": [
           { "key": "symbol", "type": "multiple" },
-          { "key": "gnomad_pli", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
-          { "key": "gnomad_loeuf", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } }
+          { "key": "gnomad_pli", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" } },
+          { "key": "gnomad_loeuf", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" } }
         ]
       },
       "pathogenicity": {
         "items": [
           { "key": "clinvar_interpretation", "type": "multiple" },
           { "key": "vep_impact", "type": "multiple" },
-          { "key": "cadd_score", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
-          { "key": "cadd_phred", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
-          { "key": "dann_score", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
+          { "key": "cadd_score", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "GreaterThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "cadd_phred", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "GreaterThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "dann_score", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "GreaterThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
           { "key": "fathmm_pred", "type": "multiple" },
           { "key": "lrt_pred", "type": "multiple" },
           { "key": "polyphen2_hvar_pred", "type": "multiple" },
-          { "key": "revel_score", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
-          { "key": "spliceai_ds", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["GreaterThan"] } },
+          { "key": "revel_score", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "GreaterThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "spliceai_ds", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "GreaterThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
           { "key": "sift_pred", "type": "multiple" }
         ]
       },
       "frequency": {
         "items": [
-          { "key": "pf", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } },
-          { "key": "gnomad_v3_af", "type": "numerical", "defaults": { "min": 0, "max": 100, "operators": ["LessThan"] } }
+          { "key": "pf", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "gnomad_v3_af", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } }
         ]
       },
       "occurrence": {

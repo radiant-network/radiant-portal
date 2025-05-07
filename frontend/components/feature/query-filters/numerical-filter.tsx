@@ -148,7 +148,7 @@ export function NumericalFilter({ field }: IProps) {
 
     if (numericFilter) {
       const values = numericFilter.content.value;
-
+      console.log('[NumericalFilter] values', values);
       // Check for __missing__ value
       if (values.includes('__missing__')) {
         setHasNoData(true);
@@ -171,6 +171,7 @@ export function NumericalFilter({ field }: IProps) {
         setSelectedRange(numericFilter.op as RangeOperators);
       }
     } else {
+      console.log('[NumericalFilter else] no filter exists', aggConfig);
       // Reset values if no filter exists
       setHasNoData(false);
 
@@ -190,7 +191,7 @@ export function NumericalFilter({ field }: IProps) {
       }
 
       if (aggConfig?.defaultOperator) {
-        setSelectedRange(aggConfig.defaultOperator);
+        setSelectedRange(RangeOperators[aggConfig.defaultOperator as keyof typeof RangeOperators]);
       }
     }
 
