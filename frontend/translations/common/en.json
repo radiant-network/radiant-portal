@@ -302,14 +302,14 @@
     "clinVars": {
       "other": "Other",
       "association_not_found": "Association not found",
-      "uncertain_significance": "Uncertain significance",
+      "uncertain_significance": "Uncertain sign.",
       "likely_benign": "Likely benign",
-      "likely_pathogenic": "Likely pathogenic",
+      "likely_pathogenic": "Likely patho.",
       "_low_penetrance": "Low penetrance",
       "low_penetrance": "Low penetrance",
       "risk_factor": "Risk factor",
       "association": "Association",
-      "uncertain_risk_allele": "Uncertain risk allele",
+      "uncertain_risk_allele": "Uncertain",
       "pathogenic": "Pathogenic",
       "protective": "Protective",
       "conflicting_interpretations_of_pathogenicity": "Conflicting interpretations of pathogenicity",
@@ -319,6 +319,12 @@
       "drug_response": "Drug response",
       "benign": "Benign",
       "confers_sensitivity": "Confers sensitivity"
+    },
+    "clinVarsTooltips": {
+      "likely_benign": "Probably benign",
+      "likely_pathogenic": "Probably pathogenic",
+      "uncertain_significance": "Uncertain significance",
+      "uncertain_risk_allele": "Uncertain risk allele"
     },
     "consequences": {
       "transcript_ablation": "Transcript Ablation",
