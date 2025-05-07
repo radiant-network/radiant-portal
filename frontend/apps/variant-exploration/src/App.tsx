@@ -189,7 +189,6 @@ function App() {
         <DataTable
           id="variant-occurrence"
           columns={getVariantColumns(t)}
-          columnSettings={defaultSettings}
           data={list ?? []}
           defaultColumnSettings={defaultSettings}
           defaultServerSorting={DEFAULT_SORTING}

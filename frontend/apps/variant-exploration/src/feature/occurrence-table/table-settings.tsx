@@ -49,7 +49,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       enableResizing: false,
     },
     columnHelper.accessor(row => row, {
-      id: 'interpretation',
+      id: 'clinicalInterpretation',
       cell: info => <InterpretationCell occurrence={info.getValue()} />,
       header: () => (
         <TooltipsHeader tooltips={t('variant.headers.clinicalInterpretation')} iconOnly>
@@ -165,8 +165,9 @@ const defaultSettings = createColumnSettings([
     pinningPosition: 'left',
   },
   {
-    id: 'interpretation',
+    id: 'clinicalInterpretation',
     visible: true,
+    fixed: true,
     pinningPosition: 'left',
   },
   {

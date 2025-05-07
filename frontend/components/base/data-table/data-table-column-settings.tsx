@@ -42,7 +42,7 @@ function deserializeColumnFixed(settings: ColumnSettings[]): string[] {
 /**
  * @returns list of all columns id that are not fixed
  */
-function deserializeColumns(columns: TableColumnDef<any, any>[]) {
+function deserializeColumns(columns: ColumnSettings[]) {
   return columns.map(column => column.id);
 }
 
@@ -50,8 +50,8 @@ function deserializeColumns(columns: TableColumnDef<any, any>[]) {
  * TableColumnSettings
  * Dropdown that manage column's visiblity and order
  */
-type TableColumnSettingsProps<TData> = {
-  columns: TableColumnDef<TData, any>[];
+type TableColumnSettingsProps = {
+  columnOrder: ColumnOrderState;
   defaultSettings: ColumnSettings[];
   visiblitySettings: {
     [key: string]: boolean;
@@ -63,16 +63,16 @@ type TableColumnSettingsProps<TData> = {
 };
 
 function TableColumnSettings({
-  columns,
+  columnOrder,
   defaultSettings,
   pristine,
   visiblitySettings,
   handleVisiblityChange,
   handleReset,
   handleOrderChange,
-}: TableColumnSettingsProps<any>) {
+}: TableColumnSettingsProps) {
   const fixedColumns = deserializeColumnFixed(defaultSettings);
-  const [items, setItems] = useState<UniqueIdentifier[]>(deserializeColumns(columns));
+  const [items, setItems] = useState<UniqueIdentifier[]>(columnOrder);
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -105,14 +105,14 @@ function TableColumnSettings({
           <DropdownMenuContent>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={items} strategy={verticalListSortingStrategy}>
-                {items.map(id => {
-                  const column = columns.find(column => column.id === id);
+                {items.map(itemId => {
+                  const column = defaultSettings.find(column => column.id === itemId);
                   if (!column) return null;
                   if (fixedColumns.includes(column.id)) return;
                   return (
                     <TableSortableColumnSetting
-                      key={id}
-                      id={id}
+                      key={itemId}
+                      id={itemId}
                       column={column}
                       checked={visiblitySettings[column.id]}
                       handleCheckboxChange={handleVisiblityChange}
@@ -126,7 +126,7 @@ function TableColumnSettings({
               variant="ghost"
               className="mt-2"
               onClick={() => {
-                setItems(deserializeColumns(columns));
+                setItems(columnOrder);
                 handleReset();
               }}
             >

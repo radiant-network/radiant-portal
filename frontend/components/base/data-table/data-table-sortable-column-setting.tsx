@@ -1,7 +1,7 @@
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
 import { UniqueIdentifier } from '@dnd-kit/core';
-import { TableColumnDef } from '@/components/base/data-table/data-table';
+import { ColumnSettings } from '@/components/base/data-table/data-table';
 import { GripVerticalIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
@@ -14,7 +14,7 @@ import { useI18n } from '@/components/hooks/i18n';
  */
 type SortableColumnSettingProps<TData> = {
   id: UniqueIdentifier;
-  column: TableColumnDef<TData, any>;
+  column: ColumnSettings;
   checked: boolean;
   handleCheckboxChange: (target: string, checked: boolean) => void;
 };

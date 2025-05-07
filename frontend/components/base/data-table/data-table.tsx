@@ -20,7 +20,6 @@ import {
 import { Maximize, Minimize } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
-import { useResizeObserver } from '@/components/base/data-table/hooks/use-resize-observer';
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
 import {
   Pagination,
@@ -40,6 +39,11 @@ import { Button } from '@/components/base/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
+import {
+  getTableCache,
+  TableCacheProps,
+  useTableStateObserver,
+} from '@/components/base/data-table/hooks/use-table-localstorage';
 
 export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
   id: string;
@@ -54,12 +58,14 @@ export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TVa
 const HEADER_HEIGHT = 43;
 const ROW_HEIGHT = 41;
 
+/**
+ * Interface and types
+ */
 type SubComponentProp<TData> = (data: TData) => React.JSX.Element;
 
 type TableProps<TData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
-  columnSettings: ColumnSettings[];
   data: TData[];
   defaultColumnSettings: ColumnSettings[];
   defaultServerSorting: SortBody[];
@@ -80,14 +86,22 @@ export interface BaseColumnSettings {
   fixed?: boolean;
   size?: number;
   pinningPosition?: ColumnPinningPosition;
+  header?: string;
 }
 
 export interface ColumnSettings extends BaseColumnSettings {
   index: number;
+  header?: string;
 }
 
-type ColumnVisiblity = {
+export type ColumnVisiblity = {
   [id: string]: boolean;
+};
+
+export type DefaultColumnTableState = {
+  columnVisibility: ColumnVisiblity;
+  columnOrder: ColumnOrderState;
+  columnPinning: ColumnPinningState;
 };
 
 /**
@@ -333,7 +347,6 @@ function getRowFlexRender({
 function DataTable<T>({
   id,
   columns,
-  columnSettings,
   data,
   defaultColumnSettings,
   defaultServerSorting,
@@ -348,35 +361,29 @@ function DataTable<T>({
   const { t } = useI18n();
 
   // default values
-  const defaultTableState = useMemo(
+  const defaultColumnTableState = useMemo<DefaultColumnTableState>(
     () => ({
       columnVisibility: deserializeColumnVisibility(defaultColumnSettings) ?? [],
-      columnOrder: deserializeColumnOrder(defaultColumnSettings) ?? [],
-      columnPinning: deserializeColumnPinning(defaultColumnSettings) ?? [],
+      columnOrder: deserializeColumnOrder(defaultColumnSettings) ?? {},
+      columnPinning: deserializeColumnPinning(defaultColumnSettings) ?? {},
     }),
     [defaultColumnSettings],
   );
-  const userTableState = useMemo(
-    () => ({
-      columnVisiblity: deserializeColumnVisibility(columnSettings) ?? [],
-      columnOrder: deserializeColumnOrder(columnSettings) ?? [],
-      columnPinning: deserializeColumnPinning(columnSettings) ?? [],
-    }),
-    [columnSettings],
-  );
+
+  /**
+   * @todo should be replaced by userApi
+   */
+  const tableCache: TableCacheProps = getTableCache(id, defaultColumnTableState);
 
   // container width
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   // table interactions
-  const [rowPinning, setRowPinning] = useState<RowPinningState>({
-    top: [],
-    bottom: [],
-  });
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(userTableState.columnVisiblity);
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(userTableState.columnOrder);
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(userTableState.columnPinning);
+  const [rowPinning, setRowPinning] = useState<RowPinningState>(tableCache.rowPinning.state);
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(tableCache.columnVisibility);
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(tableCache.columnOrder);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(tableCache.columnPinning);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
@@ -385,7 +392,7 @@ function DataTable<T>({
     columns,
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
-    data: data,
+    data,
     enableColumnResizing: true,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -431,9 +438,14 @@ function DataTable<T>({
     return colSizes;
   }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
 
-  /** @todo shout save column width in user data  */
-  useResizeObserver(table.getState(), (columnId, columnSize) => {
-    console.log(`Resize ${columnId} ${columnSize}`);
+  /**
+   * Sync table state with local storage
+   */
+  useTableStateObserver({
+    id,
+    state: table.getState(),
+    rows: table.getRowModel().rows,
+    previousTableCache: tableCache,
   });
 
   /**
@@ -497,18 +509,25 @@ function DataTable<T>({
         <div>
           {/* columns order and visibility */}
           <TableColumnSettings
-            columns={columns}
+            columnOrder={tableCache.columnOrder}
             defaultSettings={defaultColumnSettings}
             visiblitySettings={columnVisibility}
             handleVisiblityChange={(target: string, checked: boolean) => {
               setColumnVisibility({ ...columnVisibility, [target]: checked });
             }}
             handleOrderChange={setColumnOrder}
-            pristine={JSON.stringify(defaultTableState) == JSON.stringify(userTableState)}
+            pristine={
+              JSON.stringify(defaultColumnTableState) ==
+              JSON.stringify({
+                columnVisibility: tableCache.columnVisibility,
+                columnOrder: tableCache.columnOrder,
+                columnPinning: tableCache.columnPinning,
+              })
+            }
             handleReset={() => {
-              setColumnOrder(defaultTableState.columnOrder);
-              setColumnVisibility(defaultTableState.columnVisibility);
-              setColumnPinning(defaultTableState.columnPinning);
+              setColumnOrder(defaultColumnTableState.columnOrder);
+              setColumnVisibility(defaultColumnTableState.columnVisibility);
+              setColumnPinning(defaultColumnTableState.columnPinning);
             }}
           />
           {/* fullscreen toggle */}
@@ -570,7 +589,7 @@ function DataTable<T>({
           {loadingStates?.list &&
             new Array(pagination.pageSize).fill(0).map((_, index) => (
               <TableRow key={`skeleton-row-${index}`}>
-                <TableCell colSpan={columnSettings.length}>
+                <TableCell colSpan={defaultColumnSettings.length}>
                   <Skeleton className="w-full h-[20px]" />
                 </TableCell>
               </TableRow>
