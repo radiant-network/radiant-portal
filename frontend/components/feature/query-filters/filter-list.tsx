@@ -33,7 +33,7 @@ export function FilterList({ groupKey }: FilterListProps) {
       </li>
       {fields.map(field => (
         <li key={field.key}>
-          <FilterContainer field={field} aggregation={groupKey!} isOpen={toggleAllAccordions} />
+          <FilterContainer field={field} isOpen={toggleAllAccordions} />
         </li>
       ))}
     </ul>

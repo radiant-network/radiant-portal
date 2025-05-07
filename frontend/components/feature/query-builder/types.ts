@@ -9,14 +9,10 @@ import {
   IUserSavedFilter,
 } from "@/components/model/saved-filter";
 import {
-  ISqonGroupFilter,
-  ISyntheticSqon,
   IValueFilter,
   ResolveSyntheticSqonFunc,
-  TSyntheticSqonContentValue,
 } from "@/components/model/sqon";
-import { LucideProps } from "lucide-react";
-import { ReactElement, ReactNode } from "react";
+import { ReactNode } from "react";
 import { DeepPartial } from "react-hook-form";
 
 export type ArrayTenOrMore<T> = {

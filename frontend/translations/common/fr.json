@@ -171,7 +171,6 @@
       "labels": {
         "chromosome": "Chromosome",
         "filter": "Filtre",
-        "zygosity": "Zygosité",
         "impact_score": "Score d'Impact",
         "variant_class": "Classe de Variant",
         "symbol": "Symbole",
@@ -211,33 +210,30 @@
         "revelscore": "REVEL",
         "spliceai_ds": "SpliceAI",
         "sift_pred": "SIFT",
-        "pathogenicity": {
-          "sift": {
-            "T": "Toléré",
-            "D": "Délétère"
-          },
-          "hvar": {
-            "B": "Bénin",
-            "D": "Délétère",
-            "P": "Potentiellement délétère"
-          },
-          "fathmm": {
-            "T": "Toléré",
-            "D": "Délétère"
-          },
-          "lrt": {
-            "N": "Neutre",
-            "D": "Délétère",
-            "U": "Inconnu"
-          }
+        "sift_pred_value": {
+          "T": "Toléré",
+          "D": "Délétère"
         },
-        "variant": {
-          "zygosity": {
-            "het": "Hétérozygote",
-            "wt": "Type sauvage",
-            "hom": "Homozygote",
-            "unk": "Inconnu"
-          }
+        "polyphen2_hvar_pred_value": {
+          "B": "Bénin",
+          "D": "Délétère",
+          "P": "Potentiellement délétère"
+        },
+        "fathmm_pred_value": {
+          "T": "Toléré",
+          "D": "Délétère"
+        },
+        "lrt_pred_value": {
+          "N": "Neutre",
+          "D": "Délétère",
+          "U": "Inconnu"
+        },
+        "zygosity": "Zygosité",
+        "zygosity_value": {
+          "het": "Hétérozygote",
+          "wt": "Type sauvage",
+          "hom": "Homozygote",
+          "unk": "Inconnu"
         }
       },
       "operators": {

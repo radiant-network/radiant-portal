@@ -32,10 +32,10 @@ export const useQueryBuilderDictionary = (): QueryBuilderDictionary => {
     queryPill: {
       operator: {
         changeOperatorTo: t('common.queryPill.operator.changeOperatorTo'),
-        and: t('common.queryPill.operator.and'),
+        and: t('common.queryPill.operator.and'), 
         or: t('common.queryPill.operator.or'),
       },
-      facet: (key) => key,
+      facet: (key) => t(`common.filters.labels.${key}`, { defaultValue: key }),
       customPill: {
         editDialog: {
           title: t('common.queryPill.customPill.editDialog.title'),
