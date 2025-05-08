@@ -57,7 +57,7 @@ export default function OccurrenceExpendHeader({ occurrence }: OccurrenceExpendH
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                LitVar
+                LitVAR
               </a>
             </Button>
           )}
