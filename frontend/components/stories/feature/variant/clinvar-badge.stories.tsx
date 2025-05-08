@@ -19,7 +19,10 @@ export const Default: Story = {
     return (
       <div className="flex flex-col gap-2 items-start">
         {Object.keys(ClinVarValueMap).map(key => (
-          <ClinVarBadge value={key} />
+          <div className="flex items-center gap-2" key={key}>
+            <ClinVarBadge value={key} />
+            <ClinVarBadge value={key} abbreviated />
+          </div>
         ))}
       </div>
     );

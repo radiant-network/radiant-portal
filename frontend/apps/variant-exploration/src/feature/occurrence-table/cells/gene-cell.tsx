@@ -5,24 +5,12 @@ import { Button } from '@/components/base/ui/button';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { useConfig } from '@/components/model/applications-config';
 import { MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
+import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 
 type GeneCellProps = {
   className?: string;
   symbol?: string;
 };
-
-type GetOmimOrgUrlProps = {
-  omimGeneId?: string;
-  symbol: string;
-};
-
-function getOmimOrgUrl({ omimGeneId, symbol }: GetOmimOrgUrlProps): string {
-  if (omimGeneId) {
-    return `https://www.omim.org/entry/${omimGeneId}`;
-  }
-
-  return `https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${symbol}`;
-}
 
 /**
  * Display Symbol of the gene whose consequence was prioritized by the picked as the value in the table.

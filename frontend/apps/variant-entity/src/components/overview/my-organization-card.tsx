@@ -7,6 +7,7 @@ import { Badge } from '@/components/base/ui/badge';
 import { Separator } from '@/components/base/ui/separator';
 import NumberBadge from '@/components/base/number-badge';
 import { useI18n } from '@/components/hooks/i18n';
+import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
 
 function MyOrganizationCard(props: CardProps) {
   const { t } = useI18n();
@@ -30,13 +31,13 @@ function MyOrganizationCard(props: CardProps) {
           <div className="ml-6">
             <div className="ml-3 flex items-center gap-3">
               <NumberBadge count={12}>
-                <Badge variant="orange">LP</Badge>
+                <ClinVarBadge value="likely_pathogenic" abbreviated />
               </NumberBadge>
               <NumberBadge count={3}>
-                <Badge variant="red">P</Badge>
+                <ClinVarBadge value="pathogenic" abbreviated />
               </NumberBadge>
               <NumberBadge count={3}>
-                <Badge variant="yellow">VUS</Badge>
+                <ClinVarBadge value="uncertain_significance" abbreviated />
               </NumberBadge>
             </div>
           </div>
@@ -50,13 +51,16 @@ function MyOrganizationCard(props: CardProps) {
           <div className="ml-6 text-sm">
             <div className="ml-3 space-y-3">
               <div className="flex items-center gap-2">
-                <span className="min-w-20 text-muted-foreground">Exomiser</span> <Badge variant="red">P</Badge>
+                <span className="min-w-20 text-muted-foreground">Exomiser</span>
+                <ClinVarBadge value="pathogenic" abbreviated />
               </div>
               <div className="flex items-center gap-2">
-                <span className="min-w-20 text-muted-foreground">Phenovar</span> <Badge variant="orange">LP</Badge>
+                <span className="min-w-20 text-muted-foreground">Phenovar</span>
+                <ClinVarBadge value="likely_pathogenic" abbreviated />
               </div>
               <div className="flex items-center gap-2">
-                <span className="min-w-20 text-muted-foreground">Franklin</span> <Badge variant="red">P</Badge>
+                <span className="min-w-20 text-muted-foreground">Franklin</span>
+                <ClinVarBadge value="pathogenic" abbreviated />
               </div>
             </div>
           </div>
