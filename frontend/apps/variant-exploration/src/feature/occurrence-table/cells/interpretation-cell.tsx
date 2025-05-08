@@ -12,15 +12,17 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
   const { t } = useI18n();
   return (
     <Tooltip>
-      <TooltipTrigger>
-        <InterpretationDialogButton
-          iconOnly
-          variant="ghost"
-          className="text-muted-foreground size-5"
-          occurrence={occurrence}
-        >
-          <ZapIcon size={16} />
-        </InterpretationDialogButton>
+      <TooltipTrigger asChild>
+        <span>
+          <InterpretationDialogButton
+            iconOnly
+            variant="ghost"
+            className="text-muted-foreground size-5"
+            occurrence={occurrence}
+          >
+            <ZapIcon size={16} />
+          </InterpretationDialogButton>
+        </span>
       </TooltipTrigger>
       <TooltipContent>{t('variant.interpretation.tooltips')}</TooltipContent>
     </Tooltip>
