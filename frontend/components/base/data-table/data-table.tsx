@@ -40,7 +40,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
 import {
-  getTableCache,
+  cleanTableLocaleStorage,
+  getTableLocaleStorage,
   TableCacheProps,
   useTableStateObserver,
 } from '@/components/base/data-table/hooks/use-table-localstorage';
@@ -363,27 +364,29 @@ function DataTable<T>({
   // default values
   const defaultColumnTableState = useMemo<DefaultColumnTableState>(
     () => ({
-      columnVisibility: deserializeColumnVisibility(defaultColumnSettings) ?? [],
       columnOrder: deserializeColumnOrder(defaultColumnSettings) ?? {},
       columnPinning: deserializeColumnPinning(defaultColumnSettings) ?? {},
+      columnSizing: {}, // keep empty, data means the column has been resized
+      columnVisibility: deserializeColumnVisibility(defaultColumnSettings) ?? [],
     }),
     [defaultColumnSettings],
   );
 
   /**
+   * Load the previous table state
    * @todo should be replaced by userApi
    */
-  const tableCache: TableCacheProps = getTableCache(id, defaultColumnTableState);
+  const tableLocaleStorage: TableCacheProps = getTableLocaleStorage(id, defaultColumnTableState);
 
   // container width
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   // table interactions
-  const [rowPinning, setRowPinning] = useState<RowPinningState>(tableCache.rowPinning.state);
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(tableCache.columnVisibility);
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(tableCache.columnOrder);
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(tableCache.columnPinning);
+  const [rowPinning, setRowPinning] = useState<RowPinningState>(tableLocaleStorage.rowPinning.state);
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(tableLocaleStorage.columnVisibility);
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(tableLocaleStorage.columnOrder);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(tableLocaleStorage.columnPinning);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
@@ -430,22 +433,23 @@ function DataTable<T>({
   const columnSizeVars = useMemo(() => {
     const headers = table.getFlatHeaders();
     const colSizes: { [key: string]: number } = {};
-    for (let i = 0; i < headers.length; i++) {
-      const header = headers[i]!;
-      colSizes[`--header-${header.id}-size`] = header.getSize();
-      colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
-    }
+    headers.forEach(header => {
+      colSizes[`--header-${header.id}-size`] = tableLocaleStorage.columnSizing[header.id] ?? header.getSize();
+      colSizes[`--col-${header.column.id}-size`] =
+        tableLocaleStorage.columnSizing[header.column.id] ?? header.column.getSize();
+    });
     return colSizes;
-  }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
+  }, [tableLocaleStorage.columnSizing]);
 
   /**
    * Sync table state with local storage
+   * Table Cache is to live result of each table interaction
    */
-  useTableStateObserver({
+  const { tableCache, setTableCache } = useTableStateObserver({
     id,
     state: table.getState(),
     rows: table.getRowModel().rows,
-    previousTableCache: tableCache,
+    previousTableCache: tableLocaleStorage,
   });
 
   /**
@@ -509,7 +513,7 @@ function DataTable<T>({
         <div>
           {/* columns order and visibility */}
           <TableColumnSettings
-            columnOrder={tableCache.columnOrder}
+            columnOrder={tableLocaleStorage.columnOrder}
             defaultSettings={defaultColumnSettings}
             visiblitySettings={columnVisibility}
             handleVisiblityChange={(target: string, checked: boolean) => {
@@ -519,15 +523,19 @@ function DataTable<T>({
             pristine={
               JSON.stringify(defaultColumnTableState) ==
               JSON.stringify({
-                columnVisibility: tableCache.columnVisibility,
                 columnOrder: tableCache.columnOrder,
                 columnPinning: tableCache.columnPinning,
+                columnSizing: tableCache.columnSizing,
+                columnVisibility: tableCache.columnVisibility,
               })
             }
             handleReset={() => {
+              cleanTableLocaleStorage(id, defaultColumnTableState, setTableCache);
               setColumnOrder(defaultColumnTableState.columnOrder);
               setColumnVisibility(defaultColumnTableState.columnVisibility);
               setColumnPinning(defaultColumnTableState.columnPinning);
+              table.resetColumnSizing();
+              table.resetHeaderSizeInfo();
             }}
           />
           {/* fullscreen toggle */}

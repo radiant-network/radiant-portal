@@ -1,24 +1,33 @@
-import { ColumnSettings, ColumnVisiblity, DefaultColumnTableState } from '@/components/base/data-table/data-table';
-import { ColumnOrderState, ColumnPinningState, Row, RowPinningState, TableState } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+import { ColumnVisiblity, DefaultColumnTableState } from '@/components/base/data-table/data-table';
+import {
+  ColumnOrderState,
+  ColumnPinningState,
+  ColumnSizingState,
+  Row,
+  RowPinningState,
+  TableState,
+} from '@tanstack/react-table';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 export type TableCacheProps = {
+  columnOrder: ColumnOrderState;
+  columnPinning: ColumnPinningState;
+  columnSizing: ColumnSizingState;
+  columnVisibility: ColumnVisiblity;
   rowPinning: {
     rows: Row<any>[];
     state: RowPinningState;
   };
-  columnSizing: {
-    [key: string]: number;
-  }[];
   pagination?: {
     pageSize: number;
   };
-  columnVisibility: ColumnVisiblity;
-  columnOrder: ColumnOrderState;
-  columnPinning: ColumnPinningState;
 };
 
 const DEFAULT_TABLE_CACHE: TableCacheProps = {
+  columnOrder: [],
+  columnPinning: {},
+  columnSizing: {},
+  columnVisibility: {},
   rowPinning: {
     rows: [],
     state: {
@@ -26,10 +35,6 @@ const DEFAULT_TABLE_CACHE: TableCacheProps = {
       bottom: [],
     },
   },
-  columnSizing: [],
-  columnVisiblity: {},
-  columnOrder: [],
-  columnPinning: {},
 };
 
 type useTableStateObserverProps = {
@@ -41,12 +46,18 @@ type useTableStateObserverProps = {
 
 export function useTableStateObserver({ id, state, rows, previousTableCache }: useTableStateObserverProps) {
   const [tableCache, setTableCache] = useState<TableCacheProps>(previousTableCache);
-
   const columnResizeRef = useRef<string | false>(false);
 
-  // column pin
+  // column pinning
+  useEffect(() => {
+    setTableCache({
+      ...tableCache,
+      columnPinning: state.columnPinning,
+    });
+  }, [state.columnPinning]);
 
   // pagination
+  /** @fixme doesn't works, usefull ? How to make it works before the first call */
   useEffect(() => {
     setTableCache({
       ...tableCache,
@@ -58,19 +69,19 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
 
   // column order
   useEffect(() => {
-    console.log('-update-'); //TODO: to remove
-    console.log('state.columnOrder', state.columnOrder); //TODO: to remove
     setTableCache({
       ...tableCache,
       columnOrder: state.columnOrder,
     });
   }, state.columnOrder);
 
-  // resize
+  // column sizing
   useEffect(() => {
     if (state.columnSizingInfo && !state.columnSizingInfo?.isResizingColumn && columnResizeRef.current) {
-      console.log(columnResizeRef.current);
-      console.log(state.columnSizing[columnResizeRef.current]);
+      setTableCache({
+        ...tableCache,
+        columnSizing: state.columnSizing,
+      });
     }
     columnResizeRef.current = state.columnSizingInfo?.isResizingColumn;
   }, [state.columnSizingInfo, state.columnSizing]);
@@ -100,16 +111,26 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
   useEffect(() => {
     localStorage.setItem(id, JSON.stringify(tableCache));
   }, [tableCache]);
+
+  return { tableCache, setTableCache };
 }
 
-export function getTableCache(id: string, defaultTableState: DefaultColumnTableState) {
+export function getTableLocaleStorage(id: string, defaultColumnTableState: DefaultColumnTableState) {
   const storage = localStorage.getItem(id);
   if (storage == null) {
-    const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultTableState };
-    console.log('--- create a new cache ---');
+    const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState };
     localStorage.setItem(id, JSON.stringify(defaultCache));
     return defaultCache;
   }
 
   return JSON.parse(storage);
+}
+
+export function cleanTableLocaleStorage(
+  id: string,
+  defaultColumnTableState: DefaultColumnTableState,
+  setTableCache: Dispatch<SetStateAction<TableCacheProps>>,
+) {
+  localStorage.setItem(id, JSON.stringify({ ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState }));
+  setTableCache({ ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState });
 }
