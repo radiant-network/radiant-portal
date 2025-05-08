@@ -6,6 +6,7 @@ import TranscriptDetails from './transcript-details';
 import { useI18n } from '@/components/hooks/i18n';
 import { VariantConsequence } from '@/api/api';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 
 interface ConsequenceAccordionItemProps extends RefAttributes<HTMLDivElement> {
   value: string;
@@ -19,14 +20,20 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
     <AccordionItem value={value} className="border rounded">
       <AccordionTrigger asChild className="py-4 px-5 hover:cursor-pointer">
         <div className="flex flex-1 ml-4 items-center gap-3">
-          <a
-            href={`https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${data.symbol}`}
-            target="_blank"
-            rel="noreferrer"
-            className="font-semibold text-base hover:underline"
-          >
-            {data.symbol}
-          </a>
+          <span className="font-semibold text-base">
+            {data.symbol ? (
+              <a
+                href={getOmimOrgUrl({ symbol: data.symbol })}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:underline"
+              >
+                {data.symbol}
+              </a>
+            ) : (
+              '-'
+            )}
+          </span>
           {/* 
             ref: https://d3b.atlassian.net/browse/SJRA-146
           TODO when vep_impact is added to the api if data.picked == true

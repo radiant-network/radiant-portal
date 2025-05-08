@@ -9,6 +9,8 @@ import { useI18n } from '@/components/hooks/i18n';
 import ImpactIcon from '@/components/feature/variant/impact-icon';
 import ClinvarBadge from '@/components/feature/variant/clinvar-badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { InfoIcon } from 'lucide-react';
 
 function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
@@ -19,7 +21,22 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
       <CardContent className="px-6 py-8 flex-grow">
         <div className="flex items-start [&>div]:w-40 justify-between gap-6 mt-6">
           <div className="flex flex-col gap-2">
-            <div className="text-2xl font-semibold uppercase">{data?.symbol || '-'}</div>
+            <div className="text-2xl font-semibold uppercase">
+              {data.symbol ? (
+                <a
+                  href={getOmimOrgUrl({
+                    symbol: data.symbol,
+                  })}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:underline"
+                >
+                  {data.symbol}
+                </a>
+              ) : (
+                '-'
+              )}
+            </div>
             <div className="text-sm">{'-'}</div>
           </div>
           <div className="flex flex-col gap-2">
@@ -52,7 +69,15 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="text-sm text-muted-foreground">{t('variantEntity.overview.participants')}</div>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              {t('variantEntity.overview.patient')}{' '}
+              <Tooltip>
+                <TooltipTrigger>
+                  <InfoIcon size={16} />
+                </TooltipTrigger>
+                <TooltipContent>{t('variantEntity.overview.patientInfoTooltip')}</TooltipContent>
+              </Tooltip>
+            </div>
             <div className="font-semibold">
               {data?.pc ? (
                 <Link to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`} className="hover:underline">
@@ -64,7 +89,15 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="text-sm text-muted-foreground">{t('variantEntity.overview.gnomAD')}</div>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              {t('variantEntity.overview.gnomAD')}
+              <Tooltip>
+                <TooltipTrigger>
+                  <InfoIcon size={16} />
+                </TooltipTrigger>
+                <TooltipContent>{t('variantEntity.overview.gnomADInfoTooltip')}</TooltipContent>
+              </Tooltip>
+            </div>
             <div className="font-semibold">
               {data?.gnomad_v3_af ? (
                 <a

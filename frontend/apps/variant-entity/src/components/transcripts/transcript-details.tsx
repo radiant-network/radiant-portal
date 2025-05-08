@@ -91,7 +91,7 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
       <span className="text-muted-foreground">{t('variant.predictions.sift')}:</span>
       {data?.sift_pred && data.sift_score !== undefined ? (
         <span>
-          {data?.sift_pred} ({data?.sift_score})
+          {t(`common.filters.labels.sift_pred_value.${data.sift_pred}`)} ({data?.sift_score})
         </span>
       ) : (
         '-'
@@ -101,7 +101,8 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
       <span className="text-muted-foreground">{t('variant.predictions.polyphen2hvar')}:</span>
       {data?.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined ? (
         <span>
-          {data?.polyphen2_hvar_pred} ({data?.polyphen2_hvar_score})
+          {t(`common.filters.labels.polyphen2_hvar_pred_value.${data.polyphen2_hvar_pred}`)} (
+          {data?.polyphen2_hvar_score})
         </span>
       ) : (
         '-'
@@ -115,7 +116,7 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
       <span className="text-muted-foreground">{t('variant.predictions.fathmm')}:</span>
       {data?.fathmm_pred && data.fathmm_score !== undefined ? (
         <span>
-          {data?.fathmm_pred} ({data?.fathmm_score})
+          {t(`common.filters.labels.fathmm_pred_value.${data.fathmm_pred}`)} ({data?.fathmm_score})
         </span>
       ) : (
         '-'
@@ -137,7 +138,7 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
       <span className="text-muted-foreground">{t('variant.predictions.lrt')}:</span>
       {data?.lrt_pred && data.lrt_score !== undefined ? (
         <span>
-          {data?.lrt_pred} ({data?.lrt_score})
+          {t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`)} ({data?.lrt_score})
         </span>
       ) : (
         '-'
