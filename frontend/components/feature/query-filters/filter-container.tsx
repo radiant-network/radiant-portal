@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
+import React from 'react';
 import { SearchIcon } from 'lucide-react';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
-import { NumericalFilter } from './numerical-filter';
-import { ToggleFilter } from './toggle-filter';
 import { useI18n } from '@/components/hooks/i18n';
+import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
+import { NumericalFilter } from '@/components/feature/query-filters/numerical-filter';
+import { ToggleFilter } from '@/components/feature/query-filters/toggle-filter';
+import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
+
+type FilterContainerProps = {
+  field: AggregationConfig;
+  isOpen: boolean;
+};
 
 export function FilterComponent({ field, searchVisible }: { field: AggregationConfig; searchVisible: boolean }) {
   const { t } = useI18n();
@@ -22,14 +27,9 @@ export function FilterComponent({ field, searchVisible }: { field: AggregationCo
   }
 }
 
-export function FilterContainer({ field, isOpen  }: { field: AggregationConfig; isOpen?: boolean; }) {
+export function FilterContainer({ field, isOpen }: FilterContainerProps) {
   const { t } = useI18n();
-  const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const [searchVisible, setSearchVisible] = React.useState(false);
-
-  useEffect(() => {
-    setOpenItem(isOpen ? field.key : undefined);
-  }, [isOpen]);
 
   function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
     e.stopPropagation();
@@ -37,20 +37,18 @@ export function FilterContainer({ field, isOpen  }: { field: AggregationConfig; 
   }
 
   return (
-    <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem}>
-      <AccordionItem key={field.key} value={field.key}>
-        <AccordionTrigger className="AccordionTrigger">
-          <div className="flex items-center justify-between w-full text-base">
-            <span className="capitalize">{t(`common.filters.labels.${field.key}`, { defaultValue: field.key })}</span>
-            {openItem === field.key && field.type === 'multiple' && (
-              <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
-            )}
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <FilterComponent field={field} searchVisible={searchVisible} />
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <AccordionItem key={field.key} value={field.key}>
+      <AccordionTrigger className="AccordionTrigger">
+        <div className="flex items-center justify-between w-full text-base">
+          <span className="capitalize">{t(`common.filters.labels.${field.key}`, { defaultValue: field.key })}</span>
+          {isOpen && field.type === 'multiple' && (
+            <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
+          )}
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        <FilterComponent field={field} searchVisible={searchVisible} />
+      </AccordionContent>
+    </AccordionItem>
   );
 }
