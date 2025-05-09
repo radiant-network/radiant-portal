@@ -37,7 +37,7 @@ function useStatisticsBuilder(field: string, shouldFetch: boolean = false, appId
     data = null;
   } else {
     data = {
-      seqId: '5011',
+      seqId: '1',
       statisticsBody: {
         field: field,
       },
