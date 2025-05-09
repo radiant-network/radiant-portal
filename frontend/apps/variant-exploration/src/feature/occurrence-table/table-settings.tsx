@@ -26,13 +26,6 @@ const columnHelper = createColumnHelper<Occurrence>();
 function getVariantColumns(t: TFunction<string, undefined>) {
   return [
     {
-      id: 'pinRow',
-      cell: PinRowCell,
-      size: 40,
-      enableResizing: false,
-      enablePinning: false,
-    },
-    {
       id: 'rowExpand',
       cell: RowExpandCell,
       size: 40,
@@ -146,12 +139,6 @@ function getVariantColumns(t: TFunction<string, undefined>) {
 }
 
 const defaultSettings = createColumnSettings([
-  {
-    id: 'pinRow',
-    visible: true,
-    fixed: true,
-    pinningPosition: 'left',
-  },
   {
     id: 'rowExpand',
     visible: true,
