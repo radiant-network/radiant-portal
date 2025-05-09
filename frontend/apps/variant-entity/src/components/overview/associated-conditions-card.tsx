@@ -14,20 +14,20 @@ function AssociatedConditionsCard({ data, ...props }: { data: VariantOverview } 
       </CardHeader>
       <CardContent className="p-6 text-sm space-y-3">
         {data?.omim_conditions?.map(condition => (
-          <div key={`${condition.name}${condition.omim_id}`} className="flex items-center justify-between">
+          <div key={`${condition.panel}${condition.omim_phenotype_id}`} className="flex items-center justify-between">
             <span className="text-muted-foreground">
               <a
-                href={`https://www.omim.org/entry/${condition.omim_id}`}
+                href={`https://www.omim.org/entry/${condition.omim_phenotype_id}`}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:underline"
               >
-                {condition.name}
+                {condition.panel}
               </a>
             </span>
             <div className="flex items-center gap-1">
               {condition.inheritance_code?.map(code => (
-                <Tooltip key={`${condition.name}${condition.omim_id}${code}`}>
+                <Tooltip key={`${condition.panel}${condition.omim_phenotype_id}${code}`}>
                   <TooltipTrigger>
                     <Badge variant="outline">{code}</Badge>
                   </TooltipTrigger>

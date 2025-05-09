@@ -83,7 +83,7 @@ function App() {
           'rsnumber',
           'symbol',
           'vep_impact',
-          'mane_select',
+          'is_mane_select',
           'omim_inheritance_code',
           'clinvar',
           'pf',

@@ -13,7 +13,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
       </CardHeader>
       <CardContent className="p-6 text-sm space-y-3">
         <a
-          href={`https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_id}`}
+          href={`https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_name}`}
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-1 hover:underline"
