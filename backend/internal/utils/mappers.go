@@ -4,15 +4,15 @@ import "github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 
 func ConsequenceToTranscript(csq types.Consequence) types.Transcript {
 	return types.Transcript{
-		TranscriptId:       csq.EnsemblTranscriptId,
-		Canonical:          csq.Canonical,
-		ManeSelect:         csq.ManeSelect,
-		ManePlus:           csq.ManePlus,
+		TranscriptId:       csq.TranscriptId,
+		IsCanonical:        csq.IsCanonical,
+		IsManeSelect:       csq.IsManeSelect,
+		IsManePlus:         csq.IsManePlus,
 		ExonRank:           csq.ExonRank,
 		ExonTotal:          csq.ExonTotal,
-		CodingDnaChange:    csq.CodingDnaChange,
+		DnaChange:          csq.DnaChange,
 		AaChange:           csq.AaChange,
-		Consequence:        csq.Consequence,
+		Consequences:       csq.Consequences,
 		VepImpact:          csq.VepImpact,
 		SiftPred:           csq.SiftPred,
 		SiftScore:          csq.SiftScore,
@@ -27,7 +27,6 @@ func ConsequenceToTranscript(csq types.Consequence) types.Transcript {
 		Polyphen2HvarPred:  csq.Polyphen2HvarPred,
 		Polyphen2HvarScore: csq.Polyphen2HvarScore,
 		PhyloP17wayPrimate: csq.PhyloP17wayPrimate,
-		RefseqMrnaId:       csq.RefseqMrnaId,
 	}
 }
 
@@ -41,7 +40,7 @@ func ConsequencesToVariantConsequences(consequences []types.Consequence) []types
 	for symbol, consequencesPerSymbol := range groupedBySymbol {
 		firstConsequence := consequencesPerSymbol[0]
 		variantConsequence := types.VariantConsequence{
-			Picked:       firstConsequence.Picked,
+			IsPicked:     firstConsequence.IsPicked,
 			Symbol:       symbol,
 			Biotype:      firstConsequence.Biotype,
 			GnomadPli:    firstConsequence.GnomadPli,

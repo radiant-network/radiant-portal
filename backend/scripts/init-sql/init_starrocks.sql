@@ -46,7 +46,7 @@ CREATE TABLE `occurrences`
 ) ENGINE = OLAP
     PRIMARY KEY(`part`,`seq_id`, `locus_id`);
 
-CREATE TABLE `sequencing_experiment`
+CREATE TABLE `sequencing_experiments`
 (
     `seq_id`                          int     NOT NULL COMMENT "",
     `part`                            tinyint NOT NULL

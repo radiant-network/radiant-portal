@@ -18,50 +18,6 @@ func (m *MockRepository) CheckDatabaseConnection() string {
 	return "up"
 }
 
-func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrence, error) {
-	return []types.Occurrence{
-		{
-			SeqId:              1,
-			LocusId:            1000,
-			Filter:             "PASS",
-			Zygosity:           "HET",
-			Pf:                 0.99,
-			Pc:                 3,
-			Af:                 0.01,
-			Hgvsg:              "hgvsg1",
-			AdRatio:            1.0,
-			VariantClass:       "class1",
-			RsNumber:           "rs111111111",
-			AaChange:           "p.Arg19His",
-			PickedConsequences: []string{"splice acceptor"},
-			GenotypeQuality:    1,
-			GnomadV3Af:         0.1,
-			Chromosome:         "1",
-			Start:              1,
-		},
-	}, nil
-}
-
-func (m *MockRepository) CountOccurrences(int, types.CountQuery) (int64, error) {
-	return 15, nil
-}
-
-func (m *MockRepository) AggregateOccurrences(int, types.AggQuery) ([]types.Aggregation, error) {
-	return []types.Aggregation{
-			{Bucket: "HET", Count: 2},
-			{Bucket: "HOM", Count: 1},
-		},
-		nil
-}
-
-func (m *MockRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*types.Statistics, error) {
-	return &types.Statistics{
-			Min: 0,
-			Max: 100,
-		},
-		nil
-}
-
 func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
 	return &types.Sequencing{
 		SeqId:          1,
@@ -83,66 +39,6 @@ func (m *MockRepository) GetTermAutoComplete(string, string, int) ([]*types.Auto
 		nil
 }
 
-func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurrence, error) {
-	return &types.ExpendedOccurrence{
-		LocusId:      1000,
-		Hgvsg:        "hgvsg1",
-		SiftPred:     "T",
-		SiftScore:    0.1,
-		FathmmPred:   "T",
-		FathmmScore:  0.1,
-		RevelScore:   0.1,
-		CaddScore:    0.1,
-		CaddPhred:    0.1,
-		SpliceaiDs:   0.1,
-		SpliceaiType: []string{"AG"},
-		GnomadPli:    0.1,
-		GnomadLoeuf:  0.1,
-		GnomadV3Af:   0.01,
-		Filter:       "PASS",
-		Gq:           100,
-		Consequence:  []string{"splice acceptor"},
-	}, nil
-}
-
-func (m *MockRepository) GetVariantHeader(int) (*types.VariantHeader, error) {
-	return &types.VariantHeader{
-		Hgvsg:           "hgvsg1",
-		AssemblyVersion: "GRCh38",
-		Source:          []string{"WGS"},
-	}, nil
-}
-
-func (m *MockRepository) GetVariantOverview(int) (*types.VariantOverview, error) {
-	return &types.VariantOverview{
-		LocusFull:    "locus1",
-		Pf:           0.99,
-		Pc:           3,
-		SiftPred:     "T",
-		SiftScore:    0.1,
-		FathmmPred:   "T",
-		FathmmScore:  0.1,
-		RevelScore:   0.1,
-		CaddScore:    0.1,
-		CaddPhred:    0.1,
-		SpliceaiDs:   0.1,
-		SpliceaiType: []string{"AG"},
-		GnomadPli:    0.1,
-		GnomadLoeuf:  0.1,
-		GnomadV3Af:   0.01,
-		Consequence:  []string{"splice acceptor"},
-	}, nil
-}
-
-func (r *MockRepository) GetVariantConsequences(int) (*[]types.VariantConsequence, error) {
-	var transcriptsBRAF = []types.Transcript{{TranscriptId: "T001"}, {TranscriptId: "T002"}}
-	var transcriptsBRAC = []types.Transcript{{TranscriptId: "T003"}}
-	return &[]types.VariantConsequence{
-		{Symbol: "BRAF", Transcripts: transcriptsBRAF},
-		{Symbol: "BRAC", Transcripts: transcriptsBRAC},
-	}, nil
-}
-
 func Test_StatusHandler(t *testing.T) {
 	repoStarrocks := &MockRepository{}
 	repoPostgres := &MockRepository{}
@@ -157,103 +53,6 @@ func Test_StatusHandler(t *testing.T) {
 	assert.JSONEq(t, `{"status": {"starrocks": "up", "postgres": "up"}}`, w.Body.String())
 }
 
-func Test_OccurrencesListHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.POST("/occurrences/:seq_id/list", OccurrencesListHandler(repo))
-	body := `{
-			"additional_fields":[
-				"seq_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
-			]
-	}`
-	req, _ := http.NewRequest("POST", "/occurrences/1/list", bytes.NewBuffer([]byte(body)))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `[{
-        "seq_id": 1,
-		"chromosome": "1",
-		"start": 1,
-        "locus_id": 1000,
-        "filter": "PASS",
-        "zygosity": "HET",
-        "pf": 0.99,
-        "pc": 3,
-        "af": 0.01,
-        "hgvsg": "hgvsg1",
-        "ad_ratio": 1.0,
-        "variant_class": "class1",
-		"rsnumber": "rs111111111",
-		"aa_change": "p.Arg19His",
-		"picked_consequences": ["splice acceptor"],
-		"genotype_quality": 1,
-		"gnomad_v3_af":0.1
-    }]`, w.Body.String())
-}
-
-func Test_OccurrencesCountHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.POST("/occurrences/:seq_id/count", OccurrencesCountHandler(repo))
-
-	req, _ := http.NewRequest("POST", "/occurrences/1/count", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"count":15}`, w.Body.String())
-}
-
-func Test_OccurrencesAggregateHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.POST("/occurrences/:seq_id/aggregate", OccurrencesAggregateHandler(repo))
-
-	body := `{
-			"field": "zygosity",
-			"sqon":{
-				"op":"in",
-				"content":{
-					"field": "filter",
-					"value": ["PASS"]
-				}
-		    },
-			"size": 10
-	}`
-	req, _ := http.NewRequest("POST", "/occurrences/1/aggregate", bytes.NewBuffer([]byte(body)))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	expected := `[{"key": "HET", "count": 2}, {"key": "HOM", "count": 1}]`
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, expected, w.Body.String())
-}
-
-func Test_OccurrencesStatisticsHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.POST("/occurrences/:seq_id/statistics", OccurrencesStatisticsHandler(repo))
-
-	body := `{
-			"field": "pf",
-			"sqon":{
-				"op":"in",
-				"content":{
-					"field": "filter",
-					"value": ["PASS"]
-				}
-		    }
-	}`
-	req, _ := http.NewRequest("POST", "/occurrences/1/statistics", bytes.NewBuffer([]byte(body)))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	expected := `{"min": 0, "max": 100}`
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, expected, w.Body.String())
-}
-
 func Test_GetSequencingHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -264,7 +63,7 @@ func Test_GetSequencingHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"seq_id":1, "experiment_type":"WGS", "analysis_type": "germline"}`, w.Body.String())
+	assert.JSONEq(t, `{"seq_id":1, "experiment_type":"WGS", "is_affected":false, "analysis_type": "germline"}`, w.Body.String())
 }
 
 func Test_MondoTermAutoCompleteHandler(t *testing.T) {
@@ -304,56 +103,4 @@ func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{"source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
-}
-
-func Test_GetExpendedOccurrence(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/occurrences/:seq_id/:locus_id/expended", GetExpendedOccurrence(repo))
-
-	req, _ := http.NewRequest("GET", "/occurrences/1/1000/expended", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "hgvsg":"hgvsg1", "locus_id":1000, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
-}
-
-func Test_GetVariantHeader(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/variants/:locus_id/header", GetVariantHeader(repo))
-
-	req, _ := http.NewRequest("GET", "/variants/1000/header", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"hgvsg":"hgvsg1", "assembly_version": "GRCh38", "source": ["WGS"]}`, w.Body.String())
-}
-
-func Test_GetVariantOverview(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/variants/:locus_id/overview", GetVariantOverview(repo))
-
-	req, _ := http.NewRequest("GET", "/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.01, "locus":"locus1", "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"]}`, w.Body.String())
-}
-
-func Test_GetVariantConsequences(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/variants/:locus_id/consequences", GetVariantConsequences(repo))
-
-	req, _ := http.NewRequest("GET", "/variants/1000/consequences", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `[{"symbol":"BRAF", "transcripts":[{"transcript_id": "T001"}, {"transcript_id": "T002"}]}, {"symbol":"BRAC", "transcripts":[{"transcript_id": "T003"}]}]`, w.Body.String())
 }

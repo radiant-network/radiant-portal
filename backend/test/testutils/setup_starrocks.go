@@ -75,6 +75,7 @@ func initDb(folderName string) (*gorm.DB, string, error) {
 		if filepath.Ext(file.Name()) == ".tsv" {
 			err = createTableAndPopulateData(db, folderName, file)
 			if err != nil {
+				log.Println("file", file)
 				log.Fatal("failed to create table and populate data", err)
 			}
 		}

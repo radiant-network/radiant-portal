@@ -3,11 +3,12 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/utils"
 	"log"
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/utils"
 
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -21,7 +22,7 @@ type Statistics = types.Statistics
 type ExpendedOccurrence = types.ExpendedOccurrence
 type VariantHeader = types.VariantHeader
 type VariantOverview = types.VariantOverview
-type OmimGeneSet = types.OmimGeneSet
+type OmimGenePanel = types.OmimGenePanel
 type VariantConsequence = types.VariantConsequence
 type Consequence = types.Consequence
 type Transcript = types.Transcript
@@ -107,14 +108,14 @@ func addWhere(userQuery types.Query, tx *gorm.DB) {
 }
 
 func addImplicitOccurrencesFilters(seqId int, r *StarrocksRepository, part int) *gorm.DB {
-	tx := r.db.Table("occurrences o").Where("o.seq_id = ? and o.part=? and has_alt", seqId, part)
+	tx := r.db.Table("occurrences o").Where("o.seq_id = ? and o.part=?", seqId, part)
 	return tx
 }
 func joinWithVariants(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("JOIN variants v ON v.locus_id=o.locus_id")
 }
 func (r *StarrocksRepository) GetPart(seqId int) (int, error) { //TODO cache
-	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
+	tx := r.db.Table("sequencing_experiments").Where("seq_id = ?", seqId).Select("part")
 	var part int
 	err := tx.Scan(&part).Error
 	if err != nil {
@@ -168,14 +169,14 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *StarrocksRepos
 
 		if userQuery.Filters() != nil && (userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...)) {
 			if userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-				// In this case we need to build a subquery that join the consequences_filter table with the gene panels tables
-				// This subquery will join the consequences_filter table with the gene panels tables on symbol column and will be used to filter the occurrences
+				// In this case we need to build a subquery that join the consequences_filter_partitioned table with the gene panels tables
+				// This subquery will join the consequences_filter_partitioned table with the gene panels tables on symbol column and will be used to filter the occurrences
 
 				// Example of the generated query:
 				// SELECT o.locus_id as locus_id, ... FROM occurrences o
 				// LEFT SEMI JOIN (
 				//		SELECT cf.locus_id,cf.part,om.panel as omim_gene_panel,hpo.panel as hpo_gene_panel,cf.impact_score as impact_score
-				//		FROM consequences_filter cf
+				//		FROM consequences_filter_partitioned cf
 				//		LEFT JOIN omim_gene_panel om ON om.symbol=cf.symbol
 				//		LEFT JOIN hpo_gene_panel hpo ON hpo.symbol=cf.symbol
 				//		WHERE part = 1
@@ -188,7 +189,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *StarrocksRepos
 				selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
 				selectedPanelsTables := getDistinctTablesFromFields(selectedPanelsField)
 
-				consequenceFilterTable := r.db.Table("consequences_filter cf").Where("part = ?", part)
+				consequenceFilterTable := r.db.Table("consequences_filter_partitioned cf").Where("part = ?", part)
 
 				// overrideTableAliases will be used to override the table aliases when generating the filter. The sub-query will contain the columns with their aliases.
 				// For instance panel column from omim_gene_panel will be aliased as omim_gene_panel in the subquery.
@@ -215,7 +216,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *StarrocksRepos
 
 			} else {
 				filters, params := userQuery.Filters().ToSQL(nil)
-				joinClause := "LEFT SEMI JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part and (?)"
+				joinClause := "LEFT SEMI JOIN consequences_filter_partitioned cf ON cf.locus_id=o.locus_id AND cf.part = o.part and (?)"
 				tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
 			}
 
@@ -257,7 +258,7 @@ func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *StarrocksR
 	if userQuery != nil {
 		tx = joinWithVariants(tx)
 		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-			joinClause := "LEFT JOIN consequences_filter cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
+			joinClause := "LEFT JOIN consequences_filter_partitioned cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
 			tx = tx.Joins(joinClause)
 			selectedPanelsTables := getDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
 			for _, panelsTable := range selectedPanelsTables {
@@ -320,7 +321,7 @@ func (r *StarrocksRepository) GetStatisticsOccurrences(seqId int, userQuery type
 }
 
 func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error) {
-	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId)
+	tx := r.db.Table("sequencing_experiments").Where("seq_id = ?", seqId)
 	var sequencing types.Sequencing
 	err := tx.First(&sequencing).Error
 	if err != nil {
@@ -329,6 +330,10 @@ func (r *StarrocksRepository) GetSequencing(seqId int) (*types.Sequencing, error
 		} else {
 			return nil, nil
 		}
+	}
+
+	if sequencing.AnalysisType == "germline" {
+		sequencing.ExperimentType = "WGS"
 	}
 	return &sequencing, err
 }
@@ -380,9 +385,9 @@ func (r *StarrocksRepository) GetTermAutoComplete(termsTable string, input strin
 
 func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error) {
 	tx := r.db.Table("occurrences o")
-	tx = tx.Joins("JOIN consequences c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.picked = true", seqId, locusId)
+	tx = tx.Joins("JOIN consequences c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
 	tx = tx.Joins("JOIN variants v ON o.locus_id=v.locus_id")
-	tx = tx.Select("c.locus_id, v.hgvsg, v.symbol, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.sift_score, c.sift_pred, c.fathmm_score, c.fathmm_pred, c.cadd_score, c.cadd_phred, c.revel_score, v.gnomad_v3_af, o.filter, o.gq, o.ad_alt, o.ad_total, o.info_qd, v.canonical, v.mane_select, v.rsnumber, v.aa_change, c.coding_dna_change, v.consequence, v.vep_impact")
+	tx = tx.Select("c.locus_id, v.hgvsg, v.symbol, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.sift_score, c.sift_pred, c.fathmm_score, c.fathmm_pred, c.cadd_score, c.cadd_phred, c.revel_score, v.gnomad_v3_af, o.filter, o.gq, o.ad_alt, o.ad_total, o.info_qd, v.is_canonical, v.is_mane_select, v.rsnumber, v.aa_change, c.dna_change, v.consequences, v.vep_impact")
 
 	var expendedOccurrence ExpendedOccurrence
 	err := tx.First(&expendedOccurrence).Error
@@ -420,9 +425,9 @@ func (r *StarrocksRepository) GetVariantHeader(locusId int) (*VariantHeader, err
 
 func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview, error) {
 	tx := r.db.Table("variants v")
-	tx = tx.Joins("JOIN consequences c ON v.locus_id=c.locus_id AND v.locus_id = ? AND c.picked = true", locusId)
-	tx = tx.Joins("LEFT JOIN clinvar cl ON cl.chromosome = v.chromosome AND cl.start = v.start AND cl.reference = v.reference AND cl.alternate = v.alternate")
-	tx = tx.Select("v.symbol, v.consequence, v.clinvar_interpretation, v.pc, v.pf, v.gnomad_v3_af, v.canonical, v.mane_select, v.transcript_id, c.coding_dna_change, v.rsnumber, v.vep_impact, v.aa_change, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus_full, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli, cl.name as clinvar_id")
+	tx = tx.Joins("JOIN consequences c ON v.locus_id=c.locus_id AND v.locus_id = ? AND c.is_picked = true", locusId)
+	tx = tx.Joins("LEFT JOIN clinvar cl ON cl.locus_id = v.locus_id")
+	tx = tx.Select("v.symbol, v.consequences, v.clinvar_interpretation, v.clinvar_name, v.pc, v.pf, v.pn, v.gnomad_v3_af, v.is_canonical, v.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.transcript_id, c.dna_change, v.rsnumber, v.vep_impact, v.aa_change, c.consequences, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli, cl.name as clinvar_id")
 
 	var variantOverview VariantOverview
 	err := tx.First(&variantOverview).Error
@@ -434,11 +439,12 @@ func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview,
 		}
 	}
 
-	txOmim := r.db.Table("omim_gene_set_flat omgsf")
-	txOmim = txOmim.Select("omgsf.phenotype_omim_id, omgsf.phenotype_name, omgsf.phenotype_inheritance_code")
-	txOmim = txOmim.Where("omgsf.phenotype_omim_id is not null and omgsf.symbol = ?", variantOverview.Symbol)
+	txOmim := r.db.Table("omim_gene_panel omim")
+	txOmim = txOmim.Select("omim.omim_phenotype_id, omim.panel, omim.inheritance_code")
+	txOmim = txOmim.Where("omim.omim_phenotype_id is not null and omim.symbol = ?", variantOverview.Symbol)
+	txOmim = txOmim.Order("omim.omim_phenotype_id asc")
 
-	var omimConditions []OmimGeneSet
+	var omimConditions []OmimGenePanel
 	errOmim := txOmim.Find(&omimConditions).Error
 	if errOmim != nil {
 		if !errors.Is(errOmim, gorm.ErrRecordNotFound) {
@@ -453,10 +459,9 @@ func (r *StarrocksRepository) GetVariantOverview(locusId int) (*VariantOverview,
 
 func (r *StarrocksRepository) GetVariantConsequences(locusId int) (*[]VariantConsequence, error) {
 	tx := r.db.Table("consequences c")
-	tx = tx.Joins(" LEFT JOIN biotype_dict b on c.biotype_id = b.biotype_id")
-	tx = tx.Select("c.picked, c.symbol, b.biotype, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.ensembl_transcript_id, c.canonical, c.mane_select, c.coding_dna_change, c.aa_change, c.sift_pred, c.sift_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.revel_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate")
+	tx = tx.Select("c.is_picked, c.symbol, c.biotype, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.transcript_id, c.vep_impact, c.is_canonical, c.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.dna_change, c.aa_change, c.consequences, c.sift_pred, c.sift_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.revel_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate")
 	tx = tx.Where("c.locus_id = ?", locusId)
-	tx = tx.Order("c.picked desc, c.symbol asc")
+	tx = tx.Order("c.is_picked desc, c.symbol asc")
 
 	var consequences []Consequence
 	err := tx.Find(&consequences).Error
@@ -466,6 +471,9 @@ func (r *StarrocksRepository) GetVariantConsequences(locusId int) (*[]VariantCon
 		} else {
 			return nil, nil
 		}
+	}
+	if len(consequences) == 0 {
+		return nil, nil
 	}
 
 	variantConsequences := utils.ConsequencesToVariantConsequences(consequences)

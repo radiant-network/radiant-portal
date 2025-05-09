@@ -62,9 +62,7 @@ components:
           type: number
         cadd_score:
           type: number
-        canonical:
-          type: boolean
-        coding_dna_change:
+        dna_change:
           type: string
         fathmm_pred:
           type: string
@@ -82,10 +80,12 @@ components:
           type: number
         hgvsg:
           type: string
+        is_canonical:
+          type: boolean
+        is_mane_select:
+          type: boolean
         locus_id:
           type: integer
-        mane_select:
-          type: boolean
         picked_consequences:
           items:
             type: string
@@ -264,8 +264,6 @@ components:
           type: number
         af:
           type: number
-        canonical:
-          type: boolean
         chromosome:
           type: string
         clinvar:
@@ -283,10 +281,12 @@ components:
           type: string
         impact_score:
           type: string
+        is_canonical:
+          type: boolean
+        is_mane_select:
+          type: boolean
         locus_id:
           type: integer
-        mane_select:
-          type: boolean
         omim_inheritance_code:
           items:
             type: string
@@ -301,6 +301,8 @@ components:
             type: string
           type: array
           uniqueItems: false
+        pn:
+          type: integer
         rsnumber:
           type: string
         seq_id:
@@ -331,16 +333,16 @@ components:
       - variant_class
       - zygosity
       type: object
-    OmimGeneSet:
+    OmimGenePanel:
       properties:
         inheritance_code:
           items:
             type: string
           type: array
           uniqueItems: false
-        name:
+        omim_phenotype_id:
           type: string
-        omim_id:
+        panel:
           type: string
       type: object
     PubmedCitation:
@@ -360,14 +362,24 @@ components:
       properties:
         analysis_type:
           type: string
+        case_id:
+          type: integer
         experiment_type:
           type: string
+        family_role:
+          type: string
+        is_affected:
+          type: boolean
         patient_id:
-          type: integer
+          type: string
         sample_id:
-          type: integer
+          type: string
         seq_id:
           type: integer
+        sex:
+          type: string
+        vcf_filepath:
+          type: string
       type: object
     SortBody:
       properties:
@@ -434,46 +446,39 @@ components:
           type: number
         cadd_score:
           type: number
-        canonical:
-          type: boolean
-        coding_dna_change:
-          type: string
-        consequence:
-          description: TODO
+        consequences:
           items:
             type: string
           type: array
           uniqueItems: false
         dann_score:
           type: number
+        dna_change:
+          type: string
         exon_rank:
-          description: TODO
           type: integer
         exon_total:
-          description: TODO
           type: integer
         fathmm_pred:
           type: string
         fathmm_score:
           type: number
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
         lrt_pred:
           type: string
         lrt_score:
           type: number
-        mane_plus:
-          description: TODO
-          type: boolean
-        mane_select:
-          type: boolean
         phyloP17way_primate:
           type: number
         polyphen2_hvar_pred:
           type: string
         polyphen2_hvar_score:
           type: number
-        refseq_mrna_id:
-          description: TODO
-          type: string
         revel_score:
           type: number
         sift_pred:
@@ -513,7 +518,7 @@ components:
           type: number
         gnomad_pli:
           type: number
-        picked:
+        is_picked:
           type: boolean
         spliceai_ds:
           type: number
@@ -552,24 +557,20 @@ components:
           type: number
         cadd_score:
           type: number
-        canonical:
-          type: boolean
         clinvar:
           items:
             type: string
           type: array
           uniqueItems: false
-        clinvar_id:
-          type: string
-        coding_dna_change:
+        clinvar_name:
           type: string
         dann_score:
           type: number
+        dna_change:
+          type: string
         exon_rank:
-          description: TODO
           type: integer
         exon_total:
-          description: TODO
           type: integer
         fathmm_pred:
           type: string
@@ -581,17 +582,19 @@ components:
           type: number
         gnomad_v3_af:
           type: number
+        is_canonical:
+          type: boolean
+        is_mane_select:
+          type: boolean
         locus:
           type: string
         lrt_pred:
           type: string
         lrt_score:
           type: number
-        mane_select:
-          type: boolean
         omim_conditions:
           items:
-            $ref: '#/components/schemas/OmimGeneSet'
+            $ref: '#/components/schemas/OmimGenePanel'
           type: array
           uniqueItems: false
         pc:
@@ -606,15 +609,11 @@ components:
           type: array
           uniqueItems: false
         pn:
-          description: TODO
           type: integer
         polyphen2_hvar_pred:
           type: string
         polyphen2_hvar_score:
           type: number
-        refseq_mrna_id:
-          description: TODO
-          type: string
         revel_score:
           type: number
         rsnumber:

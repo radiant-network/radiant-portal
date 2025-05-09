@@ -1,3 +1,3 @@
-locus_id	impact_score	pf	pc	af	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	mane_select	canonical	clinvar_interpretation	rsnumber	aa_change	consequence	locus_full	chromosome	start	reference	alternate
+locus_id	impact_score	pf	pc	af	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	is_mane_select	is_canonical	clinvar_interpretation	rsnumber	aa_change	consequences	locus	chromosome	start	reference	alternate
 1000	4	0.99	3	0.01	0.001	hgvsg1	code1	class1	impact1	BRAF	true	true	["Benign", "Pathogenic"]	rs111111111	p.Arg19His	["splice acceptor"]	locus1	1	1111	A	T
 2000	4	0.99	2	0.01	0.001	hgvsg2	code1	class1	impact1	symbol1	true	true	["Benign"]	rs222222222	p.Arg19His	["splice acceptor"]	locus2	2	2222	C	G

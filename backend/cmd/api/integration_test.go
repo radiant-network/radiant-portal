@@ -76,7 +76,7 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 }
 
 func Test_OccurrencesList(t *testing.T) {
-	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "pf":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "start":1, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "is_canonical":false, "is_mane_select":true, "pf":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
 }
 
 func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
@@ -92,7 +92,7 @@ func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *tes
 				}
 		}
 		}`
-	expected := `[{"ad_ratio":1, "af":0.01, "chromosome": "1", "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "pc":3, "pf":0.99, "picked_consequences": null, "seq_id":1, "start": 1, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
+	expected := `[{"ad_ratio":1, "af":0.01, "chromosome": "1", "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "is_canonical":false, "is_mane_select":true, "pc":3, "pf":0.99, "picked_consequences": null, "seq_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
 
 }
@@ -183,7 +183,7 @@ func Test_Filter_On_Consequence_Column(t *testing.T) {
 			},
 			"size": 10
 		}`
-	expected := `[{"ad_ratio":1, "af":0.01, "chromosome": "1", "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "pc":3, "pf":0.99, "picked_consequences": null, "seq_id":1, "start": 1, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
+	expected := `[{"ad_ratio":1, "af":0.01, "chromosome": "1", "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "is_canonical":false, "is_mane_select":true, "pc":3, "pf":0.99, "picked_consequences": null, "seq_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
 }
 
@@ -386,7 +386,7 @@ func assertGetSequencing(t *testing.T, data string, seqId int, expected string) 
 }
 
 func Test_GetSequencing(t *testing.T) {
-	expected := `{"seq_id":1, "experiment_type":"WGS", "analysis_type":"germline"}`
+	expected := `{"analysis_type":"germline", "case_id":1, "experiment_type":"WGS", "is_affected":false, "seq_id":1}`
 	assertGetSequencing(t, "simple", 1, expected)
 }
 
@@ -498,7 +498,7 @@ func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId i
 }
 
 func Test_GetExpendedOccurrence(t *testing.T) {
-	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "canonical":true, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "mane_select":true, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "vep_impact":"impact1"}`
+	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "is_canonical":true, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":1000, "is_mane_select":true, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "vep_impact":"impact1"}`
 	assertGetExpendedOccurrence(t, "simple", 1, 1000, expected)
 }
 
@@ -538,7 +538,7 @@ func assertGetVariantOverview(t *testing.T, data string, locusId int, expected s
 }
 
 func Test_GetVariantOverview(t *testing.T) {
-	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "canonical":true, "clinvar": ["Benign", "Pathogenic"], "clinvar_id":"111111", "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "locus":"locus1", "mane_select":true, "omim_conditions": [{"inheritance_code": ["AD"], "name": "Noonan syndrome 7", "omim_id": "613706"}, {"inheritance_code": ["AD"], "name":"LEOPARD syndrome 3", "omim_id":"613707"}], "pc":3, "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "vep_impact":"impact1"}`
+	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "is_canonical":true, "clinvar": ["Benign", "Pathogenic"], "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "locus":"locus1", "is_mane_select":true, "omim_conditions": [{"inheritance_code": ["AD"], "panel": "Noonan syndrome 7", "omim_phenotype_id": "613706"}, {"inheritance_code": ["AD"], "panel":"LEOPARD syndrome 3", "omim_phenotype_id":"613707"}], "pc":3, "pf":0.99, "picked_consequences":["csq10"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "transcript_id":"T001", "vep_impact":"impact1"}`
 	assertGetVariantOverview(t, "simple", 1000, expected)
 }
 
@@ -558,7 +558,7 @@ func assertGetVariantConsequences(t *testing.T, data string, locusId int, expect
 }
 
 func Test_GetVariantConsequences(t *testing.T) {
-	expected := `[{"biotype":"IG_C_gene", "gnomad_loeuf":0.1, "gnomad_pli":0.1, "picked":true, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "transcripts":[{"cadd_phred":0.1, "cadd_score":0.1, "fathmm_pred":"T", "fathmm_score":0.1, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1}]}, {"biotype":"IG_C_pseudogene", "gnomad_loeuf":0.1, "gnomad_pli":0.1, "spliceai_ds":0.2, "spliceai_type":["AT"], "symbol":"BRAC", "transcripts":[{"cadd_phred":0.2, "cadd_score":0.2, "fathmm_pred":"T", "fathmm_score":0.2, "revel_score":0.2, "sift_pred":"T", "sift_score":0.2}]}]`
+	expected := `[{"biotype":"IG_C_gene", "gnomad_loeuf":0.1, "gnomad_pli":0.1, "is_picked":true, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "transcripts":[{"cadd_phred":0.1, "cadd_score":0.1, "consequences": ["csq10"], "fathmm_pred":"T", "fathmm_score":0.1, "is_canonical":false, "is_mane_plus":false, "is_mane_select":false, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "transcript_id":"T001"}]}, {"biotype":"IG_C_pseudogene", "gnomad_loeuf":0.1, "gnomad_pli":0.1, "spliceai_ds":0.2, "spliceai_type":["AT"], "symbol":"BRAC", "is_picked":false, "transcripts":[{"cadd_phred":0.2, "cadd_score":0.2, "consequences": ["csq11"], "fathmm_pred":"T", "fathmm_score":0.2, "is_canonical":false, "is_mane_plus":false, "is_mane_select":false, "revel_score":0.2, "sift_pred":"T", "sift_score":0.2, "transcript_id":"T002"}]}]`
 	assertGetVariantConsequences(t, "simple", 1000, expected)
 }
 

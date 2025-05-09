@@ -1,9 +1,5 @@
 package types
 
-var OmimGenePanelTable = Table{
-	Name:  "omim_gene_panel",
-	Alias: "om",
-}
 var OmimGenePanelField = Field{
 	Name:            "panel",
 	Alias:           "omim_gene_panel",
