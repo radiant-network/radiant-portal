@@ -1,45 +1,45 @@
 package utils
 
 import (
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
-	"github.com/stretchr/testify/assert"
 	"sort"
 	"testing"
+
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func Consequence() types.Consequence {
 	return types.Consequence{
-		Picked:              true,
-		Symbol:              "Symbol",
-		Biotype:             "Biotype",
-		GnomadPli:           1.1,
-		GnomadLoeuf:         1.2,
-		SpliceaiDs:          1.3,
-		SpliceaiType:        []string{"SpliceaiType"},
-		EnsemblTranscriptId: "TranscriptId",
-		Canonical:           true,
-		ManeSelect:          false,
-		ManePlus:            true,
-		ExonRank:            2,
-		ExonTotal:           3,
-		CodingDnaChange:     "CodingDnaChange",
-		AaChange:            "AaChange",
-		Consequence:         []string{"Consequence"},
-		VepImpact:           "VepImpact",
-		SiftPred:            "SiftPred",
-		SiftScore:           1.4,
-		FathmmPred:          "FathmmPred",
-		FathmmScore:         1.5,
-		CaddScore:           1.6,
-		CaddPhred:           1.7,
-		DannScore:           1.8,
-		LrtPred:             "LrtPred",
-		LrtScore:            1.9,
-		RevelScore:          2.0,
-		Polyphen2HvarPred:   "Polyphen2HvarPred",
-		Polyphen2HvarScore:  2.1,
-		PhyloP17wayPrimate:  2.2,
-		RefseqMrnaId:        "RefseqMrnaId",
+		IsPicked:           true,
+		Symbol:             "Symbol",
+		Biotype:            "Biotype",
+		GnomadPli:          1.1,
+		GnomadLoeuf:        1.2,
+		SpliceaiDs:         1.3,
+		SpliceaiType:       []string{"SpliceaiType"},
+		TranscriptId:       "TranscriptId",
+		IsCanonical:        true,
+		IsManeSelect:       false,
+		IsManePlus:         true,
+		ExonRank:           2,
+		ExonTotal:          3,
+		DnaChange:          "DnaChange",
+		AaChange:           "AaChange",
+		Consequences:       []string{"Consequence"},
+		VepImpact:          "VepImpact",
+		SiftPred:           "SiftPred",
+		SiftScore:          1.4,
+		FathmmPred:         "FathmmPred",
+		FathmmScore:        1.5,
+		CaddScore:          1.6,
+		CaddPhred:          1.7,
+		DannScore:          1.8,
+		LrtPred:            "LrtPred",
+		LrtScore:           1.9,
+		RevelScore:         2.0,
+		Polyphen2HvarPred:  "Polyphen2HvarPred",
+		Polyphen2HvarScore: 2.1,
+		PhyloP17wayPrimate: 2.2,
 	}
 }
 
@@ -48,15 +48,15 @@ func Test_ConsequenceToTranscript(t *testing.T) {
 
 	transcript := ConsequenceToTranscript(consequence)
 
-	assert.Equal(t, consequence.EnsemblTranscriptId, transcript.TranscriptId)
-	assert.Equal(t, consequence.Canonical, transcript.Canonical)
-	assert.Equal(t, consequence.ManeSelect, transcript.ManeSelect)
-	assert.Equal(t, consequence.ManePlus, transcript.ManePlus)
+	assert.Equal(t, consequence.TranscriptId, transcript.TranscriptId)
+	assert.Equal(t, consequence.IsCanonical, transcript.IsCanonical)
+	assert.Equal(t, consequence.IsManeSelect, transcript.IsManeSelect)
+	assert.Equal(t, consequence.IsManePlus, transcript.IsManePlus)
 	assert.Equal(t, consequence.ExonRank, transcript.ExonRank)
 	assert.Equal(t, consequence.ExonTotal, transcript.ExonTotal)
-	assert.Equal(t, consequence.CodingDnaChange, transcript.CodingDnaChange)
+	assert.Equal(t, consequence.DnaChange, transcript.DnaChange)
 	assert.Equal(t, consequence.AaChange, transcript.AaChange)
-	assert.Equal(t, consequence.Consequence, transcript.Consequence)
+	assert.Equal(t, consequence.Consequences, transcript.Consequences)
 	assert.Equal(t, consequence.VepImpact, transcript.VepImpact)
 	assert.Equal(t, consequence.SiftPred, transcript.SiftPred)
 	assert.Equal(t, consequence.SiftScore, transcript.SiftScore)
@@ -71,25 +71,24 @@ func Test_ConsequenceToTranscript(t *testing.T) {
 	assert.Equal(t, consequence.Polyphen2HvarPred, transcript.Polyphen2HvarPred)
 	assert.Equal(t, consequence.Polyphen2HvarScore, transcript.Polyphen2HvarScore)
 	assert.Equal(t, consequence.PhyloP17wayPrimate, transcript.PhyloP17wayPrimate)
-	assert.Equal(t, consequence.RefseqMrnaId, transcript.RefseqMrnaId)
 }
 
 func Test_ConsequencesToVariantConsequences(t *testing.T) {
 	consequence1 := Consequence()
 	consequence1.Symbol = "AAA"
-	consequence1.EnsemblTranscriptId = "TranscriptId_1"
+	consequence1.TranscriptId = "TranscriptId_1"
 	consequence2 := Consequence()
 	consequence2.Symbol = "BBB"
-	consequence2.EnsemblTranscriptId = "TranscriptId_2"
+	consequence2.TranscriptId = "TranscriptId_2"
 	consequence3 := Consequence()
 	consequence3.Symbol = "CCC"
-	consequence3.EnsemblTranscriptId = "TranscriptId_3"
+	consequence3.TranscriptId = "TranscriptId_3"
 	consequence4 := Consequence()
 	consequence4.Symbol = "AAA"
-	consequence4.EnsemblTranscriptId = "TranscriptId_4"
+	consequence4.TranscriptId = "TranscriptId_4"
 	consequence5 := Consequence()
 	consequence5.Symbol = "BBB"
-	consequence5.EnsemblTranscriptId = "TranscriptId_5"
+	consequence5.TranscriptId = "TranscriptId_5"
 
 	consequences := []types.Consequence{consequence1, consequence2, consequence3, consequence4, consequence5}
 

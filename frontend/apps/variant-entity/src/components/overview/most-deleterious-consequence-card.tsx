@@ -126,7 +126,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               >
                 {data?.transcript_id}
               </a>
-              {data.canonical && (
+              {data.is_canonical && (
                 <Tooltip>
                   <TooltipTrigger>
                     <TranscriptCanonicalIcon size={16} className="text-primary" />
@@ -136,16 +136,6 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               )}
             </div>
           )}
-          {data?.refseq_mrna_id && (
-            <>
-              <Separator orientation="vertical" className="mx-4 h-5" />
-              <div>
-                <a href={`https://www.ncbi.nlm.nih.gov/nuccore/${data?.refseq_mrna_id}?report=graph`}>
-                  {data?.refseq_mrna_id}
-                </a>
-              </div>
-            </>
-          )}
           {data?.exon_rank && data?.exon_total && (
             <>
               <Separator orientation="vertical" className="mx-4 h-5" />
@@ -154,10 +144,10 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               </div>
             </>
           )}
-          {data?.coding_dna_change && (
+          {data?.dna_change && (
             <>
               <Separator orientation="vertical" className="mx-4 h-5" />
-              <div>{data?.coding_dna_change}</div>
+              <div>{data?.dna_change}</div>
             </>
           )}
           {data?.rsnumber && (

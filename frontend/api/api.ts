@@ -175,16 +175,10 @@ export interface ExpendedOccurrence {
     'cadd_score'?: number;
     /**
      * 
-     * @type {boolean}
-     * @memberof ExpendedOccurrence
-     */
-    'canonical'?: boolean;
-    /**
-     * 
      * @type {string}
      * @memberof ExpendedOccurrence
      */
-    'coding_dna_change'?: string;
+    'dna_change'?: string;
     /**
      * 
      * @type {string}
@@ -235,16 +229,22 @@ export interface ExpendedOccurrence {
     'hgvsg': string;
     /**
      * 
-     * @type {number}
+     * @type {boolean}
      * @memberof ExpendedOccurrence
      */
-    'locus_id': number;
+    'is_canonical'?: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof ExpendedOccurrence
      */
-    'mane_select'?: boolean;
+    'is_mane_select'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'locus_id': number;
     /**
      * 
      * @type {Array<string>}
@@ -658,12 +658,6 @@ export interface Occurrence {
     'af'?: number;
     /**
      * 
-     * @type {boolean}
-     * @memberof Occurrence
-     */
-    'canonical'?: boolean;
-    /**
-     * 
      * @type {string}
      * @memberof Occurrence
      */
@@ -706,16 +700,22 @@ export interface Occurrence {
     'impact_score'?: string;
     /**
      * 
-     * @type {number}
+     * @type {boolean}
      * @memberof Occurrence
      */
-    'locus_id': number;
+    'is_canonical'?: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof Occurrence
      */
-    'mane_select'?: boolean;
+    'is_mane_select'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Occurrence
+     */
+    'locus_id': number;
     /**
      * 
      * @type {Array<string>}
@@ -740,6 +740,12 @@ export interface Occurrence {
      * @memberof Occurrence
      */
     'picked_consequences': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Occurrence
+     */
+    'pn'?: number;
     /**
      * 
      * @type {string}
@@ -794,27 +800,27 @@ export interface Occurrence {
 /**
  * 
  * @export
- * @interface OmimGeneSet
+ * @interface OmimGenePanel
  */
-export interface OmimGeneSet {
+export interface OmimGenePanel {
     /**
      * 
      * @type {Array<string>}
-     * @memberof OmimGeneSet
+     * @memberof OmimGenePanel
      */
     'inheritance_code'?: Array<string>;
     /**
      * 
      * @type {string}
-     * @memberof OmimGeneSet
+     * @memberof OmimGenePanel
      */
-    'name'?: string;
+    'omim_phenotype_id'?: string;
     /**
      * 
      * @type {string}
-     * @memberof OmimGeneSet
+     * @memberof OmimGenePanel
      */
-    'omim_id'?: string;
+    'panel'?: string;
 }
 /**
  * 
@@ -862,28 +868,58 @@ export interface Sequencing {
     'analysis_type'?: string;
     /**
      * 
+     * @type {number}
+     * @memberof Sequencing
+     */
+    'case_id'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof Sequencing
      */
     'experiment_type'?: string;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof Sequencing
      */
-    'patient_id'?: number;
+    'family_role'?: string;
     /**
      * 
-     * @type {number}
+     * @type {boolean}
      * @memberof Sequencing
      */
-    'sample_id'?: number;
+    'is_affected'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
+    'patient_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
+    'sample_id'?: string;
     /**
      * 
      * @type {number}
      * @memberof Sequencing
      */
     'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
+    'sex'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
+    'vcf_filepath'?: string;
 }
 /**
  * 
@@ -1037,22 +1073,10 @@ export interface Transcript {
     'cadd_score'?: number;
     /**
      * 
-     * @type {boolean}
-     * @memberof Transcript
-     */
-    'canonical'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof Transcript
-     */
-    'coding_dna_change'?: string;
-    /**
-     * TODO
      * @type {Array<string>}
      * @memberof Transcript
      */
-    'consequence'?: Array<string>;
+    'consequences'?: Array<string>;
     /**
      * 
      * @type {number}
@@ -1060,13 +1084,19 @@ export interface Transcript {
      */
     'dann_score'?: number;
     /**
-     * TODO
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
+    'dna_change'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof Transcript
      */
     'exon_rank'?: number;
     /**
-     * TODO
+     * 
      * @type {number}
      * @memberof Transcript
      */
@@ -1085,6 +1115,24 @@ export interface Transcript {
     'fathmm_score'?: number;
     /**
      * 
+     * @type {boolean}
+     * @memberof Transcript
+     */
+    'is_canonical'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Transcript
+     */
+    'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Transcript
+     */
+    'is_mane_select'?: boolean;
+    /**
+     * 
      * @type {string}
      * @memberof Transcript
      */
@@ -1095,18 +1143,6 @@ export interface Transcript {
      * @memberof Transcript
      */
     'lrt_score'?: number;
-    /**
-     * TODO
-     * @type {boolean}
-     * @memberof Transcript
-     */
-    'mane_plus'?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Transcript
-     */
-    'mane_select'?: boolean;
     /**
      * 
      * @type {number}
@@ -1125,12 +1161,6 @@ export interface Transcript {
      * @memberof Transcript
      */
     'polyphen2_hvar_score'?: number;
-    /**
-     * TODO
-     * @type {string}
-     * @memberof Transcript
-     */
-    'refseq_mrna_id'?: string;
     /**
      * 
      * @type {number}
@@ -1242,7 +1272,7 @@ export interface VariantConsequence {
      * @type {boolean}
      * @memberof VariantConsequence
      */
-    'picked'?: boolean;
+    'is_picked'?: boolean;
     /**
      * 
      * @type {number}
@@ -1319,12 +1349,6 @@ export interface VariantOverview {
     'cadd_score'?: number;
     /**
      * 
-     * @type {boolean}
-     * @memberof VariantOverview
-     */
-    'canonical'?: boolean;
-    /**
-     * 
      * @type {Array<string>}
      * @memberof VariantOverview
      */
@@ -1334,13 +1358,7 @@ export interface VariantOverview {
      * @type {string}
      * @memberof VariantOverview
      */
-    'clinvar_id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantOverview
-     */
-    'coding_dna_change'?: string;
+    'clinvar_name'?: string;
     /**
      * 
      * @type {number}
@@ -1348,13 +1366,19 @@ export interface VariantOverview {
      */
     'dann_score'?: number;
     /**
-     * TODO
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
+    'dna_change'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof VariantOverview
      */
     'exon_rank'?: number;
     /**
-     * TODO
+     * 
      * @type {number}
      * @memberof VariantOverview
      */
@@ -1391,6 +1415,18 @@ export interface VariantOverview {
     'gnomad_v3_af': number;
     /**
      * 
+     * @type {boolean}
+     * @memberof VariantOverview
+     */
+    'is_canonical'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VariantOverview
+     */
+    'is_mane_select'?: boolean;
+    /**
+     * 
      * @type {string}
      * @memberof VariantOverview
      */
@@ -1409,16 +1445,10 @@ export interface VariantOverview {
     'lrt_score'?: number;
     /**
      * 
-     * @type {boolean}
+     * @type {Array<OmimGenePanel>}
      * @memberof VariantOverview
      */
-    'mane_select'?: boolean;
-    /**
-     * 
-     * @type {Array<OmimGeneSet>}
-     * @memberof VariantOverview
-     */
-    'omim_conditions'?: Array<OmimGeneSet>;
+    'omim_conditions'?: Array<OmimGenePanel>;
     /**
      * 
      * @type {number}
@@ -1444,7 +1474,7 @@ export interface VariantOverview {
      */
     'picked_consequences': Array<string>;
     /**
-     * TODO
+     * 
      * @type {number}
      * @memberof VariantOverview
      */
@@ -1461,12 +1491,6 @@ export interface VariantOverview {
      * @memberof VariantOverview
      */
     'polyphen2_hvar_score'?: number;
-    /**
-     * TODO
-     * @type {string}
-     * @memberof VariantOverview
-     */
-    'refseq_mrna_id'?: string;
     /**
      * 
      * @type {number}

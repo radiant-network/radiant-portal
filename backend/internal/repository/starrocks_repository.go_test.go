@@ -45,7 +45,7 @@ func Test_GetOccurrences(t *testing.T) {
 			assert.Equal(t, 3, occurrences[0].Pc)
 			assert.Equal(t, 0.01, occurrences[0].Af)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
-			assert.Equal(t, 1.0, occurrences[0].AdRatio)
+			assert.Equal(t, float32(1.0), occurrences[0].AdRatio)
 			assert.Equal(t, "class1", occurrences[0].VariantClass)
 		}
 	})
@@ -160,7 +160,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 			assert.Equal(t, 3, occurrences[0].Pc)
 			assert.Equal(t, 0.01, occurrences[0].Af)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
-			assert.Equal(t, 1.0, occurrences[0].AdRatio)
+			assert.Equal(t, float32(1.0), occurrences[0].AdRatio)
 			assert.Equal(t, "class1", occurrences[0].VariantClass)
 		}
 	})
@@ -629,7 +629,6 @@ func Test_GetSequencing(t *testing.T) {
 		sequencing, err := repo.GetSequencing(1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, sequencing.SeqId)
-		assert.Equal(t, "WGS", sequencing.ExperimentType)
 		assert.Equal(t, "germline", sequencing.AnalysisType)
 	})
 }
@@ -706,11 +705,10 @@ func Test_GetVariantOverview(t *testing.T) {
 		repo := NewStarrocksRepository(db)
 		variantOverview, err := repo.GetVariantOverview(1000)
 		assert.NoError(t, err)
-		assert.Equal(t, "locus1", variantOverview.LocusFull)
+		assert.Equal(t, "locus1", variantOverview.Locus)
 		assert.Equal(t, float32(0.1), variantOverview.SiftScore)
 		assert.Equal(t, "T", variantOverview.SiftPred)
 		assert.Equal(t, 2, len(variantOverview.OmimConditions))
-		assert.Equal(t, "111111", variantOverview.ClinvarId)
 	})
 }
 

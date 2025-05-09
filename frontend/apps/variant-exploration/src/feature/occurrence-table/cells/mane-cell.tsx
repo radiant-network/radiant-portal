@@ -5,26 +5,30 @@ import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-se
 import TranscriptManePlusIcon from '@/components/base/icons/transcript-mane-plus-icon';
 
 type ManeCellProps = {
-  canonical?: boolean;
-  mane_select?: boolean;
-  mane_plus?: boolean;
+  isCanonical?: boolean;
+  isManeSelect?: boolean;
+  isManePlus?: boolean;
 };
 
-function ManeCell({ canonical, mane_select, mane_plus }: ManeCellProps) {
-  if (!canonical && !mane_select && !mane_plus) return <EmptyCell />;
+function ManeCell({ isCanonical: isCanonical, isManeSelect, isManePlus }: ManeCellProps) {
+  if (!isCanonical && !isManeSelect && !isManePlus) return <EmptyCell />;
 
   const pills = [
     {
-      condition: canonical,
+      condition: isCanonical,
       icon: <TranscriptCanonicalIcon className="text-primary" size={18} />,
       tooltip: 'Canonical',
     },
     {
-      condition: mane_select,
+      condition: isManeSelect,
       icon: <TranscriptManeSelectIcon className="text-primary" size={18} />,
       tooltip: 'Mane Select',
     },
-    { condition: mane_plus, icon: <TranscriptManePlusIcon className="text-primary" size={18} />, tooltip: 'Mane Plus' },
+    {
+      condition: isManePlus,
+      icon: <TranscriptManePlusIcon className="text-primary" size={18} />,
+      tooltip: 'Mane Plus',
+    },
   ];
 
   return (

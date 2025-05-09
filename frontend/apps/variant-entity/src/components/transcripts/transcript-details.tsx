@@ -24,7 +24,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
           >
             {data?.transcript_id}
           </a>
-          {data.canonical && (
+          {data.is_canonical && (
             <Tooltip>
               <TooltipTrigger>
                 <TranscriptCanonicalIcon size={16} className="text-primary" />
@@ -35,7 +35,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
         </div>
         <div className="flex flex-col gap-2 text-muted-foreground text-xs">
           <span>Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : '-'}</span>
-          {data.coding_dna_change && <span>{data.coding_dna_change}</span>}
+          {data.dna_change && <span>{data.dna_change}</span>}
           <div>
             <Tooltip>
               <TooltipTrigger>{data.aa_change && <span>{data.aa_change}</span>}</TooltipTrigger>
@@ -63,20 +63,6 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
             <span className="text-muted-foreground">{t('variant.predictions.phylop17way')}:</span>{' '}
             {data.phyloP17way_primate}
           </>
-        ) : (
-          '-'
-        )}
-      </div>
-      <div>
-        {data.refseq_mrna_id ? (
-          <a
-            href={`https://www.ncbi.nlm.nih.gov/nuccore/${data.refseq_mrna_id}?report=graph`}
-            target="_blank"
-            rel="noreferrer"
-            className="hover:underline"
-          >
-            {data.refseq_mrna_id}
-          </a>
         ) : (
           '-'
         )}

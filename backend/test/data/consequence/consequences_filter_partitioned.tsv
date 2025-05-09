@@ -1,0 +1,15 @@
+part	locus_id	consequence	symbol	impact_score	sift_pred	is_deleterious
+1	1000	csq1	BRAF	3	D	true
+1	1000	csq2	BRAF	1	T	true
+1	1000	csq1	TP53	4	D	true
+1	1001	csq1	BRAF	1	T	true
+1	1001	csq1	TP53	1	T	true
+1	1002	csq1	BRAF	3	D	true
+1	1003	csq1	BRAF	1	T	true
+1	1004	csq1	BRAF	3	D	true
+1	1005	csq1	BRAF	1	T	true
+1	1006	csq1	BRAF	3	D	true
+1	1007	csq1	BRAF	1	T	true
+1	1008	csq1	BRAF	3	D	true
+1	1009	csq1	BRAF	1	T	true
+1	1010	csq1	BRAF	1	T	true

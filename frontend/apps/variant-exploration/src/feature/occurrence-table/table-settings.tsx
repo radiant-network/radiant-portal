@@ -87,9 +87,11 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       ),
       size: 225,
     }),
-    columnHelper.accessor(row => row.mane_select, {
+    columnHelper.accessor(row => row, {
       id: 'maneSelect',
-      cell: info => <ManeCell mane_select={info.getValue()} />,
+      cell: info => (
+        <ManeCell isManeSelect={info.getValue().is_mane_select} isCanonical={info.getValue().is_canonical} />
+      ),
       header: t('variant.headers.maneSelect'),
     }),
     columnHelper.accessor(row => row.omim_inheritance_code, {

@@ -17,9 +17,9 @@ export default function OccurrenceExpendTranscript({ occurrence }: OccurrenceExp
     <div className="flex items-center gap-3">
       <div className="italic">todo ensembl</div>
       <Separator orientation="vertical" className="h-5" />
-      {occurrence.mane_select && (
+      {occurrence.is_mane_select && (
         <>
-          <div>{occurrence.mane_select && <TranscriptManeSelectIcon size={18} className="text-primary" />}</div>
+          <div>{occurrence.is_mane_select && <TranscriptManeSelectIcon size={18} className="text-primary" />}</div>
           <Separator orientation="vertical" className="h-5" />
         </>
       )}

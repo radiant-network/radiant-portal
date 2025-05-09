@@ -1,3 +1,3 @@
-seq_id	part	locus_id	gq	filter	zygosity	ad_ratio	has_alt	chromosome	start
-1	1	1000	100	PASS	HET	1.0	1	1	1
-2	1	1000	100	PASS	HET	1.0	1	1	1
+part	seq_id	locus_id	gq	filter	zygosity	ad_ratio
+1	1	1000	100	PASS	HET	1.0
+1	2	1000	100	PASS	HET	1.0
