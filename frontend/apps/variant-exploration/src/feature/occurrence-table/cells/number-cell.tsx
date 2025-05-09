@@ -8,7 +8,7 @@ type NumberCellProps = {
 function NumberCell({ value }: NumberCellProps) {
   if (value === undefined) return <EmptyCell />;
 
-  return <span>{value}</span>;
+  return <span>{value.toFixed(2)}</span>;
 }
 
 export default NumberCell;

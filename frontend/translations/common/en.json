@@ -253,7 +253,7 @@
   },
   "variant": {
     "headers": {
-      "adRatio": "Ad ratio",
+      "adRatio": "AD Ratio",
       "clinVar": "ClinVar",
       "hgvsg": "Variant",
       "clinicalInterpretation": "Clinical Interpretation",
@@ -418,7 +418,8 @@
       "indel": "Indel",
       "insertion": "Insertion",
       "snv": "SNV",
-      "deletion": "Deletion"
+      "deletion": "Deletion",
+      "sequence_alteration": "Sequence Alteration"
     },
     "canonicalTranscript": "Canonical Transcript"
   },
