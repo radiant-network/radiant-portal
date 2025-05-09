@@ -418,7 +418,8 @@
       "indel": "Indel",
       "insertion": "Insertion",
       "snv": "SNV",
-      "deletion": "Deletion"
+      "deletion": "Deletion",
+      "sequence_alteration": "Sequence Alteration"
     },
     "canonicalTranscript": "Canonical Transcript"
   },

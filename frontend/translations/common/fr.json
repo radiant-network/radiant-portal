@@ -444,7 +444,8 @@
       "indel": "Indel",
       "insertion": "Insertion",
       "snv": "SNV",
-      "deletion": "Effacement"
+      "deletion": "Effacement",
+      "sequence_alteration": "Modification de séquence"
     },
     "canonicalTranscript": "Canonical Transcript"
   },
