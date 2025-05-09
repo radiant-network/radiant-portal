@@ -279,7 +279,7 @@
   },
   "variant": {
     "headers": {
-      "adRatio": "Ratio Ad",
+      "adRatio": "Ratio AD",
       "clinVar": "ClinVar",
       "hgvsg": "Variant",
       "clinicalInterpretation": "Interprétation Clinique",
