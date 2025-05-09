@@ -16,7 +16,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { ColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import { ColumnOrderState } from '@tanstack/react-table';
+import { ColumnOrderState, ColumnPinningState } from '@tanstack/react-table';
 import { Button } from '@/base/ui/button';
 import { SettingsIcon } from 'lucide-react';
 import TableSortableColumnSetting from '@/components/base/data-table/data-table-sortable-column-setting';
@@ -32,18 +32,21 @@ import {
  * @param settings
  * @returns ['id1', 'id2']
  */
-function deserializeColumnFixed(settings: ColumnSettings[]): string[] {
-  return settings
+function deserializeColumnFixed(settings: ColumnSettings[], columnPinning: ColumnPinningState): string[] {
+  const result = settings
     .sort((a, b) => a.index - b.index)
     .filter(setting => setting.fixed === true)
     .map(setting => setting.id);
-}
 
-/**
- * @returns list of all columns id that are not fixed
- */
-function deserializeColumns(columns: ColumnSettings[]) {
-  return columns.map(column => column.id);
+  const iterator = (id: string) => {
+    if (!result.includes(id)) {
+      result.push(id);
+    }
+  };
+  columnPinning.left?.forEach(iterator);
+  columnPinning.right?.forEach(iterator);
+
+  return result;
 }
 
 /**
@@ -52,6 +55,7 @@ function deserializeColumns(columns: ColumnSettings[]) {
  */
 type TableColumnSettingsProps = {
   columnOrder: ColumnOrderState;
+  columnPinning: ColumnPinningState;
   defaultSettings: ColumnSettings[];
   visiblitySettings: {
     [key: string]: boolean;
@@ -64,6 +68,7 @@ type TableColumnSettingsProps = {
 
 function TableColumnSettings({
   columnOrder,
+  columnPinning,
   defaultSettings,
   pristine,
   visiblitySettings,
@@ -71,7 +76,7 @@ function TableColumnSettings({
   handleReset,
   handleOrderChange,
 }: TableColumnSettingsProps) {
-  const fixedColumns = deserializeColumnFixed(defaultSettings);
+  const fixedColumns = deserializeColumnFixed(defaultSettings, columnPinning);
   const [items, setItems] = useState<UniqueIdentifier[]>(columnOrder);
   const sensors = useSensors(
     useSensor(PointerSensor),
