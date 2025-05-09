@@ -513,6 +513,7 @@ function DataTable<T>({
         <div>
           {/* columns order and visibility */}
           <TableColumnSettings
+            columnPinning={tableCache.columnPinning}
             columnOrder={tableLocaleStorage.columnOrder}
             defaultSettings={defaultColumnSettings}
             visiblitySettings={columnVisibility}
