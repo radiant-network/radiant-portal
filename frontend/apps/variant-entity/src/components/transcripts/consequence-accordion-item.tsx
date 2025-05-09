@@ -27,6 +27,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
                 target="_blank"
                 rel="noreferrer"
                 className="hover:underline"
+                onClick={e => e.stopPropagation()}
               >
                 {data.symbol}
               </a>

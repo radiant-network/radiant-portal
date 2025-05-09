@@ -483,6 +483,8 @@
     }
   },
   "variantEntity": {
+    "notFound": "Variant not found",
+    "notFound.button": "Back to variant list",
     "header": {
       "variants": "Variants",
       "germline": "Germline"
@@ -529,7 +531,8 @@
       "title": "Conditions"
     },
     "transcripts": {
-      "title": "Transcripts"
+      "title": "Transcripts",
+      "aminoAcidSubstitution": "Amino Acid Substitution"
     },
     "cases": {
       "title": "Cases"

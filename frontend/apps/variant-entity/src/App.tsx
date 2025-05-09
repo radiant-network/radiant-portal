@@ -11,10 +11,12 @@ import TranscriptsTab from './components/transcripts/transcripts-tab';
 import CasesTab from './components/cases-tab';
 import { VariantEntityTabs } from './types';
 import { variantsApi } from '@/utils/api';
-import { VariantHeader } from '@/api/api';
+import { VariantHeader, ApiError } from '@/api/api';
 import useSWR from 'swr';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
+import Result from '@/components/base/result';
+import { Button } from '@/components/base/ui/button';
 
 type VariantHeaderInput = {
   key: string;
@@ -32,7 +34,7 @@ export default function App() {
   const params = useParams<{ locusId: string }>();
   const [activeTab, setActiveTab] = useState<VariantEntityTabs>(VariantEntityTabs.Overview);
 
-  const { data, isLoading } = useSWR<VariantHeader, any, VariantHeaderInput>(
+  const { data, error, isLoading } = useSWR<VariantHeader, ApiError, VariantHeaderInput>(
     {
       key: 'variant-header',
       locusId: params.locusId!,
@@ -40,6 +42,7 @@ export default function App() {
     fetchVariantHeader,
     {
       revalidateOnFocus: false,
+      shouldRetryOnError: false,
     },
   );
 
@@ -57,6 +60,21 @@ export default function App() {
     window.history.pushState({}, '', `#${value}`);
     setActiveTab(value);
   }, []);
+
+  if (!isLoading && error?.status === 404) {
+    return (
+      <Result
+        status="404"
+        message={t('variantEntity.notFound')}
+        className="h-screen"
+        extra={
+          <Link to="/">
+            <Button>{t('variantEntity.notFound.button')}</Button>
+          </Link>
+        }
+      />
+    );
+  }
 
   return (
     <main className="bg-muted/40 h-screen overflow-auto">
