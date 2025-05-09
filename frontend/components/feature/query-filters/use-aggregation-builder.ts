@@ -19,7 +19,7 @@ export function useAggregationBuilder(field: string, size: number = 30, shouldFe
     data = null;
   } else {
     data = {
-      seqId: '5011',
+      seqId: '1',
       aggregationBody: {
         field: field,
         size: size,

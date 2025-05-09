@@ -45,7 +45,7 @@ async function fetchOccurrencesCount(input: OccurrenceCountInput) {
   return response.data;
 }
 
-const SEQ_ID = '5011';
+const SEQ_ID = '1';
 
 function App() {
   const config = useConfig();
