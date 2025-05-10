@@ -517,6 +517,8 @@
     }
   },
   "variantEntity": {
+    "notFound": "Variante introuvable",
+    "notFound.button": "Retour à la liste de variants",
     "header": {
       "variants": "Variants",
       "germline": "Germline"
