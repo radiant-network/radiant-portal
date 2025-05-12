@@ -45,6 +45,9 @@ import {
   TableCacheProps,
   useTableStateObserver,
 } from '@/components/base/data-table/hooks/use-table-localstorage';
+import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
+
+export const IS_SERVER = typeof window === 'undefined';
 
 export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
   id: string;
@@ -64,7 +67,7 @@ const ROW_HEIGHT = 41;
  */
 type SubComponentProp<TData> = (data: TData) => React.JSX.Element;
 
-type TableProps<TData> = {
+export type TableProps<TData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
   data: TData[];
@@ -345,7 +348,7 @@ function getRowFlexRender({
  *  enablePinning: false,
  * }]
  */
-function DataTable<T>({
+function TranstackTable<T>({
   id,
   columns,
   data,
@@ -439,7 +442,7 @@ function DataTable<T>({
         tableLocaleStorage.columnSizing[header.column.id] ?? header.column.getSize();
     });
     return colSizes;
-  }, [tableLocaleStorage.columnSizing]);
+  }, [table.getState().columnSizingInfo, table.getState().columnSizing, tableLocaleStorage.columnSizing]);
 
   /**
    * Sync table state with local storage
@@ -552,65 +555,63 @@ function DataTable<T>({
           </Tooltip>
         </div>
       </div>
-      <Table id={id} containerRef={containerRef} style={{ ...columnSizeVars }}>
-        <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
-          {table.getHeaderGroups().map(headerGroup => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <TableHead
-                  key={header.id}
-                  className={cn('group', getColumnPinningExtraCN(header.column))}
-                  style={{
-                    width: `calc(var(--header-${header?.id}-size) * 1px)`,
-                    ...getColumnPinningExtraStyles(header.column),
-                  }}
-                >
-                  <>
-                    <div className="flex items-center gap-2">
-                      {/* Header rendering */}
-                      <div className="flex-1">{flexRender(header.column.columnDef.header, header.getContext())}</div>
+      <DataTableSkeletonLoading
+        loading={loadingStates?.list}
+        headerGroups={table.getHeaderGroups()}
+        pagination={pagination}
+        columnSettings={defaultColumnSettings}
+      >
+        <Table id={id} containerRef={containerRef} style={{ ...columnSizeVars }}>
+          <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <TableHead
+                    key={header.id}
+                    className={cn('group', getColumnPinningExtraCN(header.column))}
+                    style={{
+                      width: `calc(var(--header-${header?.id}-size) * 1px)`,
+                      ...getColumnPinningExtraStyles(header.column),
+                    }}
+                  >
+                    <>
+                      <div className="flex items-center gap-2">
+                        {/* Header rendering */}
+                        <div className="flex-1">{flexRender(header.column.columnDef.header, header.getContext())}</div>
 
-                      {/* Table Header Actions, only display on hover */}
-                      <TableHeaderActions header={header} />
-                    </div>
+                        {/* Table Header Actions, only display on hover */}
+                        <TableHeaderActions header={header} />
+                      </div>
 
-                    {/* Resize Grip */}
-                    {header.column.getCanResize() && (
-                      <div
-                        onDoubleClick={() => header.column.resetSize()}
-                        onMouseDown={header.getResizeHandler()}
-                        onTouchStart={header.getResizeHandler()}
-                        className={cn(
-                          'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
-                          table.options.columnResizeDirection,
-                          header.column.getIsResizing() ? 'opacity-100' : '',
-                        )}
-                      />
-                    )}
-                  </>
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {/* Render skeleton loading */}
-          {loadingStates?.list &&
-            new Array(pagination.pageSize).fill(0).map((_, index) => (
-              <TableRow key={`skeleton-row-${index}`}>
-                <TableCell colSpan={defaultColumnSettings.length}>
-                  <Skeleton className="w-full h-[20px]" />
-                </TableCell>
+                      {/* Resize Grip */}
+                      {header.column.getCanResize() && (
+                        <div
+                          onDoubleClick={() => header.column.resetSize()}
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className={cn(
+                            'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
+                            table.options.columnResizeDirection,
+                            header.column.getIsResizing() ? 'opacity-100' : '',
+                          )}
+                        />
+                      )}
+                    </>
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
+          </TableHeader>
+          <TableBody>
+            {/* Render pinned rows */}
+            {table.getTopRows().map(rowFlexRender)}
 
-          {/* Render pinned rows */}
-          {!loadingStates?.list && table.getTopRows().map(rowFlexRender)}
+            {/* Render table content */}
+            {table.getCenterRows().map(rowFlexRender)}
+          </TableBody>
+        </Table>
+      </DataTableSkeletonLoading>
 
-          {/* Render table content */}
-          {!loadingStates?.list && table.getCenterRows().map(rowFlexRender)}
-        </TableBody>
-      </Table>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div>
           {/* PageSize select */}
@@ -666,6 +667,25 @@ function DataTable<T>({
       </div>
     </div>
   );
+}
+
+/**
+ * Tanstack can cause some side effects with SSR when using
+ * - localStorage
+ * - loading and resize columns
+ *
+ * @fixme to be disabled when using userApi to see if the same issues happens
+ */
+function DataTable<T>(props: TableProps<T>) {
+  const [isClient, setIsClient] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (IS_SERVER || !isClient) return null;
+
+  return <TranstackTable {...props} />;
 }
 
 export default DataTable;
