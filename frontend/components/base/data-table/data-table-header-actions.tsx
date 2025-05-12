@@ -80,12 +80,16 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
       {/* Pin/Unpin column */}
       {header.column.getCanPin() && (
         <DropdownMenu onOpenChange={open => setIsPinningDropdownActive(open)}>
-          <DropdownMenuTrigger
-            className={cn({
-              'opacity-0 group-hover:opacity-100': !isPinningDropdownActive,
-            })}
-          >
-            <Pin className="size-4" />
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              iconOnly
+              className={cn('size-5', {
+                'opacity-0 group-hover:opacity-100': !isPinningDropdownActive,
+              })}
+            >
+              <Pin />
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
             <DropdownMenuContent>
@@ -113,7 +117,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn({
+              className={cn('size-5', {
                 'opacity-0 group-hover:opacity-100': !header.column.getIsSorted(),
               })}
               onClick={header.column.getToggleSortingHandler()}

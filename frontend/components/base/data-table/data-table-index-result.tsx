@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/base/ui/skeleton";
-import { numberWithCommas } from "@/components/lib/number-format";
+import { Skeleton } from '@/components/base/ui/skeleton';
+import { numberWithCommas } from '@/components/lib/number-format';
 
 /**
  * TableIndexResult
@@ -12,12 +12,7 @@ type TableIndexResultProp = {
   pageSize: number;
 };
 
-function TableIndexResult({
-  loading,
-  pageIndex,
-  pageSize,
-  total,
-}: TableIndexResultProp) {
+function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexResultProp) {
   if (loading) return <Skeleton className="h-[24px] w-[250px]" />;
 
   let to = pageSize * pageIndex;
@@ -28,9 +23,8 @@ function TableIndexResult({
   }
 
   return (
-    <span>
-      Results {numberWithCommas(from)} - {numberWithCommas(to)} of{" "}
-      {numberWithCommas(total)}
+    <span className="text-sm text-muted-foreground">
+      Results {numberWithCommas(from)} - {numberWithCommas(to)} of {numberWithCommas(total)}
     </span>
   );
 }
