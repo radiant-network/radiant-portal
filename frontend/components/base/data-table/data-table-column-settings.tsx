@@ -15,7 +15,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { ColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { ColumnSettings } from '@/components/base/data-table/data-table';
 import { ColumnOrderState, ColumnPinningState } from '@tanstack/react-table';
 import { Button } from '@/base/ui/button';
 import { SettingsIcon } from 'lucide-react';
@@ -32,21 +32,19 @@ import {
  * @param settings
  * @returns ['id1', 'id2']
  */
-function deserializeColumnFixed(settings: ColumnSettings[], columnPinning: ColumnPinningState): string[] {
+function deserializeColumnsFixed(settings: ColumnSettings[]): string[] {
   const result = settings
     .sort((a, b) => a.index - b.index)
     .filter(setting => setting.fixed === true)
     .map(setting => setting.id);
 
-  const iterator = (id: string) => {
-    if (!result.includes(id)) {
-      result.push(id);
-    }
-  };
-  columnPinning.left?.forEach(iterator);
-  columnPinning.right?.forEach(iterator);
-
   return result;
+}
+
+function filterColumnById(defaultSettings: ColumnSettings[]) {
+  return function (id: string) {
+    return defaultSettings.find(column => column.id === id);
+  };
 }
 
 /**
@@ -76,8 +74,11 @@ function TableColumnSettings({
   handleReset,
   handleOrderChange,
 }: TableColumnSettingsProps) {
-  const fixedColumns = deserializeColumnFixed(defaultSettings, columnPinning);
-  const [items, setItems] = useState<UniqueIdentifier[]>(columnOrder);
+  const fixedColumns = deserializeColumnsFixed(defaultSettings);
+  const columnsLeft = (columnPinning.left ?? []).map(filterColumnById(defaultSettings));
+  const columnsRight = (columnPinning.right ?? []).map(filterColumnById(defaultSettings));
+  const [columnsMiddle, setColumnsMiddle] = useState<UniqueIdentifier[]>(columnOrder);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -88,15 +89,15 @@ function TableColumnSettings({
     const { active, over } = event;
     if (!over) return;
     if (active.id !== over.id) {
-      setItems(items => {
+      setColumnsMiddle(items => {
         return arrayMove(items, items.indexOf(active.id), items.indexOf(over.id));
       });
     }
   }
 
   useEffect(() => {
-    handleOrderChange(items as ColumnOrderState);
-  }, [items]);
+    handleOrderChange(columnsMiddle as ColumnOrderState);
+  }, [columnsMiddle]);
 
   return (
     <span>
@@ -109,15 +110,51 @@ function TableColumnSettings({
         <DropdownMenuPortal>
           <DropdownMenuContent>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={items} strategy={verticalListSortingStrategy}>
-                {items.map(itemId => {
-                  const column = defaultSettings.find(column => column.id === itemId);
-                  if (!column) return null;
-                  if (fixedColumns.includes(column.id)) return;
+              <SortableContext items={columnsMiddle} strategy={verticalListSortingStrategy}>
+                {columnsLeft.map(column => {
+                  if (!column || fixedColumns.includes(column.id)) return null;
                   return (
                     <TableSortableColumnSetting
+                      sortEnabled={false}
+                      key={column.id}
+                      id={column.id}
+                      column={column}
+                      checked={visiblitySettings[column.id]}
+                      handleCheckboxChange={handleVisiblityChange}
+                    />
+                  );
+                })}
+
+                {columnsMiddle.map(itemId => {
+                  const column = defaultSettings.find(column => column.id === itemId);
+                  if (
+                    !column ||
+                    (columnPinning.left ?? []).includes(column.id) ||
+                    (columnPinning.right ?? []).includes(column.id) ||
+                    fixedColumns.includes(column.id)
+                  ) {
+                    return null;
+                  }
+
+                  return (
+                    <TableSortableColumnSetting
+                      sortEnabled={true}
                       key={itemId}
                       id={itemId}
+                      column={column}
+                      checked={visiblitySettings[column.id]}
+                      handleCheckboxChange={handleVisiblityChange}
+                    />
+                  );
+                })}
+
+                {columnsRight.map(column => {
+                  if (!column || fixedColumns.includes(column.id)) return null;
+                  return (
+                    <TableSortableColumnSetting
+                      sortEnabled={false}
+                      key={column.id}
+                      id={column.id}
                       column={column}
                       checked={visiblitySettings[column.id]}
                       handleCheckboxChange={handleVisiblityChange}
@@ -131,7 +168,7 @@ function TableColumnSettings({
               variant="ghost"
               className="mt-2"
               onClick={() => {
-                setItems(columnOrder);
+                setColumnsMiddle(columnOrder);
                 handleReset();
               }}
             >

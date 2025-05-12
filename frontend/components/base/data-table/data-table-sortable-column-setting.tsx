@@ -4,40 +4,41 @@ import { UniqueIdentifier } from '@dnd-kit/core';
 import { ColumnSettings } from '@/components/base/data-table/data-table';
 import { GripVerticalIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Checkbox } from '../ui/checkbox';
-import { useI18n } from '@/components/hooks/i18n';
+import VisibilityColumnSetting from '@/components/base/data-table/data-table-column-visibility-settings';
 
 /**
  * SortableColumnSetting
- * - Checkbox manage columns visibility
- * - Drag'n drop manage columns order
+ * - Manage columns order through Drag'n drop
  */
-type SortableColumnSettingProps<TData> = {
+type SortableColumnSettingProps = {
   id: UniqueIdentifier;
   column: ColumnSettings;
   checked: boolean;
+  sortEnabled: boolean;
   handleCheckboxChange: (target: string, checked: boolean) => void;
 };
-function TableSortableColumnSetting({ id, column, checked, handleCheckboxChange }: SortableColumnSettingProps<any>) {
-  const { t } = useI18n();
+function TableSortableColumnSetting({ id, checked, handleCheckboxChange, sortEnabled }: SortableColumnSettingProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
+  if (!sortEnabled) {
+    return (
+      <div key={id} className={cn('flex items-center gap-[8xp] mt-[8px] mr-[8px]')}>
+        <GripVerticalIcon className="mr-[4px] opacity-50  cursor-not-allowed " size={14} />
+        <VisibilityColumnSetting id={id} checked={checked} handleCheckboxChange={handleCheckboxChange} />
+      </div>
+    );
+  }
+
   return (
     <div key={id} ref={setNodeRef} style={style} className={cn('flex items-center gap-[8xp] mt-[8px] mr-[8px]')}>
       <div {...attributes} {...listeners}>
         <GripVerticalIcon className="mr-[4px]" size={14} />
       </div>
-      <Checkbox
-        checked={checked}
-        onCheckedChange={value => {
-          handleCheckboxChange(column.id, !!value);
-        }}
-      />
-      <label className="flex pl-[4px] text-[15px] leading-none">{t(`variant.headers.${column.id}`)}</label>
+      <VisibilityColumnSetting id={id} checked={checked} handleCheckboxChange={handleCheckboxChange} />
     </div>
   );
 }
