@@ -57,6 +57,7 @@ func (m *MockRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*
 func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurrence, error) {
 	return &types.ExpendedOccurrence{
 		LocusId:      1000,
+		Chromosome:   "1",
 		Hgvsg:        "hgvsg1",
 		SiftPred:     "T",
 		SiftScore:    0.1,
@@ -188,6 +189,7 @@ func Test_GetExpendedOccurrenceHandler(t *testing.T) {
 	assert.JSONEq(t, `{
 		"cadd_phred":0.1, 
 		"cadd_score":0.1,
+		"chromosome":"1",
 		"fathmm_pred":"T",
 		"fathmm_score":0.1, 
 		"filter":"PASS", 
@@ -197,6 +199,7 @@ func Test_GetExpendedOccurrenceHandler(t *testing.T) {
 		"gnomad_v3_af":0.01, 
 		"hgvsg":"hgvsg1", 
 		"is_canonical":false,
+		"is_mane_plus":false,
 		"is_mane_select":false,
 		"locus_id":1000,
 		"picked_consequences":["splice acceptor"], 

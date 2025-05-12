@@ -387,7 +387,7 @@ func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*Ex
 	tx := r.db.Table("occurrences o")
 	tx = tx.Joins("JOIN consequences c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
 	tx = tx.Joins("JOIN variants v ON o.locus_id=v.locus_id")
-	tx = tx.Select("c.locus_id, v.hgvsg, v.symbol, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.sift_score, c.sift_pred, c.fathmm_score, c.fathmm_pred, c.cadd_score, c.cadd_phred, c.revel_score, v.gnomad_v3_af, o.filter, o.gq, o.ad_alt, o.ad_total, o.info_qd, v.is_canonical, v.is_mane_select, v.rsnumber, v.aa_change, c.dna_change, v.consequences, v.vep_impact")
+	tx = tx.Select("c.locus_id, v.hgvsg, v.chromosome, v.start, v.symbol, v.transcript_id, v.is_canonical, v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, v.gnomad_v3_af, c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, o.zygosity, o.transmission_mode, o.parental_origin, o.father_calls, o.mother_calls, o.info_qd, o.ad_alt, o.ad_total, o.filter, o.gq")
 
 	var expendedOccurrence ExpendedOccurrence
 	err := tx.First(&expendedOccurrence).Error
@@ -399,7 +399,22 @@ func (r *StarrocksRepository) GetExpendedOccurrence(seqId int, locusId int) (*Ex
 		}
 	}
 
-	return &expendedOccurrence, err
+	txOmim := r.db.Table("omim_gene_panel omim")
+	txOmim = txOmim.Select("omim.omim_phenotype_id, omim.panel, omim.inheritance_code")
+	txOmim = txOmim.Where("omim.omim_phenotype_id is not null and omim.symbol = ?", expendedOccurrence.Symbol)
+	txOmim = txOmim.Order("omim.omim_phenotype_id asc")
+
+	var omimConditions []OmimGenePanel
+	errOmim := txOmim.Find(&omimConditions).Error
+	if errOmim != nil {
+		if !errors.Is(errOmim, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching omim conditions: %w", errOmim)
+		} else {
+			return &expendedOccurrence, errOmim
+		}
+	}
+	expendedOccurrence.OmimConditions = omimConditions
+	return &expendedOccurrence, nil
 }
 
 func (r *StarrocksRepository) GetVariantHeader(locusId int) (*VariantHeader, error) {
@@ -461,7 +476,7 @@ func (r *StarrocksRepository) GetVariantConsequences(locusId int) (*[]VariantCon
 	tx := r.db.Table("consequences c")
 	tx = tx.Select("c.is_picked, c.symbol, c.biotype, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.transcript_id, c.vep_impact, c.is_canonical, c.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.dna_change, c.aa_change, c.consequences, c.sift_pred, c.sift_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.revel_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate")
 	tx = tx.Where("c.locus_id = ?", locusId)
-	tx = tx.Order("c.is_picked desc, c.symbol asc")
+	tx = tx.Order("c.symbol asc")
 
 	var consequences []Consequence
 	err := tx.Find(&consequences).Error

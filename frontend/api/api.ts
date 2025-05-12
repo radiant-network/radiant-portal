@@ -178,7 +178,49 @@ export interface ExpendedOccurrence {
      * @type {string}
      * @memberof ExpendedOccurrence
      */
+    'chromosome'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpendedOccurrence
+     */
+    'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'dann_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
     'dna_change'?: string;
+    /**
+     * TODO
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'end'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'exon_rank'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'exon_total'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ExpendedOccurrence
+     */
+    'father_calls'?: Array<number>;
     /**
      * 
      * @type {string}
@@ -238,6 +280,12 @@ export interface ExpendedOccurrence {
      * @type {boolean}
      * @memberof ExpendedOccurrence
      */
+    'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpendedOccurrence
+     */
     'is_mane_select'?: boolean;
     /**
      * 
@@ -245,6 +293,24 @@ export interface ExpendedOccurrence {
      * @memberof ExpendedOccurrence
      */
     'locus_id': number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ExpendedOccurrence
+     */
+    'mother_calls'?: Array<number>;
+    /**
+     * 
+     * @type {Array<OmimGenePanel>}
+     * @memberof ExpendedOccurrence
+     */
+    'omim_conditions'?: Array<OmimGenePanel>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'parental_origin'?: string;
     /**
      * 
      * @type {Array<string>}
@@ -295,16 +361,40 @@ export interface ExpendedOccurrence {
     'spliceai_type'?: Array<string>;
     /**
      * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'start'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof ExpendedOccurrence
      */
     'symbol'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'transmission'?: string;
+    /**
+     * 
      * @type {VepImpact}
      * @memberof ExpendedOccurrence
      */
     'vep_impact'?: VepImpact;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
+    'zygosity'?: string;
 }
 
 
