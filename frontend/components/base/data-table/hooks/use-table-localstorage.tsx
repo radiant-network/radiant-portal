@@ -1,4 +1,4 @@
-import { ColumnVisiblity, DefaultColumnTableState } from '@/components/base/data-table/data-table';
+import { ColumnVisiblity, DefaultColumnTableState, TableColumnDef } from '@/components/base/data-table/data-table';
 import {
   ColumnOrderState,
   ColumnPinningState,
@@ -9,11 +9,18 @@ import {
 } from '@tanstack/react-table';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
+type TableCacheColumn = {
+  id: string;
+  minSize?: number;
+  maxSize?: number;
+};
+
 export type TableCacheProps = {
   columnOrder: ColumnOrderState;
   columnPinning: ColumnPinningState;
   columnSizing: ColumnSizingState;
   columnVisibility: ColumnVisiblity;
+  columns: TableCacheColumn[];
   rowPinning: {
     rows: Row<any>[];
     state: RowPinningState;
@@ -28,6 +35,7 @@ const DEFAULT_TABLE_CACHE: TableCacheProps = {
   columnPinning: {},
   columnSizing: {},
   columnVisibility: {},
+  columns: [],
   rowPinning: {
     rows: [],
     state: {
@@ -36,6 +44,9 @@ const DEFAULT_TABLE_CACHE: TableCacheProps = {
     },
   },
 };
+
+// SERVER SIDE RENDERING
+export const IS_SERVER = typeof window === 'undefined';
 
 type useTableStateObserverProps = {
   id: string;
@@ -78,9 +89,26 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
   // column sizing
   useEffect(() => {
     if (state.columnSizingInfo && !state.columnSizingInfo?.isResizingColumn && columnResizeRef.current) {
+      const column = tableCache.columns.find(column => column.id === columnResizeRef.current);
+      let size = state.columnSizing[columnResizeRef.current];
+
+      /**
+       * Resize handle is linked to mouse input, it can
+       * be released and return an invalid size of 0. This
+       * prevent invalid value
+       */
+      if (column?.minSize && size < column.minSize) {
+        size = column?.minSize;
+      } else if (column?.maxSize && size > column.maxSize) {
+        size = column.maxSize;
+      }
+
       setTableCache({
         ...tableCache,
-        columnSizing: state.columnSizing,
+        columnSizing: {
+          ...state.columnSizing,
+          [columnResizeRef.current]: size,
+        },
       });
     }
     columnResizeRef.current = state.columnSizingInfo?.isResizingColumn;
@@ -115,15 +143,23 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
   return { tableCache, setTableCache };
 }
 
-export function getTableLocaleStorage(id: string, defaultColumnTableState: DefaultColumnTableState) {
+export function getTableLocaleStorage(
+  id: string,
+  columns: TableCacheColumn,
+  defaultColumnTableState: DefaultColumnTableState,
+) {
   const storage = localStorage.getItem(id);
   if (storage == null) {
-    const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState };
+    const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState, columns: columns };
     localStorage.setItem(id, JSON.stringify(defaultCache));
     return defaultCache;
   }
-
-  return JSON.parse(storage);
+  // validate cache to the lastest version
+  const cache = JSON.parse(storage);
+  return {
+    ...cache,
+    columns,
+  };
 }
 
 export function cleanTableLocaleStorage(
