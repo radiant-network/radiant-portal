@@ -50,13 +50,13 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
         </div>
         <div className="flex flex-1 justify-end items-center gap-4 text-sm">
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">{t('variant.predictions.loeuf')}:</span>
-            <span>{data.gnomad_loeuf || '-'}</span>
+            <span className="text-muted-foreground">{t('variant.predictions.pli')}:</span>
+            <span>{data?.gnomad_pli?.toExponential(2) ?? '-'}</span>
           </div>
           <Separator orientation="vertical" className="h-4" />
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">{t('variant.predictions.pli')}:</span>
-            <span>{data?.gnomad_pli?.toExponential(2) ?? '-'}</span>
+            <span className="text-muted-foreground">{t('variant.predictions.loeuf')}:</span>
+            <span>{data.gnomad_loeuf || '-'}</span>
           </div>
           <Separator orientation="vertical" className="h-4" />
           <div className="flex items-center gap-2">

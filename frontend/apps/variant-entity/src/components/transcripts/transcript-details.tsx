@@ -83,21 +83,6 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
         '-'
       )}
     </div>,
-    <div key="psl-polyphen2hvar" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.polyphen2hvar')}:</span>
-      {data?.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined ? (
-        <span>
-          {t(`common.filters.labels.polyphen2_hvar_pred_value.${data.polyphen2_hvar_pred}`)} (
-          {data?.polyphen2_hvar_score})
-        </span>
-      ) : (
-        '-'
-      )}
-    </div>,
-    <div key="psl-revel" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.revel')}:</span>
-      <span>{data?.revel_score ?? '-'}</span>
-    </div>,
     <div key="psl-fathmm" className="flex gap-2 items-center">
       <span className="text-muted-foreground">{t('variant.predictions.fathmm')}:</span>
       {data?.fathmm_pred && data.fathmm_score !== undefined ? (
@@ -125,6 +110,21 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
       {data?.lrt_pred && data.lrt_score !== undefined ? (
         <span>
           {t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`)} ({data?.lrt_score})
+        </span>
+      ) : (
+        '-'
+      )}
+    </div>,
+    <div key="psl-revel" className="flex gap-2 items-center">
+      <span className="text-muted-foreground">{t('variant.predictions.revel')}:</span>
+      <span>{data?.revel_score ?? '-'}</span>
+    </div>,
+    <div key="psl-polyphen2hvar" className="flex gap-2 items-center">
+      <span className="text-muted-foreground">{t('variant.predictions.polyphen2hvar')}:</span>
+      {data?.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined ? (
+        <span>
+          {t(`common.filters.labels.polyphen2_hvar_pred_value.${data.polyphen2_hvar_pred}`)} (
+          {data?.polyphen2_hvar_score})
         </span>
       ) : (
         '-'
