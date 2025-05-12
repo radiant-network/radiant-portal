@@ -201,6 +201,8 @@ function App() {
           onServerSortingChange={setSorting}
           subComponent={(data: Occurrence) => <OccurrenceExpend occurrence={data} />}
           total={total?.count ?? 0}
+          enableColumnOrdering
+          enableFullscreen
         />
       </main>
     </div>

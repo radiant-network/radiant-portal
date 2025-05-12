@@ -33,7 +33,6 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
-import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 import { Button } from '@/components/base/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
@@ -82,6 +81,9 @@ export type TableProps<TData> = {
   onServerSortingChange: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProp<TData>;
   total: number;
+  enableColumnOrdering?: boolean;
+  enableFullscreen?: boolean;
+  tableIndexResultPosition?: 'top' | 'bottom';
 };
 
 export interface BaseColumnSettings {
@@ -360,6 +362,9 @@ function TranstackTable<T>({
   onServerSortingChange,
   subComponent,
   total,
+  enableColumnOrdering = false,
+  enableFullscreen = false,
+  tableIndexResultPosition = 'top',
 }: TableProps<T>) {
   // translations
   const { t } = useI18n();
@@ -506,53 +511,64 @@ function TranstackTable<T>({
       })}
     >
       <div className="w-full flex text-left justify-between items-center mb-2">
-        <TableIndexResult
-          loading={loadingStates?.total}
-          pageIndex={table.getState().pagination.pageIndex + 1}
-          pageSize={table.getState().pagination.pageSize}
-          total={total}
-        />
-
         <div>
-          {/* columns order and visibility */}
-          <TableColumnSettings
-            columnPinning={tableCache.columnPinning}
-            columnOrder={tableLocaleStorage.columnOrder}
-            defaultSettings={defaultColumnSettings}
-            visiblitySettings={columnVisibility}
-            handleVisiblityChange={(target: string, checked: boolean) => {
-              setColumnVisibility({ ...columnVisibility, [target]: checked });
-            }}
-            handleOrderChange={setColumnOrder}
-            pristine={
-              JSON.stringify(defaultColumnTableState) ==
-              JSON.stringify({
-                columnOrder: tableCache.columnOrder,
-                columnPinning: tableCache.columnPinning,
-                columnSizing: tableCache.columnSizing,
-                columnVisibility: tableCache.columnVisibility,
-              })
-            }
-            handleReset={() => {
-              cleanTableLocaleStorage(id, defaultColumnTableState, setTableCache);
-              setColumnOrder(defaultColumnTableState.columnOrder);
-              setColumnVisibility(defaultColumnTableState.columnVisibility);
-              setColumnPinning(defaultColumnTableState.columnPinning);
-              table.resetColumnSizing();
-              table.resetHeaderSizeInfo();
-            }}
-          />
-          {/* fullscreen toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" iconOnly onClick={() => setIsFullscreen(!isFullscreen)}>
-                {isFullscreen ? <Minimize /> : <Maximize />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {isFullscreen ? t('common.table.fullscreen.minimize') : t('common.table.fullscreen.maximize')}
-            </TooltipContent>
-          </Tooltip>
+          {tableIndexResultPosition === 'top' && (
+            <TableIndexResult
+              loading={loadingStates?.total}
+              pageIndex={table.getState().pagination.pageIndex + 1}
+              pageSize={table.getState().pagination.pageSize}
+              total={total}
+            />
+          )}
+        </div>
+        <div>
+          {enableColumnOrdering && (
+            <>
+              {/* columns order and visibility */}
+              <TableColumnSettings
+                columnPinning={tableCache.columnPinning}
+                columnOrder={tableLocaleStorage.columnOrder}
+                defaultSettings={defaultColumnSettings}
+                visiblitySettings={columnVisibility}
+                handleVisiblityChange={(target: string, checked: boolean) => {
+                  setColumnVisibility({ ...columnVisibility, [target]: checked });
+                }}
+                handleOrderChange={setColumnOrder}
+                pristine={
+                  JSON.stringify(defaultColumnTableState) ==
+                  JSON.stringify({
+                    columnOrder: tableCache.columnOrder,
+                    columnPinning: tableCache.columnPinning,
+                    columnSizing: tableCache.columnSizing,
+                    columnVisibility: tableCache.columnVisibility,
+                  })
+                }
+                handleReset={() => {
+                  cleanTableLocaleStorage(id, defaultColumnTableState, setTableCache);
+                  setColumnOrder(defaultColumnTableState.columnOrder);
+                  setColumnVisibility(defaultColumnTableState.columnVisibility);
+                  setColumnPinning(defaultColumnTableState.columnPinning);
+                  table.resetColumnSizing();
+                  table.resetHeaderSizeInfo();
+                }}
+              />
+            </>
+          )}
+          {enableFullscreen && (
+            <>
+              {/* fullscreen toggle */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" iconOnly onClick={() => setIsFullscreen(!isFullscreen)}>
+                    {isFullscreen ? <Minimize /> : <Maximize />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isFullscreen ? t('common.table.fullscreen.minimize') : t('common.table.fullscreen.maximize')}
+                </TooltipContent>
+              </Tooltip>
+            </>
+          )}
         </div>
       </div>
       <DataTableSkeletonLoading
@@ -612,57 +628,69 @@ function TranstackTable<T>({
         </Table>
       </DataTableSkeletonLoading>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className={'flex items-center justify-between py-3 '}>
         <div>
-          {/* PageSize select */}
-          <Select
-            value={String(table.getState().pagination.pageSize)}
-            onValueChange={value => {
-              table.setPageSize(Number(value));
-            }}
-          >
-            <SelectTrigger className="min-w-[125px] h-8">
-              <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {[10, 20, 30, 40, 50].map(pageSize => (
-                <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {tableIndexResultPosition === 'bottom' && (
+            <TableIndexResult
+              loading={loadingStates?.total}
+              pageIndex={table.getState().pagination.pageIndex + 1}
+              pageSize={table.getState().pagination.pageSize}
+              total={total}
+            />
+          )}
         </div>
-        <div>
-          {/* Pagination */}
-          <Pagination className="w-auto">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  disabled={!table.getCanPreviousPage()}
-                  onClick={() => {
-                    if (!table.getCanPreviousPage()) return;
-                    table.previousPage();
-                  }}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext
-                  disabled={!table.getCanNextPage()}
-                  onClick={() => {
-                    if (!table.getCanNextPage()) return;
-                    table.nextPage();
-                  }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+        <div className="flex items-center gap-2">
+          <div>
+            {/* PageSize select */}
+            <Select
+              value={String(table.getState().pagination.pageSize)}
+              onValueChange={value => {
+                table.setPageSize(Number(value));
+              }}
+            >
+              <SelectTrigger className="min-w-[125px] h-8">
+                <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {[10, 20, 30, 40, 50].map(pageSize => (
+                  <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            {/* Pagination */}
+            <Pagination className="w-auto">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    disabled={!table.getCanPreviousPage()}
+                    onClick={() => {
+                      if (!table.getCanPreviousPage()) return;
+                      table.previousPage();
+                    }}
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    disabled={!table.getCanNextPage()}
+                    onClick={() => {
+                      if (!table.getCanNextPage()) return;
+                      table.nextPage();
+                    }}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       </div>
     </div>
