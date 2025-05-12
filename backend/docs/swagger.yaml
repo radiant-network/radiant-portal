@@ -62,8 +62,29 @@ components:
           type: number
         cadd_score:
           type: number
+        chromosome:
+          type: string
+        clinvar:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        dann_score:
+          type: number
         dna_change:
           type: string
+        end:
+          description: TODO
+          type: integer
+        exon_rank:
+          type: integer
+        exon_total:
+          type: integer
+        father_calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
         fathmm_pred:
           type: string
         fathmm_score:
@@ -82,10 +103,24 @@ components:
           type: string
         is_canonical:
           type: boolean
+        is_mane_plus:
+          type: boolean
         is_mane_select:
           type: boolean
         locus_id:
           type: integer
+        mother_calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        omim_conditions:
+          items:
+            $ref: '#/components/schemas/OmimGenePanel'
+          type: array
+          uniqueItems: false
+        parental_origin:
+          type: string
         picked_consequences:
           items:
             type: string
@@ -108,10 +143,18 @@ components:
             type: string
           type: array
           uniqueItems: false
+        start:
+          type: integer
         symbol:
+          type: string
+        transcript_id:
+          type: string
+        transmission:
           type: string
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
+        zygosity:
+          type: string
       required:
       - genotype_quality
       - gnomad_v3_af
