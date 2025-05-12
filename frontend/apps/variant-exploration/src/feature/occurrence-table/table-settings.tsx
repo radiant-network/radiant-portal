@@ -3,7 +3,6 @@ import { TableColumnDef, createColumnSettings } from '@/components/base/data-tab
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
-import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import GeneCell from '@/feature/occurrence-table/cells/gene-cell';
 import LinkCell from '@/feature/occurrence-table/cells/link-cell';
@@ -37,7 +36,6 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
       cell: info => <RowSelectionCell row={info.row} />,
       size: 40,
-      maxSize: 40,
       enablePinning: false,
       enableResizing: false,
     },
@@ -59,17 +57,19 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       cell: info => <LinkCell url={`/variants/entity/${info.row.original.locus_id}`}>{info.getValue()}</LinkCell>,
       header: t('variant.headers.hgvsg'),
       size: 150,
-      minSize: 100,
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.variant_class, {
       id: 'variantClass',
       cell: info => <VariantClassCell value={info.getValue()} />,
       header: t('variant.headers.variantClass'),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
       cell: info => <GeneCell symbol={info.getValue()} />,
       header: t('variant.headers.symbol'),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row, {
       id: 'mostDeleteriousConsequence',
@@ -86,6 +86,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         </TooltipsHeader>
       ),
       size: 225,
+      minSize: 160,
     }),
     columnHelper.accessor(row => row, {
       id: 'maneSelect',
@@ -93,6 +94,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         <ManeCell isManeSelect={info.getValue().is_mane_select} isCanonical={info.getValue().is_canonical} />
       ),
       header: t('variant.headers.maneSelect'),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.omim_inheritance_code, {
       id: 'omimInheritanceCode',
@@ -102,11 +104,13 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           {t('variant.headers.omimInheritanceCode')}
         </TooltipsHeader>
       ),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.clinvar, {
       id: 'clinVar',
       cell: info => <ClinvarCell codes={info.getValue()} />,
       header: t('variant.headers.clinVar'),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.gnomad_v3_af, {
       id: 'gnomadv3AF',
@@ -116,26 +120,31 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           {t('variant.headers.gnomadv3AF')}
         </TooltipsHeader>
       ),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.pf, {
       id: 'pf',
       cell: info => <ParticipantFrequencyCell value={info.getValue()} />,
       header: t('variant.headers.pf'),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.genotype_quality, {
       id: 'genotypeQuality',
       cell: info => <NumberCell value={info.getValue()} />,
       header: t('variant.headers.genotypeQuality'),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
       cell: info => <ZygosityCell value={info.getValue()} />,
       header: t('variant.headers.zygosity'),
+      minSize: 120,
     }),
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'adRatio',
       cell: info => <NumberCell value={info.getValue()} />,
       header: t('variant.headers.adRatio'),
+      minSize: 120,
     }),
   ] as TableColumnDef<Occurrence, any>[];
 }

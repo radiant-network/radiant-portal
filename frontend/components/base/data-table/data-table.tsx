@@ -48,9 +48,8 @@ import DataTableSkeletonLoading from '@/components/base/data-table/data-table-sk
 
 export const IS_SERVER = typeof window === 'undefined';
 
-export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id' | 'header'> {
+export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id'> {
   id: string;
-  header: string;
   subComponent?: string;
 }
 
@@ -384,7 +383,7 @@ function TranstackTable<T>({
    * Load the previous table state
    * @todo should be replaced by userApi
    */
-  const tableLocaleStorage: TableCacheProps = getTableLocaleStorage(id, defaultColumnTableState);
+  const tableLocaleStorage: TableCacheProps = getTableLocaleStorage(id, columns, defaultColumnTableState);
 
   // container width
   const containerRef = useRef(null);
@@ -400,7 +399,16 @@ function TranstackTable<T>({
 
   // Initialize tanstack table
   const table = useReactTable({
-    columns,
+    columns: columns.map(column => {
+      // load saved size
+      if (tableLocaleStorage.columnSizing[column.id]) {
+        return {
+          ...column,
+          size: tableLocaleStorage.columnSizing[column.id],
+        };
+      }
+      return column;
+    }),
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
     data,
@@ -442,12 +450,11 @@ function TranstackTable<T>({
     const headers = table.getFlatHeaders();
     const colSizes: { [key: string]: number } = {};
     headers.forEach(header => {
-      colSizes[`--header-${header.id}-size`] = tableLocaleStorage.columnSizing[header.id] ?? header.getSize();
-      colSizes[`--col-${header.column.id}-size`] =
-        tableLocaleStorage.columnSizing[header.column.id] ?? header.column.getSize();
+      colSizes[`--header-${header.id}-size`] = header.getSize();
+      colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
     });
     return colSizes;
-  }, [table.getState().columnSizingInfo, table.getState().columnSizing, tableLocaleStorage.columnSizing]);
+  }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
 
   /**
    * Sync table state with local storage
