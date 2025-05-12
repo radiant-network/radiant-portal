@@ -75,7 +75,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
   const [isPinningDropdownActive, setIsPinningDropdownActive] = useState<boolean>(false);
 
   return (
-    <>
+    <div className="flex items-center gap-0.5">
       {/* Pin/Unpin column */}
       {header.column.getCanPin() && (
         <DropdownMenu onOpenChange={open => setIsPinningDropdownActive(open)}>
@@ -134,7 +134,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
           </TooltipContent>
         </Tooltip>
       )}
-    </>
+    </div>
   );
 }
 

@@ -8,7 +8,7 @@ import { debounce } from '@/components/hooks/useDebounce';
 import { Button } from '@/components/base/ui/button';
 import { mondoApi } from '@/utils/api';
 import capitalize from 'lodash/capitalize';
-import InterpretationMondoOptionItemLabel from './mondo-option-item-label';
+import MondoOptionItemLabel from '@/components/feature/variant/mondo-option-item-label';
 import useSWR from 'swr';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -31,7 +31,7 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
       onSuccess: data => {
         setOptions(
           data.data.map(item => ({
-            label: <InterpretationMondoOptionItemLabel mondo={item} />,
+            label: <MondoOptionItemLabel mondo={item} />,
             value: item.source?.id || '',
             display: capitalize(item.source?.name),
             filter: `${item.source?.name}${item.source?.id}`,

@@ -8,7 +8,7 @@ import EvidenceTab from './components/evidence-tab';
 import FrequencyTab from './components/frequency-tab';
 import ConditionsTab from './components/conditions-tab';
 import TranscriptsTab from './components/transcripts/transcripts-tab';
-import CasesTab from './components/cases-tab';
+import CasesTab from './components/cases/cases-tab';
 import { VariantEntityTabs } from './types';
 import { variantsApi } from '@/utils/api';
 import { VariantHeader, ApiError } from '@/api/api';
@@ -32,7 +32,7 @@ export default function App() {
   const { t } = useI18n();
   const location = useLocation();
   const params = useParams<{ locusId: string }>();
-  const [activeTab, setActiveTab] = useState<VariantEntityTabs>(VariantEntityTabs.Overview);
+  const [activeTab, setActiveTab] = useState<VariantEntityTabs>();
 
   const { data, error, isLoading } = useSWR<VariantHeader, ApiError, VariantHeaderInput>(
     {
@@ -53,6 +53,8 @@ export default function App() {
       if (Object.values(VariantEntityTabs).includes(tab)) {
         setActiveTab(tab);
       }
+    } else {
+      setActiveTab(VariantEntityTabs.Overview);
     }
   }, [location]);
 
@@ -74,6 +76,11 @@ export default function App() {
         }
       />
     );
+  }
+
+  // To avoid hydration mismatch with hash in ssr
+  if (!activeTab) {
+    return null;
   }
 
   return (

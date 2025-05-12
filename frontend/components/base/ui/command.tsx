@@ -39,8 +39,9 @@ const CommandInput = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
     wrapperClassName?: string;
     rightAddon?: React.ReactNode;
+    leftAddon?: React.ReactNode;
   }
->(({ className, wrapperClassName, rightAddon, disabled, ...props }, ref) => (
+>(({ className, wrapperClassName, leftAddon, rightAddon, disabled, ...props }, ref) => (
   <div
     className={cn(
       'flex h-9 items-center px-3 bg-background rounded-md border border-input enabled:focus-within:ring-1 enabled:focus-within:ring-ring',
@@ -51,6 +52,7 @@ const CommandInput = React.forwardRef<
     )}
     cmdk-input-wrapper=""
   >
+    {leftAddon}
     <CommandPrimitive.Input
       ref={ref}
       className={cn(

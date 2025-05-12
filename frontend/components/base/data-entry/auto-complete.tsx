@@ -12,7 +12,7 @@ export type Option = {
   [name: string]: any;
 };
 
-type AutoCompleteProps<T extends Option> = {
+export type AutoCompleteProps<T extends Option> = {
   options?: T[];
   emptyIndicator?: ReactNode;
   value?: string;
@@ -25,6 +25,7 @@ type AutoCompleteProps<T extends Option> = {
   optionLabelProp?: keyof T;
   optionFilterProp?: keyof T;
   loading?: boolean;
+  leftAddon?: ReactNode;
 };
 
 export function getSelectedOptionByValue<T extends Option>(value: string | undefined, options: T[]): T | undefined {
@@ -44,6 +45,7 @@ export const AutoComplete = <T extends Option>({
   optionLabelProp = 'label',
   className,
   loading,
+  leftAddon,
 }: AutoCompleteProps<T>) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -134,7 +136,7 @@ export const AutoComplete = <T extends Option>({
       // based on the custom optionFilterProp
       shouldFilter={false}
     >
-      <div className="relative shadow-sm outline-none focus-within:ring-1 focus-within:ring-ring rounded-md">
+      <div className="w-full relative shadow-sm outline-none focus-within:ring-1 focus-within:ring-ring rounded-md">
         <CommandInput
           ref={inputRef}
           value={inputValue}
@@ -151,6 +153,7 @@ export const AutoComplete = <T extends Option>({
           placeholder={placeholder}
           disabled={disabled}
           className="text-sm"
+          leftAddon={leftAddon}
           rightAddon={
             <button
               type="button"
@@ -163,16 +166,16 @@ export const AutoComplete = <T extends Option>({
                 hidden: !selected || disabled,
               })}
             >
-              <XIcon size={18} className="" />
+              <XIcon size={16} className="" />
             </button>
           }
         />
       </div>
-      <div className="relative mt-1">
+      <div className="relative">
         <div
           className={cn(
             'animate-in fade-in-0 zoom-in-95 absolute top-0 z-10 w-full rounded-xl bg-popover outline-none shadow-md',
-            isOpen ? 'block' : 'hidden',
+            isOpen ? 'block mt-1' : 'hidden',
           )}
         >
           <CommandList className="rounded-lg border">

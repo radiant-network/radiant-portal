@@ -1,6 +1,6 @@
 import { AutoCompleteTerm } from '@/api/api';
 
-function InterpretationMondoOptionItemLabel({ mondo }: { mondo: AutoCompleteTerm }) {
+function MondoOptionItemLabel({ mondo }: { mondo: AutoCompleteTerm }) {
   return (
     <div>
       {mondo.highlight?.name ? (
@@ -22,4 +22,4 @@ function InterpretationMondoOptionItemLabel({ mondo }: { mondo: AutoCompleteTerm
   );
 }
 
-export default InterpretationMondoOptionItemLabel;
+export default MondoOptionItemLabel;

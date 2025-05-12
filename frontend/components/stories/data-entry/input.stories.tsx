@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
 import { Input } from '@/components/base/ui/input';
+import { Car, ListFilter } from 'lucide-react';
 
 const meta = {
   title: 'Data Entry/Inputs/Input',
@@ -25,6 +26,27 @@ export const Default: Story = {
     return (
       <Input
         value={value}
+        onChange={e => {
+          setValue(e.target.value);
+          action('onChange')(e);
+        }}
+        className="max-w-[300px]"
+        placeholder="Placeholder"
+        autoFocus
+      />
+    );
+  },
+};
+
+export const WithIcon: Story = {
+  render: () => {
+    const [value, setValue] = useState('');
+
+    return (
+      <Input
+        value={value}
+        startIcon={ListFilter}
+        endIcon={Car}
         onChange={e => {
           setValue(e.target.value);
           action('onChange')(e);
