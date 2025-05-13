@@ -18,6 +18,7 @@ import OccurrenceExpend from '@/feature/occurrence-table/occurrence-expend';
 import { FilterComponent } from '@/components/feature/query-filters/filter-container';
 import { useI18n } from '@/components/hooks/i18n';
 import { X } from 'lucide-react';
+import { cn } from '@/components/lib/utils';
 type OccurrencesListInput = {
   seqId: string;
   listBody: ListBody;
@@ -127,11 +128,10 @@ function App() {
             <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
           </div>
           <div
-            className={`
-                overflow-auto mb-0 border-r
-                transition-[width] duration-300 ease-in-out
-                ${selectedSidebarItem ? 'w-[280px] p-4 opacity-100 relative' : 'w-0 opacity-0'}
-              `}
+            className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
+              'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
+              'w-0 opacity-0': !selectedSidebarItem,
+            })}
           >
             <div className="whitespace-nowrap">
               <div className="flex justify-end mb-4">
