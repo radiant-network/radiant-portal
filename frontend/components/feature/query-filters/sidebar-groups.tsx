@@ -94,7 +94,7 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
           <SidebarMenu>
             {Object.entries(aggregationGroups).map(([id]) => {
               const Icon = iconMap[id as keyof typeof iconMap];
-              const label = t(`queryFilters.sidebarPanel.filters.${id}`, id.charAt(0).toUpperCase() + id.slice(1));
+              const label = t(`queryFilters.sidebarPanel.filters.${id}`);
               return (
                 <SidebarMenuItem key={id}>
                   <SidebarMenuButton
