@@ -166,6 +166,12 @@ export interface ExpendedOccurrence {
      * @type {number}
      * @memberof ExpendedOccurrence
      */
+    'af'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
     'cadd_phred'?: number;
     /**
      * 
@@ -311,6 +317,12 @@ export interface ExpendedOccurrence {
      * @memberof ExpendedOccurrence
      */
     'parental_origin'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'pf'?: number;
     /**
      * 
      * @type {Array<string>}

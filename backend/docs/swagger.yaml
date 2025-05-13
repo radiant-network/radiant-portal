@@ -58,6 +58,8 @@ components:
           type: integer
         ad_total:
           type: integer
+        af:
+          type: number
         cadd_phred:
           type: number
         cadd_score:
@@ -121,6 +123,8 @@ components:
           uniqueItems: false
         parental_origin:
           type: string
+        pf:
+          type: number
         picked_consequences:
           items:
             type: string
