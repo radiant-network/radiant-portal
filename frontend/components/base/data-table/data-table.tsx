@@ -578,63 +578,66 @@ function TranstackTable<T>({
           )}
         </div>
       </div>
-      <DataTableSkeletonLoading
-        loading={loadingStates?.list}
-        headerGroups={table.getHeaderGroups()}
-        pagination={pagination}
-        columnSettings={defaultColumnSettings}
-      >
-        <Table id={id} containerRef={containerRef} style={{ ...columnSizeVars }}>
-          <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
-            {table.getHeaderGroups().map(headerGroup => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <TableHead
-                    key={header.id}
-                    className={cn('group', getColumnPinningExtraCN(header.column))}
-                    style={{
-                      width: `calc(var(--header-${header?.id}-size) * 1px)`,
-                      ...getColumnPinningExtraStyles(header.column),
-                    }}
-                  >
-                    <>
-                      <div className="flex items-center gap-2">
-                        {/* Header rendering */}
-                        <div className="flex-1">{flexRender(header.column.columnDef.header, header.getContext())}</div>
+      <div ref={containerRef}>
+        <DataTableSkeletonLoading
+          loading={loadingStates?.list}
+          headerGroups={table.getHeaderGroups()}
+          pagination={pagination}
+          columnSettings={defaultColumnSettings}
+        >
+          <Table id={id} style={{ ...columnSizeVars }}>
+            <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
+              {table.getHeaderGroups().map(headerGroup => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <TableHead
+                      key={header.id}
+                      className={cn('group', getColumnPinningExtraCN(header.column))}
+                      style={{
+                        width: `calc(var(--header-${header?.id}-size) * 1px)`,
+                        ...getColumnPinningExtraStyles(header.column),
+                      }}
+                    >
+                      <>
+                        <div className="flex items-center gap-2">
+                          {/* Header rendering */}
+                          <div className="flex-1">
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </div>
 
-                        {/* Table Header Actions, only display on hover */}
-                        <TableHeaderActions header={header} />
-                      </div>
+                          {/* Table Header Actions, only display on hover */}
+                          <TableHeaderActions header={header} />
+                        </div>
 
-                      {/* Resize Grip */}
-                      {header.column.getCanResize() && (
-                        <div
-                          onDoubleClick={() => header.column.resetSize()}
-                          onMouseDown={header.getResizeHandler()}
-                          onTouchStart={header.getResizeHandler()}
-                          className={cn(
-                            'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
-                            table.options.columnResizeDirection,
-                            header.column.getIsResizing() ? 'opacity-100' : '',
-                          )}
-                        />
-                      )}
-                    </>
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {/* Render pinned rows */}
-            {table.getTopRows().map(rowFlexRender)}
+                        {/* Resize Grip */}
+                        {header.column.getCanResize() && (
+                          <div
+                            onDoubleClick={() => header.column.resetSize()}
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            className={cn(
+                              'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
+                              table.options.columnResizeDirection,
+                              header.column.getIsResizing() ? 'opacity-100' : '',
+                            )}
+                          />
+                        )}
+                      </>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {/* Render pinned rows */}
+              {table.getTopRows().map(rowFlexRender)}
 
-            {/* Render table content */}
-            {table.getCenterRows().map(rowFlexRender)}
-          </TableBody>
-        </Table>
-      </DataTableSkeletonLoading>
-
+              {/* Render table content */}
+              {table.getCenterRows().map(rowFlexRender)}
+            </TableBody>
+          </Table>
+        </DataTableSkeletonLoading>
+      </div>
       <div className={'flex items-center justify-between py-3 '}>
         <div>
           {tableIndexResultPosition === 'bottom' && (
