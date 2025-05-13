@@ -6,6 +6,7 @@ import { MultiSelectFilter } from '@/components/feature/query-filters/multiselec
 import { NumericalFilter } from '@/components/feature/query-filters/numerical-filter';
 import { ToggleFilter } from '@/components/feature/query-filters/toggle-filter';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 type FilterContainerProps = {
   field: AggregationConfig;
@@ -36,15 +37,37 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
     setSearchVisible(!searchVisible);
   }
 
+  const label = t(`common.filters.labels.${field.key}`, { defaultValue: field.key });
+  const tooltipKey = `common.filters.labels.${field.key}_tooltip`;
+  const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
+
+  function renderTrigger() {
+      return (
+              <div className="flex items-center justify-between w-full text-base">
+                <span>{label}</span>
+                {isOpen && field.type === 'multiple' && (
+                  <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
+                )}
+      </div>
+    );
+  }
+
   return (
     <AccordionItem key={field.key} value={field.key}>
       <AccordionTrigger className="AccordionTrigger">
-        <div className="flex items-center justify-between w-full text-base">
-          <span className="capitalize">{t(`common.filters.labels.${field.key}`, { defaultValue: field.key })}</span>
-          {isOpen && field.type === 'multiple' && (
-            <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
-          )}
-        </div>
+        {tooltipContent ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {renderTrigger()}
+            </TooltipTrigger>
+            <TooltipContent>
+              {tooltipContent}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          renderTrigger()
+        )}
+
       </AccordionTrigger>
       <AccordionContent>
         <FilterComponent field={field} searchVisible={searchVisible} />
