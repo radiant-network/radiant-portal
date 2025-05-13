@@ -8,8 +8,10 @@ import { PlusIcon, XIcon } from 'lucide-react';
 import InputSearch from '@/components/base/data-entry/input-search';
 import { Button } from '@/components/base/ui/button';
 import useSWR from 'swr';
+import { useI18n } from '@/components/hooks/i18n';
 
 function PubmedFormField() {
+  const { t } = useI18n();
   const { control, register, getValues, setError, clearErrors, setValue, getFieldState } =
     useFormContext<GenericInterpretationSchemaType>();
   const { fields, append, remove } = useFieldArray<GenericInterpretationSchemaType>({
@@ -34,7 +36,7 @@ function PubmedFormField() {
       onError: () => {
         if (pubmedFetchKey?.index) {
           setError(`pubmed.${pubmedFetchKey.index}.citation`, {
-            message: 'Invalid or unknown PMID',
+            message: t('variant.interpretationForm.generic.pubMedIdNotFound'),
           });
         }
       },
@@ -46,7 +48,7 @@ function PubmedFormField() {
 
   return (
     <div className="space-y-2.5">
-      <FormLabel>PubMed Publication</FormLabel>
+      <FormLabel>{t('variant.interpretationForm.generic.pubMedPublication')}</FormLabel>
       <div className="space-y-2">
         {fields.map((field, index) => {
           const citation = getValues().pubmed?.[index].citation;
@@ -81,6 +83,7 @@ function PubmedFormField() {
                       disabled: !!error,
                     }}
                     autoFocus
+                    placeholder={t('variant.interpretationForm.generic.citation-placeholder')}
                     onSearch={searchValue =>
                       setPubmedFetchKey({
                         value: searchValue,
@@ -113,7 +116,7 @@ function PubmedFormField() {
             })
           }
         >
-          <PlusIcon /> Add a publication
+          <PlusIcon /> {t('variant.interpretationForm.generic.addCitation')}
         </Button>
       </div>
     </div>

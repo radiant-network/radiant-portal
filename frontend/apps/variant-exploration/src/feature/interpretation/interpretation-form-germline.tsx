@@ -16,11 +16,13 @@ import { Badge } from '@/components/base/ui/badge';
 import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
 import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
 import { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { useI18n } from '@/components/hooks/i18n';
 
 function InterpretationFormGermline(
   { interpretation, saveInterpretation, onDirtyChange }: InterpretationFormProps<InterpretationGermline>,
   ref: React.Ref<InterpretationFormRef>,
 ) {
+  const { t } = useI18n();
   const form = useForm<GermlineInterpretationSchemaType>({
     resolver: zodResolver(germlineInterpretationFormSchema),
     values: {
@@ -55,13 +57,17 @@ function InterpretationFormGermline(
   return (
     <FormProvider {...form}>
       <div className="space-y-6">
-        <MondoAutoCompleteFormField name="condition" label="Mondo condition" placeholder="e.g. muscular dystrophy" />
+        <MondoAutoCompleteFormField
+          name="condition"
+          label={t('variant.interpretationForm.germline.condition')}
+          placeholder={t('variant.interpretationForm.germline.condition-placeholder')}
+        />
         <FormField
           control={form.control}
           name="classification"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Classification</FormLabel>
+              <FormLabel>{t('variant.interpretationForm.germline.classification')}</FormLabel>
               <FormControl>
                 <ToggleGroup
                   type="single"
@@ -75,7 +81,7 @@ function InterpretationFormGermline(
                     value="LA6668-3"
                     className=" data-[state=on]:bg-red-100 data-[state=on]:text-red-800 border data-[state=on]:border-red-200"
                   >
-                    Pathogenic
+                    {t('variant.interpretationForm.germline.classification-options.pathogenic')}
                   </ToggleGroupItem>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -84,11 +90,13 @@ function InterpretationFormGermline(
                           value="LA26332-9"
                           className=" data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 border data-[state=on]:border-yellow-300"
                         >
-                          Likely Pathogenic
+                          {t('variant.interpretationForm.germline.classification-options.likelyPathogenic')}
                         </ToggleGroupItem>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>Probably pathogenic</TooltipContent>
+                    <TooltipContent>
+                      {t('variant.interpretationForm.germline.classification-options.likelyPathogenic-tooltip')}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -97,11 +105,13 @@ function InterpretationFormGermline(
                           value="LA26333-7"
                           className=" data-[state=on]:bg-orange-100 data-[state=on]:text-orange-900 border data-[state=on]:border-orange-300"
                         >
-                          VUS
+                          {t('variant.interpretationForm.germline.classification-options.vus')}
                         </ToggleGroupItem>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>Variant of Uncertain Significance</TooltipContent>
+                    <TooltipContent>
+                      {t('variant.interpretationForm.germline.classification-options.vus-tooltip')}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -110,17 +120,19 @@ function InterpretationFormGermline(
                           value="LA26334-5"
                           className=" data-[state=on]:bg-lime-100 data-[state=on]:text-lime-900 border data-[state=on]:border-lime-300"
                         >
-                          Likely Benign
+                          {t('variant.interpretationForm.germline.classification-options.likelyBenign')}
                         </ToggleGroupItem>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>Probably benign</TooltipContent>
+                    <TooltipContent>
+                      {t('variant.interpretationForm.germline.classification-options.likelyBenign-tooltip')}
+                    </TooltipContent>
                   </Tooltip>
                   <ToggleGroupItem
                     value="LA6675-8"
                     className=" data-[state=on]:bg-green-100 data-[state=on]:text-green-800 border data-[state=on]:border-green-300"
                   >
-                    Benign
+                    {t('variant.interpretationForm.germline.classification-options.benign')}
                   </ToggleGroupItem>
                 </ToggleGroup>
               </FormControl>
@@ -132,11 +144,11 @@ function InterpretationFormGermline(
           name="classification_criterias"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Classification criteria e.g. PM1, PS2</FormLabel>
+              <FormLabel>{t('variant.interpretationForm.germline.classificationCriteria')}</FormLabel>
               <FormControl>
                 <MultipleSelector
                   defaultOptions={classificationCriterias}
-                  placeholder="Classification criteria"
+                  placeholder={t('variant.interpretationForm.germline.classificationCriteria-placeholder')}
                   emptyIndicator={<>no results found.</>}
                   renderBadge={({ option, onRemove }) => {
                     const tagColor = getClassificationCriteriaColor(option.value);
@@ -169,11 +181,11 @@ function InterpretationFormGermline(
           name="transmission_modes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mode of inheritance</FormLabel>
+              <FormLabel>{t('variant.interpretationForm.germline.modeOfTransmission')}</FormLabel>
               <FormControl>
                 <MultipleSelector
-                  defaultOptions={getTransmissionModes()}
-                  placeholder="Select"
+                  defaultOptions={getTransmissionModes(t)}
+                  placeholder={t('variant.interpretationForm.germline.modeOfTransmission-placeholder')}
                   emptyIndicator={<p>no results found.</p>}
                   {...field}
                 />

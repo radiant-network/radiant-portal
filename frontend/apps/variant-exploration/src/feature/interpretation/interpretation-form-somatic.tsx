@@ -21,11 +21,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import InterpretationFormGeneric from './interpretation-form-generic';
 import { InterpretationSomatic } from '@/api/api';
 import { forwardRef, useImperativeHandle } from 'react';
+import { useI18n } from '@/components/hooks/i18n';
 
 function InterpretationFormSomatic(
   { interpretation, saveInterpretation }: InterpretationFormProps<InterpretationSomatic>,
   ref: React.Ref<InterpretationFormRef>,
 ) {
+  const { t } = useI18n();
   const form = useForm<SomaticInterpretationSchemaType>({
     resolver: zodResolver(somaticInterpretationFormSchema),
     defaultValues: {
@@ -56,7 +58,11 @@ function InterpretationFormSomatic(
   return (
     <FormProvider {...form}>
       <div className="space-y-6">
-        <MondoAutoCompleteFormField name="tumoral_type" label="Tumor type" placeholder="Select" />
+        <MondoAutoCompleteFormField
+          name="tumoral_type"
+          label={t('variant.interpretationForm.somatic.tumoralType')}
+          placeholder={t('variant.interpretationForm.somatic.tumoralType-placeholder')}
+        />
         <FormField
           control={form.control}
           name="oncogenicity"
@@ -64,7 +70,7 @@ function InterpretationFormSomatic(
             <FormItem>
               <FormLabel>
                 <span>
-                  Oncogenicity ClinGen/CGC/VICC (
+                  {t('variant.interpretationForm.somatic.oncogenicity')} (
                   <a
                     href="https://pubmed.ncbi.nlm.nih.gov/35101336/"
                     target="_blank"
@@ -89,7 +95,7 @@ function InterpretationFormSomatic(
                     value="LA6668-3"
                     className=" data-[state=on]:bg-red-100 data-[state=on]:text-red-800 border data-[state=on]:border-red-200"
                   >
-                    Oncogenic
+                    {t('variant.interpretationForm.somatic.oncogenicity-options.oncogenic')}
                   </ToggleGroupItem>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -98,11 +104,13 @@ function InterpretationFormSomatic(
                           value="LA26332-9"
                           className="data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 border data-[state=on]:border-yellow-300"
                         >
-                          Likely Oncogenic
+                          {t('variant.interpretationForm.somatic.oncogenicity-options.likelyOncogenic')}
                         </ToggleGroupItem>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>Probably oncogenic</TooltipContent>
+                    <TooltipContent>
+                      {t('variant.interpretationForm.somatic.oncogenicity-options.likelyOncogenic-tooltip')}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -111,11 +119,13 @@ function InterpretationFormSomatic(
                           value="LA26333-7"
                           className=" data-[state=on]:bg-orange-100 data-[state=on]:text-orange-900 border data-[state=on]:border-orange-300"
                         >
-                          VUS
+                          {t('variant.interpretationForm.somatic.oncogenicity-options.vus')}
                         </ToggleGroupItem>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>Variant of Uncertain Significance</TooltipContent>
+                    <TooltipContent>
+                      {t('variant.interpretationForm.somatic.oncogenicity-options.vus-tooltip')}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -124,17 +134,19 @@ function InterpretationFormSomatic(
                           value="LA26334-5"
                           className=" data-[state=on]:bg-lime-100 data-[state=on]:text-lime-900 border data-[state=on]:border-lime-300"
                         >
-                          Likely Benign
+                          {t('variant.interpretationForm.somatic.oncogenicity-options.likelyBenign')}
                         </ToggleGroupItem>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>Probably benign</TooltipContent>
+                    <TooltipContent>
+                      {t('variant.interpretationForm.somatic.oncogenicity-options.likelyBenign-tooltip')}
+                    </TooltipContent>
                   </Tooltip>
                   <ToggleGroupItem
                     value="LA6675-8"
                     className=" data-[state=on]:bg-green-100 data-[state=on]:text-green-800 border data-[state=on]:border-green-300"
                   >
-                    Benign
+                    {t('variant.interpretationForm.somatic.oncogenicity-options.benign')}
                   </ToggleGroupItem>
                 </ToggleGroup>
               </FormControl>
@@ -147,11 +159,11 @@ function InterpretationFormSomatic(
           name="oncogenicity_classification_criterias"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Classification criteria e.g. PM1, PS2</FormLabel>
+              <FormLabel>{t('variant.interpretationForm.somatic.classificationCriteria')}</FormLabel>
               <FormControl>
                 <MultipleSelector
                   defaultOptions={oncogenicityClassificationCriterias}
-                  placeholder="Classification criteria"
+                  placeholder={t('variant.interpretationForm.somatic.classificationCriteria-placeholder')}
                   emptyIndicator={<>no results found.</>}
                   renderBadge={({ option, onRemove }) => {
                     const tagColor = getOncogenicityClassificationCriteriaColor(option.value);
@@ -185,16 +197,16 @@ function InterpretationFormSomatic(
           name="clinical_utility"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Clinical utility</FormLabel>
+              <FormLabel>{t('variant.interpretationForm.somatic.clinicalUtility')}</FormLabel>
               <FormControl>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder={t('variant.interpretationForm.somatic.clinicalUtility-placeholder')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {getClinicalUtilitys().map(clinicalUtility => (
+                    {getClinicalUtilitys(t).map(clinicalUtility => (
                       <SelectItem key={clinicalUtility.value} value={clinicalUtility.value}>
                         {clinicalUtility.label}
                       </SelectItem>

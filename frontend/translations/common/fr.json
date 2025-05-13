@@ -455,7 +455,104 @@
       "deletion": "Effacement",
       "sequence_alteration": "Modification de séquence"
     },
-    "canonicalTranscript": "Canonical Transcript"
+    "canonicalTranscript": "Canonical Transcript",
+    "interpretationForm": {
+      "title": "Interprétation clinique",
+      "cancelText": "Annuler",
+      "okText": "Sauvegarder",
+      "lastUpdate": "Dernière mise à jour : <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
+      "header": {
+        "germline": "Germline",
+        "somatic": "Somatic"
+      },
+      "notification": {
+        "success": "Interprétation sauvegardée avec succès",
+        "error": {
+          "title": "La sauvegarde d'interprétation a échouée",
+          "text": "Une erreur s'est produite et nous n'avons pas été en mesure de sauvegarder votre interprétation. Veuillez réessayer."
+        }
+      },
+      "generic": {
+        "interpretation": "Interprétation",
+        "pubMedPublication": "Publication PubMed",
+        "pubMedIdNotFound": "PMID invalide ou inconnu",
+        "citation-placeholder": "Ex : 25741868",
+        "addCitation": "Ajouter une publication"
+      },
+      "germline": {
+        "condition": "Condition MONDO",
+        "condition-placeholder": "Ex : muscular dystrophy",
+        "condition-popover": "Rechercher une condition médicale dans",
+        "condition-popover-link": "l'ontologie MONDO",
+        "classification": "Classification ACMG/AMP",
+        "classification-options": {
+          "pathogenic": "Pathogénique",
+          "likelyPathogenic": "Prob. pathogénique",
+          "likelyPathogenic-tooltip": "Probablement pathogénique",
+          "vus": "VSI",
+          "vus-tooltip": "Variant de signification incertaine",
+          "likelyBenign": "Prob. bénigne",
+          "likelyBenign-tooltip": "Probablement bénigne",
+          "benign": "Bénigne"
+        },
+        "classificationCriteria": "Critères de classification",
+        "classificationCriteria-placeholder": "Ex : PM1, PS2",
+        "modeOfTransmission": "Mode de transmission",
+        "modeOfTransmission-placeholder": "Ex : Autosomal dominant de novo",
+        "modeOfTransmission-options": {
+          "autosomal_dominant_de_novo": "Autosomal dominant de novo",
+          "autosomal_dominant": "Autosomique dominant",
+          "autosomal_recessive": "Autosomique récessif",
+          "x_linked_dominant_de_novo": "Lié à l'X dominant de novo",
+          "x_linked_recessive_de_novo": "Lié à l'X récessif de novo",
+          "x_linked_dominant": "Lié à l'X dominant",
+          "x_linked_recessive": "Lié à l'X récessif",
+          "non_carrier_proband": "Probant non porteur",
+          "unknown_parents_genotype": "Génotype parental inconnu",
+          "unknown_father_genotype": "Génotype paternel inconnu",
+          "unknown_mother_genotype": "Génotype maternel inconnu",
+          "unknown_proband_genotype": "Génotype du probant inconnu"
+        }
+      },
+      "somatic": {
+        "tumoralType": "Type tumoral",
+        "tumoralType-placeholder": "Ex : colon sarcoma",
+        "oncogenicity": "Oncogénicité",
+        "oncogenicity-options": {
+          "oncogenic": "Oncogénique",
+          "likelyOncogenic": "Prob. oncogénique",
+          "likelyOncogenic-tooltip": "Probablement oncogénique",
+          "vus": "VSI",
+          "vus-tooltip": "Variant de signification incertaine",
+          "likelyBenign": "Prob. bénigne",
+          "likelyBenign-tooltip": "Probablement bénigne",
+          "benign": "Bénigne"
+        },
+        "classificationCriteria": "Critères de classification",
+        "classificationCriteria-placeholder": "Ex : OS1, OM2",
+        "clinicalUtility": "Utilité clinique",
+        "clinicalUtility-placeholder": "Selectionner",
+        "clinicalUtility-options": {
+          "category_ia": "Tier IA",
+          "category_ib": "Tier IB",
+          "category_iic": "Tier IIC",
+          "category_iid": "Tier IID",
+          "category_iii": "Tier III"
+        },
+        "sections": {
+          "cancer": {
+            "title": "Cancer Hotspot",
+            "hotspot": "Hotspot"
+          },
+          "annotationsVariant": {
+            "title": "Annotations variant"
+          },
+          "annotationsGene": {
+            "title": "Annotations gène"
+          }
+        }
+      }
+    }
   },
   "occurrenceExpend": {
     "actions": {

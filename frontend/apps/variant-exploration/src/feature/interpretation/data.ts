@@ -1,171 +1,68 @@
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
+import { TFunction } from 'i18next';
 
-/**
- * Temporary until we have a proper translation system in place
- */
-const trans = {
-  modal: {
-    variant: {
-      interpretation: {
-        title: 'Clinical Interpretation',
-        cancelText: 'Cancel',
-        okText: 'Save',
-        lastUpdate: "Last update: <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
-        header: {
-          germline: 'Germline',
-          somatic: 'Somatic',
-        },
-        generic: {
-          interpretation: 'Interpretation',
-          pubMedPublication: 'PubMed Publication',
-          pubMedIdNotFound: 'Invalid or unknown PMID',
-          'citation-placeholder': 'Citation',
-          addCitation: 'Add a publication',
-        },
-        germline: {
-          condition: 'MONDO condition',
-          'condition-placeholder': 'Find a condition',
-          classification: 'Classification',
-          'classification-options': {
-            pathogenic: 'Pathogenic',
-            likelyPathogenic: 'Likely Pathogenic',
-            'likelyPathogenic-tooltip': 'Probably pathogenic',
-            vus: 'VUS',
-            'vus-tooltip': 'Variant of Uncertain Significance',
-            likelyBenign: 'Likely Benign',
-            'likelyBenign-tooltip': 'Probably benign',
-            benign: 'Benign',
-          },
-          classificationCriteria: 'Classification criteria e.g. PM1, PS2',
-          'classificationCriteria-placeholder': 'Classification criteria',
-          modeOfTransmission: 'Mode of inheritance',
-          'modeOfTransmission-placeholder': 'Select',
-          'modeOfTransmission-options': {
-            autosomal_dominant_de_novo: 'Autosomal Dominant De Novo',
-            autosomal_dominant: 'Autosomal Dominant',
-            autosomal_recessive: 'Autosomal Recessive',
-            x_linked_dominant_de_novo: 'X Linked Dominant De Novo',
-            x_linked_recessive_de_novo: 'X Linked Recessive De Novo',
-            x_linked_dominant: 'X Linked Dominant',
-            x_linked_recessive: 'X Linked Recessive',
-            non_carrier_proband: 'Non Carrier Proband',
-            unknown_parents_genotype: 'Unknown Parents Genotype',
-            unknown_father_genotype: 'Unknown Father Genotype',
-            unknown_mother_genotype: 'Unknown Mother Genotype',
-            unknown_proband_genotype: 'Unknown Proband Genotype',
-          },
-        },
-        somatic: {
-          tumoralType: 'Tumor type',
-          'tumoralType-placeholder': 'Select',
-          oncogenicity: 'Oncogenicity',
-          'oncogenicity-options': {
-            oncogenic: 'Oncogenic',
-            likelyOncogenic: 'Likely Oncogenic',
-            'likelyOncogenic-tooltip': 'Probably oncogenic',
-            vus: 'VUS',
-            'vus-tooltip': 'Variant of Uncertain Significance',
-            likelyBenign: 'Likely Benign',
-            'likelyBenign-tooltip': 'Probably benign',
-            benign: 'Benign',
-          },
-          classificationCriteria: 'Classification criteria e.g. PM1, PS2',
-          'classificationCriteria-placeholder': 'Classification criteria',
-          clinicalUtility: 'Clinical utility',
-          'clinicalUtility-placeholder': 'Select',
-          'clinicalUtility-options': {
-            tier_ia: 'Tier IA',
-            tier_ib: 'Tier IB',
-            tier_iic: 'Tier IIC',
-            tier_iid: 'Tier IID',
-            tier_iii: 'Tier III',
-          },
-          sections: {
-            cancer: {
-              title: 'Cancer Hotspot',
-              hotspot: 'Hotspot',
-            },
-            annotationsVariant: {
-              title: 'Variant annotations',
-            },
-            annotationsGene: {
-              title: 'Gene annotations',
-            },
-          },
-        },
-      },
-    },
-  },
-};
-
-const getNestedValue = (path: string): any => {
-  return path.split('.').reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), trans as any);
-};
-
-export const getTransmissionModes = (): (MultiSelectorOption & {
+export const getTransmissionModes = (
+  t: TFunction,
+): (MultiSelectorOption & {
   color?: string;
 })[] => [
   {
-    label: getNestedValue(
-      'modal.variant.interpretation.germline.modeOfTransmission-options.autosomal_dominant_de_novo',
-    ),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.autosomal_dominant_de_novo'),
     value: 'autosomal_dominant_de_novo',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.autosomal_dominant'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.autosomal_dominant'),
     value: 'autosomal_dominant',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.autosomal_recessive'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.autosomal_recessive'),
     value: 'autosomal_recessive',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.x_linked_dominant_de_novo'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.x_linked_dominant_de_novo'),
     value: 'x_linked_dominant_de_novo',
     title: '',
   },
   {
-    label: getNestedValue(
-      'modal.variant.interpretation.germline.modeOfTransmission-options.x_linked_recessive_de_novo',
-    ),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.x_linked_recessive_de_novo'),
     value: 'x_linked_recessive_de_novo',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.x_linked_dominant'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.x_linked_dominant'),
     value: 'x_linked_dominant',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.x_linked_recessive'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.x_linked_recessive'),
     value: 'x_linked_recessive',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.non_carrier_proband'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.non_carrier_proband'),
     value: 'non_carrier_proband',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.unknown_parents_genotype'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.unknown_parents_genotype'),
     value: 'unknown_parents_genotype',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.unknown_father_genotype'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.unknown_father_genotype'),
     value: 'unknown_father_genotype',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.unknown_mother_genotype'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.unknown_mother_genotype'),
     value: 'unknown_mother_genotype',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.germline.modeOfTransmission-options.unknown_proband_genotype'),
+    label: t('variant.interpretationForm.germline.modeOfTransmission-options.unknown_proband_genotype'),
     value: 'unknown_proband_genotype',
     title: '',
   },
@@ -456,31 +353,33 @@ export const oncogenicityClassificationCriterias: (MultiSelectorOption & {
 export const getOncogenicityClassificationCriteriaColor = (value: string) =>
   oncogenicityClassificationCriterias.find(criteria => criteria.value === value)?.color || undefined;
 
-export const getClinicalUtilitys = (): (MultiSelectorOption & {
+export const getClinicalUtilitys = (
+  t: TFunction,
+): (MultiSelectorOption & {
   color?: string;
 })[] => [
   {
-    label: getNestedValue('modal.variant.interpretation.somatic.clinicalUtility-options.tier_ia'),
+    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_ia'),
     value: 'category_ia',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.somatic.clinicalUtility-options.tier_ib'),
+    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_ib'),
     value: 'category_ib',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.somatic.clinicalUtility-options.tier_iic'),
+    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_iic'),
     value: 'category_iic',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.somatic.clinicalUtility-options.tier_iid'),
+    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_iid'),
     value: 'category_iid',
     title: '',
   },
   {
-    label: getNestedValue('modal.variant.interpretation.somatic.clinicalUtility-options.tier_iii'),
+    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_iii'),
     value: 'category_iii',
     title: '',
   },
