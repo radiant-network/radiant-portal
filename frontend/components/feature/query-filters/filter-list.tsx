@@ -3,7 +3,7 @@ import { FilterComponent, FilterContainer } from '@/components/feature/query-fil
 
 import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
 import { Button } from '@/components/base/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { NumericalFilter } from '@/components/feature/query-filters/numerical-filter';
@@ -24,6 +24,11 @@ export function FilterList({ groupKey }: FilterListProps) {
   const fields = groupKey
     ? aggregations[groupKey]?.items || []
     : Object.values(aggregations).flatMap(group => group.items);
+
+  useEffect(() => {
+    setToggleExpandAll(false);
+    setExpandedFilters([]);
+  }, [groupKey]);
 
   return (
     <div>
