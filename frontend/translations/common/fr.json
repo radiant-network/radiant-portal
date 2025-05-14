@@ -449,7 +449,7 @@
       "lrt": "LRT",
       "polyphen2hvar": "PolyPhen-2 HVAR",
       "phylop17way": "PhyloP17Way",
-      "pli": "pLi"
+      "pli": "pLI"
     },
     "classes": {
       "indel": "Indel",
