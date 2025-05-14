@@ -295,10 +295,10 @@ export interface ExpendedOccurrence {
     'is_mane_select'?: boolean;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof ExpendedOccurrence
      */
-    'locus_id': number;
+    'locus_id': string;
     /**
      * 
      * @type {Array<number>}
@@ -814,10 +814,10 @@ export interface Occurrence {
     'is_mane_select'?: boolean;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof Occurrence
      */
-    'locus_id': number;
+    'locus_id': string;
     /**
      * 
      * @type {Array<string>}
