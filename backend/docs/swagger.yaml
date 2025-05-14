@@ -111,7 +111,7 @@ components:
         is_mane_select:
           type: boolean
         locus_id:
-          type: integer
+          type: string
         mother_calls:
           items:
             type: integer
@@ -334,7 +334,7 @@ components:
         is_mane_select:
           type: boolean
         locus_id:
-          type: integer
+          type: string
         omim_inheritance_code:
           items:
             type: string

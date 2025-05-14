@@ -6,7 +6,7 @@ type Occurrence struct {
 	SeqId               int               `json:"seq_id" validate:"required"`
 	Chromosome          string            `json:"chromosome" validate:"required"`
 	Start               int64             `json:"start" validate:"required"`
-	LocusId             int64             `json:"locus_id" validate:"required"`
+	LocusId             string            `json:"locus_id" validate:"required"`
 	GenotypeQuality     int32             `json:"genotype_quality" validate:"required"`
 	Filter              string            `json:"filter,omitempty"`
 	Zygosity            string            `json:"zygosity" validate:"required"`
@@ -32,7 +32,7 @@ type Occurrence struct {
 } // @name Occurrence
 
 type ExpendedOccurrence = struct {
-	LocusId               int64                    `json:"locus_id" validate:"required"`
+	LocusId               string                   `json:"locus_id" validate:"required"`
 	Hgvsg                 string                   `json:"hgvsg" validate:"required"`
 	Chromosome            string                   `json:"chromosome"`
 	Start                 int64                    `json:"start,omitempty"`

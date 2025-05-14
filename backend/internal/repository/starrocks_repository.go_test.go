@@ -38,7 +38,7 @@ func Test_GetOccurrences(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqId)
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Equal(t, "HET", occurrences[0].Zygosity)
 			assert.Equal(t, 0.99, occurrences[0].Pf)
@@ -62,7 +62,7 @@ func Test_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqId)
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Empty(t, occurrences[0].VepImpact)
 		}
@@ -80,7 +80,7 @@ func Test_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t *testing.T) 
 		assert.Len(t, occurrences, 1)
 
 		if assert.Len(t, occurrences, 1) {
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Empty(t, occurrences[0].Filter)
 		}
 	})
@@ -153,7 +153,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqId)
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Equal(t, "HET", occurrences[0].Zygosity)
 			assert.Equal(t, 0.99, occurrences[0].Pf)
@@ -189,9 +189,9 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 		if assert.Len(t, occurrences, 2) {
 
 			assert.Equal(t, types.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Equal(t, types.JsonArray[string]{"Pathogenic"}, occurrences[1].Clinvar)
-			assert.EqualValues(t, 1001, occurrences[1].LocusId)
+			assert.EqualValues(t, "1001", occurrences[1].LocusId)
 
 		}
 	})
@@ -220,7 +220,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *test
 		if assert.Len(t, occurrences, 1) {
 
 			assert.Equal(t, types.JsonArray[string]{"Likely_Pathogenic", "Pathogenic"}, occurrences[0].Clinvar)
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 
 		}
 	})
@@ -264,8 +264,8 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 12) {
-			assert.EqualValues(t, 1023, occurrences[0].LocusId)
-			assert.EqualValues(t, 1012, occurrences[len(occurrences)-1].LocusId)
+			assert.EqualValues(t, "1023", occurrences[0].LocusId)
+			assert.EqualValues(t, "1012", occurrences[len(occurrences)-1].LocusId)
 		}
 	})
 }
@@ -291,8 +291,8 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Sp
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 12) {
-			assert.EqualValues(t, 1016, occurrences[0].LocusId)
-			assert.EqualValues(t, 1005, occurrences[len(occurrences)-1].LocusId)
+			assert.EqualValues(t, "1016", occurrences[0].LocusId)
+			assert.EqualValues(t, "1005", occurrences[len(occurrences)-1].LocusId)
 		}
 	})
 }
@@ -321,8 +321,8 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 5) {
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
-			assert.EqualValues(t, 1008, occurrences[len(occurrences)-1].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.EqualValues(t, "1008", occurrences[len(occurrences)-1].LocusId)
 		}
 	})
 }
@@ -350,7 +350,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 		}
 	})
 }
@@ -501,9 +501,9 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel(t *testing.
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 3) {
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
-			assert.EqualValues(t, 1001, occurrences[1].LocusId)
-			assert.EqualValues(t, 1002, occurrences[2].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.EqualValues(t, "1001", occurrences[1].LocusId)
+			assert.EqualValues(t, "1002", occurrences[2].LocusId)
 
 		}
 	})
@@ -529,8 +529,8 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 2) {
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
-			assert.EqualValues(t, 1002, occurrences[1].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.EqualValues(t, "1002", occurrences[1].LocusId)
 
 		}
 	})
@@ -557,7 +557,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_An
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
-			assert.EqualValues(t, 1000, occurrences[0].LocusId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 
 		}
 	})
@@ -683,7 +683,7 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 		repo := NewStarrocksRepository(db)
 		expendedOccurrence, err := repo.GetExpendedOccurrence(1, 1000)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(1000), expendedOccurrence.LocusId)
+		assert.Equal(t, "1000", expendedOccurrence.LocusId)
 		assert.Equal(t, float32(0.1), expendedOccurrence.SiftScore)
 		assert.Equal(t, "T", expendedOccurrence.SiftPred)
 	})

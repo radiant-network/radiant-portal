@@ -14,7 +14,7 @@ func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrenc
 	return []types.Occurrence{
 		{
 			SeqId:              1,
-			LocusId:            1000,
+			LocusId:            "1000",
 			Filter:             "PASS",
 			Zygosity:           "HET",
 			Pf:                 0.99,
@@ -56,7 +56,7 @@ func (m *MockRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*
 
 func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurrence, error) {
 	return &types.ExpendedOccurrence{
-		LocusId:      1000,
+		LocusId:      "1000",
 		Chromosome:   "1",
 		Hgvsg:        "hgvsg1",
 		SiftPred:     "T",
@@ -97,7 +97,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"start": 1,
         "is_canonical":false,
 		"is_mane_select":false,
-		"locus_id": 1000,
+		"locus_id": "1000",
         "filter": "PASS",
         "zygosity": "HET",
         "pf": 0.99,
@@ -201,7 +201,7 @@ func Test_GetExpendedOccurrenceHandler(t *testing.T) {
 		"is_canonical":false,
 		"is_mane_plus":false,
 		"is_mane_select":false,
-		"locus_id":1000,
+		"locus_id":"1000",
 		"picked_consequences":["splice acceptor"], 
 		"revel_score":0.1, 
 		"sift_pred":"T", 
