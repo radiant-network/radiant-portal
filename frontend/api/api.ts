@@ -162,7 +162,7 @@ export interface ExpendedOccurrence {
      */
     'ad_total'?: number;
     /**
-     * 
+     * TODO
      * @type {number}
      * @memberof ExpendedOccurrence
      */

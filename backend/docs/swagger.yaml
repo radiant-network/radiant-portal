@@ -59,6 +59,7 @@ components:
         ad_total:
           type: integer
         af:
+          description: TODO
           type: number
         cadd_phred:
           type: number
