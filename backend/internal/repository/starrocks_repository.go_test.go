@@ -718,6 +718,8 @@ func Test_GetVariantConsequences(t *testing.T) {
 		variantConsequences, err := repo.GetVariantConsequences(1000)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(*variantConsequences))
+		assert.Equal(t, true, (*variantConsequences)[0].IsPicked)
+		assert.Equal(t, false, (*variantConsequences)[1].IsPicked)
 	})
 }
 
