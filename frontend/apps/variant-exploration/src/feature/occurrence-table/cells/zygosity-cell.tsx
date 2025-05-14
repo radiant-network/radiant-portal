@@ -12,7 +12,7 @@ function ZygosityCell({ value }: ZygosityCellProps) {
       {{
         HEM: '1',
         HET: '0/1',
-      }[value] ?? null}
+      }[value] ?? '-'}
     </span>
   );
 }
