@@ -440,8 +440,8 @@
       "loeuf": "LOEUF",
       "spliceAI": "SpliceAI",
       "fathmm": "FATHMM",
-      "caddRaw": "CADD (raw)",
-      "caddPhred": "CADD (phred)",
+      "caddRaw": "CADD (Raw)",
+      "caddPhred": "CADD (Phred)",
       "dann": "DANN",
       "lrt": "LRT",
       "polyphen2hvar": "PolyPhen-2 HVAR",
@@ -455,7 +455,7 @@
       "deletion": "Effacement",
       "sequence_alteration": "Modification de séquence"
     },
-    "canonicalTranscript": "Canonical Transcript",
+    "canonicalTranscript": "Canonical transcript",
     "interpretationForm": {
       "title": "Interprétation clinique",
       "cancelText": "Annuler",
