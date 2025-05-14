@@ -1,6 +1,8 @@
 package utils
 
-import "github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
+import (
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
+)
 
 func ConsequenceToTranscript(csq types.Consequence) types.Transcript {
 	return types.Transcript{
@@ -56,5 +58,5 @@ func ConsequencesToVariantConsequences(consequences []types.Consequence) []types
 		variantConsequences = append(variantConsequences, variantConsequence)
 	}
 
-	return variantConsequences
+	return SortConsequences(variantConsequences)
 }

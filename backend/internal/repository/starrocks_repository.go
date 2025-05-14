@@ -476,7 +476,6 @@ func (r *StarrocksRepository) GetVariantConsequences(locusId int) (*[]VariantCon
 	tx := r.db.Table("consequences c")
 	tx = tx.Select("c.is_picked, c.symbol, c.biotype, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.transcript_id, c.vep_impact, c.is_canonical, c.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.dna_change, c.aa_change, c.consequences, c.sift_pred, c.sift_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.revel_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate")
 	tx = tx.Where("c.locus_id = ?", locusId)
-	tx = tx.Order("c.symbol asc")
 
 	var consequences []Consequence
 	err := tx.Find(&consequences).Error
