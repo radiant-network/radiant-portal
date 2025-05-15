@@ -93,7 +93,7 @@ function InterpretationFormSomatic(
                 >
                   <ToggleGroupItem
                     value="LA6668-3"
-                    className=" data-[state=on]:bg-red-100 data-[state=on]:text-red-800 border data-[state=on]:border-red-200"
+                    className=" data-[state=on]:bg-red/20 data-[state=on]:text-red-foreground border data-[state=on]:border-red-foreground data-[state=on]:hover:text-red-foreground"
                   >
                     {t('variant.interpretationForm.somatic.oncogenicity-options.oncogenic')}
                   </ToggleGroupItem>
@@ -102,7 +102,7 @@ function InterpretationFormSomatic(
                       <span>
                         <ToggleGroupItem
                           value="LA26332-9"
-                          className="data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 border data-[state=on]:border-yellow-300"
+                          className="data-[state=on]:bg-orange/20 data-[state=on]:text-orange-foreground border data-[state=on]:border-yellow-foreground data-[state=on]:hover:text-orange-foreground"
                         >
                           {t('variant.interpretationForm.somatic.oncogenicity-options.likelyOncogenic')}
                         </ToggleGroupItem>
@@ -117,7 +117,7 @@ function InterpretationFormSomatic(
                       <span>
                         <ToggleGroupItem
                           value="LA26333-7"
-                          className=" data-[state=on]:bg-orange-100 data-[state=on]:text-orange-900 border data-[state=on]:border-orange-300"
+                          className=" data-[state=on]:bg-yellow/20 data-[state=on]:text-yellow-foreground border data-[state=on]:border-yellow-foreground data-[state=on]:hover:text-yellow-foreground"
                         >
                           {t('variant.interpretationForm.somatic.oncogenicity-options.vus')}
                         </ToggleGroupItem>
@@ -132,7 +132,7 @@ function InterpretationFormSomatic(
                       <span>
                         <ToggleGroupItem
                           value="LA26334-5"
-                          className=" data-[state=on]:bg-lime-100 data-[state=on]:text-lime-900 border data-[state=on]:border-lime-300"
+                          className=" data-[state=on]:bg-lime/20 data-[state=on]:text-lime-foreground border data-[state=on]:border-lime-foreground data-[state=on]:hover:text-lime-foreground"
                         >
                           {t('variant.interpretationForm.somatic.oncogenicity-options.likelyBenign')}
                         </ToggleGroupItem>
@@ -144,7 +144,7 @@ function InterpretationFormSomatic(
                   </Tooltip>
                   <ToggleGroupItem
                     value="LA6675-8"
-                    className=" data-[state=on]:bg-green-100 data-[state=on]:text-green-800 border data-[state=on]:border-green-300"
+                    className=" data-[state=on]:bg-green/20 data-[state=on]:text-green-foreground border data-[state=on]:border-green-foreground data-[state=on]:hover:text-green-foreground"
                   >
                     {t('variant.interpretationForm.somatic.oncogenicity-options.benign')}
                   </ToggleGroupItem>
