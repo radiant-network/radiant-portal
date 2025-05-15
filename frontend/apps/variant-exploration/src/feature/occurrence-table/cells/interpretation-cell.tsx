@@ -17,8 +17,8 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
       renderTrigger={handleOpen => (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button iconOnly className="size-6" variant="ghost" onClick={handleOpen}>
-              <ZapIcon size={16} className="text-muted-foreground cursor-pointer" />
+            <Button iconOnly className="text-muted-foreground size-6" variant="ghost" onClick={handleOpen}>
+              <ZapIcon size={16} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t('variant.interpretation.tooltips')}</TooltipContent>
