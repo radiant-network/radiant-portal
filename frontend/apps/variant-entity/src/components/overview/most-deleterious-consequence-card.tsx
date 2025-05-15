@@ -1,5 +1,4 @@
 import { Card, CardContent, CardFooter, CardProps } from '@/components/base/ui/card';
-import TranscriptCanonicalIcon from '@/components/base/icons/transcript-canonical-icon';
 import { Button } from '@/components/base/ui/button';
 import { Link, useParams } from 'react-router';
 import { VariantOverview } from '@/api/api';
@@ -11,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { InfoIcon } from 'lucide-react';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
+import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 
 function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
@@ -110,24 +110,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
         <Separator className="my-6" />
         <div className="flex items-center text-muted-foreground text-sm">
           {data?.transcript_id && (
-            <div className="flex items-center gap-1">
-              <a
-                href={`https://www.ensembl.org/id/${data?.transcript_id}`}
-                className="hover:underline"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {data?.transcript_id}
-              </a>
-              {data.is_canonical && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <TranscriptCanonicalIcon size={16} className="text-primary" />
-                  </TooltipTrigger>
-                  <TooltipContent>{t('variant.canonicalTranscript')}</TooltipContent>
-                </Tooltip>
-              )}
-            </div>
+            <TranscriptIdLink transcriptId={data.transcript_id} isCanonical={data.is_canonical} />
           )}
           {data?.exon_rank && data?.exon_total && (
             <>

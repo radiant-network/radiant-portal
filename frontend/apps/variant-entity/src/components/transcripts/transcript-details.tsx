@@ -1,9 +1,9 @@
 import { Transcript } from '@/api/api';
-import TranscriptCanonicalIcon from '@/components/base/icons/transcript-canonical-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import ExpandableList from '@/components/base/list/expandable-list';
 import { TFunction } from 'i18next';
+import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 
 interface TranscriptDetailsProps {
   data: Transcript;
@@ -15,24 +15,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
   return (
     <div className="flex [&>div]:p-2 [&>div]:flex-1">
       <div className="space-y-2">
-        <div className="flex items-center gap-1">
-          <a
-            href={`https://www.ensembl.org/id/${data?.transcript_id}`}
-            className="hover:underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {data?.transcript_id}
-          </a>
-          {data.is_canonical && (
-            <Tooltip>
-              <TooltipTrigger>
-                <TranscriptCanonicalIcon size={16} className="text-primary" />
-              </TooltipTrigger>
-              <TooltipContent>{t('variant.canonicalTranscript')}</TooltipContent>
-            </Tooltip>
-          )}
-        </div>
+        {data.transcript_id && <TranscriptIdLink transcriptId={data.transcript_id} isCanonical={data.is_canonical} />}
         <div className="flex flex-col gap-2 text-muted-foreground text-xs">
           <span>Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : '-'}</span>
           {data.dna_change && <span>{data.dna_change}</span>}
