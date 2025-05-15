@@ -3,6 +3,7 @@ import { cn } from '@/components/lib/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { VepImpact } from '@/api/api';
 import ImpactIcon from '@/components/feature/variant/impact-icon';
+import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 
 type MostDeleteriousConsequenceCellProps = {
   vepImpact?: VepImpact;
@@ -23,13 +24,11 @@ type MostDeleteriousConsequenceCellProps = {
  * @fixme aa_change is empty in api at the moment
  */
 function MostDeleteriousConsequenceCell({ vepImpact, consequences, aaChange }: MostDeleteriousConsequenceCellProps) {
-  const { t } = useI18n();
-
   if (vepImpact === undefined || consequences === undefined) return <EmptyCell />;
 
   return (
     <div className={cn('flex items-center gap-2')}>
-      <ImpactIcon value={vepImpact} /> {t(`variant.consequences.${consequences[0]}`)}
+      <ConsequenceLabel vepImpact={vepImpact} consequence={consequences[0]} size="sm" />
       {aaChange && ` - ${aaChange}`}
     </div>
   );
