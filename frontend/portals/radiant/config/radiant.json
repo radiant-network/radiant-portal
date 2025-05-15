@@ -25,7 +25,7 @@
       },
       "pathogenicity": {
         "items": [
-          { "key": "clinvar_interpretation", "type": "multiple" },
+          { "key": "clinvar", "type": "multiple" },
           { "key": "vep_impact", "type": "multiple" },
           { "key": "cadd_score", "type": "numerical", "defaults": { 
             "min": 0, 

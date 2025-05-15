@@ -1,6 +1,7 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
 import { ExpendedOccurrence } from '@/api/api';
+import { Badge } from '@/components/base/ui/badge';
 
 interface GeneSectionProps {
   data: ExpendedOccurrence;
@@ -8,7 +9,12 @@ interface GeneSectionProps {
 
 export default function GeneSection({ data }: GeneSectionProps) {
   const { t } = useI18n();
-
+  function getSpliceAi(data: ExpendedOccurrence) {
+    if (data.spliceai_type) {
+      return <span className="text-xs text-muted-foreground">{data.spliceai_ds} {data.spliceai_type.map((v) => <Badge>{v}</Badge>)}</span>;
+    }
+    return '-';
+  }
   return (
     <DetailSection title={t('occurrenceExpend.gene.title')}>
       <DetailItem
@@ -25,7 +31,7 @@ export default function GeneSection({ data }: GeneSectionProps) {
             : '-'
         }
       />
-      <DetailItem title={t('occurrenceExpend.gene.spliceAi')} value="-" />
+      <DetailItem title={t('occurrenceExpend.gene.spliceAi')} value={getSpliceAi(data)} />
     </DetailSection>
   );
 }
