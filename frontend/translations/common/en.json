@@ -462,6 +462,9 @@
         "germline": "Germline",
         "somatic": "Somatic"
       },
+      "transcript": {
+        "exon": "Exon"
+      },
       "notification": {
         "success": "Interpretation successfully saved",
         "error": {

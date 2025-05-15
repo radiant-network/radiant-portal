@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from '@/components/base/ui/button';
+import { Button } from '@/components/base/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -8,18 +8,18 @@ import {
   DialogTitle,
 } from '@/components/base/ui/dialog';
 import { Separator } from '@/components/base/ui/separator';
-import { Edit2Icon } from 'lucide-react';
 import InterpretationFormGermline from './interpretation-form-germline';
 import { ReactNode, useCallback, useRef, useState } from 'react';
 import { Occurrence } from '@/api/api';
 import InterpretationFormSomatic from './interpretation-form-somatic';
 import InterpretationLastUpdatedBanner from './last-updated-banner';
-import InterpretationVariantHeader from './variant-header';
+import InterpretationVariantHeader from './header';
 import { useInterpretationHelper } from './hook';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 import { Interpretation, InterpretationFormRef } from './types';
 import { Spinner } from '@/components/base/spinner';
+import InterpretationTranscript from './transcript';
 
 type InterpretationDialogButtonProps = {
   occurrence: Occurrence;
@@ -90,8 +90,9 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
             <div className="py-6 overflow-scroll space-y-6 h-[calc(95vh-150px)]">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
+              <InterpretationTranscript occurrence={occurrence} />
               <div className="grid gap-6 grid-cols-12">
-                <div className="col-span-7 border p-6 bg-muted/40">
+                <div className="rounded col-span-7 border p-6 bg-muted/40">
                   {isSomatic ? (
                     <InterpretationFormSomatic
                       ref={somaticFormRef}
@@ -116,7 +117,7 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
                     />
                   )}
                 </div>
-                <div className="col-span-5 border py-4 px-6"></div>
+                <div className="rounded col-span-5 border py-4 px-6"></div>
               </div>
             </div>
             <Separator className="mb-6" />

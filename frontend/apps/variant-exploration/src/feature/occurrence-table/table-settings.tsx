@@ -43,9 +43,11 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'clinicalInterpretation',
       cell: info => <InterpretationCell occurrence={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.clinicalInterpretation')} iconOnly>
-          <ZapIcon size={16} />
-        </TooltipsHeader>
+        <div className="flex justify-center">
+          <TooltipsHeader tooltips={t('variant.headers.clinicalInterpretation')} iconOnly>
+            <ZapIcon size={16} />
+          </TooltipsHeader>
+        </div>
       ),
       size: 40,
       enablePinning: false,

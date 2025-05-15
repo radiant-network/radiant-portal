@@ -5,7 +5,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 
 const consequenceVariant = tv({
   slots: {
-    base: 'flex gap-2',
+    base: 'flex gap-[6px]',
     icon: 'mt-[5.25px]',
   },
   variants: {
