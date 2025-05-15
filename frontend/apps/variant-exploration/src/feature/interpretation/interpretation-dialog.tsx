@@ -10,7 +10,7 @@ import {
 import { Separator } from '@/components/base/ui/separator';
 import { Edit2Icon } from 'lucide-react';
 import InterpretationFormGermline from './interpretation-form-germline';
-import { useCallback, useRef, useState } from 'react';
+import { ReactNode, useCallback, useRef, useState } from 'react';
 import { Occurrence } from '@/api/api';
 import InterpretationFormSomatic from './interpretation-form-somatic';
 import InterpretationLastUpdatedBanner from './last-updated-banner';
@@ -21,15 +21,16 @@ import useSWRMutation from 'swr/mutation';
 import { Interpretation, InterpretationFormRef } from './types';
 import { Spinner } from '@/components/base/spinner';
 
-type InterpretationDialogButtonProps = ButtonProps & {
+type InterpretationDialogButtonProps = {
   occurrence: Occurrence;
+  renderTrigger: (handleOpen: () => void) => ReactNode;
 };
 
 // Temporary flag to switch between somatic and germline interpretation forms
 // In the future, this should be determined based on the occurrence type or other criteria
 const isSomatic = false;
 
-function InterpretationDialogButton({ occurrence, children, ...buttonProps }: InterpretationDialogButtonProps) {
+function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialogButtonProps) {
   const [open, setOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const gerlimeFormRef = useRef<InterpretationFormRef>(null);
@@ -71,9 +72,7 @@ function InterpretationDialogButton({ occurrence, children, ...buttonProps }: In
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button color="primary" onClick={handleOpen} {...buttonProps}>
-        {children}
-      </Button>
+      {renderTrigger(handleOpen)}
       <DialogContent
         className="max-w-[calc(100vw-48px)] min-h-[calc(100vh-48px)] w-[1200px]"
         onEscapeKeyDown={e => e.preventDefault()}
@@ -142,4 +141,4 @@ function InterpretationDialogButton({ occurrence, children, ...buttonProps }: In
   );
 }
 
-export default InterpretationDialogButton;
+export default InterpretationDialog;

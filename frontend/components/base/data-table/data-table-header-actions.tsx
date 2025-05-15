@@ -13,7 +13,6 @@ import { Tooltip } from '@radix-ui/react-tooltip';
 import { Button } from '@/components/base/ui/button';
 import { TFunction } from 'i18next';
 import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
-import { boolean } from 'zod';
 import { useState } from 'react';
 
 const PIN_COLUMN_ACTIONS: {
@@ -84,7 +83,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-5', {
+              className={cn('size-6', {
                 'opacity-0 group-hover:opacity-100': !isPinningDropdownActive,
               })}
             >
@@ -117,7 +116,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-5', {
+              className={cn('size-6', {
                 'opacity-0 group-hover:opacity-100': !header.column.getIsSorted(),
               })}
               onClick={header.column.getToggleSortingHandler()}
