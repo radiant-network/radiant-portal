@@ -17,21 +17,21 @@ export default function OccurrenceExpendDetails({ data }: ExpendedOccurrenceDeta
   return (
     <>
       <div className="space-y-2.5">
-        <ClassificationSection />
-        <PredictionSection />
+        <ClassificationSection data={data} />
+        <PredictionSection data={data} />
         <GeneSection data={data} />
       </div>
       <div className="space-y-2.5">
-        <FrequencySection />
+        <FrequencySection data={data} />
         <FunctionalScoreSection data={data} />
       </div>
       <div className="space-y-2.5">
-        <ZygositySection />
-        <ClinicalAssociationSection />
+        <ZygositySection data={data} />
+        <ClinicalAssociationSection data={data} />
       </div>
       <div className="space-y-2.5">
-        <FamilySection />
-        <MetricSection />
+        <FamilySection data={data} />
+        <MetricSection data={data} />
       </div>
     </>
   );

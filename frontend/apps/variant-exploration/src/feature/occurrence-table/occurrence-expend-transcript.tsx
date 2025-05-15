@@ -1,4 +1,4 @@
-import { Occurrence } from '@/api/api';
+import { ExpendedOccurrence, Occurrence } from '@/api/api';
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
@@ -6,7 +6,7 @@ import ImpactIcon from '@/components/feature/variant/impact-icon';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 
 type OccurrenceExpendTranscriptProps = {
-  occurrence: Occurrence;
+  occurrence: ExpendedOccurrence;
 };
 
 export default function OccurrenceExpendTranscript({ occurrence }: OccurrenceExpendTranscriptProps) {
@@ -16,16 +16,24 @@ export default function OccurrenceExpendTranscript({ occurrence }: OccurrenceExp
 
   return (
     <div className="flex items-center gap-3">
-      <div className="italic">todo ensembl</div>
-      <Separator orientation="vertical" className="h-5" />
+      { occurrence.ensembl_gene_id && (
+        <>
+          <div className="italic"><a href={`https://www.ensembl.org/Homo_sapiens/Transcript/Summary?g=${occurrence.ensembl_gene_id}`} target="_blank">{occurrence.ensembl_gene_id}</a></div>
+          <Separator orientation="vertical" className="h-5" />
+        </>
+      )}
       {occurrence.is_mane_select && (
         <>
           <div>{occurrence.is_mane_select && <TranscriptManeSelectIcon size={18} className="text-primary" />}</div>
           <Separator orientation="vertical" className="h-5" />
         </>
       )}
-      <div className="italic">todo exon</div>
-      <Separator orientation="vertical" className="h-5" />
+      {occurrence.exon_rank && occurrence.exon_total && (
+        <>
+          <div>Exon: {occurrence.exon_rank} / {occurrence.exon_total}</div>
+          <Separator orientation="vertical" className="h-5" />
+        </>
+      )}
       {occurrence.picked_consequences.length > 0 && (
         <>
           {arn}
