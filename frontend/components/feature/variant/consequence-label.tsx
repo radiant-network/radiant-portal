@@ -5,8 +5,8 @@ import { tv, VariantProps } from 'tailwind-variants';
 
 const consequenceVariant = tv({
   slots: {
-    base: 'flex items-baseline gap-2',
-    icon: '',
+    base: 'flex gap-2',
+    icon: 'mt-[5.25px]',
   },
   variants: {
     size: {
@@ -16,7 +16,7 @@ const consequenceVariant = tv({
       },
       default: {
         base: 'text-base font-semibold',
-        icon: 'size-[14px] mt-[1px]',
+        icon: 'size-[14px]',
       },
     },
   },
@@ -24,7 +24,6 @@ const consequenceVariant = tv({
     size: 'default',
   },
 });
-
 interface ConsequenceLabelProps extends VariantProps<typeof consequenceVariant>, React.HTMLAttributes<HTMLDivElement> {
   consequence: string;
   vepImpact: VepImpact;
@@ -36,10 +35,12 @@ function ConsequenceLabel({ consequence, vepImpact, size, className, ...props }:
 
   return (
     <div className={styles.base({ className })} {...props}>
-      <ImpactIcon value={vepImpact} className={styles.icon()} />{' '}
-      {t(`variant.consequences.${consequence}`, {
-        defaultValue: consequence.replace(/_/g, ' '),
-      })}
+      <ImpactIcon value={vepImpact} className={styles.icon()} />
+      <span>
+        {t(`variant.consequences.${consequence}`, {
+          defaultValue: consequence.replace(/_/g, ' '),
+        })}
+      </span>
     </div>
   );
 }
