@@ -194,12 +194,10 @@ var ConsequencesField = Field{
 	Table:           VariantTable,
 }
 var VepImpactField = Field{
-	Name:            "vep_impact",
-	CanBeSelected:   true,
-	CanBeFiltered:   true,
-	CanBeSorted:     true,
-	CanBeAggregated: true,
-	Table:           VariantTable,
+	Name:          "vep_impact",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         VariantTable,
 }
 var SymbolField = Field{
 	Name:          "symbol",

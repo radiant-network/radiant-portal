@@ -110,6 +110,12 @@ var ZygosityField = Field{
 	CanBeAggregated: true,
 	Table:           OccurrenceTable,
 }
+var TransmissionModeField = Field{
+	Name:            "transmission_mode",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OccurrenceTable,
+}
 var GenotypeQualityField = Field{
 	Name:          "gq",
 	Alias:         "genotype_quality",
@@ -142,8 +148,6 @@ var OccurrencesFields = []Field{
 	SymbolFilterField,
 	ImpactScoreField,
 	ImpactScoreFilterField,
-	OmimGenePanelField,
-	HpoGenePanelField,
 	RsNumberField,
 	AaChangeField,
 	ConsequencesField,
@@ -153,6 +157,7 @@ var OccurrencesFields = []Field{
 	OmimInheritanceCodeField,
 	GnomadV3AfField,
 	TranscriptIdField,
+	TransmissionModeField,
 
 	// Variants
 	VariantClassField,
@@ -162,8 +167,16 @@ var OccurrencesFields = []Field{
 
 	// Genes
 	VepImpactField,
+	VepImpactFilterField,
 	GnomadPliField,
 	GnomadLoeufField,
+	BiotypeField,
+	OmimGenePanelField,
+	HpoGenePanelField,
+	DddGenePanelField,
+	CosmicGenePanelField,
+	OmimInheritanceField,
+	OrphanetGenePanelField,
 
 	// Predictions
 	CaddScoreField,
