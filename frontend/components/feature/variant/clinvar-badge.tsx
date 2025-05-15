@@ -43,7 +43,7 @@ function ClinVarBadge({ value, abbreviated, ...props }: ClinVarBadgeProps) {
       wrapper={children => (
         <Tooltip>
           <TooltipTrigger className="flex">{children}</TooltipTrigger>
-          <TooltipContent>{t(`variant.clinVars.${value}.tooltip`)}</TooltipContent>
+          <TooltipContent>{t(`variant.clinVars.${value.toLowerCase()}.tooltip`)}</TooltipContent>
         </Tooltip>
       )}
     >

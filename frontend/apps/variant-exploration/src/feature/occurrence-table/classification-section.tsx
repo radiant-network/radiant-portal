@@ -10,12 +10,18 @@ type ClassificationSectionProps = {
 export default function ClassificationSection({ data }: ClassificationSectionProps) {
   const { t } = useI18n();
 
-  const clinvar = data.clinvar?.map((clinvar) => 
-    <ClinVarBadge abbreviated value={clinvar}>{clinvar}</ClinVarBadge>);
+  const clinvar = data.clinvar?.map(clinvar => (
+    <ClinVarBadge abbreviated value={clinvar}>
+      {clinvar}
+    </ClinVarBadge>
+  ));
 
   return (
     <DetailSection title={t('occurrenceExpend.classifications.title')}>
-      <DetailItem title={t('occurrenceExpend.classifications.clinvar')} value={clinvar || '-'} />
+      <DetailItem
+        title={t('occurrenceExpend.classifications.clinvar')}
+        value={clinvar?.length ? <div className="space-x-1">{clinvar}</div> : '-'}
+      />
     </DetailSection>
   );
 }

@@ -1,4 +1,5 @@
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
+import { BadgeProps } from '@/components/base/ui/badge';
 import { TFunction } from 'i18next';
 
 export const getTransmissionModes = (
@@ -69,7 +70,7 @@ export const getTransmissionModes = (
 ];
 
 export const classificationCriterias: (MultiSelectorOption & {
-  color?: string;
+  color?: BadgeProps['variant'];
 })[] = [
   {
     label: 'PVS1',
@@ -80,61 +81,61 @@ export const classificationCriterias: (MultiSelectorOption & {
   {
     label: 'PS1',
     value: 'PS1',
-    color: 'volcano',
+    color: 'orange',
     title: '',
   },
   {
     label: 'PS2',
     value: 'PS2',
-    color: 'volcano',
+    color: 'orange',
     title: '',
   },
   {
     label: 'PS3',
     value: 'PS3',
-    color: 'volcano',
+    color: 'orange',
     title: '',
   },
   {
     label: 'PS4',
     value: 'PS4',
-    color: 'volcano',
+    color: 'orange',
     title: '',
   },
   {
     label: 'PM1',
     value: 'PM1',
-    color: 'gold',
+    color: 'yellow',
     title: '',
   },
   {
     label: 'PM2',
     value: 'PM2',
-    color: 'gold',
+    color: 'yellow',
     title: '',
   },
   {
     label: 'PM3',
     value: 'PM3',
-    color: 'gold',
+    color: 'yellow',
     title: '',
   },
   {
     label: 'PM4',
     value: 'PM4',
-    color: 'gold',
+    color: 'yellow',
     title: '',
   },
   {
     label: 'PM5',
     value: 'PM5',
-    color: 'gold',
+    color: 'yellow',
     title: '',
   },
   {
     label: 'PM6',
     value: 'PM6',
-    color: 'gold',
+    color: 'yellow',
     title: '',
   },
   {
@@ -170,31 +171,31 @@ export const classificationCriterias: (MultiSelectorOption & {
   {
     label: 'BA1',
     value: 'BA1',
-    color: 'geekblue',
+    color: 'cyan',
     title: '',
   },
   {
     label: 'BS1',
     value: 'BS1',
-    color: 'purple',
+    color: 'violet',
     title: '',
   },
   {
     label: 'BS2',
     value: 'BS2',
-    color: 'purple',
+    color: 'violet',
     title: '',
   },
   {
     label: 'BS3',
     value: 'BS3',
-    color: 'purple',
+    color: 'violet',
     title: '',
   },
   {
     label: 'BS4',
     value: 'BS4',
-    color: 'purple',
+    color: 'violet',
     title: '',
   },
   {
@@ -245,7 +246,7 @@ export const getClassificationCriteriaColor = (value: string) =>
   classificationCriterias.find(criteria => criteria.value === value)?.color || undefined;
 
 export const oncogenicityClassificationCriterias: (MultiSelectorOption & {
-  color?: string;
+  color?: BadgeProps['variant'];
 })[] = [
   {
     label: 'OVS1',
@@ -256,19 +257,19 @@ export const oncogenicityClassificationCriterias: (MultiSelectorOption & {
   {
     label: 'OS1',
     value: 'OS1',
-    color: 'volcano',
+    color: 'orange',
     title: '',
   },
   {
     label: 'OS2',
     value: 'OS2',
-    color: 'volcano',
+    color: 'orange',
     title: '',
   },
   {
     label: 'OS3',
     value: 'OS3',
-    color: 'volcano',
+    color: 'orange',
     title: '',
   },
   {
@@ -322,31 +323,31 @@ export const oncogenicityClassificationCriterias: (MultiSelectorOption & {
   {
     label: 'SBVS1',
     value: 'SBVS1',
-    color: 'purple',
+    color: 'violet',
     title: '',
   },
   {
     label: 'SBS1',
     value: 'SBS1',
-    color: 'purple',
+    color: 'violet',
     title: '',
   },
   {
     label: 'SBS2',
     value: 'SBS2',
-    color: 'purple',
+    color: 'violet',
     title: '',
   },
   {
     label: 'SBP1',
     value: 'SBP1',
-    color: 'geekblue',
+    color: 'cyan',
     title: '',
   },
   {
     label: 'SBP2',
     value: 'SBP2',
-    color: 'geekblue',
+    color: 'cyan',
     title: '',
   },
 ];
