@@ -12,6 +12,7 @@
       "variant": {
         "items": [
           { "key": "variant_class", "type": "multiple" },
+          { "key": "consequence", "type": "multiple" },
           { "key": "chromosome", "type": "multiple" },
           { "key": "zygosity", "type": "multiple" }
         ]
