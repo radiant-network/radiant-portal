@@ -6,11 +6,11 @@ import { VariantOverview } from '@/api/api';
 import { VariantEntityTabs } from '@/types';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import ImpactIcon from '@/components/feature/variant/impact-icon';
 import ClinvarBadge from '@/components/feature/variant/clinvar-badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { InfoIcon } from 'lucide-react';
+import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 
 function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
@@ -43,14 +43,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="text-sm text-muted-foreground">{t('variantEntity.overview.consequence')}</div>
             <div className="flex items-center gap-2">
               {data?.picked_consequences?.[0] && data.vep_impact ? (
-                <>
-                  <ImpactIcon value={data.vep_impact} /> {/* TODO */}
-                  <span className="font-semibold">
-                    {t(`variant.consequences.${data?.picked_consequences?.[0]}`, {
-                      defaultValue: '-',
-                    })}
-                  </span>
-                </>
+                <ConsequenceLabel vepImpact={data.vep_impact} consequence={data?.picked_consequences?.[0]} />
               ) : (
                 '-'
               )}
