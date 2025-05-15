@@ -92,7 +92,7 @@ function InterpretationDialogButton({ occurrence, children, ...buttonProps }: In
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
               <div className="grid gap-6 grid-cols-12">
-                <div className="col-span-7 border p-6 bg-muted">
+                <div className="col-span-7 border p-6 bg-muted/40">
                   {isSomatic ? (
                     <InterpretationFormSomatic
                       ref={somaticFormRef}

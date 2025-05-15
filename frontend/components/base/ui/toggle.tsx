@@ -5,17 +5,27 @@ import { tv, type VariantProps } from 'tailwind-variants';
 
 const toggleVariants = tv({
   slots: {
-    base: 'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring  disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 gap-2',
+    base: 'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors bg-background hover:bg-muted enabled:hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 gap-2',
   },
   variants: {
     variant: {
-      default: 'bg-transparent',
-      outline: 'border border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
+      default: {
+        base: '',
+      },
+      outline: {
+        base: 'border border-input hover:bg-accent hover:text-accent-foreground',
+      },
     },
     size: {
-      default: 'h-9 px-3 min-w-9',
-      sm: 'h-8 px-2.5 min-w-8',
-      lg: 'h-10 px-5 min-w-10',
+      default: {
+        base: 'h-9 px-3 min-w-9',
+      },
+      sm: {
+        base: 'h-8 px-2.5 min-w-8',
+      },
+      lg: {
+        base: 'h-10 px-5 min-w-10',
+      },
     },
   },
   defaultVariants: {
