@@ -132,14 +132,6 @@ var PnField = Field{
 	Type:          NumericType,
 	Table:         VariantTable,
 }
-var AfField = Field{
-	Name:          "af",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Type:          NumericType,
-	Table:         VariantTable,
-}
 var VariantClassField = Field{
 	Name:            "variant_class",
 	CanBeSelected:   true,

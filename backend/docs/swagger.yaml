@@ -77,7 +77,6 @@ components:
         dna_change:
           type: string
         end:
-          description: TODO
           type: integer
         exon_rank:
           type: integer
@@ -309,8 +308,6 @@ components:
         aa_change:
           type: string
         ad_ratio:
-          type: number
-        af:
           type: number
         chromosome:
           type: string

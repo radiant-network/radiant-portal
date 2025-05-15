@@ -13,7 +13,6 @@ type Occurrence struct {
 	Pf                  float64           `json:"pf" validate:"required"`
 	Pc                  int               `json:"pc,omitempty"`
 	Pn                  int               `json:"pn,omitempty"`
-	Af                  float64           `json:"af,omitempty"`
 	GnomadV3Af          float64           `json:"gnomad_v3_af" validate:"required"`
 	Hgvsg               string            `json:"hgvsg" validate:"required"`
 	OmimInheritanceCode JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
@@ -36,7 +35,7 @@ type ExpendedOccurrence = struct {
 	Hgvsg                 string                   `json:"hgvsg" validate:"required"`
 	Chromosome            string                   `json:"chromosome"`
 	Start                 int64                    `json:"start,omitempty"`
-	End                   int64                    `json:"end,omitempty"` // TODO
+	End                   int64                    `json:"end,omitempty"`
 	Symbol                string                   `json:"symbol,omitempty"`
 	TranscriptId          string                   `json:"transcript_id,omitempty"`
 	IsCanonical           bool                     `json:"is_canonical"`
@@ -141,7 +140,6 @@ var OccurrencesFields = []Field{
 	PfField,
 	PnField,
 	PcField,
-	AfField,
 	HgvsgField,
 	ClinvarField,
 	ConsequenceField,
