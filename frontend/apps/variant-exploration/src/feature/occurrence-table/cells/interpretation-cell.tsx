@@ -1,7 +1,8 @@
 import { Occurrence } from '@/api/api';
+import { Button } from '@/components/base/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import InterpretationDialogButton from '@/feature/interpretation/interpretation-dialog-button';
+import InterpretationDialog from '@/feature/interpretation/interpretation-dialog';
 import { ZapIcon } from 'lucide-react';
 
 type InterpretationCellProps = {
@@ -11,21 +12,19 @@ type InterpretationCellProps = {
 function InterpretationCell({ occurrence }: InterpretationCellProps) {
   const { t } = useI18n();
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span>
-          <InterpretationDialogButton
-            iconOnly
-            variant="ghost"
-            className="text-muted-foreground size-5"
-            occurrence={occurrence}
-          >
-            <ZapIcon size={16} />
-          </InterpretationDialogButton>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{t('variant.interpretation.tooltips')}</TooltipContent>
-    </Tooltip>
+    <InterpretationDialog
+      occurrence={occurrence}
+      renderTrigger={handleOpen => (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button iconOnly className="size-6" variant="ghost" onClick={handleOpen}>
+              <ZapIcon size={16} className="text-muted-foreground cursor-pointer" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('variant.interpretation.tooltips')}</TooltipContent>
+        </Tooltip>
+      )}
+    />
   );
 }
 

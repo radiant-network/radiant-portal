@@ -1,6 +1,6 @@
 import { Button } from '@/components/base/ui/button';
 import { Download, Edit2Icon, SquareArrowOutUpRightIcon } from 'lucide-react';
-import InterpretationDialogButton from '../interpretation/interpretation-dialog-button';
+import InterpretationDialog from '../interpretation/interpretation-dialog';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Occurrence } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
@@ -27,9 +27,14 @@ export default function OccurrenceExpendHeader({ occurrence }: OccurrenceExpendH
       </Button>
       <div className="flex items-center gap-5">
         <div className="flex gap-2">
-          <InterpretationDialogButton color="primary" size="xs" occurrence={occurrence}>
-            <Edit2Icon /> {t('occurrenceExpend.actions.interpret')}
-          </InterpretationDialogButton>
+          <InterpretationDialog
+            occurrence={occurrence}
+            renderTrigger={handleOpen => (
+              <Button size="xs" onClick={handleOpen}>
+                <Edit2Icon /> {t('occurrenceExpend.actions.interpret')}
+              </Button>
+            )}
+          />
           <Button color="primary" size="xs">
             <Download />
             {t('occurrenceExpend.actions.downloadReport')}
