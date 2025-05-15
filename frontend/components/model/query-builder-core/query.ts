@@ -193,6 +193,7 @@ export const createQuery = (syntheticSqon: ISyntheticSqon, queryBuilder: QueryBu
       if (isEmpty(data.content)) {
         deleteQueryAndSetNext(queryId, queryBuilder);
       } else {
+        const activeQueryId = queryBuilder.getState().activeQueryId;
         const currentQueryIndex = queryBuilder.getQueryIndex(queryId);
         const updatedQueries = cloneDeep(queryBuilder.getRawQueries());
         const newQuery: ISyntheticSqon = {
@@ -208,6 +209,10 @@ export const createQuery = (syntheticSqon: ISyntheticSqon, queryBuilder: QueryBu
           queries: cleanUpQueries(updatedQueries),
         }));
         queryBuilder.coreProps.onQueryUpdate?.(newQuery);
+
+        if (activeQueryId === queryId) {
+          queryBuilder.coreProps.onActiveQueryChange?.(newQuery);
+        }
       }
     },
     duplicate: () => {
