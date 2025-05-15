@@ -18,6 +18,23 @@ var OmimGenePanelTable = Table{
 	Alias: "om",
 }
 
+var OmimGenePanelField = Field{
+	Name:            "panel",
+	Alias:           "omim_gene_panel",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OmimGenePanelTable,
+}
+
+var OmimInheritanceField = Field{
+	Name:            "inheritance",
+	Alias:           "omim_inheritance",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            ArrayType,
+	Table:           OmimGenePanelTable,
+}
+
 type OmimGenePanel = struct {
 	OmimPhenotypeId string            `json:"omim_phenotype_id,omitempty"`
 	Panel           string            `json:"panel,omitempty"`

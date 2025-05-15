@@ -200,3 +200,17 @@ var GnomadLoeufField = Field{
 	Type:            NumericType,
 	Table:           ConsequenceFilterTable,
 }
+
+var BiotypeField = Field{
+	Name:            "biotype",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           ConsequenceFilterTable,
+}
+
+var VepImpactFilterField = Field{
+	Name:            "vep_impact",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           ConsequenceFilterTable,
+}
