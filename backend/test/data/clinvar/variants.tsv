@@ -1,6 +1,6 @@
-locus_id	impact_score	pf	pc	af	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	clinvar_interpretation	is_mane_select	is_canonical
-1000	4	0.99	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	["Likely_Pathogenic", "Pathogenic"]	true	true
-1001	4	0.99	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	["Pathogenic"]	true	true
-1002	4	0.99	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	["Benign"]	true	true
-1003	4	0.99	3	0.01	0.001	hgvsg1	code1	class1	impact1	symbol1	null	true	true
-2000	4	0.99	2	0.01	0.001	hgvsg2	code1	class1	impact1	symbol1	["Pathogenic"]	true	true
+locus_id	impact_score	pf	pc	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	clinvar_interpretation	is_mane_select	is_canonical
+1000	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	["Likely_Pathogenic", "Pathogenic"]	true	true
+1001	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	["Pathogenic"]	true	true
+1002	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	["Benign"]	true	true
+1003	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	null	true	true
+2000	4	0.99	2	0.001	hgvsg2	code1	class1	impact1	symbol1	["Pathogenic"]	true	true

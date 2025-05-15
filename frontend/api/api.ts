@@ -204,7 +204,7 @@ export interface ExpendedOccurrence {
      */
     'dna_change'?: string;
     /**
-     * TODO
+     * 
      * @type {number}
      * @memberof ExpendedOccurrence
      */
@@ -752,12 +752,6 @@ export interface Occurrence {
      * @memberof Occurrence
      */
     'ad_ratio': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'af'?: number;
     /**
      * 
      * @type {string}
