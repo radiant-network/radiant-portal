@@ -9,14 +9,12 @@ import logo from '@assets/logo/header.svg';
 import { SidebarProvider } from '@/components/base/ui/sidebar';
 import {
   LayoutDashboardIcon,
-  BookOpenTextIcon,
-  TelescopeIcon,
   AudioWaveformIcon,
-  BlendIcon,
   UsersIcon,
   LightbulbIcon,
   ExternalLink,
   MailIcon,
+  FolderIcon,
 } from 'lucide-react';
 import { useI18n } from '@/components/hooks/i18n';
 import { Suspense } from 'react';
@@ -62,9 +60,14 @@ const _ProtectedLayout = () => {
               title: t('mainNavbar.links.dashboard'),
               icon: <LayoutDashboardIcon />,
             },
+            // @fixme to uncommented when adding study page
+            // {
+            //   title: t('mainNavbar.links.studies'),
+            //   icon: <BookOpenTextIcon />,
+            // },
             {
-              title: t('mainNavbar.links.studies'),
-              icon: <BookOpenTextIcon />,
+              title: t('mainNavbar.links.cases'),
+              icon: <FolderIcon />,
             },
             {
               title: t('mainNavbar.links.variants'),
@@ -72,10 +75,11 @@ const _ProtectedLayout = () => {
               onClick: () => navigate('/'),
               active: pathname === '/',
             },
-            {
-              title: t('mainNavbar.links.analysis'),
-              icon: <BlendIcon />,
-            },
+            // @fixme to uncommented when adding analysis page
+            // {
+            //   title: t('mainNavbar.links.analysis'),
+            //   icon: <BlendIcon />,
+            // },
           ]}
           actions={[
             {
