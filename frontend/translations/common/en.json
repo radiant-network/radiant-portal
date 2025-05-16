@@ -666,7 +666,54 @@
       "aminoAcidSubstitution": "Amino acid substitution"
     },
     "cases": {
-      "title": "Cases"
+      "title": "Cases",
+      "description": "Clinical cases which carry this variant",
+      "filters": {
+        "label": "Conditions and phenotypes",
+        "searchInputPlaceholder": "Search for conditions and phenotypes",
+        "classifications": {
+          "allClassifications": "All Classifications"
+        },
+        "institutions": {
+          "allInstitutions": "All Institutions"
+        },
+        "tests": {
+          "allTests": "All Tests"
+        },
+        "createdAt": {
+          "mostRecent": "Most recent",
+          "leastRecent": "Least recent"
+        }
+      },
+      "interpreted-table": {
+        "title": "Interpreted cases ({{count}})",
+        "headers": {
+          "case": "Case",
+          "date": "Date",
+          "date.tooltip": "Last intepretation date",
+          "mondo": "Condition MONDO",
+          "classification": "Classification",
+          "zygosity": "Zygosity",
+          "inheritance": "Inheritance",
+          "institution": "Institution",
+          "test": "Test",
+          "status": "Status"
+        }
+      },
+      "other-table": {
+        "title": "Other cases ({{count}})",
+        "headers": {
+          "case": "Case",
+          "date": "Date",
+          "date.tooltip": "Date received",
+          "phenotypesHpo": "Phenotypes HPO",
+          "zygosity": "Zygosity",
+          "inheritance": "Inheritance",
+          "institution": "Institution",
+          "test": "Test",
+          "status": "Status"
+        }
+      }
     }
   },
   "mainNavbar": {

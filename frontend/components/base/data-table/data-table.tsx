@@ -511,13 +511,15 @@ function TranstackTable<T>({
     });
   }, [sorting]);
 
+  const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
+
   return (
     <div
       className={cn('w-full', {
         'absolute top-0 right-0 bottom-0 left-0 bg-white z-50 p-4 overflow-y-scroll': isFullscreen,
       })}
     >
-      <div className="w-full flex text-left justify-between items-center mb-2">
+      <div className={cn('w-full flex text-left justify-between items-center', { 'mb-1': hasUpperSettings })}>
         <div>
           {tableIndexResultPosition === 'top' && (
             <TableIndexResult

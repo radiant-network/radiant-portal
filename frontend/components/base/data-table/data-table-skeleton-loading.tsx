@@ -5,7 +5,7 @@ import { HeaderGroup, PaginationState } from '@tanstack/react-table';
 
 type DataTableSkeletonLoadingProps = {
   loading?: boolean;
-  headerGroups: HeaderGroup<T>[];
+  headerGroups: HeaderGroup<any>[];
   pagination: PaginationState;
   columnSettings: ColumnSettings[];
   children: JSX.Element | JSX.Element[];
