@@ -128,7 +128,7 @@ func findAggregatedField(fields []Field, aggregated string) (Field, error) {
 func findSortedFields(fields []Field, sorted []SortBody) []SortField {
 	var sortedFields []SortField
 	if len(sorted) == 0 {
-		sortedFields = append(sortedFields, SortField{Field: ImpactScoreField, Order: "desc"})
+		sortedFields = append(sortedFields, SortField{Field: PickedImpactScoreField, Order: "desc"})
 		sortedFields = append(sortedFields, SortField{Field: LocusIdField, Order: "asc"})
 		return sortedFields
 	}

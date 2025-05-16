@@ -102,7 +102,7 @@ var ConsequenceField = Field{
 	Table:           ConsequenceFilterTable,
 }
 
-var SymbolFilterField = Field{
+var SymbolField = Field{
 	Name:            "symbol",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
@@ -110,7 +110,7 @@ var SymbolFilterField = Field{
 	Table:           ConsequenceFilterTable,
 }
 
-var ImpactScoreFilterField = Field{
+var ImpactScoreField = Field{
 	Name:            "impact_score",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
