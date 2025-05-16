@@ -11,26 +11,29 @@ type ClinicalAssociationSectionProps = {
 export default function ClinicalAssociationSection({ data }: ClinicalAssociationSectionProps) {
   const { t } = useI18n();
 
-  const omimCode = useCallback((oc: string[]) => oc.map((ic: string) => <Badge key={ic}>{ic}</Badge>), []);
+  const clinicalAssociationTitle = t('common.noDataAvailable');
+
+  const omimCode = useCallback((oc: string[]) =>
+    oc.map((ic: string) => <Badge key={ic}>{ic}</Badge>),
+    []);
 
   const clinicalAssociationValue = (
     <>
-      {data.omim_conditions?.map(oc => (
+      {data.omim_conditions?.map((oc) => (
         <DetailItem
-          title={oc.omim_phenotype_id ? oc.omim_phenotype_id : '-'}
-          value={oc.inheritance_code ? omimCode(oc.inheritance_code) : '-'}
-        />
+          title={oc.panel ? oc.panel : clinicalAssociationTitle}
+          value={oc.inheritance_code ? omimCode(oc.inheritance_code) : '-'} />
       ))}
     </>
-  );
+  )
 
   return (
     <DetailSection title={t('occurrenceExpend.clinicalAssociation.title')}>
-      {data.omim_conditions ? (
-        clinicalAssociationValue
-      ) : (
-        <div className="text-sm text-muted-foreground">{t('common.noDataAvailable')}</div>
-      )}
+      {data.omim_conditions ?
+        clinicalAssociationValue :
+        <DetailItem title={clinicalAssociationTitle} value="-" />
+      }
     </DetailSection>
   );
 }
+
