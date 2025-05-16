@@ -49,13 +49,13 @@ func (f *Field) IsNumeric() bool {
 	return f.Type == NumericType
 }
 
-// findByAlias returns the field with the given name from the list of fields
-func findByAlias(fields []Field, alias string) *Field {
+// findSortableByAlias returns the sortable field with the given name from the list of fields
+func findSortableByAlias(fields []Field, alias string) *Field {
 	if fields == nil {
 		return nil
 	}
 	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
-		return field.GetAlias() == alias
+		return field.GetAlias() == alias && field.CanBeSorted
 	})
 }
 
@@ -127,17 +127,20 @@ func findAggregatedField(fields []Field, aggregated string) (Field, error) {
 // findSortedFields returns the fields that can be sorted from the list of SortBody
 func findSortedFields(fields []Field, sorted []SortBody) []SortField {
 	var sortedFields []SortField
+	println(len(fields))
+	println(len(sorted))
 	if len(sorted) == 0 {
 		sortedFields = append(sortedFields, SortField{Field: PickedImpactScoreField, Order: "desc"})
 		sortedFields = append(sortedFields, SortField{Field: LocusIdField, Order: "asc"})
 		return sortedFields
 	}
 	for _, sort := range sorted {
-		field := findByAlias(fields, sort.Field)
-		if field != nil && field.CanBeSorted && (sort.Order == "asc" || sort.Order == "desc") {
+		field := findSortableByAlias(fields, sort.Field)
+		if field != nil && (sort.Order == "asc" || sort.Order == "desc") {
 			sortedFields = append(sortedFields, SortField{Field: *field, Order: sort.Order})
 		}
 	}
+	println(len(sortedFields))
 	return sortedFields
 
 }
