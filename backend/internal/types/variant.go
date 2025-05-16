@@ -153,7 +153,7 @@ var ClinvarField = Field{
 	Alias:           "clinvar",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
-	CanBeSorted:     false,
+	CanBeSorted:     true,
 	CanBeAggregated: true,
 	Type:            ArrayType,
 	Table:           VariantTable,
@@ -167,7 +167,7 @@ var RsNumberField = Field{
 	Table:         VariantTable,
 }
 
-var AaChangeField = Field{
+var PickedAaChangeField = Field{
 	Name:          "aa_change",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -175,44 +175,44 @@ var AaChangeField = Field{
 	Table:         VariantTable,
 }
 
-var ConsequencesField = Field{
+var PickedConsequencesField = Field{
 	Name:            "consequences",
 	Alias:           "picked_consequences",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
-	CanBeSorted:     false,
+	CanBeSorted:     true,
 	CanBeAggregated: true,
 	Type:            ArrayType,
 	Table:           VariantTable,
 }
-var VepImpactField = Field{
+var PickedVepImpactField = Field{
 	Name:          "vep_impact",
 	CanBeSelected: true,
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
-var SymbolField = Field{
+var PickedSymbolField = Field{
 	Name:          "symbol",
 	CanBeSelected: true,
 	CanBeFiltered: false,
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
-var IsManeSelectField = Field{
+var PickedIsManeSelectField = Field{
 	Name:          "is_mane_select",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
-var IsCanonicalField = Field{
+var PickedIsCanonicalField = Field{
 	Name:          "is_canonical",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
-var OmimInheritanceCodeField = Field{
+var PickedOmimInheritanceCodeField = Field{
 	Name:          "omim_inheritance_code",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -229,7 +229,7 @@ var GnomadV3AfField = Field{
 	Type:            NumericType,
 	Table:           VariantTable,
 }
-var TranscriptIdField = Field{
+var PickedTranscriptIdField = Field{
 	Name:          "transcript_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -237,7 +237,7 @@ var TranscriptIdField = Field{
 	Table:         VariantTable,
 }
 
-var ImpactScoreField = Field{
+var PickedImpactScoreField = Field{
 	Name:          "impact_score",
 	CanBeSelected: true,
 	CanBeFiltered: false,
