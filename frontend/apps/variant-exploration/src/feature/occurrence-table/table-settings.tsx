@@ -25,14 +25,14 @@ const columnHelper = createColumnHelper<Occurrence>();
 function getVariantColumns(t: TFunction<string, undefined>) {
   return [
     {
-      id: 'rowExpand',
+      id: 'row_expand',
       cell: RowExpandCell,
       size: 40,
       enableResizing: false,
       enablePinning: false,
     },
     {
-      id: 'rowSelection',
+      id: 'row_selection',
       header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
       cell: info => <RowSelectionCell row={info.row} />,
       size: 40,
@@ -40,11 +40,11 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       enableResizing: false,
     },
     columnHelper.accessor(row => row, {
-      id: 'clinicalInterpretation',
+      id: 'clinical_interpretation',
       cell: info => <InterpretationCell occurrence={info.getValue()} />,
       header: () => (
         <div className="flex justify-center">
-          <TooltipsHeader tooltips={t('variant.headers.clinicalInterpretation')} iconOnly>
+          <TooltipsHeader tooltips={t('variant.headers.clinical_interpretation')} iconOnly>
             <ZapIcon size={16} />
           </TooltipsHeader>
         </div>
@@ -62,9 +62,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       minSize: 120,
     }),
     columnHelper.accessor(row => row.variant_class, {
-      id: 'variantClass',
+      id: 'variant_class',
       cell: info => <VariantClassCell value={info.getValue()} />,
-      header: t('variant.headers.variantClass'),
+      header: t('variant.headers.variant_class'),
       minSize: 120,
     }),
     columnHelper.accessor(row => row.symbol, {
@@ -72,9 +72,11 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       cell: info => <GeneCell symbol={info.getValue()} />,
       header: t('variant.headers.symbol'),
       minSize: 120,
+      sortDescFirst: true,
+      sortUndefined: 'last',
     }),
     columnHelper.accessor(row => row, {
-      id: 'mostDeleteriousConsequence',
+      id: 'picked_consequences',
       cell: info => (
         <MostDeleteriousConsequenceCell
           vepImpact={info.getValue().vep_impact}
@@ -83,43 +85,43 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         />
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.mostDeleteriousConsequenceTooltips')}>
-          {t('variant.headers.mostDeleteriousConsequence')}
+        <TooltipsHeader tooltips={t('variant.headers.picked_consequences_tooltips')}>
+          {t('variant.headers.picked_consequences')}
         </TooltipsHeader>
       ),
       size: 225,
       minSize: 160,
     }),
     columnHelper.accessor(row => row, {
-      id: 'maneSelect',
+      id: 'is_mane_select',
       cell: info => (
         <ManeCell isManeSelect={info.getValue().is_mane_select} isCanonical={info.getValue().is_canonical} />
       ),
-      header: t('variant.headers.maneSelect'),
+      header: t('variant.headers.is_mane_select'),
       minSize: 120,
     }),
     columnHelper.accessor(row => row.omim_inheritance_code, {
-      id: 'omimInheritanceCode',
+      id: 'omim_inheritance_code',
       cell: info => <OmimCell codes={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.omimInheritanceCodeTooltips')}>
-          {t('variant.headers.omimInheritanceCode')}
+        <TooltipsHeader tooltips={t('variant.headers.omim_inheritance_code_tooltips')}>
+          {t('variant.headers.omim_inheritance_code')}
         </TooltipsHeader>
       ),
       minSize: 120,
     }),
     columnHelper.accessor(row => row.clinvar, {
-      id: 'clinVar',
+      id: 'clinvar',
       cell: info => <ClinvarCell codes={info.getValue()} />,
-      header: t('variant.headers.clinVar'),
+      header: t('variant.headers.clinvar'),
       minSize: 120,
     }),
     columnHelper.accessor(row => row.gnomad_v3_af, {
-      id: 'gnomadv3AF',
+      id: 'gnomad_v3_af',
       cell: info => <GnomadCell value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.gnomadv3AFTooltips')}>
-          {t('variant.headers.gnomadv3AF')}
+        <TooltipsHeader tooltips={t('variant.headers.gnomad_v3_af_tooltips')}>
+          {t('variant.headers.gnomad_v3_af')}
         </TooltipsHeader>
       ),
       minSize: 120,
@@ -131,9 +133,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       minSize: 120,
     }),
     columnHelper.accessor(row => row.genotype_quality, {
-      id: 'genotypeQuality',
+      id: 'genotype_quality',
       cell: info => <NumberCell value={info.getValue()} />,
-      header: t('variant.headers.genotypeQuality'),
+      header: t('variant.headers.genotype_quality'),
       minSize: 120,
     }),
     columnHelper.accessor(row => row.zygosity, {
@@ -143,9 +145,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       minSize: 120,
     }),
     columnHelper.accessor(row => row.ad_ratio, {
-      id: 'adRatio',
+      id: 'ad_ratio',
       cell: info => <NumberCell value={info.getValue()} />,
-      header: t('variant.headers.adRatio'),
+      header: t('variant.headers.ad_ratio'),
       minSize: 120,
     }),
   ] as TableColumnDef<Occurrence, any>[];
@@ -153,19 +155,19 @@ function getVariantColumns(t: TFunction<string, undefined>) {
 
 const defaultSettings = createColumnSettings([
   {
-    id: 'rowExpand',
+    id: 'row_expand',
     visible: true,
     fixed: true,
     pinningPosition: 'left',
   },
   {
-    id: 'rowSelection',
+    id: 'row_selection',
     visible: true,
     fixed: true,
     pinningPosition: 'left',
   },
   {
-    id: 'clinicalInterpretation',
+    id: 'clinical_interpretation',
     visible: true,
     fixed: true,
     pinningPosition: 'left',
@@ -176,7 +178,7 @@ const defaultSettings = createColumnSettings([
     pinningPosition: 'left',
   },
   {
-    id: 'variantClass',
+    id: 'variant_class',
     visible: true,
   },
   {
@@ -184,23 +186,23 @@ const defaultSettings = createColumnSettings([
     visible: true,
   },
   {
-    id: 'mostDeleteriousConsequence',
+    id: 'picked_consequences',
     visible: true,
   },
   {
-    id: 'maneSelect',
+    id: 'is_mane_select',
     visible: true,
   },
   {
-    id: 'omimInheritanceCode',
+    id: 'omim_inheritance_code',
     visible: true,
   },
   {
-    id: 'clinVar',
+    id: 'clinvar',
     visible: true,
   },
   {
-    id: 'gnomadv3AF',
+    id: 'gnomad_v3_af',
     visible: true,
   },
   {
@@ -208,7 +210,7 @@ const defaultSettings = createColumnSettings([
     visible: true,
   },
   {
-    id: 'genotypeQuality',
+    id: 'genotype_quality',
     visible: true,
   },
   {
@@ -216,7 +218,7 @@ const defaultSettings = createColumnSettings([
     visible: true,
   },
   {
-    id: 'adRatio',
+    id: 'ad_ratio',
     visible: true,
   },
 ]);

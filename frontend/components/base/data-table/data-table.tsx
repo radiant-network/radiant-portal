@@ -394,7 +394,12 @@ function TranstackTable<T>({
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(tableLocaleStorage.columnVisibility);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(tableLocaleStorage.columnOrder);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(tableLocaleStorage.columnPinning);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>(
+    defaultServerSorting.map(serverSorting => ({
+      id: serverSorting.field,
+      desc: serverSorting.order === SortBodyOrderEnum.Desc,
+    })) as SortingState,
+  );
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   // Initialize tanstack table
