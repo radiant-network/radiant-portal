@@ -20,6 +20,7 @@ import useSWRMutation from 'swr/mutation';
 import { Interpretation, InterpretationFormRef } from './types';
 import { Spinner } from '@/components/base/spinner';
 import InterpretationTranscript from './transcript';
+import OccurrenceDetails from './occurence-details';
 
 type InterpretationDialogButtonProps = {
   occurrence: Occurrence;
@@ -117,7 +118,9 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
                     />
                   )}
                 </div>
-                <div className="rounded col-span-5 border py-4 px-6"></div>
+                <div className="rounded col-span-5 border py-4 px-6">
+                  <OccurrenceDetails occurrence={occurrence} />
+                </div>
               </div>
             </div>
             <Separator className="mb-6" />

@@ -23,8 +23,8 @@ export function DetailItem({ title, value }: DetailItemProps) {
   return (
     <div>
       <div className="flex justify-between items-center">
-        <div className="text-muted-foreground">{title}:</div>
-        <div>{value}</div>
+        <div className="text-sm text-muted-foreground">{title}:</div>
+        <div className="text-sm">{value}</div>
       </div>
       <Separator className="mt-1" />
     </div>

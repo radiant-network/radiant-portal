@@ -165,26 +165,16 @@ function InterpretationFormSomatic(
                   defaultOptions={oncogenicityClassificationCriterias}
                   placeholder={t('variant.interpretationForm.somatic.classificationCriteria-placeholder')}
                   emptyIndicator={<>no results found.</>}
-                  renderBadge={({ option, onRemove }) => {
-                    const tagColor = getOncogenicityClassificationCriteriaColor(option.value);
-
-                    return (
-                      <Badge
-                        key={option.value}
-                        data-fixed={option.fixed}
-                        onClose={onRemove}
-                        //style={{
-                        //  color: `hsl(var(--${tagColor}-9))`,
-                        //  backgroundColor: `hsl(var(--${tagColor}-3))`,
-                        //}}
-                        //closeIconProps={{
-                        //  style: { color: `hsl(var(--${tagColor}-9))` },
-                        //}}
-                      >
-                        {option.label}
-                      </Badge>
-                    );
-                  }}
+                  renderBadge={({ option, onRemove }) => (
+                    <Badge
+                      key={option.value}
+                      data-fixed={option.fixed}
+                      onClose={onRemove}
+                      variant={getOncogenicityClassificationCriteriaColor(option.value)}
+                    >
+                      {option.label}
+                    </Badge>
+                  )}
                   {...field}
                 />
               </FormControl>
