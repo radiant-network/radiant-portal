@@ -127,8 +127,6 @@ func findAggregatedField(fields []Field, aggregated string) (Field, error) {
 // findSortedFields returns the fields that can be sorted from the list of SortBody
 func findSortedFields(fields []Field, sorted []SortBody) []SortField {
 	var sortedFields []SortField
-	println(len(fields))
-	println(len(sorted))
 	if len(sorted) == 0 {
 		sortedFields = append(sortedFields, SortField{Field: PickedImpactScoreField, Order: "desc"})
 		sortedFields = append(sortedFields, SortField{Field: LocusIdField, Order: "asc"})
@@ -140,7 +138,5 @@ func findSortedFields(fields []Field, sorted []SortBody) []SortField {
 			sortedFields = append(sortedFields, SortField{Field: *field, Order: sort.Order})
 		}
 	}
-	println(len(sortedFields))
 	return sortedFields
-
 }
