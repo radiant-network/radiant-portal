@@ -724,11 +724,12 @@
       "signOut": "Se déconnecter"
     },
     "links": {
+      "analysis": "Analyse",
+      "cases": "Cas",
       "dashboard": "Tableau de bord",
-      "studies": "Études",
       "dataExploration": "Exploration des données",
-      "variants": "Variantes",
-      "analysis": "Analyse"
+      "studies": "Études",
+      "variants": "Variantes"
     },
     "actions": {
       "community": "Communauté",

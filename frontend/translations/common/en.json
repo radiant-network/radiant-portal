@@ -722,11 +722,12 @@
       "signOut": "Sign out"
     },
     "links": {
+      "analysis": "Analysis",
+      "cases": "Cases",
       "dashboard": "Dashboard",
-      "studies": "Studies",
       "dataExploration": "Data Exploration",
-      "variants": "Variants",
-      "analysis": "Analysis"
+      "studies": "Studies",
+      "variants": "Variants"
     },
     "actions": {
       "community": "Community",
