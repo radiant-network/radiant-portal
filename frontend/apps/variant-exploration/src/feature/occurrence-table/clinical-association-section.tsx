@@ -19,7 +19,13 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
 
   const clinicalAssociationValue = (
     <>
+<div className="space-x-1">
       {data.omim_conditions?.map((oc) => (
+        <DetailItem
+          title={oc.panel ? oc.panel : clinicalAssociationTitle}
+          value={oc.inheritance_code ? omimCode(oc.inheritance_code) : '-'} />
+      ))}
+    </div>
         <DetailItem
           title={oc.panel ? oc.panel : clinicalAssociationTitle}
           value={oc.inheritance_code ? omimCode(oc.inheritance_code) : '-'} />
