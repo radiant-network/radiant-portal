@@ -145,7 +145,7 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
 
 export function getTableLocaleStorage(
   id: string,
-  columns: TableCacheColumn,
+  columns: TableCacheColumn[],
   defaultColumnTableState: DefaultColumnTableState,
 ) {
   const storage = localStorage.getItem(id);
@@ -155,7 +155,8 @@ export function getTableLocaleStorage(
     return defaultCache;
   }
   // validate cache to the lastest version
-  const cache = JSON.parse(storage);
+  const cache: TableCacheProps = JSON.parse(storage);
+
   return {
     ...cache,
     columns,
