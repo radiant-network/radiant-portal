@@ -35,7 +35,11 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
 
   return (
     <DetailSection title={t('occurrenceExpend.clinicalAssociation.title')}>
-      {data.omim_conditions ?
+{data.omim_conditions ? (
+        clinicalAssociationValue
+      ) : (
+        <div className="text-sm text-muted-foreground">{t('common.noDataAvailable')}</div>
+      )}
         clinicalAssociationValue :
         <DetailItem title={clinicalAssociationTitle} value="-" />
       }
