@@ -14,14 +14,20 @@
           { "key": "variant_class", "type": "multiple" },
           { "key": "consequence", "type": "multiple" },
           { "key": "chromosome", "type": "multiple" },
-          { "key": "zygosity", "type": "multiple" }
+          { "key": "zygosity", "type": "multiple" },
+          { "key": "transmission_mode", "type": "multiple" }
         ]
       },
       "gene": {
         "items": [
-          { "key": "symbol", "type": "multiple" },
+          { "key": "biotype", "type": "multiple" },
           { "key": "gnomad_pli", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" } },
-          { "key": "gnomad_loeuf", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" } }
+          { "key": "gnomad_loeuf", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" } },
+          { "key": "hpo_gene_panel", "type": "multiple" },
+          { "key": "orphanet_gene_panel", "type": "multiple" },
+          { "key": "omim_gene_panel", "type": "multiple" },
+          { "key": "ddd_gene_panel", "type": "multiple" },
+          { "key": "cosmic_gene_panel", "type": "multiple" }
         ]
       },
       "pathogenicity": {

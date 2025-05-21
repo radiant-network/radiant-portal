@@ -1,7 +1,5 @@
 {
   "common": {
-    "seeMore": "Voir plus",
-    "seeLess": "Voir moins",
     "noDataAvailable": "Aucune donnée disponible",
     "editor": {
       "headings": {
@@ -181,8 +179,19 @@
     "filters": {
       "labels": {
         "chromosome": "Chromosome",
+        "biotype": "Gene Type",
+        "cosmic_gene_panel": "COSMIC",
+        "cosmic_gene_panel_tooltip": "Catalogue of Somatic Mutations in Cancer",
+        "ddd_gene_panel": "DDD",
+        "ddd_gene_panel_tooltip": "Deciphering Developmental Disorders",
         "filter": "Filtre",
+        "hpo_gene_panel": "HPO",
+        "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
         "impact_score": "Score d'Impact",
+        "omim_gene_panel": "OMIM",
+        "omim_gene_panel_tooltip": "Online Mendelian Inheritance in Man",
+        "orphanet_gene_panel": "ORPHANET",
+        "transmission_mode": "Transmission",
         "variant_class": "Type de Variant",
         "symbol": "Symbole",
         "pf": "Fréquence des patients",
@@ -197,7 +206,6 @@
         "consequence": "Conséquence",
         "variantexternal_reference": "Référence externe du variant",
         "start": "Position de début",
-        "transmission": "Transmission",
         "gnomad_pli": "gnomAD pLI",
         "gnomad_loeuf": "gnomAD LOEUF",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
@@ -635,85 +643,85 @@
       "germline": "Germline"
     },
     "overview": {
-      "title": "Overview",
-      "myOrganization": "My Organization",
-      "details": "Details",
+      "title": "Aperçu",
+      "myOrganization": "Mon Organisation",
+      "details": "Détails",
       "radiant": "Radiant",
-      "consequence": "Consequence",
+      "consequence": "Conséquence",
       "clinVar": "ClinVar",
       "patient": "Patient",
-      "patientInfoTooltip": "# of affected patients and frequency across My Organization",
+      "patientInfoTooltip": "Nombre de patients affectés et fréquence dans Mon Organisation",
       "gnomAD": "gnomAD",
-      "gnomadv3AFTooltips": "gnomAD Genome 3.1.2 (allele Frequency)",
+      "gnomadv3AFTooltips": "gnomAD Génome 3.1.2 (fréquence allélique)",
       "exon": "Exon",
-      "mostDeleteriousConsequenceNotice": "This transcript was selected because it represents the most deleterious consequence.",
-      "viewAllTranscripts": "View all transcripts",
-      "predictionScores": "Prediction Scores",
-      "viewAll": "View all",
-      "associatedConditionsOmim": "Associated Conditions (OMIM)",
-      "externalReferences": "External References",
+      "mostDeleteriousConsequenceNotice": "Ce transcrit a été sélectionné car il représente la conséquence la plus délétère.",
+      "viewAllTranscripts": "Voir tous les transcrits",
+      "predictionScores": "Scores de prédiction",
+      "viewAll": "Voir tout",
+      "associatedConditionsOmim": "Conditions associées (OMIM)",
+      "externalReferences": "Références externes",
       "dbSNP": "dbSNP"
     },
     "evidence": {
-      "title": "Evidence"
+      "title": "Évidence"
     },
     "frequency": {
-      "title": "Frequency"
+      "title": "Fréquence"
     },
     "conditions": {
       "title": "Conditions"
     },
     "transcripts": {
-      "title": "Transcripts",
-      "aminoAcidSubstitution": "Amino acid substitution"
+      "title": "Transcrits",
+      "aminoAcidSubstitution": "Substitution d'acide aminé"
     },
     "cases": {
-      "title": "Cases",
-      "description": "Clinical cases which carry this variant",
+      "title": "Cas",
+      "description": "Cas cliniques portant cette variante",
       "filters": {
-        "label": "Conditions and phenotypes",
-        "searchInputPlaceholder": "Search for conditions and phenotypes",
+        "label": "Conditions et phénotypes",
+        "searchInputPlaceholder": "Rechercher des conditions et phénotypes",
         "classifications": {
-          "allClassifications": "All Classifications"
+          "allClassifications": "Toutes les classifications"
         },
         "institutions": {
-          "allInstitutions": "All Institutions"
+          "allInstitutions": "Toutes les institutions"
         },
         "tests": {
-          "allTests": "All Tests"
+          "allTests": "Tous les tests"
         },
         "createdAt": {
-          "mostRecent": "Most recent",
-          "leastRecent": "Least recent"
+          "mostRecent": "Plus récent",
+          "leastRecent": "Plus ancien"
         }
       },
       "interpreted-table": {
-        "title": "Interpreted cases ({{count}})",
+        "title": "Cas interprétés ({{count}})",
         "headers": {
-          "case": "Case",
+          "case": "Cas",
           "date": "Date",
-          "date.tooltip": "Last intepretation date",
+          "date.tooltip": "Date de dernière interprétation",
           "mondo": "Condition MONDO",
           "classification": "Classification",
-          "zygosity": "Zygosity",
-          "inheritance": "Inheritance",
+          "zygosity": "Zygosité",
+          "inheritance": "Hérédité",
           "institution": "Institution",
           "test": "Test",
-          "status": "Status"
+          "status": "Statut"
         }
       },
       "other-table": {
-        "title": "Other cases ({{count}})",
+        "title": "Autres cas ({{count}})",
         "headers": {
-          "case": "Case",
+          "case": "Cas",
           "date": "Date",
-          "date.tooltip": "Date received",
-          "phenotypesHpo": "Phenotypes HPO",
-          "zygosity": "Zygosity",
-          "inheritance": "Inheritance",
+          "date.tooltip": "Date de réception",
+          "phenotypesHpo": "Phénotypes HPO",
+          "zygosity": "Zygosité",
+          "inheritance": "Hérédité",
           "institution": "Institution",
           "test": "Test",
-          "status": "Status"
+          "status": "Statut"
         }
       }
     }
