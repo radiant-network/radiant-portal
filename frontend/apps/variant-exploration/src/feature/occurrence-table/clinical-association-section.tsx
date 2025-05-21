@@ -18,31 +18,22 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
     []);
 
   const clinicalAssociationValue = (
-    <>
-<div className="space-x-1">
+    <div className="space-x-1">
       {data.omim_conditions?.map((oc) => (
         <DetailItem
           title={oc.panel ? oc.panel : clinicalAssociationTitle}
           value={oc.inheritance_code ? omimCode(oc.inheritance_code) : '-'} />
       ))}
     </div>
-        <DetailItem
-          title={oc.panel ? oc.panel : clinicalAssociationTitle}
-          value={oc.inheritance_code ? omimCode(oc.inheritance_code) : '-'} />
-      ))}
-    </>
   )
 
   return (
     <DetailSection title={t('occurrenceExpend.clinicalAssociation.title')}>
-{data.omim_conditions ? (
+      {data.omim_conditions ? (
         clinicalAssociationValue
       ) : (
         <div className="text-sm text-muted-foreground">{t('common.noDataAvailable')}</div>
       )}
-        clinicalAssociationValue :
-        <DetailItem title={clinicalAssociationTitle} value="-" />
-      }
     </DetailSection>
   );
 }
