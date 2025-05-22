@@ -30,7 +30,7 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
         )}
       </span>
       {occurrence?.picked_consequences?.[0] && occurrence.vep_impact ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 text-sm">
           <ConsequenceLabel
             vepImpact={occurrence.vep_impact}
             consequence={occurrence.picked_consequences[0]}
