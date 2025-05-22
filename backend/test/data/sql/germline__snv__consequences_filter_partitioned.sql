@@ -1,4 +1,4 @@
-CREATE TABLE `consequences_filter_partitioned`
+CREATE TABLE `germline__snv__consequences_filter_partitioned`
 (
     `part`                    tinyint NOT NULL COMMENT "",
     `locus_id`                bigint(20) NULL COMMENT "",
