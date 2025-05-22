@@ -13,19 +13,14 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
 
   const clinicalAssociationTitle = t('common.noDataAvailable');
 
-  const omimCode = useCallback((oc: string[]) =>
-    oc.map((ic: string) => <Badge key={ic}>{ic}</Badge>),
-    []);
+  const omimCode = useCallback((oc: string[]) => oc.map((ic: string) => <Badge key={ic}>{ic}</Badge>), []);
 
-  const clinicalAssociationValue = (
-    <div className="space-x-1">
-      {data.omim_conditions?.map((oc) => (
-        <DetailItem
-          title={oc.panel ? oc.panel : clinicalAssociationTitle}
-          value={oc.inheritance_code ? omimCode(oc.inheritance_code) : '-'} />
-      ))}
-    </div>
-  )
+  const clinicalAssociationValue = data.omim_conditions?.map(oc => (
+    <DetailItem
+      title={oc.panel ? oc.panel : clinicalAssociationTitle}
+      value={oc.inheritance_code ? <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div> : '-'}
+    />
+  ));
 
   return (
     <DetailSection title={t('occurrenceExpend.clinicalAssociation.title')}>
@@ -37,4 +32,3 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
     </DetailSection>
   );
 }
-

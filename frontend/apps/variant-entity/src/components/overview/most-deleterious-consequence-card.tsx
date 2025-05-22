@@ -51,7 +51,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variantEntity.overview.clinVar')}</div>
-            <div className="flex flex-col items-start gap-1">
+            <div className="flex flex-wrap items-start gap-1">
               {data?.clinvar?.length
                 ? data?.clinvar.map(clinvar => (
                     <Link key={clinvar} to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Evidence}`}>
