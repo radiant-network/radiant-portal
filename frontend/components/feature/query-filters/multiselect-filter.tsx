@@ -170,6 +170,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
           placeholder={t('common.filters.search.placeholder')}
           className="w-full p-2 mb-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => updateSearch(e.target.value)}
+          autoFocus
         />
       )}
 
