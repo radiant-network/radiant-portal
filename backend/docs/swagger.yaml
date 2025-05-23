@@ -1091,10 +1091,10 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
-  /occurrences/{seq_id}/{locus_id}/expended:
+  /occurrences/germline/{seq_id}/{locus_id}/expended:
     get:
       description: Retrieve ExpendedOccurrence data for a given locus ID
-      operationId: getExpendedOccurrence
+      operationId: getExpendedGermlineOccurrence
       parameters:
       - description: Sequence ID
         in: path
@@ -1129,13 +1129,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get a ExpendedOccurrence
+      summary: Get a germline ExpendedOccurrence
       tags:
       - occurrences
-  /occurrences/{seq_id}/aggregate:
+  /occurrences/germline/{seq_id}/aggregate:
     post:
-      description: Aggregate occurrences for a given sequence ID
-      operationId: aggregateOccurrences
+      description: Aggregate germline occurrences for a given sequence ID
+      operationId: aggregateGermlineOccurrences
       parameters:
       - description: Sequence ID
         in: path
@@ -1179,13 +1179,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Aggregate occurrences
+      summary: Aggregate germline occurrences
       tags:
       - occurrences
-  /occurrences/{seq_id}/count:
+  /occurrences/germline/{seq_id}/count:
     post:
-      description: Counts occurrences for a given sequence ID
-      operationId: countOccurrences
+      description: Counts germline occurrences for a given sequence ID
+      operationId: countGermlineOccurrences
       parameters:
       - description: Sequence ID
         in: path
@@ -1227,13 +1227,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Count occurrences
+      summary: Count germline occurrences
       tags:
       - occurrences
-  /occurrences/{seq_id}/list:
+  /occurrences/germline/{seq_id}/list:
     post:
-      description: List occurrences for a given sequence ID
-      operationId: listOccurrences
+      description: List germline occurrences for a given sequence ID
+      operationId: listGermlineOccurrences
       parameters:
       - description: Sequence ID
         in: path
@@ -1277,13 +1277,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: List occurrences
+      summary: List germline occurrences
       tags:
       - occurrences
-  /occurrences/{seq_id}/statistics:
+  /occurrences/germline/{seq_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
-      operationId: statisticsOccurrences
+      operationId: statisticsGermlineOccurrences
       parameters:
       - description: Sequence ID
         in: path
@@ -1325,7 +1325,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Statistics of occurrences
+      summary: Statistics of germline occurrences
       tags:
       - occurrences
   /sequencing/{seq_id}:
@@ -1413,10 +1413,10 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
-  /variants/{locus_id}/consequences:
+  /variants/germline/{locus_id}/consequences:
     get:
-      description: Retrieve Variant Consequences for a given locus
-      operationId: getVariantConsequences
+      description: Retrieve germline Variant Consequences for a given locus
+      operationId: getGermlineVariantConsequences
       parameters:
       - description: Locus ID
         in: path
@@ -1447,13 +1447,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get list of VariantConsequences
+      summary: Get list of VariantConsequences for a germline variant
       tags:
       - variant
-  /variants/{locus_id}/header:
+  /variants/germline/{locus_id}/header:
     get:
-      description: Retrieve Variant Header data for a given locus
-      operationId: getVariantHeader
+      description: Retrieve germline Variant Header data for a given locus
+      operationId: getGermlineVariantHeader
       parameters:
       - description: Locus ID
         in: path
@@ -1482,13 +1482,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get a VariantHeader
+      summary: Get a germline VariantHeader
       tags:
       - variant
-  /variants/{locus_id}/overview:
+  /variants/germline/{locus_id}/overview:
     get:
-      description: Retrieve Variant Overview data for a given locus
-      operationId: getVariantOverview
+      description: Retrieve germline Variant Overview data for a given locus
+      operationId: getGermlineVariantOverview
       parameters:
       - description: Locus ID
         in: path
@@ -1517,7 +1517,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get a VariantOverview
+      summary: Get a germline VariantOverview
       tags:
       - variant
 servers:

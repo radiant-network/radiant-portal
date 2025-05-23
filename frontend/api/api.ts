@@ -2524,19 +2524,19 @@ export class MondoApi extends BaseAPI {
 export const OccurrencesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Aggregate occurrences for a given sequence ID
-         * @summary Aggregate occurrences
+         * Aggregate germline occurrences for a given sequence ID
+         * @summary Aggregate germline occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBody} aggregationBody Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateOccurrences: async (seqId: string, aggregationBody: AggregationBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateGermlineOccurrences: async (seqId: string, aggregationBody: AggregationBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('aggregateOccurrences', 'seqId', seqId)
+            assertParamExists('aggregateGermlineOccurrences', 'seqId', seqId)
             // verify required parameter 'aggregationBody' is not null or undefined
-            assertParamExists('aggregateOccurrences', 'aggregationBody', aggregationBody)
-            const localVarPath = `/occurrences/{seq_id}/aggregate`
+            assertParamExists('aggregateGermlineOccurrences', 'aggregationBody', aggregationBody)
+            const localVarPath = `/occurrences/germline/{seq_id}/aggregate`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2568,19 +2568,19 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * Counts occurrences for a given sequence ID
-         * @summary Count occurrences
+         * Counts germline occurrences for a given sequence ID
+         * @summary Count germline occurrences
          * @param {string} seqId Sequence ID
          * @param {CountBody} countBody Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countOccurrences: async (seqId: string, countBody: CountBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        countGermlineOccurrences: async (seqId: string, countBody: CountBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('countOccurrences', 'seqId', seqId)
+            assertParamExists('countGermlineOccurrences', 'seqId', seqId)
             // verify required parameter 'countBody' is not null or undefined
-            assertParamExists('countOccurrences', 'countBody', countBody)
-            const localVarPath = `/occurrences/{seq_id}/count`
+            assertParamExists('countGermlineOccurrences', 'countBody', countBody)
+            const localVarPath = `/occurrences/germline/{seq_id}/count`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2613,18 +2613,18 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         },
         /**
          * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a ExpendedOccurrence
+         * @summary Get a germline ExpendedOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpendedOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getExpendedGermlineOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getExpendedOccurrence', 'seqId', seqId)
+            assertParamExists('getExpendedGermlineOccurrence', 'seqId', seqId)
             // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getExpendedOccurrence', 'locusId', locusId)
-            const localVarPath = `/occurrences/{seq_id}/{locus_id}/expended`
+            assertParamExists('getExpendedGermlineOccurrence', 'locusId', locusId)
+            const localVarPath = `/occurrences/germline/{seq_id}/{locus_id}/expended`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2654,19 +2654,19 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * List occurrences for a given sequence ID
-         * @summary List occurrences
+         * List germline occurrences for a given sequence ID
+         * @summary List germline occurrences
          * @param {string} seqId Sequence ID
          * @param {ListBody} listBody List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listOccurrences: async (seqId: string, listBody: ListBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listGermlineOccurrences: async (seqId: string, listBody: ListBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('listOccurrences', 'seqId', seqId)
+            assertParamExists('listGermlineOccurrences', 'seqId', seqId)
             // verify required parameter 'listBody' is not null or undefined
-            assertParamExists('listOccurrences', 'listBody', listBody)
-            const localVarPath = `/occurrences/{seq_id}/list`
+            assertParamExists('listGermlineOccurrences', 'listBody', listBody)
+            const localVarPath = `/occurrences/germline/{seq_id}/list`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2699,18 +2699,18 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         },
         /**
          * Return statistics about a field for a given sequence ID
-         * @summary Statistics of occurrences
+         * @summary Statistics of germline occurrences
          * @param {string} seqId Sequence ID
          * @param {StatisticsBody} statisticsBody Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsOccurrences: async (seqId: string, statisticsBody: StatisticsBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        statisticsGermlineOccurrences: async (seqId: string, statisticsBody: StatisticsBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('statisticsOccurrences', 'seqId', seqId)
+            assertParamExists('statisticsGermlineOccurrences', 'seqId', seqId)
             // verify required parameter 'statisticsBody' is not null or undefined
-            assertParamExists('statisticsOccurrences', 'statisticsBody', statisticsBody)
-            const localVarPath = `/occurrences/{seq_id}/statistics`
+            assertParamExists('statisticsGermlineOccurrences', 'statisticsBody', statisticsBody)
+            const localVarPath = `/occurrences/germline/{seq_id}/statistics`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2752,73 +2752,73 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = OccurrencesApiAxiosParamCreator(configuration)
     return {
         /**
-         * Aggregate occurrences for a given sequence ID
-         * @summary Aggregate occurrences
+         * Aggregate germline occurrences for a given sequence ID
+         * @summary Aggregate germline occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBody} aggregationBody Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateOccurrences(seqId, aggregationBody, options);
+        async aggregateGermlineOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineOccurrences(seqId, aggregationBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateOccurrences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Counts occurrences for a given sequence ID
-         * @summary Count occurrences
+         * Counts germline occurrences for a given sequence ID
+         * @summary Count germline occurrences
          * @param {string} seqId Sequence ID
          * @param {CountBody} countBody Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countOccurrences(seqId: string, countBody: CountBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.countOccurrences(seqId, countBody, options);
+        async countGermlineOccurrences(seqId: string, countBody: CountBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineOccurrences(seqId, countBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countOccurrences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a ExpendedOccurrence
+         * @summary Get a germline ExpendedOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpendedOccurrence>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpendedOccurrence(seqId, locusId, options);
+        async getExpendedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpendedOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpendedGermlineOccurrence(seqId, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpendedOccurrence']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpendedGermlineOccurrence']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List occurrences for a given sequence ID
-         * @summary List occurrences
+         * List germline occurrences for a given sequence ID
+         * @summary List germline occurrences
          * @param {string} seqId Sequence ID
          * @param {ListBody} listBody List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Occurrence>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listOccurrences(seqId, listBody, options);
+        async listGermlineOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Occurrence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineOccurrences(seqId, listBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listOccurrences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Return statistics about a field for a given sequence ID
-         * @summary Statistics of occurrences
+         * @summary Statistics of germline occurrences
          * @param {string} seqId Sequence ID
          * @param {StatisticsBody} statisticsBody Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsOccurrences(seqId, statisticsBody, options);
+        async statisticsGermlineOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineOccurrences(seqId, statisticsBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsOccurrences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsGermlineOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -2832,59 +2832,59 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
     const localVarFp = OccurrencesApiFp(configuration)
     return {
         /**
-         * Aggregate occurrences for a given sequence ID
-         * @summary Aggregate occurrences
+         * Aggregate germline occurrences for a given sequence ID
+         * @summary Aggregate germline occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBody} aggregationBody Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
-            return localVarFp.aggregateOccurrences(seqId, aggregationBody, options).then((request) => request(axios, basePath));
+        aggregateGermlineOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+            return localVarFp.aggregateGermlineOccurrences(seqId, aggregationBody, options).then((request) => request(axios, basePath));
         },
         /**
-         * Counts occurrences for a given sequence ID
-         * @summary Count occurrences
+         * Counts germline occurrences for a given sequence ID
+         * @summary Count germline occurrences
          * @param {string} seqId Sequence ID
          * @param {CountBody} countBody Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countOccurrences(seqId: string, countBody: CountBody, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
-            return localVarFp.countOccurrences(seqId, countBody, options).then((request) => request(axios, basePath));
+        countGermlineOccurrences(seqId: string, countBody: CountBody, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countGermlineOccurrences(seqId, countBody, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a ExpendedOccurrence
+         * @summary Get a germline ExpendedOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpendedOccurrence> {
-            return localVarFp.getExpendedOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
+        getExpendedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpendedOccurrence> {
+            return localVarFp.getExpendedGermlineOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
-         * List occurrences for a given sequence ID
-         * @summary List occurrences
+         * List germline occurrences for a given sequence ID
+         * @summary List germline occurrences
          * @param {string} seqId Sequence ID
          * @param {ListBody} listBody List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Occurrence>> {
-            return localVarFp.listOccurrences(seqId, listBody, options).then((request) => request(axios, basePath));
+        listGermlineOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<Occurrence>> {
+            return localVarFp.listGermlineOccurrences(seqId, listBody, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
-         * @summary Statistics of occurrences
+         * @summary Statistics of germline occurrences
          * @param {string} seqId Sequence ID
          * @param {StatisticsBody} statisticsBody Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
-            return localVarFp.statisticsOccurrences(seqId, statisticsBody, options).then((request) => request(axios, basePath));
+        statisticsGermlineOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
+            return localVarFp.statisticsGermlineOccurrences(seqId, statisticsBody, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2897,68 +2897,68 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
  */
 export class OccurrencesApi extends BaseAPI {
     /**
-     * Aggregate occurrences for a given sequence ID
-     * @summary Aggregate occurrences
+     * Aggregate germline occurrences for a given sequence ID
+     * @summary Aggregate germline occurrences
      * @param {string} seqId Sequence ID
      * @param {AggregationBody} aggregationBody Aggregation Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).aggregateOccurrences(seqId, aggregationBody, options).then((request) => request(this.axios, this.basePath));
+    public aggregateGermlineOccurrences(seqId: string, aggregationBody: AggregationBody, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).aggregateGermlineOccurrences(seqId, aggregationBody, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Counts occurrences for a given sequence ID
-     * @summary Count occurrences
+     * Counts germline occurrences for a given sequence ID
+     * @summary Count germline occurrences
      * @param {string} seqId Sequence ID
      * @param {CountBody} countBody Count Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public countOccurrences(seqId: string, countBody: CountBody, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).countOccurrences(seqId, countBody, options).then((request) => request(this.axios, this.basePath));
+    public countGermlineOccurrences(seqId: string, countBody: CountBody, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).countGermlineOccurrences(seqId, countBody, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve ExpendedOccurrence data for a given locus ID
-     * @summary Get a ExpendedOccurrence
+     * @summary Get a germline ExpendedOccurrence
      * @param {string} seqId Sequence ID
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public getExpendedOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).getExpendedOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
+    public getExpendedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getExpendedGermlineOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * List occurrences for a given sequence ID
-     * @summary List occurrences
+     * List germline occurrences for a given sequence ID
+     * @summary List germline occurrences
      * @param {string} seqId Sequence ID
      * @param {ListBody} listBody List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).listOccurrences(seqId, listBody, options).then((request) => request(this.axios, this.basePath));
+    public listGermlineOccurrences(seqId: string, listBody: ListBody, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listGermlineOccurrences(seqId, listBody, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Return statistics about a field for a given sequence ID
-     * @summary Statistics of occurrences
+     * @summary Statistics of germline occurrences
      * @param {string} seqId Sequence ID
      * @param {StatisticsBody} statisticsBody Statistics Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public statisticsOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).statisticsOccurrences(seqId, statisticsBody, options).then((request) => request(this.axios, this.basePath));
+    public statisticsGermlineOccurrences(seqId: string, statisticsBody: StatisticsBody, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).statisticsGermlineOccurrences(seqId, statisticsBody, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -3296,16 +3296,16 @@ export class UserSetsApi extends BaseAPI {
 export const VariantApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Retrieve Variant Consequences for a given locus
-         * @summary Get list of VariantConsequences
+         * Retrieve germline Variant Consequences for a given locus
+         * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVariantConsequences: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantConsequences: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getVariantConsequences', 'locusId', locusId)
-            const localVarPath = `/variants/{locus_id}/consequences`
+            assertParamExists('getGermlineVariantConsequences', 'locusId', locusId)
+            const localVarPath = `/variants/germline/{locus_id}/consequences`
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -3334,16 +3334,16 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Retrieve Variant Header data for a given locus
-         * @summary Get a VariantHeader
+         * Retrieve germline Variant Header data for a given locus
+         * @summary Get a germline VariantHeader
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVariantHeader: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantHeader: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getVariantHeader', 'locusId', locusId)
-            const localVarPath = `/variants/{locus_id}/header`
+            assertParamExists('getGermlineVariantHeader', 'locusId', locusId)
+            const localVarPath = `/variants/germline/{locus_id}/header`
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -3372,16 +3372,16 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Retrieve Variant Overview data for a given locus
-         * @summary Get a VariantOverview
+         * Retrieve germline Variant Overview data for a given locus
+         * @summary Get a germline VariantOverview
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVariantOverview: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantOverview: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getVariantOverview', 'locusId', locusId)
-            const localVarPath = `/variants/{locus_id}/overview`
+            assertParamExists('getGermlineVariantOverview', 'locusId', locusId)
+            const localVarPath = `/variants/germline/{locus_id}/overview`
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -3420,42 +3420,42 @@ export const VariantApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VariantApiAxiosParamCreator(configuration)
     return {
         /**
-         * Retrieve Variant Consequences for a given locus
-         * @summary Get list of VariantConsequences
+         * Retrieve germline Variant Consequences for a given locus
+         * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantConsequence>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getVariantConsequences(locusId, options);
+        async getGermlineVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantConsequence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConsequences(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['VariantApi.getVariantConsequences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConsequences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve Variant Header data for a given locus
-         * @summary Get a VariantHeader
+         * Retrieve germline Variant Header data for a given locus
+         * @summary Get a germline VariantHeader
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getVariantHeader(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantHeader>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getVariantHeader(locusId, options);
+        async getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantHeader>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantHeader(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['VariantApi.getVariantHeader']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantHeader']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve Variant Overview data for a given locus
-         * @summary Get a VariantOverview
+         * Retrieve germline Variant Overview data for a given locus
+         * @summary Get a germline VariantOverview
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getVariantOverview(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantOverview>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getVariantOverview(locusId, options);
+        async getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantOverview>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantOverview(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['VariantApi.getVariantOverview']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantOverview']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -3469,34 +3469,34 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = VariantApiFp(configuration)
     return {
         /**
-         * Retrieve Variant Consequences for a given locus
-         * @summary Get list of VariantConsequences
+         * Retrieve germline Variant Consequences for a given locus
+         * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantConsequence>> {
-            return localVarFp.getVariantConsequences(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantConsequence>> {
+            return localVarFp.getGermlineVariantConsequences(locusId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve Variant Header data for a given locus
-         * @summary Get a VariantHeader
+         * Retrieve germline Variant Header data for a given locus
+         * @summary Get a germline VariantHeader
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVariantHeader(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantHeader> {
-            return localVarFp.getVariantHeader(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantHeader> {
+            return localVarFp.getGermlineVariantHeader(locusId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve Variant Overview data for a given locus
-         * @summary Get a VariantOverview
+         * Retrieve germline Variant Overview data for a given locus
+         * @summary Get a germline VariantOverview
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVariantOverview(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantOverview> {
-            return localVarFp.getVariantOverview(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantOverview> {
+            return localVarFp.getGermlineVariantOverview(locusId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -3509,39 +3509,39 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
  */
 export class VariantApi extends BaseAPI {
     /**
-     * Retrieve Variant Consequences for a given locus
-     * @summary Get list of VariantConsequences
+     * Retrieve germline Variant Consequences for a given locus
+     * @summary Get list of VariantConsequences for a germline variant
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getVariantConsequences(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getVariantConsequences(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantConsequences(locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantConsequences(locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Retrieve Variant Header data for a given locus
-     * @summary Get a VariantHeader
+     * Retrieve germline Variant Header data for a given locus
+     * @summary Get a germline VariantHeader
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getVariantHeader(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getVariantHeader(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantHeader(locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Retrieve Variant Overview data for a given locus
-     * @summary Get a VariantOverview
+     * Retrieve germline Variant Overview data for a given locus
+     * @summary Get a germline VariantOverview
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getVariantOverview(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getVariantOverview(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantOverview(locusId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
