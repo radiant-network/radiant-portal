@@ -51,7 +51,7 @@ func (r *MockRepository) GetVariantConsequences(int) (*[]types.VariantConsequenc
 func Test_GetVariantHeaderHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/header", GetVariantHeader(repo))
+	router.GET("/variants/:locus_id/header", GetGermlineVariantHeader(repo))
 
 	req, _ := http.NewRequest("GET", "/variants/1000/header", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -64,7 +64,7 @@ func Test_GetVariantHeaderHandler(t *testing.T) {
 func Test_GetVariantOverviewHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/overview", GetVariantOverview(repo))
+	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo))
 
 	req, _ := http.NewRequest("GET", "/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -95,7 +95,7 @@ func Test_GetVariantOverviewHandler(t *testing.T) {
 func Test_GetVariantConsequencesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/consequences", GetVariantConsequences(repo))
+	router.GET("/variants/:locus_id/consequences", GetGermlineVariantConsequences(repo))
 
 	req, _ := http.NewRequest("GET", "/variants/1000/consequences", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()

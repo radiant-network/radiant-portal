@@ -22,7 +22,7 @@ func testList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/:seq_id/list", server.OccurrencesListHandler(repo))
+		router.POST("/occurrences/:seq_id/list", server.OccurrencesGermlineListHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/occurrences/1/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
@@ -36,7 +36,7 @@ func testCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/:seq_id/count", server.OccurrencesCountHandler(repo))
+		router.POST("/occurrences/:seq_id/count", server.OccurrencesGermlineCountHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/occurrences/1/count", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
@@ -50,7 +50,7 @@ func testAggregation(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/:seq_id/aggregate", server.OccurrencesAggregateHandler(repo))
+		router.POST("/occurrences/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/occurrences/1/aggregate", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
@@ -64,7 +64,7 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/:seq_id/statistics", server.OccurrencesStatisticsHandler(repo))
+		router.POST("/occurrences/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/occurrences/1/statistics", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
@@ -486,7 +486,7 @@ func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId i
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
-		router.GET("/occurrences/:seq_id/:locus_id/expended", server.GetExpendedOccurrence(repo))
+		router.GET("/occurrences/:seq_id/:locus_id/expended", server.GetExpendedGermlineOccurrence(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/%d/%d/expended", seqId, locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -506,9 +506,9 @@ func assertGetVariantHeader(t *testing.T, data string, locusId int, expected str
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
-		router.GET("/variants/:locus_id/header", server.GetVariantHeader(repo))
+		router.GET("/variants/germline/:locus_id/header", server.GetGermlineVariantHeader(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/header", locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/header", locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -526,9 +526,9 @@ func assertGetVariantOverview(t *testing.T, data string, locusId int, expected s
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
-		router.GET("/variants/:locus_id/overview", server.GetVariantOverview(repo))
+		router.GET("/variants/germline/:locus_id/overview", server.GetGermlineVariantOverview(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/overview", locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/overview", locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -546,9 +546,9 @@ func assertGetVariantConsequences(t *testing.T, data string, locusId int, expect
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewStarrocksRepository(db)
 		router := gin.Default()
-		router.GET("/variants/:locus_id/consequences", server.GetVariantConsequences(repo))
+		router.GET("/variants/germline/:locus_id/consequences", server.GetGermlineVariantConsequences(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/consequences", locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/consequences", locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
