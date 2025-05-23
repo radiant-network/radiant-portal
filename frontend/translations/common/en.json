@@ -589,6 +589,8 @@
     "frequencies": {
       "title": "Frequencies",
       "myOrganization": "My Organization",
+      "myOrganizationAffectedTooltip": "Affected patients",
+      "myOrganizationNonAffectedTooltip": "Unaffected patients",
       "gnomad": "gnomAD"
     },
     "functionalScores": {
@@ -596,14 +598,14 @@
       "sift": "SIFT",
       "revel": "REVEL",
       "fathmm": "FATHMM",
-      "caddRaw": "CADD (raw)",
-      "caddPhred": "CADD (phred)"
+      "caddRaw": "CADD (Raw)",
+      "caddPhred": "CADD (Phred)"
     },
     "zygosity": {
       "title": "Zygosity",
       "zygosity": "Zygosity",
       "compoundHet": "Compound Het.",
-      "potentialCompoundHet": "PotentialCompound Het.",
+      "potentialCompoundHet": "Potential Compound Het.",
       "inheritance": "Inheritance",
       "parentalOrigin": "Parental Origin"
     },
