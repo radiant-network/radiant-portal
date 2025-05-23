@@ -600,6 +600,8 @@
     "frequencies": {
       "title": "Fréquences",
       "myOrganization": "Mon Organisation",
+      "myOrganizationAffectedTooltip": "Patients affectés",
+      "myOrganizationNonAffectedTooltip": "Patients non affectés",
       "gnomad": "gnomAD"
     },
     "functionalScores": {
@@ -607,8 +609,8 @@
       "sift": "SIFT",
       "revel": "REVEL",
       "fathmm": "FATHMM",
-      "caddRaw": "CADD (brut)",
-      "caddPhred": "CADD (phred)"
+      "caddRaw": "CADD (Brut)",
+      "caddPhred": "CADD (Phred)"
     },
     "zygosity": {
       "title": "Zygosité",

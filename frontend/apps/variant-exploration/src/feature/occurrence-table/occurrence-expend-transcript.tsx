@@ -1,8 +1,6 @@
-import { ExpendedOccurrence, Occurrence } from '@/api/api';
+import { ExpendedOccurrence } from '@/api/api';
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
 import { Separator } from '@/components/base/ui/separator';
-import { useI18n } from '@/components/hooks/i18n';
-import ImpactIcon from '@/components/feature/variant/impact-icon';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 
 type OccurrenceExpendTranscriptProps = {
@@ -10,8 +8,6 @@ type OccurrenceExpendTranscriptProps = {
 };
 
 export default function OccurrenceExpendTranscript({ occurrence }: OccurrenceExpendTranscriptProps) {
-  const { t } = useI18n();
-
   const arn = occurrence.hgvsg.split(':')[1];
 
   return (
