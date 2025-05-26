@@ -24,7 +24,7 @@ type VariantHeaderInput = {
 };
 
 async function fetchVariantHeader(input: VariantHeaderInput) {
-  const response = await variantsApi.getVariantHeader(input.locusId);
+  const response = await variantsApi.getGermlineVariantHeader(input.locusId);
   return response.data;
 }
 
