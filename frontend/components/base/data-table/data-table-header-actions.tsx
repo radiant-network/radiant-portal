@@ -74,6 +74,10 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
   // use to keep DropdownMenuTrigger visible when used
   const [isPinningDropdownActive, setIsPinningDropdownActive] = useState<boolean>(false);
 
+  const hasActions = header.column.getCanPin() || header.column.getCanSort();
+
+  if (!hasActions) return null;
+
   return (
     <div className="flex items-center gap-0.5">
       {/* Pin/Unpin column */}

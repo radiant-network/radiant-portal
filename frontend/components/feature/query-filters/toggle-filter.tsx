@@ -92,7 +92,7 @@ export function ToggleFilter({ data, field }: IProps) {
         <>
           <hr className="my-4 border-border" />
           <div className="flex align-right justify-end items-center space-x-2">
-            <Button className="text-gray-600" onClick={clear}>
+            <Button onClick={clear} size="xs">
               {t('common.filters.buttons.clear')}
             </Button>
           </div>

@@ -37,19 +37,19 @@ const ListItemAction = ({
       </ConditionalWrapper>
       <div className="text-xs">{description}</div>
     </div>
-    <div className="hidden items-start group-hover:flex ml-2">
+    <div className="hidden items-start group-hover:flex gap-1.5 ml-2">
       {onShare && (
-        <Button iconOnly variant="ghost" size="xs" onClick={onShare}>
+        <Button iconOnly variant="ghost" size="xs" onClick={onShare} className="[&_svg]:size-3.5 size-5">
           <Share2Icon />
         </Button>
       )}
       {onEdit && (
-        <Button iconOnly variant="ghost" size="xs" onClick={onEdit}>
+        <Button iconOnly variant="ghost" size="xs" onClick={onEdit} className="[&_svg]:size-3.5 size-5">
           <Edit2Icon />
         </Button>
       )}
       {onDelete && (
-        <Button iconOnly variant="ghost" size="xs" onClick={onDelete}>
+        <Button iconOnly variant="ghost" size="xs" onClick={onDelete} className="[&_svg]:size-3.5 size-5">
           <TrashIcon />
         </Button>
       )}

@@ -1,0 +1,155 @@
+import { Button } from '@/components/base/ui/button';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/ui/hover-card';
+import { useI18n } from '@/components/hooks/i18n';
+import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
+import { CopyIcon, InfoIcon, PencilLineIcon, TrashIcon } from 'lucide-react';
+import { useState } from 'react';
+import QueryPillCustomEditDialog from '@/components/feature/query-builder/query-pill/query-pill-custom-edit-dialog';
+import { useQueryBuilderDictionary } from '@/components/feature/query-builder/data';
+import { QueryBuilderContext, QueryBuilderDictContext } from '@/components/feature/query-builder/query-builder-context';
+import { createSavedFilter, useQueryBuilder } from '@/components/model/query-builder-core';
+import { ISqonGroupFilter } from '@/components/model/sqon';
+import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
+
+export interface CustomPillFilterProps {
+  customPills: IUserSavedFilter[];
+  onSelectPill: (pill: ISavedFilter) => void;
+  onSavePill: (pill: ISavedFilter) => Promise<IUserSavedFilter>;
+  onDuplicatePill: (pill: ISavedFilter) => void;
+  onDeletePill: (pillId: string) => void;
+}
+
+function CustomPillFilter({
+  customPills,
+  onSelectPill,
+  onSavePill,
+  onDuplicatePill,
+  onDeletePill,
+}: CustomPillFilterProps) {
+  const { t } = useI18n();
+  const defaultDictionary = useQueryBuilderDictionary();
+
+  const [activeQueryPill, setActiveQueryPill] = useState<ISavedFilter | null>(null);
+
+  const customQueryBuilder = useQueryBuilder({
+    id: 'customPillFilterQueryBuilder',
+    state: {
+      // These are empty because we are not using
+      // the full query builder functionality here,
+      activeQueryId: '',
+      selectedQueryIndexes: [],
+      queries: [],
+      // We use the customPills prop to initialize the saved filters
+      // because this is required for the copy functionality
+      savedFilters: customPills,
+    },
+    onCustomPillUpdate: async customPill => await onSavePill(customPill),
+  });
+
+  const openConfirmDeleteDialog = (pill: IUserSavedFilter) =>
+    alertDialog.open({
+      type: 'warning',
+      title: t('common.customPillFilter.deleteDialog.title', {
+        defaultValue: 'Delete this query?',
+      }),
+      description: t('common.customPillFilter.deleteDialog.description', {
+        title: pill.title,
+        defaultValue: `You are about to delete this custom query \"${pill.title}\", which may affect your results."`,
+      }),
+      cancelProps: {
+        children: t('common.customPillFilter.deleteDialog.cancel', {
+          defaultValue: 'Cancel',
+        }),
+      },
+      actionProps: {
+        color: 'destructive',
+        onClick: () => onDeletePill(pill.id),
+        children: t('common.customPillFilter.deleteDialog.ok', {
+          defaultValue: 'Delete',
+        }),
+      },
+    });
+
+  return (
+    <QueryBuilderDictContext.Provider value={defaultDictionary}>
+      <QueryBuilderContext.Provider
+        value={{
+          queryBuilder: customQueryBuilder,
+          fetchQueryCount: async () => 0,
+          getQueryReferenceColor: () => '',
+          showLabels: true,
+          resolveSyntheticSqon: sqon => sqon as ISqonGroupFilter,
+        }}
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-1">
+            My Queries{' '}
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <InfoIcon size={16} />
+              </HoverCardTrigger>
+              <HoverCardContent side="left" className="w-[200px] space-y-3">
+                <div className="text-sm">
+                  {t('common.customPillFilter.info', {
+                    defaultValue:
+                      'You can create custom queries by adding criteria to the query bar and clicking the save button.',
+                  })}
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+          <div className="space-y-3">
+            {customPills.map(pill => (
+              <div key={pill.id} className="flex gap-1.5 group">
+                <button
+                  className="flex items-center border-2 rounded-sm border-primary px-2 h-6 text-xs whitespace-nowrap overflow-hidden hover:underline"
+                  onClick={() => onSelectPill(pill)}
+                >
+                  <span className="overflow-hidden text-ellipsis">{pill.title}</span>
+                </button>
+                <div className="hidden items-center group-hover:flex gap-1">
+                  <Button
+                    iconOnly
+                    variant="ghost"
+                    size="xs"
+                    className="[&_svg]:size-3.5 size-5"
+                    onClick={() => setActiveQueryPill(pill)}
+                  >
+                    <PencilLineIcon />
+                  </Button>
+                  <Button
+                    iconOnly
+                    variant="ghost"
+                    size="xs"
+                    className="[&_svg]:size-3.5 size-5"
+                    onClick={() => onDuplicatePill(createSavedFilter(pill, customQueryBuilder).copy())}
+                  >
+                    <CopyIcon />
+                  </Button>
+                  <Button
+                    iconOnly
+                    variant="ghost"
+                    size="xs"
+                    className="[&_svg]:size-3.5 size-5"
+                    onClick={() => openConfirmDeleteDialog(pill)}
+                  >
+                    <TrashIcon />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {activeQueryPill && (
+          <QueryPillCustomEditDialog
+            open={true}
+            onOpenChange={() => setActiveQueryPill(null)}
+            queryPill={activeQueryPill}
+          />
+        )}
+      </QueryBuilderContext.Provider>
+    </QueryBuilderDictContext.Provider>
+  );
+}
+
+export default CustomPillFilter;

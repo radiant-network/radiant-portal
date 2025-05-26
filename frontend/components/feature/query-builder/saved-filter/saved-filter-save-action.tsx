@@ -9,7 +9,8 @@ function SavedFiltersSaveAction() {
   const { queryBuilder } = useQueryBuilderContext();
 
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
-  const isDisabled = selectedSavedFilter ? !selectedSavedFilter.isDirty() : queryBuilder.isEmpty();
+  const isDisabled =
+    selectedSavedFilter && !selectedSavedFilter.isNew() ? !selectedSavedFilter.isDirty() : queryBuilder.isEmpty();
 
   const handleSave = function () {
     if (selectedSavedFilter) {

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
-
+import { action } from '@storybook/addon-actions';
 import List from '@/components/base/list/list';
 import ListItemWithAction from '@/components/base/list/list-item-with-action';
 
@@ -8,10 +7,10 @@ const meta = {
   title: 'Data Display/ListItem with action',
   component: ListItemWithAction,
   args: {
-    onEdit: fn(),
-    onDelete: fn(),
-    onShare: fn(),
-    onClick: fn(),
+    onEdit: action('onEdit'),
+    onDelete: action('onDelete'),
+    onShare: action('onShare'),
+    onClick: action('onClick'),
   },
 } satisfies Meta<typeof ListItemWithAction>;
 

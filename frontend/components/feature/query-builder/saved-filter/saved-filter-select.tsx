@@ -9,7 +9,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/base/ui/to
 function SavedFiltersSelect() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
-  const savedFilters = queryBuilder.getSavedFilters();
+  const savedFilters = queryBuilder.getSavedFilters().filter(filter => !filter.isNew());
 
   const [open, setOpen] = useState(false);
   const [openManage, setOpenManage] = useState(false);

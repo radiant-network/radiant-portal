@@ -28,11 +28,17 @@
 
   --slate: 215 20% 65%;
   --slate-foreground: 217 33% 17%;
+
+  --bookmark-amber: 38 92% 50%;
+  --bookmark-blue: 217 91% 60%;
+  --bookmark-green: 142 76% 36%;
+  --bookmark-red: 0 84% 60%;
+  --bookmark-slate: 215 20% 65%;
 }
 
 .dark {
   color-scheme: dark;
-  
+
   --red: 0 74% 42%;
   --red-foreground: 0 91% 71%;
 
@@ -62,4 +68,10 @@
 
   --slate: 215 16% 47%;
   --slate-foreground: 215 20% 65%;
+
+  --bookmark-amber: 32 95% 44%;
+  --bookmark-blue: 217 91% 60%;
+  --bookmark-green: 142 76% 36%;
+  --bookmark-red: 0 72% 51%;
+  --bookmark-slate: 215 16% 47%;
 }

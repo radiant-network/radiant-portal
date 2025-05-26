@@ -12,6 +12,15 @@
         "h6": "Heading 6"
       }
     },
+    "customPillFilter": {
+      "info": "You can create custom queries by adding criteria to the query bar and clicking the save button.",
+      "deleteDialog": {
+        "title": "Delete this query?",
+        "description": "You are about to delete this custom query \"{{title}}\". which may affect your results.",
+        "cancel": "Cancel",
+        "ok": "Delete"
+      }
+    },
     "queryBar": {
       "empty": "Use the search tools & facets on the left to build a query",
       "deletePopover": {

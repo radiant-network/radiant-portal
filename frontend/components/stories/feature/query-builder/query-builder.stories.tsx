@@ -6,10 +6,8 @@ import { defaultQueryReferenceColors } from '@/components/feature/query-builder/
 import { Button } from '@/components/base/ui/button';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { v4 } from 'uuid';
-import { BooleanOperators, ISyntheticSqon } from '@/components/model/sqon';
-import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
 import { UserIcon } from 'lucide-react';
-import { SqonOpEnum } from '@/api/api';
+import { generateRandomQuery, generateRandomUserSavedFilter } from './utils';
 
 const mockDictionary = {
   queryBar: {
@@ -155,60 +153,6 @@ type Story = StoryObj<typeof meta>;
 const qbId = 'query-builder-id';
 const qbCustomPillId = 'query-builder-custom-pill-id';
 const qbQueryPillFilterId = 'query-builder-query-pill-filter-id';
-
-const randomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-const randomNumber = (min = 1, max = 100): number => Math.floor(Math.random() * (max - min + 1)) + min;
-const randomString = () => Math.random().toString(36).substring(7);
-
-const numericOperators: SqonOpEnum[] = [
-  SqonOpEnum.GreaterThan,
-  SqonOpEnum.LessThan,
-  SqonOpEnum.Between,
-  SqonOpEnum.GreaterThanOrEqualTo,
-  SqonOpEnum.LessThanOrEqualTo,
-];
-
-const generateRandomUserSavedFilter = (filter?: ISavedFilter): IUserSavedFilter => ({
-  id: v4(),
-  title: filter?.title || `Custom Pill ${randomNumber(1, 50)}`,
-  queries: [generateRandomQuery()],
-  keycloak_id: v4(),
-  creation_date: new Date().toISOString(),
-  updated_date: new Date().toISOString(),
-  tag: 'tag',
-  favorite: false,
-});
-
-const generateRandomValue = (operator: SqonOpEnum): (string | number)[] => {
-  if (numericOperators.includes(operator)) {
-    return Array.from({ length: 2 }, () => randomNumber());
-  } else {
-    return Array.from({ length: randomNumber(2, 5) }, () => randomString());
-  }
-};
-
-const generateRandomQuery = (id: string = v4()): ISyntheticSqon => {
-  const numConditions = randomNumber(1, 3);
-  const conditions = Array.from({ length: numConditions }, () => {
-    const filteredOps = Object.values(SqonOpEnum).filter(
-      op => op !== SqonOpEnum.And && op !== SqonOpEnum.Or && op !== SqonOpEnum.Not,
-    );
-    const op = randomElement(filteredOps);
-    return {
-      op,
-      content: {
-        field: `field_${randomString()}`,
-        value: generateRandomValue(op),
-      },
-    };
-  });
-
-  return {
-    id,
-    op: randomElement(['and', 'or'] as BooleanOperators[]),
-    content: conditions as any,
-  };
-};
 
 function TestingTools({ queryBuilderId }: { queryBuilderId: string }) {
   return (

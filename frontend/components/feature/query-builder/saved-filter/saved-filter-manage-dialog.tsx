@@ -22,7 +22,7 @@ function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpe
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
-  const savedFilters = queryBuilder.getSavedFilters();
+  const savedFilters = queryBuilder.getSavedFilters().filter(savedFilter => !savedFilter.isNew());
 
   useEffect(() => {
     if (savedFilters.length === 0) {
