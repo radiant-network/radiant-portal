@@ -157,6 +157,17 @@ export function getTableLocaleStorage(
   // validate cache to the lastest version
   const cache: TableCacheProps = JSON.parse(storage);
 
+  // if table-settings is changed for a tab, the localStorage is resetted to use the table-settings
+  const columnIds = columns.map(column => column.id);
+  const depreciatedColumns = cache.columnOrder.filter(id => !columnIds.includes(id));
+  const newColumns = columnIds.filter(id => !cache.columnOrder.includes(id));
+
+  if (depreciatedColumns.length > 0 && newColumns.length > 0) {
+    const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState, columns: columns };
+    localStorage.setItem(id, JSON.stringify(defaultCache));
+    return defaultCache;
+  }
+
   return {
     ...cache,
     columns,
