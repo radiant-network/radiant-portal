@@ -635,7 +635,9 @@
     "family": {
       "title": "Famille",
       "motherGenotype": "Génotype de la Mère",
-      "fatherGenotype": "Génotype du Père"
+      "fatherGenotype": "Génotype du Père",
+      "affectedTooltip": "Affecté",
+      "notAffectedTooltip": "Non affecté"
     },
     "metrics": {
       "title": "Métriques",
