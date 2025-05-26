@@ -12,6 +12,15 @@
         "h6": "Titre 6"
       }
     },
+    "customPillFilter": {
+      "info": "Vous pouvez créer des requêtes personnalisées en ajoutant des critères à la barre de requêtes et en cliquant sur le bouton sauvegarder.",
+      "deleteDialog": {
+        "title": "Supprimer cette requête ?",
+        "description": "Vous êtes sur le point de supprimer la requête personnalisée « {{title}} », ce qui pourrait avoir un impact sur vos résultats.",
+        "cancel": "Annuler",
+        "ok": "Supprimer"
+      }
+    },
     "queryBar": {
       "empty": "Utilisez les outils de recherche et les facettes à gauche pour construire une requête",
       "deletePopover": {

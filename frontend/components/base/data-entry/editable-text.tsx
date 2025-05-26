@@ -34,7 +34,7 @@ const EditableText = ({ children, icon = PencilLineIcon, onChangeText, ...props 
       ) : (
         <div className="flex items-center gap-2">
           <span>{children}</span>
-          <Button iconOnly onClick={() => setEdit(true)}>
+          <Button iconOnly variant="ghost" onClick={() => setEdit(true)}>
             <Icon />
           </Button>
         </div>

@@ -30,7 +30,13 @@ function QueryPillCustom({ valueQuery }: QueryPillCustomProps) {
       <QueryPillContainer onRemovePill={() => query.removePillById(valueQuery.id)}>
         <QueryPillValuesContainer className="pr-1" classNameContent="space-x-1">
           <span>{valueQuery.title}</span>
-          <Button iconOnly size="xs" className="size-auto p-[2px]" onClick={() => setEditModalOpen(true)}>
+          <Button
+            iconOnly
+            size="xs"
+            variant="ghost"
+            className="size-auto p-[2px]"
+            onClick={() => setEditModalOpen(true)}
+          >
             <PencilLineIcon />
           </Button>
         </QueryPillValuesContainer>

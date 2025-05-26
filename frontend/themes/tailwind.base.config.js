@@ -108,6 +108,13 @@ module.exports = {
         },
         'sidebar-border': 'hsl(var(--sidebar-border))',
         'sidebar-ring': 'hsl(var(--sidebar-ring))',
+        bookmark: {
+          amber: 'hsl(var(--bookmark-amber))',
+          blue: 'hsl(var(--bookmark-blue))',
+          green: 'hsl(var(--bookmark-green))',
+          red: 'hsl(var(--bookmark-red))',
+          slate: 'hsl(var(--bookmark-slate))',
+        },
       }),
       cursor: {
         default: 'pointer',

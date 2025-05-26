@@ -138,7 +138,7 @@ function QueryPillCustomEditDialog({
                 <DialogClose asChild>
                   <Button variant="outline">{dict.queryPill.customPill.editDialog.cancel}</Button>
                 </DialogClose>
-                <Button type="submit" color="primary" loading={saving} disabled={!hasChanged} onClick={handleSave}>
+                <Button type="submit" loading={saving} disabled={!hasChanged} onClick={handleSave}>
                   {dict.queryPill.customPill.editDialog.ok}
                 </Button>
               </DialogFooter>

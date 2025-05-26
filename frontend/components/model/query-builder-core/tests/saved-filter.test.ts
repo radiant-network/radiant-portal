@@ -1,57 +1,41 @@
-import {
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  jest,
-} from "@jest/globals";
-import type { Mock } from "jest-mock";
-import {
-  CoreQueryBuilderProps,
-  createQueryBuilder,
-  QueryBuilderInstance,
-  QueryBuilderState,
-} from "../query-builder";
-import {
-  ISavedFilter,
-  IUserSavedFilter,
-  SavedFilterTypeEnum,
-} from "../../saved-filter";
-import { ISyntheticSqon } from "../../sqon";
-import { getDefaultSyntheticSqon } from "../utils/sqon";
+import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import type { Mock } from 'jest-mock';
+import { CoreQueryBuilderProps, createQueryBuilder, QueryBuilderInstance, QueryBuilderState } from '../query-builder';
+import { ISavedFilter, IUserSavedFilter, SavedFilterTypeEnum } from '../../saved-filter';
+import { ISyntheticSqon } from '../../sqon';
+import { getDefaultSyntheticSqon } from '../utils/sqon';
 
 const defaultQueries: ISyntheticSqon[] = [
   {
-    id: "1",
-    op: "and",
+    id: '1',
+    op: 'and',
     content: [
       {
         content: {
-          value: ["something"],
-          field: "field1",
+          value: ['something'],
+          field: 'field1',
         },
-        op: "in",
+        op: 'in',
       },
     ],
   },
   {
-    id: "2",
-    op: "and",
+    id: '2',
+    op: 'and',
     content: [
       {
         content: {
-          value: ["something-else"],
-          field: "field2",
+          value: ['something-else'],
+          field: 'field2',
         },
-        op: "in",
+        op: 'in',
       },
     ],
   },
 ];
 
 let defaultProps: CoreQueryBuilderProps = {
-  id: "test-query-builder",
+  id: 'test-query-builder',
   state: {
     activeQueryId: defaultQueries[0].id,
     queries: defaultQueries,
@@ -60,7 +44,7 @@ let defaultProps: CoreQueryBuilderProps = {
   },
 };
 
-const mockUUID = "abababab-abab-4bab-abab-abababababab";
+const mockUUID = 'abababab-abab-4bab-abab-abababababab';
 
 let qb: QueryBuilderInstance;
 let state: QueryBuilderState = defaultProps.state;
@@ -70,9 +54,9 @@ let mockOnFilterDelete: Mock<{ savedFilterId: string }, [any]>;
 let mockOnFilterUpdate: Mock<void | Promise<IUserSavedFilter>, [any]>;
 let mockOnActiveQueryChange: Mock<void, [any]>;
 
-describe("SavedFilters Manipulation", () => {
+describe('SavedFilters Manipulation', () => {
   beforeAll(() => {
-    Object.defineProperty(globalThis, "crypto", {
+    Object.defineProperty(globalThis, 'crypto', {
       value: {
         getRandomValues: () =>
           // Will generate abababab-abab-4bab-abab-abababababab
@@ -91,7 +75,7 @@ describe("SavedFilters Manipulation", () => {
 
     qb = createQueryBuilder({
       ...defaultProps,
-      onStateChange: (newState) => {
+      onStateChange: newState => {
         state = newState;
       },
       onSavedFilterCreate: mockOnFilterCreate,
@@ -101,15 +85,15 @@ describe("SavedFilters Manipulation", () => {
     });
   });
 
-  it("should return the selected saved filter if set", () => {
+  it('should return the selected saved filter if set', () => {
     const savedFilter: ISavedFilter = {
-      id: "1",
-      title: "Saved Filter 1",
+      id: '1',
+      title: 'Saved Filter 1',
       queries: defaultQueries,
       favorite: false,
     };
 
-    qb.setCoreProps((prev) => ({
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
@@ -122,8 +106,8 @@ describe("SavedFilters Manipulation", () => {
     expect(qb.getSelectedSavedFilter()?.isSelected()).toBe(true);
   });
 
-  it("should return null as the selected saved filter if not set", () => {
-    qb.setCoreProps((prev) => ({
+  it('should return null as the selected saved filter if not set', () => {
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
@@ -134,7 +118,7 @@ describe("SavedFilters Manipulation", () => {
     expect(qb.getSelectedSavedFilter()).toBeNull();
   });
 
-  it("should create a new saved filter", () => {
+  it('should create a new saved filter', () => {
     expect(state.activeQueryId).toBe(defaultQueries[0].id);
     expect(state.savedFilters).toHaveLength(0);
 
@@ -152,22 +136,20 @@ describe("SavedFilters Manipulation", () => {
     expect(state.savedFilters[0]).toMatchObject(newSavedFilter);
     expect(state.activeQueryId).toBe(mockUUID);
     expect(mockOnFilterCreate).toBeCalledTimes(1);
-    expect(mockOnFilterCreate).toBeCalledWith(
-      expect.objectContaining(newSavedFilter)
-    );
+    expect(mockOnFilterCreate).toBeCalledWith(expect.objectContaining(newSavedFilter));
   });
 
-  it("should not alter the initial queries of a saved filter when deleting a query", () => {
+  it('should not alter the initial queries of a saved filter when deleting a query', () => {
     const savedFilter: ISavedFilter = {
-      id: "1",
-      title: "Saved Filter 1",
+      id: '1',
+      title: 'Saved Filter 1',
       queries: defaultQueries,
       favorite: false,
     };
 
     expect(qb.getSelectedSavedFilter()).toBeNull();
 
-    qb.setCoreProps((prev) => ({
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
@@ -177,44 +159,40 @@ describe("SavedFilters Manipulation", () => {
 
     expect(qb.getSelectedSavedFilter()).toBeTruthy();
     expect(qb.getSelectedSavedFilter()?.getQueries().length).toBe(2);
-    expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(
-      defaultQueries
-    );
+    expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(defaultQueries);
 
-    qb.deleteQuery("1");
+    qb.deleteQuery('1');
 
     expect(qb.getSelectedSavedFilter()).toBeTruthy();
     expect(qb.getSelectedSavedFilter()?.getQueries().length).toBe(2);
-    expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(
-      defaultQueries
-    );
+    expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(defaultQueries);
   });
 
-  it("should return that the saved filter is dirty if query has changed", () => {
+  it('should return that the saved filter is dirty if query has changed', () => {
     const initialQueries: ISyntheticSqon[] = [
       {
-        id: "1",
-        op: "and",
+        id: '1',
+        op: 'and',
         content: [
           {
             content: {
-              value: ["something"],
-              field: "field1",
+              value: ['something'],
+              field: 'field1',
             },
-            op: "in",
+            op: 'in',
           },
         ],
       },
       {
-        id: "2",
-        op: "and",
+        id: '2',
+        op: 'and',
         content: [
           {
             content: {
-              value: ["something-else"],
-              field: "field2",
+              value: ['something-else'],
+              field: 'field2',
             },
-            op: "in",
+            op: 'in',
           },
         ],
       },
@@ -224,18 +202,18 @@ describe("SavedFilters Manipulation", () => {
       initialQueries[0],
       {
         ...initialQueries[1],
-        op: "or",
+        op: 'or',
       },
     ];
 
     const savedFilter: ISavedFilter = {
-      id: "1",
-      title: "Saved Filter 1",
+      id: '1',
+      title: 'Saved Filter 1',
       queries: initialQueries,
       favorite: false,
     };
 
-    qb.setCoreProps((prev) => ({
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
@@ -246,50 +224,116 @@ describe("SavedFilters Manipulation", () => {
 
     expect(qb.getSelectedSavedFilter()).toBeTruthy();
     expect(qb.getSelectedSavedFilter()?.getQueries().length).toBe(2);
-    expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(
-      initialQueries
-    );
+    expect(qb.getSelectedSavedFilter()?.getRawQueries()).toEqual(initialQueries);
     expect(qb.getSelectedSavedFilter()?.isDirty()).toBe(true);
   });
 
-  it("should duplicate the selected saved filter and set the new one as selected", () => {
+  it('should copy the saved filter', () => {
     const initialQueries: ISyntheticSqon[] = [
       {
-        id: "1",
-        op: "and",
+        id: '1',
+        op: 'and',
         content: [
           {
             content: {
-              value: ["something"],
-              field: "field1",
+              value: ['something'],
+              field: 'field1',
             },
-            op: "in",
+            op: 'in',
           },
         ],
       },
       {
-        id: "2",
-        op: "and",
+        id: '2',
+        op: 'and',
         content: [
           {
             content: {
-              value: ["something-else"],
-              field: "field2",
+              value: ['something-else'],
+              field: 'field2',
             },
-            op: "in",
+            op: 'in',
           },
         ],
       },
     ];
 
     const savedFilter: ISavedFilter = {
-      id: "1",
-      title: "Saved Filter 1",
+      id: '1',
+      title: 'Saved Filter 1',
       queries: initialQueries,
       favorite: false,
     };
 
-    qb.setCoreProps((prev) => ({
+    qb.setCoreProps(prev => ({
+      ...prev,
+      state: {
+        ...state,
+        queries: initialQueries,
+        savedFilters: [savedFilter],
+      },
+    }));
+
+    const result = qb.getSelectedSavedFilter()?.copy();
+
+    const duplicatedQueries: ISyntheticSqon[] = [
+      {
+        ...initialQueries[0],
+        id: mockUUID,
+      },
+      {
+        ...initialQueries[1],
+        id: mockUUID,
+      },
+    ];
+
+    expect(result).toContain({
+      id: mockUUID,
+      isNew: true,
+      isDirtresulty: false,
+      favorite: false,
+      queries: duplicatedQueries,
+    });
+  });
+
+  it('should duplicate the selected saved filter and set the new one as selected', () => {
+    const initialQueries: ISyntheticSqon[] = [
+      {
+        id: '1',
+        op: 'and',
+        content: [
+          {
+            content: {
+              value: ['something'],
+              field: 'field1',
+            },
+            op: 'in',
+          },
+        ],
+      },
+      {
+        id: '2',
+        op: 'and',
+        content: [
+          {
+            content: {
+              value: ['something-else'],
+              field: 'field2',
+            },
+            op: 'in',
+          },
+        ],
+      },
+    ];
+
+    const savedFilter: ISavedFilter = {
+      id: '1',
+      title: 'Saved Filter 1',
+      queries: initialQueries,
+      favorite: false,
+    };
+
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
@@ -332,19 +376,19 @@ describe("SavedFilters Manipulation", () => {
         isDirty: false,
         favorite: false,
         queries: duplicatedQueries,
-      })
+      }),
     );
   });
 
-  it("should create and set new selected saved filter when deleting the currently selected saved filter", async () => {
+  it('should create and set new selected saved filter when deleting the currently selected saved filter', async () => {
     const savedFilter: ISavedFilter = {
-      id: "1",
-      title: "Saved Filter 1",
+      id: '1',
+      title: 'Saved Filter 1',
       queries: defaultQueries,
       favorite: false,
     };
 
-    qb.setCoreProps((prev) => ({
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
@@ -353,8 +397,8 @@ describe("SavedFilters Manipulation", () => {
     }));
 
     expect(qb.getState().savedFilters.length).toBe(1);
-    expect(qb.getState().activeQueryId).toBe("1");
-    expect(qb.getState().savedFilters[0].id).toBe("1");
+    expect(qb.getState().activeQueryId).toBe('1');
+    expect(qb.getState().savedFilters[0].id).toBe('1');
     expect(qb.getState().savedFilters[0].queries).toEqual(defaultQueries);
 
     await qb.getSelectedSavedFilter()?.delete();
@@ -370,28 +414,26 @@ describe("SavedFilters Manipulation", () => {
     expect(state.savedFilters[0].id).toBe(mockUUID);
     expect(state.savedFilters[0].queries).toEqual([getDefaultSyntheticSqon()]);
     expect(mockOnFilterDelete).toHaveBeenCalledTimes(1);
-    expect(mockOnFilterDelete).toHaveBeenCalledWith("1");
+    expect(mockOnFilterDelete).toHaveBeenCalledWith('1');
     expect(mockOnActiveQueryChange).toHaveBeenCalledTimes(1);
-    expect(mockOnActiveQueryChange).toHaveBeenCalledWith(
-      getDefaultSyntheticSqon()
-    );
+    expect(mockOnActiveQueryChange).toHaveBeenCalledWith(getDefaultSyntheticSqon());
   });
 
-  it("should select savedfilter", () => {
+  it('should select savedfilter', () => {
     const savedFilter: ISavedFilter = {
-      id: "saved-filter-id-1",
-      title: "Saved Filter 1",
+      id: 'saved-filter-id-1',
+      title: 'Saved Filter 1',
       queries: [
         {
-          id: "query-id-1",
-          op: "and",
+          id: 'query-id-1',
+          op: 'and',
           content: [
             {
               content: {
-                value: ["something"],
-                field: "field1",
+                value: ['something'],
+                field: 'field1',
               },
-              op: "in",
+              op: 'in',
             },
           ],
         },
@@ -401,7 +443,7 @@ describe("SavedFilters Manipulation", () => {
 
     expect(qb.getSelectedSavedFilter()).toBeNull();
 
-    qb.setCoreProps((prev) => ({
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
@@ -413,34 +455,34 @@ describe("SavedFilters Manipulation", () => {
 
     qb.getSavedFilters()[0].select();
 
-    expect(state.activeQueryId).toBe("query-id-1");
+    expect(state.activeQueryId).toBe('query-id-1');
     expect(state.queries).toEqual(savedFilter.queries);
   });
 
-  it("should discard changes", () => {
+  it('should discard changes', () => {
     const savedFilter: ISavedFilter = {
-      id: "1",
-      title: "Saved Filter 1",
+      id: '1',
+      title: 'Saved Filter 1',
       queries: defaultQueries,
       favorite: false,
     };
 
-    qb.setCoreProps((prev) => ({
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
         queries: [
           ...defaultQueries,
           {
-            id: "3",
-            op: "and",
+            id: '3',
+            op: 'and',
             content: [
               {
                 content: {
-                  value: ["something-else"],
-                  field: "field3",
+                  value: ['something-else'],
+                  field: 'field3',
                 },
-                op: "in",
+                op: 'in',
               },
             ],
           },
@@ -457,10 +499,10 @@ describe("SavedFilters Manipulation", () => {
     expect(state.savedFilters[0].queries).toEqual(defaultQueries);
   });
 
-  it("should save filter", async () => {
+  it('should save filter', async () => {
     const savedFilter: ISavedFilter = {
-      id: "1",
-      title: "Saved Filter 1",
+      id: '1',
+      title: 'Saved Filter 1',
       queries: defaultQueries,
       favorite: false,
     };
@@ -468,21 +510,21 @@ describe("SavedFilters Manipulation", () => {
     const newQueries: ISyntheticSqon[] = [
       ...defaultQueries,
       {
-        id: "3",
-        op: "and",
+        id: '3',
+        op: 'and',
         content: [
           {
             content: {
-              value: ["something-else"],
-              field: "field3",
+              value: ['something-else'],
+              field: 'field3',
             },
-            op: "in",
+            op: 'in',
           },
         ],
       },
     ];
 
-    qb.setCoreProps((prev) => ({
+    qb.setCoreProps(prev => ({
       ...prev,
       state: {
         ...state,
@@ -494,7 +536,7 @@ describe("SavedFilters Manipulation", () => {
     expect(qb.getSelectedSavedFilter()).toBeTruthy();
     expect(qb.getSelectedSavedFilter()?.isDirty()).toBe(true);
 
-    const updatedTitle = "Saved Filter 1 Updated";
+    const updatedTitle = 'Saved Filter 1 Updated';
 
     await qb.getSelectedSavedFilter()?.save(SavedFilterTypeEnum.Filter, {
       title: updatedTitle,
@@ -508,7 +550,7 @@ describe("SavedFilters Manipulation", () => {
     expect(state.savedFilters[0].favorite).toBeTruthy();
     expect(mockOnFilterUpdate).toBeCalledTimes(1);
     expect(mockOnFilterUpdate).toBeCalledWith({
-      id: "1",
+      id: '1',
       title: updatedTitle,
       queries: newQueries,
       favorite: true,
