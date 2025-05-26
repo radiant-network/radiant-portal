@@ -37,12 +37,12 @@ const DEFAULT_SORTING = [
 ];
 
 async function fetchOccurrencesList(input: OccurrencesListInput) {
-  const response = await occurrencesApi.listOccurrences(input.seqId, input.listBody);
+  const response = await occurrencesApi.listGermlineOccurrences(input.seqId, input.listBody);
   return response.data;
 }
 
 async function fetchOccurrencesCount(input: OccurrenceCountInput) {
-  const response = await occurrencesApi.countOccurrences(input.seqId, input.countBody);
+  const response = await occurrencesApi.countGermlineOccurrences(input.seqId, input.countBody);
   return response.data;
 }
 

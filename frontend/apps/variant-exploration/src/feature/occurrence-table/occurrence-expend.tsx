@@ -18,7 +18,7 @@ type OccurrenceExpendInput = {
 };
 
 async function fetchOccurrenceExpend(input: OccurrenceExpendInput) {
-  const response = await occurrencesApi.getExpendedOccurrence(input.seqId, input.locusId);
+  const response = await occurrencesApi.getExpendedGermlineOccurrence(input.seqId, input.locusId);
   return response.data;
 }
 
