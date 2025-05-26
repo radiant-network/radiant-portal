@@ -15,6 +15,7 @@ import {
   ColumnPinningState,
   RowPinningState,
   Row,
+  ExpandedState,
 } from '@tanstack/react-table';
 
 import { Maximize, Minimize } from 'lucide-react';
@@ -249,7 +250,7 @@ function getRowFlexRender({
   subComponent?: SubComponentProp<any>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -394,6 +395,7 @@ function TranstackTable<T>({
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(tableLocaleStorage.columnVisibility);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(tableLocaleStorage.columnOrder);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(tableLocaleStorage.columnPinning);
+  const [expanded, setExpanded] = useState<ExpandedState>({});
   const [sorting, setSorting] = useState<SortingState>(
     defaultServerSorting.map(serverSorting => ({
       id: serverSorting.field,
@@ -428,6 +430,7 @@ function TranstackTable<T>({
     onColumnPinningChange: setColumnPinning,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
+    onExpandedChange: setExpanded,
     onPaginationChange,
     onRowPinningChange: setRowPinning,
     onSortingChange: setSorting,
@@ -437,6 +440,7 @@ function TranstackTable<T>({
       columnVisibility,
       columnPinning,
       pagination,
+      expanded,
       rowPinning,
       sorting,
     },
@@ -510,11 +514,20 @@ function TranstackTable<T>({
       );
     }
 
+    setExpanded({});
+
     onPaginationChange({
       pageIndex: 0,
       pageSize: pagination.pageSize,
     });
   }, [sorting]);
+
+  /**
+   * Reset expanded sub-component on pagination change
+   */
+  useEffect(() => {
+    setExpanded({});
+  }, [pagination]);
 
   const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
 
