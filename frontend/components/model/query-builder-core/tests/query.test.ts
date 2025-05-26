@@ -1,5 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import type { Mock } from 'jest-mock';
+import { beforeAll, beforeEach, describe, expect, it, vitest, Mock } from 'vitest';
 import { CoreQueryBuilderProps, createQueryBuilder, QueryBuilderInstance, QueryBuilderState } from '../query-builder';
 import { BooleanOperators, ISyntheticSqon, IValueQuery } from '../../sqon';
 import { isEmptySqon } from '../utils/sqon';
@@ -62,26 +61,21 @@ const mockUUID = 'abababab-abab-4bab-abab-abababababab';
 let qb: QueryBuilderInstance;
 let state: QueryBuilderState = defaultProps.state;
 
-let mockOnQuerySelectChange: Mock<void, [any]>;
-let mockOnActiveQueryChange: Mock<void, [any]>;
-let mockOnCustomPillSave: Mock<void, [any]>;
+let mockOnQuerySelectChange: Mock<any>;
+let mockOnActiveQueryChange: Mock<any>;
+let mockOnCustomPillSave: Mock<any>;
+
+// Mock the entire uuid module
+vitest.mock('uuid', () => ({
+  v4: () => mockUUID,
+}));
 
 describe('Query Manipulation', () => {
-  beforeAll(() => {
-    Object.defineProperty(globalThis, 'crypto', {
-      value: {
-        getRandomValues: () =>
-          // Will generate abababab-abab-4bab-abab-abababababab
-          Buffer.from(Array.from({ length: 16 }, () => 0xab)),
-      },
-    });
-  });
-
   beforeEach(() => {
     state = defaultProps.state;
-    mockOnQuerySelectChange = jest.fn();
-    mockOnActiveQueryChange = jest.fn();
-    mockOnCustomPillSave = jest.fn();
+    mockOnQuerySelectChange = vitest.fn();
+    mockOnActiveQueryChange = vitest.fn();
+    mockOnCustomPillSave = vitest.fn();
 
     qb = createQueryBuilder({
       ...defaultProps,

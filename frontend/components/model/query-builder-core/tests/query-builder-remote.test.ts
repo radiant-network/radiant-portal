@@ -1,23 +1,7 @@
-import {
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  jest,
-} from "@jest/globals";
-import type { Mock } from "jest-mock";
-import { CoreQueryBuilderProps } from "../query-builder";
-import {
-  ISyntheticSqon,
-  MERGE_VALUES_STRATEGIES,
-  TermOperators,
-} from "../../sqon";
-import {
-  queryBuilderRemote,
-  QueryBuilderRemoteState,
-  QueryBuilderUpdateEventType,
-} from "../query-builder-remote";
+import { beforeAll, beforeEach, describe, expect, it, vitest, Mock } from 'vitest';
+import { CoreQueryBuilderProps } from '../query-builder';
+import { ISyntheticSqon, MERGE_VALUES_STRATEGIES, TermOperators } from '../../sqon';
+import { queryBuilderRemote, QueryBuilderRemoteState, QueryBuilderUpdateEventType } from '../query-builder-remote';
 
 class LocalStorageMock {
   store: Record<string, string>;
@@ -53,35 +37,35 @@ class LocalStorageMock {
 
 const defaultQueries: ISyntheticSqon[] = [
   {
-    id: "1",
-    op: "and",
+    id: '1',
+    op: 'and',
     content: [
       {
         content: {
-          value: ["something"],
-          field: "field1",
+          value: ['something'],
+          field: 'field1',
         },
-        op: "in",
+        op: 'in',
       },
     ],
   },
   {
-    id: "2",
-    op: "and",
+    id: '2',
+    op: 'and',
     content: [
       {
         content: {
-          value: ["something-else"],
-          field: "field2",
+          value: ['something-else'],
+          field: 'field2',
         },
-        op: "in",
+        op: 'in',
       },
     ],
   },
 ];
 
 let defaultProps: CoreQueryBuilderProps = {
-  id: "test-query-builder",
+  id: 'test-query-builder',
   state: {
     activeQueryId: defaultQueries[0].id,
     queries: defaultQueries,
@@ -90,24 +74,19 @@ let defaultProps: CoreQueryBuilderProps = {
   },
 };
 
-const mockUUID = "abababab-abab-4bab-abab-abababababab";
+const mockUUID = 'abababab-abab-4bab-abab-abababababab';
 
-let qbId: string = "test-query-builder";
-let mockDispatchEvent: Mock<boolean, [Event]>;
+let qbId: string = 'test-query-builder';
+let mockDispatchEvent: Mock<any>;
 
-describe("SavedFilters Manipulation", () => {
-  beforeAll(() => {
-    Object.defineProperty(globalThis, "crypto", {
-      value: {
-        getRandomValues: () =>
-          // Will generate abababab-abab-4bab-abab-abababababab
-          Buffer.from(Array.from({ length: 16 }, () => 0xab)),
-      },
-    });
-  });
+// Mock the entire uuid module
+vitest.mock('uuid', () => ({
+  v4: () => mockUUID,
+}));
 
+describe('SavedFilters Manipulation', () => {
   beforeEach(() => {
-    mockDispatchEvent = jest.fn();
+    mockDispatchEvent = vitest.fn();
     // @ts-ignore
     global.window = {
       localStorage: new LocalStorageMock(),
@@ -121,17 +100,17 @@ describe("SavedFilters Manipulation", () => {
     });
   });
 
-  it("should add query", () => {
+  it('should add query', () => {
     const newQuery: ISyntheticSqon = {
       id: mockUUID,
-      op: "and",
+      op: 'and',
       content: [
         {
           content: {
-            value: ["something"],
-            field: "field",
+            value: ['something'],
+            field: 'field',
           },
-          op: "in",
+          op: 'in',
         },
       ],
     };
@@ -147,22 +126,22 @@ describe("SavedFilters Manipulation", () => {
     expect(qbStateUpdated?.queries).toContainEqual(newQuery);
   });
 
-  it("should return the active query", () => {
+  it('should return the active query', () => {
     const activeQuery = queryBuilderRemote.getActiveQuery(qbId);
     expect(activeQuery).toEqual(defaultQueries[0]);
   });
 
-  it("should update query", () => {
+  it('should update query', () => {
     const queryToUpdate: ISyntheticSqon = {
       id: defaultQueries[0].id,
-      op: "and",
+      op: 'and',
       content: [
         {
           content: {
-            value: ["new-value"],
-            field: "field1",
+            value: ['new-value'],
+            field: 'field1',
           },
-          op: "in",
+          op: 'in',
         },
       ],
     };
@@ -180,35 +159,33 @@ describe("SavedFilters Manipulation", () => {
 
   it("should update query when query doesn't exist", () => {
     const queryToUpdate: ISyntheticSqon = {
-      id: "unexistent-query-id",
-      op: "and",
+      id: 'unexistent-query-id',
+      op: 'and',
       content: [
         {
           content: {
-            value: ["new-value"],
-            field: "field1",
+            value: ['new-value'],
+            field: 'field1',
           },
-          op: "in",
+          op: 'in',
         },
       ],
     };
 
-    expect(() => queryBuilderRemote.updateQuery(qbId, queryToUpdate)).toThrow(
-      Error
-    );
+    expect(() => queryBuilderRemote.updateQuery(qbId, queryToUpdate)).toThrow(Error);
   });
 
-  it("should update active query field - MERGE_VALUES_STRATEGIES -> OVERRIDE_VALUES", () => {
+  it('should update active query field - MERGE_VALUES_STRATEGIES -> OVERRIDE_VALUES', () => {
     const activeQuery: ISyntheticSqon = {
-      id: "active-query-id",
-      op: "and",
+      id: 'active-query-id',
+      op: 'and',
       content: [
         {
           content: {
-            value: ["value"],
-            field: "field1",
+            value: ['value'],
+            field: 'field1',
           },
-          op: "in",
+          op: 'in',
         },
       ],
     };
@@ -227,21 +204,21 @@ describe("SavedFilters Manipulation", () => {
 
     const updatedQuery: ISyntheticSqon = {
       id: activeQuery.id,
-      op: "and",
+      op: 'and',
       content: [
         {
           content: {
-            value: ["new-value"],
-            field: "field1",
+            value: ['new-value'],
+            field: 'field1',
           },
-          op: "not-in",
+          op: 'not-in',
         },
       ],
     };
 
     queryBuilderRemote.updateActiveQueryField(qbId, {
-      field: "field1",
-      value: ["new-value"],
+      field: 'field1',
+      value: ['new-value'],
       operator: TermOperators.NotIn,
       merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
     });
@@ -252,17 +229,17 @@ describe("SavedFilters Manipulation", () => {
     expect(updatedActiveQuery).toEqual(updatedQuery);
   });
 
-  it("should update active query field - MERGE_VALUES_STRATEGIES -> APPEND_VALUES", () => {
+  it('should update active query field - MERGE_VALUES_STRATEGIES -> APPEND_VALUES', () => {
     const activeQuery: ISyntheticSqon = {
-      id: "active-query-id",
-      op: "and",
+      id: 'active-query-id',
+      op: 'and',
       content: [
         {
           content: {
-            value: ["value"],
-            field: "field1",
+            value: ['value'],
+            field: 'field1',
           },
-          op: "in",
+          op: 'in',
         },
       ],
     };
@@ -281,21 +258,21 @@ describe("SavedFilters Manipulation", () => {
 
     const updatedQuery: ISyntheticSqon = {
       id: activeQuery.id,
-      op: "and",
+      op: 'and',
       content: [
         {
           content: {
-            value: ["value", "new-value"],
-            field: "field1",
+            value: ['value', 'new-value'],
+            field: 'field1',
           },
-          op: "not-in",
+          op: 'not-in',
         },
       ],
     };
 
     queryBuilderRemote.updateActiveQueryField(qbId, {
-      field: "field1",
-      value: ["new-value"],
+      field: 'field1',
+      value: ['new-value'],
       operator: TermOperators.NotIn,
       merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
     });
@@ -306,22 +283,22 @@ describe("SavedFilters Manipulation", () => {
     expect(updatedActiveQuery).toEqual(updatedQuery);
   });
 
-  it("should update active query field - Recurive - MERGE_VALUES_STRATEGIES -> APPEND_VALUES", () => {
+  it('should update active query field - Recurive - MERGE_VALUES_STRATEGIES -> APPEND_VALUES', () => {
     const activeQuery: ISyntheticSqon = {
-      id: "active-query-id",
-      op: "and",
+      id: 'active-query-id',
+      op: 'and',
       content: [
         {
           content: [
             {
               content: {
-                value: ["value"],
-                field: "field1",
+                value: ['value'],
+                field: 'field1',
               },
-              op: "in",
+              op: 'in',
             },
           ],
-          op: "and",
+          op: 'and',
         },
       ],
     };
@@ -340,26 +317,26 @@ describe("SavedFilters Manipulation", () => {
 
     const updatedQuery: ISyntheticSqon = {
       id: activeQuery.id,
-      op: "and",
+      op: 'and',
       content: [
         {
           content: [
             {
               content: {
-                value: ["value", "new-value"],
-                field: "field1",
+                value: ['value', 'new-value'],
+                field: 'field1',
               },
-              op: "not-in",
+              op: 'not-in',
             },
           ],
-          op: "and",
+          op: 'and',
         },
       ],
     };
 
     queryBuilderRemote.updateActiveQueryField(qbId, {
-      field: "field1",
-      value: ["new-value"],
+      field: 'field1',
+      value: ['new-value'],
       operator: TermOperators.NotIn,
       merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
     });
@@ -370,17 +347,17 @@ describe("SavedFilters Manipulation", () => {
     expect(updatedActiveQuery).toEqual(updatedQuery);
   });
 
-  it("should remove field when value list is empty", () => {
+  it('should remove field when value list is empty', () => {
     const activeQuery: ISyntheticSqon = {
-      id: "active-query-id",
-      op: "and",
+      id: 'active-query-id',
+      op: 'and',
       content: [
         {
           content: {
-            value: ["value"],
-            field: "field1",
+            value: ['value'],
+            field: 'field1',
           },
-          op: "in",
+          op: 'in',
         },
       ],
     };
@@ -399,12 +376,12 @@ describe("SavedFilters Manipulation", () => {
 
     const updatedQuery: ISyntheticSqon = {
       id: activeQuery.id,
-      op: "and",
+      op: 'and',
       content: [],
     };
 
     queryBuilderRemote.updateActiveQueryField(qbId, {
-      field: "field1",
+      field: 'field1',
       value: [],
     });
 

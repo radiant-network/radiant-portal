@@ -1,9 +1,10 @@
-import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import type { Mock } from 'jest-mock';
+import { beforeAll, beforeEach, describe, expect, it, Mock, vitest } from 'vitest';
 import { CoreQueryBuilderProps, createQueryBuilder, QueryBuilderInstance, QueryBuilderState } from '../query-builder';
-import { ISavedFilter, IUserSavedFilter, SavedFilterTypeEnum } from '../../saved-filter';
+import { ISavedFilter, SavedFilterTypeEnum } from '../../saved-filter';
 import { ISyntheticSqon } from '../../sqon';
 import { getDefaultSyntheticSqon } from '../utils/sqon';
+import { v4 as uuidv4 } from 'uuid';
+import { title } from 'process';
 
 const defaultQueries: ISyntheticSqon[] = [
   {
@@ -49,29 +50,24 @@ const mockUUID = 'abababab-abab-4bab-abab-abababababab';
 let qb: QueryBuilderInstance;
 let state: QueryBuilderState = defaultProps.state;
 
-let mockOnFilterCreate: Mock<void, [any]>;
-let mockOnFilterDelete: Mock<{ savedFilterId: string }, [any]>;
-let mockOnFilterUpdate: Mock<void | Promise<IUserSavedFilter>, [any]>;
-let mockOnActiveQueryChange: Mock<void, [any]>;
+let mockOnFilterCreate: Mock<any>;
+let mockOnFilterDelete: Mock<any>;
+let mockOnFilterUpdate: Mock<any>;
+let mockOnActiveQueryChange: Mock<any>;
+
+// Mock the entire uuid module
+vitest.mock('uuid', () => ({
+  v4: () => mockUUID,
+}));
 
 describe('SavedFilters Manipulation', () => {
-  beforeAll(() => {
-    Object.defineProperty(globalThis, 'crypto', {
-      value: {
-        getRandomValues: () =>
-          // Will generate abababab-abab-4bab-abab-abababababab
-          Buffer.from(Array.from({ length: 16 }, () => 0xab)),
-      },
-    });
-  });
-
   beforeEach(() => {
     state = defaultProps.state;
 
-    mockOnFilterCreate = jest.fn();
-    mockOnFilterDelete = jest.fn();
-    mockOnFilterUpdate = jest.fn();
-    mockOnActiveQueryChange = jest.fn();
+    mockOnFilterCreate = vitest.fn();
+    mockOnFilterDelete = vitest.fn();
+    mockOnFilterUpdate = vitest.fn();
+    mockOnActiveQueryChange = vitest.fn();
 
     qb = createQueryBuilder({
       ...defaultProps,
@@ -287,10 +283,10 @@ describe('SavedFilters Manipulation', () => {
       },
     ];
 
-    expect(result).toContain({
+    expect(result).toMatchObject({
       id: mockUUID,
       isNew: true,
-      isDirtresulty: false,
+      isDirty: false,
       favorite: false,
       queries: duplicatedQueries,
     });
