@@ -8,10 +8,10 @@ import (
 	"strconv"
 )
 
-// OccurrencesListHandler handles list of occurrences
-// @Summary List occurrences
-// @Id listOccurrences
-// @Description List occurrences for a given sequence ID
+// OccurrencesGermlineListHandler handles list of germline occurrences
+// @Summary List germline occurrences
+// @Id listGermlineOccurrences
+// @Description List germline occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
@@ -22,8 +22,8 @@ import (
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/{seq_id}/list [post]
-func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/{seq_id}/list [post]
+func OccurrencesGermlineListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBody
@@ -66,10 +66,10 @@ func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	}
 }
 
-// OccurrencesCountHandler handles counting occurrences
-// @Summary Count occurrences
-// @Id countOccurrences
-// @Description Counts occurrences for a given sequence ID
+// OccurrencesGermlineCountHandler handles counting germline occurrences
+// @Summary Count germline occurrences
+// @Id countGermlineOccurrences
+// @Description Counts germline occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
@@ -80,8 +80,8 @@ func OccurrencesListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/{seq_id}/count [post]
-func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/{seq_id}/count [post]
+func OccurrencesGermlineCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBody
@@ -114,10 +114,10 @@ func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	}
 }
 
-// OccurrencesAggregateHandler handles aggregation of occurrences
-// @Summary Aggregate occurrences
-// @Id aggregateOccurrences
-// @Description Aggregate occurrences for a given sequence ID
+// OccurrencesGermlineAggregateHandler handles aggregation of germline occurrences
+// @Summary Aggregate germline occurrences
+// @Id aggregateGermlineOccurrences
+// @Description Aggregate germline occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
@@ -128,8 +128,8 @@ func OccurrencesCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/{seq_id}/aggregate [post]
-func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/{seq_id}/aggregate [post]
+func OccurrencesGermlineAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.AggregationBody
@@ -162,9 +162,9 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	}
 }
 
-// OccurrencesStatisticsHandler handles statistics of occurrences
-// @Summary Statistics of occurrences
-// @Id statisticsOccurrences
+// OccurrencesGermlineStatisticsHandler handles statistics of occurrences
+// @Summary Statistics of germline occurrences
+// @Id statisticsGermlineOccurrences
 // @Description Return statistics about a field for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
@@ -176,8 +176,8 @@ func OccurrencesAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/{seq_id}/statistics [post]
-func OccurrencesStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/{seq_id}/statistics [post]
+func OccurrencesGermlineStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.StatisticsBody
@@ -210,9 +210,9 @@ func OccurrencesStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc 
 	}
 }
 
-// GetExpendedOccurrence handles retrieving expended information about occurrence
-// @Summary Get a ExpendedOccurrence
-// @Id getExpendedOccurrence
+// GetExpendedGermlineOccurrence handles retrieving expended information about germline occurrence
+// @Summary Get a germline ExpendedOccurrence
+// @Id getExpendedGermlineOccurrence
 // @Description Retrieve ExpendedOccurrence data for a given locus ID
 // @Tags occurrences
 // @Security bearerauth
@@ -222,8 +222,8 @@ func OccurrencesStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc 
 // @Success 200 {object} types.ExpendedOccurrence
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/{seq_id}/{locus_id}/expended [get]
-func GetExpendedOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/{seq_id}/{locus_id}/expended [get]
+func GetExpendedGermlineOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {

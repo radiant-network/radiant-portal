@@ -9,7 +9,9 @@ type OccurrenceAggregationInput = {
 };
 
 const fetcher = (input: OccurrenceAggregationInput): Promise<Aggregation[]> => {
-  return occurrencesApi.aggregateOccurrences(input.seqId, input.aggregationBody).then(response => response.data);
+  return occurrencesApi
+    .aggregateGermlineOccurrences(input.seqId, input.aggregationBody)
+    .then(response => response.data);
 };
 
 export function useAggregationBuilder(field: string, size: number = 30, shouldFetch: boolean = false, appId: string) {
@@ -39,4 +41,4 @@ export function useAggregationBuilder(field: string, size: number = 30, shouldFe
   return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(data, fetcher, {
     revalidateOnFocus: false,
   });
-} 
+}

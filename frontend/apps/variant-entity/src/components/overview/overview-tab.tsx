@@ -17,7 +17,7 @@ type VariantOverviewInput = {
 };
 
 async function fetchVariantOverview(input: VariantOverviewInput) {
-  const response = await variantsApi.getVariantOverview(input.locusId);
+  const response = await variantsApi.getGermlineVariantOverview(input.locusId);
   return response.data;
 }
 

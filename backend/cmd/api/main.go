@@ -79,6 +79,7 @@ func main() {
 	}))
 
 	occurrencesGroup := r.Group("/occurrences")
+	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
 
 	role := os.Getenv("KEYCLOAK_CLIENT_ROLE")
 	// check if role belongs of either ResourceAccess or RealmAccess
@@ -90,11 +91,11 @@ func main() {
 	occurrencesGroup.Use(roleAccessMiddleware)
 
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres))
-	occurrencesGroup.POST("/:seq_id/count", server.OccurrencesCountHandler(repoStarrocks))
-	occurrencesGroup.POST("/:seq_id/list", server.OccurrencesListHandler(repoStarrocks))
-	occurrencesGroup.POST("/:seq_id/aggregate", server.OccurrencesAggregateHandler(repoStarrocks))
-	occurrencesGroup.POST("/:seq_id/statistics", server.OccurrencesStatisticsHandler(repoStarrocks))
-	occurrencesGroup.GET("/:seq_id/:locus_id/expended", server.GetExpendedOccurrence(repoStarrocks))
+	occurrencesGermlineGroup.POST("/:seq_id/count", server.OccurrencesGermlineCountHandler(repoStarrocks))
+	occurrencesGermlineGroup.POST("/:seq_id/list", server.OccurrencesGermlineListHandler(repoStarrocks))
+	occurrencesGermlineGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repoStarrocks))
+	occurrencesGermlineGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repoStarrocks))
+	occurrencesGermlineGroup.GET("/:seq_id/:locus_id/expended", server.GetExpendedGermlineOccurrence(repoStarrocks))
 
 	interpretationsGroup := r.Group("/interpretations")
 	interpretationsGroup.Use(roleAccessMiddleware)
@@ -123,10 +124,11 @@ func main() {
 	hpoGroup := r.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoStarrocks))
 
-	variantGroup := r.Group("/variants")
-	variantGroup.GET("/:locus_id/header", server.GetVariantHeader(repoStarrocks))
-	variantGroup.GET("/:locus_id/overview", server.GetVariantOverview(repoStarrocks))
-	variantGroup.GET("/:locus_id/consequences", server.GetVariantConsequences(repoStarrocks))
+	variantsGroup := r.Group("/variants")
+	variantsGermlineGroup := variantsGroup.Group("/germline")
+	variantsGermlineGroup.GET("/:locus_id/header", server.GetGermlineVariantHeader(repoStarrocks))
+	variantsGermlineGroup.GET("/:locus_id/overview", server.GetGermlineVariantOverview(repoStarrocks))
+	variantsGermlineGroup.GET("/:locus_id/consequences", server.GetGermlineVariantConsequences(repoStarrocks))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")

@@ -27,7 +27,9 @@ type OccurrenceStatisticsInput = {
 };
 
 const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics> => {
-  return occurrencesApi.statisticsOccurrences(input.seqId, input.statisticsBody).then(response => response.data);
+  return occurrencesApi
+    .statisticsGermlineOccurrences(input.seqId, input.statisticsBody)
+    .then(response => response.data);
 };
 
 function useStatisticsBuilder(field: string, shouldFetch: boolean = false, appId: string) {

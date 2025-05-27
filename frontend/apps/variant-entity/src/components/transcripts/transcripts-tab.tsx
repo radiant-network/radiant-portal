@@ -14,7 +14,7 @@ type VariantTranscriptsInput = {
 };
 
 async function fetchVariantConsequences(input: VariantTranscriptsInput) {
-  const response = await variantsApi.getVariantConsequences(input.locusId);
+  const response = await variantsApi.getGermlineVariantConsequences(input.locusId);
   return response.data;
 }
 
