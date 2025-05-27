@@ -183,7 +183,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
         </Button>
       </div>
 
-      <div>
+      <div className='max-h-[250px] overflow-auto'>
         {isLoading ? (
           // Loading skeleton state
           Array.from({ length: 3 }, (_, i) => (
