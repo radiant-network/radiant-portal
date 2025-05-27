@@ -1,18 +1,18 @@
+import Cookies from 'universal-cookie';
 import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { IThemeContextProps, Theme, ThemeContext } from '@/components/feature/theme-toggle/theme-context';
 
 const persistKey = 'theme';
+const cookies = new Cookies(null, { path: '/' });
 
 export default function ThemeProvider({ children }: PropsWithChildren) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // TODO find a way to correctly persist with server-side rendering
-    //const savedTheme = localStorage.getItem(persistKey) as Theme | null;
-    return Theme.LIGHT;
+    return (cookies.get(persistKey)) ? cookies.get(persistKey) : Theme.LIGHT;
   });
 
   const toggleTheme = (theme: Theme) => {
     setTheme(theme);
-    //localStorage.setItem(persistKey, newTheme);
+    cookies.set(persistKey, theme);
   };
 
   useEffect(() => {
