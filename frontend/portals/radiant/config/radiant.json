@@ -23,6 +23,7 @@
           { "key": "biotype", "type": "multiple" },
           { "key": "gnomad_pli", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" } },
           { "key": "gnomad_loeuf", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" } },
+          { "key": "omim_inheritance", "type": "multiple" },
           { "key": "hpo_gene_panel", "type": "multiple" },
           { "key": "orphanet_gene_panel", "type": "multiple" },
           { "key": "omim_gene_panel", "type": "multiple" },

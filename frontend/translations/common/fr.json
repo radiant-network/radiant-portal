@@ -201,6 +201,7 @@
         "impact_score": "Score d'Impact",
         "omim_gene_panel": "OMIM",
         "omim_gene_panel_tooltip": "Online Mendelian Inheritance in Man",
+        "omim_inheritance": "Hérédité OMIM",
         "orphanet_gene_panel": "ORPHANET",
         "transmission_mode": "Transmission",
         "variant_class": "Type de Variant",
@@ -637,7 +638,9 @@
     "family": {
       "title": "Famille",
       "motherGenotype": "Génotype de la Mère",
-      "fatherGenotype": "Génotype du Père"
+      "fatherGenotype": "Génotype du Père",
+      "affectedTooltip": "Affecté",
+      "notAffectedTooltip": "Non affecté"
     },
     "metrics": {
       "title": "Métriques",
