@@ -26,7 +26,7 @@ export const Default: Story = {
     return (
       <div className="rounded border p-5 max-w-[300px]">
         <CustomPillFilter
-          customPills={[]}
+          customPills={customPills}
           onSelectPill={action('onSelectPill')}
           onDuplicatePill={pill => {
             action('onDuplicatePill');
@@ -66,6 +66,26 @@ export const Default: Story = {
           }}
           validateCustomPillTitle={() => new Promise(resolve => setTimeout(() => resolve(true), 750))}
           fetchSavedFiltersByCustomPillId={() => new Promise(resolve => setTimeout(() => resolve([]), 750))}
+          learnMoreLink="https://google.com"
+        />
+      </div>
+    );
+  },
+};
+
+export const Empty: Story = {
+  args: {} as any, // No args needed for this story
+  render: () => {
+    return (
+      <div className="rounded border p-5 max-w-[300px]">
+        <CustomPillFilter
+          customPills={[]}
+          onSelectPill={(() => {}) as any}
+          onDuplicatePill={(() => {}) as any}
+          onDeletePill={() => {}}
+          onSavePill={(() => {}) as any}
+          validateCustomPillTitle={(() => {}) as any}
+          fetchSavedFiltersByCustomPillId={(() => {}) as any}
           learnMoreLink="https://google.com"
         />
       </div>
