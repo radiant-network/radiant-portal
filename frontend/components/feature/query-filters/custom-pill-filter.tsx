@@ -2,7 +2,17 @@ import { Button } from '@/components/base/ui/button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/ui/hover-card';
 import { useI18n } from '@/components/hooks/i18n';
 import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
-import { CopyIcon, InfoIcon, PencilLineIcon, TrashIcon } from 'lucide-react';
+import {
+  ChartColumn,
+  ChartLine,
+  ChartPie,
+  ChartScatter,
+  CopyIcon,
+  ExternalLink,
+  InfoIcon,
+  PencilLineIcon,
+  TrashIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 import QueryPillCustomEditDialog from '@/components/feature/query-builder/query-pill/query-pill-custom-edit-dialog';
 import { useQueryBuilderDictionary } from '@/components/feature/query-builder/data';
@@ -10,6 +20,7 @@ import { QueryBuilderContext, QueryBuilderDictContext } from '@/components/featu
 import { createSavedFilter, useQueryBuilder } from '@/components/model/query-builder-core';
 import { ISqonGroupFilter } from '@/components/model/sqon';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
+import { QueryPillCustomConfig } from '@/components/feature/query-builder/types';
 
 export interface CustomPillFilterProps {
   customPills: IUserSavedFilter[];
@@ -17,7 +28,15 @@ export interface CustomPillFilterProps {
   onSavePill: (pill: ISavedFilter) => Promise<IUserSavedFilter>;
   onDuplicatePill: (pill: ISavedFilter) => void;
   onDeletePill: (pillId: string) => void;
+  validateCustomPillTitle: QueryPillCustomConfig['validateCustomPillTitle'];
+  fetchSavedFiltersByCustomPillId: QueryPillCustomConfig['fetchSavedFiltersByCustomPillId'];
+  learnMoreLink: string;
 }
+
+/**
+ * validateCustomPillTitle
+ * fetchSavedFiltersByCustomPillId
+ */
 
 function CustomPillFilter({
   customPills,
@@ -25,6 +44,9 @@ function CustomPillFilter({
   onSavePill,
   onDuplicatePill,
   onDeletePill,
+  validateCustomPillTitle,
+  fetchSavedFiltersByCustomPillId,
+  learnMoreLink,
 }: CustomPillFilterProps) {
   const { t } = useI18n();
   const defaultDictionary = useQueryBuilderDictionary();
@@ -34,11 +56,9 @@ function CustomPillFilter({
   const customQueryBuilder = useQueryBuilder({
     id: 'customPillFilterQueryBuilder',
     state: {
-      // These are empty because we are not using
-      // the full query builder functionality here,
-      activeQueryId: '',
-      selectedQueryIndexes: [],
-      queries: [],
+      activeQueryId: '', // Not used in this context
+      selectedQueryIndexes: [], // Not used in this context
+      queries: [], // Not used in this context
       // We use the customPills prop to initialize the saved filters
       // because this is required for the copy functionality
       savedFilters: customPills,
@@ -70,15 +90,48 @@ function CustomPillFilter({
       },
     });
 
+  const tipText = t('common.customPillFilter.info', {
+    defaultValue: 'You can create custom queries by adding criteria to the query bar and clicking the save button.',
+  });
+
+  if (customPills.length === 0) {
+    return (
+      <div className="flex flex-col gap-3 justify-center">
+        <div className="flex gap-1 justify-center items-center text-slate">
+          <ChartColumn size={20} />
+          <ChartPie size={20} />
+          <ChartLine size={20} />
+          <ChartScatter size={20} />
+        </div>
+        <div className="text-sm text-center">{tipText}</div>
+        <a className="flex justify-center" href={learnMoreLink} target="_blank" rel="noreferrer">
+          <Button variant="link" className="py-0 h-5">
+            {t('common.customPillFilter.learnMore', {
+              defaultValue: 'Learn more',
+            })}
+            <ExternalLink />
+          </Button>
+        </a>
+      </div>
+    );
+  }
+
   return (
     <QueryBuilderDictContext.Provider value={defaultDictionary}>
       <QueryBuilderContext.Provider
         value={{
           queryBuilder: customQueryBuilder,
-          fetchQueryCount: async () => 0,
-          getQueryReferenceColor: () => '',
-          showLabels: true,
+          fetchQueryCount: async () => 0, // Not used in this context
+          getQueryReferenceColor: () => '', // Not used in this context
+          showLabels: true, // Not used in this context
           resolveSyntheticSqon: sqon => sqon as ISqonGroupFilter,
+          customPillConfig: {
+            enable: true, // Not used in this context
+            queryBuilderEditId: 'subCustomPillFilterQueryBuilder', // Not used in this context
+            fetchCustomPillById: (() => {}) as any, // Not used in this context
+            validateCustomPillTitle,
+            fetchSavedFiltersByCustomPillId,
+          },
         }}
       >
         <div className="space-y-4">
@@ -89,12 +142,7 @@ function CustomPillFilter({
                 <InfoIcon size={16} />
               </HoverCardTrigger>
               <HoverCardContent side="left" className="w-[200px] space-y-3">
-                <div className="text-sm">
-                  {t('common.customPillFilter.info', {
-                    defaultValue:
-                      'You can create custom queries by adding criteria to the query bar and clicking the save button.',
-                  })}
-                </div>
+                <div className="text-sm">{tipText}</div>
               </HoverCardContent>
             </HoverCard>
           </div>

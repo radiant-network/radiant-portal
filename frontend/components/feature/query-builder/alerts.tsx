@@ -70,7 +70,7 @@ export function openCustomPillSaveDialog(
     description: (
       <div className="space-y-4">
         <div>{dict.queryPill.customPill.saveDialog.confirmationMessage.replace('{title}', title)}</div>
-        {associatedSavedFilters?.length && (
+        {!!associatedSavedFilters?.length && (
           <div className="border rounded p-4 space-y-2">
             <div className="font-medium text-foreground">{dict.queryPill.customPill.saveDialog.affectedFilters}</div>
             <ul className="list-disc list-inside">

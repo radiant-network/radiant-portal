@@ -24,46 +24,51 @@ export const Default: Story = {
     ]);
 
     return (
-      <CustomPillFilter
-        customPills={customPills}
-        onSelectPill={action('onSelectPill')}
-        onDuplicatePill={pill => {
-          action('onDuplicatePill');
-          setCustomPills(prev => [
-            ...prev,
-            {
-              ...generateRandomUserSavedFilter(pill),
-              queries: pill.queries,
-            },
-          ]);
-        }}
-        onDeletePill={pillId => {
-          action('onDeletePill')();
-          setCustomPills(prev => prev.filter(pill => pill.id !== pillId));
-        }}
-        onSavePill={async pill => {
-          // Simulate saving the pill
-          return new Promise(resolve => {
-            setTimeout(() => {
-              action('onSavePill')(pill);
-              setCustomPills(prev => {
-                const existingPillIndex = prev.findIndex(p => p.id === pill.id);
-                if (existingPillIndex > -1) {
-                  const updatedPills = [...prev];
-                  updatedPills[existingPillIndex] = {
-                    ...generateRandomUserSavedFilter(pill),
-                    queries: pill.queries,
-                    title: pill.title,
-                  };
-                  return updatedPills;
-                }
-                return prev;
-              });
-              resolve(pill as any);
-            }, 1000);
-          });
-        }}
-      />
+      <div className="rounded border p-5 max-w-[300px]">
+        <CustomPillFilter
+          customPills={[]}
+          onSelectPill={action('onSelectPill')}
+          onDuplicatePill={pill => {
+            action('onDuplicatePill');
+            setCustomPills(prev => [
+              ...prev,
+              {
+                ...generateRandomUserSavedFilter(pill),
+                queries: pill.queries,
+              },
+            ]);
+          }}
+          onDeletePill={pillId => {
+            action('onDeletePill')();
+            setCustomPills(prev => prev.filter(pill => pill.id !== pillId));
+          }}
+          onSavePill={async pill => {
+            // Simulate saving the pill
+            return new Promise(resolve => {
+              setTimeout(() => {
+                action('onSavePill')(pill);
+                setCustomPills(prev => {
+                  const existingPillIndex = prev.findIndex(p => p.id === pill.id);
+                  if (existingPillIndex > -1) {
+                    const updatedPills = [...prev];
+                    updatedPills[existingPillIndex] = {
+                      ...generateRandomUserSavedFilter(pill),
+                      queries: pill.queries,
+                      title: pill.title,
+                    };
+                    return updatedPills;
+                  }
+                  return prev;
+                });
+                resolve(pill as any);
+              }, 1000);
+            });
+          }}
+          validateCustomPillTitle={() => new Promise(resolve => setTimeout(() => resolve(true), 750))}
+          fetchSavedFiltersByCustomPillId={() => new Promise(resolve => setTimeout(() => resolve([]), 750))}
+          learnMoreLink="https://google.com"
+        />
+      </div>
     );
   },
 };
