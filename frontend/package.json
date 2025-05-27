@@ -7,7 +7,8 @@
     "portals/*"
   ],
   "scripts": {
-    "test": "vite-jest"
+    "test": "vitest",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@ferlab/eslint-config": "^2.0.0",
@@ -16,8 +17,10 @@
     "eslint": "^8.57.1",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-prettier": "^5.2.3",
+    "husky": "^9.1.7",
     "typescript": "^5.8.2",
-    "vite-jest": "^0.1.4"
+    "vite-jest": "^0.1.4",
+    "vitest": "^3.1.4"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.35.0"
