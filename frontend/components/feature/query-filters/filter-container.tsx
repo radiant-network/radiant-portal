@@ -41,13 +41,14 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
   const tooltipKey = `common.filters.labels.${field.key}_tooltip`;
   const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
 
+
   function renderTrigger() {
-      return (
-              <div className="flex items-center justify-between w-full text-base">
-                <span>{label}</span>
-                {isOpen && field.type === 'multiple' && (
-                  <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
-                )}
+    return (
+      <div className="flex items-center justify-between w-full text-base">
+        <span>{label}</span>
+        {isOpen && field.type === 'multiple' && (
+          <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
+        )}
       </div>
     );
   }
