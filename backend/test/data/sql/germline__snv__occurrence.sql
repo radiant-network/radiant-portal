@@ -1,4 +1,4 @@
-CREATE TABLE `germline__snv__occurrences`
+CREATE TABLE `germline__snv__occurrence`
 (
     part                            INT     NOT NULL,
     seq_id                          INT     NOT NULL,

@@ -1,4 +1,4 @@
-CREATE TABLE `germline__snv__consequences`
+CREATE TABLE `germline__snv__consequence`
 (
     `locus_id`                bigint(20) NOT NULL COMMENT "",
     `symbol`                  varchar(30)  NOT NULL COMMENT "",

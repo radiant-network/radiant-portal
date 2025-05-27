@@ -85,7 +85,7 @@ type VariantOverview = struct {
 } // @name VariantOverview
 
 var VariantTable = Table{
-	Name:  "germline__snv__variants",
+	Name:  "germline__snv__variant",
 	Alias: "v",
 }
 

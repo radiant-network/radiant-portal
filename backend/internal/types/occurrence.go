@@ -78,7 +78,7 @@ type ExpendedOccurrence = struct {
 } // @name ExpendedOccurrence
 
 var OccurrenceTable = Table{
-	Name:  "germline__snv__occurrences",
+	Name:  "germline__snv__occurrence",
 	Alias: "o",
 }
 

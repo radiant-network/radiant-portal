@@ -1,4 +1,4 @@
-CREATE TABLE `sequencing_experiments`
+CREATE TABLE `sequencing_experiment`
 (
     `case_id`       int NOT NULL,
     `seq_id`        int NOT NULL,

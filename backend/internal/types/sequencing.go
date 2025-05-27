@@ -37,7 +37,7 @@ type Sequencing struct {
 } // @name Sequencing
 
 var SequencingTable = Table{
-	Name:  "sequencing_experiments",
+	Name:  "sequencing_experiment",
 	Alias: "s",
 }
 
