@@ -1,5 +1,5 @@
 -- Value Sets ---------------------------------------------------------------
-DROP TABLE sexe;
+DROP TABLE sex;
 DROP TABLE observation_category;
 DROP TABLE case_type;
 DROP TABLE status;
