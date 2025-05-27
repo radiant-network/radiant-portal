@@ -113,7 +113,7 @@ module.exports = {
           blue: 'hsl(var(--bookmark-blue))',
           green: 'hsl(var(--bookmark-green))',
           red: 'hsl(var(--bookmark-red))',
-          slate: 'hsl(var(--bookmark-slate))',
+          off: 'hsl(var(--bookmark-off))',
         },
       }),
       cursor: {
