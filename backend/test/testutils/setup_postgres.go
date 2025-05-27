@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 
@@ -27,7 +29,7 @@ func SequentialPostgresTestWithDb(t *testing.T, testFunc func(t *testing.T, db *
 
 func cleanUp(gormDb *gorm.DB) {
 	var db *sql.DB
-	db, _ = gormDb.DB();
+	db, _ = gormDb.DB()
 	db.Exec("TRUNCATE TABLE interpretation_germline")
 	db.Exec("TRUNCATE TABLE interpretation_germline_history")
 	db.Exec("TRUNCATE TABLE interpretation_somatic")
@@ -68,11 +70,43 @@ func initPostgresDb() (*gorm.DB, error) {
 		log.Fatal("failed to verify if table already exist in Postgres", err)
 		return nil, err
 	}
-	if count,_ := res.RowsAffected(); count == 0 {
+	if count, _ := res.RowsAffected(); count == 0 {
 		database.MigrateWithParams("file://../../scripts/init-sql/migrations", host, port.Port(), "radiant", "radiant", "radiant", "disable", "")
+		err := populateData(db)
+		if err != nil {
+			log.Fatal("failed to insert basic data in Postgres", err)
+			return nil, err
+		}
 	} else {
 		log.Print("radiant postgres database already setup")
 	}
 
 	return gormDb, nil
+}
+
+func populateData(db *sql.DB) error {
+	// Read the list of .sql files in the folder
+	files, err := os.ReadDir(filepath.Join(testResources, "clinical"))
+	if err != nil {
+		log.Fatal("failed to read directory test_resoures", err)
+	}
+
+	for _, file := range files {
+		if filepath.Ext(file.Name()) == ".sql" {
+			sqlFilePath := filepath.Join(testResources, "clinical", file.Name())
+
+			// Read the SQL file
+			sqlFile, err := os.ReadFile(sqlFilePath)
+			if err != nil {
+				return fmt.Errorf("failed to read SQL file: %v", err)
+			}
+
+			// Execute the SQL file to insert data
+			_, err = db.Exec(string(sqlFile))
+			if err != nil {
+				return fmt.Errorf("failed to insert data: %v", err)
+			}
+		}
+	}
+	return nil
 }
