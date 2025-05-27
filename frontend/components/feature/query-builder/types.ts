@@ -1,19 +1,10 @@
-import { Sqon } from "@/api/api";
-import { PartialKeys } from "@/components/lib/utils";
-import {
-  CoreQueryBuilderProps,
-  QueryBuilderInstance,
-} from "@/components/model/query-builder-core";
-import {
-  ISavedFilter,
-  IUserSavedFilter,
-} from "@/components/model/saved-filter";
-import {
-  IValueFilter,
-  ResolveSyntheticSqonFunc,
-} from "@/components/model/sqon";
-import { ReactNode } from "react";
-import { DeepPartial } from "react-hook-form";
+import { Sqon } from '@/api/api';
+import { PartialKeys } from '@/components/lib/utils';
+import { CoreQueryBuilderProps, QueryBuilderInstance } from '@/components/model/query-builder-core';
+import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
+import { IValueFilter, ResolveSyntheticSqonFunc } from '@/components/model/sqon';
+import { ReactNode } from 'react';
+import { DeepPartial } from 'react-hook-form';
 
 export type ArrayTenOrMore<T> = {
   0: T;
@@ -29,7 +20,7 @@ export type ArrayTenOrMore<T> = {
   10: T;
 } & Array<T>;
 
-type QueryPillCustomConfig = {
+export type QueryPillCustomConfig = {
   /**
    * Enable or disable custom pill.
    * This basically only show or hide the save icon button on a query bar.
@@ -137,7 +128,7 @@ export type QueryBuilderProps = PartialKeys<
        */
       dictionary?: DeepPartial<QueryBuilderDictionary>;
     },
-  "state"
+  'state'
 >;
 
 export type QueryBuilderContextType = QueryBuilderSharedProps & {
@@ -247,9 +238,7 @@ export type QueryBuilderDictionary = {
     manageDialog: {
       title: string;
       close: string;
-      lastSaveAt:
-        | `${string}{lastSaveAt}${string}`
-        | `${string}${string}{lastSaveAt}`;
+      lastSaveAt: `${string}{lastSaveAt}${string}` | `${string}${string}{lastSaveAt}`;
     };
     newFilter: string;
     saveTooltip: {

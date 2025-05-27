@@ -19,7 +19,8 @@
         "description": "Vous êtes sur le point de supprimer la requête personnalisée « {{title}} », ce qui pourrait avoir un impact sur vos résultats.",
         "cancel": "Annuler",
         "ok": "Supprimer"
-      }
+      },
+      "learnMore": "En savoir plus"
     },
     "queryBar": {
       "empty": "Utilisez les outils de recherche et les facettes à gauche pour construire une requête",
