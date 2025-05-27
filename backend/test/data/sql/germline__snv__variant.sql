@@ -1,4 +1,4 @@
-CREATE TABLE `germline__snv__variants`
+CREATE TABLE `germline__snv__variant`
 (
     locus_id               BIGINT NOT NULL,
     pf DOUBLE,

@@ -11,11 +11,11 @@ type Term struct {
 }
 
 var MondoTable = Table{
-	Name:  "mondo_terms",
+	Name:  "mondo_term",
 	Alias: "mondo",
 }
 
 var HPOTable = Table{
-	Name:  "hpo_terms",
+	Name:  "hpo_term",
 	Alias: "hpo",
 }

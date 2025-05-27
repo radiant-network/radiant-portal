@@ -86,12 +86,12 @@ type VariantConsequence = struct {
 } // @name VariantConsequence
 
 var ConsequenceFilterTable = Table{
-	Name:  "germline__snv__consequences_filter_partitioned",
+	Name:  "germline__snv__consequence_filter_partitioned",
 	Alias: "cf",
 }
 
 var ConsequenceTable = Table{
-	Name:  "germline__snv__consequences",
+	Name:  "germline__snv__consequence",
 	Alias: "c",
 }
 
