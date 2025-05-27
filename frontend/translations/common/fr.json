@@ -188,6 +188,7 @@
     "filters": {
       "labels": {
         "chromosome": "Chromosome",
+        "clinvar": "ClinVar",
         "biotype": "Gene Type",
         "cosmic_gene_panel": "COSMIC",
         "cosmic_gene_panel_tooltip": "Catalogue of Somatic Mutations in Cancer",
