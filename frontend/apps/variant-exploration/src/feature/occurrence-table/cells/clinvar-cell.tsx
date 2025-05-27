@@ -11,7 +11,7 @@ function ClinvarCell({ codes = [] }: ClinvarCellProps) {
   return (
     <div className="flex gap-1">
       {codes.map(code => {
-        return <ClinVarBadge value={code} abbreviated />;
+        return <ClinVarBadge key={code} value={code} abbreviated />;
       })}
     </div>
   );
