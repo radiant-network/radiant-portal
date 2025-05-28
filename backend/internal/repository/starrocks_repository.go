@@ -42,6 +42,7 @@ type StarrocksDAO interface {
 	GetVariantHeader(locusId int) (*VariantHeader, error)
 	GetVariantOverview(locusId int) (*VariantOverview, error)
 	GetVariantConsequences(locusId int) (*[]VariantConsequence, error)
+	GetOrganizations() (*[]string, error)
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
@@ -490,4 +491,19 @@ func (r *StarrocksRepository) GetVariantConsequences(locusId int) (*[]VariantCon
 	variantConsequences := utils.ConsequencesToVariantConsequences(consequences)
 
 	return &variantConsequences, nil
+}
+
+func (r *StarrocksRepository) GetOrganizations() (*[]string, error) {
+	tx := r.db.Table("radiant_jdbc.public.organization").Select("code")
+	var codes []string
+	err := tx.Find(&codes).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching organizations: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	return &codes, err
 }

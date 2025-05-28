@@ -721,8 +721,17 @@ func Test_GetVariantConsequences(t *testing.T) {
 	})
 }
 
+func Test_GetOrganizations(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewStarrocksRepository(db)
+		codes, err := repo.GetOrganizations()
+		assert.NoError(t, err)
+		assert.Len(t, *codes, 6)
+	})
+}
+
 func TestMain(m *testing.M) {
-	testutils.StartStarrocksContainer()
+	testutils.StartAllContainers()
 	code := m.Run()
 	testutils.StopAllContainers()
 	os.Exit(code)

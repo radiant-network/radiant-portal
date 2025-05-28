@@ -39,6 +39,10 @@ func (m *MockRepository) GetTermAutoComplete(string, string, int) ([]*types.Auto
 		nil
 }
 
+func (m *MockRepository) GetOrganizations() (*[]string, error) {
+	return &[]string{"CHOP"}, nil
+}
+
 func Test_StatusHandler(t *testing.T) {
 	repoStarrocks := &MockRepository{}
 	repoPostgres := &MockRepository{}

@@ -3,6 +3,7 @@ package testutils
 import (
 	"context"
 	"fmt"
+	"github.com/testcontainers/testcontainers-go/network"
 	"log"
 	"os/exec"
 	"sync"
@@ -19,8 +20,9 @@ const (
 )
 
 var (
-	PostgresContainerSetup *ContainerConf
+	PostgresContainerSetup  *ContainerConf
 	StarrocksContainerSetup *ContainerConf
+	Network                 *testcontainers.DockerNetwork
 )
 
 func StartAllContainers() {
@@ -29,31 +31,40 @@ func StartAllContainers() {
 }
 
 func StartPostgresContainer() {
-	if (PostgresContainerSetup == nil) {
+	if Network == nil {
+		Network = createNetwork()
+	}
+	if PostgresContainerSetup == nil {
 		PostgresContainerSetup = newContainerSetup(PostgresContainerName, startPostgresContainer)
 		PostgresContainerSetup.setupContainer()
 	}
 }
 
 func StartStarrocksContainer() {
-	if (StarrocksContainerSetup == nil) {
+	if Network == nil {
+		Network = createNetwork()
+	}
+	if StarrocksContainerSetup == nil {
 		StarrocksContainerSetup = newContainerSetup(StarrocksContainerName, startStarRocksContainer)
 		StarrocksContainerSetup.setupContainer()
 	}
 }
 
 func StopAllContainers() {
-	if (PostgresContainerSetup != nil) {
+	if PostgresContainerSetup != nil {
 		PostgresContainerSetup.stopContainer()
 	}
-	if (StarrocksContainerSetup != nil) {
+	if StarrocksContainerSetup != nil {
 		StarrocksContainerSetup.stopContainer()
+	}
+	if Network != nil {
+		deleteNetwork()
 	}
 }
 
-func (c*ContainerConf) stopContainer() {
+func (c *ContainerConf) stopContainer() {
 	if c.ContainerStarted {
-		fmt.Println("Stopping "+c.ContainerName+" container..")
+		fmt.Println("Stopping " + c.ContainerName + " container..")
 		if err := c.Container.Terminate(context.Background()); err != nil {
 			log.Fatal("Failed to stop "+c.ContainerName+" container: ", err)
 		}
@@ -63,8 +74,30 @@ func (c*ContainerConf) stopContainer() {
 	}
 }
 
+func createNetwork() *testcontainers.DockerNetwork {
+	ctx := context.Background()
+
+	newNetwork, err := network.New(ctx)
+
+	if err != nil {
+		log.Fatal("Failed to create network: ", err)
+	}
+	return newNetwork
+}
+
+func deleteNetwork() {
+	ctx := context.Background()
+	err := Network.Remove(ctx)
+	if err != nil {
+		log.Fatal("Failed to delete network: ", err)
+	}
+	Network = nil
+}
+
 func startStarRocksContainer() (testcontainers.Container, error) {
 	ctx := context.Background()
+	networkName := Network.Name
+	aliases := []string{StarrocksContainerName}
 
 	req := testcontainers.ContainerRequest{
 		Image:        "starrocks/allin1-ubuntu",
@@ -75,6 +108,12 @@ func startStarRocksContainer() (testcontainers.Container, error) {
 			wait.ForListeningPort("8040/tcp"),
 			wait.ForLog("Enjoy the journey to StarRocks").WithPollInterval(1*time.Second),
 		),
+		Networks: []string{
+			networkName,
+		},
+		NetworkAliases: map[string][]string{
+			networkName: aliases,
+		},
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -90,6 +129,8 @@ func startStarRocksContainer() (testcontainers.Container, error) {
 
 func startPostgresContainer() (testcontainers.Container, error) {
 	ctx := context.Background()
+	networkName := Network.Name
+	aliases := []string{PostgresContainerName}
 
 	req := testcontainers.ContainerRequest{
 		Image:        "postgres",
@@ -98,6 +139,12 @@ func startPostgresContainer() (testcontainers.Container, error) {
 			"POSTGRES_USER":     "radiant",
 			"POSTGRES_PASSWORD": "radiant",
 			"POSTGRES_DB":       "radiant",
+		},
+		Networks: []string{
+			networkName,
+		},
+		NetworkAliases: map[string][]string{
+			networkName: aliases,
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForListeningPort("5432/tcp"),
@@ -117,18 +164,18 @@ func startPostgresContainer() (testcontainers.Container, error) {
 }
 
 type ContainerConf struct {
-	ContainerName 			string
-	ContainerStartFunction 	func() (testcontainers.Container, error)
-	once               		sync.Once
-	Container  				testcontainers.Container
-	ContainerStarted   		bool
+	ContainerName          string
+	ContainerStartFunction func() (testcontainers.Container, error)
+	once                   sync.Once
+	Container              testcontainers.Container
+	ContainerStarted       bool
 }
 
 func newContainerSetup(containerName string, containerStartFunction func() (testcontainers.Container, error)) *ContainerConf {
 	return &ContainerConf{ContainerName: containerName, ContainerStartFunction: containerStartFunction}
 }
 
-func (c* ContainerConf) setupContainer() {
+func (c *ContainerConf) setupContainer() {
 	c.once.Do(func() {
 		// Run the script to start the container if it's not already running
 		cmd := exec.Command("docker", "ps", "-q", "-f", fmt.Sprintf("name=%s", c.ContainerName))
