@@ -47,6 +47,11 @@ export const getSessionAccessToken = async (request: Request): Promise<string> =
   return accessTokenSession.get('token');
 };
 
+export const getSessionRefreshToken = async (request: Request): Promise<string> => {
+  const refreshTokenSession = await getRefreshTokenSessionStorage(request);
+  return refreshTokenSession.get('token');
+};
+
 export const refreshAccessToken = async (request: Request): Promise<{ cookie: string }> => {
   const refreshTokenSession = await getRefreshTokenSessionStorage(request);
   const refreshToken = refreshTokenSession.get('token');
@@ -63,11 +68,6 @@ export const refreshAccessToken = async (request: Request): Promise<{ cookie: st
   }
 
   throw logout(request);
-};
-
-export const getSessionRefreshToken = async (request: Request): Promise<string> => {
-  const refreshTokenSession = await getRefreshTokenSessionStorage(request);
-  return refreshTokenSession.get('token');
 };
 
 export const login = async (request: Request): Promise<Response> => {
@@ -93,8 +93,6 @@ export const login = async (request: Request): Promise<Response> => {
 };
 
 export const logout = async (request: Request) => {
-  const userSession = await getUserSessionStorage(request);
-  const accessTokenSession = await getAccessTokenSessionStorage(request);
   const refreshTokenSession = await getRefreshTokenSessionStorage(request);
 
   await fetch(getKeycloakOauth2Url('logout'), {
@@ -109,6 +107,38 @@ export const logout = async (request: Request) => {
     },
   });
 
+  return await clearSession(request);
+};
+
+export const requireAuth = async (request: Request): Promise<boolean> => {
+  const token = await getSessionAccessToken(request);
+
+  if (!token) {
+    return true;
+  }
+
+  try {
+    if (!isTokenValid(token)) {
+      return true;
+    }
+
+    const user = await getSessionUser(request);
+    if (!user) {
+      return true;
+    }
+
+    return false;
+  } catch (err) {
+    await clearSession(request);
+    return true;
+  }
+};
+
+export async function clearSession(request: Request): Promise<Response> {
+  const userSession = await getUserSessionStorage(request);
+  const accessTokenSession = await getAccessTokenSessionStorage(request);
+  const refreshTokenSession = await getRefreshTokenSessionStorage(request);
+
   return redirect('/', {
     headers: [
       ['Set-Cookie', await userSessionStorage.destroySession(userSession)],
@@ -116,11 +146,7 @@ export const logout = async (request: Request) => {
       ['Set-Cookie', await refreshTokenSessionStorage.destroySession(refreshTokenSession)],
     ],
   });
-};
-
-export const requireAuth = async (request: Request): Promise<boolean> => {
-  return !(await getSessionUser(request));
-};
+}
 
 const authenticator = new Authenticator<IAuthUserWithToken>();
 
