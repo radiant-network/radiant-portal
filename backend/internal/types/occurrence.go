@@ -122,6 +122,7 @@ var GenotypeQualityField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
+	Type:          NumericType,
 	Table:         OccurrenceTable,
 }
 var AdRatioField = Field{
@@ -129,15 +130,41 @@ var AdRatioField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
+	Type:          NumericType,
 	Table:         OccurrenceTable,
 }
-
+var AdAltField = Field{
+	Name:          "ad_alt",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          NumericType,
+	Table:         OccurrenceTable,
+}
+var AdTotalField = Field{
+	Name:          "ad_total",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          NumericType,
+	Table:         OccurrenceTable,
+}
+var InfoQdField = Field{
+	Name:          "info_qd",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          NumericType,
+	Table:         OccurrenceTable,
+}
 var OccurrencesFields = []Field{
 	SeqIdField,
 	LocusIdField,
 	FilterField,
 	GenotypeQualityField,
 	AdRatioField,
+	AdAltField,
+	AdTotalField,
 	PfField,
 	PnField,
 	PcField,
@@ -157,6 +184,7 @@ var OccurrencesFields = []Field{
 	GnomadV3AfField,
 	PickedTranscriptIdField,
 	TransmissionModeField,
+	InfoQdField,
 
 	// Variants
 	VariantClassField,
