@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"slices"
 	"strings"
 
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/utils"
@@ -288,10 +287,8 @@ func (r *StarrocksRepository) AggregateOccurrences(seqId int, userQuery types.Ag
 		unnestJoin := fmt.Sprintf("join unnest(%s.%s) as unnest on true", aggCol.Table.Alias, aggCol.Name)
 		tx = tx.Joins(unnestJoin)
 		sel = "unnest as bucket, count(distinct o.locus_id) as count"
-	} else if aggCol.Table == types.ConsequenceFilterTable || slices.Contains(types.GenePanelsTables, aggCol.Table) {
-		sel = fmt.Sprintf("%s.%s as bucket, count(distinct o.locus_id) as count", aggCol.Table.Alias, aggCol.Name)
 	} else {
-		sel = fmt.Sprintf("%s.%s as bucket, count(1) as count", aggCol.Table.Alias, aggCol.Name)
+		sel = fmt.Sprintf("%s.%s as bucket, count(distinct o.locus_id) as count", aggCol.Table.Alias, aggCol.Name)
 	}
 
 	err = tx.Select(sel).
