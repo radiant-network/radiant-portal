@@ -19,7 +19,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/header [get]
-func GetGermlineVariantHeader(repo repository.StarrocksDAO) gin.HandlerFunc {
+func GetGermlineVariantHeader(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
 		if err != nil {
@@ -51,7 +51,7 @@ func GetGermlineVariantHeader(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/overview [get]
-func GetGermlineVariantOverview(repo repository.StarrocksDAO) gin.HandlerFunc {
+func GetGermlineVariantOverview(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
 		if err != nil {
@@ -83,7 +83,7 @@ func GetGermlineVariantOverview(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/consequences [get]
-func GetGermlineVariantConsequences(repo repository.StarrocksDAO) gin.HandlerFunc {
+func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
 		if err != nil {

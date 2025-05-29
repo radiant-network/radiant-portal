@@ -71,7 +71,7 @@ func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /sequencing/{seq_id} [get]
-func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
+func GetSequencing(repo repository.SequencingExperimentsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
@@ -103,7 +103,7 @@ func GetSequencing(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Success 200 {array} types.AutoCompleteTerm
 // @Failure 500 {object} types.ApiError
 // @Router /mondo/autocomplete [get]
-func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
+func GetMondoTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))
@@ -131,7 +131,7 @@ func GetMondoTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
 // @Success 200 {array} types.AutoCompleteTerm
 // @Failure 500 {object} types.ApiError
 // @Router /hpo/autocomplete [get]
-func GetHPOTermAutoComplete(repo repository.StarrocksDAO) gin.HandlerFunc {
+func GetHPOTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))

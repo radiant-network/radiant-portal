@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"os"
 	"testing"
 
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
@@ -20,18 +19,9 @@ var defaultFieldsForTest = []types.Field{
 	types.LocusIdField,
 }
 
-func Test_CheckDatabaseConnection_Return_up(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		status := repo.CheckDatabaseConnection()
-		assert.Equal(t, "up", status)
-
-	})
-}
-
 func Test_GetOccurrences(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
@@ -52,7 +42,7 @@ func Test_GetOccurrences(t *testing.T) {
 
 func Test_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "filter"}
 
 		query, err := types.NewListQuery(selectedFields, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
@@ -71,7 +61,7 @@ func Test_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
 func Test_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		query, err := types.NewListQuery(nil, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
@@ -87,7 +77,7 @@ func Test_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t *testing.T) 
 
 func Test_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		selectedFields := []string{"clinvar"}
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
@@ -106,7 +96,7 @@ func Test_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
 
 func Test_CountOccurrences(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		count, err := repo.CountOccurrences(1, nil)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, count)
@@ -116,7 +106,7 @@ func Test_CountOccurrences(t *testing.T) {
 func Test_CountOccurrences_Return_Count_That_Match_Filters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
 
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "filter",
@@ -138,7 +128,7 @@ func Test_CountOccurrences_Return_Count_That_Match_Filters(t *testing.T) {
 func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
 
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "filter",
@@ -166,7 +156,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "clinvar",
@@ -197,7 +187,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "clinvar",
@@ -227,7 +217,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *test
 func Test_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 
 		pagination := &types.Pagination{
 			Limit:  5,
@@ -244,7 +234,7 @@ func Test_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(t *testing.T)
 func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Specified(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 
 		sortedBody := []types.SortBody{
 			{
@@ -271,7 +261,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Specified(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 
 		sortedBody := []types.SortBody{
 			{
@@ -298,7 +288,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Sp
 func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
 
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
 				Field: "impact_score",
@@ -328,7 +318,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_ScoreAnd_Quality(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
 
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: ">", Content: &types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
@@ -355,7 +345,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		query, err := types.NewAggregationQuery("zygosity", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
@@ -371,7 +361,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity(t 
 
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_With_Filter(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.LeafContent{
 				Field: "filter",
@@ -394,7 +384,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_With_Filter_But_Ignore_Self_Filter(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: "in", Content: &types.LeafContent{Field: "filter", Value: []interface{}{"PASS"}}},
@@ -417,7 +407,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Clinvar(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		query, err := types.NewAggregationQuery("clinvar", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
@@ -435,7 +425,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Clinvar(t *
 
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		query, err := types.NewAggregationQuery("impact_score", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
@@ -454,7 +444,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Scor
 
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score_Combined_With_Filter(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: "in", Content: types.LeafContent{Field: "filter", Value: []interface{}{"PASS"}}},
@@ -480,7 +470,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Scor
 
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.LeafContent{
 				Field: "omim_gene_panel",
@@ -509,7 +499,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel(t *testing.
 
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
@@ -536,7 +526,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_
 
 func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_And_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
@@ -563,7 +553,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_An
 
 func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_panel_And_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
@@ -583,7 +573,7 @@ func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_pane
 
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		query, err := types.NewAggregationQuery("omim_gene_panel", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
@@ -604,7 +594,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(
 
 func Test_GetStatisticsOccurrences(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		query, err := types.NewStatisticsQuery("pf", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		statistics, err := repo.GetStatisticsOccurrences(1, query)
@@ -621,118 +611,13 @@ func Test_GetStatisticsOccurrences_Non_Numeric_Field(t *testing.T) {
 	})
 }
 
-func Test_GetSequencing(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		sequencing, err := repo.GetSequencing(1)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, sequencing.SeqId)
-		assert.Equal(t, "germline", sequencing.AnalysisType)
-	})
-}
-
-func Test_GetSequencingNotFound(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		sequencing, err := repo.GetSequencing(11)
-		assert.NoError(t, err)
-		assert.Nil(t, sequencing)
-	})
-}
-
-func Test_GetTermAutoComplete(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "blood", 20)
-		assert.NoError(t, err)
-		assert.Equal(t, 2, len(terms))
-		assert.Equal(t, "MONDO:0000001", terms[0].Source.ID)
-		assert.Equal(t, "blood group incompatibility", terms[0].Source.Name)
-		assert.Equal(t, "MONDO:0000001", terms[0].HighLight.ID)
-		assert.Equal(t, "<strong>blood</strong> group incompatibility", terms[0].HighLight.Name)
-		assert.Equal(t, "MONDO:0000002", terms[1].Source.ID)
-	})
-}
-
-func Test_GetTermAutoCompleteWithLimit(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "blood", 1)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(terms))
-		assert.Equal(t, "MONDO:0000001", terms[0].Source.ID)
-		assert.Equal(t, "blood group incompatibility", terms[0].Source.Name)
-		assert.Equal(t, "MONDO:0000001", terms[0].HighLight.ID)
-		assert.Equal(t, "<strong>blood</strong> group incompatibility", terms[0].HighLight.Name)
-	})
-}
-
-func Test_GetTermAutoCompleteNoResult(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "not_here", 20)
-		assert.NoError(t, err)
-		assert.Equal(t, 0, len(terms))
-	})
-}
-
 func Test_GetExpendedOccurrence(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewOccurrencesRepository(db)
 		expendedOccurrence, err := repo.GetExpendedOccurrence(1, 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, "1000", expendedOccurrence.LocusId)
 		assert.Equal(t, float32(0.1), expendedOccurrence.SiftScore)
 		assert.Equal(t, "T", expendedOccurrence.SiftPred)
 	})
-}
-
-func Test_GetVariantHeader(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		variantHeader, err := repo.GetVariantHeader(1000)
-		assert.NoError(t, err)
-		assert.Equal(t, "hgvsg1", variantHeader.Hgvsg)
-		assert.Equal(t, "GRCh38", variantHeader.AssemblyVersion)
-		assert.Equal(t, 1, len(variantHeader.Source))
-	})
-}
-
-func Test_GetVariantOverview(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		variantOverview, err := repo.GetVariantOverview(1000)
-		assert.NoError(t, err)
-		assert.Equal(t, "locus1", variantOverview.Locus)
-		assert.Equal(t, float32(0.1), variantOverview.SiftScore)
-		assert.Equal(t, "T", variantOverview.SiftPred)
-		assert.Equal(t, 2, len(variantOverview.OmimConditions))
-	})
-}
-
-func Test_GetVariantConsequences(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		variantConsequences, err := repo.GetVariantConsequences(1000)
-		assert.NoError(t, err)
-		assert.Equal(t, 2, len(*variantConsequences))
-		assert.Equal(t, true, (*variantConsequences)[0].IsPicked)
-		assert.Equal(t, false, (*variantConsequences)[1].IsPicked)
-	})
-}
-
-func Test_GetOrganizations(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
-		codes, err := repo.GetOrganizations()
-		assert.NoError(t, err)
-		assert.Len(t, *codes, 6)
-	})
-}
-
-func TestMain(m *testing.M) {
-	testutils.StartAllContainers()
-	code := m.Run()
-	testutils.StopAllContainers()
-	os.Exit(code)
 }
