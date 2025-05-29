@@ -3,8 +3,9 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"log"
+
+	"gorm.io/gorm"
 )
 
 type OrganizationsRepository struct {

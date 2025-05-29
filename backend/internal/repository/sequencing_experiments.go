@@ -3,9 +3,10 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"gorm.io/gorm"
-	"log"
 )
 
 type Sequencing = types.Sequencing
