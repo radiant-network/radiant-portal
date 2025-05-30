@@ -1,4 +1,4 @@
-import { ChartColumn, ChartLine, ChartPie, ChartScatter } from 'lucide-react';
+import { ChartColumn, ChartLine, ChartPie, ChartScatter, LucideIcon } from 'lucide-react';
 import React from 'react';
 import { tv, VariantProps } from 'tailwind-variants';
 import { cn } from '../lib/utils';
@@ -7,21 +7,32 @@ const emptyVariants = tv({
   slots: {
     base: 'flex flex-col',
     iconsContainer: 'text-slate',
-    title: 'text-center text-muted-foreground font-medium',
-    description: 'text-center text-muted-foreground',
+    textContainer: '',
+    title: 'text-center font-semibold',
+    description: 'text-center text-muted-foreground font-normal',
+    customIcon: 'flex items-center justify-center border rounded-md',
   },
   variants: {
+    bordered: {
+      true: {
+        base: 'border border-dashed rounded-lg',
+      },
+    },
     size: {
       mini: {
         base: 'py-10 gap-3',
         iconsContainer: '[&_svg]:size-4',
+        textContainer: 'space-y-1',
         title: 'text-base',
-        description: 'text-sm',
+        description: 'text-xs',
       },
       default: {
-        base: 'py-12 gap-4',
+        base: 'py-12 gap-6',
         iconsContainer: '[&_svg]:size-6',
-        title: 'text-xl',
+        textContainer: 'space-y-2',
+        title: 'text-lg',
+        description: 'text-sm',
+        customIcon: 'size-12',
       },
     },
   },
@@ -30,26 +41,49 @@ const emptyVariants = tv({
   },
 });
 
-export interface EmptyProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof emptyVariants> {
-  iconsType?: 'row' | 'grid';
-  showIcons?: boolean;
-  title?: string;
-  description: string;
-}
+export type EmptyProps = React.HTMLAttributes<HTMLDivElement> &
+  VariantProps<typeof emptyVariants> & {
+    showIcon?: boolean;
+    title?: string;
+    description: string;
+  } & (
+    | {
+        iconType: 'chartRow' | 'chartGrid';
+        icon?: never;
+      }
+    | {
+        iconType: 'custom';
+        icon: LucideIcon;
+      }
+  );
 
-function Empty({ title, description, showIcons = true, iconsType = 'row', size }: EmptyProps) {
-  const styles = emptyVariants({ size });
+function Empty({
+  title,
+  description,
+  showIcon = true,
+  bordered = false,
+  iconType,
+  icon: Icon,
+  size,
+  className,
+  ...props
+}: EmptyProps) {
+  const styles = emptyVariants({ size, bordered });
 
   return (
-    <div className={styles.base()}>
-      {showIcons ? (
-        iconsType === 'row' ? (
+    <div className={styles.base({ className })} {...props}>
+      {showIcon ? (
+        iconType === 'chartRow' ? (
           <EmptyIconsRow className={styles.iconsContainer()} />
-        ) : (
+        ) : iconType === 'chartGrid' ? (
           <EmptyIconsGrid className={styles.iconsContainer()} />
-        )
+        ) : iconType === 'custom' ? (
+          <div className="flex justify-center">
+            <div className={styles.customIcon()}>{<Icon />}</div>
+          </div>
+        ) : null
       ) : null}
-      <div>
+      <div className={styles.textContainer()}>
         {title && <h1 className={styles.title()}>{title}</h1>}
         <div className={styles.description()}>{description}</div>
       </div>
