@@ -14,7 +14,6 @@
           { "key": "variant_class", "type": "multiple" },
           { "key": "consequence", "type": "multiple" },
           { "key": "chromosome", "type": "multiple" },
-          { "key": "zygosity", "type": "multiple" },
           { "key": "transmission_mode", "type": "multiple" }
         ]
       },
@@ -95,7 +94,64 @@
         ]
       },
       "occurrence": {
-        "items": []
+        "items": [
+          { "key": "zygosity", "type": "multiple" },
+          { "key": "transmission_mode", "type": "multiple" },
+          { "key": "filter", "type": "numerical", 
+            "defaults": { 
+              "min": 0, 
+              "max": 100, 
+              "defaultOperator": "GreaterThan",
+              "defaultMin": 0,
+              "defaultMax": 100
+            } 
+          },
+          { "key": "info_qd", "type": "numerical", 
+            "defaults": { 
+              "min": 0, 
+              "max": 100, 
+              "defaultOperator": "GreaterThan",
+              "defaultMin": 0,
+              "defaultMax": 100
+            } 
+          },
+          { "key": "ad_alt", "type": "numerical", 
+            "defaults": { 
+              "min": 0, 
+              "max": 100, 
+              "defaultOperator": "GreaterThan",
+              "defaultMin": 0,
+              "defaultMax": 100
+            } 
+          },
+          { "key": "ad_total", "type": "numerical", 
+            "defaults": { 
+              "min": 0, 
+              "max": 100, 
+              "defaultOperator": "GreaterThan",
+              "defaultMin": 0,
+              "defaultMax": 100
+            } 
+          },
+          { "key": "ad_ration", "type": "numerical", 
+            "defaults": { 
+              "min": 0, 
+              "max": 100, 
+              "defaultOperator": "GreaterThan",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          { "key": "gq", "type": "numerical", 
+            "defaults": { 
+              "min": 0, 
+              "max": 100, 
+              "defaultOperator": "GreaterThan",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          }
+        ]
       }
     }
   },
