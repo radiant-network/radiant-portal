@@ -20,7 +20,7 @@ import (
 
 func testList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/:seq_id/list", server.OccurrencesGermlineListHandler(repo))
 
@@ -34,7 +34,7 @@ func testList(t *testing.T, data string, body string, expected string) {
 }
 func testCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/:seq_id/count", server.OccurrencesGermlineCountHandler(repo))
 
@@ -48,7 +48,7 @@ func testCount(t *testing.T, data string, body string, expected int) {
 }
 func testAggregation(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repo))
 
@@ -62,7 +62,7 @@ func testAggregation(t *testing.T, data string, body string, expected string) {
 }
 func testStatistics(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repo))
 
@@ -372,7 +372,7 @@ func Test_GetUserSet(t *testing.T) {
 
 func assertGetSequencing(t *testing.T, data string, seqId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewSequencingExperimentsRepository(db)
 		router := gin.Default()
 		router.GET("/sequencing/:seq_id", server.GetSequencing(repo))
 
@@ -392,7 +392,7 @@ func Test_GetSequencing(t *testing.T) {
 
 func assertMondoTermAutoComplete(t *testing.T, data string, prefix string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewTermsRepository(db)
 		router := gin.Default()
 		router.GET("/mondo/autocomplete", server.GetMondoTermAutoComplete(repo))
 
@@ -484,7 +484,7 @@ func assertSearchInterpretationSomatic(t *testing.T, repo repository.Interpretat
 
 func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
 		router.GET("/occurrences/:seq_id/:locus_id/expended", server.GetExpendedGermlineOccurrence(repo))
 
@@ -504,7 +504,7 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 
 func assertGetVariantHeader(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/header", server.GetGermlineVariantHeader(repo))
 
@@ -524,7 +524,7 @@ func Test_GetVariantHeader(t *testing.T) {
 
 func assertGetVariantOverview(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/overview", server.GetGermlineVariantOverview(repo))
 
@@ -544,7 +544,7 @@ func Test_GetVariantOverview(t *testing.T) {
 
 func assertGetVariantConsequences(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewStarrocksRepository(db)
+		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/consequences", server.GetGermlineVariantConsequences(repo))
 

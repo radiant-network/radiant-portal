@@ -62,6 +62,10 @@ func main() {
 
 	// Create repository
 	repoStarrocks := repository.NewStarrocksRepository(dbStarrocks)
+	repoSeqExp := repository.NewSequencingExperimentsRepository(dbStarrocks)
+	repoVariants := repository.NewVariantsRepository(dbStarrocks)
+	repoOccurrences := repository.NewOccurrencesRepository(dbStarrocks)
+	repoTerms := repository.NewTermsRepository(dbStarrocks)
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
 
@@ -91,11 +95,11 @@ func main() {
 	occurrencesGroup.Use(roleAccessMiddleware)
 
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres))
-	occurrencesGermlineGroup.POST("/:seq_id/count", server.OccurrencesGermlineCountHandler(repoStarrocks))
-	occurrencesGermlineGroup.POST("/:seq_id/list", server.OccurrencesGermlineListHandler(repoStarrocks))
-	occurrencesGermlineGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repoStarrocks))
-	occurrencesGermlineGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repoStarrocks))
-	occurrencesGermlineGroup.GET("/:seq_id/:locus_id/expended", server.GetExpendedGermlineOccurrence(repoStarrocks))
+	occurrencesGermlineGroup.POST("/:seq_id/count", server.OccurrencesGermlineCountHandler(repoOccurrences))
+	occurrencesGermlineGroup.POST("/:seq_id/list", server.OccurrencesGermlineListHandler(repoOccurrences))
+	occurrencesGermlineGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repoOccurrences))
+	occurrencesGermlineGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repoOccurrences))
+	occurrencesGermlineGroup.GET("/:seq_id/:locus_id/expended", server.GetExpendedGermlineOccurrence(repoOccurrences))
 
 	interpretationsGroup := r.Group("/interpretations")
 	interpretationsGroup.Use(roleAccessMiddleware)
@@ -116,19 +120,19 @@ func main() {
 
 	sequencingGroup := r.Group("/sequencing")
 	sequencingGroup.Use(roleAccessMiddleware)
-	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStarrocks))
+	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoSeqExp))
 
 	mondoGroup := r.Group("/mondo")
-	mondoGroup.GET("/autocomplete", server.GetMondoTermAutoComplete(repoStarrocks))
+	mondoGroup.GET("/autocomplete", server.GetMondoTermAutoComplete(repoTerms))
 
 	hpoGroup := r.Group("/hpo")
-	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoStarrocks))
+	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
 
 	variantsGroup := r.Group("/variants")
 	variantsGermlineGroup := variantsGroup.Group("/germline")
-	variantsGermlineGroup.GET("/:locus_id/header", server.GetGermlineVariantHeader(repoStarrocks))
-	variantsGermlineGroup.GET("/:locus_id/overview", server.GetGermlineVariantOverview(repoStarrocks))
-	variantsGermlineGroup.GET("/:locus_id/consequences", server.GetGermlineVariantConsequences(repoStarrocks))
+	variantsGermlineGroup.GET("/:locus_id/header", server.GetGermlineVariantHeader(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/overview", server.GetGermlineVariantOverview(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/consequences", server.GetGermlineVariantConsequences(repoVariants))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")

@@ -23,7 +23,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/{seq_id}/list [post]
-func OccurrencesGermlineListHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+func OccurrencesGermlineListHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBody
@@ -81,7 +81,7 @@ func OccurrencesGermlineListHandler(repo repository.StarrocksDAO) gin.HandlerFun
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/{seq_id}/count [post]
-func OccurrencesGermlineCountHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBody
@@ -129,7 +129,7 @@ func OccurrencesGermlineCountHandler(repo repository.StarrocksDAO) gin.HandlerFu
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/{seq_id}/aggregate [post]
-func OccurrencesGermlineAggregateHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.AggregationBody
@@ -177,7 +177,7 @@ func OccurrencesGermlineAggregateHandler(repo repository.StarrocksDAO) gin.Handl
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/{seq_id}/statistics [post]
-func OccurrencesGermlineStatisticsHandler(repo repository.StarrocksDAO) gin.HandlerFunc {
+func OccurrencesGermlineStatisticsHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.StatisticsBody
@@ -223,7 +223,7 @@ func OccurrencesGermlineStatisticsHandler(repo repository.StarrocksDAO) gin.Hand
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/{seq_id}/{locus_id}/expended [get]
-func GetExpendedGermlineOccurrence(repo repository.StarrocksDAO) gin.HandlerFunc {
+func GetExpendedGermlineOccurrence(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {

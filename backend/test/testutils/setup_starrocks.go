@@ -24,6 +24,11 @@ func ParallelTestWithDb(t *testing.T, dbName string, testFunc func(t *testing.T,
 		log.Fatal("Failed to init db connection:", err)
 
 	}
+	_, err = initPostgresDb()
+	if err != nil {
+		log.Fatal("Failed to init PostgreSQL db connection:", err)
+
+	}
 	testFunc(t, db)
 	//Drop database
 	db.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
@@ -79,6 +84,28 @@ func initDb(folderName string) (*gorm.DB, string, error) {
 				log.Fatal("failed to create table and populate data", err)
 			}
 		}
+	}
+
+	if err != nil {
+		log.Fatal("failed to get container port: ", err)
+	}
+
+	federationQuery := fmt.Sprintf(
+		`
+		CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
+		PROPERTIES
+		(
+			"type"="jdbc", 
+			"user"="radiant",
+			"password"="radiant",
+			"jdbc_uri"="jdbc:postgresql://%s:5432/radiant",
+			"driver_url"="https://repo1.maven.org/maven2/org/postgresql/postgresql/42.3.3/postgresql-42.3.3.jar",
+			"driver_class"="org.postgresql.Driver"
+		);
+	`, PostgresContainerName)
+	_, err = db.Exec(federationQuery)
+	if err != nil {
+		log.Fatal("failed to create federation", err)
 	}
 
 	return gormDb, dbName, nil
