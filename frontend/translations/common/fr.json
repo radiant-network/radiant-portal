@@ -732,9 +732,6 @@
     "frequency": {
       "title": "Fréquence"
     },
-    "conditions": {
-      "title": "Conditions"
-    },
     "transcripts": {
       "title": "Transcrits",
       "aminoAcidSubstitution": "Substitution d'acide aminé"
