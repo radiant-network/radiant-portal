@@ -204,6 +204,7 @@
         "omim_gene_panel_tooltip": "Online Mendelian Inheritance in Man",
         "orphanet_gene_panel": "Orphanet",
         "transmission_mode": "Transmission",
+        "transmission_mode_tooltip": "Mode of inheritance in the family",
         "variant_class": "Variant Type",
         "symbol": "Symbol",
         "pf": "Patient Frequency ",
@@ -265,7 +266,12 @@
           "wt": "Wild Type",
           "hom": "Homozygote",
           "unk": "Unknown"
-        }
+        },
+        "info_qd": "Quality Depth",
+        "ad_alt": "Allele Depth ALT",
+        "ad_total": "Total Depth",
+        "ad_ration": "Allele Ratio",
+        "gq": "Genotype Quality"
       },
       "operators": {
         "greaterThan": "Greater than",
