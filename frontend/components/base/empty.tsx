@@ -27,7 +27,7 @@ const emptyVariants = tv({
         description: 'text-xs',
       },
       default: {
-        base: 'py-12 gap-6',
+        base: 'py-8 gap-6',
         iconsContainer: '[&_svg]:size-6',
         textContainer: 'space-y-2',
         title: 'text-lg',

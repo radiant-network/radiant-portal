@@ -1,5 +1,6 @@
 {
   "common": {
+    "unspecified": "Unspecified",
     "noDataAvailable": "No data available",
     "editor": {
       "headings": {
@@ -679,7 +680,48 @@
       "dbSNP": "dbSNP"
     },
     "evidence": {
-      "title": "Evidence"
+      "title": "Evidence and conditions",
+      "clinVar": {
+        "title": "ClinVar",
+        "description": "Pathogenic evidence provided by ClinVar",
+        "filters": {
+          "searchPlaceholder": "Filter Conditions"
+        },
+        "table": {
+          "headers": {
+            "evaluated": "Evaluated",
+            "evaluated.tooltip": "The most recent date that a submitter evaluated this variant for the condition in the ClinVar database.",
+            "condition": "Condition",
+            "classification": "Classification",
+            "status": "Status",
+            "status.tooltip": "TODO",
+            "origin": "Origin"
+          }
+        }
+      },
+      "gene": {
+        "title": "Associated Conditions and Phenotypes by Gene",
+        "filters": {
+          "searchPlaceholder": "Filter condition or phenotype",
+          "omim": "OMIM ({{count}})",
+          "orphanet": "Orphanet ({{count}})",
+          "hpo": "HPO ({{count}})"
+        },
+        "table": {
+          "headers": {
+            "condition": "Condition (OMIM)",
+            "inheritence": "Inheritence",
+            "classification": "Classification",
+            "status": "Status",
+            "status.tooltip": "TODO",
+            "origin": "Origin"
+          },
+          "empty": {
+            "title": "No conditions for this gene",
+            "description": "Try resetting your tabs and filters above."
+          }
+        }
+      }
     },
     "frequency": {
       "title": "Frequency"

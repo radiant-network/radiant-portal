@@ -1,9 +1,10 @@
 import { VariantOverview } from '@/api/api';
-import { Card, CardContent, CardHeader, CardProps } from '@/components/base/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { ExternalLink } from 'lucide-react';
+import { ComponentProps } from 'react';
 
-function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & CardProps) {
+function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & ComponentProps<'div'>) {
   const { t } = useI18n();
 
   return (
@@ -11,7 +12,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
       <CardHeader className="flex flex-row justify-between pb-0">
         <div className="font-semibold">{t('variantEntity.overview.externalReferences')}</div>
       </CardHeader>
-      <CardContent className="p-6 text-sm space-y-3">
+      <CardContent className="text-sm space-y-3">
         <a
           href={`https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_name}`}
           target="_blank"

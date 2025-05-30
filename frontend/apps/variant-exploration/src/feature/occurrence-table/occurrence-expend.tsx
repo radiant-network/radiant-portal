@@ -36,12 +36,12 @@ export default function OccurrenceExpend({ occurrence }: GermlineVariantPreviewP
   );
 
   return (
-    <Card className="shadow-none">
-      <CardHeader className="p-4">
+    <Card className="shadow-none py-4 gap-4">
+      <CardHeader className="flex px-4">
         <OccurrenceExpendHeader occurrence={occurrence} />
       </CardHeader>
       <Separator />
-      <CardContent className="p-4 space-y-3">
+      <CardContent className="px-4 space-y-3">
         <div className="border rounded p-4">
           {isLoading || data === undefined ? (
             <Skeleton className="w-full h-6" />

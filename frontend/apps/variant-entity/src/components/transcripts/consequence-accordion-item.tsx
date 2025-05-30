@@ -8,7 +8,7 @@ import { VariantConsequence } from '@/api/api';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 
-interface ConsequenceAccordionItemProps extends RefAttributes<HTMLDivElement> {
+interface ConsequenceAccordionItemProps {
   value: string;
   data: VariantConsequence;
 }

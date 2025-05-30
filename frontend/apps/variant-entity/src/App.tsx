@@ -4,7 +4,7 @@ import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/
 import { Badge } from '@/components/base/ui/badge';
 import { Link, useLocation, useParams } from 'react-router';
 import OverviewTab from './components/overview/overview-tab';
-import EvidenceTab from './components/evidence-tab';
+import EvidenceTab from './components/evidence/evidence-tab';
 import FrequencyTab from './components/frequency-tab';
 import ConditionsTab from './components/conditions-tab';
 import TranscriptsTab from './components/transcripts/transcripts-tab';
