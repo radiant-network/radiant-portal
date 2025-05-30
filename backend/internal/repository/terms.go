@@ -21,7 +21,7 @@ type TermsDAO interface {
 
 func NewTermsRepository(db *gorm.DB) *TermsRepository {
 	if db == nil {
-		log.Print("TermsRepository: db is nil")
+		log.Fatal("TermsRepository: db is nil")
 		return nil
 	}
 	return &TermsRepository{db: db}
@@ -55,8 +55,7 @@ func (r *TermsRepository) GetTermAutoComplete(termsTable string, input string, l
 	tx := r.db.Table(termsTable).Select("id, name").Where("LOWER(name) like ? or UPPER(id) like ?", strings.ToLower(like), strings.ToUpper(like)).Order("id asc").Limit(limit)
 
 	var terms []types.Term
-	err := tx.Find(&terms).Error
-	if err != nil {
+	if err := tx.Find(&terms).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching terms: %w", err)
 		} else {
@@ -69,5 +68,5 @@ func (r *TermsRepository) GetTermAutoComplete(termsTable string, input string, l
 		output[i] = mapToAutoCompleteTerm(&term, input)
 	}
 
-	return output, err
+	return output, nil
 }

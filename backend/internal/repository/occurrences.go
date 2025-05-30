@@ -31,7 +31,7 @@ type OccurrencesDAO interface {
 
 func NewOccurrencesRepository(db *gorm.DB) *OccurrencesRepository {
 	if db == nil {
-		log.Print("OccurrencesRepository: db is nil")
+		log.Fatal("OccurrencesRepository: db is nil")
 		return nil
 	}
 	return &OccurrencesRepository{db: db}
@@ -115,14 +115,10 @@ func (r *OccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQu
 
 	addSort(tx, userQuery) //We re-apply the sort on the outer query
 
-	err = tx.Find(&occurrences).Error
-	if err != nil {
-		err = fmt.Errorf("error fetching occurrences: %w", err)
-		return nil, err
+	if err = tx.Find(&occurrences).Error; err != nil {
+		return nil, fmt.Errorf("error fetching occurrences: %w", err)
 	}
-
-	return occurrences, err
-
+	return occurrences, nil
 }
 
 func prepareListOrCountQuery(seqId int, userQuery types.Query, r *OccurrencesRepository) (*gorm.DB, int, error) {
@@ -208,12 +204,10 @@ func (r *OccurrencesRepository) CountOccurrences(seqId int, userQuery types.Coun
 		return 0, fmt.Errorf("error during query preparation %w", err)
 	}
 	var count int64
-	err = tx.Count(&count).Error
-	if err != nil {
-		log.Print("error fetching occurrences:", err)
+	if err = tx.Count(&count).Error; err != nil {
+		return 0, fmt.Errorf("error fetching occurrences: %w", err)
 	}
-	return count, err
-
+	return count, nil
 }
 
 func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *OccurrencesRepository) (*gorm.DB, int, error) {
@@ -259,14 +253,13 @@ func (r *OccurrencesRepository) AggregateOccurrences(seqId int, userQuery types.
 		sel = fmt.Sprintf("%s.%s as bucket, count(distinct o.locus_id) as count", aggCol.Table.Alias, aggCol.Name)
 	}
 
-	err = tx.Select(sel).
+	tx = tx.Select(sel).
 		Where(fmt.Sprintf("%s.%s is not null", aggCol.Table.Alias, aggCol.Name)). //We don't want to count null values
-		Group("bucket").Order("count asc, bucket asc").
-		Find(&aggregation).Error
-	if err != nil {
-		return aggregation, fmt.Errorf("error query aggragation: %w", err)
+		Group("bucket").Order("count asc, bucket asc")
+	if err = tx.Find(&aggregation).Error; err != nil {
+		return nil, fmt.Errorf("error query aggragation: %w", err)
 	}
-	return aggregation, err
+	return aggregation, nil
 }
 
 func (r *OccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
@@ -277,12 +270,11 @@ func (r *OccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery ty
 	}
 	targetCol := userQuery.GetTargetedField()
 	sel := fmt.Sprintf("MIN(%s.%s) as min, MAX(%s.%s) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
-	err = tx.Select(sel).
-		Find(&statistics).Error
-	if err != nil {
-		return &statistics, fmt.Errorf("error query statistics: %w", err)
+	tx = tx.Select(sel)
+	if err = tx.Find(&statistics).Error; err != nil {
+		return nil, fmt.Errorf("error query statistics: %w", err)
 	}
-	return &statistics, err
+	return &statistics, nil
 }
 
 func (r *OccurrencesRepository) GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error) {
@@ -292,8 +284,7 @@ func (r *OccurrencesRepository) GetExpendedOccurrence(seqId int, locusId int) (*
 	tx = tx.Select("c.locus_id, v.hgvsg, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, v.pf, v.gnomad_v3_af, c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, o.zygosity, o.transmission_mode, o.parental_origin, o.father_calls, o.mother_calls, o.info_qd, o.ad_alt, o.ad_total, o.filter, o.gq")
 
 	var expendedOccurrence ExpendedOccurrence
-	err := tx.First(&expendedOccurrence).Error
-	if err != nil {
+	if err := tx.First(&expendedOccurrence).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching expended occurrence: %w", err)
 		} else {

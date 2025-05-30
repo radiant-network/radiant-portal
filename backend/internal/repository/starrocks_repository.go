@@ -15,7 +15,7 @@ type StarrocksDAO interface {
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
 	if db == nil {
-		log.Print("StarrocksRepository: db is nil")
+		log.Fatal("StarrocksRepository: db is nil")
 		return nil
 	}
 	return &StarrocksRepository{db: db}

@@ -17,7 +17,7 @@ type OrganizationsDAO interface {
 
 func NewOrganizationsRepository(db *gorm.DB) *OrganizationsRepository {
 	if db == nil {
-		log.Print("OrganizationsRepository: db is nil")
+		log.Fatal("OrganizationsRepository: db is nil")
 		return nil
 	}
 	return &OrganizationsRepository{db: db}
