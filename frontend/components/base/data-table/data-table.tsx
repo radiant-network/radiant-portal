@@ -250,7 +250,7 @@ function getRowFlexRender({
   subComponent?: SubComponentProp<any>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -658,71 +658,73 @@ function TranstackTable<T>({
           </Table>
         </DataTableSkeletonLoading>
       </div>
-      <div className={'flex items-center justify-between py-3 '}>
-        <div>
-          {tableIndexResultPosition === 'bottom' && (
-            <TableIndexResult
-              loading={loadingStates?.total}
-              pageIndex={table.getState().pagination.pageIndex + 1}
-              pageSize={table.getState().pagination.pageSize}
-              total={total}
-            />
-          )}
-        </div>
-        <div className="flex items-center gap-2">
+      {total > 10 && (
+        <div className={'flex items-center justify-between py-3 '}>
           <div>
-            {/* PageSize select */}
-            <Select
-              value={String(table.getState().pagination.pageSize)}
-              onValueChange={value => {
-                table.setPageSize(Number(value));
-              }}
-            >
-              <SelectTrigger className="min-w-[125px] h-8">
-                <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {[10, 20, 30, 40, 50].map(pageSize => (
-                  <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {tableIndexResultPosition === 'bottom' && (
+              <TableIndexResult
+                loading={loadingStates?.total}
+                pageIndex={table.getState().pagination.pageIndex + 1}
+                pageSize={table.getState().pagination.pageSize}
+                total={total}
+              />
+            )}
           </div>
-          <div>
-            {/* Pagination */}
-            <Pagination className="w-auto">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    disabled={!table.getCanPreviousPage()}
-                    onClick={() => {
-                      if (!table.getCanPreviousPage()) return;
-                      table.previousPage();
-                    }}
-                  />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    disabled={!table.getCanNextPage()}
-                    onClick={() => {
-                      if (!table.getCanNextPage()) return;
-                      table.nextPage();
-                    }}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+          <div className="flex items-center gap-2">
+            <div>
+              {/* PageSize select */}
+              <Select
+                value={String(table.getState().pagination.pageSize)}
+                onValueChange={value => {
+                  table.setPageSize(Number(value));
+                }}
+              >
+                <SelectTrigger className="min-w-[125px] h-8">
+                  <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map(pageSize => (
+                    <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              {/* Pagination */}
+              <Pagination className="w-auto">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      disabled={!table.getCanPreviousPage()}
+                      onClick={() => {
+                        if (!table.getCanPreviousPage()) return;
+                        table.previousPage();
+                      }}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      disabled={!table.getCanNextPage()}
+                      onClick={() => {
+                        if (!table.getCanNextPage()) return;
+                        table.nextPage();
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
