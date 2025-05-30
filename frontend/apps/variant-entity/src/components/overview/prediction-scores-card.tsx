@@ -1,10 +1,10 @@
-import { Card, CardContent, CardHeader, CardProps } from '@/components/base/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
 import { Button } from '@/components/base/ui/button';
 import { VariantOverview } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
 import { useI18n } from '@/components/hooks/i18n';
 import { TFunction } from 'i18next';
-import { useMemo } from 'react';
+import { ComponentProps, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/base/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
@@ -100,7 +100,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
   ];
 };
 
-function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & CardProps) {
+function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & ComponentProps<'div'>) {
   const { t } = useI18n();
   const predictionScoreList = useMemo(() => getPredictionList(data, t), [data, t]);
 
@@ -123,7 +123,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
             </DialogContent>
           </Dialog>
         </CardHeader>
-        <CardContent className="p-6 text-sm space-y-3">{predictionScoreList.slice(0, 4)}</CardContent>
+        <CardContent className="text-sm space-y-3">{predictionScoreList.slice(0, 4)}</CardContent>
       </Card>
     </>
   );

@@ -3,6 +3,7 @@ import { TableColumnDef, createColumnSettings } from '@/components/base/data-tab
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import { TFunction } from 'i18next';
+import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
 
 const interpretedCasesColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
 const otherCasesColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
@@ -16,65 +17,65 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       enableResizing: false,
       enablePinning: false,
     },
-    interpretedCasesColumnHelper.accessor(row => row, {
+    interpretedCasesColumnHelper.accessor(row => row.case, {
       id: 'case',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.interpreted-table.headers.case'),
       size: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row, {
+    interpretedCasesColumnHelper.accessor(row => row.date, {
       id: 'date',
       cell: info => info.getValue(),
       header: () => (
-        <TooltipsHeader tooltips={t('variantEntity.cases.interpreted-table.headers.date.tooltip')} iconOnly>
+        <TooltipsHeader tooltips={t('variantEntity.cases.interpreted-table.headers.date.tooltip')}>
           {t('variantEntity.cases.interpreted-table.headers.date')}
         </TooltipsHeader>
       ),
       size: 120,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.ad_ratio, {
+    interpretedCasesColumnHelper.accessor(row => row.mondo, {
       id: 'mondo',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.interpreted-table.headers.mondo'),
       minSize: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row, {
+    interpretedCasesColumnHelper.accessor(row => row.classification, {
       id: 'classification',
-      cell: info => info.getValue(),
+      cell: info => <ClinVarBadge value={info.getValue()} />,
       header: t('variantEntity.cases.interpreted-table.headers.classification'),
       size: 120,
     }),
-    interpretedCasesColumnHelper.accessor(row => row, {
+    interpretedCasesColumnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.interpreted-table.headers.zygosity'),
       size: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row, {
+    interpretedCasesColumnHelper.accessor(row => row.inheritance, {
       id: 'inheritance',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.interpreted-table.headers.inheritance'),
       size: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row, {
+    interpretedCasesColumnHelper.accessor(row => row.institution, {
       id: 'institution',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.interpreted-table.headers.institution'),
       size: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row, {
+    interpretedCasesColumnHelper.accessor(row => row.test, {
       id: 'test',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.interpreted-table.headers.test'),
       size: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row, {
+    interpretedCasesColumnHelper.accessor(row => row.status, {
       id: 'status',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.interpreted-table.headers.status'),
@@ -85,59 +86,59 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
 
 function getOtherCasesColumns(t: TFunction<string, undefined>) {
   return [
-    otherCasesColumnHelper.accessor(row => row, {
+    otherCasesColumnHelper.accessor(row => row.case, {
       id: 'case',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.other-table.headers.case'),
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row, {
+    otherCasesColumnHelper.accessor(row => row.date, {
       id: 'date',
       cell: info => info.getValue(),
       header: () => (
-        <TooltipsHeader tooltips={t('variantEntity.cases.other-table.headers.date.tooltip')} iconOnly>
+        <TooltipsHeader tooltips={t('variantEntity.cases.other-table.headers.date.tooltip')}>
           {t('variantEntity.cases.other-table.headers.date')}
         </TooltipsHeader>
       ),
       size: 120,
     }),
-    otherCasesColumnHelper.accessor(row => row.ad_ratio, {
+    otherCasesColumnHelper.accessor(row => row.hpo, {
       id: 'hpo',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.other-table.headers.phenotypesHpo'),
       minSize: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row, {
+    otherCasesColumnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.other-table.headers.zygosity'),
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row, {
+    otherCasesColumnHelper.accessor(row => row.inheritance, {
       id: 'inheritance',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.other-table.headers.inheritance'),
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row, {
+    otherCasesColumnHelper.accessor(row => row.institution, {
       id: 'institution',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.other-table.headers.institution'),
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row, {
+    otherCasesColumnHelper.accessor(row => row.test, {
       id: 'test',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.other-table.headers.test'),
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row, {
+    otherCasesColumnHelper.accessor(row => row.status, {
       id: 'status',
       cell: info => info.getValue(),
       header: t('variantEntity.cases.other-table.headers.status'),

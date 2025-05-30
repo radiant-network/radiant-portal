@@ -1,4 +1,4 @@
-import { Card, CardContent, CardFooter, CardProps } from '@/components/base/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/base/ui/card';
 import { Button } from '@/components/base/ui/button';
 import { Link, useParams } from 'react-router';
 import { VariantOverview } from '@/api/api';
@@ -11,14 +11,15 @@ import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { InfoIcon } from 'lucide-react';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+import { ComponentProps } from 'react';
 
-function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
+function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & ComponentProps<'div'>) {
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
 
   return (
     <Card {...props}>
-      <CardContent className="px-6 py-8 flex-grow">
+      <CardContent className="px-6 flex-grow">
         <div className="flex items-start [&>div]:w-40 justify-between gap-6 mt-6">
           <div className="flex flex-col gap-2">
             <div className="text-2xl font-semibold uppercase">

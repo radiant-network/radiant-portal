@@ -54,7 +54,7 @@ const VariantOverviewSkeleton = () => {
   return (
     <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
       <Card>
-        <CardContent className="p-6">
+        <CardContent>
           <Skeleton className="h-6" />
           <Separator className="my-6" />
           <div className="space-y-4">
@@ -66,7 +66,7 @@ const VariantOverviewSkeleton = () => {
         </CardContent>
       </Card>
       <Card className="shadow-none col-span-1 md:col-span-2">
-        <CardContent className="p-6">
+        <CardContent>
           <Skeleton className="h-12" />
           <Separator className="my-6" />
           <Skeleton className="h-12" />
@@ -77,7 +77,7 @@ const VariantOverviewSkeleton = () => {
         </CardFooter>
       </Card>
       <Card>
-        <CardContent className="p-6">
+        <CardContent>
           <Skeleton className="h-6" />
           <Separator className="my-6" />
           <div className="space-y-4">
@@ -89,7 +89,7 @@ const VariantOverviewSkeleton = () => {
         </CardContent>
       </Card>
       <Card>
-        <CardContent className="p-6">
+        <CardContent>
           <Skeleton className="h-6" />
           <Separator className="my-6" />
           <div className="space-y-4">
@@ -101,7 +101,7 @@ const VariantOverviewSkeleton = () => {
         </CardContent>
       </Card>
       <Card>
-        <CardContent className="p-6">
+        <CardContent>
           <Skeleton className="h-6" />
           <Separator className="my-6" />
           <div className="space-y-4">

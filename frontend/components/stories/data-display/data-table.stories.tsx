@@ -209,7 +209,7 @@ export const VariantOccurrence: Story = {
           pageIndex: 0,
           pageSize: 50,
         }}
-        data={[...data, ...data, ...data, ...data, ...data]}
+        data={data}
         columns={getVariantColumns(t)}
         subComponent={occurrence => <OccurrenceExpend occurrence={occurrence} />}
       />

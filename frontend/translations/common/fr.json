@@ -1,5 +1,6 @@
 {
   "common": {
+    "unspecified": "Indéterminée",
     "noDataAvailable": "Aucune donnée disponible",
     "editor": {
       "headings": {
@@ -685,7 +686,48 @@
       "dbSNP": "dbSNP"
     },
     "evidence": {
-      "title": "Évidence"
+      "title": "Preuves et conditions",
+      "clinVar": {
+        "title": "ClinVar",
+        "description": "Preuves pathogènes fournies par ClinVar",
+        "filters": {
+          "searchPlaceholder": "Filtrer par condition"
+        },
+        "table": {
+          "headers": {
+            "evaluated": "Evaluated",
+            "evaluated.tooltip": "La date la plus récente à laquelle un soumissionnaire a évalué cette variante pour la condition dans la base de données ClinVar.",
+            "condition": "Condition",
+            "classification": "Classification",
+            "status": "Status",
+            "status.tooltip": "TODO",
+            "origin": "Origin"
+          }
+        }
+      },
+      "gene": {
+        "title": "Affections et phénotypes associés par gène",
+        "filters": {
+          "searchPlaceholder": "Filtrer par condition ou phenotype",
+          "omim": "OMIM ({{count}})",
+          "orphanet": "Orphanet ({{count}})",
+          "hpo": "HPO ({{count}})"
+        },
+        "table": {
+          "headers": {
+            "condition": "Condition (OMIM)",
+            "inheritence": "Inheritence",
+            "classification": "Classification",
+            "status": "Status",
+            "status.tooltip": "TODO",
+            "origin": "Origin"
+          },
+          "empty": {
+            "title": "Aucune condition pour ce gène",
+            "description": "Essayez de réinitialiser vos onglets et filtres ci-dessus."
+          }
+        }
+      }
     },
     "frequency": {
       "title": "Fréquence"
