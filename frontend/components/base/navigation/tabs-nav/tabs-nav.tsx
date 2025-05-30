@@ -24,9 +24,10 @@ export default function TabsNav<T>({ ref, value, onValueChange, ...props }: Tabs
 
 export type TabsListProps = React.HTMLAttributes<HTMLDivElement> & {
   ref?: React.Ref<HTMLDivElement>;
+  contentClassName?: string;
 };
 
-export function TabsList({ ref, className, children, ...props }: TabsListProps) {
+export function TabsList({ ref, className, contentClassName, children, ...props }: TabsListProps) {
   return (
     <div
       ref={ref}
@@ -36,7 +37,7 @@ export function TabsList({ ref, className, children, ...props }: TabsListProps) 
       )}
       {...props}
     >
-      <div className="flex overflow-x-auto">{children}</div>
+      <div className={cn('flex overflow-x-auto', contentClassName)}>{children}</div>
     </div>
   );
 }
