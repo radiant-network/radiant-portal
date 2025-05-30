@@ -9,26 +9,22 @@ export interface ButtonProps extends React.ComponentProps<'button'>, VariantProp
   loading?: boolean;
 }
 
-function Button({
-  className,
-  variant,
-  size,
-  children,
-  asChild = false,
-  loading = false,
-  disabled = false,
-  iconOnly,
-  ...props
-}: ButtonProps) {
-  const Comp = asChild ? Slot : 'button';
-  const style = buttonVariants({ variant, size, iconOnly });
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { className, variant, size, children, asChild = false, loading = false, disabled = false, iconOnly, ...props },
+    ref,
+  ) => {
+    const Comp = asChild ? Slot : 'button';
+    const style = buttonVariants({ variant, size, iconOnly });
 
-  return (
-    <Comp className={style.base({ className })} disabled={disabled || loading} {...props}>
-      {loading && <Spinner />}
-      {iconOnly && loading ? null : children}
-    </Comp>
-  );
-}
+    return (
+      <Comp ref={ref} className={style.base({ className })} disabled={disabled || loading} {...props}>
+        {loading && <Spinner />}
+        {iconOnly && loading ? null : children}
+      </Comp>
+    );
+  },
+);
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };
