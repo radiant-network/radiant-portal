@@ -1,6 +1,6 @@
 {
   "common": {
-    "unspecified": "Unspecified",
+   "unspecified": "Unspecified",
     "noDataAvailable": "No data available",
     "editor": {
       "headings": {
@@ -180,7 +180,8 @@
     "actions": {
       "selectLanguage": "Select language",
       "collapseAll": "Collapse all",
-      "expandAll": "Expand All"
+      "expandAll": "Expand All",
+      "seeMore": "See more"
     },
     "languages": {
       "en": "English",
@@ -600,7 +601,7 @@
     },
     "gene": {
       "title": "Gene",
-      "pli": "pLi",
+      "pli": "pLI",
       "loeuf": "LOEUF",
       "spliceAi": "SpliceAI"
     },
@@ -680,7 +681,7 @@
       "lrt": "LRT",
       "polyphen2hvar": "PolyPhen-2 HVAR",
       "phylop17way": "PhyloP17Way",
-      "pli": "pLi",
+      "pli": "pLI",
       "associatedConditionsOmim": "Associated Conditions (OMIM)",
       "externalReferences": "External References",
       "dbSNP": "dbSNP"

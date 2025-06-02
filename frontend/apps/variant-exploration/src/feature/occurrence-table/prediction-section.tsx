@@ -11,7 +11,6 @@ export default function PredictionSection({ data }: PredictionSectionProps) {
 
   return (
     <DetailSection title={t('occurrenceExpend.predictions.title')}>
-      <DetailItem title={t('occurrenceExpend.predictions.franklin')} value="-" />
       <DetailItem title={t('occurrenceExpend.predictions.exomiser')} value="-" />
     </DetailSection>
   );

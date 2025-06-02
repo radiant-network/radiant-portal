@@ -179,7 +179,8 @@
     "actions": {
       "selectLanguage": "Choisir une langue",
       "collapseAll": "Réduire tout",
-      "expandAll": "Développer tout"
+      "expandAll": "Développer tout",
+      "seeMore": "Plus"
     },
     "languages": {
       "en": "Anglais",
@@ -428,7 +429,7 @@
     },
     "consequences": {
       "transcript_ablation": "Transcript Ablation",
-      "splice_acceptor": "Splice Acceptor",
+      "slice_acceptor": "Splice Acceptor",
       "splice_donor": "Splice Donor",
       "stop_gained": "Stop Gained",
       "frameshift": "Frameshift",
@@ -612,7 +613,7 @@
     },
     "gene": {
       "title": "Gène",
-      "pli": "pLi",
+      "pli": "pLI",
       "loeuf": "LOEUF",
       "spliceAi": "SpliceAI"
     },
