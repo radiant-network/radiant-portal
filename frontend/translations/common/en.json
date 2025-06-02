@@ -732,9 +732,6 @@
     "frequency": {
       "title": "Frequency"
     },
-    "conditions": {
-      "title": "Conditions"
-    },
     "transcripts": {
       "title": "Transcripts",
       "aminoAcidSubstitution": "Amino acid substitution"

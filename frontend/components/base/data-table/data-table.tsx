@@ -278,7 +278,7 @@ function getRowFlexRender({
           ))}
         </TableRow>
         {subComponent && row.getIsExpanded() && (
-          <TableRow key={`subcomponent-${row.id}`}>
+          <TableRow key={`subcomponent-${row.id}`} className="bg-muted/30">
             <TableCell colSpan={row.getVisibleCells().length}>
               <div className="sticky overflow-hidden left-2" style={{ width: containerWidth - 16 }}>
                 {subComponent(row.original)}

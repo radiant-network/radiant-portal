@@ -108,8 +108,9 @@ export default function App() {
         <TabsList className="pt-6 px-3 bg-background" contentClassName="min-[1440px]:px-3 max-w-8xl mx-auto">
           <TabsListItem value={VariantEntityTabs.Overview}>{t('variantEntity.overview.title')}</TabsListItem>
           <TabsListItem value={VariantEntityTabs.Frequency}>{t('variantEntity.frequency.title')}</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Evidence}>{t('variantEntity.evidence.title')}</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Conditions}>{t('variantEntity.conditions.title')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.EvidenceAndConditions}>
+            {t('variantEntity.evidence.title')}
+          </TabsListItem>
           <TabsListItem value={VariantEntityTabs.Transcripts}>{t('variantEntity.transcripts.title')}</TabsListItem>
           <TabsListItem value={VariantEntityTabs.Cases}>{t('variantEntity.cases.title')}</TabsListItem>
         </TabsList>
@@ -119,14 +120,11 @@ export default function App() {
               <TabsContent value={VariantEntityTabs.Overview} className="py-6">
                 <OverviewTab />
               </TabsContent>
-              <TabsContent value={VariantEntityTabs.Evidence} className="py-6">
+              <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="py-6">
                 <EvidenceTab />
               </TabsContent>
               <TabsContent value={VariantEntityTabs.Frequency} className="py-6">
                 <FrequencyTab />
-              </TabsContent>
-              <TabsContent value={VariantEntityTabs.Conditions} className="py-6">
-                <ConditionsTab />
               </TabsContent>
               <TabsContent value={VariantEntityTabs.Transcripts} className="py-6">
                 <TranscriptsTab />

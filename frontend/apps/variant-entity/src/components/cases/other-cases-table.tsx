@@ -11,6 +11,29 @@ function OtherCasesTable() {
     pageSize: 10,
   });
 
+  const fakeData: any[] = [
+    {
+      case: '123456',
+      date: '2025-05-30T15:26:46.139Z',
+      hpo: 'Kidney angiomyolipoma',
+      zygosity: 'Het',
+      inheritance: 'De novo',
+      institution: 'CHUSJ',
+      test: 'RGDI',
+      status: 'Active',
+    },
+    {
+      case: '123457',
+      date: '2025-05-30T15:26:46.139Z',
+      hpo: 'Retard de développement neurologique',
+      zygosity: 'Hom',
+      inheritance: 'Maternal',
+      institution: 'CHUSJ',
+      test: 'RGDI',
+      status: 'Completed',
+    },
+  ]; // Placeholder for actual data
+
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">
@@ -21,14 +44,14 @@ function OtherCasesTable() {
       <DataTable
         id="other-cases"
         columns={getOtherCasesColumns(t)}
-        data={[]}
+        data={fakeData}
         defaultColumnSettings={otherCasesDefaultSettings}
         defaultServerSorting={[]}
         loadingStates={{
           total: false,
           list: false,
         }}
-        total={0}
+        total={fakeData.length}
         pagination={pagination}
         onPaginationChange={setPagination}
         onServerSortingChange={() => {}}

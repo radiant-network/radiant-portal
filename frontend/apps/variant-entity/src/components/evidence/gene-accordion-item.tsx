@@ -7,8 +7,6 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useState } from 'react';
 import { PaginationState } from '@tanstack/table-core';
 import Empty from '@/components/base/empty';
-import { Dna } from 'lucide-react';
-import { SortBodyOrderEnum } from '@/api/api';
 
 interface GeneAccordionItemProps {
   value: string;
