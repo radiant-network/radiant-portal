@@ -55,65 +55,142 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
 }
 
 const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) => {
+  const predictions: { key: string; label: string, value: string }[] = [];
+  const empties: { key: string; label: string }[] = [];
+
+  // sift
+  if (data.sift_pred && data.sift_score !== undefined) {
+    const siftPref = t(`common.filters.labels.sift_pred_value.${data.sift_pred}`);
+    predictions.push({
+      key: 'sift',
+      label: t('variant.predictions.sift'),
+      value: `${siftPref} (${data?.sift_score})`,
+    })
+  } else {
+    empties.push({
+      key: 'sift',
+      label: t('variant.predictions.sift'),
+    })
+  }
+
+  // fathmm
+  if (data.fathmm_pred && data.fathmm_score !== undefined) {
+    const fatmmPref = t(`common.filters.labels.fathmm_pred_value.${data.fathmm_pred}`)
+    predictions.push({
+      key: 'fathmm',
+      label: t('variant.predictions.fathmm'),
+      value: `${fatmmPref} (${data?.fathmm_score})`,
+    })
+  } else {
+    empties.push({
+      key: 'fathmm',
+      label: t('variant.predictions.fathmm'),
+    })
+  }
+
+  // caddraw
+  if (data.cadd_score) {
+    predictions.push({
+      key: 'caddraw',
+      label: t('variant.predictions.caddRaw'),
+      value: `${data.cadd_score}`
+    })
+  } else {
+    empties.push({
+      key: 'caddraw',
+      label: t('variant.predictions.caddRaw'),
+    });
+  }
+
+  // caddphred
+  if (data.cadd_phred) {
+    predictions.push({
+      key: 'caddphred',
+      label: t('variant.predictions.caddPhred'),
+      value: `${data.cadd_phred}`
+    })
+  } else {
+    empties.push({
+      key: 'caddphred',
+      label: t('variant.predictions.caddPhred'),
+    });
+  }
+
+  // dann
+  if (data.dann_score) {
+    predictions.push({
+      key: 'dann',
+      label: t('variant.predictions.dann'),
+      value: `${data.dann_score}`
+    })
+  } else {
+    empties.push({
+      key: 'dann',
+      label: t('variant.predictions.dann'),
+    });
+  }
+
+  // lrt
+  if (data?.lrt_pred && data.lrt_score !== undefined) {
+    const lrtPred = t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`)
+    predictions.push({
+      key: 'lrt',
+      label: t('variant.predictions.lrt'),
+      value: `${lrtPred} (${data?.lrt_score})`,
+    })
+  } else {
+    empties.push({
+      key: 'lrt',
+      label: t('variant.predictions.lrt'),
+    })
+  }
+
+  // revel
+  if (data.revel_score) {
+    predictions.push({
+      key: 'revel',
+      label: t('variant.predictions.revel'),
+      value: `${data.revel_score}`
+    })
+  } else {
+    empties.push({
+      key: 'revel',
+      label: t('variant.predictions.revel'),
+    })
+  }
+
+  // polyphen2_hvar
+  if (data.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined) {
+    const hvarPred = t(`common.filters.labels.polyphen2_hvar_pred_value.${data.polyphen2_hvar_pred}`);
+    predictions.push({
+      key: 'polyphen2_hvar',
+      label: t('variant.predictions.polyphen2hvar'),
+      value: `${hvarPred} ${data.polyphen2_hvar_score}`
+    })
+  } else {
+    empties.push({
+      key: 'polyphen2_hvar',
+      label: t('variant.predictions.polyphen2hvar'),
+    })
+  }
+
   return [
-    <div key="psl-sift" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.sift')}:</span>
-      {data?.sift_pred && data.sift_score !== undefined ? (
+    ...predictions.map(({ key, label, value }) => (
+      <div key={`psl-${key}`} className="flex gap-2 items-center">
+        <span className="text-muted-foreground">{label}:</span>
         <span>
-          {t(`common.filters.labels.sift_pred_value.${data.sift_pred}`)} ({data?.sift_score})
+          {value}
         </span>
-      ) : (
-        '-'
-      )}
-    </div>,
-    <div key="psl-fathmm" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.fathmm')}:</span>
-      {data?.fathmm_pred && data.fathmm_score !== undefined ? (
-        <span>
-          {t(`common.filters.labels.fathmm_pred_value.${data.fathmm_pred}`)} ({data?.fathmm_score})
-        </span>
-      ) : (
-        '-'
-      )}
-    </div>,
-    <div key="psl-caddraw" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.caddRaw')}:</span>
-      <span>{data?.cadd_score ?? '-'}</span>
-    </div>,
-    <div key="psl-caddphred" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.caddPhred')}:</span>
-      <span>{data?.cadd_phred ?? '-'}</span>
-    </div>,
-    <div key="psl-dann" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.dann')}:</span>
-      <span>{data?.dann_score ?? '-'}</span>
-    </div>,
-    <div key="psl-lrt" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.lrt')}:</span>
-      {data?.lrt_pred && data.lrt_score !== undefined ? (
-        <span>
-          {t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`)} ({data?.lrt_score})
-        </span>
-      ) : (
-        '-'
-      )}
-    </div>,
-    <div key="psl-revel" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.revel')}:</span>
-      <span>{data?.revel_score ?? '-'}</span>
-    </div>,
-    <div key="psl-polyphen2hvar" className="flex gap-2 items-center">
-      <span className="text-muted-foreground">{t('variant.predictions.polyphen2hvar')}:</span>
-      {data?.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined ? (
-        <span>
-          {t(`common.filters.labels.polyphen2_hvar_pred_value.${data.polyphen2_hvar_pred}`)} (
-          {data?.polyphen2_hvar_score})
-        </span>
-      ) : (
-        '-'
-      )}
-    </div>,
-  ];
+      </div>
+    )),
+    ...empties.map(({ key, label }) => (
+      <div key={`psl-${key}`} className="flex gap-2 items-center">
+        <span className="text-muted-foreground">{label}:</span>
+        -
+      </div>
+    ))
+
+  ]
 };
 
 export default TranscriptDetails;
