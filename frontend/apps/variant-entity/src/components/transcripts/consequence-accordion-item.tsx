@@ -1,7 +1,7 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { Badge } from '@/components/base/ui/badge';
 import { Separator } from '@/components/base/ui/separator';
-import { RefAttributes } from 'react';
+import { Fragment, RefAttributes } from 'react';
 import TranscriptDetails from './transcript-details';
 import { useI18n } from '@/components/hooks/i18n';
 import { VariantConsequence } from '@/api/api';
@@ -82,10 +82,10 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
       <AccordionContent className="py-4 pt-2 px-5 space-y-4">
         <div className="border rounded bg-muted/30">
           {data.transcripts?.map((transcript, index) => (
-            <>
+            <Fragment key={transcript.transcript_id}>
               <TranscriptDetails data={transcript} />
               {index !== (data.transcripts?.length || 0) - 1 && <Separator />}
-            </>
+            </Fragment>
           ))}
         </div>
       </AccordionContent>

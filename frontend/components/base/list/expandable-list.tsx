@@ -29,7 +29,7 @@ function ExpandableList<T>({ visibleCount = 3, items, renderItem, onExpand }: Ex
     <Fragment>
       <ul>
         {slicedData.map((item, index: number) => (
-          <li>{renderItem(item, index)}</li>
+          <li key={index}>{renderItem(item, index)}</li>
         ))}
       </ul>
       {showButton && (
