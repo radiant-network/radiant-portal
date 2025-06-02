@@ -1,4 +1,4 @@
-INSERT INTO "document" (id, name, data_category, data_type, format, size, url, hash)
+INSERT INTO "document" (id, name, data_category_code, data_type_code, format_code, size, url, hash)
 VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978,
         's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c592'),
        (2, 'FI0037662.S13230.cram.crai', 'genomic', 'alignment', 'crai', 2453667,

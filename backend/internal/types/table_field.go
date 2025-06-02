@@ -138,5 +138,6 @@ func findSortedFields(fields []Field, sorted []SortBody) []SortField {
 			sortedFields = append(sortedFields, SortField{Field: *field, Order: sort.Order})
 		}
 	}
+	sortedFields = append(sortedFields, SortField{Field: LocusIdField, Order: "asc"})
 	return sortedFields
 }

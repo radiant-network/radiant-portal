@@ -3,10 +3,11 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/Goldziher/go-utils/sliceutils"
 	"gorm.io/gorm"
-	"log"
 )
 
 type Occurrence = types.Occurrence

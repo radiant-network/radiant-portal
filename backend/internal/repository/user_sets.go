@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"gorm.io/gorm"
+	"log"
 )
 
 type UserSetsRepository struct {
@@ -16,6 +17,10 @@ type UserSetsDAO interface {
 }
 
 func NewUserSetsRepository(db *gorm.DB) *UserSetsRepository {
+	if db == nil {
+		log.Fatal("UserSetsRepository: db is nil")
+		return nil
+	}
 	return &UserSetsRepository{db: db}
 }
 

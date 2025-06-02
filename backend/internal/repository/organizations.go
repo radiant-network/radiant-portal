@@ -3,16 +3,20 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"log"
+
+	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
+	"gorm.io/gorm"
 )
+
+type Organization = types.Organization
 
 type OrganizationsRepository struct {
 	db *gorm.DB
 }
 
 type OrganizationsDAO interface {
-	GetOrganizations() (*[]string, error)
+	GetOrganizations() (*[]Organization, error)
 }
 
 func NewOrganizationsRepository(db *gorm.DB) *OrganizationsRepository {
@@ -23,11 +27,11 @@ func NewOrganizationsRepository(db *gorm.DB) *OrganizationsRepository {
 	return &OrganizationsRepository{db: db}
 }
 
-func (r *OrganizationsRepository) GetOrganizations() (*[]string, error) {
-	tx := r.db.Table("radiant_jdbc.public.organization").Select("code")
-	var codes []string
-	err := tx.Find(&codes).Error
-	if err != nil {
+func (r *OrganizationsRepository) GetOrganizations() (*[]Organization, error) {
+	tx := r.db.Table(types.OrganizationTable.Name).
+		Preload("Category")
+	var organizations []Organization
+	if err := tx.Find(&organizations).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching organizations: %w", err)
 		} else {
@@ -35,5 +39,5 @@ func (r *OrganizationsRepository) GetOrganizations() (*[]string, error) {
 		}
 	}
 
-	return &codes, err
+	return &organizations, nil
 }

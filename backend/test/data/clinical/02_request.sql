@@ -1,4 +1,4 @@
-INSERT INTO request (id, status, priority, request_code, ordering_physician, ordering_organisation_id, order_number,
+INSERT INTO request (id, status_code, priority_code, request_code, ordering_physician, ordering_organization_id, order_number,
                      created_on, updated_on)
 VALUES (1, 'completed', 'routine', '31450340', 'Felix Laflamme', 3, '25850340', '2021-10-12 13:08:00',
         '2021-10-12 13:08:00'),

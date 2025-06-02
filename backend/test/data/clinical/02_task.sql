@@ -1,4 +1,4 @@
-INSERT INTO "task" (id, type, pipeline_id, created_on)
+INSERT INTO "task" (id, type_code, pipeline_id, created_on)
 VALUES (1, 'ngba', 2, '2021-10-12 13:08:00'),
        (2, 'ngba', 2, '2021-10-12 13:08:00'),
        (3, 'ngba', 2, '2021-10-12 13:08:00'),

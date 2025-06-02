@@ -372,7 +372,7 @@ func Test_GetUserSet(t *testing.T) {
 
 func assertGetSequencing(t *testing.T, data string, seqId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSequencingExperimentsRepository(db)
+		repo := repository.NewSequencingRepository(db)
 		router := gin.Default()
 		router.GET("/sequencing/:seq_id", server.GetSequencing(repo))
 

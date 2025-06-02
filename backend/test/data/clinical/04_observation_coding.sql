@@ -5,7 +5,7 @@ INSERT INTO "observation_coding" (id,
                                   coding_system,
                                   code_value,
                                   onset_code,
-                                  interpretation,
+                                  interpretation_code,
                                   note)
 VALUES (1, 16, 44, 'phenotype', 'HPO', 'HP:0001263', 'unknown', 'negative', 'Clinical comment'),
        (2, 16, 44, 'phenotype', 'HPO', 'HP:0011344', 'infantile', 'negative', 'Clinical comment'),

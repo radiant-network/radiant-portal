@@ -9,11 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
-func Test_GetSequencingExperiments(t *testing.T) {
+func Test_GetDocuments(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewSequencingExperimentsRepository(db)
-		sequencingExperiments, err := repo.GetSequencingExperiments()
+		repo := NewDocumentsRepository(db)
+		documents, err := repo.GetDocuments()
 		assert.NoError(t, err)
-		assert.Len(t, *sequencingExperiments, 61)
+		assert.Len(t, *documents, 244)
 	})
 }

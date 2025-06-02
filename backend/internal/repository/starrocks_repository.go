@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"log"
+
+	"gorm.io/gorm"
 )
 
 type StarrocksRepository struct {

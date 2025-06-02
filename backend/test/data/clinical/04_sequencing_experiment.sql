@@ -1,5 +1,5 @@
-INSERT INTO "sequencing_experiment" (id, case_id, patient_id, sample_id, experimental_strategy, status, aliquot,
-                                     request_id, performer_lab_id, run_name, run_alias, run_date, platform, capture_kit,
+INSERT INTO "sequencing_experiment" (id, case_id, patient_id, sample_id, experimental_strategy_code, status_code, aliquot,
+                                     request_id, performer_lab_id, run_name, run_alias, run_date, platform_code, capture_kit,
                                      is_paired_end, read_length, created_on, updated_on)
 VALUES (1, 1, 3, 1, 'wgs', 'completed', 'NA12892', 3, 6, '1617', 'A00516_0169', '2021-08-17', 'illumina',
         'SureSelect Custom DNA Target', TRUE, 151, '2021-09-12 13:08:00', '2021-09-12 13:08:00'),
