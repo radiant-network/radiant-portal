@@ -1,4 +1,4 @@
-INSERT INTO patient (id, mrn, managing_organization_id, sex, dob)
+INSERT INTO patient (id, mrn, managing_organization_id, sex_code, date_of_birth)
 VALUES (1, 'MRN-283773', 3, 'female', '2012-02-03'),
        (2, 'MRN-283774', 3, 'male', '1970-01-30'),
        (3, 'MRN-283775', 3, 'male', '1973-03-23'),

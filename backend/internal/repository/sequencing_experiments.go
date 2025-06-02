@@ -3,20 +3,19 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
-
 	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"gorm.io/gorm"
+	"log"
 )
 
-type Sequencing = types.Sequencing
+type SequencingExperiment = types.SequencingExperiment
 
 type SequencingExperimentsRepository struct {
 	db *gorm.DB
 }
 
 type SequencingExperimentsDAO interface {
-	GetSequencing(seqId int) (*Sequencing, error)
+	GetSequencingExperiments() (*[]SequencingExperiment, error)
 }
 
 func NewSequencingExperimentsRepository(db *gorm.DB) *SequencingExperimentsRepository {
@@ -27,20 +26,24 @@ func NewSequencingExperimentsRepository(db *gorm.DB) *SequencingExperimentsRepos
 	return &SequencingExperimentsRepository{db: db}
 }
 
-func (r *SequencingExperimentsRepository) GetSequencing(seqId int) (*Sequencing, error) {
-	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId)
-	var sequencing types.Sequencing
-	err := tx.First(&sequencing).Error
-	if err != nil {
+func (r *SequencingExperimentsRepository) GetSequencingExperiments() (*[]SequencingExperiment, error) {
+	tx := r.db.Table(types.SequencingExperimentTable.Name).
+		Preload("Case").
+		Preload("Patient").
+		Preload("Sample").
+		Preload("ExperimentalStrategy").
+		Preload("Status").
+		Preload("Request").
+		Preload("PerformerLab").
+		Preload("Platform")
+	var sequencingExperiments []SequencingExperiment
+	if err := tx.Find(&sequencingExperiments).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error while fetching sequencing: %w", err)
+			return nil, fmt.Errorf("error while fetching sequencingExperiments: %w", err)
 		} else {
 			return nil, nil
 		}
 	}
 
-	if sequencing.AnalysisType == "germline" {
-		sequencing.ExperimentType = "WGS"
-	}
-	return &sequencing, err
+	return &sequencingExperiments, nil
 }

@@ -20,7 +20,7 @@ type CasesDAO interface {
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
 	if db == nil {
-		log.Print("CasesRepository: db is nil")
+		log.Fatal("CasesRepository: db is nil")
 		return nil
 	}
 	return &CasesRepository{db: db}
@@ -35,8 +35,7 @@ func (r *CasesRepository) GetCases() (*[]Case, error) {
 		Preload("Request").
 		Preload("PerformerLab")
 	var cases []Case
-	err := tx.Find(&cases).Error
-	if err != nil {
+	if err := tx.Find(&cases).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching cases: %w", err)
 		} else {
@@ -44,5 +43,5 @@ func (r *CasesRepository) GetCases() (*[]Case, error) {
 		}
 	}
 
-	return &cases, err
+	return &cases, nil
 }

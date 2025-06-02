@@ -1,4 +1,4 @@
-INSERT INTO "case" (id, proband_id, project_id, type, status, primary_condition, panel_id, request_id, performer_lab_id,
+INSERT INTO "case" (id, proband_id, project_id, type_code, status_code, primary_condition, panel_id, request_id, performer_lab_id,
                     note, created_on, updated_on)
 VALUES (1, 3, 1, 'heriditary_family', 'active', 'neurodevelopmental disorder (MONDO:0700092)', NULL, 1, 6,
         'Administrative comment', '2021-09-12 13:08:00', '2021-09-12 13:08:00'),

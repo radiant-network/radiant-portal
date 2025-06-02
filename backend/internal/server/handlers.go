@@ -71,7 +71,7 @@ func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /sequencing/{seq_id} [get]
-func GetSequencing(repo repository.SequencingExperimentsDAO) gin.HandlerFunc {
+func GetSequencing(repo repository.SequencingDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {

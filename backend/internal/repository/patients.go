@@ -20,7 +20,7 @@ type PatientsDAO interface {
 
 func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
 	if db == nil {
-		log.Print("PatientsRepository: db is nil")
+		log.Fatal("PatientsRepository: db is nil")
 		return nil
 	}
 	return &PatientsRepository{db: db}
@@ -31,8 +31,7 @@ func (r *PatientsRepository) GetPatients() (*[]Patient, error) {
 		Preload("Organization").
 		Preload("Sex")
 	var patients []Patient
-	err := tx.Find(&patients).Error
-	if err != nil {
+	if err := tx.Find(&patients).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching patients: %w", err)
 		} else {
@@ -40,5 +39,5 @@ func (r *PatientsRepository) GetPatients() (*[]Patient, error) {
 		}
 	}
 
-	return &patients, err
+	return &patients, nil
 }

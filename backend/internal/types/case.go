@@ -7,11 +7,11 @@ type Case struct {
 	ProbandID        int
 	Proband          Patient `gorm:"foreignKey:ID;references:ProbandID"`
 	ProjectID        int
-	Project          Project  `gorm:"foreignKey:ID;references:ProjectID"`
-	TypeCode         string   `gorm:"column:type"`
+	Project          Project `gorm:"foreignKey:ID;references:ProjectID"`
+	TypeCode         string
 	Type             CaseType `gorm:"foreignKey:code;references:TypeCode"`
-	StatusCode       string   `gorm:"column:status"`
-	Status           Status   `gorm:"foreignKey:Code;references:StatusCode"`
+	StatusCode       string
+	Status           Status `gorm:"foreignKey:Code;references:StatusCode"`
 	PrimaryCondition string
 	PanelID          int
 	RequestID        int

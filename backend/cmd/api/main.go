@@ -62,7 +62,7 @@ func main() {
 
 	// Create repository
 	repoStarrocks := repository.NewStarrocksRepository(dbStarrocks)
-	repoSeqExp := repository.NewSequencingExperimentsRepository(dbStarrocks)
+	repoSeqExp := repository.NewSequencingRepository(dbStarrocks)
 	repoVariants := repository.NewVariantsRepository(dbStarrocks)
 	repoOccurrences := repository.NewOccurrencesRepository(dbStarrocks)
 	repoTerms := repository.NewTermsRepository(dbStarrocks)

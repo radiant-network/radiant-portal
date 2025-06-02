@@ -20,7 +20,7 @@ type FamiliesDAO interface {
 
 func NewFamiliesRepository(db *gorm.DB) *FamiliesRepository {
 	if db == nil {
-		log.Print("FamiliesRepository: db is nil")
+		log.Fatal("FamiliesRepository: db is nil")
 		return nil
 	}
 	return &FamiliesRepository{db: db}
@@ -33,8 +33,7 @@ func (r *FamiliesRepository) GetFamilies() (*[]Family, error) {
 		Preload("RelationshipToProband").
 		Preload("AffectedStatus")
 	var families []Family
-	err := tx.Find(&families).Error
-	if err != nil {
+	if err := tx.Find(&families).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching families: %w", err)
 		} else {
@@ -42,5 +41,5 @@ func (r *FamiliesRepository) GetFamilies() (*[]Family, error) {
 		}
 	}
 
-	return &families, err
+	return &families, nil
 }

@@ -1,11 +1,11 @@
 package types
 
 type Organization struct {
-	ID                   int
-	Code                 string
-	Name                 string
-	Category             string
-	OrganizationCategory OrganizationCategory `gorm:"foreignKey:Code;references:Category"`
+	ID           int
+	Code         string
+	Name         string
+	CategoryCode string
+	Category     OrganizationCategory `gorm:"foreignKey:code;references:CategoryCode"`
 }
 
 var OrganizationTable = Table{

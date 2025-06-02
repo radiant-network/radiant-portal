@@ -18,6 +18,6 @@ func Test_GetOrganizations(t *testing.T) {
 		assert.Equal(t, 1, (*organizations)[0].ID)
 		assert.Equal(t, "CHOP", (*organizations)[0].Code)
 		assert.Equal(t, "Children Hospital of Philadelphia", (*organizations)[0].Name)
-		assert.Equal(t, "Healthcare Provider", (*organizations)[0].OrganizationCategory.NameEn)
+		assert.Equal(t, "Healthcare Provider", (*organizations)[0].Category.NameEn)
 	})
 }

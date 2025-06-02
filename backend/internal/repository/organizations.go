@@ -29,10 +29,9 @@ func NewOrganizationsRepository(db *gorm.DB) *OrganizationsRepository {
 
 func (r *OrganizationsRepository) GetOrganizations() (*[]Organization, error) {
 	tx := r.db.Table(types.OrganizationTable.Name).
-		Preload("OrganizationCategory")
+		Preload("Category")
 	var organizations []Organization
-	err := tx.Find(&organizations).Error
-	if err != nil {
+	if err := tx.Find(&organizations).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching organizations: %w", err)
 		} else {
@@ -40,5 +39,5 @@ func (r *OrganizationsRepository) GetOrganizations() (*[]Organization, error) {
 		}
 	}
 
-	return &organizations, err
+	return &organizations, nil
 }

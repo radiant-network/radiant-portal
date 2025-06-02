@@ -1,4 +1,4 @@
-INSERT INTO organization (id, code, name, category)
+INSERT INTO organization (id, code, name, category_code)
 VALUES (1, 'CHOP', 'Children Hospital of Philadelphia', 'healthcare_provider'),
        (2, 'UCSF', 'University of California San-Francisco', 'healthcare_provider'),
        (3, 'CHUSJ', 'Centre hospitalier universitaire Sainte-Justine', 'healthcare_provider'),

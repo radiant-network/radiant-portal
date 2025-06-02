@@ -7,9 +7,9 @@ type Patient struct {
 	Mrn                    string
 	ManagingOrganizationID int
 	Organization           Organization `gorm:"foreignKey:ID;references:ManagingOrganizationID"`
-	SexCode                string       `gorm:"column:sex"`
-	Sex                    Sex          `gorm:"foreignKey:Code;references:SexCode"`
-	DateOfBirth            time.Time    `gorm:"type:DATE;column:dob"`
+	SexCode                string
+	Sex                    Sex       `gorm:"foreignKey:Code;references:SexCode"`
+	DateOfBirth            time.Time `gorm:"type:DATE"`
 }
 
 var PatientTable = Table{

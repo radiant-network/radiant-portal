@@ -20,7 +20,7 @@ type ProjectsDAO interface {
 
 func NewProjectsRepository(db *gorm.DB) *ProjectsRepository {
 	if db == nil {
-		log.Print("ProjectsRepository: db is nil")
+		log.Fatal("ProjectsRepository: db is nil")
 		return nil
 	}
 	return &ProjectsRepository{db: db}
@@ -29,8 +29,7 @@ func NewProjectsRepository(db *gorm.DB) *ProjectsRepository {
 func (r *ProjectsRepository) GetProjects() (*[]Project, error) {
 	tx := r.db.Table(types.ProjectTable.Name)
 	var projects []Project
-	err := tx.Find(&projects).Error
-	if err != nil {
+	if err := tx.Find(&projects).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching projects: %w", err)
 		} else {
@@ -38,5 +37,5 @@ func (r *ProjectsRepository) GetProjects() (*[]Project, error) {
 		}
 	}
 
-	return &projects, err
+	return &projects, nil
 }

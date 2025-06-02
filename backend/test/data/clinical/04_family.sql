@@ -1,4 +1,4 @@
-INSERT INTO "family" (id, case_id, family_member_id, relationship_to_proband, affected_status)
+INSERT INTO "family" (id, case_id, family_member_id, relationship_to_proband_code, affected_status_code)
 VALUES (1, 1, 1, 'mother', 'affected'),
        (2, 1, 2, 'father', 'non_affected'),
        (3, 2, 5, 'father', 'non_affected'),

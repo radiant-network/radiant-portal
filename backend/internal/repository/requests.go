@@ -20,7 +20,7 @@ type RequestsDAO interface {
 
 func NewRequestsRepository(db *gorm.DB) *RequestsRepository {
 	if db == nil {
-		log.Print("RequestsRepository: db is nil")
+		log.Fatal("RequestsRepository: db is nil")
 		return nil
 	}
 	return &RequestsRepository{db: db}
@@ -32,8 +32,7 @@ func (r *RequestsRepository) GetRequests() (*[]Request, error) {
 		Preload("Status").
 		Preload("Priority")
 	var requests []Request
-	err := tx.Find(&requests).Error
-	if err != nil {
+	if err := tx.Find(&requests).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching requests: %w", err)
 		} else {
@@ -41,5 +40,5 @@ func (r *RequestsRepository) GetRequests() (*[]Request, error) {
 		}
 	}
 
-	return &requests, err
+	return &requests, nil
 }

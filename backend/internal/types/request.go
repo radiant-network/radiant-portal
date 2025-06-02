@@ -4,13 +4,13 @@ import "time"
 
 type Request struct {
 	ID                     int
-	StatusCode             string   `gorm:"column:status"`
-	Status                 Status   `gorm:"foreignKey:Code;references:StatusCode"`
-	PriorityCode           string   `gorm:"column:priority"`
+	StatusCode             string
+	Status                 Status `gorm:"foreignKey:Code;references:StatusCode"`
+	PriorityCode           string
 	Priority               Priority `gorm:"foreignKey:Code;references:PriorityCode"`
 	RequestCode            string
 	OrderingPhysician      string
-	OrderingOrganizationID int          `gorm:"column:ordering_organisation_id"`
+	OrderingOrganizationID int
 	Organization           Organization `gorm:"foreignKey:ID;references:OrderingOrganizationID"`
 	OrderNumber            string
 	CreatedOn              time.Time
