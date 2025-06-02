@@ -1,0 +1,5 @@
+import{j as p}from"./jsx-runtime-Cf8x2fCZ.js";import{T as e}from"./transcript-id-link-Cftd6Cum.js";import"./index-yBjzXJbu.js";import"./transcript-canonical-icon-BV8dVGCs.js";import"./tooltip-BvHXuUN3.js";import"./index-t5q4d8OJ.js";import"./index-Bjkhh2p3.js";import"./index-CC5eZYhG.js";import"./index-fNjTmf9T.js";import"./index-KhTUl610.js";import"./index-BiFLoO8l.js";import"./index-CTFHtJli.js";import"./index-V1T-MO6M.js";import"./index-BmfKZQ-K.js";import"./utils-CytzSlOG.js";import"./i18n-3X_dEuPz.js";import"./iframe-BJfS6fiB.js";const S={title:"Feature/Variant/Transcript ID Link",component:e,args:{transcriptId:"ENST00000367770",isCanonical:!0}},r={render:a=>p.jsx(e,{...a})};var t,o,i;r.parameters={...r.parameters,docs:{...(t=r.parameters)==null?void 0:t.docs,source:{originalSource:`{
+  render: args => {
+    return <TranscriptIdLink {...args} />;
+  }
+}`,...(i=(o=r.parameters)==null?void 0:o.docs)==null?void 0:i.source}}};const _=["Default"];export{r as Default,_ as __namedExportsOrder,S as default};
