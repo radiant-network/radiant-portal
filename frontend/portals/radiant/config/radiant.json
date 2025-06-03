@@ -14,7 +14,7 @@
           { "key": "variant_class", "type": "multiple" },
           { "key": "consequence", "type": "multiple" },
           { "key": "chromosome", "type": "multiple" },
-          { "key": "transmission_mode", "type": "multiple" }
+          { "key": "start", "type": "multiple" }
         ]
       },
       "gene": {

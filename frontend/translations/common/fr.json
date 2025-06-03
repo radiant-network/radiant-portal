@@ -220,7 +220,7 @@
         "study_code": "Code d'étude",
         "consequence": "Conséquence",
         "variantexternal_reference": "Référence externe du variant",
-        "start": "Position de début",
+        "start": "Position",
         "gnomad_pli": "gnomAD pLI",
         "gnomad_loeuf": "gnomAD LOEUF",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
@@ -270,9 +270,9 @@
           "unk": "Inconnu"
         },
         "info_qd": "Profondeur de Qualité",
-        "ad_alt": "Profondeur Allélique ALT",
-        "ad_total": "Profondeur Totale",
-        "ad_ration": "Ratio Allélique",
+        "ad_alt": "ALT Profondeur Allélique",
+        "ad_total": "Profondeur Totale ALT + REF",
+        "ad_ration": "Ratio Allélique ALT",
         "gq": "Qualité du Génotype"
       },
       "operators": {
