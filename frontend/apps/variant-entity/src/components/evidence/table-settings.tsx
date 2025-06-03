@@ -106,8 +106,8 @@ function getConditionPhenotypeColumns(t: TFunction<string, undefined>) {
           return <div className="text-muted-foreground">{t('common.unspecified')}</div>;
         }
 
-        return codes.map((code: any) => (
-          <Tooltip>
+        return codes.map((code: any, index: number) => (
+          <Tooltip key={`${code}-${index}`}>
             <TooltipTrigger>
               <Badge key={code} variant="outline">
                 {code}

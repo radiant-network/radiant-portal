@@ -20,7 +20,7 @@ import { Badge } from '@/components/base/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import InterpretationFormGeneric from './interpretation-form-generic';
 import { InterpretationSomatic } from '@/api/api';
-import { forwardRef, useImperativeHandle } from 'react';
+import { useImperativeHandle } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 
 function InterpretationFormSomatic(
@@ -214,6 +214,4 @@ function InterpretationFormSomatic(
   );
 }
 
-export default forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationSomatic>>(
-  InterpretationFormSomatic,
-);
+export default InterpretationFormSomatic;

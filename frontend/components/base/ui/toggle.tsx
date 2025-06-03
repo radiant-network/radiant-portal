@@ -34,14 +34,16 @@ const toggleVariants = tv({
   },
 });
 
-const Toggle = React.forwardRef<
-  React.ElementRef<typeof TogglePrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> & VariantProps<typeof toggleVariants>
->(({ className, variant, size, ...props }, ref) => {
+function Toggle({
+  className,
+  variant,
+  size,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> & VariantProps<typeof toggleVariants>) {
   const styles = toggleVariants({ variant, size, className });
 
-  return <TogglePrimitive.Root ref={ref} className={styles.base({ className })} {...props} />;
-});
+  return <TogglePrimitive.Root className={styles.base({ className })} {...props} />;
+}
 
 Toggle.displayName = TogglePrimitive.Root.displayName;
 

@@ -38,18 +38,19 @@ const switchVariants = tv({
   },
 });
 
-const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & VariantProps<typeof switchVariants>
->(({ className, size, ...props }, ref) => {
+function Switch({
+  className,
+  size,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & VariantProps<typeof switchVariants>) {
   const style = switchVariants({ size });
 
   return (
-    <SwitchPrimitives.Root className={style.base({ className })} {...props} ref={ref}>
+    <SwitchPrimitives.Root className={style.base({ className })} {...props}>
       <SwitchPrimitives.Thumb className={style.thumb()} />
     </SwitchPrimitives.Root>
   );
-});
+}
 Switch.displayName = SwitchPrimitives.Root.displayName;
 
 export { Switch };

@@ -15,7 +15,7 @@ import InterpretationFormGeneric from './interpretation-form-generic';
 import { Badge } from '@/components/base/ui/badge';
 import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
 import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
-import { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { useEffect, useImperativeHandle } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 
 function InterpretationFormGermline(
@@ -189,6 +189,4 @@ function InterpretationFormGermline(
   );
 }
 
-export default forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationGermline>>(
-  InterpretationFormGermline,
-);
+export default InterpretationFormGermline;

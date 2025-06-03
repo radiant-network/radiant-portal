@@ -15,6 +15,7 @@ function Rating({ rating = 0, numberOfStars = 4, starSize = 16, className, ...pr
 
     return (
       <Star
+        key={index}
         size={starSize}
         className={cn('text-bookmark-off', {
           'text-bookmark-amber fill-bookmark-amber': isFilled,

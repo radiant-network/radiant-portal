@@ -12,8 +12,8 @@
   },
   "devDependencies": {
     "@ferlab/eslint-config": "^2.0.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
     "eslint": "^8.57.1",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-prettier": "^5.2.3",
@@ -28,8 +28,8 @@
     "@hookform/resolvers": "^4.0.0",
     "axios": "^1.8.3",
     "date-fns": "^4.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-hook-form": "^7.54.2",
     "universal-cookie": "^8.0.1",
     "zod": "^3.24.2"
