@@ -209,7 +209,7 @@
         "transmission_mode_tooltip": "Mode of inheritance in the family",
         "variant_class": "Variant Type",
         "symbol": "Symbol",
-        "pf": "Patient Frequency ",
+        "pf": "All Patient Frequency ",
         "actualInterval": "Actual interval",
         "unit": "Unit",
         "selectUnit": "Select unit",
@@ -219,7 +219,7 @@
         "study_code": "Study Code",
         "consequence": "Consequence",
         "variantexternal_reference": "Variant External Reference",
-        "start": "Start Position",
+        "start": "Position",
         "transmission": "Transmission",
         "gnomad_pli": "gnomAD pLI",
         "gnomad_loeuf": "gnomAD LOEUF",
@@ -270,9 +270,9 @@
           "unk": "Unknown"
         },
         "info_qd": "Quality Depth",
-        "ad_alt": "Allele Depth ALT",
-        "ad_total": "Total Depth",
-        "ad_ration": "Allele Ratio",
+        "ad_alt": "ALT Allele Depth",
+        "ad_total": "Total Depth ALT + REF",
+        "ad_ration": "Allele Ratio ALT",
         "gq": "Genotype Quality"
       },
       "operators": {
