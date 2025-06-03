@@ -42,19 +42,16 @@ const checkboxVariants = tv({
 export type CheckboxProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> &
   VariantProps<typeof checkboxVariants>;
 
-const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
-  ({ className, size, ...props }, ref) => {
-    const style = checkboxVariants({ size });
-
-    return (
-      <CheckboxPrimitive.Root ref={ref} className={style.base({ className })} {...props}>
-        <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
-          <Check className={style.icon()} />
-        </CheckboxPrimitive.Indicator>
-      </CheckboxPrimitive.Root>
-    );
-  },
-);
+function Checkbox({ className, size, ...props }: CheckboxProps) {
+  const style = checkboxVariants({ size });
+  return (
+    <CheckboxPrimitive.Root className={style.base({ className })} {...props}>
+      <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
+        <Check className={style.icon()} />
+      </CheckboxPrimitive.Indicator>
+    </CheckboxPrimitive.Root>
+  );
+}
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
 export { Checkbox };

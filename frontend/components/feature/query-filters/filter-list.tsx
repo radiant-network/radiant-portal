@@ -46,8 +46,8 @@ export function FilterList({ groupKey }: FilterListProps) {
         </Button>
       </div>
       <Accordion type="multiple" value={expandedFilters} onValueChange={value => setExpandedFilters(value)}>
-        {fields.map(field => (
-          <FilterContainer key={field.key} isOpen={expandedFilters.includes(field.key)} field={field} />
+        {fields.map((field, index) => (
+          <FilterContainer key={`${field.key}-${index}`} isOpen={expandedFilters.includes(field.key)} field={field} />
         ))}
       </Accordion>
     </div>
