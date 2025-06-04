@@ -25,7 +25,7 @@ function Rating({ rating = 0, numberOfStars = 4, starSize = 16, className, ...pr
   });
 
   return (
-    <div className={cn('flex items-center gap-[1px]', className)} {...props}>
+    <div className={cn('flex items-center gap-px', className)} {...props}>
       {stars}
     </div>
   );

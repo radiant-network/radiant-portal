@@ -118,8 +118,8 @@ export const actionButtonVariants = tv({
     },
     variant: {
       outline: {
-        base: 'enabled:hover:z-[2]',
-        actionsButton: 'ml-[-1px] enabled:hover:z-[2]',
+        base: 'enabled:hover:z-2',
+        actionsButton: '-ml-px enabled:hover:z-2',
       },
     },
   },

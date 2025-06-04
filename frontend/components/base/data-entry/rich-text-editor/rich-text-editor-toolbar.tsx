@@ -75,7 +75,7 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
       >
         <StrikethroughIcon />
       </Toggle>
-      <Separator orientation="vertical" className="w-[1px] h-8" />
+      <Separator orientation="vertical" className="w-px h-8" />
       <Toggle
         size="sm"
         pressed={editor.isActive("bulletList")}
@@ -90,7 +90,7 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
       >
         <ListOrderedIcon />
       </Toggle>
-      <Separator orientation="vertical" className="w-[1px] h-8" />
+      <Separator orientation="vertical" className="w-px h-8" />
       <Toggle
         size="sm"
         pressed={editor.isActive("link")}

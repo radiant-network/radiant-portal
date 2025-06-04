@@ -55,7 +55,7 @@ function InputSearch({
     <div className={cn('flex items-center w-full', wrapperClassName)}>
       <Input
         type={type}
-        className={cn('rounded-r-none focus:z-[2]', className)}
+        className={cn('rounded-r-none focus:z-2', className)}
         {...props}
         onKeyDown={e => {
           handleKeyDown(e);
@@ -78,7 +78,7 @@ function InputSearch({
         {...searchButtonProps}
         variant="default"
         loading={loading || searchButtonProps?.loading}
-        className={cn('h-9 px-3 shadow-sm rounded-l-none ml-[-1px] hover:z-[2]', searchButtonProps?.className)}
+        className={cn('h-9 px-3 shadow-sm rounded-l-none -ml-px hover:z-2', searchButtonProps?.className)}
         onClick={() => handleSearch(value)}
       >
         {!searchButtonProps?.loading && !loading && <SearchIcon />}
