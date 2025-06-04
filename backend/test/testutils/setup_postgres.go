@@ -51,7 +51,7 @@ func initPostgresDb() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, "radiant", "radiant", "radiant", port.Port(), "disable")
 	gormDb, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to open connection to tb", err)
+		log.Fatal("failed to open connection to db", err)
 		return nil, err
 	}
 
