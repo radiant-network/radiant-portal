@@ -23,5 +23,6 @@ CREATE TABLE `germline__snv__consequence_filter_partitioned`
     `gnomad_pli`              decimal(6, 5) NULL COMMENT "",
     `gnomad_loeuf`            decimal(6, 5) NULL COMMENT "",
     `phyloP17way_primate`     decimal(7, 5) NULL COMMENT "",
-    `phyloP100way_vertebrate` decimal(7, 5) NULL COMMENT ""
+    `phyloP100way_vertebrate` decimal(7, 5) NULL COMMENT "",
+    `vep_impact`              varchar(20) NULL COMMENT ""
 ) ENGINE=OLAP;

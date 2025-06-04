@@ -89,3 +89,36 @@ make clean
     openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axios -o ./frontend/api
 
     ```
+
+# Dev local
+
+## Prerequisites
+
+- Docker in recent version (28.1.1 for instance)
+- Docker compose in recent version (v2.36.0 for instance)
+
+## Run backend stack
+
+```bash
+docker compose up
+```
+
+## Run frontend
+
+Then use this .env in front-end
+```
+KEYCLOAK_REALM=CQDG
+KEYCLOAK_HOST=http:localhost:8080
+KEYCLOAK_CLIENT=radiant
+KEYCLOAK_CLIENT_SECRET=ShutThisIsASecret!
+SESSION_SECRET=secret_session
+PORTAL_HOST=http://localhost:3000
+API_HOST=http://localhost:8090
+PORT=3000
+```
+
+## Play 
+
+Start the radiant portal and open your browser on http://localhost:3000
+
+Click on Register to create a user, then you're all set

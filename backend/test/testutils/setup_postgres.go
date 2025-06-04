@@ -48,10 +48,10 @@ func initPostgresDb() (*gorm.DB, error) {
 		log.Fatal("failed to get container port: ", err)
 	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, "radiant", "radiant", "radiant", port.Port(), "disable")
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, "postgres", "postgres", "radiant", port.Port(), "disable")
 	gormDb, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to open connection to tb", err)
+		log.Fatal("failed to open connection to db", err)
 		return nil, err
 	}
 
@@ -71,7 +71,7 @@ func initPostgresDb() (*gorm.DB, error) {
 		return nil, err
 	}
 	if count, _ := res.RowsAffected(); count == 0 {
-		database.MigrateWithParams("file://../../scripts/init-sql/migrations", host, port.Port(), "radiant", "radiant", "radiant", "disable", "")
+		database.MigrateWithParams("file://../../scripts/init-sql/migrations", host, port.Port(), "radiant", "postgres", "postgres", "disable", "")
 		err := populateData(db)
 		if err != nil {
 			log.Fatal("failed to insert basic data in Postgres", err)
