@@ -283,8 +283,8 @@ CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
 		PROPERTIES
 		(
 			"type"="jdbc",
-			"user"="postgres",
-			"password"="postgres",
+			"user"="radiant",
+			"password"="radiant",
 			"jdbc_uri"="jdbc:postgresql://postgres:5432/radiant",
 			"driver_url"="https://repo1.maven.org/maven2/org/postgresql/postgresql/42.3.3/postgresql-42.3.3.jar",
 			"driver_class"="org.postgresql.Driver"

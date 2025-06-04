@@ -18,11 +18,11 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: radiant
+      POSTGRES_USER: radiant
       POSTGRES_DB: radiant
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U radiant"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -62,8 +62,8 @@ services:
       DB_HOST: starrocks
       DB_PORT: 9030
       DB_NAME: test_db
-      PGUSER: postgres
-      PGPASSWORD: postgres
+      PGUSER: radiant
+      PGPASSWORD: radiant
       PGPORT: 5432
       PGHOST: postgres
       PGDATABASE: radiant
@@ -105,4 +105,4 @@ services:
     command:
       - -c
       - |
-        export PGPASSWORD='postgres'; psql -h postgres -U postgres -d radiant -f /docker-entrypoint-initdb.d/insert_clinical_data.sql;
+        export PGPASSWORD='radiant'; psql -h postgres -U radiant -d radiant -f /docker-entrypoint-initdb.d/insert_clinical_data.sql;

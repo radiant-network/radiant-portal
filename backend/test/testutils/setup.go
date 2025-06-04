@@ -136,8 +136,8 @@ func startPostgresContainer() (testcontainers.Container, error) {
 		Image:        "postgres",
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
-			"POSTGRES_USER":     "postgres",
-			"POSTGRES_PASSWORD": "postgres",
+			"POSTGRES_USER":     "radiant",
+			"POSTGRES_PASSWORD": "radiant",
 			"POSTGRES_DB":       "radiant",
 		},
 		Networks: []string{
