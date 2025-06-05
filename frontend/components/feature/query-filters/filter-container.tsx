@@ -76,7 +76,7 @@ export function MultiSelectFilterContainer({ field, isOpen }: FilterContainerPro
   );
 }
 
-export function FilterComponent({ field, isOpen}: FilterContainerProps) {
+export function FilterComponent({ field, isOpen }: FilterContainerProps) {
   const { t } = useI18n();
   const fieldType = field.type;
 
@@ -99,11 +99,8 @@ export function FilterComponent({ field, isOpen}: FilterContainerProps) {
     default:
       filterElement = <div>{t('common.filters.unsupportedType', { type: field.type })}</div>;
   }
-  return (
-    <AccordionContainer field={field} isOpen={true}>
-      {filterElement}
-    </AccordionContainer>
-  );
+
+  return filterElement;
 }
 
 export function FilterContainer({ field, isOpen }: FilterContainerProps) {
