@@ -16,7 +16,6 @@ import { Skeleton } from '@/components/base/ui/skeleton';
 
 interface IProps {
   field: AggregationConfig;
-  aggregation: AggregationConfig;
   maxVisibleItems?: number;
   searchVisible?: boolean;
 }

@@ -298,7 +298,12 @@
         "placeholder": "Rechercher..."
       },
       "noValuesFound": "Aucune valeur trouvée",
-      "unsupportedType": "Type non pris en charge"
+      "unsupportedType": "Type non pris en charge",
+      "gene_divider": "Panels de gènes",
+      "pathogenicity_exomiser_divider": "Exomiser",
+      "pathogenicity_predictions_divider": "Prédictions",
+      "occurence_metrics_divider": "Métriques",
+      "occurence_parental_divider": "Analyse parentale"
     }
   },
   "queryFilters": {
