@@ -23,6 +23,7 @@
           { "key": "gnomad_pli", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" } },
           { "key": "gnomad_loeuf", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" } },
           { "key": "omim_inheritance", "type": "multiple" },
+          { "key": "gene_divider", "type": "divider" },
           { "key": "hpo_gene_panel", "type": "multiple" },
           { "key": "orphanet_gene_panel", "type": "multiple" },
           { "key": "omim_gene_panel", "type": "multiple" },
@@ -34,6 +35,7 @@
         "items": [
           { "key": "clinvar", "type": "multiple" },
           { "key": "vep_impact", "type": "multiple" },
+          { "key": "pathogenicity_predictions_divider", "type": "divider" }, 
           { "key": "cadd_score", "type": "numerical", "defaults": { 
             "min": 0, 
             "max": 100, 
@@ -97,15 +99,8 @@
         "items": [
           { "key": "zygosity", "type": "multiple" },
           { "key": "transmission_mode", "type": "multiple" },
-          { "key": "filter", "type": "numerical", 
-            "defaults": { 
-              "min": 0, 
-              "max": 100, 
-              "defaultOperator": "GreaterThan",
-              "defaultMin": 0,
-              "defaultMax": 100
-            } 
-          },
+          { "key": "occurence_metrics_divider", "type": "divider" }, 
+          { "key": "filter", "type": "multiple"},
           { "key": "info_qd", "type": "numerical", 
             "defaults": { 
               "min": 0, 

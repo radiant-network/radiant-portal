@@ -8,46 +8,30 @@ import { ToggleFilter } from '@/components/feature/query-filters/toggle-filter';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
-type FilterContainerProps = {
+interface FilterContainerProps {
   field: AggregationConfig;
   isOpen: boolean;
+  searchHandler?: (e: React.MouseEvent<SVGElement, MouseEvent>) => void;
 };
 
-export function FilterComponent({ field, searchVisible }: { field: AggregationConfig; searchVisible: boolean }) {
+interface AccordionContainerProps extends FilterContainerProps {
+  searchHandler?: (e: React.MouseEvent<SVGElement, MouseEvent>) => void;
+  children?: React.ReactNode;
+};
+
+export function AccordionContainer({ field, isOpen, children, searchHandler }: AccordionContainerProps) {
   const { t } = useI18n();
-
-  switch (field.type) {
-    case 'multiple':
-      return <MultiSelectFilter field={field} searchVisible={searchVisible} />;
-    case 'numerical':
-      return <NumericalFilter field={field} />;
-    case 'boolean':
-      return <ToggleFilter field={field} />;
-    default:
-      return <div>{t('common.filters.unsupportedType', { type: field.type })}</div>;
-  }
-}
-
-export function FilterContainer({ field, isOpen }: FilterContainerProps) {
-  const { t } = useI18n();
-  const [searchVisible, setSearchVisible] = React.useState(false);
-
-  function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
-    e.stopPropagation();
-    setSearchVisible(!searchVisible);
-  }
 
   const label = t(`common.filters.labels.${field.key}`, { defaultValue: field.key });
   const tooltipKey = `common.filters.labels.${field.key}_tooltip`;
   const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
 
-
   function renderTrigger() {
     return (
       <div className="flex items-center justify-between w-full text-base">
         <span>{label}</span>
-        {isOpen && field.type === 'multiple' && (
-          <SearchIcon size={18} className="z-40" aria-hidden onClick={handleSearch} />
+        {isOpen && searchHandler && (
+          <SearchIcon size={18} className="z-40" aria-hidden onClick={searchHandler} />
         )}
       </div>
     );
@@ -71,8 +55,59 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
 
       </AccordionTrigger>
       <AccordionContent>
-        <FilterComponent field={field} searchVisible={searchVisible} />
+        {children}
       </AccordionContent>
     </AccordionItem>
+  )
+}
+
+export function MultiSelectFilterContainer({ field, isOpen }: FilterContainerProps) {
+  const [searchVisible, setSearchVisible] = React.useState(false);
+
+  function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
+    e.stopPropagation();
+    setSearchVisible(!searchVisible);
+  };
+
+  return (
+    <AccordionContainer field={field} isOpen={isOpen} searchHandler={handleSearch} >
+      <MultiSelectFilter field={field} searchVisible={searchVisible} />;
+    </AccordionContainer>
+  );
+}
+
+export function FilterComponent({ field, isOpen}: FilterContainerProps) {
+  const { t } = useI18n();
+  const fieldType = field.type;
+
+  if (fieldType === 'divider') {
+    return <h4 className="mx-1 my-3 mt-5 text-muted-foreground">{t(`common.filters.${field.key}`)}</h4>;
+  }
+
+  let filterElement;
+
+  switch (field.type) {
+    case 'multiple':
+      filterElement = <MultiSelectFilterContainer field={field} isOpen={isOpen} />;
+      break;
+    case 'numerical':
+      filterElement = (<AccordionContainer field={field} isOpen={isOpen}><NumericalFilter field={field} /></AccordionContainer>);
+      break;
+    case 'boolean':
+      filterElement = (<AccordionContainer field={field} isOpen={isOpen}><ToggleFilter field={field} /></AccordionContainer>);
+      break;
+    default:
+      filterElement = <div>{t('common.filters.unsupportedType', { type: field.type })}</div>;
+  }
+  return (
+    <AccordionContainer field={field} isOpen={true}>
+      {filterElement}
+    </AccordionContainer>
+  );
+}
+
+export function FilterContainer({ field, isOpen }: FilterContainerProps) {
+  return (
+    <FilterComponent field={field} isOpen={isOpen} />
   );
 }

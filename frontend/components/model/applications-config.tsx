@@ -44,7 +44,7 @@ export type TFilterGroupConfig = IFilterRangeConfig | IFilterTextInputConfig | I
 
 export interface Aggregation {
   key: string;
-  type: 'multiple' | 'boolean' | 'numerical';
+  type: 'multiple' | 'boolean' | 'numerical' | 'divider';
   defaults?: TFilterGroupConfig;
   tooltips?: string[];
   intervalDecimal?: { [key: string]: number };

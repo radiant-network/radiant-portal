@@ -298,7 +298,12 @@
         "placeholder": "Search..."
       },
       "noValuesFound": "No values found",
-      "unsupportedType": "Unsupported type"
+      "unsupportedType": "Unsupported type",
+      "gene_divider": "Gene Panels",
+      "pathogenicity_exomiser_divider": "Exomiser",
+      "pathogenicity_predictions_divider": "Predictions",
+      "occurence_metrics_divider": "Metrics",
+      "occurence_parental_divider": "Parental Analysis"
     }
   },
   "variant": {
