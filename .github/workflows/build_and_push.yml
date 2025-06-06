@@ -94,5 +94,5 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.FRONTEND_IMAGE_NAME }}
-          subject-digest: ${{ steps.push_backend.outputs.digest }}
+          subject-digest: ${{ steps.push_frontend.outputs.digest }}
           push-to-registry: true
