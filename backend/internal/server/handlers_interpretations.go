@@ -1,10 +1,10 @@
 package server
 
 import (
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/client"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/client"
+	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 	"net/http"
 	"strings"

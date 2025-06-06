@@ -2,8 +2,8 @@ package server
 
 import (
 	"fmt"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"net/http"
 )
 

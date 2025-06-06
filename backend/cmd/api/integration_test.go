@@ -9,11 +9,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/server"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
-	"github.com/Ferlab-Ste-Justine/radiant-api/test/testutils"
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
