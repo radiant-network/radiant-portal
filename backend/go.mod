@@ -1,4 +1,4 @@
-module github.com/Ferlab-Ste-Justine/radiant-api
+module github.com/radiant-network/radiant-api
 
 go 1.23.3
 

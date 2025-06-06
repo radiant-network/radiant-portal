@@ -3,7 +3,7 @@ package repository
 import (
 	"log"
 
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/client"
+	"github.com/radiant-network/radiant-api/internal/client"
 	"gorm.io/gorm"
 )
 

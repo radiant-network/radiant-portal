@@ -3,8 +3,8 @@ package repository
 import (
 	"testing"
 
-	"github.com/Ferlab-Ste-Justine/radiant-api/test/testutils"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )

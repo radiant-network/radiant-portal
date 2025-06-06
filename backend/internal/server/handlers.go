@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/repository"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"net/http"
 	"strconv"
 )

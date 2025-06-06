@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

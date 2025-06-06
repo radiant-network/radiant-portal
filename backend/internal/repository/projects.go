@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 	"log"
 )

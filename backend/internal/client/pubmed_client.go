@@ -10,14 +10,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Ferlab-Ste-Justine/radiant-api/internal/types"
-) 
+	"github.com/radiant-network/radiant-api/internal/types"
+)
 
 type PubmedClient struct {
-    httpClient *http.Client
+	httpClient *http.Client
 	baseUrl    string
-	cache 		map[string]*types.PubmedCitation
-	cacheMutex 	sync.RWMutex
+	cache      map[string]*types.PubmedCitation
+	cacheMutex sync.RWMutex
 }
 
 type PubmedClientService interface {
@@ -25,14 +25,14 @@ type PubmedClientService interface {
 }
 
 func NewPubmedClient() *PubmedClient {
-    return &PubmedClient{
-        httpClient: &http.Client{Timeout: time.Duration(15) * time.Second},
-        baseUrl:    os.Getenv("PUBMED_BASE_URL"),
-		cache: make(map[string]*types.PubmedCitation),
-    }
+	return &PubmedClient{
+		httpClient: &http.Client{Timeout: time.Duration(15) * time.Second},
+		baseUrl:    os.Getenv("PUBMED_BASE_URL"),
+		cache:      make(map[string]*types.PubmedCitation),
+	}
 }
 
-func (client * PubmedClient) GetCitationById(id string) (*types.PubmedCitation, error) {
+func (client *PubmedClient) GetCitationById(id string) (*types.PubmedCitation, error) {
 	citation, found := client.getCitationByIdFromCache(id)
 	if found {
 		return citation, nil
@@ -48,11 +48,11 @@ func (client * PubmedClient) GetCitationById(id string) (*types.PubmedCitation, 
 		return nil, err
 	}
 	// could'nt get one during tests but just in case
-	if res.StatusCode == http.StatusNotFound { 
+	if res.StatusCode == http.StatusNotFound {
 		return nil, nil
 	}
 	if res.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Error while fetching citation from pubmed: %d %s", res.StatusCode, string(data));
+		err = fmt.Errorf("Error while fetching citation from pubmed: %d %s", res.StatusCode, string(data))
 		log.Print(err)
 		if res.StatusCode == http.StatusTooManyRequests {
 			return &types.PubmedCitation{ID: id}, nil
@@ -62,7 +62,7 @@ func (client * PubmedClient) GetCitationById(id string) (*types.PubmedCitation, 
 	}
 	citation = &types.PubmedCitation{}
 	if err := json.Unmarshal(data, citation); err != nil {
-		err = fmt.Errorf("Error while parsing citation from pubmed: %d %s", res.StatusCode, string(data));
+		err = fmt.Errorf("Error while parsing citation from pubmed: %d %s", res.StatusCode, string(data))
 		log.Print(err)
 		return nil, nil // equivalent to NOT FOUND during tests
 	}
@@ -72,10 +72,9 @@ func (client * PubmedClient) GetCitationById(id string) (*types.PubmedCitation, 
 	return citation, nil
 }
 
-func (client * PubmedClient) getCitationByIdFromCache(id string) (*types.PubmedCitation, bool) {
+func (client *PubmedClient) getCitationByIdFromCache(id string) (*types.PubmedCitation, bool) {
 	client.cacheMutex.RLock()
 	defer client.cacheMutex.RUnlock()
 	item, found := client.cache[id]
 	return item, found
 }
-
