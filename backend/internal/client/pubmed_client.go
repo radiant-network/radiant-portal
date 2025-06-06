@@ -47,7 +47,7 @@ func (client *PubmedClient) GetCitationById(id string) (*types.PubmedCitation, e
 	if err != nil {
 		return nil, err
 	}
-	// could'nt get one during tests but just in case
+	// couldn't get one during tests but just in case
 	if res.StatusCode == http.StatusNotFound {
 		return nil, nil
 	}
