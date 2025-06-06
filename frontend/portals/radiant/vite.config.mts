@@ -1,9 +1,9 @@
 import { reactRouter } from '@react-router/dev/vite';
 import autoprefixer from 'autoprefixer';
-import tailwindcss from 'tailwindcss';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
+import tailwindcss from '@tailwindcss/vite';
 
 import { type AppsConfig, type PortalConfig } from '../../components/model/applications-config';
 import radiantConfig from './config/radiant.json';
@@ -19,7 +19,7 @@ const project = process.env.THEME || 'radiant';
 export default defineConfig({
   css: {
     postcss: {
-      plugins: [tailwindcss, autoprefixer],
+      plugins: [autoprefixer],
     },
   },
   define: {
@@ -33,5 +33,5 @@ export default defineConfig({
       '@translations': path.resolve(__dirname, '../../translations'),
     },
   },
-  plugins: [reactRouter() as any, tsconfigPaths()],
+  plugins: [reactRouter() as any, tsconfigPaths(), tailwindcss()],
 });

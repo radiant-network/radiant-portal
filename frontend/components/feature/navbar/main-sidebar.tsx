@@ -136,9 +136,9 @@ function MainSidebar({
       <SidebarFooter>
         <AvatarUserDetails
           {...userDetails}
-          className="group-data-[collapsible=icon]:!p-0"
+          className="group-data-[collapsible=icon]:p-0!"
           avatarClassName="size-8"
-          detailsClassName="group-data-[collapsible=icon]:!hidden"
+          detailsClassName="group-data-[collapsible=icon]:hidden!"
         />
         <SidebarMenu>
           <SidebarMenuItem key="profile">

@@ -71,7 +71,7 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
     <Sidebar
       variant="sidebar"
       collapsible="icon"
-      className={'!static flex flex-col w-full bg-primary dark:bg-secondary '}
+      className={'static! flex flex-col w-full bg-primary dark:bg-secondary '}
     >
       <SidebarContent>
         <SidebarGroup>

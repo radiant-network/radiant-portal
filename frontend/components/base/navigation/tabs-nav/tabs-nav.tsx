@@ -58,7 +58,7 @@ export function TabsListItem<T>({ ref, value, disabled = false, className, child
       data-active={active}
       data-disabled={disabled}
       className={cn(
-        'z-[1] group pt-1.5 pb-1 hover:cursor-pointer',
+        'z-1 group pt-1.5 pb-1 hover:cursor-pointer',
         {
           'border-b-2 border-primary': active,
           'opacity-50 hover:cursor-not-allowed': disabled,

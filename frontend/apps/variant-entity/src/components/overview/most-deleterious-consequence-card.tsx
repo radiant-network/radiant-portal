@@ -19,7 +19,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
 
   return (
     <Card {...props}>
-      <CardContent className="px-6 flex-grow">
+      <CardContent className="px-6 grow">
         <div className="flex items-start [&>div]:w-40 justify-between gap-6 mt-6">
           <div className="flex flex-col gap-2">
             <div className="text-2xl font-semibold uppercase">
