@@ -14,7 +14,7 @@
           { "key": "variant_class", "type": "multiple" },
           { "key": "consequence", "type": "multiple" },
           { "key": "chromosome", "type": "multiple" },
-          { "key": "start", "type": "multiple" }
+          { "key": "start", "type": "numerical", "defaults": { "min": 0, "max": 100, "defaultOperator": "Between" } }
         ]
       },
       "gene": {
