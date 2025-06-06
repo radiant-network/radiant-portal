@@ -9,7 +9,7 @@ Radiant Data Platform
 # Links
 
 - [Radiant Portal](https://portal.radiant.ferlab.bio/)
-- [Storybook](https://ferlab-ste-justine.github.io/radiant-portal)
+- [Storybook](https://radiant-network.github.io/radiant-portal)
 
 # Backend
 

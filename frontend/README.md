@@ -17,7 +17,7 @@
 3. Run the the server
 
 ```bash
-git clone git@github.com:Ferlab-Ste-Justine/radiant-portal.git
+git clone git@github.com:radiant-network/radiant-portal.git
 cd radiant-portal/frontend
 npm install
 cd portals/radiant
