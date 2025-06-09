@@ -98,8 +98,8 @@ var SeqIdField = Field{
 }
 var TaskIdField = Field{
 	Name:          "task_id",
-	CanBeSelected: false,
-	CanBeFiltered: false,
+	CanBeSelected: true,
+	CanBeFiltered: true,
 	Table:         OccurrenceTable,
 }
 var LocusIdField = Field{
