@@ -2,6 +2,7 @@ CREATE TABLE `germline__snv__occurrence`
 (
     part                            INT     NOT NULL,
     seq_id                          INT     NOT NULL,
+    task_id                         INT     NOT NULL,
     locus_id                        bigint(20) NOT NULL,
     ad_ratio                        FLOAT,
     gq                              INT,
@@ -52,4 +53,4 @@ CREATE TABLE `germline__snv__occurrence`
     transmission_mode               VARCHAR(50),
     info_old_record                 VARCHAR(2000)
 ) ENGINE=OLAP
-    DUPLICATE KEY(`part`, `seq_id`, `locus_id`)
+    DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`)

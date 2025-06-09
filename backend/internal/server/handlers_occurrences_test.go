@@ -14,6 +14,7 @@ func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrenc
 	return []types.Occurrence{
 		{
 			SeqId:              1,
+			TaskId:             1,
 			LocusId:            "1000",
 			Filter:             "PASS",
 			Zygosity:           "HET",
@@ -82,7 +83,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 	router.POST("/occurrences/germline/:seq_id/list", OccurrencesGermlineListHandler(repo))
 	body := `{
 			"additional_fields":[
-				"seq_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
+				"seq_id","task_id","locus_id","filter","zygosity","pf","pc","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
 			]
 	}`
 	req, _ := http.NewRequest("POST", "/occurrences/germline/1/list", bytes.NewBuffer([]byte(body)))
@@ -92,6 +93,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{
         "seq_id": 1,
+		"task_id": 1,
 		"chromosome": "1",
 		"start": 1,
         "is_canonical":false,

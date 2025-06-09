@@ -4,6 +4,7 @@ package types
 // @Description Occurrence represents an occurrence
 type Occurrence struct {
 	SeqId               int               `json:"seq_id" validate:"required"`
+	TaskId              int               `json:"task_id" validate:"required"`
 	Chromosome          string            `json:"chromosome" validate:"required"`
 	Start               int64             `json:"start" validate:"required"`
 	LocusId             string            `json:"locus_id" validate:"required"`
@@ -95,6 +96,12 @@ var SeqIdField = Field{
 	CanBeFiltered: true,
 	Table:         OccurrenceTable,
 }
+var TaskIdField = Field{
+	Name:          "task_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	Table:         OccurrenceTable,
+}
 var LocusIdField = Field{
 	Name:          "locus_id",
 	CanBeSelected: true,
@@ -159,6 +166,7 @@ var InfoQdField = Field{
 }
 var OccurrencesFields = []Field{
 	SeqIdField,
+	TaskIdField,
 	LocusIdField,
 	FilterField,
 	GenotypeQualityField,
@@ -219,6 +227,7 @@ var OccurrencesFields = []Field{
 
 var OccurrencesDefaultFields = []Field{
 	SeqIdField,
+	TaskIdField,
 	LocusIdField,
 	HgvsgField,
 	VariantClassField,

@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `germline__snv__occurrence`
 (
     part                            INT     NOT NULL,
     seq_id                          INT     NOT NULL,
+    task_id                         INT     NOT NULL,
     locus_id                        bigint(20) NOT NULL,
     ad_ratio                        FLOAT,
     gq                              INT,
@@ -160,7 +161,7 @@ CREATE TABLE IF NOT EXISTS `germline__snv__occurrence`
     transmission_mode               VARCHAR(50),
     info_old_record                 VARCHAR(2000)
     ) ENGINE=OLAP
-    DUPLICATE KEY(`part`, `seq_id`, `locus_id`);
+    DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`);
 
 CREATE TABLE IF NOT EXISTS `germline__snv__variant`
 (
@@ -256,10 +257,10 @@ VALUES
     (1, 1000, 'csq11', 'BRAC', 3, 'T', true),
     (1, 2000, 'csq20', 'BRAC', 1, 'T', true);
 
-INSERT INTO germline__snv__occurrence (part, seq_id, locus_id, gq, filter, zygosity, ad_ratio)
+INSERT INTO germline__snv__occurrence (part, seq_id, task_id, locus_id, gq, filter, zygosity, ad_ratio)
 VALUES
-    (1, 1, 1000, 100, 'PASS', 'HET', 1.0),
-    (1, 1, 2000, 200, 'PASS', 'HOM', 0.5);
+    (1, 1, 1, 1000, 100, 'PASS', 'HET', 1.0),
+    (1, 1, 1, 2000, 200, 'PASS', 'HOM', 0.5);
 
 INSERT INTO germline__snv__variant (locus_id, impact_score, pf, pc, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate)
 VALUES
