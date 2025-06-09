@@ -24,7 +24,9 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
           {t('variantEntity.evidence.clinVar.table.headers.evaluated')}
         </TooltipsHeader>
       ),
-      size: 120,
+      minSize: 60,
+      maxSize: 150,
+      size: 100,
       enableSorting: false,
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.condition, {
@@ -35,6 +37,8 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
         </a>
       ),
       header: t('variantEntity.evidence.clinVar.table.headers.condition'),
+      minSize: 85,
+      maxSize: 150,
       size: 120,
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.classification, {
@@ -47,7 +51,9 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
         </div>
       ),
       header: t('variantEntity.evidence.clinVar.table.headers.classification'),
-      minSize: 120,
+      minSize: 75,
+      maxSize: 150,
+      size: 120,
       enableSorting: false,
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.status, {
@@ -58,12 +64,16 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
           {t('variantEntity.evidence.clinVar.table.headers.status')}
         </TooltipsHeader>
       ),
+      minSize: 60,
+      maxSize: 150,
       size: 120,
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.origin, {
       id: 'origin',
       cell: info => <Badge variant="outline">{info.getValue()}</Badge>,
       header: t('variantEntity.evidence.clinVar.table.headers.origin'),
+      minSize: 60,
+      maxSize: 150,
       size: 120,
       enableSorting: false,
     }),
@@ -77,6 +87,8 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
         </div>
       ),
       header: '',
+      minSize: 75,
+      maxSize: 150,
       size: 120,
       enableSorting: false,
       enablePinning: false,
@@ -94,6 +106,8 @@ function getConditionPhenotypeColumns(t: TFunction<string, undefined>) {
         </a>
       ),
       header: t('variantEntity.evidence.gene.table.headers.condition'),
+      minSize: 100,
+      maxSize: 200,
       size: 120,
       enableSorting: true,
     }),
@@ -118,6 +132,8 @@ function getConditionPhenotypeColumns(t: TFunction<string, undefined>) {
         ));
       },
       header: t('variantEntity.evidence.gene.table.headers.inheritence'),
+      minSize: 100,
+      maxSize: 200,
       size: 120,
       enableSorting: false,
     }),
@@ -131,6 +147,7 @@ function getConditionPhenotypeColumns(t: TFunction<string, undefined>) {
           </Button>
         </div>
       ),
+      maxSize: 200,
       minSize: 120,
       enableSorting: false,
     }),
