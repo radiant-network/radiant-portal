@@ -29,7 +29,6 @@ func NewRequestsRepository(db *gorm.DB) *RequestsRepository {
 func (r *RequestsRepository) GetRequests() (*[]Request, error) {
 	tx := r.db.Table(types.RequestTable.Name).
 		Preload("Organization").
-		Preload("Status").
 		Preload("Priority")
 	var requests []Request
 	if err := tx.Find(&requests).Error; err != nil {

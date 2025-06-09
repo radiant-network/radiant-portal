@@ -11,7 +11,7 @@ type Sample struct {
 	TissueType        string
 	HistologyTypeCode string
 	HistologyType     HistologyType `gorm:"foreignKey:code;references:HistologyTypeCode"`
-	SubmitterId       string
+	SubmitterSampleId string
 }
 
 var SampleTable = Table{

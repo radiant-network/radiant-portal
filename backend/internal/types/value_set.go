@@ -29,16 +29,16 @@ func (ObservationCategory) TableName() string {
 	return ObservationCategoryTable.Name
 }
 
-var CaseTypeTable = Table{
-	Name: "radiant_jdbc.public.case_type",
+var CaseAnalysisTypeTable = Table{
+	Name: "radiant_jdbc.public.case_analysis_type",
 }
 
-type CaseType struct {
+type CaseAnalysisType struct {
 	ValueSet
-} // @name CaseType
+} // @name CaseAnalysisType
 
-func (CaseType) TableName() string {
-	return CaseTypeTable.Name
+func (CaseAnalysisType) TableName() string {
+	return CaseAnalysisTypeTable.Name
 }
 
 var StatusTable = Table{
@@ -244,4 +244,16 @@ type OrganizationCategory struct {
 
 func (OrganizationCategory) TableName() string {
 	return OrganizationCategoryTable.Name
+}
+
+var PanelTypeTable = Table{
+	Name: "radiant_jdbc.public.panel_type",
+}
+
+type PanelType struct {
+	ValueSet
+} // @name PanelType
+
+func (PanelType) TableName() string {
+	return PanelTypeTable.Name
 }

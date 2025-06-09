@@ -30,8 +30,7 @@ func (r *CasesRepository) GetCases() (*[]Case, error) {
 	tx := r.db.Table(types.CaseTable.Name).
 		Preload("Proband").
 		Preload("Project").
-		Preload("Type").
-		Preload("Status").
+		Preload("CaseAnalysis").
 		Preload("Request").
 		Preload("PerformerLab")
 	var cases []Case

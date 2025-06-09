@@ -31,11 +31,10 @@ func (r *SequencingExperimentsRepository) GetSequencingExperiments() (*[]Sequenc
 		Preload("Case").
 		Preload("Patient").
 		Preload("Sample").
-		Preload("ExperimentalStrategy").
+		Preload("Experiment").
 		Preload("Status").
 		Preload("Request").
-		Preload("PerformerLab").
-		Preload("Platform")
+		Preload("PerformerLab")
 	var sequencingExperiments []SequencingExperiment
 	if err := tx.Find(&sequencingExperiments).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
