@@ -83,7 +83,7 @@ func joinWithVariants(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("JOIN germline__snv__variant v ON v.locus_id=o.locus_id")
 }
 func (r *OccurrencesRepository) GetPart(seqId int) (int, error) { //TODO cache
-	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
+	tx := r.db.Table("staging_sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
 	var part int
 	err := tx.Scan(&part).Error
 	if err != nil {

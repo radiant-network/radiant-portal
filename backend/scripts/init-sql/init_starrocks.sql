@@ -222,23 +222,27 @@ CREATE TABLE IF NOT EXISTS omim_gene_panel
 ) ENGINE=OLAP
          DUPLICATE KEY(`symbol`, `panel`);
 
-CREATE TABLE IF NOT EXISTS `sequencing_experiment`
+CREATE TABLE IF NOT EXISTS `staging_sequencing_experiment`
 (
-    `case_id`       int NOT NULL,
-    `seq_id`        int NOT NULL,
-    `part`          int NOT NULL,
-    `analysis_type` varchar(100) NULL,
-    `sample_id`     varchar(255) NULL,
-    `patient_id`    varchar(255) NULL,
-    `vcf_filepath`  varchar(1024) NULL,
-    `sex`           varchar(10) NULL,
-    `family_role`   varchar(20) NULL,
-    `is_affected`   boolean NULL,
-    `created_at`    datetime NULL,
-    `updated_at`    datetime NULL,
-    `ingested_at`   datetime NULL
+    `case_id`               int NOT NULL,
+    `seq_id`                int NOT NULL,
+    `task_id`               int NOT NULL,
+    `part`                  int NOT NULL,
+    `analysis_type`         varchar(100) NULL,
+    `sample_id`             varchar(255) NULL,
+    `patient_id`            varchar(255) NULL,
+    `experimental_strategy` varchar(50) NULL,
+    `request_id`            int NULL,
+    `request_priority`      varchar(20) NULL,
+    `vcf_filepath`          varchar(1024) NULL,
+    `sex`                   varchar(10) NULL,
+    `family_role`           varchar(20) NULL,
+    `affected_status`       varchar(20) NULL,
+    `created_at`            datetime NULL,
+    `updated_at`            datetime NULL,
+    `ingested_at`           datetime NULL
     ) ENGINE = OLAP
-    PRIMARY KEY(`case_id`,`seq_id`);
+    PRIMARY KEY(`case_id`,`seq_id`,`task_id`);
 
 INSERT INTO clinvar (locus_id, chromosome, start, reference, alternate, name)
 VALUES
@@ -267,10 +271,10 @@ VALUES
     (1000, 3, 0.01, 10, 0.01, 'hgvsg1', 'AD', 'class1', 'MODIFIER', 'BRAF', true, true, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T'),
     (2000, 1, 0.02, 20, 0.02, 'hgvsg2', 'Smu', 'class2', 'MODIFIER', 'BRAC', false, true, ['Pathogenic'], 'rs2222222', 'p.Arg19His', ['splice acceptor'], 'locus_full_2000', '2', 2222, 'C', 'G');
 
-INSERT INTO sequencing_experiment (case_id, seq_id, part, analysis_type)
+INSERT INTO staging_sequencing_experiment (case_id, seq_id, task_id, part, analysis_type)
 VALUES
-    (1, 1, 1, 'germline'),
-    (1, 2, 1, 'germline');
+    (1, 1, 1, 1, 'germline'),
+    (1, 2, 1, 1, 'germline');
 
 INSERT INTO omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
 VALUES

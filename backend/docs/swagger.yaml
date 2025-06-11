@@ -356,6 +356,8 @@ components:
           type: integer
         symbol:
           type: string
+        task_id:
+          type: integer
         transcript_id:
           type: string
         variant_class:
@@ -375,6 +377,7 @@ components:
       - picked_consequences
       - seq_id
       - start
+      - task_id
       - variant_class
       - zygosity
       type: object
@@ -405,23 +408,35 @@ components:
     Sequencing:
       description: Sequencing represents a sequencing
       properties:
+        affected_status:
+          type: string
         analysis_type:
           type: string
         case_id:
           type: integer
-        experiment_type:
+        created_at:
+          type: string
+        experimental_strategy:
           type: string
         family_role:
           type: string
-        is_affected:
-          type: boolean
+        part:
+          type: integer
         patient_id:
+          type: integer
+        request_id:
+          type: integer
+        request_priority:
           type: string
         sample_id:
-          type: string
+          type: integer
         seq_id:
           type: integer
         sex:
+          type: string
+        task_id:
+          type: integer
+        updated_at:
           type: string
         vcf_filepath:
           type: string

@@ -957,6 +957,12 @@ export interface PubmedCitationDetails {
  */
 export interface Sequencing {
     /**
+     *
+     * @type {string}
+     * @memberof Sequencing
+     */
+    'affected_status'?: string;
+    /**
      * 
      * @type {string}
      * @memberof Sequencing
@@ -973,7 +979,7 @@ export interface Sequencing {
      * @type {string}
      * @memberof Sequencing
      */
-    'experiment_type'?: string;
+    'experimental_strategy'?: string;
     /**
      * 
      * @type {string}
@@ -982,16 +988,22 @@ export interface Sequencing {
     'family_role'?: string;
     /**
      * 
-     * @type {boolean}
-     * @memberof Sequencing
-     */
-    'is_affected'?: boolean;
-    /**
-     * 
      * @type {string}
      * @memberof Sequencing
      */
     'patient_id'?: string;
+    /**
+     *
+     * @type {number}
+     * @memberof Sequencing
+     */
+    'request_id'?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof Sequencing
+     */
+    'request_priority'?: string;
     /**
      * 
      * @type {string}

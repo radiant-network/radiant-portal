@@ -20,9 +20,10 @@ func (m *MockRepository) CheckDatabaseConnection() string {
 
 func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
 	return &types.Sequencing{
-		SeqId:          1,
-		ExperimentType: "WGS",
-		AnalysisType:   "germline",
+		SeqId:                1,
+		ExperimentalStrategy: "WGS",
+		AnalysisType:         "germline",
+		AffectedStatus:       "not_affected",
 	}, nil
 }
 
@@ -67,7 +68,7 @@ func Test_GetSequencingHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"seq_id":1, "experiment_type":"WGS", "is_affected":false, "analysis_type": "germline"}`, w.Body.String())
+	assert.JSONEq(t, `{"seq_id":1, "experimental_strategy":"WGS", "affected_status":"not_affected", "analysis_type": "germline"}`, w.Body.String())
 }
 
 func Test_MondoTermAutoCompleteHandler(t *testing.T) {
