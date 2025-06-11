@@ -272,7 +272,7 @@
         "info_qd": "Quality Depth",
         "ad_alt": "ALT Allele Depth",
         "ad_total": "Total Depth ALT + REF",
-        "ad_ration": "Allele Ratio ALT",
+        "ad_ration": "Allelic Ratio ALT",
         "gq": "Genotype Quality"
       },
       "operators": {

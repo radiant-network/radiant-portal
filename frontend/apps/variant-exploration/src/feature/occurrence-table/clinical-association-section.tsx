@@ -12,6 +12,8 @@ type ClinicalAssociationSectionProps = {
   data: ExpendedOccurrence;
 };
 
+const MAX_CLINICAL_ASSOCIATION = 3; // Maximum number of clinical associations to display before showing "see more"
+
 export default function ClinicalAssociationSection({ data }: ClinicalAssociationSectionProps) {
   const { t } = useI18n();
 
@@ -21,13 +23,7 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
 
   let clinicalAssociationValue: ReactElement[] = [];
   data.omim_conditions?.forEach((oc, index) => {
-    clinicalAssociationValue.push(
-      <DetailItem
-        title={oc.panel ? oc.panel : clinicalAssociationTitle}
-        value={oc.inheritance_code ? <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div> : '-'}
-      />
-    );
-    if (index === 2) {
+    if (index === MAX_CLINICAL_ASSOCIATION) {
       clinicalAssociationValue.push(
         <Button variant="link" size="sm" className="px-0 justify-start">
           <Link
@@ -40,7 +36,16 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
         </Button>
       );
       return;
+    } else if (index > MAX_CLINICAL_ASSOCIATION) {
+      return;
     }
+
+    clinicalAssociationValue.push(
+      <DetailItem
+        title={oc.panel ? oc.panel : clinicalAssociationTitle}
+        value={oc.inheritance_code ? <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div> : '-'}
+      />
+    );
   });
 
   return (
