@@ -71,7 +71,7 @@ export function MultiSelectFilterContainer({ field, isOpen }: FilterContainerPro
 
   return (
     <AccordionContainer field={field} isOpen={isOpen} searchHandler={handleSearch} >
-      <MultiSelectFilter field={field} searchVisible={searchVisible} />;
+      <MultiSelectFilter field={field} searchVisible={searchVisible} />
     </AccordionContainer>
   );
 }

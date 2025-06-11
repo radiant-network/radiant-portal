@@ -1,8 +1,6 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { cn } from '@/components/lib/utils';
-import { useI18n } from '@/components/hooks/i18n';
 import { VepImpact } from '@/api/api';
-import ImpactIcon from '@/components/feature/variant/impact-icon';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 
 type MostDeleteriousConsequenceCellProps = {
