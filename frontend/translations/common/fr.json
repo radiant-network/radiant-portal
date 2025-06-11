@@ -303,7 +303,10 @@
       "pathogenicity_exomiser_divider": "Exomiser",
       "pathogenicity_predictions_divider": "Prédictions",
       "occurence_metrics_divider": "Métriques",
-      "occurence_parental_divider": "Analyse parentale"
+      "occurence_parental_divider": "Analyse parentale",
+      "frequency_divider_my_organization": "Mon Organisation",
+      "frequency_divider_pulic_cohorts": "Cohortes Publiques",
+      "zygosity_divider_parental_analysis": "Analyse Parentale"
     }
   },
   "queryFilters": {
