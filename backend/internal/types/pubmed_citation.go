@@ -1,10 +1,10 @@
 package types
 
 type PubmedCitation struct {
-	ID 	string 					`json:"id,omitempty"`
-	Nlm PubmedCitationDetails 	`json:"nlm,omitempty"`
+	ID  string                `json:"id,omitempty"`
+	Nlm PubmedCitationDetails `json:"nlm,omitempty"`
 } // @name PubmedCitation
 
 type PubmedCitationDetails struct {
-	Format 	string `json:"format,omitempty"`
+	Format string `json:"format,omitempty"`
 }

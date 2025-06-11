@@ -28,7 +28,7 @@ func NewSequencingRepository(db *gorm.DB) *SequencingRepository {
 }
 
 func (r *SequencingRepository) GetSequencing(seqId int) (*Sequencing, error) {
-	tx := r.db.Table("sequencing_experiment").Where("seq_id = ?", seqId)
+	tx := r.db.Table("staging_sequencing_experiment").Where("seq_id = ?", seqId)
 	var sequencing types.Sequencing
 	err := tx.First(&sequencing).Error
 	if err != nil {
@@ -40,7 +40,7 @@ func (r *SequencingRepository) GetSequencing(seqId int) (*Sequencing, error) {
 	}
 
 	if sequencing.AnalysisType == "germline" {
-		sequencing.ExperimentType = "WGS"
+		sequencing.ExperimentalStrategy = "WGS"
 	}
 	return &sequencing, err
 }

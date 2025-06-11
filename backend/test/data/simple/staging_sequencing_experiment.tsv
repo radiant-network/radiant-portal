@@ -1,0 +1,3 @@
+case_id	seq_id	task_id	part	analysis_type	affected_status
+1	1	1	1	germline	affected
+1	2	1	1	germline	not_affected
