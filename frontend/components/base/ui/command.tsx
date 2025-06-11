@@ -6,6 +6,7 @@ import { Command as CommandPrimitive, useCommandState } from 'cmdk';
 
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/base/ui/dialog';
+import { Checkbox } from '@/components/base/ui/checkbox';
 
 function Command({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive>) {
   return (
@@ -106,7 +107,7 @@ function CommandItem({ className, ...props }: React.ComponentPropsWithoutRef<typ
   return (
     <CommandPrimitive.Item
       className={cn(
-        'relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+        'relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
         className,
       )}
       {...props}
@@ -114,6 +115,25 @@ function CommandItem({ className, ...props }: React.ComponentPropsWithoutRef<typ
   );
 }
 CommandItem.displayName = CommandPrimitive.Item.displayName;
+
+/**
+  * Custom Component added. We be overrided if shadcn command is run
+  */
+function CommandItemCheckbox({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>) {
+  const [checked, setChecked] = React.useState<boolean>(false);
+  return (
+    <CommandItem {...props}
+      onSelect={(value: string) => {
+        props.onSelect && props.onSelect(value);
+        setChecked(!checked);
+      }}
+    >
+      <Checkbox checked={checked} disabled={props.disabled} />
+      {props.children}
+    </CommandItem>
+  );
+}
+CommandItemCheckbox.displayName = "CommandItemCheckbox";
 
 const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return <span className={cn('ml-auto text-xs tracking-widest text-muted-foreground', className)} {...props} />;
@@ -128,6 +148,7 @@ export {
   CommandEmpty,
   CommandGroup,
   CommandItem,
+  CommandItemCheckbox,
   CommandShortcut,
   CommandSeparator,
 };
