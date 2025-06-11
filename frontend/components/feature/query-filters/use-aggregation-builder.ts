@@ -37,7 +37,6 @@ export function useAggregationBuilder(field: string, size: number = 30, shouldFe
       op: activeQuery.op as SqonOpEnum,
     };
   }
-
   return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(data, fetcher, {
     revalidateOnFocus: false,
   });

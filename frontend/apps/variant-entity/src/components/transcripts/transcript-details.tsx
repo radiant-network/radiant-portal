@@ -4,6 +4,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import ExpandableList from '@/components/base/list/expandable-list';
 import { TFunction } from 'i18next';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 
 interface TranscriptDetailsProps {
   data: Transcript;
@@ -11,7 +12,6 @@ interface TranscriptDetailsProps {
 
 function TranscriptDetails({ data }: TranscriptDetailsProps) {
   const { t } = useI18n();
-
   return (
     <div className="flex [&>div]:p-2 [&>div]:flex-1">
       <div className="space-y-2">
@@ -29,12 +29,10 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
       </div>
       <div>
         <div className="flex items-center gap-2">
-          {/**
-           * TODO when api ready: ref: https://d3b.atlassian.net/browse/SJRA-146
-           * <ImpactIcon value="HIGH" size={12} />
-          <span className="text-sm">Stop Gained</span>
-           */}
-          -
+          <div className="">
+            <ConsequenceLabel vepImpact={data.vep_impact!} consequence={data.consequences?.[0] || ''} size="sm" />
+            <span className="text-sm">{data.aa_change && ` - ${data.aa_change}`}</span> 
+          </div>
         </div>
       </div>
       <div>
