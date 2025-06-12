@@ -201,19 +201,21 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
           // Actual content
           Array.from({ length: visibleItemsCount }, (_, i) => (
             <div className="space-y-3 pt-2" key={items[i].key}>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-top">
                 <label className="flex items-center space-x-2 overflow-hidden">
                   <Checkbox
                     className="w-4 h-4"
                     checked={selectedItems.some(f => f === items[i].key)}
                     onCheckedChange={() => itemSelected(items[i])}
                   />
-                  <div className="overflow-hidden text-ellipsis text-sm">
-                    {t(`common.filters.labels.${field.key}_value.${items[i].key}`, { defaultValue: items[i].key })}
+                  <div className="overflow-hidden text-xs whitespace-normal break-words">
+                    {t(`common.filters.labels.${field.key}_value.${items[i].key}`, 
+                      { defaultValue: items[i].key }
+                    )}
                   </div>
                   <span className="checkmark"></span>
                 </label>
-                <span className="bg-accent px-2 py-1 rounded-md text-xs">{numberFormat(items[i].count || 0)}</span>
+                <span className="bg-accent px-2 pb-1 rounded-md text-xs items-top">{numberFormat(items[i].count || 0)}</span>
               </div>
             </div>
           ))
