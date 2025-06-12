@@ -10,7 +10,7 @@ components:
           description: Bucket key
           type: string
       type: object
-    AggregationBody:
+    AggregationBodyWithSqon:
       properties:
         field:
           type: string
@@ -38,6 +38,63 @@ components:
         source:
           $ref: '#/components/schemas/Term'
       type: object
+    CaseResult:
+      description: Line represented a case in case list
+      properties:
+        case_analysis_code:
+          type: string
+        case_analysis_name:
+          type: string
+        case_analysis_type_code:
+          type: string
+        case_id:
+          type: integer
+        created_on:
+          type: string
+        managing_organization_code:
+          type: string
+        managing_organization_name:
+          type: string
+        mrn:
+          type: string
+        patient_id:
+          type: integer
+        performer_lab_code:
+          type: string
+        performer_lab_name:
+          type: string
+        prescriber:
+          type: string
+        primary_condition:
+          type: string
+        priority_code:
+          type: string
+        project_code:
+          type: string
+        request_id:
+          type: integer
+        requested_by_code:
+          type: string
+        requested_by_name:
+          type: string
+        status_code:
+          type: string
+        updated_on:
+          type: string
+      required:
+      - case_analysis_code
+      - case_analysis_name
+      - case_analysis_type_code
+      - case_id
+      - created_on
+      - mrn
+      - priority_code
+      - project_code
+      - requested_by_code
+      - requested_by_name
+      - status_code
+      - updated_on
+      type: object
     Count:
       description: Count represents count result
       properties:
@@ -45,7 +102,15 @@ components:
           description: Number of results
           type: integer
       type: object
-    CountBody:
+    CountBodyWithCriteria:
+      properties:
+        search_criteria:
+          items:
+            $ref: '#/components/schemas/SearchCriterion'
+          type: array
+          uniqueItems: false
+      type: object
+    CountBodyWithSqon:
       properties:
         sqon:
           $ref: '#/components/schemas/Sqon'
@@ -280,7 +345,32 @@ components:
           type: array
           uniqueItems: false
       type: object
-    ListBody:
+    ListBodyWithCriteria:
+      description: Body of a list request with search criteria
+      properties:
+        additional_fields:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        limit:
+          type: integer
+        offset:
+          type: integer
+        page_index:
+          type: integer
+        search_criteria:
+          items:
+            $ref: '#/components/schemas/SearchCriterion'
+          type: array
+          uniqueItems: false
+        sort:
+          items:
+            $ref: '#/components/schemas/SortBody'
+          type: array
+          uniqueItems: false
+      type: object
+    ListBodyWithSqon:
       description: Body of a list request
       properties:
         additional_fields:
@@ -405,6 +495,15 @@ components:
         format:
           type: string
       type: object
+    SearchCriterion:
+      properties:
+        field:
+          type: string
+        value:
+          items: {}
+          type: array
+          uniqueItems: false
+      type: object
     Sequencing:
       description: Sequencing represents a sequencing
       properties:
@@ -484,7 +583,7 @@ components:
           description: Min for numeric facet
           type: number
       type: object
-    StatisticsBody:
+    StatisticsBodyWithSqon:
       properties:
         field:
           type: string
@@ -731,6 +830,78 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /cases/count:
+    post:
+      description: Counts cases
+      operationId: countCases
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountBodyWithCriteria'
+        description: Count Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Count'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Count cases
+      tags:
+      - cases
+  /cases/list:
+    post:
+      description: List cases
+      operationId: listCases
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CaseResult'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: List cases
+      tags:
+      - cases
   /hpo/autocomplete:
     get:
       description: Retrieve AutoCompleteTerm list of HPO terms matching input string
@@ -1162,7 +1333,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AggregationBody'
+              $ref: '#/components/schemas/AggregationBodyWithSqon'
         description: Aggregation Body
         required: true
       responses:
@@ -1212,7 +1383,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CountBody'
+              $ref: '#/components/schemas/CountBodyWithSqon'
         description: Count Body
         required: true
       responses:
@@ -1260,7 +1431,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ListBody'
+              $ref: '#/components/schemas/ListBodyWithSqon'
         description: List Body
         required: true
       responses:
@@ -1310,7 +1481,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StatisticsBody'
+              $ref: '#/components/schemas/StatisticsBodyWithSqon'
         description: Statistics Body
         required: true
       responses:

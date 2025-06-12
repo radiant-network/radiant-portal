@@ -14,6 +14,6 @@ func Test_GetRequests(t *testing.T) {
 		repo := NewRequestsRepository(db)
 		requests, err := repo.GetRequests()
 		assert.NoError(t, err)
-		assert.Len(t, *requests, 61)
+		assert.Len(t, *requests, 82)
 	})
 }

@@ -245,3 +245,12 @@ var OccurrencesDefaultFields = []Field{
 	ChromosomeField,
 	StartField,
 }
+
+var OccurrencesDefaultSort = []SortField{{Field: PickedImpactScoreField, Order: "desc"}}
+
+var OccurrencesQueryConfig = QueryConfig{
+	AllFields:     OccurrencesFields,
+	DefaultFields: OccurrencesDefaultFields,
+	DefaultSort:   OccurrencesDefaultSort,
+	IdField:       LocusIdField,
+}

@@ -83,10 +83,10 @@ func (s *Sqon) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// ListBody - Body of a list request
+// ListBodyWithSqon - Body of a list request
 // @Description Body of a list request
-// @Name ListBody
-type ListBody struct {
+// @Name ListBodyWithSqon
+type ListBodyWithSqon struct {
 	AdditionalFields []string   `json:"additional_fields"`
 	Sqon             *Sqon      `json:"sqon"`
 	Limit            int        `json:"limit"`
@@ -100,19 +100,40 @@ type SortBody struct {
 	Order string `json:"order" enums:"asc,desc"`
 } // @Name SortBody
 
-type CountBody struct {
+type CountBodyWithSqon struct {
 	Sqon *Sqon `json:"sqon"`
-} // @Name CountBody
+} // @Name CountBodyWithSqon
 
-type AggregationBody struct {
+type AggregationBodyWithSqon struct {
 	Field string
 	Sqon  *Sqon
 	Size  int
-} // @Name AggregationBody
+} // @Name AggregationBodyWithSqon
 
-type StatisticsBody struct {
+type StatisticsBodyWithSqon struct {
 	Field string
 	Sqon  *Sqon
-} // @Name StatisticsBody
+} // @Name StatisticsBodyWithSqon
 
 type ArraySqon []Sqon
+
+type SearchCriterion struct {
+	FieldName string        `json:"field"`
+	Value     []interface{} `json:"value"`
+}
+
+// ListBodyWithCriteria - Body of a list request with search criteria
+// @Description Body of a list request with search criteria
+// @Name ListBodyWithCriteria
+type ListBodyWithCriteria struct {
+	AdditionalFields []string          `json:"additional_fields"`
+	SearchCriteria   []SearchCriterion `json:"search_criteria"`
+	Limit            int               `json:"limit"`
+	Offset           int               `json:"offset"`
+	PageIndex        int               `json:"page_index"`
+	Sort             []SortBody        `json:"sort"`
+}
+
+type CountBodyWithCriteria struct {
+	SearchCriteria []SearchCriterion `json:"search_criteria"`
+} // @Name CountBodyWithCriteria

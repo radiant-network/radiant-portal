@@ -13,9 +13,35 @@ type CaseAnalysis struct {
 }
 
 var CaseAnalysisTable = Table{
-	Name: "radiant_jdbc.public.case_analysis",
+	Name:  "radiant_jdbc.public.case_analysis",
+	Alias: "ca",
 }
 
 func (CaseAnalysis) TableName() string {
 	return CaseAnalysisTable.Name
+}
+
+var CaseAnalysisTypeCodeField = Field{
+	Name:          "type_code",
+	Alias:         "case_analysis_type_code",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseAnalysisTable,
+}
+
+var CaseAnalysisCodeField = Field{
+	Name:          "code",
+	Alias:         "case_analysis_code",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseAnalysisTable,
+}
+
+var CaseAnalysisNameField = Field{
+	Name:          "name",
+	Alias:         "case_analysis_name",
+	CanBeSelected: true,
+	Table:         CaseAnalysisTable,
 }
