@@ -1,6 +1,7 @@
 import { type RouteConfig, index, layout, prefix, route } from '@react-router/dev/routes';
 
 export default [
+  route('health-check', './routes/health-check.tsx'),
   layout('./layout/protected-layout.tsx', [
     index('./routes/home.tsx'),
     route('variants/entity/:locusId', './routes/variants/entity.tsx'),
