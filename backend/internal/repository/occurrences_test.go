@@ -11,18 +11,25 @@ import (
 	"gorm.io/gorm"
 )
 
-var allFields = sliceutils.Map(types.OccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
+var allOccurrencesFields = sliceutils.Map(types.OccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
 	return value.Name
 })
 
-var defaultFieldsForTest = []types.Field{
+var defaultOccurrencesFieldsForTest = []types.Field{
 	types.LocusIdField,
+}
+
+var OccurrencesQueryConfigForTest = types.QueryConfig{
+	AllFields:     types.OccurrencesFields,
+	DefaultFields: defaultOccurrencesFieldsForTest,
+	DefaultSort:   types.OccurrencesDefaultSort,
+	IdField:       types.LocusIdField,
 }
 
 func Test_GetOccurrences(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrencesRepository(db)
-		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, allOccurrencesFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -45,7 +52,7 @@ func Test_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
 		repo := NewOccurrencesRepository(db)
 		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "filter"}
 
-		query, err := types.NewListQuery(selectedFields, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, selectedFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -62,7 +69,7 @@ func Test_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t *testing.T) 
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewOccurrencesRepository(db)
-		query, err := types.NewListQuery(nil, nil, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, nil, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -82,7 +89,7 @@ func Test_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
 		}
-		query, err := types.NewListQuery(selectedFields, nil, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, selectedFields, nil, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -115,7 +122,7 @@ func Test_CountOccurrences_Return_Count_That_Match_Filters(t *testing.T) {
 
 			Op: "in",
 		}
-		query, err := types.NewCountQuery(sqon, types.OccurrencesFields)
+		query, err := types.NewCountQueryFromSqon(sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
 		c, err2 := repo.CountOccurrences(1, query)
 
@@ -136,7 +143,7 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 			},
 			Op: "in",
 		}
-		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, nil)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, allOccurrencesFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -170,7 +177,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 		}
 		selectedFields := []string{"locus_id", "clinvar"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -201,7 +208,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *test
 		}
 		selectedFields := []string{"locus_id", "clinvar"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -223,7 +230,7 @@ func Test_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(t *testing.T)
 			Limit:  5,
 			Offset: 0,
 		}
-		query, err := types.NewListQuery(nil, nil, types.OccurrencesFields, defaultFieldsForTest, pagination, nil)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, nil, nil, pagination, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -247,7 +254,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 			Offset: 5,
 		}
 
-		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, defaultFieldsForTest, pagination, sortedBody)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, allOccurrencesFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -274,7 +281,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Sp
 			PageIndex: 1,
 		}
 
-		query, err := types.NewListQuery(allFields, nil, types.OccurrencesFields, defaultFieldsForTest, pagination, sortedBody)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, allOccurrencesFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -304,7 +311,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 			},
 		}
 
-		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sortedBody)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, allOccurrencesFields, sqon, nil, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -333,7 +340,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 			},
 		}
 
-		query, err := types.NewListQuery(allFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sortedBody)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, allOccurrencesFields, sqon, nil, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -346,7 +353,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrencesRepository(db)
-		query, err := types.NewAggregationQuery("zygosity", nil, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon("zygosity", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
 		assert.NoError(t, err)
@@ -369,7 +376,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 			},
 			Op: "in",
 		}
-		query, err := types.NewAggregationQuery("zygosity", sqon, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon("zygosity", sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
 		assert.NoError(t, err)
@@ -392,7 +399,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 			},
 			Op: "and",
 		}
-		query, err := types.NewAggregationQuery("zygosity", sqon, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon("zygosity", sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
 		assert.NoError(t, err)
@@ -408,7 +415,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_Wi
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Clinvar(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrencesRepository(db)
-		query, err := types.NewAggregationQuery("clinvar", nil, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon("clinvar", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
 		assert.NoError(t, err)
@@ -426,7 +433,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Clinvar(t *
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrencesRepository(db)
-		query, err := types.NewAggregationQuery("impact_score", nil, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon("impact_score", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
 		assert.NoError(t, err)
@@ -452,7 +459,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Scor
 			},
 			Op: "and",
 		}
-		query, err := types.NewAggregationQuery("impact_score", sqon, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon("impact_score", sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
 		assert.NoError(t, err)
@@ -484,7 +491,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel(t *testing.
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -512,7 +519,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -540,7 +547,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_An
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQuery(selectedFields, sqon, types.OccurrencesFields, defaultFieldsForTest, nil, sort)
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(1, query)
 		assert.NoError(t, err)
@@ -563,7 +570,7 @@ func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_pane
 			Op: "and",
 		}
 
-		query, err := types.NewCountQuery(sqon, types.OccurrencesFields)
+		query, err := types.NewCountQueryFromSqon(sqon, types.OccurrencesFields)
 		assert.NoError(t, err)
 		c, err := repo.CountOccurrences(1, query)
 		assert.NoError(t, err)
@@ -574,7 +581,7 @@ func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_pane
 func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrencesRepository(db)
-		query, err := types.NewAggregationQuery("omim_gene_panel", nil, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon("omim_gene_panel", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(1, query)
 		assert.NoError(t, err)
@@ -595,7 +602,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(
 func Test_GetStatisticsOccurrences(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrencesRepository(db)
-		query, err := types.NewStatisticsQuery("pf", nil, types.OccurrencesFields)
+		query, err := types.NewStatisticsQueryFromSqon("pf", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		statistics, err := repo.GetStatisticsOccurrences(1, query)
 		assert.NoError(t, err)
@@ -606,7 +613,7 @@ func Test_GetStatisticsOccurrences(t *testing.T) {
 
 func Test_GetStatisticsOccurrences_Non_Numeric_Field(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
-		_, err := types.NewStatisticsQuery("hgvsg", nil, types.OccurrencesFields)
+		_, err := types.NewStatisticsQueryFromSqon("hgvsg", nil, types.OccurrencesFields)
 		assert.Error(t, err)
 	})
 }

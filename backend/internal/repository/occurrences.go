@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/radiant-network/radiant-api/internal/utils"
+
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -38,43 +40,6 @@ func NewOccurrencesRepository(db *gorm.DB) *OccurrencesRepository {
 	return &OccurrencesRepository{db: db}
 }
 
-const (
-	MinLimit = 10
-	MaxLimit = 200
-)
-
-func addLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
-	if userQuery.Pagination() != nil {
-		var l int
-		if userQuery.Pagination().Limit < MaxLimit {
-			l = userQuery.Pagination().Limit
-		} else {
-			l = MaxLimit
-		}
-		if userQuery.Pagination().PageIndex != 0 {
-			tx = tx.Limit(l).Offset(userQuery.Pagination().PageIndex * l)
-		} else {
-			tx = tx.Limit(l).Offset(userQuery.Pagination().Offset)
-		}
-	} else {
-		tx = tx.Limit(MinLimit)
-	}
-	addSort(tx, userQuery)
-}
-
-func addSort(tx *gorm.DB, userQuery types.ListQuery) {
-	for _, sort := range userQuery.SortedFields() {
-		s := fmt.Sprintf("%s.%s %s", sort.Field.Table.Alias, sort.Field.GetName(), sort.Order)
-		tx = tx.Order(s)
-	}
-}
-func addWhere(userQuery types.Query, tx *gorm.DB) {
-	if userQuery.Filters() != nil {
-		filters, params := userQuery.Filters().ToSQL(nil)
-		tx.Where(filters, params...)
-	}
-}
-
 func addImplicitOccurrencesFilters(seqId int, r *OccurrencesRepository, part int) *gorm.DB {
 	tx := r.db.Table("germline__snv__occurrence o").Where("o.seq_id = ? and o.part=?", seqId, part)
 	return tx
@@ -103,7 +68,7 @@ func (r *OccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQu
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 
-	addLimitAndSort(tx, userQuery)
+	utils.AddLimitAndSort(tx, userQuery)
 	// we build a TOP-N query like :
 	// SELECT o.locus_id, o.quality, o.ad_ratio, ...., v.variant_class, v.hgvsg... FROM germline__snv__occurrence o, germline__snv__variant v
 	// WHERE o.locus_id in (
@@ -114,7 +79,7 @@ func (r *OccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQu
 		Select(columns).
 		Where("o.seq_id = ? and part=? and v.locus_id = o.locus_id and o.locus_id in (?)", seqId, part, tx)
 
-	addSort(tx, userQuery) //We re-apply the sort on the outer query
+	utils.AddSort(tx, userQuery) //We re-apply the sort on the outer query
 
 	if err = tx.Find(&occurrences).Error; err != nil {
 		return nil, fmt.Errorf("error fetching occurrences: %w", err)
@@ -151,7 +116,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *OccurrencesRep
 				//	ORDER BY o.locus_id asc LIMIT 10
 
 				selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
-				selectedPanelsTables := getDistinctTablesFromFields(selectedPanelsField)
+				selectedPanelsTables := utils.GetDistinctTablesFromFields(selectedPanelsField)
 
 				consequenceFilterTable := r.db.Table("germline__snv__consequence_filter_partitioned cf").Where("part = ?", part)
 
@@ -185,18 +150,11 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *OccurrencesRep
 			}
 
 		} else {
-			addWhere(userQuery, tx)
+			utils.AddWhere(userQuery, tx)
 		}
 
 	}
 	return tx, part, nil
-}
-
-func getDistinctTablesFromFields(selectedPanelsField []types.Field) []types.Table {
-	selectedPanelsTables := sliceutils.Unique(sliceutils.Map(selectedPanelsField, func(field types.Field, index int, slice []types.Field) types.Table {
-		return field.Table
-	}))
-	return selectedPanelsTables
 }
 
 func (r *OccurrencesRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
@@ -222,13 +180,13 @@ func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *Occurrence
 		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 			joinClause := "LEFT JOIN germline__snv__consequence_filter_partitioned cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
 			tx = tx.Joins(joinClause)
-			selectedPanelsTables := getDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
+			selectedPanelsTables := utils.GetDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
 			for _, panelsTable := range selectedPanelsTables {
 				tx = tx.
 					Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
 			}
 		}
-		addWhere(userQuery, tx)
+		utils.AddWhere(userQuery, tx)
 
 	}
 	return tx, part, nil

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_NewAggregationQuery_Return_Error_When_Aggregate_Field_Is_Unknown(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_Return_Error_When_Aggregate_Field_Is_Unknown(t *testing.T) {
 	t.Parallel()
 
 	sqon := Sqon{
@@ -18,13 +18,13 @@ func Test_NewAggregationQuery_Return_Error_When_Aggregate_Field_Is_Unknown(t *te
 
 	aggregate := "unknown_field"
 
-	_, err := NewAggregationQuery(aggregate, &sqon, allEmpoyeeFields)
+	_, err := NewAggregationQueryFromSqon(aggregate, &sqon, allEmpoyeeFields)
 
 	assert.ErrorContains(t, err, "error during build aggregation")
 	assert.ErrorContains(t, err, "unknown_field can not be aggregated")
 }
 
-func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Or(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_Remove_Aggregate_Field_From_Filters_Or(t *testing.T) {
 	t.Parallel()
 
 	sqon := Sqon{
@@ -37,7 +37,7 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Or(t *testing.
 
 	aggregate := "age"
 
-	query, err := NewAggregationQuery(aggregate, &sqon, allEmpoyeeFields)
+	query, err := NewAggregationQueryFromSqon(aggregate, &sqon, allEmpoyeeFields)
 
 	if assert.NoError(t, err) {
 
@@ -54,7 +54,7 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Or(t *testing.
 	}
 }
 
-func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Not(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_Remove_Aggregate_Field_From_Filters_Not(t *testing.T) {
 	t.Parallel()
 
 	sqon := Sqon{
@@ -65,7 +65,7 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Not(t *testing
 	}
 	aggregate := "age"
 
-	query, err := NewAggregationQuery(aggregate, &sqon, allEmpoyeeFields)
+	query, err := NewAggregationQueryFromSqon(aggregate, &sqon, allEmpoyeeFields)
 
 	if assert.NoError(t, err) {
 		assert.Empty(t, query.Filters(), "filters should be empty")
@@ -73,7 +73,7 @@ func Test_NewAggregationQuery_Remove_Aggregate_Field_From_Filters_Not(t *testing
 
 }
 
-func Test_NewAggregationQuery_Return_Empty_Filter_If_Empty_Or(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_Return_Empty_Filter_If_Empty_Or(t *testing.T) {
 	t.Parallel()
 
 	sqon := Sqon{
@@ -85,32 +85,32 @@ func Test_NewAggregationQuery_Return_Empty_Filter_If_Empty_Or(t *testing.T) {
 
 	aggregate := "age"
 
-	query, err := NewAggregationQuery(aggregate, &sqon, allEmpoyeeFields)
+	query, err := NewAggregationQueryFromSqon(aggregate, &sqon, allEmpoyeeFields)
 
 	if assert.NoError(t, err) {
 		assert.Empty(t, query.Filters(), "filters should be empty")
 	}
 }
 
-func TestListQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_SelectedList(t *testing.T) {
+func Test_NewListQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_SelectedList(t *testing.T) {
 	t.Parallel()
 	fields := []string{"age", "salary", "department_name"}
-	query, err := NewListQuery(fields, nil, allFields, defaultFields, nil, nil)
+	query, err := NewListQueryFromSqon(queryConfig, fields, nil, nil, nil)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
 
-func TestListQuery_HasFieldFromTables_Return_False_If_Not_Contains_Field_In_SelectedList(t *testing.T) {
+func Test_NewListQueryFromSqon_HasFieldFromTables_Return_False_If_Not_Contains_Field_In_SelectedList(t *testing.T) {
 	t.Parallel()
 	fields := []string{"age", "salary"}
-	query, err := NewListQuery(fields, nil, allFields, defaultFields, nil, nil)
+	query, err := NewListQueryFromSqon(queryConfig, fields, nil, nil, nil)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
 
-func TestListQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
+func Test_NewListQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
 	t.Parallel()
 	fields := []string{"department_name"}
 	sqon := Sqon{
@@ -119,13 +119,13 @@ func TestListQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFiel
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewListQuery(fields, &sqon, allFields, defaultFields, nil, nil)
+	query, err := NewListQueryFromSqon(queryConfig, fields, &sqon, nil, nil)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(EmployeeTable, DepartmentTable))
 	}
 }
 
-func TestListQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields_Or_Selected_Fields(t *testing.T) {
+func Test_NewListQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields_Or_Selected_Fields(t *testing.T) {
 	t.Parallel()
 	fields := []string{"salary"}
 	sqon := Sqon{
@@ -134,29 +134,29 @@ func TestListQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_Filer
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewListQuery(fields, &sqon, allFields, defaultFields, nil, nil)
+	query, err := NewListQueryFromSqon(queryConfig, fields, &sqon, nil, nil)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
 
-func TestAggQuery_HasFieldFromTables_Return_True_If_Contains_Field_Aggregated(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_Aggregated(t *testing.T) {
 	t.Parallel()
-	query, err := NewAggregationQuery("department_name", nil, allFields)
+	query, err := NewAggregationQueryFromSqon("department_name", nil, allFields)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
 
-func TestAggQuery_HasFieldFromTables_Agg_Return_False_If_Not_Contains_Field_Aggregated(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_HasFieldFromTables_Agg_Return_False_If_Not_Contains_Field_Aggregated(t *testing.T) {
 	t.Parallel()
-	query, err := NewAggregationQuery("salary", nil, allFields)
+	query, err := NewAggregationQueryFromSqon("salary", nil, allFields)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
 
-func TestAggQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
 	t.Parallel()
 
 	sqon := Sqon{
@@ -165,13 +165,13 @@ func TestAggQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerField
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewAggregationQuery("salary", &sqon, allFields)
+	query, err := NewAggregationQueryFromSqon("salary", &sqon, allFields)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(EmployeeTable, DepartmentTable))
 	}
 }
 
-func TestAggQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields_Or_Aggregated(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields_Or_Aggregated(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
@@ -179,13 +179,13 @@ func TestAggQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerF
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewAggregationQuery("salary", &sqon, allFields)
+	query, err := NewAggregationQueryFromSqon("salary", &sqon, allFields)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
 
-func TestCountQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
+func Test_NewCountQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
@@ -193,13 +193,13 @@ func TestCountQuery_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFie
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewCountQuery(&sqon, allFields)
+	query, err := NewCountQueryFromSqon(&sqon, allFields)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(EmployeeTable, DepartmentTable))
 	}
 }
 
-func TestCountQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields(t *testing.T) {
+func Test_NewCountQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
@@ -207,8 +207,65 @@ func TestCountQuery_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_File
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewCountQuery(&sqon, allFields)
+	query, err := NewCountQueryFromSqon(&sqon, allFields)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
+	}
+}
+
+func Test_NewListQueryFromCriteria_Empty_Criteria(t *testing.T) {
+	t.Parallel()
+	fields := []string{"salary"}
+	searchCriteria := make([]SearchCriterion, 0)
+	query, err := NewListQueryFromCriteria(queryConfig, fields, searchCriteria, nil, nil)
+	if assert.NoError(t, err) {
+		assert.Nil(t, query.Filters())
+	}
+}
+
+func Test_NewListQueryFromCriteria_Unknown_Field(t *testing.T) {
+	t.Parallel()
+	fields := []string{"salary"}
+	searchCriteria := []SearchCriterion{{FieldName: "unknown", Value: []interface{}{"a", "b", "c"}}}
+	_, err := NewListQueryFromCriteria(queryConfig, fields, searchCriteria, nil, nil)
+	assert.ErrorContains(t, err, "error during build list query from search criteria")
+	assert.ErrorContains(t, err, "unknown can not be filtered")
+}
+
+func Test_NewListQueryFromCriteria_Valid_Criteria(t *testing.T) {
+	t.Parallel()
+	fields := []string{"salary", "age"}
+	searchCriteria := []SearchCriterion{{FieldName: "department_name", Value: []interface{}{"a", "b", "c"}}}
+	query, err := NewListQueryFromCriteria(queryConfig, fields, searchCriteria, nil, nil)
+	if assert.NoError(t, err) {
+		assert.NotNil(t, query.Filters())
+		assert.True(t, query.HasFieldFromTables(DepartmentTable, EmployeeTable))
+	}
+}
+
+func Test_NewCountQueryFromCriteria_Empty_Criteria(t *testing.T) {
+	t.Parallel()
+	searchCriteria := make([]SearchCriterion, 0)
+	query, err := NewCountQueryFromCriteria(searchCriteria, queryConfig.AllFields)
+	if assert.NoError(t, err) {
+		assert.Nil(t, query.Filters())
+	}
+}
+
+func Test_NewCountQueryFromCriteria_Unknown_Field(t *testing.T) {
+	t.Parallel()
+	searchCriteria := []SearchCriterion{{FieldName: "unknown", Value: []interface{}{"a", "b", "c"}}}
+	_, err := NewCountQueryFromCriteria(searchCriteria, queryConfig.AllFields)
+	assert.ErrorContains(t, err, "error during build count query from search criteria")
+	assert.ErrorContains(t, err, "unknown can not be filtered")
+}
+
+func Test_CountListQueryFromCriteria_Valid_Criteria(t *testing.T) {
+	t.Parallel()
+	searchCriteria := []SearchCriterion{{FieldName: "department_name", Value: []interface{}{"a", "b", "c"}}}
+	query, err := NewCountQueryFromCriteria(searchCriteria, queryConfig.AllFields)
+	if assert.NoError(t, err) {
+		assert.NotNil(t, query.Filters())
+		assert.True(t, query.HasFieldFromTables(DepartmentTable, EmployeeTable))
 	}
 }

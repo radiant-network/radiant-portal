@@ -12,6 +12,13 @@ type Query interface {
 	GetFieldsFromTables(tables ...Table) []Field
 }
 
+type QueryConfig struct {
+	AllFields     []Field
+	DefaultFields []Field
+	DefaultSort   []SortField
+	IdField       Field
+}
+
 type ListQuery interface {
 	SelectedFields() []Field
 	Filters() FilterNode
@@ -74,18 +81,52 @@ type Pagination struct {
 	PageIndex int //PageIndex the page index in case there is pagination
 }
 
-func NewListQuery(additional []string, sqon *Sqon, fields []Field, defaultFields []Field, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
+func ResolvePagination(limit int, offset int, pageIndex int) *Pagination {
+	var p Pagination
+	if limit != 0 && pageIndex != 0 {
+		p = Pagination{Limit: limit, PageIndex: pageIndex}
+	} else if limit != 0 && offset != 0 {
+		p = Pagination{Limit: limit, Offset: offset}
+	} else if limit != 0 {
+		p = Pagination{Limit: limit, Offset: 0}
+	} else {
+		p = Pagination{Limit: 10, Offset: 0}
+	}
+	return &p
+}
+
+func NewListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
 
 	// Define allowed selectedCols
-	selectedFields := findSelectedFields(fields, additional, defaultFields)
+	selectedFields := findSelectedFields(config.AllFields, additional, config.DefaultFields)
 
 	// Define allowed sortedCols
-	sortedField := findSortedFields(fields, sorted)
+	sortedField := findSortedFields(config.AllFields, sorted, config.DefaultSort, config.IdField)
 
 	if sqon != nil {
-		root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)
+		root, visitedFilteredFields, err := sqonToFilter(sqon, config.AllFields, nil)
 		if err != nil {
-			return nil, fmt.Errorf("error during build list query %w", err)
+			return nil, fmt.Errorf("error during build list query from sqon %w", err)
+		}
+		return &listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, nil
+
+	} else {
+		return &listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField}, nil
+	}
+}
+
+func NewListQueryFromCriteria(config QueryConfig, additional []string, searchCriteria []SearchCriterion, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
+
+	// Define allowed selectedCols
+	selectedFields := findSelectedFields(config.AllFields, additional, config.DefaultFields)
+
+	// Define allowed sortedCols
+	sortedField := findSortedFields(config.AllFields, sorted, config.DefaultSort, config.IdField)
+
+	if len(searchCriteria) != 0 {
+		root, visitedFilteredFields, err := criteriaToFilter(searchCriteria, config.AllFields)
+		if err != nil {
+			return nil, fmt.Errorf("error during build list query from search criteria %w", err)
 		}
 		return &listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, nil
 
@@ -132,7 +173,7 @@ func (l *aggQuery) GetAggregateField() Field {
 	return l.aggregateField
 }
 
-func NewAggregationQuery(aggregation string, sqon *Sqon, fields []Field) (AggQuery, error) {
+func NewAggregationQueryFromSqon(aggregation string, sqon *Sqon, fields []Field) (AggQuery, error) {
 	// Define allowed aggregated cols
 	aggregate, err := findAggregatedField(fields, aggregation)
 	if err != nil {
@@ -176,12 +217,26 @@ func (l *countQuery) GetFieldsFromTables(tables ...Table) []Field {
 	return sliceutils.Unique(filtered)
 }
 
-func NewCountQuery(sqon *Sqon, fields []Field) (CountQuery, error) {
+func NewCountQueryFromSqon(sqon *Sqon, fields []Field) (CountQuery, error) {
 
 	if sqon != nil {
 		root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error during build list query %w", err)
+		}
+		return &countQuery{filteredFields: visitedFilteredFields, filters: root}, nil
+
+	} else {
+		return &countQuery{}, nil
+	}
+}
+
+func NewCountQueryFromCriteria(searchCriteria []SearchCriterion, fields []Field) (CountQuery, error) {
+
+	if len(searchCriteria) != 0 {
+		root, visitedFilteredFields, err := criteriaToFilter(searchCriteria, fields)
+		if err != nil {
+			return nil, fmt.Errorf("error during build count query from search criteria %w", err)
 		}
 		return &countQuery{filteredFields: visitedFilteredFields, filters: root}, nil
 
@@ -228,7 +283,7 @@ func (l *statisticsQuery) GetFieldsFromTables(tables ...Table) []Field {
 	return sliceutils.Unique(filtered)
 }
 
-func NewStatisticsQuery(field string, sqon *Sqon, fields []Field) (StatisticsQuery, error) {
+func NewStatisticsQueryFromSqon(field string, sqon *Sqon, fields []Field) (StatisticsQuery, error) {
 	// Define allowed target col
 	target := findNumericByAlias(fields, field)
 	if target != nil {

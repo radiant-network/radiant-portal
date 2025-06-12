@@ -41,7 +41,10 @@ func Test_FindSortedFields_Return_Only_Valid_Field_And_Field_That_Can_Be_Sorted(
 		{Field: fields[2], Order: "asc"},
 		{Field: fields[3], Order: "asc"},
 	}
-	result := findSortedFields(fields, sorted)
+	defaultSorted := []SortField{
+		{Field: fields[0], Order: "asc"},
+	}
+	result := findSortedFields(fields, sorted, defaultSorted, LocusIdField)
 	assert.Equal(t, result, expected)
 }
 
@@ -63,6 +66,9 @@ func Test_FindSortedFields_Filter_out_Field_With_Bad_Order(t *testing.T) {
 		{Field: fields[2], Order: "asc"},
 		{Field: fields[3], Order: "asc"},
 	}
-	result := findSortedFields(fields, sorted)
+	defaultSorted := []SortField{
+		{Field: fields[0], Order: "asc"},
+	}
+	result := findSortedFields(fields, sorted, defaultSorted, LocusIdField)
 	assert.Equal(t, result, expected)
 }

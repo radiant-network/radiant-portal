@@ -32,6 +32,18 @@ var allDepartmentFields = []Field{departmentNameField}
 var allFields = sliceutils.Merge(allDepartmentFields, allEmpoyeeFields)
 var defaultFields = sliceutils.Merge(allEmpoyeeFields)
 
+var defaultSort = []SortField{
+	{Field: ageField, Order: "asc"},
+}
+var idField = salaryField
+
+var queryConfig = QueryConfig{
+	AllFields:     allFields,
+	DefaultFields: defaultFields,
+	DefaultSort:   defaultSort,
+	IdField:       idField,
+}
+
 func Test_SqonToFilter_Return_Expected_Filters(t *testing.T) {
 	t.Parallel()
 

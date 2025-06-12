@@ -237,3 +237,25 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 		return nil, nil, fmt.Errorf("invalid operation: %s", sqon.Op)
 	}
 }
+
+func criteriaToFilter(searchCriteria []SearchCriterion, fields []Field) (FilterNode, []Field, error) {
+	visitedFilteredFields := make([]Field, 0)
+	filters := make([]FilterNode, 0)
+	for _, criterion := range searchCriteria {
+		filteredField := findFilterByAlias(fields, criterion.FieldName)
+		if filteredField != nil {
+			visitedFilteredFields = append(visitedFilteredFields, *filteredField)
+			filters = append(filters, &ComparisonNode{
+				Operator: "in",
+				Value:    criterion.Value,
+				Field:    *filteredField,
+			})
+		} else {
+			return nil, nil, fmt.Errorf("%s can not be filtered", criterion.FieldName)
+		}
+	}
+	root := &AndNode{
+		Children: filters,
+	}
+	return root, visitedFilteredFields, nil
+}

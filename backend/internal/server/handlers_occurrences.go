@@ -15,7 +15,7 @@ import (
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
-// @Param			message	body		types.ListBody	true	"List Body"
+// @Param			message	body		types.ListBodyWithSqon	true	"List Body"
 // @Accept json
 // @Produce json
 // @Success 200 {array} types.Occurrence
@@ -26,7 +26,7 @@ import (
 func OccurrencesGermlineListHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body  types.ListBody
+			body  types.ListBodyWithSqon
 			query types.ListQuery
 		)
 
@@ -36,17 +36,8 @@ func OccurrencesGermlineListHandler(repo repository.OccurrencesDAO) gin.HandlerF
 			HandleValidationError(c, err)
 			return
 		}
-		var p types.Pagination
-		if body.Limit != 0 && body.PageIndex != 0 {
-			p = types.Pagination{Limit: body.Limit, PageIndex: body.PageIndex}
-		} else if body.Limit != 0 && body.Offset != 0 {
-			p = types.Pagination{Limit: body.Limit, Offset: body.Offset}
-		} else if body.Limit != 0 {
-			p = types.Pagination{Limit: body.Limit, Offset: 0}
-		} else {
-			p = types.Pagination{Limit: 10, Offset: 0}
-		}
-		query, err := types.NewListQuery(body.AdditionalFields, body.Sqon, types.OccurrencesFields, types.OccurrencesDefaultFields, &p, body.Sort)
+		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		query, err := types.NewListQueryFromSqon(types.OccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -73,7 +64,7 @@ func OccurrencesGermlineListHandler(repo repository.OccurrencesDAO) gin.HandlerF
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
-// @Param			message	body		types.CountBody	true	"Count Body"
+// @Param			message	body		types.CountBodyWithSqon	true	"Count Body"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.Count
@@ -84,7 +75,7 @@ func OccurrencesGermlineListHandler(repo repository.OccurrencesDAO) gin.HandlerF
 func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body  types.CountBody
+			body  types.CountBodyWithSqon
 			query types.CountQuery
 		)
 
@@ -94,7 +85,7 @@ func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.Handler
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewCountQuery(body.Sqon, types.OccurrencesFields)
+		query, err := types.NewCountQueryFromSqon(body.Sqon, types.OccurrencesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -121,7 +112,7 @@ func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.Handler
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
-// @Param			message	body		types.AggregationBody	true	"Aggregation Body"
+// @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
 // @Accept json
 // @Produce json
 // @Success 200 {array} types.Aggregation
@@ -132,7 +123,7 @@ func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.Handler
 func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body  types.AggregationBody
+			body  types.AggregationBodyWithSqon
 			query types.AggQuery
 		)
 
@@ -143,7 +134,7 @@ func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.Han
 			return
 		}
 
-		query, err := types.NewAggregationQuery(body.Field, body.Sqon, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon(body.Field, body.Sqon, types.OccurrencesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -169,7 +160,7 @@ func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.Han
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
-// @Param			message	body		types.StatisticsBody	true	"Statistics Body"
+// @Param			message	body		types.StatisticsBodyWithSqon	true	"Statistics Body"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.Statistics
@@ -180,7 +171,7 @@ func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.Han
 func OccurrencesGermlineStatisticsHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body  types.StatisticsBody
+			body  types.StatisticsBodyWithSqon
 			query types.StatisticsQuery
 		)
 
@@ -191,7 +182,7 @@ func OccurrencesGermlineStatisticsHandler(repo repository.OccurrencesDAO) gin.Ha
 			return
 		}
 
-		query, err := types.NewStatisticsQuery(body.Field, body.Sqon, types.OccurrencesFields)
+		query, err := types.NewStatisticsQueryFromSqon(body.Field, body.Sqon, types.OccurrencesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
