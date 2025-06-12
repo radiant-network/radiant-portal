@@ -73,7 +73,7 @@ func CasesCountHandler(repo repository.CasesDAO) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewCountQueryFromCriteria(body.SearchCriteria, types.OccurrencesFields)
+		query, err := types.NewCountQueryFromCriteria(body.SearchCriteria, types.CasesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
