@@ -1,0 +1,33 @@
+@reference 'tailwindcss';
+
+.appLayout {
+	@apply flex flex-1;
+
+	aside {
+		@apply w-auto min-w-fit;
+	}
+}
+
+h1 {
+	@apply text-3xl;
+}
+
+h2 {
+	@apply text-xl;
+}
+
+h3 {
+	@apply text-lg;
+}
+
+h4 {
+	@apply text-base;
+}
+
+h5 {
+	@apply text-sm;
+}
+
+h6 {
+	@apply text-sm;
+}

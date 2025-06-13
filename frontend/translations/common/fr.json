@@ -309,6 +309,14 @@
       "zygosity_divider_parental_analysis": "Analyse Parentale"
     }
   },
+  "caseExploration": {
+    "case": {
+      "title": "Cas"
+    },
+    "assays": {
+      "title": "Prescriptions"
+    }
+  },
   "queryFilters": {
     "sidebarPanel": {
       "collapse": "Réduire",

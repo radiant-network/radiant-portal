@@ -20,6 +20,7 @@
       "@assets/*": ["../../themes/radiant/assets/*"],
       "variant-exploration/*": ["../../apps/variant-exploration/src/*"],
       "variant-entity/*": ["../../apps/variant-entity/src/*"],
+      "case-exploration/*": ["../../apps/case-exploration/src/*"],
       "~/*": ["./app/*"],
       "react": ["./node_modules/@types/react"]
     },
