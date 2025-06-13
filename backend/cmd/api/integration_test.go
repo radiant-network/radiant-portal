@@ -647,6 +647,63 @@ func Test_CaseIdsAutoComplete(t *testing.T) {
 	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
 }
 
+func assertGetCasesFilters(t *testing.T, data string, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewCasesRepository(db)
+		router := gin.Default()
+		router.POST("/cases/filters", server.CasesFiltersHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/cases/filters", bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetCasesFilters(t *testing.T) {
+	expected := `{
+		"case_analysis":[
+			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
+			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"},
+			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"}], 
+		"performer_lab":[
+			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}, 
+			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
+			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
+			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 
+			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"}], 
+		"priority":[
+			{"count":0, "key":"routine", "label":"Routine"}, 
+			{"count":0, "key":"urgent", "label":"Urgent"}, 
+			{"count":0, "key":"asap", "label":"Asap"}, 
+			{"count":0, "key":"stat", "label":"Stat"}], 
+		"project":[
+			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
+			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}], 
+		"requested_by":[
+			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}, 
+			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
+			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
+			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 
+			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"}], 
+		"status":[
+			{"count":0, "key":"unknown", "label":"Unknown"}, 
+			{"count":0, "key":"draft", "label":"Draft"}, 
+			{"count":0, "key":"active", "label":"Active"}, 
+			{"count":0, "key":"revoke", "label":"Revoke"}, 
+			{"count":0, "key":"completed", "label":"Completed"}, 
+			{"count":0, "key":"on-hold", "label":"On-hold"}, 
+			{"count":0, "key":"incomplete", "label":"Incomplete"}, 
+			{"count":0, "key":"submitted", "label":"Submitted"}]	
+		}`
+	assertGetCasesFilters(t, "simple", expected)
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartAllContainers()
 	code := m.Run()

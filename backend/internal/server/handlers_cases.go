@@ -116,3 +116,24 @@ func CasesAutocompleteHandler(repo repository.CasesDAO) gin.HandlerFunc {
 		c.JSON(http.StatusOK, ids)
 	}
 }
+
+// CasesFiltersHandler handles retrieving cases filters
+// @Summary Get types.CaseFilters cases filters
+// @Id casesFilters
+// @Description Retrieve types.CaseFilters cases filters
+// @Tags cases
+// @Security bearerauth
+// @Produce json
+// @Success 200 {object} types.CaseFilters
+// @Failure 500 {object} types.ApiError
+// @Router /cases/filters [post]
+func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		filters, err := repo.GetCasesFilters()
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, filters)
+	}
+}

@@ -125,3 +125,17 @@ func Test_SearchById(t *testing.T) {
 		assert.Equal(t, (*autocompleteResult)[4].Value, "10")
 	})
 }
+
+func Test_GetCasesFilters(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		filters, err := repo.GetCasesFilters()
+		assert.NoError(t, err)
+		assert.Equal(t, len((*filters).Status), 8)
+		assert.Equal(t, len((*filters).Priority), 4)
+		assert.Equal(t, len((*filters).CaseAnalysis), 4)
+		assert.Equal(t, len((*filters).Project), 2)
+		assert.Equal(t, len((*filters).PerformerLab), 6)
+		assert.Equal(t, len((*filters).RequestedBy), 6)
+	})
+}

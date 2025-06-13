@@ -56,6 +56,38 @@ func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.Autocomp
 	return &result, nil
 }
 
+func (m *MockRepository) GetCasesFilters() (*types.CaseFilters, error) {
+	var result = types.CaseFilters{
+		Status: []types.Aggregation{
+			{Bucket: "draft", Label: "Draft"},
+			{Bucket: "active", Label: "Active"},
+			{Bucket: "revoke", Label: "Revoke"},
+		},
+		Priority: []types.Aggregation{
+			{Bucket: "routine", Label: "Routine"},
+			{Bucket: "asap", Label: "Asap"},
+			{Bucket: "stat", Label: "Stat"},
+		},
+		CaseAnalysis: []types.Aggregation{
+			{Bucket: "WGA", Label: "Whole Genome Analysis"},
+			{Bucket: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
+		},
+		Project: []types.Aggregation{
+			{Bucket: "N1", Label: "NeuroDev Phase I"},
+			{Bucket: "N2", Label: "NeuroDev Phase II"},
+		},
+		PerformerLab: []types.Aggregation{
+			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		},
+		RequestedBy: []types.Aggregation{
+			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		},
+	}
+	return &result, nil
+}
+
 func Test_CasesListHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -122,4 +154,39 @@ func Test_CasesAutocompleteHandler(t *testing.T) {
 		{"type":"request_id", "value":"10"},
 		{"type":"case_id", "value":"10"}
 	]`, w.Body.String())
+}
+
+func Test_CasesFiltersHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/cases/filters", CasesFiltersHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/cases/filters", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"case_analysis":[
+			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
+		], "performer_lab":[
+			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+		], "priority":[
+			{"count":0, "key":"routine", "label":"Routine"},
+			{"count":0, "key":"asap", "label":"Asap"},
+			{"count":0, "key":"stat", "label":"Stat"}
+		], "project":[
+			{"count":0, "key":"N1", "label":"NeuroDev Phase I"},
+			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
+		], "requested_by":[
+			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+		], "status":[
+			{"count":0, "key":"draft", "label":"Draft"},
+			{"count":0, "key":"active", "label":"Active"},
+			{"count":0, "key":"revoke", "label":"Revoke"}
+		]
+	}`, w.Body.String())
 }
