@@ -627,6 +627,26 @@ func Test_CasesCount(t *testing.T) {
 	assertCasesCount(t, "simple", body, 21)
 }
 
+func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewCasesRepository(db)
+		router := gin.Default()
+		router.GET("/cases/autocomplete", server.CasesAutocompleteHandler(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/cases/autocomplete?prefix=%s&limit=%d", prefix, limit), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CaseIdsAutoComplete(t *testing.T) {
+	expected := `[{"type":"case_id", "value":"1"}, {"type":"request_id", "value":"1"}, {"type":"patient_id", "value":"10"}, {"type":"request_id", "value":"10"}, {"type":"case_id", "value":"10"}]`
+	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartAllContainers()
 	code := m.Run()

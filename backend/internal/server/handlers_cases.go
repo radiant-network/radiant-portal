@@ -5,6 +5,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"net/http"
+	"strconv"
 )
 
 // CasesListHandler handles list of cases
@@ -85,5 +86,33 @@ func CasesCountHandler(repo repository.CasesDAO) gin.HandlerFunc {
 		}
 		countResponse := types.Count{*count}
 		c.JSON(http.StatusOK, countResponse)
+	}
+}
+
+// CasesAutocompleteHandler handles retrieving ids by autocomplete
+// @Summary Get types.AutocompleteResult list of matching prefix
+// @Id autocompleteCases
+// @Description Retrieve types.AutocompleteResult list of ids matching prefix
+// @Tags cases
+// @Security bearerauth
+// @Param prefix query string true "Prefix"
+// @Param limit query string false "Limit"
+// @Produce json
+// @Success 200 {array} types.AutocompleteResult
+// @Failure 500 {object} types.ApiError
+// @Router /cases/autocomplete [get]
+func CasesAutocompleteHandler(repo repository.CasesDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			limit = 25
+		}
+		ids, err := repo.SearchById(prefix, limit)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, ids)
 	}
 }

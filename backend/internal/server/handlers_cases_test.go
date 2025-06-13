@@ -45,6 +45,17 @@ func (m *MockRepository) CountCases(userQuery types.CountQuery) (*int64, error) 
 	return &c, nil
 }
 
+func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error) {
+	var result = []types.AutocompleteResult{
+		{Type: "case_id", Value: "1"},
+		{Type: "request_id", Value: "1"},
+		{Type: "patient_id", Value: "10"},
+		{Type: "request_id", Value: "10"},
+		{Type: "case_id", Value: "10"},
+	}
+	return &result, nil
+}
+
 func Test_CasesListHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -92,4 +103,23 @@ func Test_CasesCountHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"count":15}`, w.Body.String())
+}
+
+func Test_CasesAutocompleteHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/cases/autocomplete", CasesAutocompleteHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/cases/autocomplete?prefix=1&limit=5", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[
+		{"type":"case_id", "value":"1"},
+		{"type":"request_id", "value":"1"},
+		{"type":"patient_id", "value":"10"},
+		{"type":"request_id", "value":"10"},
+		{"type":"case_id", "value":"10"}
+	]`, w.Body.String())
 }
