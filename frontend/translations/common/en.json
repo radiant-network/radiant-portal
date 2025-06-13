@@ -309,6 +309,14 @@
       "zygosity_divider_parental_analysis": "Parental Analysis"
     }
   },
+  "caseExploration": {
+    "case": {
+      "title": "Cases"
+    },
+    "assays": {
+      "title": "Assays"
+    }
+  },
   "variant": {
     "headers": {
       "ad_ratio": "AD Ratio",

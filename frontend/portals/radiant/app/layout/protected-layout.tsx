@@ -68,6 +68,8 @@ const _ProtectedLayout = () => {
             {
               title: t('mainNavbar.links.cases'),
               icon: <FolderIcon />,
+              onClick: () => navigate('/case-exploration'),
+              active: pathname === '/case-exploration'
             },
             {
               title: t('mainNavbar.links.variants'),
