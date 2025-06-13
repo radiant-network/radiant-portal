@@ -139,6 +139,7 @@ func main() {
 	casesGroup.POST("/list", server.CasesListHandler(repoCases))
 	casesGroup.POST("/count", server.CasesCountHandler(repoCases))
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
+	casesGroup.POST("/filters", server.CasesFiltersHandler(repoCases))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")

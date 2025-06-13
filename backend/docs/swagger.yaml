@@ -9,6 +9,9 @@ components:
         key:
           description: Bucket key
           type: string
+        label:
+          description: Label corresponding to the key
+          type: string
       type: object
     AggregationBodyWithSqon:
       properties:
@@ -47,6 +50,43 @@ components:
       required:
       - type
       - value
+      type: object
+    CaseFilters:
+      properties:
+        case_analysis:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        performer_lab:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        priority:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        project:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        requested_by:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        status:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+      required:
+      - case_analysis
+      - priority
+      - status
       type: object
     CaseResult:
       description: Line represented a case in case list
@@ -909,6 +949,28 @@ paths:
       security:
       - bearerauth: []
       summary: Count cases
+      tags:
+      - cases
+  /cases/filters:
+    post:
+      description: Retrieve CaseFilters cases filters
+      operationId: casesFilters
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseFilters'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get CaseFilters cases filters
       tags:
       - cases
   /cases/list:

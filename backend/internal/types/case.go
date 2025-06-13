@@ -182,3 +182,12 @@ var CaseDiagnosticLabNameField = Field{
 	CanBeSelected: true,
 	Table:         PerformerLabTable,
 }
+
+type CaseFilters struct {
+	Status       []Aggregation `json:"status" validate:"required"`
+	Priority     []Aggregation `json:"priority" validate:"required"`
+	CaseAnalysis []Aggregation `json:"case_analysis" validate:"required"`
+	Project      []Aggregation `json:"project,omitempty"`
+	PerformerLab []Aggregation `json:"performer_lab,omitempty"`
+	RequestedBy  []Aggregation `json:"requested_by,omitempty"`
+}

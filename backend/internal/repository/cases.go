@@ -13,6 +13,7 @@ import (
 type Case = types.Case
 type CaseResult = types.CaseResult
 type AutocompleteResult = types.AutocompleteResult
+type CaseFilters = types.CaseFilters
 
 type CasesRepository struct {
 	db *gorm.DB
@@ -22,6 +23,7 @@ type CasesDAO interface {
 	SearchCases(userQuery types.ListQuery) (*[]CaseResult, error)
 	CountCases(userQuery types.CountQuery) (*int64, error)
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
+	GetCasesFilters() (*CaseFilters, error)
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
@@ -102,6 +104,54 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 		return nil, fmt.Errorf("error searching for case autocomplete: %w", err)
 	}
 	return &autocompleteResult, nil
+}
+
+func (r *CasesRepository) GetCasesFilters() (*CaseFilters, error) {
+
+	var status []Aggregation
+	var priority []Aggregation
+	var caseAnalysis []Aggregation
+	var project []Aggregation
+	var organization []Aggregation
+
+	txStatus := r.db.Table(fmt.Sprintf("%s %s", types.StatusTable.Name, types.StatusTable.Alias))
+	txStatus = txStatus.Select("code as bucket, name_en as label, 0 as count")
+	if err := txStatus.Find(&status).Error; err != nil {
+		return nil, fmt.Errorf("error fetching status: %w", err)
+	}
+
+	txPriority := r.db.Table(fmt.Sprintf("%s %s", types.PriorityTable.Name, types.PriorityTable.Alias))
+	txPriority = txPriority.Select("code as bucket, name_en as label, 0 as count")
+	if err := txPriority.Find(&priority).Error; err != nil {
+		return nil, fmt.Errorf("error fetching priority: %w", err)
+	}
+
+	txCaseAnalysis := r.db.Table(fmt.Sprintf("%s %s", types.CaseAnalysisTable.Name, types.CaseAnalysisTable.Alias))
+	txCaseAnalysis = txCaseAnalysis.Select("code as bucket, name as label, 0 as count")
+	if err := txCaseAnalysis.Find(&caseAnalysis).Error; err != nil {
+		return nil, fmt.Errorf("error fetching case_analysis: %w", err)
+	}
+
+	txProject := r.db.Table(fmt.Sprintf("%s %s", types.ProjectTable.Name, types.ProjectTable.Alias))
+	txProject = txProject.Select("code as bucket, name as label, 0 as count")
+	if err := txProject.Find(&project).Error; err != nil {
+		return nil, fmt.Errorf("error fetching project: %w", err)
+	}
+
+	txOrganization := r.db.Table(fmt.Sprintf("%s %s", types.OrganizationTable.Name, types.OrganizationTable.Alias))
+	txOrganization = txOrganization.Select("code as bucket, name as label, 0 as count")
+	if err := txOrganization.Find(&organization).Error; err != nil {
+		return nil, fmt.Errorf("error fetching organization: %w", err)
+	}
+
+	return &CaseFilters{
+		Status:       status,
+		Priority:     priority,
+		CaseAnalysis: caseAnalysis,
+		Project:      project,
+		PerformerLab: organization,
+		RequestedBy:  organization,
+	}, nil
 }
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
