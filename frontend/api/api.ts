@@ -112,6 +112,25 @@ export interface AutoCompleteTerm {
     'source'?: Term;
 }
 /**
+ * 
+ * @export
+ * @interface AutocompleteResult
+ */
+export interface AutocompleteResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof AutocompleteResult
+     */
+    'type': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AutocompleteResult
+     */
+    'value': string;
+}
+/**
  * Line represented a case in case list
  * @export
  * @interface CaseResult
@@ -1912,6 +1931,52 @@ export type VepImpact = typeof VepImpact[keyof typeof VepImpact];
 export const CasesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Retrieve AutocompleteResult list of ids matching prefix
+         * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        autocompleteCases: async (prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'prefix' is not null or undefined
+            assertParamExists('autocompleteCases', 'prefix', prefix)
+            const localVarPath = `/cases/autocomplete`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (prefix !== undefined) {
+                localVarQueryParameter['prefix'] = prefix;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Counts cases
          * @summary Count cases
          * @param {CountBodyWithCriteria} countBodyWithCriteria Count Body
@@ -2002,6 +2067,20 @@ export const CasesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = CasesApiAxiosParamCreator(configuration)
     return {
         /**
+         * Retrieve AutocompleteResult list of ids matching prefix
+         * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async autocompleteCases(prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutocompleteResult>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.autocompleteCases(prefix, limit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.autocompleteCases']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Counts cases
          * @summary Count cases
          * @param {CountBodyWithCriteria} countBodyWithCriteria Count Body
@@ -2038,6 +2117,17 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = CasesApiFp(configuration)
     return {
         /**
+         * Retrieve AutocompleteResult list of ids matching prefix
+         * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        autocompleteCases(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutocompleteResult>> {
+            return localVarFp.autocompleteCases(prefix, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Counts cases
          * @summary Count cases
          * @param {CountBodyWithCriteria} countBodyWithCriteria Count Body
@@ -2067,6 +2157,19 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
  * @extends {BaseAPI}
  */
 export class CasesApi extends BaseAPI {
+    /**
+     * Retrieve AutocompleteResult list of ids matching prefix
+     * @summary Get AutocompleteResult list of matching prefix
+     * @param {string} prefix Prefix
+     * @param {string} [limit] Limit
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public autocompleteCases(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).autocompleteCases(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Counts cases
      * @summary Count cases

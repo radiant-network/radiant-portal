@@ -111,3 +111,17 @@ func Test_CountCases(t *testing.T) {
 		assert.Equal(t, *count, int64(21))
 	})
 }
+
+func Test_SearchById(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		autocompleteResult, err := repo.SearchById("1", 5)
+		assert.NoError(t, err)
+		assert.Equal(t, len(*autocompleteResult), 5)
+		assert.Equal(t, (*autocompleteResult)[0].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[1].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[2].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[3].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[4].Value, "10")
+	})
+}

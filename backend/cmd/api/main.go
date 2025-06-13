@@ -138,6 +138,7 @@ func main() {
 	casesGroup := r.Group("/cases")
 	casesGroup.POST("/list", server.CasesListHandler(repoCases))
 	casesGroup.POST("/count", server.CasesCountHandler(repoCases))
+	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")
