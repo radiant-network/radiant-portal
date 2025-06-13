@@ -12,6 +12,7 @@ import (
 
 type Case = types.Case
 type CaseResult = types.CaseResult
+type AutocompleteResult = types.AutocompleteResult
 
 type CasesRepository struct {
 	db *gorm.DB
@@ -20,6 +21,7 @@ type CasesRepository struct {
 type CasesDAO interface {
 	SearchCases(userQuery types.ListQuery) (*[]CaseResult, error)
 	CountCases(userQuery types.CountQuery) (*int64, error)
+	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
@@ -62,6 +64,44 @@ func (r *CasesRepository) CountCases(userQuery types.CountQuery) (*int64, error)
 		return nil, fmt.Errorf("error fetching cases: %w", err)
 	}
 	return &count, nil
+}
+
+func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteResult, error) {
+	/**
+	  	(SELECT "case_id" as type, id as value from `radiant_jdbc`.`public`.`case` WHERE CAST(id AS TEXT) LIKE '1%')
+	    UNION
+	    (SELECT "patient_id" as type, proband_id as value from `radiant_jdbc`.`public`.`case` WHERE CAST(proband_id AS TEXT) LIKE '1%')
+	    UNION
+	    (SELECT "mrn" as type, mrn as value from `radiant_jdbc`.`public`.`patient` WHERE mrn LIKE '1%')
+	    UNION
+	    (SELECT "request_id" as type, id as value from `radiant_jdbc`.`public`.`request` WHERE CAST(id AS TEXT) LIKE '1%')
+	    ORDER BY value asc;
+	*/
+	var autocompleteResult []AutocompleteResult
+	searchInput := fmt.Sprintf("%s%%", prefix)
+	subQueryCaseId := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	subQueryCaseId = subQueryCaseId.Select("\"case_id\" as type, id as value")
+	subQueryCaseId = subQueryCaseId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	subQueryProbandId := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	subQueryProbandId = subQueryProbandId.Select("\"patient_id\" as type, proband_id as value")
+	subQueryProbandId = subQueryProbandId.Where("CAST(proband_id AS TEXT) LIKE ?", searchInput)
+
+	subQueryMrn := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
+	subQueryMrn = subQueryMrn.Select("\"mrn\" as type, mrn as value")
+	subQueryMrn = subQueryMrn.Where("mrn LIKE ?", searchInput)
+
+	subQueryRequestId := r.db.Table(fmt.Sprintf("%s %s", types.RequestTable.Name, types.RequestTable.Alias))
+	subQueryRequestId = subQueryRequestId.Select("\"request_id\" as type, id as value")
+	subQueryRequestId = subQueryRequestId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	tx := r.db.Table("(? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryMrn, subQueryRequestId)
+	tx = tx.Order("value asc")
+	tx = tx.Limit(limit)
+	if err := tx.Find(&autocompleteResult).Error; err != nil {
+		return nil, fmt.Errorf("error searching for case autocomplete: %w", err)
+	}
+	return &autocompleteResult, nil
 }
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {

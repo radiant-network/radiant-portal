@@ -38,6 +38,16 @@ components:
         source:
           $ref: '#/components/schemas/Term'
       type: object
+    AutocompleteResult:
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+      required:
+      - type
+      - value
+      type: object
     CaseResult:
       description: Line represented a case in case list
       properties:
@@ -830,6 +840,42 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /cases/autocomplete:
+    get:
+      description: Retrieve AutocompleteResult list of ids matching prefix
+      operationId: autocompleteCases
+      parameters:
+      - description: Prefix
+        in: query
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - description: Limit
+        in: query
+        name: limit
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AutocompleteResult'
+                type: array
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get AutocompleteResult list of matching prefix
+      tags:
+      - cases
   /cases/count:
     post:
       description: Counts cases
