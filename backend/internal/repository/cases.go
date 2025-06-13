@@ -96,7 +96,7 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	subQueryRequestId = subQueryRequestId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
 	tx := r.db.Table("(? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryMrn, subQueryRequestId)
-	tx = tx.Order("value asc")
+	tx = tx.Order("value asc, type asc")
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {
 		return nil, fmt.Errorf("error searching for case autocomplete: %w", err)

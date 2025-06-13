@@ -643,7 +643,7 @@ func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit i
 }
 
 func Test_CaseIdsAutoComplete(t *testing.T) {
-	expected := `[{"type":"case_id", "value":"1"}, {"type":"request_id", "value":"1"}, {"type":"patient_id", "value":"10"}, {"type":"request_id", "value":"10"}, {"type":"case_id", "value":"10"}]`
+	expected := `[{"type":"case_id", "value":"1"}, {"type":"request_id", "value":"1"}, {"type":"case_id", "value":"10"}, {"type":"patient_id", "value":"10"}, {"type":"request_id", "value":"10"}]`
 	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
 }
 
