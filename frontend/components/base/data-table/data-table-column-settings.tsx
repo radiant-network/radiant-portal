@@ -26,6 +26,7 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
+import { Skeleton } from '../ui/skeleton';
 
 /**
  * Read user config to return column order (in asc)
@@ -42,7 +43,7 @@ function deserializeColumnsFixed(settings: ColumnSettings[]): string[] {
 }
 
 function filterColumnById(defaultSettings: ColumnSettings[]) {
-  return function (id: string) {
+  return function(id: string) {
     return defaultSettings.find(column => column.id === id);
   };
 }
@@ -52,6 +53,7 @@ function filterColumnById(defaultSettings: ColumnSettings[]) {
  * Dropdown that manage column's visiblity and order
  */
 type TableColumnSettingsProps = {
+  loading?: boolean;
   columnOrder: ColumnOrderState;
   columnPinning: ColumnPinningState;
   defaultSettings: ColumnSettings[];
@@ -68,6 +70,7 @@ function TableColumnSettings({
   columnOrder,
   columnPinning,
   defaultSettings,
+  loading = true,
   pristine,
   visiblitySettings,
   handleVisiblityChange,
@@ -98,6 +101,8 @@ function TableColumnSettings({
   useEffect(() => {
     handleOrderChange(columnsMiddle as ColumnOrderState);
   }, [columnsMiddle]);
+
+  if (loading) return <Skeleton className='w-[24px] h-[24px] mr-2' />;
 
   return (
     <span>
