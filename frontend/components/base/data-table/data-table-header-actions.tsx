@@ -1,4 +1,4 @@
-import { ArrowDownAZ, ArrowDownUp, ArrowUpZA, Pin, PinIcon, PinOff } from 'lucide-react';
+import { ArrowDown, ArrowDownUp, ArrowUp, Pin, PinIcon, PinOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import {
@@ -126,8 +126,8 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
               onClick={header.column.getToggleSortingHandler()}
             >
               {{
-                asc: <ArrowDownAZ size={16} />,
-                desc: <ArrowUpZA size={16} />,
+                asc: <ArrowDown size={16} />,
+                desc: <ArrowUp size={16} />,
               }[header.column.getIsSorted() as string] ?? <ArrowDownUp />}
             </Button>
           </TooltipTrigger>

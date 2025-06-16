@@ -35,6 +35,7 @@ function DataTableSkeletonLoading({
                   <Skeleton className="w-full h-[24px]" />
                 </TableHead>
               ))}
+
             </TableRow>
           ))}
         </TableHeader>

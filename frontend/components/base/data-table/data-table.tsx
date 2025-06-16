@@ -18,7 +18,6 @@ import {
   ExpandedState,
 } from '@tanstack/react-table';
 
-import { Maximize, Minimize } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
@@ -34,9 +33,6 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
-import { useI18n } from '@/components/hooks/i18n';
-import { Button } from '@/components/base/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
 import {
@@ -46,6 +42,7 @@ import {
   useTableStateObserver,
 } from '@/components/base/data-table/hooks/use-table-localstorage';
 import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
+import DataTableFullscreenButton from '@/components/base/data-table/data-table-fullscreen-button';
 
 export const IS_SERVER = typeof window === 'undefined';
 
@@ -64,7 +61,8 @@ const ROW_HEIGHT = 41;
 /**
  * Interface and types
  */
-type SubComponentProp<TData> = (data: TData) => React.JSX.Element;
+type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
+type FiltersGroupFormProps = (loading: boolean) => React.JSX.Element;
 
 export type TableProps<TData> = {
   id: string;
@@ -79,11 +77,12 @@ export type TableProps<TData> = {
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
   onServerSortingChange: (sorting: SortBody[]) => void;
-  subComponent?: SubComponentProp<TData>;
+  subComponent?: SubComponentProps<TData>;
+  FiltersGroupForm?: FiltersGroupFormProps;
   total: number;
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
-  tableIndexResultPosition?: 'top' | 'bottom';
+  tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 };
 
 export interface BaseColumnSettings {
@@ -247,10 +246,10 @@ function getRowFlexRender({
   subComponent,
   containerWidth,
 }: {
-  subComponent?: SubComponentProp<any>;
+  subComponent?: SubComponentProps<any>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -356,6 +355,7 @@ function TranstackTable<T>({
   data,
   defaultColumnSettings,
   defaultServerSorting,
+  FiltersGroupForm,
   loadingStates,
   pagination,
   onPaginationChange,
@@ -366,9 +366,6 @@ function TranstackTable<T>({
   enableFullscreen = false,
   tableIndexResultPosition = 'top',
 }: TableProps<T>) {
-  // translations
-  const { t } = useI18n();
-
   // default values
   const defaultColumnTableState = useMemo<DefaultColumnTableState>(
     () => ({
@@ -537,8 +534,10 @@ function TranstackTable<T>({
         'absolute top-0 right-0 bottom-0 left-0 bg-white z-50 p-4 overflow-y-scroll': isFullscreen,
       })}
     >
-      <div className={cn('w-full flex text-left justify-between items-center', { 'mb-1': hasUpperSettings })}>
-        <div>
+      <div className={cn('w-full flex text-left justify-between items-end', { 'mb-1': hasUpperSettings })}>
+
+        {/* Total */}
+        <div className="flex">
           {tableIndexResultPosition === 'top' && (
             <TableIndexResult
               loading={loadingStates?.total}
@@ -548,11 +547,17 @@ function TranstackTable<T>({
             />
           )}
         </div>
-        <div>
+
+        {/* FiltersGroup */}
+        {FiltersGroupForm && FiltersGroupForm(loadingStates?.list ?? true)}
+
+        {/* Right Menu Options */}
+        <div className='flex flex-1 justify-end'>
           {enableColumnOrdering && (
             <>
               {/* columns order and visibility */}
               <TableColumnSettings
+                loading={loadingStates?.list}
                 columnPinning={tableCache.columnPinning}
                 columnOrder={tableLocaleStorage.columnOrder}
                 defaultSettings={defaultColumnSettings}
@@ -581,20 +586,10 @@ function TranstackTable<T>({
               />
             </>
           )}
+
+          {/* fullscreen toggle */}
           {enableFullscreen && (
-            <>
-              {/* fullscreen toggle */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" iconOnly onClick={() => setIsFullscreen(!isFullscreen)}>
-                    {isFullscreen ? <Minimize /> : <Maximize />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {isFullscreen ? t('common.table.fullscreen.minimize') : t('common.table.fullscreen.maximize')}
-                </TooltipContent>
-              </Tooltip>
-            </>
+            <DataTableFullscreenButton loading={loadingStates?.list} active={isFullscreen} handleClick={setIsFullscreen} />
           )}
         </div>
       </div>

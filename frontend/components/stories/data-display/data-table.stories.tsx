@@ -6,12 +6,17 @@ import { ConfigProvider, PortalConfig } from '@/components/model/applications-co
 
 import {
   getVariantColumns,
-  defaultSettings,
+  defaultSettings as occurenceDefaultsSettings,
 } from '../../../apps/variant-exploration/src/feature/occurrence-table/table-settings';
+import {
+  getCaseExplorationColumns,
+  defaultSettings as caseDefaultsSettings
+} from '../../../apps/case-exploration/src/feature/case-table/table-settings';
 import OccurrenceExpend from '../../../apps/variant-exploration/src/feature/occurrence-table/occurrence-expend';
 
 // Purposely used absolute paths since variant app is not a dependency of the components library
 import { useI18n } from '@/components/hooks/i18n';
+import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
 
 const config: PortalConfig = {
   variant_exploration: {
@@ -164,7 +169,6 @@ const meta = {
     id: 'variant',
     columns: [],
     data,
-    defaultColumnSettings: defaultSettings,
     defaultServerSorting: [
       {
         field: 'pf',
@@ -179,8 +183,8 @@ const meta = {
       pageIndex: 0,
       pageSize: 10,
     },
-    onPaginationChange: () => {},
-    onServerSortingChange: sorting => {},
+    onPaginationChange: () => { },
+    onServerSortingChange: sorting => { },
     total: 10,
   },
   decorators: [
@@ -210,8 +214,30 @@ export const VariantOccurrence: Story = {
           pageSize: 50,
         }}
         data={data}
+        defaultColumnSettings={occurenceDefaultsSettings}
         columns={getVariantColumns(t)}
         subComponent={occurrence => <OccurrenceExpend occurrence={occurrence} />}
+      />
+    );
+  },
+};
+
+
+export const Cases: Story = {
+  render: args => {
+    const { t } = useI18n();
+
+    return (
+      <DataTable
+        {...args}
+        pagination={{
+          pageIndex: 0,
+          pageSize: 50,
+        }}
+        data={data}
+        defaultColumnSettings={caseDefaultsSettings}
+        columns={getCaseExplorationColumns(t)}
+        tableIndexResultPosition='hidden'
       />
     );
   },
@@ -224,6 +250,26 @@ export const Loading: Story = {
       total: true,
     },
     data: [],
+    enableColumnOrdering: true,
+    enableFullscreen: true,
+    defaultColumnSettings: occurenceDefaultsSettings,
+  },
+  render: args => <DataTable {...args} />,
+};
+
+
+export const LoadingWithFiltersGroup: Story = {
+  args: {
+    loadingStates: {
+      list: true,
+      total: true,
+    },
+    data: [],
+    enableColumnOrdering: true,
+    enableFullscreen: true,
+    defaultColumnSettings: occurenceDefaultsSettings,
+    tableIndexResultPosition: 'hidden',
+    FiltersGroupForm: FiltersGroupSkeleton,
   },
   render: args => <DataTable {...args} />,
 };

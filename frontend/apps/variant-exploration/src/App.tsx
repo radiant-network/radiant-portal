@@ -1,5 +1,5 @@
 import styles from './App.module.css';
-import { Count, CountBody, ListBody, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
+import { Count, CountBodyWithSqon, ListBodyWithSqon, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import { getVariantColumns, defaultSettings } from '@/feature/occurrence-table/table-settings';
@@ -19,14 +19,15 @@ import { FilterComponent } from '@/components/feature/query-filters/filter-conta
 import { useI18n } from '@/components/hooks/i18n';
 import { X } from 'lucide-react';
 import { cn } from '@/components/lib/utils';
+
 type OccurrencesListInput = {
   seqId: string;
-  listBody: ListBody;
+  listBody: ListBodyWithSqon;
 };
 
 type OccurrenceCountInput = {
   seqId: string;
-  countBody: CountBody;
+  countBody: CountBodyWithSqon;
 };
 
 const DEFAULT_SORTING = [
