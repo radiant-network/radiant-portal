@@ -171,55 +171,68 @@ const defaultSettings = createColumnSettings([
     visible: true,
     fixed: true,
     pinningPosition: 'left',
+    label: 'variant.headers.clinical_interpretation'
   },
   {
     id: 'hgvsg',
     visible: true,
     pinningPosition: 'left',
+    label: 'variant.headers.hgvsg'
   },
   {
     id: 'variant_class',
     visible: true,
+    label: 'variant.headers.variant_class'
   },
   {
     id: 'symbol',
     visible: true,
+    label: 'variant.headers.symbol'
   },
   {
     id: 'picked_consequences',
     visible: true,
+    label: 'variant.headers.picked_consequences'
   },
   {
     id: 'is_mane_select',
     visible: true,
+    label: 'variant.headers.is_mane_select'
   },
   {
     id: 'omim_inheritance_code',
     visible: true,
+    label: 'variant.headers.omim_inheritance_code'
   },
   {
     id: 'clinvar',
     visible: true,
+    label: 'variant.headers.clinvar'
   },
   {
     id: 'gnomad_v3_af',
     visible: true,
+    label: 'variant.headers.gnomad_v3_af'
   },
   {
     id: 'pf',
     visible: true,
+    label: 'variant.headers.pf'
   },
   {
     id: 'genotype_quality',
     visible: true,
+    label: 'variant.headers.genotype_quality'
   },
   {
     id: 'zygosity',
     visible: true,
+    label: 'variant.headers.zygosity'
   },
   {
     id: 'ad_ratio',
     visible: true,
+    label: 'variant.headers.ad_ratio'
   },
 ]);
 

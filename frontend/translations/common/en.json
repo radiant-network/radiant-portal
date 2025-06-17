@@ -310,8 +310,24 @@
     }
   },
   "caseExploration": {
+    "filtersGroup": {
+      "searchById": "Search by ID",
+      "priority_code": "Priority",
+      "status_code": "Status",
+      "case_analysis_code": "Analysis"
+    },
     "case": {
-      "title": "Cases"
+      "title": "Cases",
+      "headers": {
+        "case_id": "Case",
+        "mrn": "MRN",
+        "priority_code": "Priority",
+        "status_code": "Status",
+        "case_analysis_type_code": "Type",
+        "case_analysis_code": "Analysis",
+        "requested_by_name": "Req. by",
+        "updated_on": "Updated"
+      }
     },
     "assays": {
       "title": "Assays"

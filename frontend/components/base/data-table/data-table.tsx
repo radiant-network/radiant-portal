@@ -62,7 +62,7 @@ const ROW_HEIGHT = 41;
  * Interface and types
  */
 type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
-type FiltersGroupFormProps = (loading: boolean) => React.JSX.Element;
+type FiltersGroupFormProps = ({ loading }: { loading: boolean }) => React.JSX.Element;
 
 export type TableProps<TData> = {
   id: string;
@@ -79,7 +79,7 @@ export type TableProps<TData> = {
   onServerSortingChange: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProps<TData>;
   FiltersGroupForm?: FiltersGroupFormProps;
-  total: number;
+  total?: number;
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
@@ -92,6 +92,7 @@ export interface BaseColumnSettings {
   size?: number;
   pinningPosition?: ColumnPinningPosition;
   header?: string;
+  label?: string;
 }
 
 export interface ColumnSettings extends BaseColumnSettings {
@@ -361,7 +362,7 @@ function TranstackTable<T>({
   onPaginationChange,
   onServerSortingChange,
   subComponent,
-  total,
+  total = 0,
   enableColumnOrdering = false,
   enableFullscreen = false,
   tableIndexResultPosition = 'top',
@@ -549,7 +550,7 @@ function TranstackTable<T>({
         </div>
 
         {/* FiltersGroup */}
-        {FiltersGroupForm && FiltersGroupForm(loadingStates?.list ?? true)}
+        {FiltersGroupForm && FiltersGroupForm({ loading: loadingStates?.list ?? true })}
 
         {/* Right Menu Options */}
         <div className='flex flex-1 justify-end'>

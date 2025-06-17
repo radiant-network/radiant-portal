@@ -158,26 +158,32 @@ const pathogenicEvidenceDefaultSettings = createColumnSettings([
   {
     id: 'evaluated',
     visible: true,
+    label: 'variant.headers.evaluated'
   },
   {
     id: 'condition',
     visible: true,
+    label: 'variant.headers.condition'
   },
   {
     id: 'classification',
     visible: true,
+    label: 'variant.headers.classification'
   },
   {
     id: 'status',
     visible: true,
+    label: 'variant.headers.status'
   },
   {
     id: 'origin',
     visible: true,
+    label: 'variant.headers.origin'
   },
   {
     id: 'action',
     visible: true,
+    label: 'variant.headers.action'
   },
 ]);
 
@@ -185,14 +191,17 @@ const conditionPhenotypeDefaultSettings = createColumnSettings([
   {
     id: 'condition',
     visible: true,
+    label: 'variant.headers.condition'
   },
   {
     id: 'inheritence',
     visible: true,
+    label: 'variant.headers.inheritence'
   },
   {
     id: 'action',
     visible: true,
+    label: 'variant.headers.action'
   },
 ]);
 

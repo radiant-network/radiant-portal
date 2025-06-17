@@ -311,10 +311,20 @@
   },
   "caseExploration": {
     "case": {
-      "title": "Cas"
+      "title": "Cas",
+      "headers": {
+        "case_id": "Cas",
+        "mrn": "MRN",
+        "priority_code": "Priorité",
+        "status_code": "Status",
+        "case_analysis_type_code": "Type",
+        "case_analysis_code": "Analise",
+        "requested_by_name": "Dem. par",
+        "updated_on": "Mise à jour"
+      }
     },
     "assays": {
-      "title": "Prescriptions"
+      "title": "Prescription"
     }
   },
   "queryFilters": {
