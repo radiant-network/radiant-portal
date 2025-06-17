@@ -220,30 +220,37 @@ const interpretedCasesDefaultSettings = createColumnSettings([
   {
     id: 'mondo',
     visible: true,
+    label: 'variant.headers.mondo'
   },
   {
     id: 'classification',
     visible: true,
+    label: 'variant.headers.classification'
   },
   {
     id: 'zygosity',
     visible: true,
+    label: 'variant.headers.zygosity'
   },
   {
     id: 'inheritance',
     visible: true,
+    label: 'variant.headers.inheritance'
   },
   {
     id: 'institution',
     visible: true,
+    label: 'variant.headers.institution'
   },
   {
     id: 'test',
     visible: true,
+    label: 'variant.headers.test'
   },
   {
     id: 'status',
     visible: true,
+    label: 'variant.headers.status'
   },
 ]);
 
@@ -251,34 +258,42 @@ const otherCasesDefaultSettings = createColumnSettings([
   {
     id: 'case',
     visible: true,
+    label: 'variant.headers.case'
   },
   {
     id: 'date',
     visible: true,
+    label: 'variant.headers.date'
   },
   {
     id: 'hpo',
     visible: true,
+    label: 'variant.headers.hpo'
   },
   {
     id: 'zygosity',
     visible: true,
+    label: 'variant.headers.zygosity'
   },
   {
     id: 'inheritance',
     visible: true,
+    label: 'variant.headers.inheritance'
   },
   {
     id: 'institution',
     visible: true,
+    label: 'variant.headers.institution'
   },
   {
     id: 'test',
     visible: true,
+    label: 'variant.headers.test'
   },
   {
     id: 'status',
     visible: true,
+    label: 'variant.headers.status'
   },
 ]);
 

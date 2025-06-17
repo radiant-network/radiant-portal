@@ -13,15 +13,15 @@ function FiltersGroupForm({ loading = true }: FiltersGroupFormProps) {
 	if (loading) return <FiltersGroupSkeleton />;
 
 	return (
-		<div>
-			<label>{t('caseExploration.form.searchById')}</label>
+		<div className='py-4'>
+			<label>{t('caseExploration.filtersGroup.searchById')}</label>
 			<div className="flex gap-2">
 				<Command>
 					<CommandInput />
 				</Command>
-				<Button>Priority</Button>
-				<Button>Status</Button>
-				<Button>Analysis</Button>
+				<Button>{t('caseExploration.filtersGroup.priority_code')}</Button>
+				<Button>{t('caseExploration.filtersGroup.status_code')}</Button>
+				<Button>{t('caseExploration.filtersGroup.case_analysis_code')}</Button>
 			</div>
 		</div>
 	)

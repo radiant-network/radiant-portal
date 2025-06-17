@@ -58,6 +58,25 @@ function CasesTab() {
 				additional_fields: [
 					'case_analysis_code',
 					'created_at',
+					'case_analysis_name',
+					'case_analysis_type_code',
+					'case_id',
+					'created_on',
+					'managing_organization_code',
+					'managing_organization_name',
+					'mrn',
+					'patient_id',
+					'performer_lab_code',
+					'performer_lab_name',
+					'prescriber',
+					'primary_condition',
+					'priority_code',
+					'project_code',
+					'request_id',
+					'requested_by_code',
+					'requested_by_name',
+					'status_code',
+					'updated_on',
 				],
 				search_criteria: [],
 				limit: pagination.pageSize,
@@ -87,7 +106,7 @@ function CasesTab() {
 				pagination={pagination}
 				onPaginationChange={setPagination}
 				onServerSortingChange={setSorting}
-				total={total ?? 0}
+				total={total?.count ?? 0}
 				enableColumnOrdering
 				enableFullscreen
 				tableIndexResultPosition='hidden'

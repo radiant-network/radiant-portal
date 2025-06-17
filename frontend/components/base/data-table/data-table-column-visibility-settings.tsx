@@ -5,6 +5,7 @@ import { UniqueIdentifier } from '@dnd-kit/core';
 type VisibilityColumnSettingProps = {
   id: UniqueIdentifier;
   checked: boolean;
+  label?: string;
   handleCheckboxChange: (target: string, checked: boolean) => void;
 };
 
@@ -12,7 +13,7 @@ type VisibilityColumnSettingProps = {
  * VisibilityColumnSetting
  * - Manage column visibility
  */
-function VisibilityColumnSetting({ id, checked, handleCheckboxChange }: VisibilityColumnSettingProps) {
+function VisibilityColumnSetting({ id, label, checked, handleCheckboxChange }: VisibilityColumnSettingProps) {
   const { t } = useI18n();
   return (
     <>
@@ -22,7 +23,7 @@ function VisibilityColumnSetting({ id, checked, handleCheckboxChange }: Visibili
           handleCheckboxChange(id as string, !!value);
         }}
       />
-      <label className="flex pl-[4px] text-[15px] leading-none">{t(`variant.headers.${id}`)}</label>
+      {label && <label className="flex pl-[4px] text-[15px] leading-none">{t(label)}</label>}
     </>
   );
 }
