@@ -250,7 +250,7 @@ function getRowFlexRender({
   subComponent?: SubComponentProps<any>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -536,7 +536,6 @@ function TranstackTable<T>({
       })}
     >
       <div className={cn('w-full flex text-left justify-between items-end', { 'mb-1': hasUpperSettings })}>
-
         {/* Total */}
         <div className="flex">
           {tableIndexResultPosition === 'top' && (
@@ -553,7 +552,7 @@ function TranstackTable<T>({
         {FiltersGroupForm && FiltersGroupForm({ loading: loadingStates?.list ?? true })}
 
         {/* Right Menu Options */}
-        <div className='flex flex-1 justify-end'>
+        <div className="flex flex-1 justify-end">
           {enableColumnOrdering && (
             <>
               {/* columns order and visibility */}
@@ -590,7 +589,11 @@ function TranstackTable<T>({
 
           {/* fullscreen toggle */}
           {enableFullscreen && (
-            <DataTableFullscreenButton loading={loadingStates?.list} active={isFullscreen} handleClick={setIsFullscreen} />
+            <DataTableFullscreenButton
+              loading={loadingStates?.list}
+              active={isFullscreen}
+              handleClick={setIsFullscreen}
+            />
           )}
         </div>
       </div>

@@ -1,5 +1,8 @@
 :root {
-  --red: 0 91% 71%;
+  --amber: 38 92% 50%;
+  --amber-foreground: 0 74% 42%;
+
+  --red: 0 84% 60%;
   --red-foreground: 0 74% 42%;
 
   --orange: 27 96% 61%;
@@ -34,6 +37,9 @@
   --bookmark-green: 142 76% 36%;
   --bookmark-red: 0 84% 60%;
   --bookmark-off: 215 20% 65%;
+
+  --base-popover: 0 84 100%;
+  --popover-foreground: 100% 100% 100%;
 }
 
 .dark {
@@ -74,4 +80,7 @@
   --bookmark-green: 142 76% 36%;
   --bookmark-red: 0 72% 51%;
   --bookmark-off: 215 16% 47%;
+
+  --base-popover: 229, 84%, 5%;
+  --popover-foreground: 210, 40%, 98%;
 }
