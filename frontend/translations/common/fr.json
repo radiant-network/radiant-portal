@@ -1,5 +1,6 @@
 {
   "common": {
+    "date": "yyyy-MM-dd",
     "unspecified": "Indéterminée",
     "noDataAvailable": "Aucune donnée disponible",
     "editor": {

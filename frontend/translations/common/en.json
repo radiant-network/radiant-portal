@@ -1,6 +1,7 @@
 {
   "common": {
-   "unspecified": "Unspecified",
+    "date": "yyyy-MM-dd",
+    "unspecified": "Unspecified",
     "noDataAvailable": "No data available",
     "editor": {
       "headings": {

@@ -1,3 +1,4 @@
+import { useI18n } from '@/components/hooks/i18n';
 import { formatDate } from 'date-fns';
 
 type DateCellProps = {
@@ -5,7 +6,8 @@ type DateCellProps = {
 };
 
 function DateCell({ date }: DateCellProps) {
-  return <div className="text-muted-foreground">{formatDate(date, 'yyyy-MM-dd')}</div>;
+  const { t } = useI18n();
+  return <div className="text-muted-foreground">{formatDate(date, t('common.date'))}</div>;
 }
 
 export default DateCell;
