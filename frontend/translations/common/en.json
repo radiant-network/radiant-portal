@@ -1,6 +1,7 @@
 {
   "common": {
-   "unspecified": "Unspecified",
+    "date": "yyyy-MM-dd",
+    "unspecified": "Unspecified",
     "noDataAvailable": "No data available",
     "editor": {
       "headings": {
@@ -316,17 +317,47 @@
       "status_code": "Status",
       "case_analysis_code": "Analysis"
     },
+    "priority": {
+      "asap": "ASAP",
+      "asap_tooltips": "As Soon As Possible",
+      "routine": "Routine",
+      "routine_tooltips": "Routine Service",
+      "stat": "STAT",
+      "stat_tooltips": "The request should be actioned immediately - highest possible priority",
+      "urgent": "Urgent",
+      "urgent_tooltips": "The request should be actioned promptly"
+    },
+    "analysis_type_code": {
+      "somatic": "Somatic",
+      "germline": "Germline",
+      "germline_family": "Family Germline"
+    },
+    "status": {
+      "active": "In-progress",
+      "completed": "Completed",
+      "draft": "Draft",
+      "incomplete": "Incomplete",
+      "on-hold": "Submitted",
+      "revoke": "Revoked"
+    },
     "case": {
       "title": "Cases",
+      "actions": {
+        "view_case": "View Case",
+        "view_variant": "View Variants"
+      },
       "headers": {
         "case_id": "Case",
         "mrn": "MRN",
+        "mrn_tooltips": "Patients’ medical record number",
         "priority_code": "Priority",
         "status_code": "Status",
         "case_analysis_type_code": "Type",
         "case_analysis_code": "Analysis",
-        "requested_by_name": "Req. by",
-        "updated_on": "Updated"
+        "requested_by_code": "Req. by",
+        "requested_by_code_tooltips": "Requested by",
+        "updated_on": "Updated",
+        "updated_on_tooltips": "Date of last case modification (yyyy-mm-dd)"
       }
     },
     "assays": {

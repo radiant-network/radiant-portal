@@ -5,7 +5,7 @@ import RowSelectionCell from '@/components/base/data-table/cells/row-selection-c
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import GeneCell from '@/feature/occurrence-table/cells/gene-cell';
-import LinkCell from '@/feature/occurrence-table/cells/link-cell';
+import LinkCell from '@/components/base/data-table/cells/link-cell';
 import ManeCell from '@/feature/occurrence-table/cells/mane-cell';
 import ClinvarCell from '@/feature/occurrence-table/cells/clinvar-cell';
 import ParticipantFrequencyCell from '@/feature/occurrence-table/cells/participant-frequency-cell';

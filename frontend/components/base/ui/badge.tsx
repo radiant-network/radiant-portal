@@ -33,6 +33,9 @@ const badgeVariants = tv({
       outline: {
         base: 'text-foreground border',
       },
+      amber: {
+        base: 'bg-amber/20 text-amber-foreground',
+      },
       red: {
         base: 'bg-red/20 text-red-foreground',
       },
@@ -85,6 +88,11 @@ const badgeVariants = tv({
       clickable: true,
       variant: 'outline',
       className: 'hover:bg-accent',
+    },
+    {
+      clickable: true,
+      variant: 'amber',
+      className: 'hover:bg-amber/15',
     },
     {
       clickable: true,

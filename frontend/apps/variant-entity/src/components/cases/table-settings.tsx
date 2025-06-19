@@ -1,6 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import DateCell from '@/components/base/data-table/cells/date-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import { TFunction } from 'i18next';
 import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
@@ -32,7 +33,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.date, {
       id: 'date',
-      cell: info => <div className="text-muted-foreground">{formatDate(info.getValue(), 'yyyy-MM-dd')}</div>,
+      cell: info => <DateCell date={info.getValue()} />,
       header: () => (
         <TooltipsHeader tooltips={t('variantEntity.cases.interpreted-table.headers.date.tooltip')}>
           {t('variantEntity.cases.interpreted-table.headers.date')}
@@ -220,37 +221,37 @@ const interpretedCasesDefaultSettings = createColumnSettings([
   {
     id: 'mondo',
     visible: true,
-    label: 'variant.headers.mondo'
+    label: 'variant.headers.mondo',
   },
   {
     id: 'classification',
     visible: true,
-    label: 'variant.headers.classification'
+    label: 'variant.headers.classification',
   },
   {
     id: 'zygosity',
     visible: true,
-    label: 'variant.headers.zygosity'
+    label: 'variant.headers.zygosity',
   },
   {
     id: 'inheritance',
     visible: true,
-    label: 'variant.headers.inheritance'
+    label: 'variant.headers.inheritance',
   },
   {
     id: 'institution',
     visible: true,
-    label: 'variant.headers.institution'
+    label: 'variant.headers.institution',
   },
   {
     id: 'test',
     visible: true,
-    label: 'variant.headers.test'
+    label: 'variant.headers.test',
   },
   {
     id: 'status',
     visible: true,
-    label: 'variant.headers.status'
+    label: 'variant.headers.status',
   },
 ]);
 
@@ -258,42 +259,42 @@ const otherCasesDefaultSettings = createColumnSettings([
   {
     id: 'case',
     visible: true,
-    label: 'variant.headers.case'
+    label: 'variant.headers.case',
   },
   {
     id: 'date',
     visible: true,
-    label: 'variant.headers.date'
+    label: 'variant.headers.date',
   },
   {
     id: 'hpo',
     visible: true,
-    label: 'variant.headers.hpo'
+    label: 'variant.headers.hpo',
   },
   {
     id: 'zygosity',
     visible: true,
-    label: 'variant.headers.zygosity'
+    label: 'variant.headers.zygosity',
   },
   {
     id: 'inheritance',
     visible: true,
-    label: 'variant.headers.inheritance'
+    label: 'variant.headers.inheritance',
   },
   {
     id: 'institution',
     visible: true,
-    label: 'variant.headers.institution'
+    label: 'variant.headers.institution',
   },
   {
     id: 'test',
     visible: true,
-    label: 'variant.headers.test'
+    label: 'variant.headers.test',
   },
   {
     id: 'status',
     visible: true,
-    label: 'variant.headers.status'
+    label: 'variant.headers.status',
   },
 ]);
 

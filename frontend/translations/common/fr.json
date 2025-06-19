@@ -1,5 +1,6 @@
 {
   "common": {
+    "date": "yyyy-MM-dd",
     "unspecified": "Indéterminée",
     "noDataAvailable": "Aucune donnée disponible",
     "editor": {
@@ -310,17 +311,49 @@
     }
   },
   "caseExploration": {
+    "filtersGroup": {
+      "searchById": "Recherche par ID",
+      "priority_code": "Priorité",
+      "status_code": "Status",
+      "case_analysis_code": "Analyse"
+    },
+    "priority": {
+      "asap": "ASAP",
+      "asap_tooltips": "Dès que possible",
+      "routine": "Routine",
+      "routine_tooltips": "Service de routine",
+      "stat": "STAT",
+      "stat_tooltips": "La demande doit être traitée immédiatement, en priorité la plus élevée possible",
+      "urgent": "Urgent",
+      "urgent_tooltips": "La demande doit être traitée rapidement"
+    },
+    "analysis_type_code": {
+      "somatic": "Somatic",
+      "germline": "Germline",
+      "germline_family": "Family Germline"
+    },
+    "status": {
+      "active": "En cours",
+      "completed": "Completé",
+      "draft": "Brouillon",
+      "incomplete": "Incomplet",
+      "on-hold": "Soumis",
+      "revoke": "Refusé"
+    },
     "case": {
       "title": "Cas",
       "headers": {
         "case_id": "Cas",
-        "mrn": "MRN",
+        "mrn": "Dossier",
+        "mrn_tooltips": "Numéro de dossier médicale du patient",
         "priority_code": "Priorité",
         "status_code": "Status",
-        "case_analysis_type_code": "Type",
-        "case_analysis_code": "Analise",
-        "requested_by_name": "Dem. par",
-        "updated_on": "Mise à jour"
+        "case_analysis_type_code": "Type de cas",
+        "case_analysis_code": "Analyse",
+        "requested_by_code": "Req. par",
+        "requested_by_code_tooltips": "Requested by",
+        "updated_on": "Dernière modification",
+        "updated_on_tooltips": "Date de la dernière modification du cas (aaaa-mm-jj)"
       }
     },
     "assays": {
