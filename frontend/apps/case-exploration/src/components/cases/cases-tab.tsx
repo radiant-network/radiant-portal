@@ -6,7 +6,8 @@ import { CaseResult, Count, CountBodyWithCriteria, ListBodyWithCriteria, SortBod
 import { useState } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
-import FiltersGroupForm from '@/components/filters-group/filters-group';
+import FiltersGroupForm from '../../components/filters-group/filters-group';
+import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
 type CaseListInput = {
   listBody: ListBodyWithCriteria;
@@ -40,10 +41,44 @@ function CasesTab() {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>(
+    'case-exploration-filters',
+    {
+      priority: [],
+      status: [],
+      caseAnalysis: [],
+      project: [],
+      performerLab: [],
+      requestedBy: [],
+    }
+  );
+
+  // Build search_criteria array
+  type SearchCriterion = { field: string; value: string[] };
+  let search_criteria: SearchCriterion[] = [];
+
+  if (filters.priority.length > 0) {
+    search_criteria.push({ field: 'priority_code', value: filters.priority });
+  }
+  if (filters.status.length > 0) {
+    search_criteria.push({ field: 'status_code', value: filters.status });
+  }
+  if (filters.caseAnalysis.length > 0) {
+    search_criteria.push({ field: 'case_analysis_code', value: filters.caseAnalysis });
+  }
+  if (filters.project.length > 0) {
+    search_criteria.push({ field: 'project_code', value: filters.project });
+  }
+  if (filters.performerLab.length > 0) {
+    search_criteria.push({ field: 'performer_lab_code', value: filters.performerLab });
+  }
+  if (filters.requestedBy.length > 0) {
+    search_criteria.push({ field: 'requested_by_code', value: filters.requestedBy });
+  }
 
   const { data: total, isLoading: totalIsLoading } = useSWR<Count, any, CaseCountInput>(
     {
-      countBody: { search_criteria: [] },
+      countBody: { search_criteria },
     },
     fetchCasesCount,
     {
@@ -77,7 +112,7 @@ function CasesTab() {
           'status_code',
           'updated_on',
         ],
-        search_criteria: [],
+        search_criteria,
         limit: pagination.pageSize,
         page_index: pagination.pageIndex,
         sort: sorting,
@@ -94,7 +129,13 @@ function CasesTab() {
       <DataTable
         id="case-exploration"
         columns={getCaseExplorationColumns(t)}
-        FiltersGroupForm={FiltersGroupForm}
+        FiltersGroupForm={() => (
+          <FiltersGroupForm
+            loading={listIsLoading}
+            filters={filters}
+            setFilters={setFilters}
+          />
+        )}
         data={list ?? []}
         defaultColumnSettings={defaultSettings}
         defaultServerSorting={DEFAULT_SORTING}

@@ -274,7 +274,10 @@
         "ad_alt": "ALT Allele Depth",
         "ad_total": "Total Depth ALT + REF",
         "ad_ration": "Allelic Ratio ALT",
-        "gq": "Genotype Quality"
+        "gq": "Genotype Quality",
+        "project_code": "Project",
+        "performer_lab": "Diagnostic lab",
+        "requested_by": "Prescribing Institution"
       },
       "operators": {
         "greaterThan": "Greater than",
@@ -315,7 +318,11 @@
       "searchById": "Search by ID",
       "priority_code": "Priority",
       "status_code": "Status",
-      "case_analysis_code": "Analysis"
+      "case_analysis_code": "Analysis",
+      "search_placeholder": "Case, assay, patient, or MRN",
+      "project_code": "Project",
+      "performer_lab": "Diagnostic lab",
+      "requested_by": "Prescribing Institution"
     },
     "priority": {
       "asap": "ASAP",
@@ -349,7 +356,7 @@
       "headers": {
         "case_id": "Case",
         "mrn": "MRN",
-        "mrn_tooltips": "Patients’ medical record number",
+        "mrn_tooltips": "Patients' medical record number",
         "priority_code": "Priority",
         "status_code": "Status",
         "case_analysis_type_code": "Type",
