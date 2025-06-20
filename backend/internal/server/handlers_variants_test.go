@@ -21,8 +21,8 @@ func (m *MockRepository) GetVariantHeader(int) (*types.VariantHeader, error) {
 func (m *MockRepository) GetVariantOverview(int) (*types.VariantOverview, error) {
 	return &types.VariantOverview{
 		Locus:        "locus1",
-		Pf:           0.99,
-		Pc:           3,
+		PfWgs:        0.99,
+		PcWgs:        3,
 		SiftPred:     "T",
 		SiftScore:    0.1,
 		FathmmPred:   "T",
@@ -82,7 +82,7 @@ func Test_GetVariantOverviewHandler(t *testing.T) {
 		"is_canonical":false,
 		"is_mane_select":false, 
 		"locus":"locus1",
-		"pc":3, "pf":0.99,
+		"pc_wgs":3, "pf_wgs":0.99,
 		"picked_consequences":["splice acceptor"],
 		"revel_score":0.1,
 		"sift_pred":"T",

@@ -80,7 +80,7 @@
       "frequency": {
         "items": [
           { "key": "frequency_divider_my_organization", "type": "divider" }, 
-          { "key": "pf", "type": "numerical", "defaults": { 
+          { "key": "pf_wgs", "type": "numerical", "defaults": {
             "min": 0, 
             "max": 100, 
             "defaultOperator": "LessThan",

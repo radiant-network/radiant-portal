@@ -5,12 +5,12 @@ package types
 |Field                 |Type               |Null|Key  |Default|Extra|
 +----------------------+-------------------+----+-----+-------+-----+
 |locus_id              |bigint             |NO  |true |null   |     |
-|pf                    |double             |YES |false|null   |     |
+|pf_wgs                |double             |YES |false|null   |     |
 |gnomad_v3_af          |double             |YES |false|null   |     |
 |topmed_af             |double             |YES |false|null   |     |
 |tg_af                 |double             |YES |false|null   |     |
-|pc                    |int                |YES |false|null   |     |
-|pn                    |int                |YES |false|null   |     |
+|pc_wgs                |int                |YES |false|null   |     |
+|pn_wgs                |int                |YES |false|null   |     |
 |chromosome            |char(2)            |YES |false|null   |     |
 |start                 |bigint             |YES |false|null   |     |
 |clinvar_name          |varchar(2000)      |YES |false|null   |     |
@@ -49,9 +49,9 @@ type VariantOverview = struct {
 	Symbol                string                   `json:"symbol,omitempty"`
 	Consequences          JsonArray[string]        `gorm:"type:json" json:"picked_consequences" validate:"required"`
 	ClinvarInterpretation JsonArray[string]        `gorm:"type:json" json:"clinvar,omitempty"`
-	Pc                    int                      `json:"pc,omitempty"`
-	Pn                    int                      `json:"pn,omitempty"`
-	Pf                    float64                  `json:"pf" validate:"required"`
+	PcWgs                 int                      `json:"pc_wgs,omitempty"`
+	PnWgs                 int                      `json:"pn_wgs,omitempty"`
+	PfWgs                 float64                  `json:"pf_wgs" validate:"required"`
 	GnomadV3Af            float64                  `json:"gnomad_v3_af" validate:"required"`
 	IsCanonical           bool                     `json:"is_canonical"`
 	IsManeSelect          bool                     `json:"is_mane_select"`
@@ -108,24 +108,24 @@ var StartField = Field{
 	Table:           VariantTable,
 }
 
-var PfField = Field{
-	Name:          "pf",
+var PfWgsField = Field{
+	Name:          "pf_wgs",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
 	Table:         VariantTable,
 }
-var PcField = Field{
-	Name:          "pc",
+var PcWgsField = Field{
+	Name:          "pc_wgs",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
 	Table:         VariantTable,
 }
-var PnField = Field{
-	Name:          "pn",
+var PnWgsField = Field{
+	Name:          "pn_wgs",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,

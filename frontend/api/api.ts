@@ -530,7 +530,7 @@ export interface ExpendedOccurrence {
      * @type {number}
      * @memberof ExpendedOccurrence
      */
-    'pf'?: number;
+    'pf_wgs'?: number;
     /**
      * 
      * @type {Array<string>}
@@ -1074,13 +1074,13 @@ export interface Occurrence {
      * @type {number}
      * @memberof Occurrence
      */
-    'pc'?: number;
+    'pc_wgs'?: number;
     /**
      * 
      * @type {number}
      * @memberof Occurrence
      */
-    'pf': number;
+    'pf_wgs': number;
     /**
      * 
      * @type {Array<string>}
@@ -1092,7 +1092,7 @@ export interface Occurrence {
      * @type {number}
      * @memberof Occurrence
      */
-    'pn'?: number;
+    'pn_wgs'?: number;
     /**
      * 
      * @type {string}
@@ -1862,13 +1862,13 @@ export interface VariantOverview {
      * @type {number}
      * @memberof VariantOverview
      */
-    'pc'?: number;
+    'pc_wgs'?: number;
     /**
      * 
      * @type {number}
      * @memberof VariantOverview
      */
-    'pf': number;
+    'pf_wgs': number;
     /**
      * 
      * @type {number}
@@ -1886,7 +1886,7 @@ export interface VariantOverview {
      * @type {number}
      * @memberof VariantOverview
      */
-    'pn'?: number;
+    'pn_wgs'?: number;
     /**
      * 
      * @type {string}

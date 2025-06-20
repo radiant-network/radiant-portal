@@ -1,12 +1,12 @@
 CREATE TABLE `germline__snv__variant`
 (
     locus_id               BIGINT NOT NULL,
-    pf DOUBLE,
+    pf_wgs DOUBLE,
     gnomad_v3_af DOUBLE,
     topmed_af DOUBLE,
     tg_af DOUBLE,
-    pc                     INT(11),
-    pn                     INT(11),
+    pc_wgs                     INT(11),
+    pn_wgs                     INT(11),
     chromosome             CHAR(2),
     start                  BIGINT NULL COMMENT '',
     end                    BIGINT NULL COMMENT '',

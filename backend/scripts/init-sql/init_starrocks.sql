@@ -166,12 +166,12 @@ CREATE TABLE IF NOT EXISTS `germline__snv__occurrence`
 CREATE TABLE IF NOT EXISTS `germline__snv__variant`
 (
     locus_id               BIGINT NOT NULL,
-    pf DOUBLE,
+    pf_wgs DOUBLE,
     gnomad_v3_af DOUBLE,
     topmed_af DOUBLE,
     tg_af DOUBLE,
-    pc                     INT(11),
-    pn                     INT(11),
+    pc_wgs                     INT(11),
+    pn_wgs                     INT(11),
     chromosome             CHAR(2),
     start                  BIGINT NULL COMMENT '',
     end                    BIGINT NULL COMMENT '',
@@ -266,7 +266,7 @@ VALUES
     (1, 1, 1, 1000, 100, 'PASS', 'HET', 1.0),
     (1, 1, 1, 2000, 200, 'PASS', 'HOM', 0.5);
 
-INSERT INTO germline__snv__variant (locus_id, impact_score, pf, pc, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate)
+INSERT INTO germline__snv__variant (locus_id, impact_score, pf_wgs, pc_wgs, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate)
 VALUES
     (1000, 3, 0.01, 10, 0.01, 'hgvsg1', 'AD', 'class1', 'MODIFIER', 'BRAF', true, true, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T'),
     (2000, 1, 0.02, 20, 0.02, 'hgvsg2', 'Smu', 'class2', 'MODIFIER', 'BRAC', false, true, ['Pathogenic'], 'rs2222222', 'p.Arg19His', ['splice acceptor'], 'locus_full_2000', '2', 2222, 'C', 'G');

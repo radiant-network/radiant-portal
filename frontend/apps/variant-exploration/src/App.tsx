@@ -32,7 +32,7 @@ type OccurrenceCountInput = {
 
 const DEFAULT_SORTING = [
   {
-    field: 'pf',
+    field: 'pf_wgs',
     order: SortBodyOrderEnum.Asc,
   },
 ];
@@ -88,7 +88,7 @@ function App() {
           'is_mane_select',
           'omim_inheritance_code',
           'clinvar',
-          'pf',
+          'pf_wgs',
           'transcript_id',
         ],
         limit: pagination.pageSize,
