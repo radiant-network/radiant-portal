@@ -43,6 +43,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
+  
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
     let prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
@@ -70,12 +71,12 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
     });
     
     aggregationData?.forEach(item => {
-      item.key = item.key?.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())
+      item.label = item.key?.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())
     })
 
     setItems(aggregationData || []);
     setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));
-  }, [aggregationData]);
+  }, [aggregationData, items]);
 
   // Memoize these functions with useCallback
   //
@@ -210,7 +211,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
                   />
                   <div className="overflow-hidden text-xs whitespace-normal break-words">
                     {t(`common.filters.labels.${field.key}_value.${items[i].key}`, 
-                      { defaultValue: items[i].key }
+                      { defaultValue: items[i].label }
                     )}
                   </div>
                   <span className="checkmark"></span>
