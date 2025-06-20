@@ -73,9 +73,9 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               </Tooltip>
             </div>
             <div className="font-semibold">
-              {data?.pc ? (
+              {data?.pc_wgs ? (
                 <Link to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`} className="hover:underline">
-                  {`${data.pc} (${data.pf.toExponential(2)})`}
+                  {`${data.pc_wgs} (${data.pf_wgs.toExponential(2)})`}
                 </Link>
               ) : (
                 '-'

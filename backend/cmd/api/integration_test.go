@@ -76,13 +76,13 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 }
 
 func Test_OccurrencesList(t *testing.T) {
-	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":"1000", "is_canonical":false, "is_mane_select":true, "pf":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":1, "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":"1000", "is_canonical":false, "is_mane_select":true, "pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":1, "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
 }
 
 func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
 	body := `{
 			"additional_fields":[
-				"seq_id","locus_id","filter","zygosity","pf","pc","hgvsg","ad_ratio","variant_class"
+				"seq_id","locus_id","filter","zygosity","pf_wgs","pc_wgs","hgvsg","ad_ratio","variant_class"
 			],
 			"sqon":{
 				"op":"in",
@@ -92,7 +92,7 @@ func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *tes
 				}
 		}
 		}`
-	expected := `[{"ad_ratio":1, "chromosome": "1", "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":"1000", "is_canonical":false, "is_mane_select":true, "pc":3, "pf":0.99, "picked_consequences": null, "seq_id":1, "task_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
+	expected := `[{"ad_ratio":1, "chromosome": "1", "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":"1000", "is_canonical":false, "is_mane_select":true, "pc_wgs":3, "pf_wgs":0.99, "picked_consequences": null, "seq_id":1, "task_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
 
 }
@@ -145,7 +145,7 @@ func Test_Aggregation(t *testing.T) {
 
 func Test_Statistics(t *testing.T) {
 	body := `{
-			"field": "pf",
+			"field": "pf_wgs",
 			"sqon": {
 				"op": "and",
 				"content": [
@@ -166,7 +166,7 @@ func Test_Statistics(t *testing.T) {
 func Test_Filter_On_Consequence_Column(t *testing.T) {
 	body := `{
 			"additional_fields":[
-				"seq_id","task_id","locus_id","filter","zygosity","pf","pc","hgvsg","ad_ratio","variant_class"
+				"seq_id","task_id","locus_id","filter","zygosity","pf_wgs","pc_wgs","hgvsg","ad_ratio","variant_class"
 			],
 			"sqon": {
 				"op": "and",
@@ -183,7 +183,7 @@ func Test_Filter_On_Consequence_Column(t *testing.T) {
 			},
 			"size": 10
 		}`
-	expected := `[{"ad_ratio":1, "chromosome": "1", "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":"1000", "is_canonical":false, "is_mane_select":true, "pc":3, "pf":0.99, "picked_consequences": null, "seq_id":1, "task_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
+	expected := `[{"ad_ratio":1, "chromosome": "1", "filter":"PASS", "genotype_quality":100, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "locus_id":"1000", "is_canonical":false, "is_mane_select":true, "pc_wgs":3, "pf_wgs":0.99, "picked_consequences": null, "seq_id":1, "task_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
 }
 
@@ -498,7 +498,7 @@ func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId i
 }
 
 func Test_GetExpendedOccurrence(t *testing.T) {
-	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "is_canonical":true, "is_mane_plus":false, "is_mane_select":true, "locus_id":"1000", "is_mane_select":true, "omim_conditions":[{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, {"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}], "pf":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "start":1111, "symbol":"BRAF", "vep_impact":"impact1", "zygosity":"HET"}`
+	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "is_canonical":true, "is_mane_plus":false, "is_mane_select":true, "locus_id":"1000", "is_mane_select":true, "omim_conditions":[{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, {"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}], "pf_wgs":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "start":1111, "symbol":"BRAF", "vep_impact":"impact1", "zygosity":"HET"}`
 	assertGetExpendedOccurrence(t, "simple", 1, 1000, expected)
 }
 
@@ -538,7 +538,7 @@ func assertGetVariantOverview(t *testing.T, data string, locusId int, expected s
 }
 
 func Test_GetVariantOverview(t *testing.T) {
-	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "is_canonical":true, "clinvar": ["Benign", "Pathogenic"], "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "locus":"locus1", "is_mane_select":true, "omim_conditions": [{"inheritance_code": ["AD"], "panel": "Noonan syndrome 7", "omim_phenotype_id": "613706"}, {"inheritance_code": ["AD"], "panel":"LEOPARD syndrome 3", "omim_phenotype_id":"613707"}], "pc":3, "pf":0.99, "picked_consequences":["csq10"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "transcript_id":"T001", "vep_impact":"impact1"}`
+	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "is_canonical":true, "clinvar": ["Benign", "Pathogenic"], "fathmm_pred":"T", "fathmm_score":0.1, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "locus":"locus1", "is_mane_select":true, "omim_conditions": [{"inheritance_code": ["AD"], "panel": "Noonan syndrome 7", "omim_phenotype_id": "613706"}, {"inheritance_code": ["AD"], "panel":"LEOPARD syndrome 3", "omim_phenotype_id":"613707"}], "pc_wgs":3, "pf_wgs":0.99, "picked_consequences":["csq10"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "symbol":"BRAF", "transcript_id":"T001", "vep_impact":"impact1"}`
 	assertGetVariantOverview(t, "simple", 1000, expected)
 }
 

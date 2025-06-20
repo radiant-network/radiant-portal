@@ -11,9 +11,9 @@ type Occurrence struct {
 	GenotypeQuality     int32             `json:"genotype_quality" validate:"required"`
 	Filter              string            `json:"filter,omitempty"`
 	Zygosity            string            `json:"zygosity" validate:"required"`
-	Pf                  float64           `json:"pf" validate:"required"`
-	Pc                  int               `json:"pc,omitempty"`
-	Pn                  int               `json:"pn,omitempty"`
+	PfWgs               float64           `json:"pf_wgs" validate:"required"`
+	PcWgs               int               `json:"pc_wgs,omitempty"`
+	PnWgs               int               `json:"pn_wgs,omitempty"`
 	GnomadV3Af          float64           `json:"gnomad_v3_af" validate:"required"`
 	Hgvsg               string            `json:"hgvsg" validate:"required"`
 	OmimInheritanceCode JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
@@ -55,7 +55,7 @@ type ExpendedOccurrence = struct {
 	SpliceaiType          JsonArray[string]        `gorm:"type:json" json:"spliceai_type,omitempty"`
 	SpliceaiDs            float32                  `json:"spliceai_ds,omitempty"`
 	Af                    float64                  `json:"af,omitempty"` // TODO
-	Pf                    float64                  `json:"pf,omitempty"`
+	PfWgs                 float64                  `json:"pf_wgs,omitempty"`
 	GnomadV3Af            float64                  `json:"gnomad_v3_af" validate:"required"`
 	SiftPred              string                   `json:"sift_pred,omitempty"`
 	SiftScore             float32                  `json:"sift_score,omitempty"`
@@ -173,9 +173,9 @@ var OccurrencesFields = []Field{
 	AdRatioField,
 	AdAltField,
 	AdTotalField,
-	PfField,
-	PnField,
-	PcField,
+	PfWgsField,
+	PnWgsField,
+	PcWgsField,
 	HgvsgField,
 	ClinvarField,
 	ConsequenceField,
@@ -232,7 +232,7 @@ var OccurrencesDefaultFields = []Field{
 	HgvsgField,
 	VariantClassField,
 	GnomadV3AfField,
-	PfField,
+	PfWgsField,
 	GenotypeQualityField,
 	ZygosityField,
 	AdRatioField,

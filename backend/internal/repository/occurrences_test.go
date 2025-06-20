@@ -38,8 +38,8 @@ func Test_GetOccurrences(t *testing.T) {
 			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Equal(t, "HET", occurrences[0].Zygosity)
-			assert.Equal(t, 0.99, occurrences[0].Pf)
-			assert.Equal(t, 3, occurrences[0].Pc)
+			assert.Equal(t, 0.99, occurrences[0].PfWgs)
+			assert.Equal(t, 3, occurrences[0].PcWgs)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
 			assert.Equal(t, float32(1.0), occurrences[0].AdRatio)
 			assert.Equal(t, "class1", occurrences[0].VariantClass)
@@ -152,8 +152,8 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Equal(t, "HET", occurrences[0].Zygosity)
-			assert.Equal(t, 0.99, occurrences[0].Pf)
-			assert.Equal(t, 3, occurrences[0].Pc)
+			assert.Equal(t, 0.99, occurrences[0].PfWgs)
+			assert.Equal(t, 3, occurrences[0].PcWgs)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
 			assert.Equal(t, float32(1.0), occurrences[0].AdRatio)
 			assert.Equal(t, "class1", occurrences[0].VariantClass)
@@ -245,7 +245,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 
 		sortedBody := []types.SortBody{
 			{
-				Field: "pf",
+				Field: "pf_wgs",
 				Order: "desc",
 			},
 		}
@@ -272,7 +272,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Sp
 
 		sortedBody := []types.SortBody{
 			{
-				Field: "pf",
+				Field: "pf_wgs",
 				Order: "desc",
 			},
 		}
@@ -602,7 +602,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(
 func Test_GetStatisticsOccurrences(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrencesRepository(db)
-		query, err := types.NewStatisticsQueryFromSqon("pf", nil, types.OccurrencesFields)
+		query, err := types.NewStatisticsQueryFromSqon("pf_wgs", nil, types.OccurrencesFields)
 		assert.NoError(t, err)
 		statistics, err := repo.GetStatisticsOccurrences(1, query)
 		assert.NoError(t, err)
