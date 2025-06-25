@@ -46,18 +46,25 @@ openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axio
 [Contribution](./docs/contribution.md)
 
 ## Project Directory Structure
-
 [Project Structure Documentation](./docs/project-structure.md)
 
 ## Code Conventions
-
 [Code Convention Documentation](./docs/code-conventions.md)
+
+## Theme and Figma
+[Theme and Figma documentation](./docs/theme.md)
+
+## Shadcn
+[shadcn convention documentation](./docs/shadcn.md)
+
+## Adding a new Page Application
+[Create An Application](./docs/create-an-application.md)
 
 ## Development Workflow
 
 1. **Components Development**: Build reusable components in the `Components` directory.
 2. **Theme Integration**: Apply consistent styles using the `Themes` directory. Tailwindcss is used for styling.
-3. **Application Assembly**: Use the `Apps` directory to create full applications by combining components and pages.
+3. **Application Assembly or Application Page**: Use the `Apps` directory to create full applications by combining components and pages. See [Create An Application](./docs/create-an-application.md)
 4. **Portal Customization**: Configure and generate multiple portals via the `Portals` directory. radiant should be a builder for the other portals. Different configuration should define what portals should be build.
 5. **Testing and Documentation**: Use `Storybook` to test components in isolation and demonstrate their usage.
 
