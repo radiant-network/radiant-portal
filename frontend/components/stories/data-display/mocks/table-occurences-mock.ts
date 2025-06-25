@@ -4,7 +4,7 @@ export default [
   {
     genotype_quality: 49,
     zygosity: 'HET',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     hgvsg: 'chr1:g.169114295T>G',
     omim_inheritance_code: ['Mu'],
     ad_ratio: 0.53571,
@@ -18,7 +18,7 @@ export default [
   {
     genotype_quality: 54,
     zygosity: 'HET',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     gnomad_v3_af: 0.000022,
     hgvsg: 'chr9:g.18180552_18180555dup',
     ad_ratio: 1,
@@ -31,7 +31,7 @@ export default [
   {
     genotype_quality: 38,
     zygosity: 'HET',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     hgvsg: 'chr12:g.65113035T>G',
     ad_ratio: 0.69444,
     variant_class: 'SNV',
@@ -44,7 +44,7 @@ export default [
   {
     genotype_quality: 50,
     zygosity: 'HET',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     gnomad_v3_af: 0.000454,
     hgvsg: 'chr1:g.87737552G>A',
     ad_ratio: 0.47059,
@@ -57,7 +57,7 @@ export default [
   {
     genotype_quality: 7,
     zygosity: 'HOM',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     hgvsg: 'chr17:g.70647334_70647335insTTTTTTTTTATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
     ad_ratio: 1,
     variant_class: 'insertion',
@@ -68,7 +68,7 @@ export default [
   {
     genotype_quality: 36,
     zygosity: 'HET',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     gnomad_v3_af: 0.001928,
     hgvsg: 'chr10:g.20287985A>T',
     ad_ratio: 0.66667,
@@ -82,7 +82,7 @@ export default [
   {
     genotype_quality: 27,
     zygosity: 'HOM',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     gnomad_v3_af: 0.000055,
     hgvsg: 'chr20:g.4203263_4203264insTTTTTTTTTTTTTTTTTTTTTTTTTTT',
     ad_ratio: 1,
@@ -94,7 +94,7 @@ export default [
   {
     genotype_quality: 50,
     zygosity: 'HET',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     hgvsg: 'chr4:g.172858073T>C',
     ad_ratio: 0.525,
     variant_class: 'SNV',
@@ -107,7 +107,7 @@ export default [
   {
     genotype_quality: 50,
     zygosity: 'HET',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     hgvsg: 'chr11:g.92239648T>C',
     ad_ratio: 0.475,
     variant_class: 'SNV',
@@ -120,7 +120,7 @@ export default [
   {
     genotype_quality: 50,
     zygosity: 'HET',
-    pf: 0.000353,
+    pf_wgs: 0.000353,
     gnomad_v3_af: 0.000007,
     hgvsg: 'chr10:g.129505704A>T',
     ad_ratio: 0.51786,

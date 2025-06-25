@@ -238,7 +238,7 @@ components:
           uniqueItems: false
         parental_origin:
           type: string
-        pf:
+        pf_wgs:
           type: number
         picked_consequences:
           items:
@@ -477,16 +477,16 @@ components:
             type: string
           type: array
           uniqueItems: false
-        pc:
+        pc_wgs:
           type: integer
-        pf:
+        pf_wgs:
           type: number
         picked_consequences:
           items:
             type: string
           type: array
           uniqueItems: false
-        pn:
+        pn_wgs:
           type: integer
         rsnumber:
           type: string
@@ -513,7 +513,7 @@ components:
       - gnomad_v3_af
       - hgvsg
       - locus_id
-      - pf
+      - pf_wgs
       - picked_consequences
       - seq_id
       - start
@@ -806,9 +806,9 @@ components:
             $ref: '#/components/schemas/OmimGenePanel'
           type: array
           uniqueItems: false
-        pc:
+        pc_wgs:
           type: integer
-        pf:
+        pf_wgs:
           type: number
         phyloP17way_primate:
           type: number
@@ -817,7 +817,7 @@ components:
             type: string
           type: array
           uniqueItems: false
-        pn:
+        pn_wgs:
           type: integer
         polyphen2_hvar_pred:
           type: string
@@ -847,7 +847,7 @@ components:
       required:
       - gnomad_v3_af
       - locus
-      - pf
+      - pf_wgs
       - picked_consequences
       type: object
     VepImpact:

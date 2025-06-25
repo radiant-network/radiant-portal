@@ -126,10 +126,10 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       ),
       minSize: 120,
     }),
-    columnHelper.accessor(row => row.pf, {
-      id: 'pf',
+    columnHelper.accessor(row => row.pf_wgs, {
+      id: 'pf_wgs',
       cell: info => <ParticipantFrequencyCell value={info.getValue()} />,
-      header: t('variant.headers.pf'),
+      header: t('variant.headers.pf_wgs'),
       minSize: 120,
     }),
     columnHelper.accessor(row => row.genotype_quality, {
@@ -215,9 +215,9 @@ const defaultSettings = createColumnSettings([
     label: 'variant.headers.gnomad_v3_af'
   },
   {
-    id: 'pf',
+    id: 'pf_wgs',
     visible: true,
-    label: 'variant.headers.pf'
+    label: 'variant.headers.pf_wgs'
   },
   {
     id: 'genotype_quality',

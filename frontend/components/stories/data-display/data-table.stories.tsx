@@ -40,7 +40,7 @@ const meta = {
     data: [],
     defaultServerSorting: [
       {
-        field: 'pf',
+        field: 'pf_wgs',
         order: SortBodyOrderEnum.Asc,
       },
     ],
