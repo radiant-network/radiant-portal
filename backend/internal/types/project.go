@@ -17,10 +17,11 @@ func (Project) TableName() string {
 }
 
 var ProjectCodeField = Field{
-	Name:          "code",
-	Alias:         "project_code",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         ProjectTable,
+	Name:            "code",
+	Alias:           "project_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           ProjectTable,
 }

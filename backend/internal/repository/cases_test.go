@@ -129,7 +129,14 @@ func Test_SearchById(t *testing.T) {
 func Test_GetCasesFilters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		filters, err := repo.GetCasesFilters()
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.RequestPriorityCodeField.GetAlias(),
+				Value:     []interface{}{"routine"},
+			},
+		}
+		query, err := types.NewAggregationQueryFromCriteria(searchCriteria, CasesQueryConfigForTest.AllFields)
+		filters, err := repo.GetCasesFilters(query)
 		assert.NoError(t, err)
 		assert.Equal(t, len((*filters).Status), 8)
 		assert.Equal(t, len((*filters).Priority), 4)

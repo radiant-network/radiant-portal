@@ -128,11 +128,12 @@ var CaseProbandIdField = Field{
 }
 
 var CaseStatusCodeField = Field{
-	Name:          "status_code",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         CaseTable,
+	Name:            "status_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           CaseTable,
 }
 
 var CasePrimaryConditionField = Field{
@@ -168,12 +169,13 @@ var CaseRequestIdField = Field{
 }
 
 var CaseDiagnosticLabCodeField = Field{
-	Name:          "code",
-	Alias:         "performer_lab_code",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         PerformerLabTable,
+	Name:            "code",
+	Alias:           "performer_lab_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           PerformerLabTable,
 }
 
 var CaseDiagnosticLabNameField = Field{
@@ -187,7 +189,7 @@ type CaseFilters struct {
 	Status       []Aggregation `json:"status" validate:"required"`
 	Priority     []Aggregation `json:"priority" validate:"required"`
 	CaseAnalysis []Aggregation `json:"case_analysis" validate:"required"`
-	Project      []Aggregation `json:"project,omitempty"`
-	PerformerLab []Aggregation `json:"performer_lab,omitempty"`
-	RequestedBy  []Aggregation `json:"requested_by,omitempty"`
+	Project      []Aggregation `json:"project" validate:"required"`
+	PerformerLab []Aggregation `json:"performer_lab" validate:"required"`
+	RequestedBy  []Aggregation `json:"requested_by" validate:"required"`
 }

@@ -137,3 +137,7 @@ type ListBodyWithCriteria struct {
 type CountBodyWithCriteria struct {
 	SearchCriteria []SearchCriterion `json:"search_criteria"`
 } // @Name CountBodyWithCriteria
+
+type FiltersBodyWithCriteria struct {
+	SearchCriteria []SearchCriterion `json:"search_criteria"`
+} // @Name FiltersBodyWithCriteria

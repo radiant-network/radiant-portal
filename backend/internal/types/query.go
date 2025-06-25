@@ -189,6 +189,18 @@ func NewAggregationQueryFromSqon(aggregation string, sqon *Sqon, fields []Field)
 	}
 }
 
+func NewAggregationQueryFromCriteria(searchCriteria []SearchCriterion, fields []Field) (AggQuery, error) {
+	if len(searchCriteria) != 0 {
+		root, visitedFilteredFields, err := criteriaToFilter(searchCriteria, fields)
+		if err != nil {
+			return nil, fmt.Errorf("error during build agg query from search criteria %w", err)
+		}
+		return &aggQuery{filters: root, filteredFields: visitedFilteredFields}, err
+	} else {
+		return &aggQuery{}, nil
+	}
+}
+
 type CountQuery interface {
 	Filters() FilterNode
 	HasFieldFromTables(tables ...Table) bool

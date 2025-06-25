@@ -85,7 +85,10 @@ components:
           uniqueItems: false
       required:
       - case_analysis
+      - performer_lab
       - priority
+      - project
+      - requested_by
       - status
       type: object
     CaseResult:
@@ -280,6 +283,14 @@ components:
       - hgvsg
       - locus_id
       - picked_consequences
+      type: object
+    FiltersBodyWithCriteria:
+      properties:
+        search_criteria:
+          items:
+            $ref: '#/components/schemas/SearchCriterion'
+          type: array
+          uniqueItems: false
       type: object
     InterpretationGermline:
       properties:
@@ -955,6 +966,13 @@ paths:
     post:
       description: Retrieve CaseFilters cases filters
       operationId: casesFilters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FiltersBodyWithCriteria'
+        description: Filters Body
+        required: true
       responses:
         "200":
           content:
