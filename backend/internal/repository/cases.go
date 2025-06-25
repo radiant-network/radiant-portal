@@ -70,9 +70,9 @@ func (r *CasesRepository) CountCases(userQuery types.CountQuery) (*int64, error)
 
 func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteResult, error) {
 	/**
-	  	(SELECT "case_id" as type, id as value from `radiant_jdbc`.`public`.`case` WHERE CAST(id AS TEXT) LIKE '1%')
+	  	(SELECT "case_id" as type, id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(id AS TEXT) LIKE '1%')
 	    UNION
-	    (SELECT "patient_id" as type, proband_id as value from `radiant_jdbc`.`public`.`case` WHERE CAST(proband_id AS TEXT) LIKE '1%')
+	    (SELECT "patient_id" as type, proband_id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(proband_id AS TEXT) LIKE '1%')
 	    UNION
 	    (SELECT "mrn" as type, mrn as value from `radiant_jdbc`.`public`.`patient` WHERE mrn LIKE '1%')
 	    UNION
@@ -157,19 +157,19 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 		return nil, fmt.Errorf("error fetching project: %w", err)
 	}
 
-	txPerformerLab := r.db.Table(fmt.Sprintf("%s %s", types.OrganizationTable.Name, types.OrganizationTable.Alias))
-	txPerformerLab = txPerformerLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label, count(distinct cases.id) as count", types.OrganizationTable.Alias, types.OrganizationTable.Alias))
-	txPerformerLab = txPerformerLab.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.performer_lab_id = %s.id", types.OrganizationTable.Alias), txCases)
-	txPerformerLab = txPerformerLab.Group(fmt.Sprintf("%s.code, %s.name", types.OrganizationTable.Alias, types.OrganizationTable.Alias))
+	txPerformerLab := r.db.Table(fmt.Sprintf("%s %s", types.PerformerLabTable.Name, types.PerformerLabTable.Alias))
+	txPerformerLab = txPerformerLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label, count(distinct cases.id) as count", types.PerformerLabTable.Alias, types.PerformerLabTable.Alias))
+	txPerformerLab = txPerformerLab.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.performer_lab_id = %s.id", types.PerformerLabTable.Alias), txCases)
+	txPerformerLab = txPerformerLab.Group(fmt.Sprintf("%s.code, %s.name", types.PerformerLabTable.Alias, types.PerformerLabTable.Alias))
 	txPerformerLab = txPerformerLab.Order("count desc, bucket asc")
 	if err := txPerformerLab.Find(&performerLab).Error; err != nil {
 		return nil, fmt.Errorf("error fetching performer lab: %w", err)
 	}
 
-	txRequestedBy := r.db.Table(fmt.Sprintf("%s %s", types.OrganizationTable.Name, types.OrganizationTable.Alias))
-	txRequestedBy = txRequestedBy.Select(fmt.Sprintf("%s.code as bucket, %s.name as label, count(distinct cases.id) as count", types.OrganizationTable.Alias, types.OrganizationTable.Alias))
-	txRequestedBy = txRequestedBy.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.ordering_organization_id = %s.id", types.OrganizationTable.Alias), txCases)
-	txRequestedBy = txRequestedBy.Group(fmt.Sprintf("%s.code, %s.name", types.OrganizationTable.Alias, types.OrganizationTable.Alias))
+	txRequestedBy := r.db.Table(fmt.Sprintf("%s %s", types.OrderingOrganizationTable.Name, types.OrderingOrganizationTable.Alias))
+	txRequestedBy = txRequestedBy.Select(fmt.Sprintf("%s.code as bucket, %s.name as label, count(distinct cases.id) as count", types.OrderingOrganizationTable.Alias, types.OrderingOrganizationTable.Alias))
+	txRequestedBy = txRequestedBy.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.ordering_organization_id = %s.id", types.OrderingOrganizationTable.Alias), txCases)
+	txRequestedBy = txRequestedBy.Group(fmt.Sprintf("%s.code, %s.name", types.OrderingOrganizationTable.Alias, types.OrderingOrganizationTable.Alias))
 	txRequestedBy = txRequestedBy.Order("count desc, bucket asc")
 	if err := txRequestedBy.Find(&requestedBy).Error; err != nil {
 		return nil, fmt.Errorf("error fetching ordering org: %w", err)

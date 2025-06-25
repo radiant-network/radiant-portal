@@ -1,4 +1,4 @@
-INSERT INTO "case" (id, proband_id, project_id, case_analysis_id, status_code, request_id, performer_lab_id,
+INSERT INTO "cases" (id, proband_id, project_id, case_analysis_id, status_code, request_id, performer_lab_id,
                     primary_condition, note, created_on, updated_on)
 VALUES (1, 3, 1, 1, 'active', 1, 6, 'neurodevelopmental disorder (MONDO:0700092)', 'Administrative comment',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00'),

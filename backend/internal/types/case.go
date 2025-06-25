@@ -49,7 +49,7 @@ type CaseResult struct {
 }
 
 var CaseTable = Table{
-	Name:  "`radiant_jdbc`.`public`.`case`",
+	Name:  "`radiant_jdbc`.`public`.`cases`",
 	Alias: "c",
 }
 
