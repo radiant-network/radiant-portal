@@ -36,6 +36,12 @@ const proxyApi = async (request: Request) => {
     const transformedUrl = transformUrl(request.url);
     const accessToken = await getSessionAccessToken(request);
 
+    let data;
+    if (request.method.toLowerCase() !== 'get') {
+      const text = await request.text();
+      data = text ? JSON.parse(text) : undefined;
+    }
+
     const response = await axios({
       method: request.method,
       url: transformedUrl,
@@ -43,7 +49,7 @@ const proxyApi = async (request: Request) => {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      data: request.method.toLowerCase() === 'get' ? undefined : await request.json(),
+      data,
     });
     return new Response(JSON.stringify(response.data), {
       status: 200,

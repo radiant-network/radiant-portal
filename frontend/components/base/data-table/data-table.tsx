@@ -552,7 +552,7 @@ function TranstackTable<T>({
         {FiltersGroupForm && FiltersGroupForm({ loading: loadingStates?.list ?? true })}
 
         {/* Right Menu Options */}
-        <div className="flex flex-1 justify-end">
+        <div className="flex justify-end">
           {enableColumnOrdering && (
             <>
               {/* columns order and visibility */}
