@@ -53,7 +53,7 @@ export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TVa
 
 /**
  * Static value for header and row height
- * @note must be update is design change
+ * @note must be update if design change
  */
 const HEADER_HEIGHT = 43;
 const ROW_HEIGHT = 41;
@@ -111,7 +111,7 @@ export type DefaultColumnTableState = {
 };
 
 /**
- * Automate index create for column settings
+ * Automate index creation for column settings
  * @param settings BaseColumnSettings[]
  * @returns ColumnSettings[]
  */
@@ -250,7 +250,7 @@ function getRowFlexRender({
   subComponent?: SubComponentProps<any>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow

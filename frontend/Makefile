@@ -7,10 +7,11 @@ PORTALS_PATH := ./portals
 .PHONY: help
 help:
 	@echo "Available commands:"
-	@echo "  make docker-build-all      - Build all portal Docker images."
-	@echo "  make docker-run-all        - Run all portals with specified ports."
-	@echo "  make docker-build-<portal> - Build a specific portal (e.g., build-radiant-portal)."
-	@echo "  make docker-run-<portal>   - Run a specific portal with its port (e.g., run-radiant-portal)."
+	@echo "  make docker-build-all      	- Build all portal Docker images."
+	@echo "  make docker-run-all        	- Run all portals with specified ports."
+	@echo "  make docker-build-<portal> 	- Build a specific portal (e.g., build-radiant-portal)."
+	@echo "  make docker-run-<portal>   	- Run a specific portal with its port (e.g., run-radiant-portal)."
+	@echo "  make create-page-application	- Running CLI to create a new Page Application
 
 # Rules to build all portals
 .PHONY: build-all
@@ -51,6 +52,12 @@ $(addprefix docker-dev-, $(subst :, ,$(PORTALS))): docker-dev-%:
 	@echo "Running portal: $(PORTAL) on port $(PORTAL_PORT)"
 	docker build --target development -t $(DOCKER_IMAGE_PREFIX)-$(PORTAL)-dev -f ./Dockerfile.$(PORTAL).dev .
 	docker run --rm -p $(PORTAL_PORT):3000 --env-file ./portals/radiant/.env.production $(DOCKER_IMAGE_PREFIX)-$(PORTAL)-dev
+
+# Execute CLI to create a new Page Application
+.PHONY: create-page-application
+create-page-application:
+	@echo "Running CLI to create a new Page Application..."
+	@bash ./cli/create-application/create-app.sh
 
 # Clean node_modules directories
 .PHONY: clean
