@@ -42,7 +42,8 @@ func (CaseAnalysisType) TableName() string {
 }
 
 var StatusTable = Table{
-	Name: "radiant_jdbc.public.status",
+	Name:  "radiant_jdbc.public.status",
+	Alias: "status",
 }
 
 type Status struct {
@@ -54,7 +55,8 @@ func (Status) TableName() string {
 }
 
 var PriorityTable = Table{
-	Name: "radiant_jdbc.public.priority",
+	Name:  "radiant_jdbc.public.priority",
+	Alias: "priority",
 }
 
 type Priority struct {

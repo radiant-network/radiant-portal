@@ -123,13 +123,30 @@ func CasesAutocompleteHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Description Retrieve types.CaseFilters cases filters
 // @Tags cases
 // @Security bearerauth
+// @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
+// @Accept json
 // @Produce json
 // @Success 200 {object} types.CaseFilters
 // @Failure 500 {object} types.ApiError
 // @Router /cases/filters [post]
 func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		filters, err := repo.GetCasesFilters()
+		var (
+			body types.FiltersBodyWithCriteria
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		query, err := types.NewAggregationQueryFromCriteria(body.SearchCriteria, types.CasesFields)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		filters, err := repo.GetCasesFilters(query)
 		if err != nil {
 			HandleError(c, err)
 			return

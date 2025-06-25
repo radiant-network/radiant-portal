@@ -260,10 +260,27 @@ func Test_NewCountQueryFromCriteria_Unknown_Field(t *testing.T) {
 	assert.ErrorContains(t, err, "unknown can not be filtered")
 }
 
-func Test_CountListQueryFromCriteria_Valid_Criteria(t *testing.T) {
+func Test_NewCountQueryFromCriteria_Valid_Criteria(t *testing.T) {
 	t.Parallel()
 	searchCriteria := []SearchCriterion{{FieldName: "department_name", Value: []interface{}{"a", "b", "c"}}}
 	query, err := NewCountQueryFromCriteria(searchCriteria, queryConfig.AllFields)
+	if assert.NoError(t, err) {
+		assert.NotNil(t, query.Filters())
+		assert.True(t, query.HasFieldFromTables(DepartmentTable, EmployeeTable))
+	}
+}
+
+func Test_NewAggregationQueryFromCriteria_Unknown_Field(t *testing.T) {
+	t.Parallel()
+	searchCriteria := []SearchCriterion{{FieldName: "unknown", Value: []interface{}{"a", "b", "c"}}}
+	_, err := NewAggregationQueryFromCriteria(searchCriteria, queryConfig.AllFields)
+	assert.ErrorContains(t, err, "error during build agg query from search criteria")
+	assert.ErrorContains(t, err, "unknown can not be filtered")
+}
+func Test_NewAggregationQueryFromCriteria_Valid_Criteria(t *testing.T) {
+	t.Parallel()
+	searchCriteria := []SearchCriterion{{FieldName: "department_name", Value: []interface{}{"a", "b", "c"}}}
+	query, err := NewAggregationQueryFromCriteria(searchCriteria, queryConfig.AllFields)
 	if assert.NoError(t, err) {
 		assert.NotNil(t, query.Filters())
 		assert.True(t, query.HasFieldFromTables(DepartmentTable, EmployeeTable))

@@ -34,20 +34,22 @@ var RequestOrderingPhysicianField = Field{
 }
 
 var RequestPriorityCodeField = Field{
-	Name:          "priority_code",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         RequestTable,
+	Name:            "priority_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           RequestTable,
 }
 
 var RequestOrderingOrganizationCodeField = Field{
-	Name:          "code",
-	Alias:         "requested_by_code",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         OrderingOrganizationTable,
+	Name:            "code",
+	Alias:           "requested_by_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           OrderingOrganizationTable,
 }
 
 var RequestOrderingOrganizationNameField = Field{

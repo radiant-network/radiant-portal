@@ -9,7 +9,8 @@ type Organization struct {
 }
 
 var OrganizationTable = Table{
-	Name: "radiant_jdbc.public.organization",
+	Name:  "radiant_jdbc.public.organization",
+	Alias: "org",
 }
 
 func (Organization) TableName() string {

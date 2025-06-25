@@ -56,7 +56,7 @@ func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.Autocomp
 	return &result, nil
 }
 
-func (m *MockRepository) GetCasesFilters() (*types.CaseFilters, error) {
+func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilters, error) {
 	var result = types.CaseFilters{
 		Status: []types.Aggregation{
 			{Bucket: "draft", Label: "Draft"},

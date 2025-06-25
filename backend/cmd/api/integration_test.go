@@ -647,13 +647,13 @@ func Test_CaseIdsAutoComplete(t *testing.T) {
 	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
 }
 
-func assertGetCasesFilters(t *testing.T, data string, expected string) {
+func assertGetCasesFilters(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
 		router.POST("/cases/filters", server.CasesFiltersHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/cases/filters", bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("POST", "/cases/filters", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -663,45 +663,48 @@ func assertGetCasesFilters(t *testing.T, data string, expected string) {
 }
 
 func Test_GetCasesFilters(t *testing.T) {
+	body := `{
+			"search_criteria":[{"field": "status_code", "value": ["draft"]}]
+		}`
 	expected := `{
 		"case_analysis":[
-			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"count":1, "key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"},
 			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
-			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"},
-			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"}], 
+			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"}], 
 		"performer_lab":[
+			{"count":1, "key":"CQGC", "label":"Quebec Clinical Genomic Center"},
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}, 
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
+			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 
-			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"}], 
+			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}], 
 		"priority":[
-			{"count":0, "key":"routine", "label":"Routine"}, 
-			{"count":0, "key":"urgent", "label":"Urgent"}, 
-			{"count":0, "key":"asap", "label":"Asap"}, 
-			{"count":0, "key":"stat", "label":"Stat"}], 
+			{"count":1, "key":"routine", "label":"Routine"}, 
+			{"count":0, "key":"asap", "label":"Asap"},
+			{"count":0, "key":"stat", "label":"Stat"},
+			{"count":0, "key":"urgent", "label":"Urgent"}], 
 		"project":[
-			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
+			{"count":1, "key":"N1", "label":"NeuroDev Phase I"}, 
 			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}], 
 		"requested_by":[
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}, 
+			{"count":1, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
+			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"},
+			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 
-			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"}], 
+			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}], 
 		"status":[
-			{"count":0, "key":"unknown", "label":"Unknown"}, 
-			{"count":0, "key":"draft", "label":"Draft"}, 
+			{"count":1, "key":"draft", "label":"Draft"}, 
 			{"count":0, "key":"active", "label":"Active"}, 
-			{"count":0, "key":"revoke", "label":"Revoke"}, 
-			{"count":0, "key":"completed", "label":"Completed"}, 
-			{"count":0, "key":"on-hold", "label":"On-hold"}, 
+			{"count":0, "key":"completed", "label":"Completed"},
 			{"count":0, "key":"incomplete", "label":"Incomplete"}, 
-			{"count":0, "key":"submitted", "label":"Submitted"}]	
+			{"count":0, "key":"on-hold", "label":"On-hold"}, 
+			{"count":0, "key":"revoke", "label":"Revoke"},
+			{"count":0, "key":"submitted", "label":"Submitted"},
+			{"count":0, "key":"unknown", "label":"Unknown"}]	
 		}`
-	assertGetCasesFilters(t, "simple", expected)
+	assertGetCasesFilters(t, "simple", body, expected)
 }
 
 func TestMain(m *testing.M) {

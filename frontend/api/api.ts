@@ -153,7 +153,7 @@ export interface CaseFilters {
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'performer_lab'?: Array<Aggregation>;
+    'performer_lab': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
@@ -165,13 +165,13 @@ export interface CaseFilters {
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'project'?: Array<Aggregation>;
+    'project': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'requested_by'?: Array<Aggregation>;
+    'requested_by': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
@@ -618,6 +618,19 @@ export interface ExpendedOccurrence {
 }
 
 
+/**
+ * 
+ * @export
+ * @interface FiltersBodyWithCriteria
+ */
+export interface FiltersBodyWithCriteria {
+    /**
+     * 
+     * @type {Array<SearchCriterion>}
+     * @memberof FiltersBodyWithCriteria
+     */
+    'search_criteria'?: Array<SearchCriterion>;
+}
 /**
  * 
  * @export
@@ -2028,10 +2041,13 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
+         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        casesFilters: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        casesFilters: async (filtersBodyWithCriteria: FiltersBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'filtersBodyWithCriteria' is not null or undefined
+            assertParamExists('casesFilters', 'filtersBodyWithCriteria', filtersBodyWithCriteria)
             const localVarPath = `/cases/filters`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2050,9 +2066,12 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
 
 
     
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(filtersBodyWithCriteria, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2166,11 +2185,12 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
+         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async casesFilters(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseFilters>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.casesFilters(options);
+        async casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.casesFilters(filtersBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.casesFilters']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -2225,11 +2245,12 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
+         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        casesFilters(options?: RawAxiosRequestConfig): AxiosPromise<CaseFilters> {
-            return localVarFp.casesFilters(options).then((request) => request(axios, basePath));
+        casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<CaseFilters> {
+            return localVarFp.casesFilters(filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
          * Counts cases
@@ -2277,12 +2298,13 @@ export class CasesApi extends BaseAPI {
     /**
      * Retrieve CaseFilters cases filters
      * @summary Get CaseFilters cases filters
+     * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public casesFilters(options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).casesFilters(options).then((request) => request(this.axios, this.basePath));
+    public casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).casesFilters(filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

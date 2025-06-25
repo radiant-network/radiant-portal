@@ -31,12 +31,13 @@ var CaseAnalysisTypeCodeField = Field{
 }
 
 var CaseAnalysisCodeField = Field{
-	Name:          "code",
-	Alias:         "case_analysis_code",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         CaseAnalysisTable,
+	Name:            "code",
+	Alias:           "case_analysis_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           CaseAnalysisTable,
 }
 
 var CaseAnalysisNameField = Field{
