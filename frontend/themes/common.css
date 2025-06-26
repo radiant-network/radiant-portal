@@ -38,6 +38,8 @@
   --bookmark-red: 0 84% 60%;
   --bookmark-off: 215 20% 65%;
 
+  --base-border: 214, 32%, 91%;
+
   --base-popover: 0 84 100%;
   --popover-foreground: 100% 100% 100%;
 }
@@ -80,6 +82,8 @@
   --bookmark-green: 142 76% 36%;
   --bookmark-red: 0 72% 51%;
   --bookmark-off: 215 16% 47%;
+
+  --base-border: 217, 33%, 17%;
 
   --base-popover: 229, 84%, 5%;
   --popover-foreground: 210, 40%, 98%;

@@ -6,6 +6,7 @@ module.exports = {
       borderColor: ({ theme }) => ({
         ...theme('colors'),
         DEFAULT: theme('colors.border'),
+        border: 'hsl(var(--base-border))',
       }),
       borderRadius: {
         DEFAULT: 'var(--radius)',
@@ -46,7 +47,7 @@ module.exports = {
         },
         amber: {
           DEFAULT: 'hsl(var(--amber))',
-          foreground: 'hsl(var(--amber-foreground))',
+          foreground: 'hsl(var(--red-foreground))',
         },
         red: {
           DEFAULT: 'hsl(var(--red))',
@@ -88,7 +89,6 @@ module.exports = {
           DEFAULT: 'hsl(var(--slate))',
           foreground: 'hsl(var(--slate-foreground))',
         },
-        border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         chart: {
