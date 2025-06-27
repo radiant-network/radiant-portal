@@ -3,10 +3,10 @@ import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import { getCaseExplorationColumns, defaultSettings } from '@/feature/case-table/table-settings';
 import { CaseResult, Count, CountBodyWithCriteria, ListBodyWithCriteria, SortBody, SortBodyOrderEnum } from '@/api/api';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
-import FiltersGroupForm from '../../components/filters-group/filters-group';
+import TableFilters from '../table-filters/table-filters';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
 type CaseListInput = {
@@ -34,6 +34,8 @@ async function fetchCasesCount(input: CaseCountInput) {
   return response.data;
 }
 
+type SearchCriterion = { field: string; value: string[] };
+
 function CasesTab() {
   const { t } = useI18n();
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
@@ -52,33 +54,38 @@ function CasesTab() {
       requestedBy: [],
     }
   );
-
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
+  
   // Build search_criteria array
-  type SearchCriterion = { field: string; value: string[] };
-  let search_criteria: SearchCriterion[] = [];
+  useEffect(() => {
+    console.log('>>> useEffect in cases-tab: ', filters)
+    let search_criteria: SearchCriterion[] = [];
 
-  if (filters.priority.length > 0) {
-    search_criteria.push({ field: 'priority_code', value: filters.priority });
-  }
-  if (filters.status.length > 0) {
-    search_criteria.push({ field: 'status_code', value: filters.status });
-  }
-  if (filters.caseAnalysis.length > 0) {
-    search_criteria.push({ field: 'case_analysis_code', value: filters.caseAnalysis });
-  }
-  if (filters.project.length > 0) {
-    search_criteria.push({ field: 'project_code', value: filters.project });
-  }
-  if (filters.performerLab.length > 0) {
-    search_criteria.push({ field: 'performer_lab_code', value: filters.performerLab });
-  }
-  if (filters.requestedBy.length > 0) {
-    search_criteria.push({ field: 'requested_by_code', value: filters.requestedBy });
-  }
+    if (filters.priority.length > 0) {
+      search_criteria.push({ field: 'priority_code', value: filters.priority });
+    }
+    if (filters.status.length > 0) {
+      search_criteria.push({ field: 'status_code', value: filters.status });
+    }
+    if (filters.caseAnalysis.length > 0) {
+      search_criteria.push({ field: 'case_analysis_code', value: filters.caseAnalysis });
+    }
+    if (filters.project.length > 0) {
+      search_criteria.push({ field: 'project_code', value: filters.project });
+    }
+    if (filters.performerLab.length > 0) {
+      search_criteria.push({ field: 'performer_lab_code', value: filters.performerLab });
+    }
+    if (filters.requestedBy.length > 0) {
+      search_criteria.push({ field: 'requested_by_code', value: filters.requestedBy });
+    }
+    setSearchCriteria(search_criteria);
 
+  }, [filters]);
+  
   const { data: total, isLoading: totalIsLoading } = useSWR<Count, any, CaseCountInput>(
     {
-      countBody: { search_criteria },
+      countBody: { search_criteria: searchCriteria },
     },
     fetchCasesCount,
     {
@@ -112,7 +119,7 @@ function CasesTab() {
           'status_code',
           'updated_on',
         ],
-        search_criteria,
+        search_criteria: searchCriteria,
         limit: pagination.pageSize,
         page_index: pagination.pageIndex,
         sort: sorting,
@@ -129,11 +136,12 @@ function CasesTab() {
       <DataTable
         id="case-exploration"
         columns={getCaseExplorationColumns(t)}
-        FiltersGroupForm={() => (
-          <FiltersGroupForm
+        TableFilters={() => (
+          <TableFilters
             loading={listIsLoading}
             filters={filters}
             setFilters={setFilters}
+            searchCriteria={searchCriteria}
           />
         )}
         data={list ?? []}
