@@ -181,7 +181,8 @@
       "selectLanguage": "Choisir une langue",
       "collapseAll": "Réduire tout",
       "expandAll": "Développer tout",
-      "seeMore": "Plus"
+      "seeMore": "Plus",
+      "clear": "Effacer"
     },
     "languages": {
       "en": "Anglais",
@@ -319,7 +320,10 @@
       "priority_code": "Priorité",
       "status_code": "Status",
       "case_analysis_code": "Analyse",
-      "search_placeholder": "Cas, analyse, patient, analyse ou MRN"
+      "search_placeholder": "Cas, analyse, patient, analyse ou MRN",
+      "project_code": "Projet",
+      "performer_lab": "Laboratoire de diagnostic",
+      "requested_by": "Établissement prescripteur"
     },
     "priority": {
       "asap": "ASAP",

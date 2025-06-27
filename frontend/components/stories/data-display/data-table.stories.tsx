@@ -143,7 +143,7 @@ export const LoadingWithFiltersGroup: Story = {
     enableFullscreen: true,
     defaultColumnSettings: occurenceDefaultsSettings,
     tableIndexResultPosition: 'hidden',
-    FiltersGroupForm: FiltersGroupSkeleton,
+    TableFilters: FiltersGroupSkeleton,
   },
   render: args => <DataTable {...args} />,
 };
