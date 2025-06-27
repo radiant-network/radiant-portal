@@ -59,6 +59,7 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
   });
 
   const handleSave = useCallback(() => {
+    console.log('>>> handleSave');
     if (isSomatic) {
       somaticFormRef.current?.submit();
     } else {

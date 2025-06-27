@@ -20,13 +20,13 @@ import { Badge } from '@/components/base/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import InterpretationFormGeneric from './interpretation-form-generic';
 import { InterpretationSomatic } from '@/api/api';
-import { useImperativeHandle } from 'react';
+import { useImperativeHandle, forwardRef, useEffect } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 
-function InterpretationFormSomatic(
-  { interpretation, saveInterpretation }: InterpretationFormProps<InterpretationSomatic>,
-  ref: React.Ref<InterpretationFormRef>,
-) {
+const InterpretationFormSomatic = forwardRef<
+  InterpretationFormRef,
+  InterpretationFormProps<InterpretationSomatic>
+>(({ interpretation, saveInterpretation, onDirtyChange }, ref) => {
   const { t } = useI18n();
   const form = useForm<SomaticInterpretationSchemaType>({
     resolver: zodResolver(somaticInterpretationFormSchema),
@@ -46,13 +46,17 @@ function InterpretationFormSomatic(
     saveInterpretation(values);
   }
 
+  useEffect(() => {
+    onDirtyChange(form.formState.isDirty);
+  }, [form.formState.isDirty, onDirtyChange]);
+
   useImperativeHandle(
     ref,
     () => ({
       submit: () => form.handleSubmit(onSubmit)(),
       isDirty: form.formState.isDirty,
     }),
-    [ref, form, onSubmit],
+    [form, onSubmit, form.formState.isDirty],
   );
 
   return (
@@ -212,6 +216,8 @@ function InterpretationFormSomatic(
       </div>
     </FormProvider>
   );
-}
+});
+
+InterpretationFormSomatic.displayName = 'InterpretationFormSomatic';
 
 export default InterpretationFormSomatic;

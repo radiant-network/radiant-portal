@@ -880,6 +880,9 @@
       "contact": "Contact"
     }
   },
+  "interpretation": {
+    "title": "Clinical Interpretation"
+  },
   "queryFilters": {
     "sidebarPanel": {
       "collapse": "Collapse",
