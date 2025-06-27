@@ -62,7 +62,7 @@ const ROW_HEIGHT = 41;
  * Interface and types
  */
 type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
-type FiltersGroupFormProps = ({ loading }: { loading: boolean }) => React.JSX.Element;
+type TableFiltersProps = ({ loading }: { loading: boolean }) => React.JSX.Element;
 
 export type TableProps<TData> = {
   id: string;
@@ -78,7 +78,7 @@ export type TableProps<TData> = {
   onPaginationChange: OnChangeFn<PaginationState>;
   onServerSortingChange: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProps<TData>;
-  FiltersGroupForm?: FiltersGroupFormProps;
+  TableFilters?: TableFiltersProps;
   total?: number;
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
@@ -356,7 +356,7 @@ function TranstackTable<T>({
   data,
   defaultColumnSettings,
   defaultServerSorting,
-  FiltersGroupForm,
+  TableFilters: FiltersGroupForm,
   loadingStates,
   pagination,
   onPaginationChange,
@@ -535,7 +535,7 @@ function TranstackTable<T>({
         'absolute top-0 right-0 bottom-0 left-0 bg-white z-50 p-4 overflow-y-scroll': isFullscreen,
       })}
     >
-      <div className={cn('w-full flex text-left justify-between items-end', { 'mb-1': hasUpperSettings })}>
+      <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
         {/* Total */}
         <div className="flex">
           {tableIndexResultPosition === 'top' && (

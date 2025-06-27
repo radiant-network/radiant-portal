@@ -182,7 +182,8 @@
       "selectLanguage": "Select language",
       "collapseAll": "Collapse all",
       "expandAll": "Expand All",
-      "seeMore": "See more"
+      "seeMore": "See more",
+      "clear": "Clear"
     },
     "languages": {
       "en": "English",
