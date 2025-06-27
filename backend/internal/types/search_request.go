@@ -120,6 +120,7 @@ type ArraySqon []Sqon
 type SearchCriterion struct {
 	FieldName string        `json:"field"`
 	Value     []interface{} `json:"value"`
+	Operator  string        `json:"operator"`
 }
 
 // ListBodyWithCriteria - Body of a list request with search criteria

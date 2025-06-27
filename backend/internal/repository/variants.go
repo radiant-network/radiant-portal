@@ -14,6 +14,9 @@ import (
 type VariantHeader = types.VariantHeader
 type VariantOverview = types.VariantOverview
 type VariantConsequence = types.VariantConsequence
+type VariantInterpretedCase = types.VariantInterpretedCase
+type VariantUninterpretedCase = types.VariantUninterpretedCase
+type VariantExpendedInterpretedCase = types.VariantExpendedInterpretedCase
 
 type VariantsRepository struct {
 	db *gorm.DB
@@ -23,6 +26,9 @@ type VariantsDAO interface {
 	GetVariantHeader(locusId int) (*VariantHeader, error)
 	GetVariantOverview(locusId int) (*VariantOverview, error)
 	GetVariantConsequences(locusId int) (*[]VariantConsequence, error)
+	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, error)
+	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, error)
+	GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error)
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
@@ -105,4 +111,89 @@ func (r *VariantsRepository) GetVariantConsequences(locusId int) (*[]VariantCons
 	variantConsequences := utils.ConsequencesToVariantConsequences(consequences)
 
 	return &variantConsequences, nil
+}
+
+func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, error) {
+	tx := r.db.Table("`radiant_jdbc`.`public`.`interpretation_germline` ig")
+	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON ig.sequencing_id = o.seq_id and ig.locus_id = o.locus_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`request` r ON r.id = s.request_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` order_org ON order_org.id = r.ordering_organization_id")
+	tx = tx.Where("o.locus_id = ?", locusId)
+	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, ig.condition as condition, ig.classification, o.zygosity, order_org.code as requested_by_code, order_org.name as requested_by_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
+
+	utils.AddLimitAndSort(tx, userQuery)
+
+	if userQuery != nil {
+		utils.AddWhere(userQuery, tx)
+	}
+
+	var variantInterpretedCases []VariantInterpretedCase
+	if err := tx.Find(&variantInterpretedCases).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching variant interpreted cases: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	return &variantInterpretedCases, nil
+}
+
+func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, error) {
+	if userQuery != nil && userQuery.HasFieldFromTables(types.InterpretationGermlineTable) {
+		return &[]VariantUninterpretedCase{}, nil
+	}
+
+	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline").Select("sequencing_id").Where("locus_id = ?", locusId)
+
+	tx := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
+	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`request` r ON r.id = s.request_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` order_org ON order_org.id = r.ordering_organization_id")
+	tx = tx.Where("o.locus_id = ? AND s.id NOT IN (?)", locusId, txInterpreted)
+	tx = tx.Select("distinct c.id as case_id, c.created_on, c.updated_on, c.primary_condition as primary_condition, o.zygosity, order_org.code as requested_by_code, order_org.name as requested_by_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
+
+	utils.AddLimitAndSort(tx, userQuery)
+
+	if userQuery != nil {
+		utils.AddWhere(userQuery, tx)
+	}
+
+	var variantUninterpretedCases []VariantUninterpretedCase
+	if err := tx.Find(&variantUninterpretedCases).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching variant uninterpreted cases: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	return &variantUninterpretedCases, nil
+}
+
+func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error) {
+	tx := r.db.Table("radiant_jdbc.public.interpretation_germline i")
+	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON i.sequencing_id = o.seq_id and o.locus_id = i.locus_id")
+	tx = tx.Joins("INNER JOIN germline__snv__variant v ON i.locus_id = v.locus_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = c.proband_id")
+	tx = tx.Where("i.locus_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusId, seqId, transcriptId)
+	tx = tx.Select("c.proband_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias, i.transmission_modes as inheritances, i.pubmed as pubmed_ids, p.sex_code as patient_sex_code")
+
+	var variantExpendedInterpretedCase VariantExpendedInterpretedCase
+	if err := tx.Find(&variantExpendedInterpretedCase).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching variant expended interpreted cases: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	return &variantExpendedInterpretedCase, nil
 }

@@ -106,6 +106,12 @@ func (n *ComparisonNode) ToSQL(overrideTableAliases map[string]string) (string, 
 			return fmt.Sprintf("arrays_overlap(%s, [%s])", field, placeholder), params
 		}
 		return fmt.Sprintf("%s %s (%s)", field, operator, placeholder), params
+	case "contains":
+		if valueLength > 1 {
+			return "", nil //Not supported
+		}
+		value := strings.ToLower(fmt.Sprintf("%%%s%%", params[0]))
+		return fmt.Sprintf("LOWER(%s) like ?", field), []interface{}{value}
 	case "not-in":
 		placeholder := placeholders(valueLength)
 		operator := "NOT IN"
@@ -245,8 +251,12 @@ func criteriaToFilter(searchCriteria []SearchCriterion, fields []Field) (FilterN
 		filteredField := findFilterByAlias(fields, criterion.FieldName)
 		if filteredField != nil {
 			visitedFilteredFields = append(visitedFilteredFields, *filteredField)
+			operator := "in"
+			if criterion.Operator != "" {
+				operator = criterion.Operator
+			}
 			filters = append(filters, &ComparisonNode{
-				Operator: "in",
+				Operator: operator,
 				Value:    criterion.Value,
 				Field:    *filteredField,
 			})

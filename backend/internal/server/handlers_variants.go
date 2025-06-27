@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"net/http"
 	"strconv"
 )
@@ -100,5 +101,145 @@ func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc
 			return
 		}
 		c.JSON(http.StatusOK, variantConsequences)
+	}
+}
+
+// GetVariantInterpretedCases handles retrieving a variant interpreted cases by its locus
+// @Summary Get list of interpreted Cases for a variant
+// @Id getVariantInterpretedCases
+// @Description Retrieve Variant interpreted cases for a given locus
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Param			message	body		types.ListBodyWithCriteria	true	"Filters Body"
+// @Accept json
+// @Produce json
+// @Success 200 {array} types.VariantCase
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/{locus_id}/cases/interpreted [post]
+func GetVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		var (
+			body types.ListBodyWithCriteria
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, body.AdditionalFields, body.SearchCriteria, p, body.Sort)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		cases, err := repo.GetVariantInterpretedCases(locusID, query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if cases == nil {
+			HandleNotFoundError(c, "variant interpreted cases")
+			return
+		}
+		c.JSON(http.StatusOK, cases)
+	}
+}
+
+// GetVariantUninterpretedCases handles retrieving a variant uninterpreted cases by its locus
+// @Summary Get list of uninterpreted Cases for a variant
+// @Id postVariantUninterpretedCases
+// @Description Retrieve Variant uninterpreted cases for a given locus
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
+// @Accept json
+// @Produce json
+// @Success 200 {array} types.VariantCase
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/{locus_id}/cases/uninterpreted [post]
+func GetVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		var (
+			body types.ListBodyWithCriteria
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, body.AdditionalFields, body.SearchCriteria, p, body.Sort)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		cases, err := repo.GetVariantUninterpretedCases(locusID, query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if cases == nil {
+			HandleNotFoundError(c, "variant uninterpreted cases")
+			return
+		}
+		c.JSON(http.StatusOK, cases)
+	}
+}
+
+// GetExpendedVariantInterpretedCase handles retrieving expended interpreted case for a given locus, sequencing and transcript
+// @Summary Get expended interpreted case for a given locus, sequencing and transcript
+// @Id getExpendedVariantInterpretedCase
+// @Description Retrieve expended interpreted case for a given locus, sequencing and transcript
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Param seq_id path string true "Seq ID"
+// @Param transcript path string true "Transcript ID"
+// @Produce json
+// @Success 200 {object} types.VariantCase
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/{locus_id}/cases/interpreted/{seq_id}/{transcript_id} [get]
+func GetExpendedVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
+		if errSeq != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
+		if errLocus != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		transcriptId := c.Param("transcript_id")
+		cases, err := repo.GetVariantExpendedInterpretedCase(locusId, seqId, transcriptId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if cases == nil {
+			HandleNotFoundError(c, "variant expended interpreted case")
+			return
+		}
+		c.JSON(http.StatusOK, cases)
 	}
 }
