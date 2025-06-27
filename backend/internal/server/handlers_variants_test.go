@@ -48,6 +48,26 @@ func (r *MockRepository) GetVariantConsequences(int) (*[]types.VariantConsequenc
 	}, nil
 }
 
+func (m *MockRepository) GetVariantInterpretedCases(int, types.ListQuery) (*[]types.VariantInterpretedCase, error) {
+	return &[]types.VariantInterpretedCase{
+		{CaseId: 1111},
+		{CaseId: 2222},
+	}, nil
+}
+
+func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]types.VariantUninterpretedCase, error) {
+	return &[]types.VariantUninterpretedCase{
+		{CaseId: 3333},
+		{CaseId: 4444},
+	}, nil
+}
+
+func (m *MockRepository) GetVariantExpendedInterpretedCase(int, int, string) (*types.VariantExpendedInterpretedCase, error) {
+	return &types.VariantExpendedInterpretedCase{
+		PatientID: 5555,
+	}, nil
+}
+
 func Test_GetVariantHeaderHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()

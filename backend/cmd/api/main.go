@@ -134,6 +134,9 @@ func main() {
 	variantsGermlineGroup.GET("/:locus_id/header", server.GetGermlineVariantHeader(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/overview", server.GetGermlineVariantOverview(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/consequences", server.GetGermlineVariantConsequences(repoVariants))
+	variantsGermlineGroup.POST("/:locus_id/cases/interpreted", server.GetVariantInterpretedCases(repoVariants))
+	variantsGermlineGroup.POST("/:locus_id/cases/uninterpreted", server.GetVariantUninterpretedCases(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedVariantInterpretedCase(repoVariants))
 
 	casesGroup := r.Group("/cases")
 	casesGroup.POST("/list", server.CasesListHandler(repoCases))

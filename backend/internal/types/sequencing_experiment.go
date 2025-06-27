@@ -30,7 +30,8 @@ type SequencingExperiment struct {
 }
 
 var SequencingExperimentTable = Table{
-	Name: "radiant_jdbc.public.sequencing_experiment",
+	Name:  "radiant_jdbc.public.sequencing_experiment",
+	Alias: "s",
 }
 
 func (SequencingExperiment) TableName() string {

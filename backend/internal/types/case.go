@@ -85,6 +85,8 @@ var CasesFields = []Field{
 	PatientManagingOrganizationNameField,
 }
 
+var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, GermlineInterpretationConditionField)
+
 var CasesDefaultFields = []Field{
 	CaseIdField,
 	PatientMrnField,
@@ -101,10 +103,25 @@ var CasesDefaultFields = []Field{
 }
 
 var CasesDefaultSort = []SortField{{Field: CaseUpdatedOnField, Order: "desc"}}
+var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
 
 var CasesQueryConfig = QueryConfig{
 	AllFields:     CasesFields,
 	DefaultFields: CasesDefaultFields,
+	DefaultSort:   CasesDefaultSort,
+	IdField:       CaseIdField,
+}
+
+var VariantInterpretedCasesQueryConfig = QueryConfig{
+	AllFields:     VariantInterpretedCasesFields,
+	DefaultFields: []Field{},
+	DefaultSort:   VariantInterpretedCasesDefaultSort,
+	IdField:       CaseIdField,
+}
+
+var VariantUninterpretedCasesQueryConfig = QueryConfig{
+	AllFields:     VariantInterpretedCasesFields,
+	DefaultFields: []Field{},
 	DefaultSort:   CasesDefaultSort,
 	IdField:       CaseIdField,
 }
@@ -193,3 +210,42 @@ type CaseFilters struct {
 	PerformerLab []Aggregation `json:"performer_lab" validate:"required"`
 	RequestedBy  []Aggregation `json:"requested_by" validate:"required"`
 }
+
+type VariantInterpretedCase = struct {
+	SeqId                   int       `json:"seq_id" validate:"required"`
+	CaseId                  int       `json:"case_id" validate:"required"`
+	TranscriptId            string    `json:"transcript_id" validate:"required"`
+	InterpretationUpdatedOn time.Time `json:"interpretation_updated_on" validate:"required"`
+	Condition               string    `json:"condition" validate:"required"`
+	Classification          string    `json:"classification" validate:"required"`
+	Zygosity                string    `json:"zygosity" validate:"required"`
+	RequestedByCode         string    `json:"requested_by_code" validate:"required"`
+	RequestedByName         string    `json:"requested_by_name" validate:"required"`
+	CaseAnalysisCode        string    `json:"case_analysis_code" validate:"required"`
+	CaseAnalysisName        string    `json:"case_analysis_name" validate:"required"`
+	StatusCode              string    `json:"status_code" validate:"required"`
+} // @name VariantInterpretedCase
+
+type VariantUninterpretedCase = struct {
+	CaseId           int       `json:"case_id" validate:"required"`
+	CreatedOn        time.Time `json:"created_on" validate:"required"`
+	UpdatedOn        time.Time `json:"updated_on" validate:"required"`
+	PrimaryCondition string    `json:"primary_condition" validate:"required"`
+	Zygosity         string    `json:"zygosity" validate:"required"`
+	RequestedByCode  string    `json:"requested_by_code" validate:"required"`
+	RequestedByName  string    `json:"requested_by_name" validate:"required"`
+	CaseAnalysisCode string    `json:"case_analysis_code" validate:"required"`
+	CaseAnalysisName string    `json:"case_analysis_name" validate:"required"`
+	StatusCode       string    `json:"status_code" validate:"required"`
+} // @name VariantUninterpretedCase
+
+type VariantExpendedInterpretedCase = struct {
+	PatientID               int    `json:"patient_id" validate:"required"`
+	InterpreterName         string `json:"interpreter_name" validate:"required"`
+	Interpretation          string `json:"interpretation" validate:"required"`
+	GeneSymbol              string `json:"gene_symbol" validate:"required"`
+	ClassificationCriterias string `json:"classification_criterias" validate:"required"`
+	Inheritances            string `json:"inheritances" validate:"required"`
+	PatientSexCode          string `json:"patient_sex_code" validate:"required"`
+	PubmedIDs               string `json:"pubmed_ids" validate:"required"`
+} // @name VariantExpendedInterpretedCase

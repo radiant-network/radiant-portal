@@ -49,7 +49,8 @@ type InterpretationPubmed struct {
 } // @name InterpretationPubmed
 
 var InterpretationGermlineTable = Table{
-	Name: "interpretation_germline",
+	Name:  "interpretation_germline",
+	Alias: "ig",
 }
 
 var InterpretationSomaticTable = Table{
@@ -86,4 +87,28 @@ type InterpretationSomaticDAO struct {
 	Oncogenicity                        string
 	OncogenicityClassificationCriterias string
 	ClinicalUtility                     string
+}
+
+var GermlineInterpretationClassificationField = Field{
+	Name:          "classification",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         InterpretationGermlineTable,
+}
+
+var GermlineInterpretationUpdatedOnField = Field{
+	Name:          "updated_at",
+	Alias:         "interpretation_updated_on",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         InterpretationGermlineTable,
+}
+
+var GermlineInterpretationConditionField = Field{
+	Name:          "condition",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         InterpretationGermlineTable,
 }

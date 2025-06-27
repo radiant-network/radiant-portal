@@ -211,6 +211,12 @@ create table IF NOT EXISTS hpo_term
     name  varchar(2000) NOT NULL
 );
 
+create table IF NOT EXISTS mondo_term
+(
+    id varchar(2000)  NOT NULL,
+    name  varchar(2000) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS omim_gene_panel
 (
     `symbol`            varchar(30)  NOT NULL COMMENT "",
@@ -283,6 +289,12 @@ VALUES
 ('BRAF','LEOPARD syndrome 3',164757, 613707, ['AD'], ['Autosomal dominant']),
 ('BRAC', 'Osteosarcoma', 191170, 259500, ['Smu'], ['Somatic mutation']),
 ('TML1', 'Leukemia/lymphoma, T-cell', 603769, 603769, null, null);
+
+INSERT INTO mondo_term (id, name)
+VALUES
+('MONDO:0000001', 'blood group incompatibility'),
+('MONDO:0000002', 'blood vessel neoplasm'),
+('MONDO:0000003', 'colorblindness, partial');
 
 CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
 		PROPERTIES
