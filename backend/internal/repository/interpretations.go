@@ -208,6 +208,7 @@ func (r *InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 	if existing != nil {
 		dao.CreatedBy = existing.CreatedBy
 		dao.CreatedByName = existing.CreatedByName
+		dao.CreatedAt = existing.CreatedAt
 		query.Select("*").Updates(dao) // select * to update all fields
 	} else {
 		query.Save(dao)
