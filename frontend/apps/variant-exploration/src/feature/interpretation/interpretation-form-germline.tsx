@@ -15,13 +15,13 @@ import InterpretationFormGeneric from './interpretation-form-generic';
 import { Badge } from '@/components/base/ui/badge';
 import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
 import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
-import { useEffect, useImperativeHandle } from 'react';
+import { useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 
-function InterpretationFormGermline(
-  { interpretation, saveInterpretation, onDirtyChange }: InterpretationFormProps<InterpretationGermline>,
-  ref: React.Ref<InterpretationFormRef>,
-) {
+const InterpretationFormGermline = forwardRef<
+  InterpretationFormRef,
+  InterpretationFormProps<InterpretationGermline>
+>(({ interpretation, saveInterpretation, onDirtyChange }, ref) => {
   const { t } = useI18n();
   const form = useForm<GermlineInterpretationSchemaType>({
     resolver: zodResolver(germlineInterpretationFormSchema),
@@ -187,6 +187,8 @@ function InterpretationFormGermline(
       </div>
     </FormProvider>
   );
-}
+});
+
+InterpretationFormGermline.displayName = 'InterpretationFormGermline';
 
 export default InterpretationFormGermline;
