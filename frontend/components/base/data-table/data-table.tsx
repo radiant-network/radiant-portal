@@ -250,7 +250,7 @@ function getRowFlexRender({
   subComponent?: SubComponentProps<any>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -539,16 +539,17 @@ function TranstackTable<T>({
     >
       <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
         {/* Total */}
-        <div className="flex">
-          {tableIndexResultPosition === 'top' && (
+
+        {tableIndexResultPosition === 'top' && (
+          <div className="flex">
             <TableIndexResult
               loading={loadingStates?.total}
               pageIndex={table.getState().pagination.pageIndex + 1}
               pageSize={table.getState().pagination.pageSize}
               total={total}
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {/* FiltersGroup */}
         {FiltersGroupForm && FiltersGroupForm({ loading: loadingStates?.list ?? true })}
