@@ -32,6 +32,7 @@
       "@/base/*": ["../../components/base/*"],
       "@/lib/*": ["../../components/lib/*"],
       "@/hooks/*": ["../../components/hooks/*"],
+      "@/themes/*": ["../../themes/*"],
       "@/*": ["./src/*"]
     }
   },

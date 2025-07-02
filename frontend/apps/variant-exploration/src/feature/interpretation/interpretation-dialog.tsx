@@ -93,7 +93,7 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
               <InterpretationVariantHeader occurrence={occurrence} />
               <InterpretationTranscript occurrence={occurrence} />
               <div className="grid gap-6 grid-cols-12">
-                <div className="rounded col-span-7 border p-6 bg-muted/40">
+                <div className="rounded-sm col-span-7 border p-6 bg-muted/40">
                   {isSomatic ? (
                     <InterpretationFormSomatic
                       ref={somaticFormRef}
@@ -118,7 +118,7 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
                     />
                   )}
                 </div>
-                <div className="rounded col-span-5 border py-4 px-6">
+                <div className="rounded-sm col-span-5 border py-4 px-6">
                   <OccurrenceDetails occurrence={occurrence} />
                 </div>
               </div>

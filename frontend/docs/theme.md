@@ -1,101 +1,91 @@
-# Theme
-## Figma
-### Ready for development workflow
-Figma has a [ready for development](https://www.figma.com/design/Y0l9SoMCYlTQZxce3NzZiK/shadcn_ui-kit-for-Figma---Pro-Blocks---New-York---January-2025?node-id=580-9181&p=f&ready-for-dev=1&m=dev) section (left side) where all the `Ready for dev` components are displayed. 
+# Theme Guide
 
-`Ready for dev` state means that the component can be added to Radiant.
+## Figma Workflow
 
-When a new component is added to `Ready for dev`:
-- The UI kit uses a basic component that has never been used => Use [shadcn cli](./shadcn.md) to create the component.
-- The component is custom to our needs and will be used across multiple pages => Create a new components inside `components/base`
-- The UI kit is a composition of multiples components and will be used across project => Create a new components inside `components/feature`
-- The UI kit is a new page => Create a [Page Application](./create-an-application.md)
-- The UI kit uses a unique feature specific to a Page Application => Create a new components inside `apps/%page_applications%/components/feature`. See [Create Application documentation](./create-an-application.md)
+- **Ready for Development**: In Figma, components marked as `Ready for dev` (left sidebar) are ready to be implemented in Radiant.
+- **Component Types & Where to Add**:
+  - **New, basic UI kit component**: Use [shadcn CLI](./shadcn.md).
+  - **Custom, reusable across pages**: Add to `components/base`.
+  - **Composed, used across project**: Add to `components/feature`.
+  - **New page**: Create a [Page Application](./create-an-application.md).
+  - **Feature unique to a Page Application**: Add to `apps/%page_application%/components/feature`. See [Create Application documentation](./create-an-application.md).
 
-When the component has been coded
-- Create a new entry in storybook to display the new component
-- Wait for the storybook build to success
-- Go to [Radiant's storybook](https://radiant-network.github.io/radiant-portal/) to see if your component is visible
-- Go to Figma and use the button `Mark as completed`
-- Change your Jira task to QA
-- Inside the Jira, tag the UI/UX designer to validate the final result (you can also send a slack message just to be sure). 
+**After Coding the Component:**
 
-### Figma's variables vs tailwind
+1. Add a Storybook entry for the new component.
+2. Wait for the Storybook build to succeed.
+3. Check your component in [Radiant's Storybook](https://radiant-network.github.io/radiant-portal/).
+4. In Figma, click `Mark as completed`.
+5. Move your Jira task to QA.
+6. Tag the UI/UX designer in Jira (and optionally notify via Slack) for validation.
 
-All Figma variables should match tailwind spacing. If a variable's name is `--spacing-2` it matches `-2` suffix in tailwind.
+---
 
-e.g.
-Figma
+## Figma Variables & Tailwind
+
+- Figma variables should match Tailwind spacing.
+  - Example: `--spacing-2` in Figma = `gap-2` in Tailwind.
+
+**Figma:**
+
 ```css
 display: flex;
 align-items: center;
 gap: var(--spacing-2, 8px);
-``` 
+```
 
-Tailwind
-```typescript
+**Tailwind:**
+
+```tsx
 <div className="flex items-center gap-2">
 ```
 
+---
 
-## Shadcn/Tailwind stacks
+## Shadcn/Tailwind Stacks
 
-With our multi portals and multi page application workflows, 3 styles sheet are loaded into the page.
+- The global stylesheet is `@/themes/tailwind.base.css`.
 
-1. `frontdend/themes/commons/css`
-2. `frontend/themes/%portal%/main.css` where `%portal%` can be radiant, kid-first etc.
-3. `frontend/themes/%portal%/apps/%page-application%/src/App.module.css` where `%page-application%` can be variant-entity, case-exploration etc.
+### Adding New CSS Variables
 
+- **Colors**: Use oklch values (ask Lucas if unsure).
+- **Global variables**: Define in `themes/tailwind.base.css` under `:root` and `.dark`.
+- **Portal-specific variables**: Define in `themes/%portal%/theme.css` and reference them in `tailwind.base.css`.
 
-### Adding a new css variables
+### Making Variables Accessible via Tailwind ClassNames
 
-1. Set Figma to display the HSL value of the color. You can double click on the variable name (in the style box) to display to display a popup with the HSL value.
-![figma_hsl_colors.png](media/figma_hsl_colors.png)
-2. Copy both **light** and **dark** value.
-3. Add the new HSL values to `frontend/themes/common.css`. 
-```css
-:root {
-  --base-border: 214, 32%, 91%;
-}
-.dark {
-  --base-border: 217, 33%, 17%;
-}
-```
+1. Add the variable in the `@theme` and `@layer theme` sections of `tailwind.base.css`:
+   ```css
+   /* themes/tailwind.base.css */
+   @theme inline {
+     --color-custom-color: var(--portal-specific-color);
+   }
+   ```
+2. Use in Tailwind:
+   ```tsx
+   <div className="bg-custom-color" />
+   ```
 
-4. Use `frontend/themes/tailwind.base.config.js` to setup the new variable. It will create a `border-border` class.
+---
 
-```javascript
-...
-      borderColor: ({ theme }) => ({
-        ...theme('colors'),
-        DEFAULT: theme('colors.border'),
-        border: 'hsl(var(--base-border))', 
-      }),
-...
-```
+## Overriding Global Classes
 
-5. You can now use the new css class for tailwind
-```typescript
-<div className="border-border"/>
-```
-
-
-#### How to override a global class
-Since our project use multiple styles, the best way to override a native tailwind behavior, we needs to override directly in `portals/%portal%/app/app.css` where %portals% can be radiant, kids-first etc.
+- To override Tailwind or global styles for a specific portal, edit `portals/%portal%/app/app.css`:
 
 ```css
 /* portals/radiant/app/app.css */
-@import 'tailwindcss';
-@config "../tailwind.config.js";
-/* Will override border-color with our custom border-border class */
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    @apply border-border;
+@import '@styles/theme.css';
+@import '@styles/tailwind.css';
+
+html,
+body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+
+  @media (prefers-color-scheme: light) {
+    color-scheme: light;
   }
 }
 ```
-

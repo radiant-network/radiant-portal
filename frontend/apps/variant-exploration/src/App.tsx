@@ -1,4 +1,3 @@
-import styles from './App.module.css';
 import { Count, CountBodyWithSqon, ListBodyWithSqon, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
@@ -122,8 +121,8 @@ function App() {
   }, [JSON.stringify(qbState?.queries), qbState?.activeQueryId]);
 
   return (
-    <div className={`${styles.appLayout} flex h-screen overflow-hidden`}>
-      <aside className="h-full shrink-0">
+    <div className={`flex flex-1 h-screen overflow-hidden`}>
+      <aside className="w-auto min-w-fit h-full shrink-0">
         <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
           <div className="z-10">
             <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
@@ -176,12 +175,12 @@ function App() {
               blacklistedFacets: ['locus_id'],
               onFacetClick: filter => (
                 <FilterComponent
+                  isOpen
                   field={
                     Object.values(config.variant_exploration.aggregations)
                       .flatMap(f => f.items)
                       .find(f => f.key === filter.content.field)!
                   }
-                  searchVisible={true}
                 />
               ),
             }}

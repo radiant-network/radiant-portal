@@ -97,7 +97,7 @@ export default function UserProfilePage() {
 ```tsx
 // styles/common.js
 export const cardStyles = 'p-4 bg-white rounded-lg shadow-md';
-export const buttonStyles = 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600';
+export const buttonStyles = 'px-4 py-2 bg-blue-500 text-white rounded-sm hover:bg-blue-600';
 ```
 
 3. Use Semantic Class Groups

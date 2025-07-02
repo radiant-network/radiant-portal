@@ -42,7 +42,7 @@ function OverviewTab() {
   return (
     <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
       <MyOrganizationCard />
-      <MostDeleteriousConsequenceCard data={data} className="flex flex-col shadow-none col-span-1 md:col-span-2" />
+      <MostDeleteriousConsequenceCard data={data} className="flex flex-col col-span-1 md:col-span-2" />
       <PredictionScoresCard data={data} />
       <AssociatedConditionsCard data={data} />
       <ExternalReferencesCard data={data} />

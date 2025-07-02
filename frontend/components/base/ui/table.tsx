@@ -5,7 +5,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 
 const tableVariants = tv({
   slots: {
-    base: 'rounded w-full border-separate border-spacing-0 caption-bottom table-fixed [&>tbody>tr>td]:px-2 [&>thead>tr>th]:px-2 [&>thead>tr>th]:h-10 [&>tfoot>tr>td]:px-2 [&>tfoot>tr>td]:h-10',
+    base: 'rounded-sm w-full border-separate border-spacing-0 caption-bottom table-fixed [&>tbody>tr>td]:px-2 [&>thead>tr>th]:px-2 [&>thead>tr>th]:h-10 [&>tfoot>tr>td]:px-2 [&>tfoot>tr>td]:h-10',
   },
   variants: {
     size: {
@@ -34,7 +34,7 @@ function Table({ containerRef, className, size, ...props }: TableProps) {
   const styles = tableVariants({ size });
 
   return (
-    <div ref={containerRef} className="rounded relative w-full border overflow-auto max-h-[calc(100vh-120px)]">
+    <div ref={containerRef} className="rounded-sm relative w-full border overflow-auto max-h-[calc(100vh-120px)]">
       <table className={styles.base({ className })} {...props} />
     </div>
   );

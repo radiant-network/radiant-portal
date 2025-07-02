@@ -1,22 +1,8 @@
-@import 'tailwindcss';
-@config "../tailwind.config.js";
-
-
-@layer base {
-
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    @apply border-border;
-  }
-}
+@import '@styles/theme.css';
+@import '@styles/tailwind.css';
 
 html,
 body {
-  @apply bg-background;
-  @apply text-foreground;
   height: 100vh;
   margin: 0;
   padding: 0;

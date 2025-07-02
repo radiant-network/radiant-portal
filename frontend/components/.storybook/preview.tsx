@@ -1,3 +1,6 @@
+import '@styles/theme.css';
+import '@styles/tailwind.css';
+
 import React from 'react';
 import type { Preview } from '@storybook/react';
 import { withThemeByClassName } from '@storybook/addon-themes';
@@ -5,9 +8,6 @@ import { TooltipProvider } from '../base/ui/tooltip';
 import { AlertDialogProvider } from '../base/dialog/alert-dialog-provider';
 import { I18nProvider } from '../hooks/I18nProvider';
 import ThemeProvider from '../feature/theme-toggle/theme-provider';
-import './index.css';
-import '@styles/common.css';
-import '@styles/main.css';
 
 const preview: Preview = {
   parameters: {

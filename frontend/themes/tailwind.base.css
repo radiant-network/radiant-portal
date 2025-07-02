@@ -1,0 +1,225 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source "../apps/*/src/**/*.{html,js,jsx,ts,tsx}";
+@source "../components/base/**/*.{html,js,ts,tsx,jsx}";
+@source "../components/feature/**/*.{html,js,ts,tsx,jsx}";
+
+:root {
+  /* Define colors/variable that are global for all portals */
+}
+
+.dark {
+  /* Define colors/variable that are global for all portals in dark mode */
+}
+
+@theme inline {
+  /* Radiant Shadcn UI Styles. Check -> themes/[Portal]/main.css */
+  --color-border: var(--border);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar-background: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radiant Custom Colors */
+  --color-amber: var(--color-amber-500);
+  --color-amber-foreground: var(--color-amber-800);
+
+  --color-red: var(--color-red-400);
+  --color-red-foreground: var(--color-red-700);
+
+  --color-orange: var(--color-orange-400);
+  --color-orange-foreground: var(--color-orange-800);
+
+  --color-yellow: var(--color-yellow-400);
+  --color-yellow-foreground: var(--color-yellow-800);
+
+  --color-lime: var(--color-lime-400);
+  --color-lime-foreground: var(--color-lime-800);
+
+  --color-green: var(--color-green-300);
+  --color-green-foreground: var(--color-green-800);
+
+  --color-cyan: var(--color-cyan-400);
+  --color-cyan-foreground: var(--color-cyan-800);
+
+  --color-blue: var(--color-blue-400);
+  --color-blue-foreground: var(--color-blue-700);
+
+  --color-violet: var(--color-violet-400);
+  --color-violet-foreground: var(--color-violet-700);
+
+  --color-fuchsia: var(--color-fuchsia-400);
+  --color-fuchsia-foreground: var(--color-fuchsia-700);
+
+  --color-slate: var(--color-slate-400);
+  --color-slate-foreground: var(--color-slate-800);
+
+  --color-bookmark-amber: var(--color-amber-500);
+  --color-bookmark-blue: var(--color-blue-500);
+  --color-bookmark-green: var(--color-green-600);
+  --color-bookmark-red: var(--color-red-500);
+  --color-bookmark-off: var(--color-slate-400);
+}
+
+@layer theme {
+  .dark {
+    /* Radiant Custom Colors Dark Mode */
+    --color-amber: var(--color-amber-600);
+    --color-amber-foreground: var(--color-amber-400);
+
+    --color-red: var(--color-red-700);
+    --color-red-foreground: var(--color-red-400);
+
+    --color-orange: var(--color-orange-400);
+    --color-orange-foreground: var(--color-orange-400);
+
+    --color-yellow: var(--color-yellow-400);
+    --color-yellow-foreground: var(--color-yellow-400);
+
+    --color-lime: var(--color-lime-400);
+    --color-lime-foreground: var(--color-lime-400);
+
+    --color-green: var(--color-green-400);
+    --color-green-foreground: var(--color-green-300);
+
+    --color-cyan: var(--color-cyan-400);
+    --color-cyan-foreground: var(--color-cyan-400);
+
+    --color-blue: var(--color-blue-800);
+    --color-blue-foreground: var(--color-blue-400);
+
+    --color-violet: var(--color-violet-800);
+    --color-violet-foreground: var(--color-violet-400);
+
+    --color-fuchsia: var(--color-fuchsia-600);
+    --color-fuchsia-foreground: var(--color-fuchsia-400);
+
+    --color-slate: var(--color-slate-500);
+    --color-slate-foreground: var(--color-slate-400);
+
+    --color-bookmark-amber: var(--color-amber-600);
+    --color-bookmark-blue: var(--color-blue-500);
+    --color-bookmark-green: var(--color-green-600);
+    --color-bookmark-red: var(--color-red-600);
+    --color-bookmark-off: var(--color-slate-500);
+  }
+}
+
+@layer base {
+  :root {
+    border-radius: var(--radius);
+  }
+
+  html,
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  h1 {
+    @apply text-3xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  h4 {
+    @apply text-base;
+  }
+
+  h5 {
+    @apply text-sm;
+  }
+
+  h6 {
+    @apply text-sm;
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+@layer utilities {
+  .cursor-default {
+    cursor: pointer;
+  }
+
+  .max-w-8xl {
+    max-width: 1440px;
+  }
+
+  .animate-accordion-down {
+    animation: accordion-down 0.2s ease-out;
+  }
+
+  .animate-accordion-up {
+    animation: accordion-up 0.2s ease-out;
+  }
+}

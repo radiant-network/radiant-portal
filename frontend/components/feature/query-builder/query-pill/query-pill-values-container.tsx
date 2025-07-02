@@ -18,7 +18,7 @@ function QueryPillValuesContainer({
   return (
     <div
       className={cn(
-        'bg-background rounded-sm pl-2 text-xs font-medium leading-5 relative',
+        'bg-background rounded-xs pl-2 text-xs font-medium leading-5 relative',
         canExpand ? 'pr-[22px]' : 'pr-2',
         className,
       )}

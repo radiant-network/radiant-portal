@@ -6,7 +6,6 @@ import { Link, useLocation, useParams } from 'react-router';
 import OverviewTab from './components/overview/overview-tab';
 import EvidenceTab from './components/evidence/evidence-tab';
 import FrequencyTab from './components/frequency-tab';
-import ConditionsTab from './components/conditions-tab';
 import TranscriptsTab from './components/transcripts/transcripts-tab';
 import CasesTab from './components/cases/cases-tab';
 import { VariantEntityTabs } from './types';

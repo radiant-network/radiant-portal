@@ -24,7 +24,7 @@ export const Default: Story = {
     ]);
 
     return (
-      <div className="rounded border p-5 max-w-[300px]">
+      <div className="rounded-sm border p-5 max-w-[300px]">
         <CustomPillFilter
           customPills={customPills}
           onSelectPill={action('onSelectPill')}
@@ -77,7 +77,7 @@ export const Empty: Story = {
   args: {} as any, // No args needed for this story
   render: () => {
     return (
-      <div className="rounded border p-5 max-w-[300px]">
+      <div className="rounded-sm border p-5 max-w-[300px]">
         <CustomPillFilter
           customPills={[]}
           onSelectPill={(() => {}) as any}

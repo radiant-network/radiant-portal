@@ -2,21 +2,21 @@ import { tv } from 'tailwind-variants';
 
 export const baseButtonVariants = tv({
   slots: {
-    base: 'inline-flex items-center justify-center whitespace-nowrap rounded-md gap-2 font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-4',
+    base: 'inline-flex items-center justify-center hover:cursor-pointer whitespace-nowrap rounded-md gap-2 font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-4',
   },
   variants: {
     variant: {
       default: {
-        base: 'bg-primary text-primary-foreground shadow enabled:hover:bg-primary/90',
+        base: 'bg-primary text-primary-foreground shadow-sm enabled:hover:bg-primary/90',
       },
       destructive: {
-        base: 'bg-destructive text-destructive-foreground shadow-sm enabled:hover:bg-destructive/90',
+        base: 'bg-destructive text-destructive-foreground shadow-xs enabled:hover:bg-destructive/90',
       },
       outline: {
-        base: 'border border-input bg-background text-foreground shadow-sm enabled:hover:bg-accent enabled:hover:text-accent-foreground',
+        base: 'border border-input bg-background text-foreground shadow-xs enabled:hover:bg-accent enabled:hover:text-accent-foreground',
       },
       secondary: {
-        base: 'bg-secondary text-secondary-foreground shadow-sm enabled:hover:bg-secondary/80',
+        base: 'bg-secondary text-secondary-foreground shadow-xs enabled:hover:bg-secondary/80',
       },
       ghost: {
         base: 'enabled:hover:bg-accent enabled:hover:text-accent-foreground',

@@ -67,7 +67,7 @@ export const Variants: Story = {
 
 const Color = ({ color, colorClass }: { color: string; colorClass: string }) => (
   <div className="flex flex-col items-center gap-1">
-    <div className={cn('rounded size-10 border', colorClass)} />
+    <div className={cn('rounded-sm size-10 border', colorClass)} />
     <div className="text-sm text-center">{color}</div>
   </div>
 );
