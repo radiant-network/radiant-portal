@@ -1,8 +1,6 @@
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
-import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
-import '@styles/common.css';
-import '@styles/main.css';
+import type { Route } from './+types/root';
 import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
 import { TooltipProvider } from '@/components/base/ui/tooltip';
 import ThemeProvider from '@/components/feature/theme-toggle/theme-provider';

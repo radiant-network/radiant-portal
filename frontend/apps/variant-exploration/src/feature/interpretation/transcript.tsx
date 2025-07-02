@@ -13,7 +13,7 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
   const { t } = useI18n();
 
   return (
-    <div className="flex items-center rounded gap-4 border p-3">
+    <div className="flex items-center rounded-sm gap-4 border p-3">
       <span className="font-semibold text-base">
         {occurrence.symbol ? (
           <a

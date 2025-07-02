@@ -87,7 +87,7 @@ const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, 
 
   return (
     <div
-      className={cn('shadow-sm rounded-md bg-background focus-within:ring-1 focus-within:ring-ring', wrapperClassName)}
+      className={cn('shadow-xs rounded-md bg-background focus-within:ring-1 focus-within:ring-ring', wrapperClassName)}
     >
       {editor ? <RichTextEditorToolbar editor={editor} /> : null}
       <EditorContent editor={editor} {...props} />

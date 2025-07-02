@@ -5,13 +5,13 @@ import { tv, type VariantProps } from 'tailwind-variants';
 
 const badgeVariants = tv({
   slots: {
-    base: 'inline-flex items-center shadow-sm rounded-md transition-colors px-1.5 py-0.5 text-xs [&_svg]:size-3 gap-1 outline-none font-medium',
+    base: 'inline-flex items-center shadow-xs rounded-md transition-colors px-1.5 py-0.5 text-xs [&_svg]:size-3 gap-1 outline-none font-medium',
     closeIcon: '',
   },
   variants: {
     clickable: {
       true: {
-        base: 'cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-ring',
+        base: 'hover:cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-ring',
       },
     },
     closable: {
@@ -162,7 +162,7 @@ function Badge({ className, variant, children, closeIconProps, ...props }: Badge
     <div className={cn(styles.base({ className }))} {...props}>
       {children}
       {props.onClose && (
-        <button onClick={props.onClose}>
+        <button className="hover:cursor-pointer" onClick={props.onClose}>
           <XIcon {...closeIconProps} className={styles.closeIcon({ className: closeIconProps?.className })} />
         </button>
       )}

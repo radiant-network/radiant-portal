@@ -150,7 +150,7 @@ function CustomPillFilter({
             {customPills.map(pill => (
               <div key={pill.id} className="flex gap-1.5 group">
                 <button
-                  className="flex items-center border-2 rounded-sm border-primary px-2 h-6 text-xs whitespace-nowrap overflow-hidden hover:underline"
+                  className="flex items-center border-2 rounded-xs border-primary px-2 h-6 text-xs whitespace-nowrap overflow-hidden hover:underline"
                   onClick={() => onSelectPill(pill)}
                 >
                   <span className="overflow-hidden text-ellipsis">{pill.title}</span>

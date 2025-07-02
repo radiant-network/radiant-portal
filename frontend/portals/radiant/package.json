@@ -1,5 +1,6 @@
 {
   "name": "radiant",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,8 +15,8 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "@react-router/node": "^7.3.0",
-    "@react-router/serve": "^7.3.0",
+    "@react-router/node": "^7.4.0",
+    "@react-router/serve": "^7.4.0",
     "axios": "^1.8.3",
     "isbot": "^5.1.25",
     "jwt-decode": "4.0.0",
@@ -23,13 +24,12 @@
     "remix-auth-oauth2": "^3.2.2"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.3.0",
+    "@react-router/dev": "^7.4.0",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "autoprefixer": "^10.4.21",
     "cross-env": "^7.0.3",
-    "postcss": "^8.4.49",
-    "react-router": "^7.3.0",
-    "react-router-dom": "^7.3.0",
+    "react-router": "^7.4.0",
+    "react-router-dom": "^7.4.0",
     "tailwindcss": "^4.1.8",
     "vite": "^6.2.2",
     "vite-tsconfig-paths": "^5.1.4"

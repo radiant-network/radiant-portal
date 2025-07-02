@@ -14,7 +14,7 @@ import { useSidebar } from '@/components/base/ui/sidebar';
 
 const navbarVariant = tv({
   slots: {
-    base: 'flex items-center py-3 border-b bg-background shadow-sm w-full',
+    base: 'flex items-center py-3 border-b bg-background shadow-xs w-full',
   },
 });
 

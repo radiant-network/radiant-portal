@@ -81,7 +81,7 @@ function QueryBuilder({
           <AccordionItem value="query-builder" className="border-none">
             <AccordionTrigger
               asChild
-              className="border py-0 px-5 rounded-t data-[state=closed]:rounded hover:cursor-pointer"
+              className="border py-0 px-5 rounded-t data-[state=closed]:rounded-sm hover:cursor-pointer"
             >
               <SavedFiltersLeftActions className="py-4 pr-4" />
               <SavedFiltersRightActions className="ml-auto py-4" />

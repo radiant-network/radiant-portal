@@ -42,14 +42,14 @@ export default function OccurrenceExpend({ occurrence }: GermlineVariantPreviewP
       </CardHeader>
       <Separator />
       <CardContent className="px-4 space-y-3">
-        <div className="border rounded p-4">
+        <div className="border rounded-sm p-4">
           {isLoading || data === undefined ? (
             <Skeleton className="w-full h-6" />
           ) : (
             <OccurrenceExpendTranscript occurrence={occurrence} />
           )}
         </div>
-        <div className="border rounded p-4 gap-10 grid grid-cols-2 2xl:grid-cols-4">
+        <div className="border rounded-sm p-4 gap-10 grid grid-cols-2 2xl:grid-cols-4">
           {isLoading || data === undefined ? (
             <>
               <OccurrenceExpendSkeleton />

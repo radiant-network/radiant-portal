@@ -4,7 +4,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 
 const IndicatorVariants = tv({
   slots: {
-    base: 'rounded px-0 py-0 w-2 h-2',
+    base: 'rounded-sm px-0 py-0 w-2 h-2',
   },
   variants: {
     variant: {

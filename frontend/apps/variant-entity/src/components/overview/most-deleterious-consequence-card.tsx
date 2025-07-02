@@ -55,10 +55,10 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="flex flex-wrap items-start gap-1">
               {data?.clinvar?.length
                 ? data?.clinvar.map(clinvar => (
-                    <Link key={clinvar} to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Evidence}`}>
-                      <ClinvarBadge key={clinvar} value={clinvar} />
-                    </Link>
-                  ))
+                  <Link key={clinvar} to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}>
+                    <ClinvarBadge key={clinvar} value={clinvar} />
+                  </Link>
+                ))
                 : '-'}
             </div>
           </div>

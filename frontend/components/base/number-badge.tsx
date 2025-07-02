@@ -5,7 +5,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 export const numberBadgeVariants = tv({
   slots: {
     base: 'relative',
-    badge: 'absolute h-[14px] px-[3px] rounded text-xs leading-[14px]',
+    badge: 'absolute h-[14px] px-[3px] rounded-xl text-xs leading-[14px]',
   },
   variants: {
     variant: {

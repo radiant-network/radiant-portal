@@ -80,7 +80,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
         </div>
       </AccordionTrigger>
       <AccordionContent className="py-4 pt-2 px-5 space-y-4">
-        <div className="border rounded bg-muted/30">
+        <div className="border rounded-sm bg-muted/30">
           {data.transcripts?.map((transcript, index) => (
             <Fragment key={transcript.transcript_id}>
               <TranscriptDetails data={transcript} />

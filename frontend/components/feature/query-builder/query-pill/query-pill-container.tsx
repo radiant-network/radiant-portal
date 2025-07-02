@@ -10,7 +10,7 @@ function QueryPillContainer({ children, className, onRemovePill, ...props }: Que
   return (
     <div
       className={cn(
-        'flex items-center rounded-sm p-[2px] bg-muted group-data-[query-active=true]/query:bg-primary/25',
+        'flex items-center rounded-xs p-[2px] bg-muted group-data-[query-active=true]/query:bg-primary/25',
         className,
       )}
       {...props}

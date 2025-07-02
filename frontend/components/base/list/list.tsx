@@ -2,7 +2,7 @@ import React from 'react';
 import { tv, VariantProps } from 'tailwind-variants';
 
 const listVariants = tv({
-  base: 'overflow-scroll rounded-sm',
+  base: 'overflow-scroll rounded-xs',
   variants: {
     bordered: {
       true: 'border',
