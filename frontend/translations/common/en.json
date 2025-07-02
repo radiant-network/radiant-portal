@@ -201,6 +201,7 @@
         "ddd_gene_panel": "DDD",
         "ddd_gene_panel_tooltip": "Deciphering Developmental Disorders",
         "filter": "Filter",
+        "omim_inheritance": "OMIM Inheritance",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
         "impact_score": "Impact Score",
