@@ -336,9 +336,9 @@
       "urgent_tooltips": "La demande doit être traitée rapidement"
     },
     "analysis_type_code": {
-      "somatic": "Somatic",
-      "germline": "Germline",
-      "germline_family": "Family Germline"
+      "somatic": "Somatique",
+      "germline": "Germinal seul",
+      "germline_family": "Germinal familial"
     },
     "status": {
       "active": "En cours",
@@ -352,16 +352,27 @@
       "title": "Cas",
       "headers": {
         "case_id": "Cas",
+        "patient_id": "Patient",
         "mrn": "Dossier",
         "mrn_tooltips": "Numéro de dossier médicale du patient",
         "priority_code": "Priorité",
         "status_code": "Status",
         "case_analysis_type_code": "Type de cas",
+        "primary_condition": "Condition principale",
         "case_analysis_code": "Analyse",
         "requested_by_code": "Req. par",
         "requested_by_code_tooltips": "Requested by",
+        "project_code": "Projet",
         "updated_on": "Dernière modification",
-        "updated_on_tooltips": "Date de la dernière modification du cas (aaaa-mm-jj)"
+        "updated_on_tooltips": "Date de la dernière modification du cas (aaaa-mm-jj)",
+        "prescriber": "Prescripteur",
+        "prescriber_tooltips": "Médecin prescripteur",
+        "diagnostic_lab": "Laboratoire de diagnostic",
+        "diagnostic_lab_tooltips": "Laboratoire de diagnostic moléculaire",
+        "request_id": "Requête",
+        "managing_organization": "Organisation responsable du patient",
+        "created_on": "Créé le",
+        "created_on_tooltips": "Date de création du cas (aaaa-mm-jj)"
       }
     },
     "assays": {

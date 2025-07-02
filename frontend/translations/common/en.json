@@ -337,8 +337,8 @@
     },
     "analysis_type_code": {
       "somatic": "Somatic",
-      "germline": "Germline",
-      "germline_family": "Family Germline"
+      "germline": "Solo germline",
+      "germline_family": "Family germline"
     },
     "status": {
       "active": "In-progress",
@@ -356,16 +356,27 @@
       },
       "headers": {
         "case_id": "Case",
+        "patient_id": "Patient",
         "mrn": "MRN",
-        "mrn_tooltips": "Patients' medical record number",
+        "mrn_tooltips": "Patient's medical record number",
         "priority_code": "Priority",
         "status_code": "Status",
         "case_analysis_type_code": "Type",
         "case_analysis_code": "Analysis",
-        "requested_by_code": "Req. by",
+        "primary_condition": "Primary Condition",
+        "requested_by_code": "Req. By",
         "requested_by_code_tooltips": "Requested by",
+        "project_code": "Project",
         "updated_on": "Updated",
-        "updated_on_tooltips": "Date of last case modification (yyyy-mm-dd)"
+        "updated_on_tooltips": "Date of last case modification (yyyy-mm-dd)",
+        "prescriber": "Prescriber",
+        "prescriber_tooltips": "Prescribing doctor",
+        "diagnostic_lab": "Diagnostic Lab",
+        "diagnostic_lab_tooltips": "Molecular diagnostic laboratory",
+        "request_id": "Request",
+        "managing_organization": "Patient Managing Organization",
+        "created_on": "Created On",
+        "created_on_tooltips": "Date of case creation (yyyy-mm-dd)"
       }
     },
     "assays": {
