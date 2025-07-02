@@ -14,7 +14,7 @@ function TooltipsHeader({ tooltips, children, iconOnly = false }: TooltipsHeader
   return (
     <Tooltip>
       <TooltipTrigger
-        className={cn('underline decoration-dotted underline-offset-4', {
+        className={cn('underline decoration-dotted underline-offset-4 text-left', {
           relative: iconOnly,
         })}
       >

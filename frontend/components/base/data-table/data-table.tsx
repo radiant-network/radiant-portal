@@ -250,7 +250,7 @@ function getRowFlexRender({
   subComponent?: SubComponentProps<any>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -451,7 +451,9 @@ function TranstackTable<T>({
 
   /*
    * Prevent calling of `column.getSize()` on every render
-   * @see https://tanstack.com/table/v8/docs/framework/react/examples/column-resizing-performant
+   * @see https://tanstack.com/table/latest/docs/framework/react/examples/column-resizing-performant
+   *
+   * Must be re-calculated when columnVisibility changes
    */
   const columnSizeVars = useMemo(() => {
     const headers = table.getFlatHeaders();
@@ -461,7 +463,7 @@ function TranstackTable<T>({
       colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
     });
     return colSizes;
-  }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
+  }, [table.getState().columnSizingInfo, table.getState().columnSizing, columnVisibility]);
 
   /**
    * Sync table state with local storage
@@ -475,7 +477,7 @@ function TranstackTable<T>({
   });
 
   /**
-   * Fix scrolling when a subcomponent is open
+   * Fix scrolling when a subcomponent is open by setting a containerWidth
    */
   useEffect(() => {
     const element = containerRef.current;

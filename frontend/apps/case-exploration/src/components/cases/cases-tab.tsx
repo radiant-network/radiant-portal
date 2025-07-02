@@ -98,7 +98,6 @@ function CasesTab() {
       listBody: {
         additional_fields: [
           'case_analysis_code',
-          'created_at',
           'case_analysis_name',
           'case_analysis_type_code',
           'case_id',

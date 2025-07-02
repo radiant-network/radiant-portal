@@ -2,11 +2,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 
 type TextTooltipsCell = {
   children: any;
-  tooltipsText: string;
+  tooltipsText?: string;
   asChild?: boolean;
 };
 
 function TextTooltipsCell({ children, tooltipsText, asChild = false }: TextTooltipsCell) {
+
+  if (!tooltipsText) {
+    return <span>{children}</span>;
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger asChild={asChild}>{children}</TooltipTrigger>
