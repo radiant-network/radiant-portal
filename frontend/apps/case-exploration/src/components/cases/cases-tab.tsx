@@ -6,7 +6,7 @@ import { CaseResult, Count, CountBodyWithCriteria, ListBodyWithCriteria, SortBod
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
-import TableFilters from '../table-filters/table-filters';
+import TableFilters, { FILTER_DEFAULTS, FILTERS_SEARCH_DEFAULTS } from '../table-filters/table-filters';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
 type CaseListInput = {
@@ -45,20 +45,12 @@ function CasesTab() {
   });
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>(
     'case-exploration-filters',
-    {
-      priority: [],
-      status: [],
-      caseAnalysis: [],
-      project: [],
-      performerLab: [],
-      requestedBy: [],
-    }
+    { ...FILTER_DEFAULTS, ...FILTERS_SEARCH_DEFAULTS },
   );
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
   
   // Build search_criteria array
   useEffect(() => {
-    console.log('>>> useEffect in cases-tab: ', filters)
     let search_criteria: SearchCriterion[] = [];
 
     if (filters.priority.length > 0) {
@@ -79,6 +71,21 @@ function CasesTab() {
     if (filters.requestedBy.length > 0) {
       search_criteria.push({ field: 'requested_by_code', value: filters.requestedBy });
     }
+    
+    // Add search-based criteria
+    if (filters.case_id && filters.case_id.length > 0) {
+      search_criteria.push({ field: 'case_id', value: filters.case_id });
+    }
+    if (filters.patient_id && filters.patient_id.length > 0) {
+      search_criteria.push({ field: 'patient_id', value: filters.patient_id });
+    }
+    if (filters.mrn && filters.mrn.length > 0) {
+      search_criteria.push({ field: 'mrn', value: filters.mrn });
+    }
+    if (filters.request_id && filters.request_id.length > 0) {
+      search_criteria.push({ field: 'request_id', value: filters.request_id });
+    }
+    
     setSearchCriteria(search_criteria);
 
   }, [filters]);

@@ -374,6 +374,12 @@
         "managing_organization": "Organisation responsable du patient",
         "created_on": "Créé le",
         "created_on_tooltips": "Date de création du cas (aaaa-mm-jj)"
+      },
+      "search": {
+        "case_id": "Cas",
+        "patient_id": "Patient",
+        "mrn": "MRN",
+        "request_id": "Analyse"
       }
     },
     "assays": {
