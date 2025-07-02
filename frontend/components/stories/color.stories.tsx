@@ -51,7 +51,7 @@ export const Variants: Story = {
           <Color color="blue" colorClass="bg-blue" />
           <Color color="violet" colorClass="bg-violet" />
           <Color color="fuchsia" colorClass="bg-fuchsia" />
-          <Color color="slate" colorClass="bg-slate" />
+          <Color color="neutral" colorClass="bg-neutral" />
         </div>
         <div className="grid grid-cols-6 gap-4">
           <Color color="bookmark amber" colorClass="bg-bookmark-amber" />

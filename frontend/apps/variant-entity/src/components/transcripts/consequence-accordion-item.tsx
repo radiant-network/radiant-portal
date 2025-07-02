@@ -42,7 +42,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
           */}
         </div>
         <div className="flex flex-1">
-          <Badge variant="slate" className="capitalize">
+          <Badge variant="neutral" className="capitalize">
             {t(`variant.biotype`, {
               defaultValue: data.biotype?.replace(/_/g, ' ') || '-',
             })}

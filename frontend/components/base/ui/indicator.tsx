@@ -8,55 +8,25 @@ const IndicatorVariants = tv({
   },
   variants: {
     variant: {
-      default: {
-        base: 'bg-primary text-primary-foreground',
-      },
-      secondary: {
-        base: 'bg-secondary text-secondary-foreground',
-      },
-      destructive: {
-        base: 'bg-destructive text-destructive-foreground',
-      },
-      outline: {
-        base: 'text-foreground border',
+      red: {
+        base: 'bg-indicator-red',
       },
       amber: {
-        base: 'bg-amber text-amber-foreground',
+        base: 'bg-indicator-amber',
       },
-      red: {
-        base: 'bg-red text-red-foreground',
-      },
-      orange: {
-        base: 'bg-orange text-orange-foreground',
-      },
-      yellow: {
-        base: 'bg-yellow text-yellow-foreground',
-      },
-      lime: {
-        base: 'bg-lime text-lime-foreground',
-      },
-      green: {
-        base: 'bg-green text-green-foreground',
-      },
-      cyan: {
-        base: 'bg-cyan text-cyan-foreground',
+      emerald: {
+        base: 'bg-indicator-emerald',
       },
       blue: {
-        base: 'bg-blue text-blue-foreground',
-      },
-      violet: {
-        base: 'bg-violet text-violet-foreground',
+        base: 'bg-indicator-blue',
       },
       fuchsia: {
-        base: 'bg-fuchsia text-fuchsia-foreground',
+        base: 'bg-indicator-fuchsia',
       },
-      slate: {
-        base: 'bg-slate text-slate-foreground',
+      grey: {
+        base: 'bg-indicator-grey',
       },
     },
-  },
-  defaultVariants: {
-    variant: 'default',
   },
 });
 

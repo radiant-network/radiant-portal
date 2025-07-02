@@ -37,6 +37,9 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
+  --color-neutral: var(--neutral);
+  --color-neutral-foreground: var(--neutral-foreground);
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
 
@@ -92,14 +95,20 @@
   --color-fuchsia: var(--color-fuchsia-400);
   --color-fuchsia-foreground: var(--color-fuchsia-700);
 
-  --color-slate: var(--color-slate-400);
-  --color-slate-foreground: var(--color-slate-800);
-
+  /* Bookmark Colors */
   --color-bookmark-amber: var(--color-amber-500);
   --color-bookmark-blue: var(--color-blue-500);
   --color-bookmark-green: var(--color-green-600);
   --color-bookmark-red: var(--color-red-500);
   --color-bookmark-off: var(--color-slate-400);
+
+  /* Indicator Colors */
+  --color-indicator-red: var(--color-red-500);
+  --color-indicator-amber: var(--color-amber-500);
+  --color-indicator-emerald: var(--color-emerald-600);
+  --color-indicator-blue: var(--color-blue-500);
+  --color-indicator-fuchsia: var(--color-fuchsia-600);
+  --color-indicator-grey: var(--color-slate-300);
 }
 
 @layer theme {
@@ -135,14 +144,9 @@
     --color-fuchsia: var(--color-fuchsia-600);
     --color-fuchsia-foreground: var(--color-fuchsia-400);
 
-    --color-slate: var(--color-slate-500);
-    --color-slate-foreground: var(--color-slate-400);
-
-    --color-bookmark-amber: var(--color-amber-600);
-    --color-bookmark-blue: var(--color-blue-500);
-    --color-bookmark-green: var(--color-green-600);
-    --color-bookmark-red: var(--color-red-600);
-    --color-bookmark-off: var(--color-slate-500);
+    /* Bookmark Colors */
+    /* Other colors stays the same as light mode */
+    --color-indicator-grey: var(--color-slate-500);
   }
 }
 

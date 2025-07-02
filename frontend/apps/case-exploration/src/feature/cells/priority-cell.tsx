@@ -8,7 +8,7 @@ type PriorityCellProps = {
 
 const colors: Record<string, IndicatorProps['variant']> = {
   asap: 'amber',
-  routine: 'slate',
+  routine: 'grey',
   stat: 'red',
   urgent: 'blue',
 };
