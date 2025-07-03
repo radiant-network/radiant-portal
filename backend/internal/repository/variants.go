@@ -29,6 +29,7 @@ type VariantsDAO interface {
 	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, error)
 	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, error)
 	GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error)
+	GetVariantCasesCount(locusId int) (int64, error)
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
@@ -203,4 +204,16 @@ func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqI
 	variantExpendedInterpretedCase.PubmedIDs = split(variantExpendedInterpretedCase.PubmedIDsString)
 
 	return &variantExpendedInterpretedCase, nil
+}
+
+func (r *VariantsRepository) GetVariantCasesCount(locusId int) (int64, error) {
+	tx := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
+	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
+	tx = tx.Where("o.locus_id = ?", locusId)
+	tx = tx.Distinct("s.case_id")
+	var count int64
+	if err := tx.Count(&count).Error; err != nil {
+		return 0, fmt.Errorf("error fetching occurrences: %w", err)
+	}
+	return count, nil
 }

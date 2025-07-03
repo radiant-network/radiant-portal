@@ -243,3 +243,32 @@ func GetExpendedVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerF
 		c.JSON(http.StatusOK, cases)
 	}
 }
+
+// GetVariantCasesCount handles retrieving cases count for a given locus id
+// @Summary Get cases count for a given locus
+// @Id getVariantCasesCount
+// @Description Retrieve cases count for a given locus id
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {object} types.Count
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/{locus_id}/cases/count [get]
+func GetVariantCasesCount(repo repository.VariantsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
+		if errLocus != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		count, err := repo.GetVariantCasesCount(locusId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		countResponse := types.Count{Count: count}
+		c.JSON(http.StatusOK, countResponse)
+	}
+}
