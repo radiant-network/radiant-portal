@@ -98,7 +98,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       id: 'status',
       cell: info => {
         const status = info.getValue();
-        return <Badge variant={status === 'Active' ? 'slate' : 'default'}>{status}</Badge>;
+        return <Badge variant={status === 'Active' ? 'neutral' : 'default'}>{status}</Badge>;
       },
       header: t('variantEntity.cases.interpreted-table.headers.status'),
       minSize: 100,
@@ -194,7 +194,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       id: 'status',
       cell: info => {
         const status = info.getValue();
-        return <Badge variant={status === 'Active' ? 'slate' : 'default'}>{status}</Badge>;
+        return <Badge variant={status === 'Active' ? 'neutral' : 'default'}>{status}</Badge>;
       },
       header: t('variantEntity.cases.other-table.headers.status'),
       minSize: 100,

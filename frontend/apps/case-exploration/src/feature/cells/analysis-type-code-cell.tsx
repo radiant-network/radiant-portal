@@ -21,7 +21,7 @@ function AnalysisTypeCodeCell({ code, size = 12 }: AnalysisTypeCodeCellProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge variant={'slate'}>
+        <Badge variant="neutral">
           <Icon size={size} />
         </Badge>
       </TooltipTrigger>

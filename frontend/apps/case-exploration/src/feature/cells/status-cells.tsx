@@ -7,7 +7,7 @@ type StatusCellProps = {
 };
 
 const colors: Record<string, BadgeProps['variant']> = {
-  draft: 'slate',
+  draft: 'neutral',
   'on-hold': 'yellow',
   active: 'blue',
   revoke: 'red',
@@ -31,7 +31,7 @@ function StatusCell({ status }: StatusCellProps) {
   const Icon = icons[status];
 
   return (
-    <Badge variant={color ?? 'slate'}>
+    <Badge variant={color ?? 'neutral'}>
       <Icon />
       {t(`caseExploration.status.${status}`)}
     </Badge>

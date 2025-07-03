@@ -6,7 +6,7 @@ const meta = {
   component: ClinVarBadge,
   args: {
     value: 'other',
-    variant: 'slate',
+    variant: 'neutral',
   },
 } satisfies Meta<typeof ClinVarBadge>;
 
