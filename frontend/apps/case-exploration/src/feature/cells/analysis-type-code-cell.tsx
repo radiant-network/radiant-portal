@@ -21,7 +21,7 @@ function AnalysisTypeCodeCell({ code, size = 12 }: AnalysisTypeCodeCellProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge variant="neutral">
+        <Badge variant="neutral" iconOnly>
           <Icon size={size} />
         </Badge>
       </TooltipTrigger>
@@ -35,19 +35,19 @@ export function AnalysisTypeCodeCellTooltips() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2">
-        <Badge variant="secondary">
+        <Badge variant="secondary" iconOnly>
           <Biohazard />
         </Badge>
         <span>{t(`caseExploration.analysis_type_code.somatic`)}</span>
       </div>
       <div className="flex gap-2">
-        <Badge variant="secondary">
+        <Badge variant="secondary" iconOnly>
           <User />
         </Badge>
         <span>{t(`caseExploration.analysis_type_code.germline`)}</span>
       </div>
       <div className="flex gap-2">
-        <Badge variant="secondary">
+        <Badge variant="secondary" iconOnly>
           <Users />
         </Badge>
         <span>{t(`caseExploration.analysis_type_code.germline_family`)}</span>

@@ -73,3 +73,19 @@ export const WithIcon: Story = {
     </div>
   ),
 };
+
+export const IconOnly: Story = {
+  args: {
+    children: 'Badge',
+    iconOnly: true,
+  },
+  render: args => (
+    <div className="flex flex-col items-start gap-2">
+      {badgeVariants.map(variant => (
+        <Badge variant={variant} {...args}>
+          <User />
+        </Badge>
+      ))}
+    </div>
+  ),
+};
