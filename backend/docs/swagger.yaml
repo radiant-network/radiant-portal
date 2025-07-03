@@ -1846,6 +1846,41 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
+  /variants/{locus_id}/cases/count:
+    get:
+      description: Retrieve cases count for a given locus id
+      operationId: getVariantCasesCount
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Count'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get cases count for a given locus
+      tags:
+      - variant
   /variants/{locus_id}/cases/interpreted:
     post:
       description: Retrieve Variant interpreted cases for a given locus

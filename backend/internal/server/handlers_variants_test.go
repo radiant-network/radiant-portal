@@ -109,6 +109,10 @@ func (m *MockRepository) GetVariantExpendedInterpretedCase(int, int, string) (*t
 	}, nil
 }
 
+func (m *MockRepository) GetVariantCasesCount(int) (int64, error) {
+	return int64(4), nil
+}
+
 func Test_GetVariantHeaderHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -310,4 +314,17 @@ func Test_GetVariantUninterpretedCasesHandler(t *testing.T) {
 			"zygosity":"HOM"
 		}
 	]`, w.Body.String())
+}
+
+func Test_GetVariantCasesCountHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/:locus_id/cases/count", GetVariantCasesCount(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/1000/cases/count", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"count":4}`, w.Body.String())
 }

@@ -137,6 +137,7 @@ func main() {
 	variantsGermlineGroup.POST("/:locus_id/cases/interpreted", server.GetVariantInterpretedCases(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/uninterpreted", server.GetVariantUninterpretedCases(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedVariantInterpretedCase(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/cases/count", server.GetVariantCasesCount(repoVariants))
 
 	casesGroup := r.Group("/cases")
 	casesGroup.POST("/list", server.CasesListHandler(repoCases))
