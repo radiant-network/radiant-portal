@@ -208,13 +208,15 @@ create table IF NOT EXISTS hpo_gene_panel
 create table IF NOT EXISTS hpo_term
 (
     id varchar(2000)  NOT NULL,
-    name  varchar(2000) NOT NULL
+    name  varchar(2000) NOT NULL,
+    term  varchar(2000) NOT NULL
 );
 
 create table IF NOT EXISTS mondo_term
 (
     id varchar(2000)  NOT NULL,
-    name  varchar(2000) NOT NULL
+    name  varchar(2000) NOT NULL,
+    term  varchar(2000) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS omim_gene_panel
@@ -290,11 +292,18 @@ VALUES
 ('BRAC', 'Osteosarcoma', 191170, 259500, ['Smu'], ['Somatic mutation']),
 ('TML1', 'Leukemia/lymphoma, T-cell', 603769, 603769, null, null);
 
-INSERT INTO mondo_term (id, name)
+INSERT INTO mondo_term (id, name, term)
 VALUES
-('MONDO:0000001', 'blood group incompatibility'),
-('MONDO:0000002', 'blood vessel neoplasm'),
-('MONDO:0000003', 'colorblindness, partial');
+('MONDO:0000001', 'blood group incompatibility', 'MONDO:0000001 blood group incompatibility'),
+('MONDO:0000002', 'blood vessel neoplasm', 'MONDO:0000002 blood vessel neoplasm'),
+('MONDO:0000003', 'colorblindness, partial', 'MONDO:0000003 colorblindness, partial'),
+('MONDO:0700092', 'neurodevelopmental disorder', 'MONDO:0700092 neurodevelopmental disorder');
+
+INSERT INTO hpo_term (id, name, term)
+VALUES
+    ('HP:0000001', 'Nocturia', 'HP:0000001 Nocturia'),
+    ('HP:0000002', 'Abnormality of body height', 'HP:0000002 Abnormality of body height'),
+    ('HP:0000003', 'Multicystic kidney dysplasia', 'HP:0000003 Multicystic kidney dysplasia');
 
 CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
 		PROPERTIES

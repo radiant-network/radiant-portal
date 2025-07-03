@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/radiant-network/radiant-api/internal/types"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -40,5 +41,154 @@ func Test_GetVariantConsequences(t *testing.T) {
 		assert.Equal(t, 2, len(*variantConsequences))
 		assert.Equal(t, true, (*variantConsequences)[0].IsPicked)
 		assert.Equal(t, false, (*variantConsequences)[1].IsPicked)
+	})
+}
+
+func Test_GetVariantInterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
+		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, len(*interpretedCases))
+		assert.Equal(t, "LA6675-8", (*interpretedCases)[0].Classification)
+		assert.Equal(t, "LA26332-9", (*interpretedCases)[1].Classification)
+		assert.Equal(t, "LA6668-3", (*interpretedCases)[2].Classification)
+	})
+}
+
+func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_DefaultSort(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		pagination := types.Pagination{Limit: 2}
+		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, nil)
+		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(*interpretedCases))
+		assert.Equal(t, "LA6675-8", (*interpretedCases)[0].Classification)
+		assert.Equal(t, "LA26332-9", (*interpretedCases)[1].Classification)
+	})
+}
+
+func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_CustomSort(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		pagination := types.Pagination{Limit: 2}
+		sort := types.SortBody{Field: types.ConditionIdField.Alias, Order: "asc"}
+		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, []types.SortBody{sort})
+		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(*interpretedCases))
+		assert.Equal(t, "MONDO:0000001", (*interpretedCases)[0].ConditionId)
+		assert.Equal(t, "MONDO:0000001", (*interpretedCases)[1].ConditionId)
+	})
+}
+
+func Test_GetVariantInterpretedCases_WithCriteria_NoPagination_DefaultSort(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		criteria := []types.SearchCriterion{
+			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"incompatibility"}, Operator: "contains"},
+			{FieldName: types.GermlineInterpretationClassificationField.Name, Value: []interface{}{"LA26332-9"}},
+		}
+		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
+		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(*interpretedCases))
+		assert.Equal(t, "MONDO:0000001", (*interpretedCases)[0].ConditionId)
+		assert.Equal(t, "LA26332-9", (*interpretedCases)[0].Classification)
+	})
+}
+
+func Test_GetVariantInterpretedCases_NoResult(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		criteria := []types.SearchCriterion{
+			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"not found"}, Operator: "contains"},
+		}
+		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
+		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(*interpretedCases))
+	})
+}
+
+func Test_GetVariantExpendedInterpretedCase(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		expended, err := repo.GetVariantExpendedInterpretedCase(1000, 1, "T002")
+		assert.NoError(t, err)
+		assert.Equal(t, 3, (*expended).PatientID)
+		assert.Equal(t, "PM1,PM2", (*expended).ClassificationCriterias)
+		assert.Equal(t, "autosomal_dominant_de_novo", (*expended).Inheritances)
+		assert.Equal(t, "BRAF", (*expended).GeneSymbol)
+	})
+}
+func Test_GetVariantUninterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
+		uninterpretedCases, err := repo.GetVariantUninterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, len(*uninterpretedCases))
+		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
+		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
+		assert.Equal(t, 5, (*uninterpretedCases)[2].CaseId)
+	})
+}
+
+func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_DefaultSort(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		pagination := types.Pagination{Limit: 2}
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, nil)
+		uninterpretedCases, err := repo.GetVariantUninterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(*uninterpretedCases))
+		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
+		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
+	})
+}
+
+func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_CustomSort(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		pagination := types.Pagination{Limit: 2}
+		sort := types.SortBody{Field: types.CaseStatusCodeField.Name, Order: "asc"}
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, []types.SortBody{sort})
+		uninterpretedCases, err := repo.GetVariantUninterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(*uninterpretedCases))
+		assert.Equal(t, 5, (*uninterpretedCases)[0].CaseId)
+		assert.Equal(t, 3, (*uninterpretedCases)[1].CaseId)
+	})
+}
+
+func Test_GetVariantUninterpretedCases_WithCriteria_NoPagination_DefaultSort(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		criteria := []types.SearchCriterion{
+			{FieldName: types.CaseStatusCodeField.Name, Value: []interface{}{"incomplete"}},
+			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"disorder"}, Operator: "contains"},
+		}
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
+		uninterpretedCases, err := repo.GetVariantUninterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(*uninterpretedCases))
+		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
+		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
+	})
+}
+
+func Test_GetVariantUninterpretedCases_NoResult(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		criteria := []types.SearchCriterion{
+			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"not found"}, Operator: "contains"},
+		}
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
+		uninterpretedCases, err := repo.GetVariantUninterpretedCases(2000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(*uninterpretedCases))
 	})
 }

@@ -1234,6 +1234,12 @@ export interface SearchCriterion {
     'field'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof SearchCriterion
+     */
+    'operator'?: string;
+    /**
+     * 
      * @type {Array<any>}
      * @memberof SearchCriterion
      */
@@ -1467,6 +1473,12 @@ export interface Term {
      * @memberof Term
      */
     'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Term
+     */
+    'term'?: string;
 }
 /**
  * 
@@ -1722,6 +1734,61 @@ export interface VariantConsequence {
 /**
  * 
  * @export
+ * @interface VariantExpendedInterpretedCase
+ */
+export interface VariantExpendedInterpretedCase {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpendedInterpretedCase
+     */
+    'classification_criterias': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpendedInterpretedCase
+     */
+    'gene_symbol': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpendedInterpretedCase
+     */
+    'inheritances': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpendedInterpretedCase
+     */
+    'interpretation': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpendedInterpretedCase
+     */
+    'interpreter_name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantExpendedInterpretedCase
+     */
+    'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpendedInterpretedCase
+     */
+    'patient_sex_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpendedInterpretedCase
+     */
+    'pubmed_ids': string;
+}
+/**
+ * 
+ * @export
  * @interface VariantHeader
  */
 export interface VariantHeader {
@@ -1743,6 +1810,91 @@ export interface VariantHeader {
      * @memberof VariantHeader
      */
     'source'?: Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface VariantInterpretedCase
+ */
+export interface VariantInterpretedCase {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'case_analysis_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'case_analysis_name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantInterpretedCase
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'classification': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'condition_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'condition_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'interpretation_updated_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'performer_lab_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'performer_lab_name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantInterpretedCase
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'transcript_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'zygosity': string;
 }
 /**
  * 
@@ -1969,6 +2121,79 @@ export interface VariantOverview {
 }
 
 
+/**
+ * 
+ * @export
+ * @interface VariantUninterpretedCase
+ */
+export interface VariantUninterpretedCase {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'case_analysis_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'case_analysis_name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantUninterpretedCase
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'performer_lab_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'performer_lab_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'primary_condition_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'primary_condition_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'updated_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'zygosity': string;
+}
 /**
  * TODO
  * @export
@@ -3969,6 +4194,52 @@ export class UserSetsApi extends BaseAPI {
 export const VariantApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Retrieve expended interpreted case for a given locus, sequencing and transcript
+         * @summary Get expended interpreted case for a given locus, sequencing and transcript
+         * @param {string} locusId Locus ID
+         * @param {string} seqId Seq ID
+         * @param {string} transcriptId Transcript ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpendedVariantInterpretedCase: async (locusId: string, seqId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getExpendedVariantInterpretedCase', 'locusId', locusId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getExpendedVariantInterpretedCase', 'seqId', seqId)
+            // verify required parameter 'transcriptId' is not null or undefined
+            assertParamExists('getExpendedVariantInterpretedCase', 'transcriptId', transcriptId)
+            const localVarPath = `/variants/{locus_id}/cases/interpreted/{seq_id}/{transcript_id}`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
@@ -4082,6 +4353,94 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Retrieve Variant interpreted cases for a given locus
+         * @summary Get list of interpreted Cases for a variant
+         * @param {string} locusId Locus ID
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Filters Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVariantInterpretedCases: async (locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getVariantInterpretedCases', 'locusId', locusId)
+            // verify required parameter 'listBodyWithCriteria' is not null or undefined
+            assertParamExists('getVariantInterpretedCases', 'listBodyWithCriteria', listBodyWithCriteria)
+            const localVarPath = `/variants/{locus_id}/cases/interpreted`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(listBodyWithCriteria, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve Variant uninterpreted cases for a given locus
+         * @summary Get list of uninterpreted Cases for a variant
+         * @param {string} locusId Locus ID
+         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postVariantUninterpretedCases: async (locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('postVariantUninterpretedCases', 'locusId', locusId)
+            // verify required parameter 'filtersBodyWithCriteria' is not null or undefined
+            assertParamExists('postVariantUninterpretedCases', 'filtersBodyWithCriteria', filtersBodyWithCriteria)
+            const localVarPath = `/variants/{locus_id}/cases/uninterpreted`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(filtersBodyWithCriteria, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -4092,6 +4451,21 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
 export const VariantApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VariantApiAxiosParamCreator(configuration)
     return {
+        /**
+         * Retrieve expended interpreted case for a given locus, sequencing and transcript
+         * @summary Get expended interpreted case for a given locus, sequencing and transcript
+         * @param {string} locusId Locus ID
+         * @param {string} seqId Seq ID
+         * @param {string} transcriptId Transcript ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExpendedVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantExpendedInterpretedCase>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpendedVariantInterpretedCase(locusId, seqId, transcriptId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getExpendedVariantInterpretedCase']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
         /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
@@ -4131,6 +4505,34 @@ export const VariantApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantOverview']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Retrieve Variant interpreted cases for a given locus
+         * @summary Get list of interpreted Cases for a variant
+         * @param {string} locusId Locus ID
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Filters Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantInterpretedCase>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getVariantInterpretedCases(locusId, listBodyWithCriteria, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getVariantInterpretedCases']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve Variant uninterpreted cases for a given locus
+         * @summary Get list of uninterpreted Cases for a variant
+         * @param {string} locusId Locus ID
+         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async postVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantUninterpretedCase>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postVariantUninterpretedCases(locusId, filtersBodyWithCriteria, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.postVariantUninterpretedCases']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -4141,6 +4543,18 @@ export const VariantApiFp = function(configuration?: Configuration) {
 export const VariantApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = VariantApiFp(configuration)
     return {
+        /**
+         * Retrieve expended interpreted case for a given locus, sequencing and transcript
+         * @summary Get expended interpreted case for a given locus, sequencing and transcript
+         * @param {string} locusId Locus ID
+         * @param {string} seqId Seq ID
+         * @param {string} transcriptId Transcript ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpendedVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantExpendedInterpretedCase> {
+            return localVarFp.getExpendedVariantInterpretedCase(locusId, seqId, transcriptId, options).then((request) => request(axios, basePath));
+        },
         /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
@@ -4171,6 +4585,28 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
         getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantOverview> {
             return localVarFp.getGermlineVariantOverview(locusId, options).then((request) => request(axios, basePath));
         },
+        /**
+         * Retrieve Variant interpreted cases for a given locus
+         * @summary Get list of interpreted Cases for a variant
+         * @param {string} locusId Locus ID
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Filters Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantInterpretedCase>> {
+            return localVarFp.getVariantInterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve Variant uninterpreted cases for a given locus
+         * @summary Get list of uninterpreted Cases for a variant
+         * @param {string} locusId Locus ID
+         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantUninterpretedCase>> {
+            return localVarFp.postVariantUninterpretedCases(locusId, filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -4181,6 +4617,20 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class VariantApi extends BaseAPI {
+    /**
+     * Retrieve expended interpreted case for a given locus, sequencing and transcript
+     * @summary Get expended interpreted case for a given locus, sequencing and transcript
+     * @param {string} locusId Locus ID
+     * @param {string} seqId Seq ID
+     * @param {string} transcriptId Transcript ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public getExpendedVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getExpendedVariantInterpretedCase(locusId, seqId, transcriptId, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Retrieve germline Variant Consequences for a given locus
      * @summary Get list of VariantConsequences for a germline variant
@@ -4215,6 +4665,32 @@ export class VariantApi extends BaseAPI {
      */
     public getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantOverview(locusId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve Variant interpreted cases for a given locus
+     * @summary Get list of interpreted Cases for a variant
+     * @param {string} locusId Locus ID
+     * @param {ListBodyWithCriteria} listBodyWithCriteria Filters Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public getVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getVariantInterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve Variant uninterpreted cases for a given locus
+     * @summary Get list of uninterpreted Cases for a variant
+     * @param {string} locusId Locus ID
+     * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public postVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).postVariantUninterpretedCases(locusId, filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

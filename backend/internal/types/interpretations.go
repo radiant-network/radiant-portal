@@ -104,11 +104,3 @@ var GermlineInterpretationUpdatedOnField = Field{
 	CanBeSorted:   true,
 	Table:         InterpretationGermlineTable,
 }
-
-var GermlineInterpretationConditionField = Field{
-	Name:          "condition",
-	CanBeSelected: true,
-	CanBeSorted:   true,
-	CanBeFiltered: true,
-	Table:         InterpretationGermlineTable,
-}

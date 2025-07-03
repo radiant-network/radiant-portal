@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func (m *MockRepository) GetVariantHeader(int) (*types.VariantHeader, error) {
@@ -50,21 +51,60 @@ func (r *MockRepository) GetVariantConsequences(int) (*[]types.VariantConsequenc
 
 func (m *MockRepository) GetVariantInterpretedCases(int, types.ListQuery) (*[]types.VariantInterpretedCase, error) {
 	return &[]types.VariantInterpretedCase{
-		{CaseId: 1111},
-		{CaseId: 2222},
+		{CaseId: 1, SeqId: 1, TranscriptId: "T002",
+			InterpretationUpdatedOn: time.Date(2025, 6, 30, 15, 51, 29, 0, time.UTC),
+			ConditionId:             "MONDO:0000002", ConditionName: "blood vessel neoplasm",
+			Classification: "LA6675-8", Zygosity: "HET",
+			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active"},
+		{CaseId: 1, SeqId: 2, TranscriptId: "T001",
+			InterpretationUpdatedOn: time.Date(2025, 6, 27, 19, 51, 0, 0, time.UTC),
+			ConditionId:             "MONDO:0000001", ConditionName: "blood group incompatibility",
+			Classification: "LA26332-9", Zygosity: "HET",
+			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active"},
+		{CaseId: 1, SeqId: 1, TranscriptId: "T001",
+			InterpretationUpdatedOn: time.Date(2025, 5, 23, 14, 57, 36, 0, time.UTC),
+			ConditionId:             "MONDO:0000001", ConditionName: "blood group incompatibility",
+			Classification: "LA6668-3", Zygosity: "HET",
+			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active"},
 	}, nil
 }
 
 func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]types.VariantUninterpretedCase, error) {
 	return &[]types.VariantUninterpretedCase{
-		{CaseId: 3333},
-		{CaseId: 4444},
+		{CaseId: 3,
+			PrimaryConditionId: "MONDO:0700092", PrimaryConditionName: "neurodevelopmental disorder",
+			CreatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
+			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
+			Zygosity:         "HET",
+			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "incomplete"},
+		{CaseId: 4,
+			PrimaryConditionId: "MONDO:0700092", PrimaryConditionName: "neurodevelopmental disorder",
+			CreatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
+			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
+			Zygosity:         "HOM",
+			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "incomplete"},
+		{CaseId: 5,
+			PrimaryConditionId: "MONDO:0700092", PrimaryConditionName: "neurodevelopmental disorder",
+			CreatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
+			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
+			Zygosity:         "HOM",
+			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active"},
 	}, nil
 }
 
 func (m *MockRepository) GetVariantExpendedInterpretedCase(int, int, string) (*types.VariantExpendedInterpretedCase, error) {
 	return &types.VariantExpendedInterpretedCase{
-		PatientID: 5555,
+		PatientID:               3,
+		GeneSymbol:              "BRAF",
+		ClassificationCriterias: "PM1,PM2",
+		Inheritances:            "autosomal_dominant_de_novo",
+		PatientSexCode:          "male",
 	}, nil
 }
 
@@ -137,6 +177,136 @@ func Test_GetVariantConsequencesHandler(t *testing.T) {
 			"transcripts":[
 				{"is_canonical":false, "is_mane_plus":false, "is_mane_select":false, "transcript_id": "T003"}
 			]
+		}
+	]`, w.Body.String())
+}
+
+func Test_GetVariantInterpretedCasesHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/variants/:locus_id/cases/interpreted", GetVariantInterpretedCases(repo))
+	body := `{}`
+	req, _ := http.NewRequest("POST", "/variants/1000/cases/interpreted", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[
+		{
+			"case_analysis_code":"WGA", 
+			"case_analysis_name":"Whole Genome Analysis", 
+			"case_id":1, 
+			"classification":"LA6675-8", 
+			"condition_id":"MONDO:0000002", 
+			"condition_name":"blood vessel neoplasm", 
+			"interpretation_updated_on":"2025-06-30T15:51:29Z", 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"seq_id":1, 
+			"status_code":"active", 
+			"transcript_id":"T002", 
+			"zygosity":"HET"
+		}, {
+			"case_analysis_code":"WGA", 
+			"case_analysis_name":"Whole Genome Analysis", 
+			"case_id":1, 
+			"classification":"LA26332-9", 
+			"condition_id":"MONDO:0000001", 
+			"condition_name":"blood group incompatibility", 
+			"interpretation_updated_on":"2025-06-27T19:51:00Z", 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"seq_id":2, 
+			"status_code":"active", 
+			"transcript_id":"T001", 
+			"zygosity":"HET"
+		}, {
+			"case_analysis_code":"WGA", 
+			"case_analysis_name":"Whole Genome Analysis", 
+			"case_id":1, 
+			"classification":"LA6668-3", 
+			"condition_id":"MONDO:0000001", 
+			"condition_name":"blood group incompatibility", 
+			"interpretation_updated_on":"2025-05-23T14:57:36Z", 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"seq_id":1, 
+			"status_code":"active", 
+			"transcript_id":"T001", 
+			"zygosity":"HET"
+		}
+	]`, w.Body.String())
+}
+
+func Test_GetExpendedVariantInterpretedCaseHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/:locus_id/cases/interpreted/:seq_id/:transcript_id", GetExpendedVariantInterpretedCase(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/1000/cases/interpreted/1/T002", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"classification_criterias":"PM1,PM2",
+		"gene_symbol":"BRAF",
+		"inheritances":"autosomal_dominant_de_novo",
+		"interpretation":"",
+		"interpreter_name":"", 
+		"patient_id":3, 
+		"patient_sex_code":"male", 
+		"pubmed_ids":""
+	}`, w.Body.String())
+}
+
+func Test_GetVariantUninterpretedCasesHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/variants/:locus_id/cases/uninterpreted", GetVariantUninterpretedCases(repo))
+	body := `{}`
+	req, _ := http.NewRequest("POST", "/variants/1000/cases/uninterpreted", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[
+		{
+			"case_analysis_code":"WGA", 
+			"case_analysis_name":"Whole Genome Analysis", 
+			"case_id":3, 
+			"created_on":"2021-09-12T12:08:00Z", 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"primary_condition_id":"MONDO:0700092", 
+			"primary_condition_name":"neurodevelopmental disorder", 
+			"status_code":"incomplete", 
+			"updated_on":"2021-09-12T12:08:00Z",
+			"zygosity":"HET"
+		}, {
+			"case_analysis_code":"WGA", 
+			"case_analysis_name":"Whole Genome Analysis", 
+			"case_id":4, 
+			"created_on":"2021-09-12T12:08:00Z", 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"primary_condition_id":"MONDO:0700092", 
+			"primary_condition_name":"neurodevelopmental disorder", 
+			"status_code":"incomplete", 
+			"updated_on":"2021-09-12T12:08:00Z",
+			"zygosity":"HOM"
+		}, {
+			"case_analysis_code":"WGA", 
+			"case_analysis_name":"Whole Genome Analysis", 
+			"case_id":5, 
+			"created_on":"2021-09-12T12:08:00Z", 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"primary_condition_id":"MONDO:0700092", 
+			"primary_condition_name":"neurodevelopmental disorder", 
+			"status_code":"active", 
+			"updated_on":"2021-09-12T12:08:00Z",
+			"zygosity":"HOM"
 		}
 	]`, w.Body.String())
 }
