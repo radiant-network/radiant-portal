@@ -119,8 +119,9 @@ func Test_GetVariantExpendedInterpretedCase(t *testing.T) {
 		expended, err := repo.GetVariantExpendedInterpretedCase(1000, 1, "T002")
 		assert.NoError(t, err)
 		assert.Equal(t, 3, (*expended).PatientID)
-		assert.Equal(t, "PM1,PM2", (*expended).ClassificationCriterias)
-		assert.Equal(t, "autosomal_dominant_de_novo", (*expended).Inheritances)
+		assert.Equal(t, types.JsonArray[string]{"PM1", "PM2"}, (*expended).ClassificationCriterias)
+		assert.Equal(t, types.JsonArray[string]{"autosomal_dominant_de_novo"}, (*expended).Inheritances)
+		assert.Equal(t, types.JsonArray[string]{}, (*expended).PubmedIDs)
 		assert.Equal(t, "BRAF", (*expended).GeneSymbol)
 	})
 }

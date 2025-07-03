@@ -1739,10 +1739,10 @@ export interface VariantConsequence {
 export interface VariantExpendedInterpretedCase {
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof VariantExpendedInterpretedCase
      */
-    'classification_criterias': string;
+    'classification_criterias': Array<string>;
     /**
      * 
      * @type {string}
@@ -1751,10 +1751,10 @@ export interface VariantExpendedInterpretedCase {
     'gene_symbol': string;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof VariantExpendedInterpretedCase
      */
-    'inheritances': string;
+    'inheritances': Array<string>;
     /**
      * 
      * @type {string}
@@ -1781,10 +1781,10 @@ export interface VariantExpendedInterpretedCase {
     'patient_sex_code': string;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof VariantExpendedInterpretedCase
      */
-    'pubmed_ids': string;
+    'pubmed_ids': Array<string>;
 }
 /**
  * 
