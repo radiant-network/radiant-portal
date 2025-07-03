@@ -14,6 +14,11 @@ const badgeVariants = tv({
         base: 'hover:cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-ring',
       },
     },
+    iconOnly: {
+      true: {
+        base: 'size-5 p-0 items-center justify-center',
+      },
+    },
     closable: {
       true: {
         base: '',
@@ -155,8 +160,8 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, Varian
   closeIconProps?: React.HTMLAttributes<SVGElement>;
 }
 
-function Badge({ className, variant, children, closeIconProps, ...props }: BadgeProps) {
-  const styles = badgeVariants({ variant, closable: !!props.onClose, clickable: !!props.onClick });
+function Badge({ className, variant, children, closeIconProps, iconOnly, ...props }: BadgeProps) {
+  const styles = badgeVariants({ variant, closable: !!props.onClose, clickable: !!props.onClick, iconOnly });
 
   return (
     <div className={cn(styles.base({ className }))} {...props}>
