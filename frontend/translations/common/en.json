@@ -355,6 +355,15 @@
         "view_case": "View Case",
         "view_variant": "View Variants"
       },
+      "filters": {
+        "more_placeholder": "Filters",
+        "priority": "Priority",
+        "status": "Status",
+        "case_analysis": "Analysis",
+        "project": "Project",
+        "performer_lab": "Diagnostic lab",
+        "requested_by": "Prescribing Institution"
+      },
       "headers": {
         "case_id": "Case",
         "patient_id": "Patient",

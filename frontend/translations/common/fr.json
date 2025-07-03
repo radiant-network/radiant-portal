@@ -351,6 +351,15 @@
     },
     "case": {
       "title": "Cas",
+      "filters": {
+        "more_placeholder": "Filtres",
+        "priority": "Priorité",
+        "status": "Status",
+        "case_analysis": "Analyse",
+        "project": "Projet",
+        "performer_lab": "Laboratoire de diagnostic",
+        "requested_by": "Établissement prescripteur"
+      },
       "headers": {
         "case_id": "Cas",
         "patient_id": "Patient",
