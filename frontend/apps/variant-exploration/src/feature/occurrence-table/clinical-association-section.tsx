@@ -1,12 +1,11 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
 import { ExpendedOccurrence } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
 import { useCallback } from 'react';
 import { Link } from 'react-router';
-import { SquareArrowOutUpRightIcon } from 'lucide-react';
-import { Button } from '@/components/base/ui/button';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type ClinicalAssociationSectionProps = {
   data: ExpendedOccurrence;
@@ -25,15 +24,9 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
   data.omim_conditions?.forEach((oc, index) => {
     if (index === MAX_CLINICAL_ASSOCIATION) {
       clinicalAssociationValue.push(
-        <Button variant="link" size="sm" className="px-0 justify-start">
-          <Link
-            to={`/variants/entity/${data.locus_id}`}
-            className="flex gap-2 items-center outline-none"
-          >
-            <span className="max-w-72 overflow-hidden text-ellipsis">{t('common.actions.seeMore')}</span>
-            <SquareArrowOutUpRightIcon />
-          </Link>
-        </Button>
+        <AnchorLink component={Link} to={`/variants/entity/${data.locus_id}`} className="justify-start" size="sm">
+          <span className="max-w-72 overflow-hidden text-ellipsis">{t('common.actions.seeMore')}</span>
+        </AnchorLink>,
       );
       return;
     } else if (index > MAX_CLINICAL_ASSOCIATION) {
@@ -43,8 +36,10 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
     clinicalAssociationValue.push(
       <DetailItem
         title={oc.panel ? oc.panel : clinicalAssociationTitle}
-        value={oc.inheritance_code ? <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div> : '-'}
-      />
+        value={
+          oc.inheritance_code ? <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div> : '-'
+        }
+      />,
     );
   });
 

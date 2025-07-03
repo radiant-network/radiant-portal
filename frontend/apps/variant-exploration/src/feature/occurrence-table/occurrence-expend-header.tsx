@@ -1,11 +1,12 @@
 import { Button } from '@/components/base/ui/button';
-import { Download, Edit2Icon, SquareArrowOutUpRightIcon } from 'lucide-react';
+import { Download, Edit2Icon } from 'lucide-react';
 import InterpretationDialog from '../interpretation/interpretation-dialog';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Occurrence } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
 import { Link } from 'react-router';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type OccurrenceExpendHeaderProps = {
   occurrence: Occurrence;
@@ -16,15 +17,9 @@ export default function OccurrenceExpendHeader({ occurrence }: OccurrenceExpendH
 
   return (
     <div className="flex items-center gap-8">
-      <Button variant="link" className="px-0">
-        <Link
-          to={`/variants/entity/${occurrence.locus_id}`}
-          className="flex text-lg gap-2 font-medium items-center justify-center outline-none"
-        >
-          <span className="max-w-72 overflow-hidden text-ellipsis">{occurrence.hgvsg}</span>
-          <SquareArrowOutUpRightIcon />
-        </Link>
-      </Button>
+      <AnchorLink component={Link} to={`/variants/entity/${occurrence.locus_id}`} size="lg">
+        <span className="max-w-72 overflow-hidden text-ellipsis">{occurrence.hgvsg}</span>
+      </AnchorLink>
       <div className="flex items-center gap-5">
         <div className="flex gap-2">
           <InterpretationDialog
