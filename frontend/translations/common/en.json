@@ -378,6 +378,12 @@
         "managing_organization": "Patient Managing Organization",
         "created_on": "Created On",
         "created_on_tooltips": "Date of case creation (yyyy-mm-dd)"
+      },
+      "search": {
+        "case_id": "Case",
+        "patient_id": "Patient",
+        "mrn": "MRN",
+        "request_id": "Assay"
       }
     },
     "assays": {

@@ -1,15 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/base/ui/command';
 import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
-import { Search, FileQuestion, CircleDashed, Pen, Hourglass, RefreshCcw, Check, OctagonX, ListFilter, X } from 'lucide-react';
+import { FileQuestion, CircleDashed, Pen, Hourglass, RefreshCcw, Check, OctagonX, ListFilter, X } from 'lucide-react';
 import FilterButton from '@/components/base/buttons/filter-button';
 import { AggregationWithIcon } from '@/components/base/buttons/filter-button';
 import { Aggregation, CaseFilters, SearchCriterion } from '@/api/api';
@@ -17,6 +9,7 @@ import useSWR from 'swr';
 import { caseApi } from '@/utils/api';
 import { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { Button } from '@/components/base/ui/button';
+import TableFiltersSearch from './table-filters-search';
 
 type CaseFiltersInput = {
   search_criteria: Array<SearchCriterion>;
@@ -48,21 +41,35 @@ async function fetchFilters(searchCriteria: CaseFiltersInput) {
   return response.data;
 }
 
+export const FILTER_DEFAULTS = {
+  priority: [],
+  status: [],
+  caseAnalysis: [],
+  project: [],
+  performerLab: [],
+  requestedBy: [],
+};
+
+export const FILTERS_SEARCH_DEFAULTS = {
+  case_id: [],
+  patient_id: [],
+  mrn: [],
+  request_id: [],
+}
+
 function FiltersGroupForm({
   loading = true,
   filters,
   setFilters,
   searchCriteria,
 }: FiltersGroupFormProps) {
-  const [open, setOpen] = useState(false);
   const [visibleFilters, setVisibleFilters] = useState<string[]>([]);
   const { t } = useI18n();
-  const [results, setResults] = useState<Aggregation[] | null>(null);
 
   // Generic function to add icons and translations to options
   const addIconsAndTranslations = (
-    options: Aggregation[], 
-    translationKeyPrefix: string, 
+    options: Aggregation[],
+    translationKeyPrefix: string,
     iconMapFunction: (key: string) => any
   ): AggregationWithIcon[] => {
     return options.map(option => ({
@@ -71,6 +78,7 @@ function FiltersGroupForm({
       icon: iconMapFunction(option.key || ''),
     }));
   };
+
   const { data: apiFilters } = useSWR<CaseFilters, any, CaseFiltersInput>({ search_criteria: searchCriteria }, fetchFilters, {
     revalidateOnFocus: false,
   });
@@ -106,81 +114,91 @@ function FiltersGroupForm({
     },
   ];
 
-  useEffect(() => {
-    if (open) {
-      setResults(priorityOptions);
-    }
-  }, [open, priorityOptions]);
-
   // Auto-show filters that have selections
   useEffect(() => {
     const autoShowFilters: string[] = [];
     if (projectSelected) autoShowFilters.push('project');
     if (performerLabSelected) autoShowFilters.push('performerLab');
     if (requestedBySelected) autoShowFilters.push('requestedBy');
-    
-    setVisibleFilters(current => {
+
+    setVisibleFilters((current: string[]) => {
       const combined = [...new Set([...current, ...autoShowFilters])];
       return combined;
     });
   }, [projectSelected, performerLabSelected, requestedBySelected]);
 
+  // Handle autocomplete item selection - only one search term allowed at a time
+  const handleAutocompleteSelect = useCallback((type: string, value: string) => {
+    // Clear all existing search terms first
+    const clearedFilters = {
+      ...filters,
+      ...FILTERS_SEARCH_DEFAULTS,
+    };
+
+    // Set the new search term
+    setFilters({
+      ...clearedFilters,
+      [type]: [value],
+    });
+  }, [filters, setFilters]);
+
+  // Handle clearing the search input
+  const handleSearchClear = useCallback(() => {
+    setFilters({
+      ...filters,
+      ...FILTERS_SEARCH_DEFAULTS,
+    });
+  }, [filters, setFilters]);
+
+  // Get the current search term for display (only one allowed)
+  const getSearchTerm = () => {
+    const searchTypes = ['case_id', 'patient_id', 'mrn', 'assay_id'];
+
+    for (const type of searchTypes) {
+      const values = filters[type] || [];
+      if (values.length > 0) {
+        return {
+          type,
+          value: values[0], // Only take the first value since we only allow one
+          label: t(`caseExploration.case.headers.${type}`, type.toUpperCase()) + ': ' + values[0]
+        };
+      }
+    }
+
+    return null;
+  };
+
   // Check if any filters are active
-  const hasActiveFilters = 
+  const hasActiveFilters =
     filters.priority.length > 0 ||
     filters.status.length > 0 ||
     filters.caseAnalysis.length > 0 ||
     filters.project.length > 0 ||
     filters.performerLab.length > 0 ||
     filters.requestedBy.length > 0 ||
+    getSearchTerm() !== null ||
     visibleFilters.length > 0;
 
   // Clear all filters function
   const clearAllFilters = () => {
     setFilters({
-      priority: [],
-      status: [],
-      caseAnalysis: [],
-      project: [],
-      performerLab: [],
-      requestedBy: [],
+      ...FILTER_DEFAULTS,
+      ...FILTERS_SEARCH_DEFAULTS,
     });
     setVisibleFilters([]);
   };
 
   if (loading) return <FiltersGroupSkeleton />;
 
+  const searchTerm = getSearchTerm();
+
   return (
     <div id="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
-      <div className="flex flex-col">
-        <label className="text-sm font-medium text-foreground h-[14px] mb-[8px]">{t('caseExploration.filtersGroup.searchById')}</label>
-        <Command className="relative h-8 w-[260px] overflow-visible">
-          <CommandInput
-            className="px-[6px]"
-            placeholder={t('caseExploration.filtersGroup.search_placeholder')}
-            leftAddon={<Search size={16} />}
-            onFocus={() => {
-              setOpen(true);
-            }}
-            onBlur={() => setTimeout(() => setOpen(false), 100)}
-          />
-          {open && (
-            <CommandList
-              className="absolute left-0 top-full z-50 mt-1 w-full overflow-auto rounded-md border bg-background shadow-lg"
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              <CommandEmpty>{t('common.filters.noValuesFound')}</CommandEmpty>
-              <CommandGroup heading="Suggestions">
-                {results?.map((result) => (
-                  <CommandItem key={result.key}>
-                    <span>{result.label}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          )}
-        </Command>
-      </div>
+      <TableFiltersSearch
+        onSelect={handleAutocompleteSelect}
+        onClear={handleSearchClear}
+        selectedValue={searchTerm?.value}
+      />
 
       <div className="flex flex-wrap gap-2 items-end">
         {/* Always show first three filters */}
@@ -203,7 +221,7 @@ function FiltersGroupForm({
           onSelect={(v) => setFilters({ ...filters, caseAnalysis: v })}
           keyValueLabel={true}
         />
-        
+
         {/* Conditionally show additional filters based on visibility selection */}
         {visibleFilters.includes('project') && (
           <FilterButton
@@ -229,7 +247,7 @@ function FiltersGroupForm({
             onSelect={(v) => setFilters({ ...filters, requestedBy: v })}
           />
         )}
-        
+
         {/* Additional filters control button - always visible */}
         <FilterButton
           label={t('common.filters.more', 'More')}
