@@ -46,9 +46,17 @@ export type TabsListItemProps<T> = React.HTMLAttributes<HTMLDivElement> & {
   value: T;
   disabled?: boolean;
   ref?: React.Ref<HTMLDivElement>;
+  children: React.ReactNode;
 };
 
-export function TabsListItem<T>({ ref, value, disabled = false, className, children, ...props }: TabsListItemProps<T>) {
+export function TabsListItem<T extends string | number | symbol = string>({
+  ref,
+  value,
+  disabled = false,
+  className,
+  children,
+  ...props
+}: React.PropsWithChildren<TabsListItemProps<T>>) {
   const tabsContext = useTabsNavContext();
   const active = tabsContext.value === value;
 
@@ -60,7 +68,7 @@ export function TabsListItem<T>({ ref, value, disabled = false, className, child
       className={cn(
         'z-1 group pt-1.5 pb-1 hover:cursor-pointer',
         {
-          'border-b-2 border-primary': active,
+          'border-b-2 border-primary font-semibold': active,
           'opacity-50 hover:cursor-not-allowed': disabled,
         },
         className,
@@ -75,7 +83,7 @@ export function TabsListItem<T>({ ref, value, disabled = false, className, child
         props.onClick?.(e);
       }}
     >
-      <div className="px-3 py-2 text-sm text-muted-foreground rounded-sm hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none">
+      <div className="flex items-center has-[svg]:px-4 px-3 py-2 [&_svg]:size-4 gap-2 text-sm text-muted-foreground rounded-sm hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none">
         {children}
       </div>
     </div>

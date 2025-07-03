@@ -1,5 +1,6 @@
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import type { Meta, StoryObj } from '@storybook/react';
+import { User } from 'lucide-react';
 import { useState } from 'react';
 
 const meta = {
@@ -26,7 +27,9 @@ export const Default: Story = {
     return (
       <TabsNav value={value} onValueChange={setValue}>
         <TabsList>
-          <TabsListItem value={Tabs.Tab1}>Tab 1</TabsListItem>
+          <TabsListItem value={Tabs.Tab1}>
+            <User /> Tab 1
+          </TabsListItem>
           <TabsListItem value={Tabs.Tab2}>Tab 2</TabsListItem>
           <TabsListItem value={Tabs.Tab3}>Tab 3</TabsListItem>
         </TabsList>
