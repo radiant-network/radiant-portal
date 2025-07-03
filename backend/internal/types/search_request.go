@@ -142,3 +142,11 @@ type CountBodyWithCriteria struct {
 type FiltersBodyWithCriteria struct {
 	SearchCriteria []SearchCriterion `json:"search_criteria"`
 } // @Name FiltersBodyWithCriteria
+
+type SearchResponse[T any] struct {
+	List  JsonArray[T] `json:"list" validate:"required"`
+	Count int64        `json:"count" validate:"required"`
+} // @Name SearchResponse
+
+type VariantInterpretedCasesSearchResponse = SearchResponse[VariantInterpretedCase]
+type VariantUninterpretedCasesSearchResponse = SearchResponse[VariantUninterpretedCase]

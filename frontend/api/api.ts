@@ -1899,6 +1899,25 @@ export interface VariantInterpretedCase {
 /**
  * 
  * @export
+ * @interface VariantInterpretedCasesSearchResponse
+ */
+export interface VariantInterpretedCasesSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantInterpretedCasesSearchResponse
+     */
+    'count': number;
+    /**
+     * 
+     * @type {Array<VariantInterpretedCase>}
+     * @memberof VariantInterpretedCasesSearchResponse
+     */
+    'list': Array<VariantInterpretedCase>;
+}
+/**
+ * 
+ * @export
  * @interface VariantOverview
  */
 export interface VariantOverview {
@@ -2193,6 +2212,25 @@ export interface VariantUninterpretedCase {
      * @memberof VariantUninterpretedCase
      */
     'zygosity': string;
+}
+/**
+ * 
+ * @export
+ * @interface VariantUninterpretedCasesSearchResponse
+ */
+export interface VariantUninterpretedCasesSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantUninterpretedCasesSearchResponse
+     */
+    'count': number;
+    /**
+     * 
+     * @type {Array<VariantUninterpretedCase>}
+     * @memberof VariantUninterpretedCasesSearchResponse
+     */
+    'list': Array<VariantUninterpretedCase>;
 }
 /**
  * TODO
@@ -4564,7 +4602,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantInterpretedCase>>> {
+        async getVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInterpretedCasesSearchResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getVariantInterpretedCases(locusId, listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getVariantInterpretedCases']?.[localVarOperationServerIndex]?.url;
@@ -4578,7 +4616,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantUninterpretedCase>>> {
+        async postVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantUninterpretedCasesSearchResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.postVariantUninterpretedCases(locusId, filtersBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.postVariantUninterpretedCases']?.[localVarOperationServerIndex]?.url;
@@ -4654,7 +4692,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantInterpretedCase>> {
+        getVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<VariantInterpretedCasesSearchResponse> {
             return localVarFp.getVariantInterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4665,7 +4703,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantUninterpretedCase>> {
+        postVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<VariantUninterpretedCasesSearchResponse> {
             return localVarFp.postVariantUninterpretedCases(locusId, filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
     };
