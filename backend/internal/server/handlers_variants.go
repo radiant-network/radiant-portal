@@ -114,7 +114,7 @@ func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc
 // @Param			message	body		types.ListBodyWithCriteria	true	"Filters Body"
 // @Accept json
 // @Produce json
-// @Success 200 {array} types.VariantCase
+// @Success 200 {array} types.VariantInterpretedCase
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/{locus_id}/cases/interpreted [post]
@@ -164,7 +164,7 @@ func GetVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 // @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
 // @Accept json
 // @Produce json
-// @Success 200 {array} types.VariantCase
+// @Success 200 {array} types.VariantUninterpretedCase
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/{locus_id}/cases/uninterpreted [post]
@@ -212,9 +212,9 @@ func GetVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
 // @Param seq_id path string true "Seq ID"
-// @Param transcript path string true "Transcript ID"
+// @Param transcript_id path string true "Transcript ID"
 // @Produce json
-// @Success 200 {object} types.VariantCase
+// @Success 200 {object} types.VariantExpendedInterpretedCase
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/{locus_id}/cases/interpreted/{seq_id}/{transcript_id} [get]

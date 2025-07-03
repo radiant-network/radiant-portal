@@ -78,14 +78,14 @@ var CasesFields = []Field{
 	CaseCreatedOnField,
 	CaseUpdatedOnField,
 	RequestOrderingPhysicianField,
-	CaseDiagnosticLabCodeField,
-	CaseDiagnosticLabNameField,
+	CasePerformerLabCodeField,
+	CasePerformerLabNameField,
 	CaseRequestIdField,
 	PatientManagingOrganizationCodeField,
 	PatientManagingOrganizationNameField,
 }
 
-var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, GermlineInterpretationConditionField)
+var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField)
 
 var CasesDefaultFields = []Field{
 	CaseIdField,
@@ -185,7 +185,7 @@ var CaseRequestIdField = Field{
 	Table:         CaseTable,
 }
 
-var CaseDiagnosticLabCodeField = Field{
+var CasePerformerLabCodeField = Field{
 	Name:            "code",
 	Alias:           "performer_lab_code",
 	CanBeSelected:   true,
@@ -195,7 +195,7 @@ var CaseDiagnosticLabCodeField = Field{
 	Table:           PerformerLabTable,
 }
 
-var CaseDiagnosticLabNameField = Field{
+var CasePerformerLabNameField = Field{
 	Name:          "name",
 	Alias:         "performer_lab_name",
 	CanBeSelected: true,
@@ -216,27 +216,29 @@ type VariantInterpretedCase = struct {
 	CaseId                  int       `json:"case_id" validate:"required"`
 	TranscriptId            string    `json:"transcript_id" validate:"required"`
 	InterpretationUpdatedOn time.Time `json:"interpretation_updated_on" validate:"required"`
-	Condition               string    `json:"condition" validate:"required"`
+	ConditionId             string    `json:"condition_id" validate:"required"`
+	ConditionName           string    `json:"condition_name" validate:"required"`
 	Classification          string    `json:"classification" validate:"required"`
 	Zygosity                string    `json:"zygosity" validate:"required"`
-	RequestedByCode         string    `json:"requested_by_code" validate:"required"`
-	RequestedByName         string    `json:"requested_by_name" validate:"required"`
+	PerformerLabCode        string    `json:"performer_lab_code" validate:"required"`
+	PerformerLabName        string    `json:"performer_lab_name" validate:"required"`
 	CaseAnalysisCode        string    `json:"case_analysis_code" validate:"required"`
 	CaseAnalysisName        string    `json:"case_analysis_name" validate:"required"`
 	StatusCode              string    `json:"status_code" validate:"required"`
 } // @name VariantInterpretedCase
 
 type VariantUninterpretedCase = struct {
-	CaseId           int       `json:"case_id" validate:"required"`
-	CreatedOn        time.Time `json:"created_on" validate:"required"`
-	UpdatedOn        time.Time `json:"updated_on" validate:"required"`
-	PrimaryCondition string    `json:"primary_condition" validate:"required"`
-	Zygosity         string    `json:"zygosity" validate:"required"`
-	RequestedByCode  string    `json:"requested_by_code" validate:"required"`
-	RequestedByName  string    `json:"requested_by_name" validate:"required"`
-	CaseAnalysisCode string    `json:"case_analysis_code" validate:"required"`
-	CaseAnalysisName string    `json:"case_analysis_name" validate:"required"`
-	StatusCode       string    `json:"status_code" validate:"required"`
+	CaseId               int       `json:"case_id" validate:"required"`
+	CreatedOn            time.Time `json:"created_on" validate:"required"`
+	UpdatedOn            time.Time `json:"updated_on" validate:"required"`
+	PrimaryConditionId   string    `json:"primary_condition_id" validate:"required"`
+	PrimaryConditionName string    `json:"primary_condition_name" validate:"required"`
+	Zygosity             string    `json:"zygosity" validate:"required"`
+	PerformerLabCode     string    `json:"performer_lab_code" validate:"required"`
+	PerformerLabName     string    `json:"performer_lab_name" validate:"required"`
+	CaseAnalysisCode     string    `json:"case_analysis_code" validate:"required"`
+	CaseAnalysisName     string    `json:"case_analysis_name" validate:"required"`
+	StatusCode           string    `json:"status_code" validate:"required"`
 } // @name VariantUninterpretedCase
 
 type VariantExpendedInterpretedCase = struct {

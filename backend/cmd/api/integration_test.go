@@ -587,7 +587,7 @@ func Test_CasesList_WithCriteria(t *testing.T) {
 }
 
 func Test_CasesList_WithAdditionalFields(t *testing.T) {
-	expected := `[{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_analysis_type_code":"germline", "case_id":8, "created_on":"2021-09-12T13:08:00Z", "managing_organization_code":"CHUSJ", "mrn":"MRN-283794", "primary_condition":"neurodevelopmental disorder (MONDO:0700092)", "priority_code":"routine", "project_code":"N1", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"on-hold", "updated_on":"2021-09-12T13:08:00Z"}]`
+	expected := `[{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_analysis_type_code":"germline", "case_id":8, "created_on":"2021-09-12T13:08:00Z", "managing_organization_code":"CHUSJ", "mrn":"MRN-283794", "primary_condition":"MONDO:0700092", "priority_code":"routine", "project_code":"N1", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"on-hold", "updated_on":"2021-09-12T13:08:00Z"}]`
 	body := `{
 			"additional_fields":["primary_condition", "managing_organization_code"],
 			"search_criteria":[{"field": "status_code", "value": ["on-hold"]}]
@@ -705,6 +705,110 @@ func Test_GetCasesFilters(t *testing.T) {
 			{"count":0, "key":"unknown", "label":"Unknown"}]	
 		}`
 	assertGetCasesFilters(t, "simple", body, expected)
+}
+
+func assertGetVariantInterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewVariantsRepository(db)
+		router := gin.Default()
+		router.POST("/variants/:locus_id/cases/interpreted", server.GetVariantInterpretedCases(repo))
+
+		req, _ := http.NewRequest("POST", fmt.Sprintf("/variants/%d/cases/interpreted", locusId), bytes.NewBuffer([]byte(body)))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetVariantInterpretedCases(t *testing.T) {
+	body := `{
+			"search_criteria":[{"field": "condition_term", "value": ["vessel"], "operator": "contains"}]
+		}`
+	expected := `[
+		{
+			"case_analysis_code":"WGA", 
+			"case_analysis_name":"Whole Genome Analysis", 
+			"case_id":1, 
+			"classification":"LA6675-8", 
+			"condition_id":"MONDO:0000002", 
+			"condition_name":"blood vessel neoplasm", 
+			"interpretation_updated_on":"2025-06-30T15:51:29Z", 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"seq_id":1, 
+			"status_code":"active", 
+			"transcript_id":"T002", 
+			"zygosity":"HET"
+		}
+	]`
+	assertGetVariantInterpretedCases(t, "simple", 1000, body, expected)
+}
+func assertGetVariantUninterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewVariantsRepository(db)
+		router := gin.Default()
+		router.POST("/variants/:locus_id/cases/uninterpreted", server.GetVariantUninterpretedCases(repo))
+
+		req, _ := http.NewRequest("POST", fmt.Sprintf("/variants/%d/cases/uninterpreted", locusId), bytes.NewBuffer([]byte(body)))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetVariantUninterpretedCases(t *testing.T) {
+	body := `{
+			"search_criteria":[{"field": "status_code", "value": ["active"]}]
+		}`
+	expected := `[
+		{
+			"case_analysis_code":"WGA", 
+			"case_analysis_name":"Whole Genome Analysis", 
+			"case_id":5, 
+			"created_on":"2021-09-12T13:08:00Z", 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"primary_condition_id":"MONDO:0700092", 
+			"primary_condition_name":"neurodevelopmental disorder", 
+			"status_code":"active", 
+			"updated_on":"2021-09-12T13:08:00Z",
+			"zygosity":"HOM"
+		}
+	]`
+	assertGetVariantUninterpretedCases(t, "simple", 1000, body, expected)
+}
+
+func assertGetExpendedVariantInterpretedCase(t *testing.T, data string, locusId int, seqId int, transcriptId string, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewVariantsRepository(db)
+		router := gin.Default()
+		router.GET("variants/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedVariantInterpretedCase(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/cases/interpreted/%d/%s", locusId, seqId, transcriptId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetExpendedVariantInterpretedCase(t *testing.T) {
+	expected := `{
+		"classification_criterias":"PM1,PM2",
+		"gene_symbol":"BRAF",
+		"inheritances":"autosomal_dominant_de_novo",
+		"interpretation":"",
+		"interpreter_name":"", 
+		"patient_id":3, 
+		"patient_sex_code":"male", 
+		"pubmed_ids":""
+	}`
+	assertGetExpendedVariantInterpretedCase(t, "simple", 1000, 1, "T002", expected)
 }
 
 func TestMain(m *testing.M) {

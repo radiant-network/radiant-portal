@@ -119,10 +119,10 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`request` r ON r.id = s.request_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` order_org ON order_org.id = r.ordering_organization_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
+	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = ig.condition")
 	tx = tx.Where("o.locus_id = ?", locusId)
-	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, ig.condition as condition, ig.classification, o.zygosity, order_org.code as requested_by_code, order_org.name as requested_by_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
+	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, ig.classification, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
 
 	utils.AddLimitAndSort(tx, userQuery)
 
@@ -147,16 +147,17 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		return &[]VariantUninterpretedCase{}, nil
 	}
 
-	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline").Select("sequencing_id").Where("locus_id = ?", locusId)
+	locusIdString := fmt.Sprintf("%d", locusId)
+	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline").Select("sequencing_id").Where("locus_id = ?", locusIdString)
 
 	tx := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`request` r ON r.id = s.request_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` order_org ON order_org.id = r.ordering_organization_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
+	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
 	tx = tx.Where("o.locus_id = ? AND s.id NOT IN (?)", locusId, txInterpreted)
-	tx = tx.Select("distinct c.id as case_id, c.created_on, c.updated_on, c.primary_condition as primary_condition, o.zygosity, order_org.code as requested_by_code, order_org.name as requested_by_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
+	tx = tx.Select("distinct c.id as case_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, mondo.name as primary_condition_name, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
 
 	utils.AddLimitAndSort(tx, userQuery)
 
@@ -177,13 +178,15 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 }
 
 func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error) {
+	locusIdAsString := fmt.Sprintf("%d", locusId)
+	SeqIdAsString := fmt.Sprintf("%d", seqId)
 	tx := r.db.Table("radiant_jdbc.public.interpretation_germline i")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON i.sequencing_id = o.seq_id and o.locus_id = i.locus_id")
 	tx = tx.Joins("INNER JOIN germline__snv__variant v ON i.locus_id = v.locus_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = c.proband_id")
-	tx = tx.Where("i.locus_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusId, seqId, transcriptId)
+	tx = tx.Where("i.locus_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusIdAsString, SeqIdAsString, transcriptId)
 	tx = tx.Select("c.proband_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias, i.transmission_modes as inheritances, i.pubmed as pubmed_ids, p.sex_code as patient_sex_code")
 
 	var variantExpendedInterpretedCase VariantExpendedInterpretedCase

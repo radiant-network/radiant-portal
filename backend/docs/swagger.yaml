@@ -560,6 +560,8 @@ components:
       properties:
         field:
           type: string
+        operator:
+          type: string
         value:
           items: {}
           type: array
@@ -656,6 +658,8 @@ components:
         id:
           type: string
         name:
+          type: string
+        term:
           type: string
       type: object
     Transcript:
@@ -755,6 +759,34 @@ components:
           type: array
           uniqueItems: false
       type: object
+    VariantExpendedInterpretedCase:
+      properties:
+        classification_criterias:
+          type: string
+        gene_symbol:
+          type: string
+        inheritances:
+          type: string
+        interpretation:
+          type: string
+        interpreter_name:
+          type: string
+        patient_id:
+          type: integer
+        patient_sex_code:
+          type: string
+        pubmed_ids:
+          type: string
+      required:
+      - classification_criterias
+      - gene_symbol
+      - inheritances
+      - interpretation
+      - interpreter_name
+      - patient_id
+      - patient_sex_code
+      - pubmed_ids
+      type: object
     VariantHeader:
       properties:
         assembly_version:
@@ -768,6 +800,49 @@ components:
           uniqueItems: false
       required:
       - hgvsg
+      type: object
+    VariantInterpretedCase:
+      properties:
+        case_analysis_code:
+          type: string
+        case_analysis_name:
+          type: string
+        case_id:
+          type: integer
+        classification:
+          type: string
+        condition_id:
+          type: string
+        condition_name:
+          type: string
+        interpretation_updated_on:
+          type: string
+        performer_lab_code:
+          type: string
+        performer_lab_name:
+          type: string
+        seq_id:
+          type: integer
+        status_code:
+          type: string
+        transcript_id:
+          type: string
+        zygosity:
+          type: string
+      required:
+      - case_analysis_code
+      - case_analysis_name
+      - case_id
+      - classification
+      - condition_id
+      - condition_name
+      - interpretation_updated_on
+      - performer_lab_code
+      - performer_lab_name
+      - seq_id
+      - status_code
+      - transcript_id
+      - zygosity
       type: object
     VariantOverview:
       properties:
@@ -860,6 +935,43 @@ components:
       - locus
       - pf_wgs
       - picked_consequences
+      type: object
+    VariantUninterpretedCase:
+      properties:
+        case_analysis_code:
+          type: string
+        case_analysis_name:
+          type: string
+        case_id:
+          type: integer
+        created_on:
+          type: string
+        performer_lab_code:
+          type: string
+        performer_lab_name:
+          type: string
+        primary_condition_id:
+          type: string
+        primary_condition_name:
+          type: string
+        status_code:
+          type: string
+        updated_on:
+          type: string
+        zygosity:
+          type: string
+      required:
+      - case_analysis_code
+      - case_analysis_name
+      - case_id
+      - created_on
+      - performer_lab_code
+      - performer_lab_name
+      - primary_condition_id
+      - primary_condition_name
+      - status_code
+      - updated_on
+      - zygosity
       type: object
     VepImpact:
       description: TODO
@@ -1725,6 +1837,142 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
+  /variants/{locus_id}/cases/interpreted:
+    post:
+      description: Retrieve Variant interpreted cases for a given locus
+      operationId: getVariantInterpretedCases
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: Filters Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/VariantInterpretedCase'
+                type: array
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get list of interpreted Cases for a variant
+      tags:
+      - variant
+  /variants/{locus_id}/cases/interpreted/{seq_id}/{transcript_id}:
+    get:
+      description: Retrieve expended interpreted case for a given locus, sequencing
+        and transcript
+      operationId: getExpendedVariantInterpretedCase
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Seq ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantExpendedInterpretedCase'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get expended interpreted case for a given locus, sequencing and transcript
+      tags:
+      - variant
+  /variants/{locus_id}/cases/uninterpreted:
+    post:
+      description: Retrieve Variant uninterpreted cases for a given locus
+      operationId: postVariantUninterpretedCases
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FiltersBodyWithCriteria'
+        description: Filters Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/VariantUninterpretedCase'
+                type: array
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get list of uninterpreted Cases for a variant
+      tags:
+      - variant
   /variants/germline/{locus_id}/consequences:
     get:
       description: Retrieve germline Variant Consequences for a given locus
