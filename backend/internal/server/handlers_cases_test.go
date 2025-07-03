@@ -48,9 +48,9 @@ func (m *MockRepository) CountCases(userQuery types.CountQuery) (*int64, error) 
 func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error) {
 	var result = []types.AutocompleteResult{
 		{Type: "case_id", Value: "1"},
-		{Type: "request_id", Value: "1"},
+		//{Type: "request_id", Value: "1"},
 		{Type: "patient_id", Value: "10"},
-		{Type: "request_id", Value: "10"},
+		//{Type: "request_id", Value: "10"},
 		{Type: "case_id", Value: "10"},
 	}
 	return &result, nil
@@ -149,11 +149,16 @@ func Test_CasesAutocompleteHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[
 		{"type":"case_id", "value":"1"},
-		{"type":"request_id", "value":"1"},
 		{"type":"patient_id", "value":"10"},
-		{"type":"request_id", "value":"10"},
 		{"type":"case_id", "value":"10"}
 	]`, w.Body.String())
+	//assert.JSONEq(t, `[
+	//	{"type":"case_id", "value":"1"},
+	//	{"type":"request_id", "value":"1"},
+	//	{"type":"patient_id", "value":"10"},
+	//	{"type":"request_id", "value":"10"},
+	//	{"type":"case_id", "value":"10"}
+	//]`, w.Body.String())
 }
 
 func Test_CasesFiltersHandler(t *testing.T) {

@@ -93,11 +93,12 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	subQueryMrn = subQueryMrn.Select("\"mrn\" as type, mrn as value")
 	subQueryMrn = subQueryMrn.Where("mrn LIKE ?", searchInput)
 
-	subQueryRequestId := r.db.Table(fmt.Sprintf("%s %s", types.RequestTable.Name, types.RequestTable.Alias))
-	subQueryRequestId = subQueryRequestId.Select("\"request_id\" as type, id as value")
-	subQueryRequestId = subQueryRequestId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+	//subQueryRequestId := r.db.Table(fmt.Sprintf("%s %s", types.RequestTable.Name, types.RequestTable.Alias))
+	//subQueryRequestId = subQueryRequestId.Select("\"request_id\" as type, id as value")
+	//subQueryRequestId = subQueryRequestId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	tx := r.db.Table("(? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryMrn, subQueryRequestId)
+	//tx := r.db.Table("(? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryMrn, subQueryRequestId)
+	tx := r.db.Table("(? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryMrn)
 	tx = tx.Order("value asc, type asc")
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {

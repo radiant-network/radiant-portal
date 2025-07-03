@@ -119,10 +119,10 @@ func Test_SearchById(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, len(*autocompleteResult), 5)
 		assert.Equal(t, (*autocompleteResult)[0].Value, "1")
-		assert.Equal(t, (*autocompleteResult)[1].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[1].Value, "10")
 		assert.Equal(t, (*autocompleteResult)[2].Value, "10")
-		assert.Equal(t, (*autocompleteResult)[3].Value, "10")
-		assert.Equal(t, (*autocompleteResult)[4].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[3].Value, "11")
+		assert.Equal(t, (*autocompleteResult)[4].Value, "12")
 	})
 }
 
