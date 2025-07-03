@@ -213,7 +213,7 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (int64, error) {
 	tx = tx.Distinct("s.case_id")
 	var count int64
 	if err := tx.Count(&count).Error; err != nil {
-		return 0, fmt.Errorf("error fetching occurrences: %w", err)
+		return 0, fmt.Errorf("error counting variant cases: %w", err)
 	}
 	return count, nil
 }
