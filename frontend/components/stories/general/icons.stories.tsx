@@ -17,6 +17,21 @@ import ShapeTriangleDownIcon from '@/components/base/icons/shape-triangle-down-i
 import ShapeCircleIcon from '@/components/base/icons/shape-circle-icon';
 import ShapeDonutIcon from '@/components/base/icons/shape-donut-icon';
 import ShapeSquareIcon from '@/components/base/icons/shape-square-icon';
+import PedigreeMaleAffectedIcon from '@/components/base/icons/pedigree-male-affected-icon';
+import PedigreeMaleCarrierIcon from '@/components/base/icons/pedigree-male-carrier-icon';
+import PedigreeMaleDeceasedIcon from '@/components/base/icons/pedigree-male-deceased-icon';
+import PedigreeMaleNotAffectedIcon from '@/components/base/icons/pedigree-male-not-affected-icon';
+import PedigreeMaleProbandIcon from '@/components/base/icons/pedigree-male-proband-icon';
+import PedigreeUnknownAffectedIcon from '@/components/base/icons/pedigree-unknown-affected-icon';
+import PedigreeUnknownCarrierIcon from '@/components/base/icons/pedigree-unknown-carrier-icon';
+import PedigreeUnknownDeceasedIcon from '@/components/base/icons/pedigree-unknown-deceased-icon';
+import PedigreeUnknownNotAffectedIcon from '@/components/base/icons/pedigree-unknown-not-affected-icon';
+import PedigreeUnknownProbandIcon from '@/components/base/icons/pedigree-unknown-proband-icon';
+import PedigreeFemaleAffectedIcon from '@/components/base/icons/pedigree-female-affected-icon';
+import PedigreeFemaleCarrierIcon from '@/components/base/icons/pedigree-female-carrier-icon';
+import PedigreeFemaleDeceasedIcon from '@/components/base/icons/pedigree-female-deceased-icon';
+import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-female-not-affected-icon';
+import PedigreeFemaleProbandIcon from '@/components/base/icons/pedigree-female-proband-icon';
 
 const meta = {
   title: 'General/Icons',
@@ -68,6 +83,28 @@ export const Default: Story = {
         <IconDisplay icon={TranscriptCanonicalIcon} title="Canonical" args={args} />
         <IconDisplay icon={TranscriptManePlusIcon} title="Mane Plus" args={args} />
         <IconDisplay icon={TranscriptManeSelectIcon} title="Mane Select" args={args} />
+      </div>
+      <h1 className="font-bold text-xl">Pedigree:</h1>
+      <div className="grid grid-cols-12 gap-2">
+        <IconDisplay icon={PedigreeMaleAffectedIcon} title="Male Affected" args={args} />
+        <IconDisplay icon={PedigreeMaleNotAffectedIcon} title="Male Not Affected" args={args} />
+        <IconDisplay icon={PedigreeMaleCarrierIcon} title="Male Carrier" args={args} />
+        <IconDisplay icon={PedigreeMaleDeceasedIcon} title="Male Deceased" args={args} />
+        <IconDisplay icon={PedigreeMaleProbandIcon} title="Male Proband" args={args} />
+      </div>
+      <div className="grid grid-cols-12 gap-2">
+        <IconDisplay icon={PedigreeFemaleAffectedIcon} title="Female Affected" args={args} />
+        <IconDisplay icon={PedigreeFemaleNotAffectedIcon} title="Female Not Affected" args={args} />
+        <IconDisplay icon={PedigreeFemaleCarrierIcon} title="Female Carrier" args={args} />
+        <IconDisplay icon={PedigreeFemaleDeceasedIcon} title="Female Deceased" args={args} />
+        <IconDisplay icon={PedigreeFemaleProbandIcon} title="Female Proband" args={args} />
+      </div>
+      <div className="grid grid-cols-12 gap-2">
+        <IconDisplay icon={PedigreeUnknownAffectedIcon} title="Unknown Affected" args={args} />
+        <IconDisplay icon={PedigreeUnknownNotAffectedIcon} title="Unknown Not Affected" args={args} />
+        <IconDisplay icon={PedigreeUnknownCarrierIcon} title="Unknown Carrier" args={args} />
+        <IconDisplay icon={PedigreeUnknownDeceasedIcon} title="Unknown Deceased" args={args} />
+        <IconDisplay icon={PedigreeUnknownProbandIcon} title="Unknown Proband" args={args} />
       </div>
     </div>
   ),
