@@ -104,10 +104,10 @@ func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc
 	}
 }
 
-// GetVariantInterpretedCases handles retrieving a variant interpreted cases by its locus
-// @Summary Get list of interpreted Cases for a variant
-// @Id getVariantInterpretedCases
-// @Description Retrieve Variant interpreted cases for a given locus
+// GetGermlineVariantInterpretedCases handles retrieving a variant interpreted cases by its locus
+// @Summary Get list of interpreted Cases for a germline variant
+// @Id getGermlineVariantInterpretedCases
+// @Description Retrieve Germline Variant interpreted cases for a given locus
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
@@ -117,8 +117,8 @@ func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc
 // @Success 200 {object} types.VariantInterpretedCasesSearchResponse
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/{locus_id}/cases/interpreted [post]
-func GetVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
+// @Router /variants/germline/{locus_id}/cases/interpreted [post]
+func GetGermlineVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
 		if err != nil {
@@ -155,10 +155,10 @@ func GetVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 	}
 }
 
-// GetVariantUninterpretedCases handles retrieving a variant uninterpreted cases by its locus
-// @Summary Get list of uninterpreted Cases for a variant
-// @Id postVariantUninterpretedCases
-// @Description Retrieve Variant uninterpreted cases for a given locus
+// GetGermlineVariantUninterpretedCases handles retrieving a variant uninterpreted cases by its locus
+// @Summary Get list of uninterpreted Cases for a germline variant
+// @Id postGermlineVariantUninterpretedCases
+// @Description Retrieve Germline Variant uninterpreted cases for a given locus
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
@@ -168,8 +168,8 @@ func GetVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 // @Success 200 {object} types.VariantUninterpretedCasesSearchResponse
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/{locus_id}/cases/uninterpreted [post]
-func GetVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
+// @Router /variants/germline/{locus_id}/cases/uninterpreted [post]
+func GetGermlineVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
 		if err != nil {
@@ -206,10 +206,10 @@ func GetVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 	}
 }
 
-// GetExpendedVariantInterpretedCase handles retrieving expended interpreted case for a given locus, sequencing and transcript
-// @Summary Get expended interpreted case for a given locus, sequencing and transcript
-// @Id getExpendedVariantInterpretedCase
-// @Description Retrieve expended interpreted case for a given locus, sequencing and transcript
+// GetExpendedGermlineVariantInterpretedCase handles retrieving expended interpreted case for a given locus, sequencing and transcript
+// @Summary Get expended germline interpreted case for a given locus, sequencing and transcript
+// @Id getExpendedGermlineVariantInterpretedCase
+// @Description Retrieve germline expended interpreted case for a given locus, sequencing and transcript
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
@@ -219,8 +219,8 @@ func GetVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 // @Success 200 {object} types.VariantExpendedInterpretedCase
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/{locus_id}/cases/interpreted/{seq_id}/{transcript_id} [get]
-func GetExpendedVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerFunc {
+// @Router /variants/germline/{locus_id}/cases/interpreted/{seq_id}/{transcript_id} [get]
+func GetExpendedGermlineVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {
@@ -246,9 +246,9 @@ func GetExpendedVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerF
 	}
 }
 
-// GetVariantCasesCount handles retrieving cases count for a given locus id
-// @Summary Get cases count for a given locus
-// @Id getVariantCasesCount
+// GetGermlineVariantCasesCount handles retrieving cases count for a given locus id
+// @Summary Get germline cases count for a given locus
+// @Id getGermlineVariantCasesCount
 // @Description Retrieve cases count for a given locus id
 // @Tags variant
 // @Security bearerauth
@@ -257,8 +257,8 @@ func GetExpendedVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerF
 // @Success 200 {object} types.Count
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/{locus_id}/cases/count [get]
-func GetVariantCasesCount(repo repository.VariantsDAO) gin.HandlerFunc {
+// @Router /variants/germline/{locus_id}/cases/count [get]
+func GetGermlineVariantCasesCount(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
 		if errLocus != nil {
@@ -272,5 +272,27 @@ func GetVariantCasesCount(repo repository.VariantsDAO) gin.HandlerFunc {
 		}
 		countResponse := types.Count{Count: count}
 		c.JSON(http.StatusOK, countResponse)
+	}
+}
+
+// GetGermlineVariantCasesFilters handles retrieving cases filters for variant entity
+// @Summary Get cases filters for germline variant entity
+// @Id getGermlineVariantCasesFilters
+// @Description Retrieve cases filters for germline variant entity
+// @Tags variant
+// @Security bearerauth
+// @Produce json
+// @Success 200 {object} types.VariantCasesFilters
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/germline/cases/filters [get]
+func GetGermlineVariantCasesFilters(repo repository.VariantsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		filters, err := repo.GetVariantCasesFilters()
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, filters)
 	}
 }

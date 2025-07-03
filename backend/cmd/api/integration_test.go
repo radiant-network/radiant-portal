@@ -22,9 +22,9 @@ func testList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/:seq_id/list", server.OccurrencesGermlineListHandler(repo))
+		router.POST("/occurrences/germline/:seq_id/list", server.OccurrencesGermlineListHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/1/list", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/1/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -36,9 +36,9 @@ func testCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/:seq_id/count", server.OccurrencesGermlineCountHandler(repo))
+		router.POST("/occurrences/germline/:seq_id/count", server.OccurrencesGermlineCountHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/1/count", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/1/count", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -50,9 +50,9 @@ func testAggregation(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repo))
+		router.POST("/occurrences/germline/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/1/aggregate", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/1/aggregate", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -64,9 +64,9 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repo))
+		router.POST("/occurrences/germline/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/1/statistics", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/1/statistics", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -486,9 +486,9 @@ func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId i
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
-		router.GET("/occurrences/:seq_id/:locus_id/expended", server.GetExpendedGermlineOccurrence(repo))
+		router.GET("/occurrences/germline/:seq_id/:locus_id/expended", server.GetExpendedGermlineOccurrence(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/%d/%d/expended", seqId, locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/%d/%d/expended", seqId, locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -712,9 +712,9 @@ func assertGetVariantInterpretedCases(t *testing.T, data string, locusId int, bo
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
-		router.POST("/variants/:locus_id/cases/interpreted", server.GetVariantInterpretedCases(repo))
+		router.POST("/variants/germline/:locus_id/cases/interpreted", server.GetGermlineVariantInterpretedCases(repo))
 
-		req, _ := http.NewRequest("POST", fmt.Sprintf("/variants/%d/cases/interpreted", locusId), bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("POST", fmt.Sprintf("/variants/germline/%d/cases/interpreted", locusId), bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -752,9 +752,9 @@ func assertGetVariantUninterpretedCases(t *testing.T, data string, locusId int, 
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
-		router.POST("/variants/:locus_id/cases/uninterpreted", server.GetVariantUninterpretedCases(repo))
+		router.POST("/variants/germline/:locus_id/cases/uninterpreted", server.GetGermlineVariantUninterpretedCases(repo))
 
-		req, _ := http.NewRequest("POST", fmt.Sprintf("/variants/%d/cases/uninterpreted", locusId), bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("POST", fmt.Sprintf("/variants/germline/%d/cases/uninterpreted", locusId), bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -792,9 +792,9 @@ func assertGetExpendedVariantInterpretedCase(t *testing.T, data string, locusId 
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
-		router.GET("variants/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedVariantInterpretedCase(repo))
+		router.GET("variants/germline/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedGermlineVariantInterpretedCase(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/cases/interpreted/%d/%s", locusId, seqId, transcriptId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/cases/interpreted/%d/%s", locusId, seqId, transcriptId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -821,9 +821,9 @@ func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
-		router.GET("variants/:locus_id/cases/count", server.GetVariantCasesCount(repo))
+		router.GET("variants/germline/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/%d/cases/count", locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/cases/count", locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -835,6 +835,46 @@ func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected
 func Test_GetVariantCasesCount(t *testing.T) {
 	expected := `{"count":4}`
 	assertGetVariantCasesCount(t, "simple", 1000, expected)
+}
+
+func assertGetVariantCasesFilters(t *testing.T, data string, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewVariantsRepository(db)
+		router := gin.Default()
+		router.GET("variants/germline/cases/filters", server.GetGermlineVariantCasesFilters(repo))
+
+		req, _ := http.NewRequest("GET", "/variants/germline/cases/filters", bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetVariantCasesFilters(t *testing.T) {
+	expected := `{
+		"case_analysis":[
+			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
+			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"},
+			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"}], 
+		"classification": [
+			{"count": 0, "key":"LA6668-3", "label":"pathogenic"}, 
+			{"count": 0, "key":"LA26332-9", "label":"likelyPathogenic"}, 
+			{"count": 0, "key":"LA26333-7", "label":"vus"}, 
+			{"count": 0, "key":"LA26334-5", "label":"likelyBenign"}, 
+			{"count": 0, "key":"LA6675-8", "label":"benign"} 
+		],
+		"performer_lab":[
+			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"},
+			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
+			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 			
+			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
+			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"}]
+	}`
+	assertGetVariantCasesFilters(t, "simple", expected)
 }
 
 func TestMain(m *testing.M) {

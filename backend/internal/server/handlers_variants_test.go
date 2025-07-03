@@ -115,6 +115,26 @@ func (m *MockRepository) GetVariantCasesCount(int) (int64, error) {
 	return int64(4), nil
 }
 
+func (m *MockRepository) GetVariantCasesFilters() (*types.VariantCasesFilters, error) {
+	return &types.VariantCasesFilters{
+		Classification: []types.Aggregation{
+			{Bucket: "LA6668-3", Label: "pathogenic"},
+			{Bucket: "LA26332-9", Label: "likelyPathogenic"},
+			{Bucket: "LA26333-7", Label: "vus"},
+			{Bucket: "LA26334-5", Label: "likelyBenign"},
+			{Bucket: "LA6675-8", Label: "benign"},
+		},
+		CaseAnalysis: []types.Aggregation{
+			{Bucket: "WGA", Label: "Whole Genome Analysis"},
+			{Bucket: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
+		},
+		PerformerLab: []types.Aggregation{
+			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		},
+	}, nil
+}
+
 func Test_GetVariantHeaderHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -188,12 +208,12 @@ func Test_GetVariantConsequencesHandler(t *testing.T) {
 	]`, w.Body.String())
 }
 
-func Test_GetVariantInterpretedCasesHandler(t *testing.T) {
+func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/variants/:locus_id/cases/interpreted", GetVariantInterpretedCases(repo))
+	router.POST("/variants/germline/:locus_id/cases/interpreted", GetGermlineVariantInterpretedCases(repo))
 	body := `{}`
-	req, _ := http.NewRequest("POST", "/variants/1000/cases/interpreted", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/variants/germline/1000/cases/interpreted", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -248,12 +268,12 @@ func Test_GetVariantInterpretedCasesHandler(t *testing.T) {
 	}`, w.Body.String())
 }
 
-func Test_GetExpendedVariantInterpretedCaseHandler(t *testing.T) {
+func Test_GetExpendedGermlineVariantInterpretedCaseHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/cases/interpreted/:seq_id/:transcript_id", GetExpendedVariantInterpretedCase(repo))
+	router.GET("/variants/germline/:locus_id/cases/interpreted/:seq_id/:transcript_id", GetExpendedGermlineVariantInterpretedCase(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/1000/cases/interpreted/1/T002", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/cases/interpreted/1/T002", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -270,12 +290,12 @@ func Test_GetExpendedVariantInterpretedCaseHandler(t *testing.T) {
 	}`, w.Body.String())
 }
 
-func Test_GetVariantUninterpretedCasesHandler(t *testing.T) {
+func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/variants/:locus_id/cases/uninterpreted", GetVariantUninterpretedCases(repo))
+	router.POST("/variants/germline/:locus_id/cases/uninterpreted", GetGermlineVariantUninterpretedCases(repo))
 	body := `{}`
-	req, _ := http.NewRequest("POST", "/variants/1000/cases/uninterpreted", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/variants/germline/1000/cases/uninterpreted", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -324,15 +344,44 @@ func Test_GetVariantUninterpretedCasesHandler(t *testing.T) {
 	}`, w.Body.String())
 }
 
-func Test_GetVariantCasesCountHandler(t *testing.T) {
+func Test_GetGermlineVariantCasesCountHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/cases/count", GetVariantCasesCount(repo))
+	router.GET("/variants/germline/:locus_id/cases/count", GetGermlineVariantCasesCount(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/1000/cases/count", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/cases/count", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"count":4}`, w.Body.String())
+}
+
+func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/germline/cases/filters", GetGermlineVariantCasesFilters(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/germline/cases/filters", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"case_analysis":[
+			{"count": 0, "key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"count": 0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
+		],
+		"classification": [
+			{"count": 0, "key":"LA6668-3", "label":"pathogenic"}, 
+			{"count": 0, "key":"LA26332-9", "label":"likelyPathogenic"}, 
+			{"count": 0, "key":"LA26333-7", "label":"vus"}, 
+			{"count": 0, "key":"LA26334-5", "label":"likelyBenign"}, 
+			{"count": 0, "key":"LA6675-8", "label":"benign"} 
+		],
+		"performer_lab":[
+			{"count": 0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"count": 0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+		]
+	}`, w.Body.String())
 }
