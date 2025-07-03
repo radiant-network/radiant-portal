@@ -46,6 +46,30 @@ gap: var(--spacing-2, 8px);
 
 - The global stylesheet is `@/themes/tailwind.base.css`.
 
+### Radiant Custom Colors
+
+We have a list of custom colors. The list is the following:
+
+```css
+amber, red, orange, yellow, lime, green, cyan, blue, violet, fuchsia and neutral.
+```
+
+\*Note: `neutral` is defined in the `themes/%portal%/theme.css` file since its portal specific.
+
+These color variables will be defined in Figma as `--badge-[color]` and `--badge-[color]-foreground` due to limitation. The term badge is only the name we used in figma to defined these variables but it not related only to badge. For example, you will see something like this in Figma for the Alert component:
+
+```css
+background: var(--badge-red);
+```
+
+In the frontend it means you need to use the variable `--red` or in this case `bg-red` as the className.
+
+\*IMPORTANT: in the frontend `--red` is the base color without any opacity change, but in Figma, `--badge-red` might have an opacity. DONT change the value of the variable `--red`. Instead add the opacity using tailwind modifiers like this:
+
+```html
+<div className="bg-red/20" />
+```
+
 ### Adding New CSS Variables
 
 - **Colors**: Use oklch values (ask Lucas if unsure).
@@ -62,7 +86,7 @@ gap: var(--spacing-2, 8px);
    }
    ```
 2. Use in Tailwind:
-   ```tsx
+   ```html
    <div className="bg-custom-color" />
    ```
 

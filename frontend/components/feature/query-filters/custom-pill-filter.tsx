@@ -97,7 +97,7 @@ function CustomPillFilter({
   if (customPills.length === 0) {
     return (
       <div className="flex flex-col gap-3 justify-center">
-        <div className="flex gap-1 justify-center items-center text-slate">
+        <div className="flex gap-1 justify-center items-center text-neutral">
           <ChartColumn size={20} />
           <ChartPie size={20} />
           <ChartLine size={20} />

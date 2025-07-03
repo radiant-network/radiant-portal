@@ -63,8 +63,8 @@ const badgeVariants = tv({
       fuchsia: {
         base: 'bg-fuchsia/20 text-fuchsia-foreground',
       },
-      slate: {
-        base: 'bg-slate/20 text-slate-foreground',
+      neutral: {
+        base: 'bg-neutral/20 text-neutral-foreground',
       },
     },
   },
@@ -141,8 +141,8 @@ const badgeVariants = tv({
     },
     {
       clickable: true,
-      variant: 'slate',
-      className: 'hover:bg-slate/15',
+      variant: 'neutral',
+      className: 'hover:bg-neutral/15',
     },
   ],
   defaultVariants: {

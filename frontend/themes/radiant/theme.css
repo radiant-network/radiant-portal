@@ -23,6 +23,8 @@
   --accent-foreground: var(--color-radiant-950);
   --muted: var(--color-slate-100);
   --muted-foreground: var(--color-slate-500);
+  --neutral: var(--color-slate-400);
+  --neutral-foreground: var(--color-slate-800);
   --card: var(--color-white);
   --card-foreground: var(--color-radiant-950);
   --popover: var(--color-white);
@@ -59,6 +61,8 @@
   --accent-foreground: var(--color-slate-50);
   --muted: var(--color-slate-800);
   --muted-foreground: var(--color-slate-400);
+  --neutral: var(--color-slate-500);
+  --neutral-foreground: var(--color-slate-400);
   --card: var(--color-slate-950);
   --card-foreground: var(--color-slate-50);
   --popover: var(--color-slate-950);

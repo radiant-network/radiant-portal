@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Indicator } from '@/components/base/ui/indicator';
-import { badgeVariants } from './utils';
+import { indicatorVariants } from './utils';
 
 const meta = {
   title: 'Data Display/Indicator',
@@ -16,7 +16,7 @@ export const Variants: Story = {
   args: {},
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map(variant => (
+      {indicatorVariants.map(variant => (
         <Indicator variant={variant} {...args} />
       ))}
     </div>
@@ -29,7 +29,7 @@ export const WithLabel: Story = {
   },
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map(variant => (
+      {indicatorVariants.map(variant => (
         <Indicator variant={variant} {...args}>
           <span>Text</span>
         </Indicator>
