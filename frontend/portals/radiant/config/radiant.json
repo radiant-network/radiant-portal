@@ -140,7 +140,7 @@
               "defaultMax": 100
             }
           },
-          { "key": "gq", "type": "numerical", 
+          { "key": "genotype_quality", "type": "numerical",
             "defaults": { 
               "min": 0, 
               "max": 100, 
