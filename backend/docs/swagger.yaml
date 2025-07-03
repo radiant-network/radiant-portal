@@ -762,11 +762,17 @@ components:
     VariantExpendedInterpretedCase:
       properties:
         classification_criterias:
-          type: string
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         gene_symbol:
           type: string
         inheritances:
-          type: string
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         interpretation:
           type: string
         interpreter_name:
@@ -776,7 +782,10 @@ components:
         patient_sex_code:
           type: string
         pubmed_ids:
-          type: string
+          items:
+            type: string
+          type: array
+          uniqueItems: false
       required:
       - classification_criterias
       - gene_symbol

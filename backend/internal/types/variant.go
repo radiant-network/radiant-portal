@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 /*
 +----------------------+-------------------+----+-----+-------+-----+
 |Field                 |Type               |Null|Key  |Default|Extra|
@@ -83,6 +85,50 @@ type VariantOverview = struct {
 	AaChange              string                   `json:"aa_change,omitempty"`
 	VepImpact             VepImpact                `json:"vep_impact,omitempty" enums:"MODIFIER,LOW,MODERATE,HIGH"`
 } // @name VariantOverview
+
+type VariantInterpretedCase = struct {
+	SeqId                   int       `json:"seq_id" validate:"required"`
+	CaseId                  int       `json:"case_id" validate:"required"`
+	TranscriptId            string    `json:"transcript_id" validate:"required"`
+	InterpretationUpdatedOn time.Time `json:"interpretation_updated_on" validate:"required"`
+	ConditionId             string    `json:"condition_id" validate:"required"`
+	ConditionName           string    `json:"condition_name" validate:"required"`
+	Classification          string    `json:"classification" validate:"required"`
+	Zygosity                string    `json:"zygosity" validate:"required"`
+	PerformerLabCode        string    `json:"performer_lab_code" validate:"required"`
+	PerformerLabName        string    `json:"performer_lab_name" validate:"required"`
+	CaseAnalysisCode        string    `json:"case_analysis_code" validate:"required"`
+	CaseAnalysisName        string    `json:"case_analysis_name" validate:"required"`
+	StatusCode              string    `json:"status_code" validate:"required"`
+} // @name VariantInterpretedCase
+
+type VariantUninterpretedCase = struct {
+	CaseId               int       `json:"case_id" validate:"required"`
+	CreatedOn            time.Time `json:"created_on" validate:"required"`
+	UpdatedOn            time.Time `json:"updated_on" validate:"required"`
+	PrimaryConditionId   string    `json:"primary_condition_id" validate:"required"`
+	PrimaryConditionName string    `json:"primary_condition_name" validate:"required"`
+	Zygosity             string    `json:"zygosity" validate:"required"`
+	PerformerLabCode     string    `json:"performer_lab_code" validate:"required"`
+	PerformerLabName     string    `json:"performer_lab_name" validate:"required"`
+	CaseAnalysisCode     string    `json:"case_analysis_code" validate:"required"`
+	CaseAnalysisName     string    `json:"case_analysis_name" validate:"required"`
+	StatusCode           string    `json:"status_code" validate:"required"`
+} // @name VariantUninterpretedCase
+
+type VariantExpendedInterpretedCase = struct {
+	PatientID                     int               `json:"patient_id" validate:"required"`
+	InterpreterName               string            `json:"interpreter_name" validate:"required"`
+	Interpretation                string            `json:"interpretation" validate:"required"`
+	GeneSymbol                    string            `json:"gene_symbol" validate:"required"`
+	ClassificationCriteriasString string            `json:"-"`
+	ClassificationCriterias       JsonArray[string] `json:"classification_criterias" validate:"required"`
+	InheritancesString            string            `json:"-"`
+	Inheritances                  JsonArray[string] `json:"inheritances" validate:"required"`
+	PatientSexCode                string            `json:"patient_sex_code" validate:"required"`
+	PubmedIDsString               string            `json:"-"`
+	PubmedIDs                     JsonArray[string] `json:"pubmed_ids" validate:"required"`
+} // @name VariantExpendedInterpretedCase
 
 var VariantTable = Table{
 	Name:  "germline__snv__variant",

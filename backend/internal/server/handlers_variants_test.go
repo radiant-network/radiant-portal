@@ -102,9 +102,10 @@ func (m *MockRepository) GetVariantExpendedInterpretedCase(int, int, string) (*t
 	return &types.VariantExpendedInterpretedCase{
 		PatientID:               3,
 		GeneSymbol:              "BRAF",
-		ClassificationCriterias: "PM1,PM2",
-		Inheritances:            "autosomal_dominant_de_novo",
+		ClassificationCriterias: types.JsonArray[string]{"PM1", "PM2"},
+		Inheritances:            types.JsonArray[string]{"autosomal_dominant_de_novo"},
 		PatientSexCode:          "male",
+		PubmedIDs:               types.JsonArray[string]{},
 	}, nil
 }
 
@@ -249,14 +250,14 @@ func Test_GetExpendedVariantInterpretedCaseHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"classification_criterias":"PM1,PM2",
+		"classification_criterias":["PM1","PM2"],
 		"gene_symbol":"BRAF",
-		"inheritances":"autosomal_dominant_de_novo",
+		"inheritances":["autosomal_dominant_de_novo"],
 		"interpretation":"",
 		"interpreter_name":"", 
 		"patient_id":3, 
 		"patient_sex_code":"male", 
-		"pubmed_ids":""
+		"pubmed_ids":[]
 	}`, w.Body.String())
 }
 

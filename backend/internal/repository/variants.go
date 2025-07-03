@@ -187,7 +187,7 @@ func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqI
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = c.proband_id")
 	tx = tx.Where("i.locus_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusIdAsString, SeqIdAsString, transcriptId)
-	tx = tx.Select("c.proband_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias, i.transmission_modes as inheritances, i.pubmed as pubmed_ids, p.sex_code as patient_sex_code")
+	tx = tx.Select("c.proband_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias_string, i.transmission_modes as inheritances_string, i.pubmed as pubmed_ids_string, p.sex_code as patient_sex_code")
 
 	var variantExpendedInterpretedCase VariantExpendedInterpretedCase
 	if err := tx.Find(&variantExpendedInterpretedCase).Error; err != nil {
@@ -197,6 +197,10 @@ func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqI
 			return nil, nil
 		}
 	}
+
+	variantExpendedInterpretedCase.ClassificationCriterias = split(variantExpendedInterpretedCase.ClassificationCriteriasString)
+	variantExpendedInterpretedCase.Inheritances = split(variantExpendedInterpretedCase.InheritancesString)
+	variantExpendedInterpretedCase.PubmedIDs = split(variantExpendedInterpretedCase.PubmedIDsString)
 
 	return &variantExpendedInterpretedCase, nil
 }

@@ -799,14 +799,14 @@ func assertGetExpendedVariantInterpretedCase(t *testing.T, data string, locusId 
 
 func Test_GetExpendedVariantInterpretedCase(t *testing.T) {
 	expected := `{
-		"classification_criterias":"PM1,PM2",
+		"classification_criterias":["PM1","PM2"],
 		"gene_symbol":"BRAF",
-		"inheritances":"autosomal_dominant_de_novo",
+		"inheritances":["autosomal_dominant_de_novo"],
 		"interpretation":"",
 		"interpreter_name":"", 
 		"patient_id":3, 
 		"patient_sex_code":"male", 
-		"pubmed_ids":""
+		"pubmed_ids":[]
 	}`
 	assertGetExpendedVariantInterpretedCase(t, "simple", 1000, 1, "T002", expected)
 }
