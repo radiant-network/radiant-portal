@@ -17,6 +17,7 @@ type VariantConsequence = types.VariantConsequence
 type VariantInterpretedCase = types.VariantInterpretedCase
 type VariantUninterpretedCase = types.VariantUninterpretedCase
 type VariantExpendedInterpretedCase = types.VariantExpendedInterpretedCase
+type VariantCasesFilters = types.VariantCasesFilters
 
 type VariantsRepository struct {
 	db *gorm.DB
@@ -30,6 +31,7 @@ type VariantsDAO interface {
 	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error)
 	GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error)
 	GetVariantCasesCount(locusId int) (int64, error)
+	GetVariantCasesFilters() (*VariantCasesFilters, error)
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
@@ -238,4 +240,35 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (int64, error) {
 		return 0, fmt.Errorf("error counting variant cases: %w", err)
 	}
 	return count, nil
+}
+
+func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, error) {
+	var caseAnalysis []Aggregation
+	var performerLab []Aggregation
+
+	txCaseAnalysis := r.db.Table(fmt.Sprintf("%s %s", types.CaseAnalysisTable.Name, types.CaseAnalysisTable.Alias))
+	txCaseAnalysis = txCaseAnalysis.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.CaseAnalysisTable.Alias, types.CaseAnalysisTable.Alias))
+	if err := txCaseAnalysis.Find(&caseAnalysis).Error; err != nil {
+		return nil, fmt.Errorf("error fetching case_analysis: %w", err)
+	}
+
+	txPerformerLab := r.db.Table(fmt.Sprintf("%s %s", types.PerformerLabTable.Name, types.PerformerLabTable.Alias))
+	txPerformerLab = txPerformerLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.PerformerLabTable.Alias, types.PerformerLabTable.Alias))
+	if err := txPerformerLab.Find(&performerLab).Error; err != nil {
+		return nil, fmt.Errorf("error fetching performer lab: %w", err)
+	}
+
+	var classification = []Aggregation{
+		{Bucket: "LA6668-3", Label: "pathogenic"},
+		{Bucket: "LA26332-9", Label: "likelyPathogenic"},
+		{Bucket: "LA26333-7", Label: "vus"},
+		{Bucket: "LA26334-5", Label: "likelyBenign"},
+		{Bucket: "LA6675-8", Label: "benign"},
+	}
+
+	return &VariantCasesFilters{
+		Classification: classification,
+		CaseAnalysis:   caseAnalysis,
+		PerformerLab:   performerLab,
+	}, nil
 }

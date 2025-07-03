@@ -734,6 +734,28 @@ components:
         user_id:
           type: string
       type: object
+    VariantCasesFilters:
+      properties:
+        case_analysis:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        classification:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        performer_lab:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+      required:
+      - case_analysis
+      - classification
+      - performer_lab
+      type: object
     VariantConsequence:
       properties:
         biotype:
@@ -1872,10 +1894,10 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
-  /variants/{locus_id}/cases/count:
+  /variants/germline/{locus_id}/cases/count:
     get:
       description: Retrieve cases count for a given locus id
-      operationId: getVariantCasesCount
+      operationId: getGermlineVariantCasesCount
       parameters:
       - description: Locus ID
         in: path
@@ -1904,13 +1926,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get cases count for a given locus
+      summary: Get germline cases count for a given locus
       tags:
       - variant
-  /variants/{locus_id}/cases/interpreted:
+  /variants/germline/{locus_id}/cases/interpreted:
     post:
-      description: Retrieve Variant interpreted cases for a given locus
-      operationId: getVariantInterpretedCases
+      description: Retrieve Germline Variant interpreted cases for a given locus
+      operationId: getGermlineVariantInterpretedCases
       parameters:
       - description: Locus ID
         in: path
@@ -1946,14 +1968,14 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get list of interpreted Cases for a variant
+      summary: Get list of interpreted Cases for a germline variant
       tags:
       - variant
-  /variants/{locus_id}/cases/interpreted/{seq_id}/{transcript_id}:
+  /variants/germline/{locus_id}/cases/interpreted/{seq_id}/{transcript_id}:
     get:
-      description: Retrieve expended interpreted case for a given locus, sequencing
-        and transcript
-      operationId: getExpendedVariantInterpretedCase
+      description: Retrieve germline expended interpreted case for a given locus,
+        sequencing and transcript
+      operationId: getExpendedGermlineVariantInterpretedCase
       parameters:
       - description: Locus ID
         in: path
@@ -1994,13 +2016,14 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get expended interpreted case for a given locus, sequencing and transcript
+      summary: Get expended germline interpreted case for a given locus, sequencing
+        and transcript
       tags:
       - variant
-  /variants/{locus_id}/cases/uninterpreted:
+  /variants/germline/{locus_id}/cases/uninterpreted:
     post:
-      description: Retrieve Variant uninterpreted cases for a given locus
-      operationId: postVariantUninterpretedCases
+      description: Retrieve Germline Variant uninterpreted cases for a given locus
+      operationId: postGermlineVariantUninterpretedCases
       parameters:
       - description: Locus ID
         in: path
@@ -2036,7 +2059,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get list of uninterpreted Cases for a variant
+      summary: Get list of uninterpreted Cases for a germline variant
       tags:
       - variant
   /variants/germline/{locus_id}/consequences:
@@ -2144,6 +2167,34 @@ paths:
       security:
       - bearerauth: []
       summary: Get a germline VariantOverview
+      tags:
+      - variant
+  /variants/germline/cases/filters:
+    get:
+      description: Retrieve cases filters for germline variant entity
+      operationId: getGermlineVariantCasesFilters
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantCasesFilters'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get cases filters for germline variant entity
       tags:
       - variant
 servers:

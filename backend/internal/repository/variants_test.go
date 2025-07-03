@@ -212,3 +212,14 @@ func Test_GetVariantCasesCount(t *testing.T) {
 		assert.Equal(t, int64(4), count)
 	})
 }
+
+func Test_GetVariantCasesFilters(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		filters, err := repo.GetVariantCasesFilters()
+		assert.NoError(t, err)
+		assert.Equal(t, 5, len((*filters).Classification))
+		assert.Equal(t, 4, len((*filters).CaseAnalysis))
+		assert.Equal(t, 6, len((*filters).PerformerLab))
+	})
+}

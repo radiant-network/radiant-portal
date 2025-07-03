@@ -130,6 +130,12 @@ type VariantExpendedInterpretedCase = struct {
 	PubmedIDs                     JsonArray[string] `json:"pubmed_ids" validate:"required"`
 } // @name VariantExpendedInterpretedCase
 
+type VariantCasesFilters = struct {
+	Classification []Aggregation `json:"classification" validate:"required"`
+	CaseAnalysis   []Aggregation `json:"case_analysis" validate:"required"`
+	PerformerLab   []Aggregation `json:"performer_lab" validate:"required"`
+} // @name VariantCasesFilters
+
 var VariantTable = Table{
 	Name:  "germline__snv__variant",
 	Alias: "v",
