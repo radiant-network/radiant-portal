@@ -276,7 +276,7 @@
         "ad_alt": "ALT Allele Depth",
         "ad_total": "Total Depth ALT + REF",
         "ad_ration": "Allelic Ratio ALT",
-        "gq": "Genotype Quality",
+        "genotype_quality": "Genotype Quality",
         "project_code": "Project",
         "performer_lab": "Diagnostic lab",
         "requested_by": "Prescribing Institution"
