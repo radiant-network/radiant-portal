@@ -118,7 +118,9 @@ components:
           type: string
         prescriber:
           type: string
-        primary_condition:
+        primary_condition_id:
+          type: string
+        primary_condition_name:
           type: string
         priority_code:
           type: string

@@ -587,9 +587,9 @@ func Test_CasesList_WithCriteria(t *testing.T) {
 }
 
 func Test_CasesList_WithAdditionalFields(t *testing.T) {
-	expected := `[{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_analysis_type_code":"germline", "case_id":8, "created_on":"2021-09-12T13:08:00Z", "managing_organization_code":"CHUSJ", "mrn":"MRN-283794", "primary_condition":"MONDO:0700092", "priority_code":"routine", "project_code":"N1", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"on-hold", "updated_on":"2021-09-12T13:08:00Z"}]`
+	expected := `[{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_analysis_type_code":"germline", "case_id":8, "created_on":"2021-09-12T13:08:00Z", "managing_organization_code":"CHUSJ", "mrn":"MRN-283794", "primary_condition_id":"MONDO:0700092", "primary_condition_name":"neurodevelopmental disorder", "priority_code":"routine", "project_code":"N1", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"on-hold", "updated_on":"2021-09-12T13:08:00Z"}]`
 	body := `{
-			"additional_fields":["primary_condition", "managing_organization_code"],
+			"additional_fields":["primary_condition_id", "primary_condition_name", "managing_organization_code"],
 			"search_criteria":[{"field": "status_code", "value": ["on-hold"]}]
 		}`
 	assertCasesList(t, "simple", body, expected)

@@ -262,7 +262,13 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'primary_condition'?: string;
+    'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'primary_condition_name'?: string;
     /**
      * 
      * @type {string}

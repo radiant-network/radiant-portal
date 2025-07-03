@@ -141,6 +141,24 @@ var VariantTable = Table{
 	Alias: "v",
 }
 
+var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField)
+var VariantUninterpretedCasesFields = append(CasesFields, ConditionTermField)
+var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
+
+var VariantInterpretedCasesQueryConfig = QueryConfig{
+	AllFields:     VariantInterpretedCasesFields,
+	DefaultFields: []Field{},
+	DefaultSort:   VariantInterpretedCasesDefaultSort,
+	IdField:       CaseIdField,
+}
+
+var VariantUninterpretedCasesQueryConfig = QueryConfig{
+	AllFields:     VariantUninterpretedCasesFields,
+	DefaultFields: []Field{},
+	DefaultSort:   CasesDefaultSort,
+	IdField:       CaseIdField,
+}
+
 var ChromosomeField = Field{
 	Name:            "chromosome",
 	CanBeSelected:   true,

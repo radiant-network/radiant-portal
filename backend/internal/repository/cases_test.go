@@ -35,6 +35,8 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
 		assert.Equal(t, "germline", (*cases)[0].CaseAnalysisTypeCode)
+		assert.Equal(t, "MONDO:0700092", (*cases)[0].PrimaryConditionID)
+		assert.Equal(t, "neurodevelopmental disorder", (*cases)[0].PrimaryConditionName)
 	})
 }
 

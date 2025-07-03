@@ -198,6 +198,10 @@ func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 		if userQuery.HasFieldFromTables(types.PerformerLabTable) {
 			tx = joinPerformerLab(tx)
 		}
+
+		if userQuery.HasFieldFromTables(types.MondoTable) {
+			tx = joinMondoTerm(tx)
+		}
 	}
 	return tx, nil
 }
@@ -227,4 +231,8 @@ func joinWithProject(tx *gorm.DB) *gorm.DB {
 
 func joinPerformerLab(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.performer_lab_id=%s.id", types.PerformerLabTable.Name, types.PerformerLabTable.Alias, types.CaseTable.Alias, types.PerformerLabTable.Alias))
+}
+
+func joinMondoTerm(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.primary_condition=%s.id", types.MondoTable.Name, types.MondoTable.Alias, types.CaseTable.Alias, types.MondoTable.Alias))
 }
