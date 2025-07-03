@@ -48,8 +48,9 @@ func Test_GetVariantInterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *te
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
 		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
-		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		interpretedCases, count, err := repo.GetVariantInterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(3), *count)
 		assert.Equal(t, 3, len(*interpretedCases))
 		assert.Equal(t, "LA6675-8", (*interpretedCases)[0].Classification)
 		assert.Equal(t, "LA26332-9", (*interpretedCases)[1].Classification)
@@ -62,8 +63,9 @@ func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_DefaultSort(t *te
 		repo := NewVariantsRepository(db)
 		pagination := types.Pagination{Limit: 2}
 		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, nil)
-		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		interpretedCases, count, err := repo.GetVariantInterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(3), *count)
 		assert.Equal(t, 2, len(*interpretedCases))
 		assert.Equal(t, "LA6675-8", (*interpretedCases)[0].Classification)
 		assert.Equal(t, "LA26332-9", (*interpretedCases)[1].Classification)
@@ -76,8 +78,9 @@ func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_CustomSort(t *tes
 		pagination := types.Pagination{Limit: 2}
 		sort := types.SortBody{Field: types.ConditionIdField.Alias, Order: "asc"}
 		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, []types.SortBody{sort})
-		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		interpretedCases, count, err := repo.GetVariantInterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(3), *count)
 		assert.Equal(t, 2, len(*interpretedCases))
 		assert.Equal(t, "MONDO:0000001", (*interpretedCases)[0].ConditionId)
 		assert.Equal(t, "MONDO:0000001", (*interpretedCases)[1].ConditionId)
@@ -92,8 +95,9 @@ func Test_GetVariantInterpretedCases_WithCriteria_NoPagination_DefaultSort(t *te
 			{FieldName: types.GermlineInterpretationClassificationField.Name, Value: []interface{}{"LA26332-9"}},
 		}
 		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
-		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		interpretedCases, count, err := repo.GetVariantInterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
 		assert.Equal(t, 1, len(*interpretedCases))
 		assert.Equal(t, "MONDO:0000001", (*interpretedCases)[0].ConditionId)
 		assert.Equal(t, "LA26332-9", (*interpretedCases)[0].Classification)
@@ -107,8 +111,9 @@ func Test_GetVariantInterpretedCases_NoResult(t *testing.T) {
 			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"not found"}, Operator: "contains"},
 		}
 		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
-		interpretedCases, err := repo.GetVariantInterpretedCases(1000, query)
+		interpretedCases, count, err := repo.GetVariantInterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
 		assert.Equal(t, 0, len(*interpretedCases))
 	})
 }
@@ -129,8 +134,9 @@ func Test_GetVariantUninterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
-		uninterpretedCases, err := repo.GetVariantUninterpretedCases(1000, query)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(3), *count)
 		assert.Equal(t, 3, len(*uninterpretedCases))
 		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
@@ -143,8 +149,9 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_DefaultSort(t *
 		repo := NewVariantsRepository(db)
 		pagination := types.Pagination{Limit: 2}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, nil)
-		uninterpretedCases, err := repo.GetVariantUninterpretedCases(1000, query)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(3), *count)
 		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
@@ -157,8 +164,9 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_CustomSort(t *t
 		pagination := types.Pagination{Limit: 2}
 		sort := types.SortBody{Field: types.CaseStatusCodeField.Name, Order: "asc"}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, []types.SortBody{sort})
-		uninterpretedCases, err := repo.GetVariantUninterpretedCases(1000, query)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(3), *count)
 		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 5, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 3, (*uninterpretedCases)[1].CaseId)
@@ -173,8 +181,9 @@ func Test_GetVariantUninterpretedCases_WithCriteria_NoPagination_DefaultSort(t *
 			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"disorder"}, Operator: "contains"},
 		}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
-		uninterpretedCases, err := repo.GetVariantUninterpretedCases(1000, query)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(2), *count)
 		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
@@ -188,8 +197,9 @@ func Test_GetVariantUninterpretedCases_NoResult(t *testing.T) {
 			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"not found"}, Operator: "contains"},
 		}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
-		uninterpretedCases, err := repo.GetVariantUninterpretedCases(2000, query)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(2000, query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
 		assert.Equal(t, 0, len(*uninterpretedCases))
 	})
 }

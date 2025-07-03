@@ -26,8 +26,8 @@ type VariantsDAO interface {
 	GetVariantHeader(locusId int) (*VariantHeader, error)
 	GetVariantOverview(locusId int) (*VariantOverview, error)
 	GetVariantConsequences(locusId int) (*[]VariantConsequence, error)
-	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, error)
-	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, error)
+	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error)
+	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error)
 	GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error)
 	GetVariantCasesCount(locusId int) (int64, error)
 }
@@ -114,7 +114,9 @@ func (r *VariantsRepository) GetVariantConsequences(locusId int) (*[]VariantCons
 	return &variantConsequences, nil
 }
 
-func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, error) {
+func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error) {
+	var count int64
+
 	tx := r.db.Table("`radiant_jdbc`.`public`.`interpretation_germline` ig")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON ig.sequencing_id = o.seq_id and ig.locus_id = o.locus_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
@@ -122,30 +124,41 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = ig.condition")
+
 	tx = tx.Where("o.locus_id = ?", locusId)
-	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, ig.classification, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
-
-	utils.AddLimitAndSort(tx, userQuery)
-
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 	}
 
-	var variantInterpretedCases []VariantInterpretedCase
-	if err := tx.Find(&variantInterpretedCases).Error; err != nil {
+	if err := tx.Count(&count).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error while fetching variant interpreted cases: %w", err)
+			return nil, nil, fmt.Errorf("error while counting variant interpreted cases: %w", err)
 		} else {
-			return nil, nil
+			return nil, nil, nil
 		}
 	}
 
-	return &variantInterpretedCases, nil
+	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, ig.classification, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
+
+	utils.AddLimitAndSort(tx, userQuery)
+
+	var variantInterpretedCases []VariantInterpretedCase
+	if err := tx.Find(&variantInterpretedCases).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil, fmt.Errorf("error while fetching variant interpreted cases: %w", err)
+		} else {
+			return nil, nil, nil
+		}
+	}
+
+	return &variantInterpretedCases, &count, nil
 }
 
-func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, error) {
+func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error) {
+	var count int64
 	if userQuery != nil && userQuery.HasFieldFromTables(types.InterpretationGermlineTable) {
-		return &[]VariantUninterpretedCase{}, nil
+		count = 0
+		return &[]VariantUninterpretedCase{}, &count, nil
 	}
 
 	locusIdString := fmt.Sprintf("%d", locusId)
@@ -158,24 +171,33 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
 	tx = tx.Where("o.locus_id = ? AND s.id NOT IN (?)", locusId, txInterpreted)
-	tx = tx.Select("distinct c.id as case_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, mondo.name as primary_condition_name, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
-
-	utils.AddLimitAndSort(tx, userQuery)
 
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 	}
 
-	var variantUninterpretedCases []VariantUninterpretedCase
-	if err := tx.Find(&variantUninterpretedCases).Error; err != nil {
+	if err := tx.Distinct("c.id").Count(&count).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error while fetching variant uninterpreted cases: %w", err)
+			return nil, nil, fmt.Errorf("error while counting variant uninterpreted cases: %w", err)
 		} else {
-			return nil, nil
+			return nil, nil, nil
 		}
 	}
 
-	return &variantUninterpretedCases, nil
+	tx = tx.Select("c.id as case_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, mondo.name as primary_condition_name, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
+
+	utils.AddLimitAndSort(tx, userQuery)
+
+	var variantUninterpretedCases []VariantUninterpretedCase
+	if err := tx.Find(&variantUninterpretedCases).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil, fmt.Errorf("error while fetching variant uninterpreted cases: %w", err)
+		} else {
+			return nil, nil, nil
+		}
+	}
+
+	return &variantUninterpretedCases, &count, nil
 }
 
 func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error) {

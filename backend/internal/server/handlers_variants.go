@@ -114,7 +114,7 @@ func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc
 // @Param			message	body		types.ListBodyWithCriteria	true	"Filters Body"
 // @Accept json
 // @Produce json
-// @Success 200 {array} types.VariantInterpretedCase
+// @Success 200 {object} types.VariantInterpretedCasesSearchResponse
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/{locus_id}/cases/interpreted [post]
@@ -141,7 +141,7 @@ func GetVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		cases, err := repo.GetVariantInterpretedCases(locusID, query)
+		cases, count, err := repo.GetVariantInterpretedCases(locusID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -150,7 +150,8 @@ func GetVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 			HandleNotFoundError(c, "variant interpreted cases")
 			return
 		}
-		c.JSON(http.StatusOK, cases)
+		searchResponse := types.SearchResponse[types.VariantInterpretedCase]{List: *cases, Count: *count}
+		c.JSON(http.StatusOK, searchResponse)
 	}
 }
 
@@ -164,7 +165,7 @@ func GetVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 // @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
 // @Accept json
 // @Produce json
-// @Success 200 {array} types.VariantUninterpretedCase
+// @Success 200 {object} types.VariantUninterpretedCasesSearchResponse
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/{locus_id}/cases/uninterpreted [post]
@@ -191,7 +192,7 @@ func GetVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		cases, err := repo.GetVariantUninterpretedCases(locusID, query)
+		cases, count, err := repo.GetVariantUninterpretedCases(locusID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -200,7 +201,8 @@ func GetVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 			HandleNotFoundError(c, "variant uninterpreted cases")
 			return
 		}
-		c.JSON(http.StatusOK, cases)
+		searchResponse := types.SearchResponse[types.VariantUninterpretedCase]{List: *cases, Count: *count}
+		c.JSON(http.StatusOK, searchResponse)
 	}
 }
 

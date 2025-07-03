@@ -727,23 +727,25 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 	body := `{
 			"search_criteria":[{"field": "condition_term", "value": ["vessel"], "operator": "contains"}]
 		}`
-	expected := `[
-		{
-			"case_analysis_code":"WGA", 
-			"case_analysis_name":"Whole Genome Analysis", 
-			"case_id":1, 
-			"classification":"LA6675-8", 
-			"condition_id":"MONDO:0000002", 
-			"condition_name":"blood vessel neoplasm", 
-			"interpretation_updated_on":"2025-06-30T15:51:29Z", 
-			"performer_lab_code":"CQGC", 
-			"performer_lab_name":"Quebec Clinical Genomic Center", 
-			"seq_id":1, 
-			"status_code":"active", 
-			"transcript_id":"T002", 
-			"zygosity":"HET"
-		}
-	]`
+	expected := `{
+		"list":[
+			{
+				"case_analysis_code":"WGA", 
+				"case_analysis_name":"Whole Genome Analysis", 
+				"case_id":1, 
+				"classification":"LA6675-8", 
+				"condition_id":"MONDO:0000002", 
+				"condition_name":"blood vessel neoplasm", 
+				"interpretation_updated_on":"2025-06-30T15:51:29Z", 
+				"performer_lab_code":"CQGC", 
+				"performer_lab_name":"Quebec Clinical Genomic Center", 
+				"seq_id":1, 
+				"status_code":"active", 
+				"transcript_id":"T002", 
+				"zygosity":"HET"
+			}
+		], "count": 1
+	}`
 	assertGetVariantInterpretedCases(t, "simple", 1000, body, expected)
 }
 func assertGetVariantUninterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
@@ -765,21 +767,24 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 	body := `{
 			"search_criteria":[{"field": "status_code", "value": ["active"]}]
 		}`
-	expected := `[
-		{
-			"case_analysis_code":"WGA", 
-			"case_analysis_name":"Whole Genome Analysis", 
-			"case_id":5, 
-			"created_on":"2021-09-12T13:08:00Z", 
-			"performer_lab_code":"CQGC", 
-			"performer_lab_name":"Quebec Clinical Genomic Center", 
-			"primary_condition_id":"MONDO:0700092", 
-			"primary_condition_name":"neurodevelopmental disorder", 
-			"status_code":"active", 
-			"updated_on":"2021-09-12T13:08:00Z",
-			"zygosity":"HOM"
-		}
-	]`
+	expected := `{
+		"list": [
+			{
+				"case_analysis_code":"WGA", 
+				"case_analysis_name":"Whole Genome Analysis", 
+				"case_id":5, 
+				"created_on":"2021-09-12T13:08:00Z", 
+				"performer_lab_code":"CQGC", 
+				"performer_lab_name":"Quebec Clinical Genomic Center", 
+				"primary_condition_id":"MONDO:0700092", 
+				"primary_condition_name":"neurodevelopmental disorder", 
+				"status_code":"active", 
+				"updated_on":"2021-09-12T13:08:00Z",
+				"zygosity":"HOM"
+			}
+		],
+		"count": 1
+	}`
 	assertGetVariantUninterpretedCases(t, "simple", 1000, body, expected)
 }
 

@@ -853,6 +853,19 @@ components:
       - transcript_id
       - zygosity
       type: object
+    VariantInterpretedCasesSearchResponse:
+      properties:
+        count:
+          type: integer
+        list:
+          items:
+            $ref: '#/components/schemas/VariantInterpretedCase'
+          type: array
+          uniqueItems: false
+      required:
+      - count
+      - list
+      type: object
     VariantOverview:
       properties:
         aa_change:
@@ -981,6 +994,19 @@ components:
       - status_code
       - updated_on
       - zygosity
+      type: object
+    VariantUninterpretedCasesSearchResponse:
+      properties:
+        count:
+          type: integer
+        list:
+          items:
+            $ref: '#/components/schemas/VariantUninterpretedCase'
+          type: array
+          uniqueItems: false
+      required:
+      - count
+      - list
       type: object
     VepImpact:
       description: TODO
@@ -1904,9 +1930,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/VariantInterpretedCase'
-                type: array
+                $ref: '#/components/schemas/VariantInterpretedCasesSearchResponse'
           description: OK
         "404":
           content:
@@ -1996,9 +2020,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/VariantUninterpretedCase'
-                type: array
+                $ref: '#/components/schemas/VariantUninterpretedCasesSearchResponse'
           description: OK
         "404":
           content:
