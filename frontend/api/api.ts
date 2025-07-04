@@ -1081,6 +1081,12 @@ export interface Occurrence {
      * @type {boolean}
      * @memberof Occurrence
      */
+    'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Occurrence
+     */
     'is_mane_select'?: boolean;
     /**
      * 

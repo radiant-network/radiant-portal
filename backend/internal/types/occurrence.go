@@ -23,6 +23,7 @@ type Occurrence struct {
 	Symbol              string            `json:"symbol,omitempty"`
 	Clinvar             JsonArray[string] `gorm:"type:json" json:"clinvar,omitempty"`
 	IsManeSelect        bool              `json:"is_mane_select"`
+	IsManePlus          bool              `json:"is_mane_plus"`
 	IsCanonical         bool              `json:"is_canonical"`
 	AaChange            string            `json:"aa_change,omitempty"`
 	RsNumber            string            `json:"rsnumber,omitempty"`
@@ -187,6 +188,7 @@ var OccurrencesFields = []Field{
 	PickedConsequencesField,
 	PickedSymbolField,
 	PickedIsManeSelectField,
+	PickedIsManePlusField,
 	PickedIsCanonicalField,
 	PickedOmimInheritanceCodeField,
 	GnomadV3AfField,
@@ -240,6 +242,7 @@ var OccurrencesDefaultFields = []Field{
 	PickedAaChangeField,
 	ClinvarField,
 	PickedIsManeSelectField,
+	PickedIsManePlusField,
 	PickedVepImpactField,
 	PickedSymbolField,
 	ChromosomeField,
