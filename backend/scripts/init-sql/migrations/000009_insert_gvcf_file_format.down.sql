@@ -1,0 +1,1 @@
+delete from file_format where code='gvcf';
