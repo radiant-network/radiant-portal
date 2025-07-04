@@ -185,7 +185,7 @@ function getColumnPinningExtraCN(column: Column<any>): string {
   const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
 
   return cn({
-    'sticky z-10 bg-background': isPinned,
+    'sticky z-10 bg-background group-data-[state=selected]:bg-table-active': isPinned,
     'border-r': isLastLeftPinnedColumn,
     'border-l': isFirstRightPinnedColumn,
   });
@@ -213,7 +213,7 @@ function getRowPinningExtraCN(row: Row<any>): string {
   const isPinned = row.getIsPinned();
   if (!isPinned) return '';
 
-  return cn({ 'sticky z-20 bg-background bg-muted': isPinned });
+  return cn({ 'sticky z-20 bg-muted': isPinned });
 }
 
 /**
@@ -250,7 +250,7 @@ function getRowFlexRender({
   subComponent?: SubComponentProps<any>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -259,6 +259,7 @@ function getRowFlexRender({
           style={{
             ...getRowPinningExtraStyles(row),
           }}
+          data-state={row.getIsSelected() && 'selected'}
         >
           {row.getVisibleCells().map(cell => (
             <TableCell
@@ -621,9 +622,9 @@ function TranstackTable<T>({
                       }}
                     >
                       <>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between gap-1">
                           {/* Header rendering */}
-                          <div className="flex-1">
+                          <div className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
                             {flexRender(header.column.columnDef.header, header.getContext())}
                           </div>
 

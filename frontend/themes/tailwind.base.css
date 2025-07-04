@@ -109,6 +109,10 @@
   --color-indicator-blue: var(--color-blue-500);
   --color-indicator-fuchsia: var(--color-fuchsia-600);
   --color-indicator-grey: var(--color-slate-300);
+
+  /* Table Colors */
+  --color-table-accent: var(--table-accent);
+  --color-table-active: var(--table-active);
 }
 
 @layer theme {

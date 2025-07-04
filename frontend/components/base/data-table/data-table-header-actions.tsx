@@ -20,22 +20,22 @@ const PIN_COLUMN_ACTIONS: {
   position: ColumnPinningPosition;
   icon: React.ReactNode;
 }[] = [
-    {
-      key: 'common.table.pin.left',
-      position: 'left',
-      icon: <PinIcon className="rotate-90" />,
-    },
-    {
-      key: 'common.table.pin.right',
-      position: 'right',
-      icon: <PinIcon className="ransform -rotate-90" />,
-    },
-    {
-      key: 'common.table.pin.unpin',
-      position: false,
-      icon: <PinOff />,
-    },
-  ];
+  {
+    key: 'common.table.pin.left',
+    position: 'left',
+    icon: <PinIcon className="rotate-90" />,
+  },
+  {
+    key: 'common.table.pin.right',
+    position: 'right',
+    icon: <PinIcon className="ransform -rotate-90" />,
+  },
+  {
+    key: 'common.table.pin.unpin',
+    position: false,
+    icon: <PinOff />,
+  },
+];
 
 /**
  * Use header.column.getNextSortingOrder() to display the next action on sort
@@ -68,6 +68,7 @@ function getNextSortingOrderHeaderTitle(
 type TableHeaderActionsProps<TData> = {
   header: Header<TData, unknown>;
 };
+
 function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
   const { t } = useI18n();
 
@@ -79,7 +80,11 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
   if (!hasActions) return null;
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div
+      className={cn('hidden items-center gap-0.5 group-hover:flex', {
+        flex: isPinningDropdownActive,
+      })}
+    >
       {/* Pin/Unpin column */}
       {header.column.getCanPin() && (
         <DropdownMenu onOpenChange={open => setIsPinningDropdownActive(open)}>
@@ -117,14 +122,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
       {header.column.getCanSort() && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              iconOnly
-              className={cn('size-6', {
-                'opacity-0 group-hover:opacity-100': !header.column.getIsSorted(),
-              })}
-              onClick={header.column.getToggleSortingHandler()}
-            >
+            <Button variant="ghost" iconOnly className="size-6" onClick={header.column.getToggleSortingHandler()}>
               {{
                 asc: <ArrowDown size={16} />,
                 desc: <ArrowUp size={16} />,

@@ -21,9 +21,16 @@ import { useI18n } from '@/components/hooks/i18n';
 import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
 
 const config: PortalConfig = {
+  variant_entity: {
+    app_id: 'variant_entity',
+  },
   variant_exploration: {
     app_id: 'variant_exploration_multi_select_filter',
-    aggregations: [],
+    aggregations: [] as any,
+  },
+  admin: {
+    admin_code: 'admin',
+    app_id: 'admin',
   },
   portal: {
     name: '',
@@ -72,19 +79,21 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const VariantOccurrence: Story = {
+  args: {
+    id: 'variant-occurence',
+    defaultColumnSettings: occurenceDefaultsSettings,
+  },
   render: args => {
     const { t } = useI18n();
 
     return (
       <DataTable
         {...args}
-        id="variant-occurence"
         pagination={{
           pageIndex: 0,
           pageSize: 50,
         }}
         data={occurrencesData}
-        defaultColumnSettings={occurenceDefaultsSettings}
         columns={getVariantColumns(t)}
         subComponent={occurrence => <OccurrenceExpend occurrence={occurrence} />}
         enableFullscreen
@@ -95,12 +104,15 @@ export const VariantOccurrence: Story = {
 };
 
 export const Cases: Story = {
+  args: {
+    id: 'case-exploration',
+    defaultColumnSettings: caseDefaultsSettings,
+  },
   render: args => {
     const { t } = useI18n();
 
     return (
       <DataTable
-        id="case-exploration"
         {...args}
         pagination={{
           pageIndex: 0,
@@ -108,7 +120,6 @@ export const Cases: Story = {
         }}
         total={12}
         data={casesData}
-        defaultColumnSettings={caseDefaultsSettings}
         columns={getCaseExplorationColumns(t)}
         tableIndexResultPosition="bottom"
         enableFullscreen

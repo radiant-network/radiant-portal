@@ -60,7 +60,7 @@ function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElem
   return (
     <tr
       className={cn(
-        'transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted [&>td]:border-b [&>th]:border-b',
+        'group transition-colors data-[state=selected]:bg-muted [&>td]:border-b [&>th]:border-b hover:[&:has(td)]:[&>td]:bg-table-accent',
         className,
       )}
       {...props}
@@ -71,13 +71,19 @@ TableRow.displayName = 'TableRow';
 
 function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <th className={cn('relative text-left align-middle font-medium text-muted-foreground', className)} {...props} />
+    <th
+      className={cn(
+        'relative text-left align-middle font-medium text-muted-foreground hover:bg-table-accent',
+        className,
+      )}
+      {...props}
+    />
   );
 }
 TableHead.displayName = 'TableHead';
 
 function TableCell({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn('align-middle', className)} {...props} />;
+  return <td className={cn('align-middle transition-colors', className)} {...props} />;
 }
 TableCell.displayName = 'TableCell';
 
