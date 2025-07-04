@@ -9,6 +9,7 @@ import InputSearch from '@/components/base/data-entry/input-search';
 import { Button } from '@/components/base/ui/button';
 import useSWR from 'swr';
 import { useI18n } from '@/components/hooks/i18n';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 function PubmedFormField() {
   const { t } = useI18n();
@@ -48,7 +49,18 @@ function PubmedFormField() {
 
   return (
     <div className="space-y-2.5">
-      <FormLabel>{t('variant.interpretationForm.generic.pubMedPublication')}</FormLabel>
+      <FormLabel
+        infoCardContent={
+          <div className="leading-6">
+            {t('variant.interpretationForm.generic.pubMedPublication_popover.enter')}{' '}
+            <AnchorLink className='inline-flex' href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" size="sm" external>
+              {t('variant.interpretationForm.generic.pubMedPublication_popover.pmid')}
+            </AnchorLink>
+          </div>
+        }
+      >
+        {t('variant.interpretationForm.generic.pubMedPublication')}
+      </FormLabel>
       <div className="space-y-2">
         {fields.map((field, index) => {
           const citation = getValues().pubmed?.[index].citation;

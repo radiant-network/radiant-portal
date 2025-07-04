@@ -2,36 +2,56 @@ import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
 import { ExpendedOccurrence } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 interface GeneSectionProps {
   data: ExpendedOccurrence;
 }
 
+function formatGnomad(value: number) {
+  return (value < 0.001) ? value.toExponential(2) : value;
+}
+
 export default function GeneSection({ data }: GeneSectionProps) {
   const { t } = useI18n();
-  function getSpliceAi(data: ExpendedOccurrence) {
-    if (data.spliceai_type) {
-      return <span className="text-xs text-muted-foreground">{data.spliceai_ds} {data.spliceai_type.map((v) => <Badge>{v}</Badge>)}</span>;
-    }
-    return '-';
-  }
   return (
     <DetailSection title={t('occurrenceExpend.gene.title')}>
       <DetailItem
         title={t('occurrenceExpend.gene.pli')}
-        value={data.gnomad_pli ? (data.gnomad_pli < 0.001 ? data.gnomad_pli.toExponential(2) : data.gnomad_pli) : '-'}
+        value={
+          data.gnomad_pli ?
+            <AnchorLink href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`} target='_blank' size="sm">
+              {formatGnomad(data.gnomad_pli)}
+            </AnchorLink>
+            : '-'
+        }
       />
       <DetailItem
         title={t('occurrenceExpend.gene.loeuf')}
         value={
-          data.gnomad_loeuf
-            ? data.gnomad_loeuf < 0.001
-              ? data.gnomad_loeuf?.toExponential(2)
-              : data.gnomad_loeuf
+          data.gnomad_loeuf ?
+            <AnchorLink href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`} target='_blank' size="sm">
+              {formatGnomad(data.gnomad_loeuf)}
+            </AnchorLink>
             : '-'
         }
       />
-      <DetailItem title={t('occurrenceExpend.gene.spliceAi')} value={getSpliceAi(data)} />
+      <DetailItem
+        title={t('occurrenceExpend.gene.revel')}
+        value={data.revel_score ?? '-'}
+      />
+      <DetailItem
+        title={t('occurrenceExpend.gene.spliceAi')}
+        value={
+          data.spliceai_type ?
+            <AnchorLink href={`https://spliceailookup.broadinstitute.org/#variant=${data.locus_id}&hg=38`} target='_blank' size="sm">
+              <span className="text-xs text-muted-foreground">
+                {data.spliceai_ds} {data.spliceai_type.map((v) => <Badge>{v}</Badge>)}
+              </span>
+            </AnchorLink>
+            : '-'
+        }
+      />
     </DetailSection>
   );
 }

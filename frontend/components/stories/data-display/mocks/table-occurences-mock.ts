@@ -12,6 +12,8 @@ export default [
     vep_impact: 'MODIFIER',
     symbol: 'ATP1B1',
     is_mane_select: true,
+    is_canonical: true,
+    is_mane_plus: true,
     seq_id: 1,
     locus_id: 1,
   },

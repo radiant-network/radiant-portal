@@ -69,6 +69,7 @@ const InterpretationFormSomatic = forwardRef<
         />
         <FormField
           control={form.control}
+          schema={somaticInterpretationFormSchema}
           name="oncogenicity"
           render={({ field }) => (
             <FormItem>

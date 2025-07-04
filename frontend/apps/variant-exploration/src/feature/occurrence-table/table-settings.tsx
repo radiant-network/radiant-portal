@@ -95,7 +95,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row, {
       id: 'is_mane_select',
       cell: info => (
-        <ManeCell isManeSelect={info.getValue().is_mane_select} isCanonical={info.getValue().is_canonical} />
+        <ManeCell isManePlus={info.getValue().is_mane_plus} isManeSelect={info.getValue().is_mane_select} isCanonical={info.getValue().is_canonical} />
       ),
       header: t('variant.headers.is_mane_select'),
       minSize: 120,

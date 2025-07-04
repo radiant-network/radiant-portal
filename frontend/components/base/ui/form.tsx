@@ -2,11 +2,12 @@ import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
-
 import { cn } from '@/lib/utils';
 import { Label } from '@/base/ui/label';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card';
 import { InfoIcon } from 'lucide-react';
+import z from 'zod';
+import { isFieldRequired } from '@/components/lib/zod';
 
 const Form = FormProvider;
 
@@ -18,17 +19,38 @@ type FormFieldContextValue<
 };
 
 const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue);
+const FormSchemaContext = React.createContext<z.ZodObject<any> | null>(null);
 
+function FormSchemaProvider({
+  schema,
+  children,
+}: {
+  schema: z.ZodObject<any>;
+  children: React.ReactNode;
+}) {
+  return (
+    <FormSchemaContext.Provider value={schema}>
+      {children}
+    </FormSchemaContext.Provider>
+  );
+}
+
+type FormFieldProps<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValues>> =
+  ControllerProps<TFieldValues, TName> & {
+    schema: z.ZodObject<any> | null;
+  };
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   ...props
-}: ControllerProps<TFieldValues, TName>) => {
+}: FormFieldProps<TFieldValues, TName>) => {
   return (
-    <FormFieldContext.Provider value={{ name: props.name }}>
-      <Controller {...props} />
-    </FormFieldContext.Provider>
+    <FormSchemaContext.Provider value={props.schema}>
+      <FormFieldContext.Provider value={{ name: props.name }}>
+        <Controller {...props} />
+      </FormFieldContext.Provider>
+    </FormSchemaContext.Provider>
   );
 };
 
@@ -77,7 +99,7 @@ FormItem.displayName = 'FormItem';
 
 function FormLabel({
   className,
-  colon = true,
+  colon = false,
   infoCardContent,
   children,
   ...props
@@ -86,6 +108,12 @@ function FormLabel({
   infoCardContent?: React.ReactNode;
 }) {
   const { formItemId } = useFormField();
+  const fieldContext = React.useContext(FormFieldContext);
+  const schema = React.useContext(FormSchemaContext);
+  const isRequired =
+    schema && fieldContext?.name
+      ? isFieldRequired(schema, fieldContext.name as string)
+      : false;
 
   return (
     <Label className={cn('flex items-center gap-1', className)} htmlFor={formItemId} {...props}>
@@ -98,7 +126,8 @@ function FormLabel({
           <HoverCardContent>{infoCardContent}</HoverCardContent>
         </HoverCard>
       )}{' '}
-      {colon ? ':' : ''}
+      {isRequired && <span className='text-destructive'>*</span>}
+      {colon && ':'}
     </Label>
   );
 }
@@ -141,4 +170,4 @@ function FormMessage({ className, children, ...props }: React.HTMLAttributes<HTM
 }
 FormMessage.displayName = 'FormMessage';
 
-export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField };
+export { useFormField, FormSchemaProvider, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField };

@@ -3,6 +3,7 @@
     "date": "yyyy-MM-dd",
     "unspecified": "Unspecified",
     "noDataAvailable": "No data available",
+    "save": "Save",
     "editor": {
       "headings": {
         "normal": "Normal",
@@ -580,7 +581,6 @@
       "deletion": "Deletion",
       "sequence_alteration": "Sequence Alteration"
     },
-    "canonicalTranscript": "Canonical transcript",
     "interpretationForm": {
       "title": "Clinical Interpretation",
       "cancelText": "Cancel",
@@ -603,6 +603,10 @@
       "generic": {
         "interpretation": "Interpretation",
         "pubMedPublication": "PubMed Publication",
+        "pubMedPublication_popover": {
+          "enter": "Enter a",
+          "pmid": "PMID"
+        },
         "pubMedIdNotFound": "Invalid or unknown PMID",
         "citation-placeholder": "Ex : 25741868",
         "addCitation": "Add a publication"
@@ -613,6 +617,11 @@
         "condition-popover": "Search for a medical condition in",
         "condition-popover-link": "MONDO ontology",
         "classification": "ACMG/AMP classification",
+        "classification_popover": {
+          "consult": "Consult",
+          "standards_and_guidelines": "standards and guidelines",
+          "variant_interpretation": "for variant interpretation"
+        },
         "classification-options": {
           "pathogenic": "Pathogenic",
           "likelyPathogenic": "Likely Pathogenic",
@@ -701,6 +710,7 @@
       "title": "Gene",
       "pli": "pLI",
       "loeuf": "LOEUF",
+      "revel": "REVEL",
       "spliceAi": "SpliceAI"
     },
     "frequencies": {
@@ -924,5 +934,10 @@
         "organization": "My Organization"
       }
     }
+  },
+  "occurence": {
+    "canonical": "Canonical",
+    "mane_select": "Mane Select",
+    "mane_plus": "Mane Plus"
   }
 }
