@@ -144,6 +144,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
                       <CommandItem
                         className="h-[32px]"
                         key={result.value}
+                        value={`${result.value}-${category}`}
                         onSelect={(value) => {
                           handleAutocompleteSelect(result.type, value);
                         }}
