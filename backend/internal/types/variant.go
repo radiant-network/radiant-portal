@@ -275,6 +275,13 @@ var PickedIsManeSelectField = Field{
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
+var PickedIsManePlusField = Field{
+	Name:          "is_mane_plus",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         VariantTable,
+}
 var PickedIsCanonicalField = Field{
 	Name:          "is_canonical",
 	CanBeSelected: true,

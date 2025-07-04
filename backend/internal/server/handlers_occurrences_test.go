@@ -97,6 +97,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"chromosome": "1",
 		"start": 1,
         "is_canonical":false,
+		"is_mane_plus":false,
 		"is_mane_select":false,
 		"locus_id": "1000",
         "filter": "PASS",
