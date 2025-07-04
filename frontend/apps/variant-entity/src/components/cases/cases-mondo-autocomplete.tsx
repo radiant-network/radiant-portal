@@ -3,17 +3,16 @@ import useSWR from 'swr';
 import { mondoApi } from '@/utils/api';
 import capitalize from 'lodash/capitalize';
 import { ListFilter } from 'lucide-react';
-import { useI18n } from '@/components/hooks/i18n';
 import { debounce } from '@/components/hooks/useDebounce';
 import MondoOptionItemLabel from '@/components/feature/variant/mondo-option-item-label';
 import { AutoComplete, AutoCompleteProps, Option } from '@/components/base/data-entry/auto-complete';
 
 interface CasesMondoAutocompleteProps {
+  placeholder?: string;
   onChange?: AutoCompleteProps<any>['onChange'];
 }
 
-function CasesMondoAutocomplete({ onChange }: CasesMondoAutocompleteProps) {
-  const { t } = useI18n();
+function CasesMondoAutocomplete({ placeholder, onChange }: CasesMondoAutocompleteProps) {
   const [options, setOptions] = useState<Option[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
 
@@ -38,7 +37,7 @@ function CasesMondoAutocomplete({ onChange }: CasesMondoAutocompleteProps) {
 
   return (
     <AutoComplete
-      placeholder={t('variantEntity.cases.filters.searchInputPlaceholder')}
+      placeholder={placeholder}
       onSearch={value => {
         if (value.length >= 3) {
           debouncedSearch(value);

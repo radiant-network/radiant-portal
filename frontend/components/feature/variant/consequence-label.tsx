@@ -5,7 +5,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 
 const consequenceVariant = tv({
   slots: {
-    base: 'flex gap-[6px]',
+    base: 'flex gap-[6px] overflow-hidden',
     icon: 'mt-[5.25px]',
   },
   variants: {
@@ -36,7 +36,7 @@ function ConsequenceLabel({ consequence, vepImpact, size, className, ...props }:
   return (
     <div className={styles.base({ className })} {...props}>
       <ImpactIcon value={vepImpact} className={styles.icon()} />
-      <span>
+      <span className="text-ellipsis overflow-hidden">
         {t(`variant.consequences.${consequence}`, {
           defaultValue: consequence.replace(/_/g, ' '),
         })}

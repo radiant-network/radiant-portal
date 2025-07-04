@@ -836,11 +836,10 @@
       "aminoAcidSubstitution": "Amino acid substitution"
     },
     "cases": {
-      "title": "Cases",
+      "title": "{{count}} Cases",
+      "tab": "Cases",
       "description": "Clinical cases which carry this variant",
-      "filters": {
-        "label": "Conditions and phenotypes",
-        "searchInputPlaceholder": "Search for conditions and phenotypes",
+      "commonFilters": {
         "classifications": {
           "allClassifications": "All Classifications"
         },
@@ -855,8 +854,12 @@
           "leastRecent": "Least recent"
         }
       },
+      "status": {
+        "active": "Active",
+        "completed": "Completed"
+      },
       "interpreted-table": {
-        "title": "Interpreted cases ({{count}})",
+        "title": "Clinical Interpretations ({{count}})",
         "headers": {
           "case": "Case",
           "date": "Date",
@@ -868,10 +871,14 @@
           "institution": "Institution",
           "test": "Test",
           "status": "Status"
+        },
+        "filters": {
+          "label": "Conditions",
+          "searchInputPlaceholder": "Filter MONDO conditions"
         }
       },
       "other-table": {
-        "title": "Other cases ({{count}})",
+        "title": "Non-interpreted Cases ({{count}})",
         "headers": {
           "case": "Case",
           "date": "Date",
@@ -882,6 +889,10 @@
           "institution": "Institution",
           "test": "Test",
           "status": "Status"
+        },
+        "filters": {
+          "label": "Phenotypes",
+          "searchInputPlaceholder": "Filter HPO phenotypes"
         }
       }
     }

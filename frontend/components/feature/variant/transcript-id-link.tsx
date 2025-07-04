@@ -24,7 +24,7 @@ function TranscriptIdLink({
     <div className={cn('flex items-center gap-1', className)} {...props}>
       <a
         href={`https://www.ensembl.org/id/${transcriptId}`}
-        className={cn('hover:underline', linkClassName)}
+        className={cn('hover:underline font-mono', linkClassName)}
         target="_blank"
         rel="noreferrer"
       >

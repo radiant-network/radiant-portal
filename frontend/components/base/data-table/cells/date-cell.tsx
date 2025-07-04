@@ -7,7 +7,7 @@ type DateCellProps = {
 
 function DateCell({ date }: DateCellProps) {
   const { t } = useI18n();
-  return <div className="text-muted-foreground">{formatDate(date, t('common.date'))}</div>;
+  return <div className="text-muted-foreground font-mono text-xs">{formatDate(date, t('common.date'))}</div>;
 }
 
 export default DateCell;
