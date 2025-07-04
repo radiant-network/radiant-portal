@@ -100,6 +100,7 @@ type VariantInterpretedCase = struct {
 	CaseAnalysisCode        string    `json:"case_analysis_code" validate:"required"`
 	CaseAnalysisName        string    `json:"case_analysis_name" validate:"required"`
 	StatusCode              string    `json:"status_code" validate:"required"`
+	PhenotypesUnparsed      string    `json:"-"`
 } // @name VariantInterpretedCase
 
 type VariantUninterpretedCase = struct {
@@ -114,6 +115,7 @@ type VariantUninterpretedCase = struct {
 	CaseAnalysisCode     string    `json:"case_analysis_code" validate:"required"`
 	CaseAnalysisName     string    `json:"case_analysis_name" validate:"required"`
 	StatusCode           string    `json:"status_code" validate:"required"`
+	PhenotypesUnparsed   string    `json:"-"`
 } // @name VariantUninterpretedCase
 
 type VariantExpendedInterpretedCase = struct {

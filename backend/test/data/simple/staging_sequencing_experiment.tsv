@@ -4,3 +4,4 @@ case_id	seq_id	task_id	part	analysis_type	affected_status
 3	7	7	2	germline	affected
 4	10	10	2	germline	affected
 5	13	13	3	germline	not_affected
+7	19	19	4	germline	affected

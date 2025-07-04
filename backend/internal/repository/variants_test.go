@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"github.com/radiant-network/radiant-api/internal/types"
 	"testing"
+
+	"github.com/radiant-network/radiant-api/internal/types"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -136,11 +137,12 @@ func Test_GetVariantUninterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(3), *count)
-		assert.Equal(t, 3, len(*uninterpretedCases))
+		assert.Equal(t, int64(4), *count)
+		assert.Equal(t, 4, len(*uninterpretedCases))
 		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
 		assert.Equal(t, 5, (*uninterpretedCases)[2].CaseId)
+		assert.Equal(t, 7, (*uninterpretedCases)[3].CaseId)
 	})
 }
 
@@ -151,7 +153,7 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_DefaultSort(t *
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(3), *count)
+		assert.Equal(t, int64(4), *count)
 		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
@@ -166,7 +168,7 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_CustomSort(t *t
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, []types.SortBody{sort})
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(3), *count)
+		assert.Equal(t, int64(4), *count)
 		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 5, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 3, (*uninterpretedCases)[1].CaseId)
@@ -209,9 +211,9 @@ func Test_GetVariantCasesCount(t *testing.T) {
 		repo := NewVariantsRepository(db)
 		counts, err := repo.GetVariantCasesCount(1000)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(4), counts.CountTotalCases)
+		assert.Equal(t, int64(5), counts.CountTotalCases)
 		assert.Equal(t, int64(1), counts.CountInterpretedCases)
-		assert.Equal(t, int64(3), counts.CountUninterpretedCases)
+		assert.Equal(t, int64(4), counts.CountUninterpretedCases)
 		assert.Equal(t, int64(3), counts.CountInterpretations)
 	})
 }
