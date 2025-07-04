@@ -141,8 +141,7 @@ func main() {
 	variantsGermlineGroup.GET("/cases/filters", server.GetGermlineVariantCasesFilters(repoVariants))
 
 	casesGroup := r.Group("/cases")
-	casesGroup.POST("/list", server.CasesListHandler(repoCases))
-	casesGroup.POST("/count", server.CasesCountHandler(repoCases))
+	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 	casesGroup.POST("/filters", server.CasesFiltersHandler(repoCases))
 

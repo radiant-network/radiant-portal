@@ -150,20 +150,25 @@ components:
       - status_code
       - updated_on
       type: object
+    CasesSearchResponse:
+      properties:
+        count:
+          type: integer
+        list:
+          items:
+            $ref: '#/components/schemas/CaseResult'
+          type: array
+          uniqueItems: false
+      required:
+      - count
+      - list
+      type: object
     Count:
       description: Count represents count result
       properties:
         count:
           description: Number of results
           type: integer
-      type: object
-    CountBodyWithCriteria:
-      properties:
-        search_criteria:
-          items:
-            $ref: '#/components/schemas/SearchCriterion'
-          type: array
-          uniqueItems: false
       type: object
     CountBodyWithSqon:
       properties:
@@ -1098,41 +1103,6 @@ paths:
       summary: Get AutocompleteResult list of matching prefix
       tags:
       - cases
-  /cases/count:
-    post:
-      description: Counts cases
-      operationId: countCases
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CountBodyWithCriteria'
-        description: Count Body
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Count'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Count cases
-      tags:
-      - cases
   /cases/filters:
     post:
       description: Retrieve CaseFilters cases filters
@@ -1162,10 +1132,10 @@ paths:
       summary: Get CaseFilters cases filters
       tags:
       - cases
-  /cases/list:
+  /cases/search:
     post:
-      description: List cases
-      operationId: listCases
+      description: Search cases
+      operationId: searchCases
       requestBody:
         content:
           application/json:
@@ -1178,9 +1148,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/CaseResult'
-                type: array
+                $ref: '#/components/schemas/CasesSearchResponse'
           description: OK
         "400":
           content:
@@ -1196,7 +1164,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: List cases
+      summary: Search cases
       tags:
       - cases
   /hpo/autocomplete:

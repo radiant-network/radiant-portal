@@ -11,7 +11,8 @@ import (
 	"time"
 )
 
-func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, error) {
+func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
+	var count = int64(1)
 	return &[]types.CaseResult{
 		{
 			CaseID:               1,
@@ -38,12 +39,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 			ManagingOrganizationCode: "CHUSJ",
 			ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine",
 		},
-	}, nil
-}
-
-func (m *MockRepository) CountCases(userQuery types.CountQuery) (*int64, error) {
-	var c = int64(15)
-	return &c, nil
+	}, &count, nil
 }
 
 func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error) {
@@ -89,54 +85,44 @@ func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilte
 	return &result, nil
 }
 
-func Test_CasesListHandler(t *testing.T) {
+func Test_SearchCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/cases/list", CasesListHandler(repo))
+	router.POST("/cases/search", SearchCasesHandler(repo))
 	body := `{
 			"additional_fields":[]
 	}`
-	req, _ := http.NewRequest("POST", "/cases/list", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/cases/search", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `[{
-        "case_analysis_code":"WGA",
-		"case_analysis_name":"Whole Genome Analysis",
-		"case_analysis_type_code":"germline",
-		"case_id":1,
-		"created_on":"2000-01-01T00:00:00Z",
-		"managing_organization_code":"CHUSJ",
-		"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine",
-		"mrn":"MRN-283775",
-		"patient_id":3,
-		"performer_lab_code":"CQGC",
-		"performer_lab_name":"Quebec Clinical Genomic Center",
-		"prescriber":"Felix Laflamme",
-		"primary_condition_id":"MONDO:0700092",
-		"primary_condition_name":"neurodevelopmental disorder",
-		"priority_code":"routine",
-		"project_code":"N1",
-		"request_id":1,
-		"requested_by_code":"CHUSJ",
-		"requested_by_name":"Centre hospitalier universitaire Sainte-Justine",
-		"status_code":"active",
-		"updated_on":"2000-02-02T00:00:00Z"
-    }]`, w.Body.String())
-}
-
-func Test_CasesCountHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.POST("/cases/count", CasesCountHandler(repo))
-
-	req, _ := http.NewRequest("POST", "/cases/count", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"count":15}`, w.Body.String())
+	assert.JSONEq(t, `{
+		"list": [{
+			"case_analysis_code":"WGA",
+			"case_analysis_name":"Whole Genome Analysis",
+			"case_analysis_type_code":"germline",
+			"case_id":1,
+			"created_on":"2000-01-01T00:00:00Z",
+			"managing_organization_code":"CHUSJ",
+			"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine",
+			"mrn":"MRN-283775",
+			"patient_id":3,
+			"performer_lab_code":"CQGC",
+			"performer_lab_name":"Quebec Clinical Genomic Center",
+			"prescriber":"Felix Laflamme",
+			"primary_condition_id":"MONDO:0700092",
+			"primary_condition_name":"neurodevelopmental disorder",
+			"priority_code":"routine",
+			"project_code":"N1",
+			"request_id":1,
+			"requested_by_code":"CHUSJ",
+			"requested_by_name":"Centre hospitalier universitaire Sainte-Justine",
+			"status_code":"active",
+			"updated_on":"2000-02-02T00:00:00Z"
+		}],
+		"count": 1
+	}`, w.Body.String())
 }
 
 func Test_CasesAutocompleteHandler(t *testing.T) {

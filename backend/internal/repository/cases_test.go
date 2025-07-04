@@ -31,9 +31,10 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, nil, nil, nil)
-		cases, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
+		assert.Equal(t, int64(21), *count)
 		assert.Equal(t, "germline", (*cases)[0].CaseAnalysisTypeCode)
 		assert.Equal(t, "MONDO:0700092", (*cases)[0].PrimaryConditionID)
 		assert.Equal(t, "neurodevelopmental disorder", (*cases)[0].PrimaryConditionName)
@@ -50,8 +51,9 @@ func Test_SearchCasesNoResult(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
 		assert.Len(t, *cases, 0)
 	})
 }
@@ -66,51 +68,10 @@ func Test_SearchCases(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
+		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
-	})
-}
-
-func Test_CountCasesNoFilters(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(db)
-		query, err := types.NewCountQueryFromSqon(nil, CasesQueryConfigForTest.AllFields)
-		count, err := repo.CountCases(query)
-		assert.NoError(t, err)
-		assert.Equal(t, *count, int64(21))
-	})
-}
-
-func Test_CountCasesNoResult(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(db)
-		searchCriteria := []types.SearchCriterion{
-			{
-				FieldName: types.RequestPriorityCodeField.GetAlias(),
-				Value:     []interface{}{"stat", "urgent"},
-			},
-		}
-		query, err := types.NewCountQueryFromCriteria(searchCriteria, CasesQueryConfigForTest.AllFields)
-		count, err := repo.CountCases(query)
-		assert.NoError(t, err)
-		assert.Equal(t, *count, int64(0))
-	})
-}
-
-func Test_CountCases(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(db)
-		searchCriteria := []types.SearchCriterion{
-			{
-				FieldName: types.RequestPriorityCodeField.GetAlias(),
-				Value:     []interface{}{"routine"},
-			},
-		}
-		query, err := types.NewCountQueryFromCriteria(searchCriteria, CasesQueryConfigForTest.AllFields)
-		count, err := repo.CountCases(query)
-		assert.NoError(t, err)
-		assert.Equal(t, *count, int64(21))
 	})
 }
 
