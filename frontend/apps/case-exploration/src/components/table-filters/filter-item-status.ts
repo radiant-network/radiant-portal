@@ -1,6 +1,6 @@
 import { Aggregation } from '@/api/api';
 import { FileQuestion, CircleDashed, Pen, Hourglass, RefreshCcw, Check, OctagonX, ListFilter, X } from 'lucide-react';
-import { AggregationWithIcon } from '@/components/base/buttons/filter-button';
+import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 // Status icon mapping function
 function getStatusIcon(statusKey: string) {
@@ -15,7 +15,7 @@ function getStatusIcon(statusKey: string) {
   return iconMap[statusKey.toLowerCase()] || FileQuestion;
 }
 
-export default function filterItemStatus(options: Aggregation[], t: any):  AggregationWithIcon[] {
+export default function filterItemStatus(options: Aggregation[], t: any):  IFilterButtonItem[] {
   const translationKeyPrefix = 'caseExploration.status';
 
   return options.map(option => ({
