@@ -8,20 +8,20 @@ import (
 	"strconv"
 )
 
-// CasesListHandler handles list of cases
-// @Summary List cases
-// @Id listCases
-// @Description List cases
+// SearchCasesHandler handles search of cases
+// @Summary Search cases
+// @Id searchCases
+// @Description Search cases
 // @Tags cases
 // @Security bearerauth
 // @Param			message	body		types.ListBodyWithCriteria	true	"List Body"
 // @Accept json
 // @Produce json
-// @Success 200 {array} types.CaseResult
+// @Success 200 {object} types.CasesSearchResponse
 // @Failure 400 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/list [post]
-func CasesListHandler(repo repository.CasesDAO) gin.HandlerFunc {
+// @Router /cases/search [post]
+func SearchCasesHandler(repo repository.CasesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.ListBodyWithCriteria
@@ -39,53 +39,14 @@ func CasesListHandler(repo repository.CasesDAO) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		cases, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(query)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
 
-		c.JSON(http.StatusOK, cases)
-	}
-}
-
-// CasesCountHandler handles counting cases
-// @Summary Count cases
-// @Id countCases
-// @Description Counts cases
-// @Tags cases
-// @Security bearerauth
-// @Param			message	body		types.CountBodyWithCriteria	true	"Count Body"
-// @Accept json
-// @Produce json
-// @Success 200 {object} types.Count
-// @Failure 400 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Router /cases/count [post]
-func CasesCountHandler(repo repository.CasesDAO) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var (
-			body types.CountBodyWithCriteria
-		)
-
-		// Bind JSON to the struct
-		if err := c.ShouldBindJSON(&body); err != nil {
-			// Return a 400 Bad Request if validation fails
-			HandleValidationError(c, err)
-			return
-		}
-		query, err := types.NewCountQueryFromCriteria(body.SearchCriteria, types.CasesFields)
-		if err != nil {
-			HandleValidationError(c, err)
-			return
-		}
-		count, err := repo.CountCases(query)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		countResponse := types.Count{*count}
-		c.JSON(http.StatusOK, countResponse)
+		searchResponse := types.SearchResponse[types.CaseResult]{List: *cases, Count: *count}
+		c.JSON(http.StatusOK, searchResponse)
 	}
 }
 

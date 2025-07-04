@@ -10,17 +10,21 @@ type PhenotypeConditionLinkCellProps = {
 };
 
 function getBaseUrl(type: PhenotypeType, code: string) {
+  var id = code.split(":")[1]
   switch (type) {
     case PhenotypeType.MONDO:
-      return `${MONDO_URL}_${code}`;
+      return `${MONDO_URL}_${id}`;
     case PhenotypeType.HPO:
-      return `${HPO_URL}_${code}`;
+      return `${HPO_URL}_${id}`;
   }
 }
 
 function PhenotypeConditionLinkCell({ type, code, name }: PhenotypeConditionLinkCellProps) {
   return (
-    <span>{name}(<a href={getBaseUrl(type, code)}>{code}</a>)</span>
+    <span>
+      {name}{' '}
+      (<a className="underline" href={getBaseUrl(type, code)} target="_blank">{code}</a>)
+    </span>
   );
 }
 

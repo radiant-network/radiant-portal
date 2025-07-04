@@ -34,7 +34,8 @@ type CaseResult struct {
 	CaseAnalysisTypeCode     string    `json:"case_analysis_type_code" validate:"required"`
 	CaseAnalysisCode         string    `json:"case_analysis_code" validate:"required"`
 	CaseAnalysisName         string    `json:"case_analysis_name" validate:"required"`
-	PrimaryCondition         string    `json:"primary_condition,omitempty"`
+	PrimaryConditionID       string    `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName     string    `json:"primary_condition_name,omitempty"`
 	RequestedByCode          string    `json:"requested_by_code" validate:"required"`
 	RequestedByName          string    `json:"requested_by_name" validate:"required"`
 	ProjectCode              string    `json:"project_code" validate:"required"`
@@ -71,7 +72,8 @@ var CasesFields = []Field{
 	CaseAnalysisTypeCodeField,
 	CaseAnalysisCodeField,
 	CaseAnalysisNameField,
-	CasePrimaryConditionField,
+	CasePrimaryConditionIdField,
+	CasePrimaryConditionNameField,
 	RequestOrderingOrganizationCodeField,
 	RequestOrderingOrganizationNameField,
 	ProjectCodeField,
@@ -84,8 +86,6 @@ var CasesFields = []Field{
 	PatientManagingOrganizationCodeField,
 	PatientManagingOrganizationNameField,
 }
-
-var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField)
 
 var CasesDefaultFields = []Field{
 	CaseIdField,
@@ -103,25 +103,10 @@ var CasesDefaultFields = []Field{
 }
 
 var CasesDefaultSort = []SortField{{Field: CaseUpdatedOnField, Order: "desc"}}
-var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
 
 var CasesQueryConfig = QueryConfig{
 	AllFields:     CasesFields,
 	DefaultFields: CasesDefaultFields,
-	DefaultSort:   CasesDefaultSort,
-	IdField:       CaseIdField,
-}
-
-var VariantInterpretedCasesQueryConfig = QueryConfig{
-	AllFields:     VariantInterpretedCasesFields,
-	DefaultFields: []Field{},
-	DefaultSort:   VariantInterpretedCasesDefaultSort,
-	IdField:       CaseIdField,
-}
-
-var VariantUninterpretedCasesQueryConfig = QueryConfig{
-	AllFields:     VariantInterpretedCasesFields,
-	DefaultFields: []Field{},
 	DefaultSort:   CasesDefaultSort,
 	IdField:       CaseIdField,
 }
@@ -151,14 +136,6 @@ var CaseStatusCodeField = Field{
 	CanBeSorted:     true,
 	CanBeAggregated: true,
 	Table:           CaseTable,
-}
-
-var CasePrimaryConditionField = Field{
-	Name:          "primary_condition",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         CaseTable,
 }
 
 var CaseCreatedOnField = Field{
@@ -200,6 +177,24 @@ var CasePerformerLabNameField = Field{
 	Alias:         "performer_lab_name",
 	CanBeSelected: true,
 	Table:         PerformerLabTable,
+}
+
+var CasePrimaryConditionIdField = Field{
+	Name:          "id",
+	Alias:         "primary_condition_id",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         MondoTable,
+}
+
+var CasePrimaryConditionNameField = Field{
+	Name:          "name",
+	Alias:         "primary_condition_name",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         MondoTable,
 }
 
 type CaseFilters struct {

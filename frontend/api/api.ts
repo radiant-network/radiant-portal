@@ -262,7 +262,13 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'primary_condition'?: string;
+    'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'primary_condition_name'?: string;
     /**
      * 
      * @type {string}
@@ -307,6 +313,25 @@ export interface CaseResult {
     'updated_on': string;
 }
 /**
+ * 
+ * @export
+ * @interface CasesSearchResponse
+ */
+export interface CasesSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof CasesSearchResponse
+     */
+    'count': number;
+    /**
+     * 
+     * @type {Array<CaseResult>}
+     * @memberof CasesSearchResponse
+     */
+    'list': Array<CaseResult>;
+}
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -318,19 +343,6 @@ export interface Count {
      * @memberof Count
      */
     'count'?: number;
-}
-/**
- * 
- * @export
- * @interface CountBodyWithCriteria
- */
-export interface CountBodyWithCriteria {
-    /**
-     * 
-     * @type {Array<SearchCriterion>}
-     * @memberof CountBodyWithCriteria
-     */
-    'search_criteria'?: Array<SearchCriterion>;
 }
 /**
  * 
@@ -2367,56 +2379,16 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Counts cases
-         * @summary Count cases
-         * @param {CountBodyWithCriteria} countBodyWithCriteria Count Body
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        countCases: async (countBodyWithCriteria: CountBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'countBodyWithCriteria' is not null or undefined
-            assertParamExists('countCases', 'countBodyWithCriteria', countBodyWithCriteria)
-            const localVarPath = `/cases/count`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(countBodyWithCriteria, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * List cases
-         * @summary List cases
+         * Search cases
+         * @summary Search cases
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listCases: async (listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        searchCases: async (listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'listBodyWithCriteria' is not null or undefined
-            assertParamExists('listCases', 'listBodyWithCriteria', listBodyWithCriteria)
-            const localVarPath = `/cases/list`;
+            assertParamExists('searchCases', 'listBodyWithCriteria', listBodyWithCriteria)
+            const localVarPath = `/cases/search`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -2484,29 +2456,16 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Counts cases
-         * @summary Count cases
-         * @param {CountBodyWithCriteria} countBodyWithCriteria Count Body
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async countCases(countBodyWithCriteria: CountBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.countCases(countBodyWithCriteria, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['CasesApi.countCases']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * List cases
-         * @summary List cases
+         * Search cases
+         * @summary Search cases
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CaseResult>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listCases(listBodyWithCriteria, options);
+        async searchCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CasesSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchCases(listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['CasesApi.listCases']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.searchCases']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -2541,24 +2500,14 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.casesFilters(filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
-         * Counts cases
-         * @summary Count cases
-         * @param {CountBodyWithCriteria} countBodyWithCriteria Count Body
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        countCases(countBodyWithCriteria: CountBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
-            return localVarFp.countCases(countBodyWithCriteria, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * List cases
-         * @summary List cases
+         * Search cases
+         * @summary Search cases
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<Array<CaseResult>> {
-            return localVarFp.listCases(listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        searchCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<CasesSearchResponse> {
+            return localVarFp.searchCases(listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2596,27 +2545,15 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
-     * Counts cases
-     * @summary Count cases
-     * @param {CountBodyWithCriteria} countBodyWithCriteria Count Body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof CasesApi
-     */
-    public countCases(countBodyWithCriteria: CountBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).countCases(countBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * List cases
-     * @summary List cases
+     * Search cases
+     * @summary Search cases
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public listCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).listCases(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public searchCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).searchCases(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

@@ -562,13 +562,13 @@ func Test_GetVariantConsequences(t *testing.T) {
 	assertGetVariantConsequences(t, "simple", 1000, expected)
 }
 
-func assertCasesList(t *testing.T, data string, body string, expected string) {
+func assertSearchCasesHandler(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
-		router.POST("/cases/list", server.CasesListHandler(repo))
+		router.POST("/cases/search", server.SearchCasesHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/cases/list", bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("POST", "/cases/search", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -577,54 +577,32 @@ func assertCasesList(t *testing.T, data string, body string, expected string) {
 	})
 }
 
-func Test_CasesList_WithCriteria(t *testing.T) {
-	expected := `[{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_analysis_type_code":"germline", "case_id":8, "created_on":"2021-09-12T13:08:00Z", "mrn":"MRN-283794", "priority_code":"routine", "project_code":"N1", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"on-hold", "updated_on":"2021-09-12T13:08:00Z"}]`
+func Test_SearchCasesHandler_WithCriteria(t *testing.T) {
+	expected := `{"list": [{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_analysis_type_code":"germline", "case_id":8, "created_on":"2021-09-12T13:08:00Z", "mrn":"MRN-283794", "priority_code":"routine", "project_code":"N1", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"on-hold", "updated_on":"2021-09-12T13:08:00Z"}], "count": 1}`
 	body := `{
 			"additional_fields":[],
 			"search_criteria":[{"field": "status_code", "value": ["on-hold"]}]
 		}`
-	assertCasesList(t, "simple", body, expected)
+	assertSearchCasesHandler(t, "simple", body, expected)
 }
 
-func Test_CasesList_WithAdditionalFields(t *testing.T) {
-	expected := `[{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_analysis_type_code":"germline", "case_id":8, "created_on":"2021-09-12T13:08:00Z", "managing_organization_code":"CHUSJ", "mrn":"MRN-283794", "primary_condition":"MONDO:0700092", "priority_code":"routine", "project_code":"N1", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"on-hold", "updated_on":"2021-09-12T13:08:00Z"}]`
+func Test_SearchCasesHandler_WithAdditionalFields(t *testing.T) {
+	expected := `{"list": [{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_analysis_type_code":"germline", "case_id":8, "created_on":"2021-09-12T13:08:00Z", "managing_organization_code":"CHUSJ", "mrn":"MRN-283794", "primary_condition_id":"MONDO:0700092", "primary_condition_name":"neurodevelopmental disorder", "priority_code":"routine", "project_code":"N1", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"on-hold", "updated_on":"2021-09-12T13:08:00Z"}], "count": 1}`
 	body := `{
-			"additional_fields":["primary_condition", "managing_organization_code"],
+			"additional_fields":["primary_condition_id", "primary_condition_name", "managing_organization_code"],
 			"search_criteria":[{"field": "status_code", "value": ["on-hold"]}]
 		}`
-	assertCasesList(t, "simple", body, expected)
+	assertSearchCasesHandler(t, "simple", body, expected)
 }
 
-func Test_CasesList_WithSortAndLimit(t *testing.T) {
-	expected := `[{"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_analysis_type_code":"germline", "case_id":21, "created_on":"2020-09-12T13:08:00Z", "mrn":"MRN-283832", "priority_code":"routine", "project_code":"N2", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"active", "updated_on":"2020-09-12T13:08:00Z"}, {"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_analysis_type_code":"germline", "case_id":20, "created_on":"2020-09-12T13:08:00Z", "mrn":"MRN-283830", "priority_code":"routine", "project_code":"N2", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"completed", "updated_on":"2020-09-12T13:08:00Z"}]`
+func Test_SearchCasesHandler_WithSortAndLimit(t *testing.T) {
+	expected := `{"list": [{"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_analysis_type_code":"germline", "case_id":21, "created_on":"2020-09-12T13:08:00Z", "mrn":"MRN-283832", "priority_code":"routine", "project_code":"N2", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"active", "updated_on":"2020-09-12T13:08:00Z"}, {"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_analysis_type_code":"germline", "case_id":20, "created_on":"2020-09-12T13:08:00Z", "mrn":"MRN-283830", "priority_code":"routine", "project_code":"N2", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"completed", "updated_on":"2020-09-12T13:08:00Z"}], "count": 21}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "patient_id", "order": "desc"}],
 			"limit": 2
 		}`
-	assertCasesList(t, "simple", body, expected)
-}
-
-func assertCasesCount(t *testing.T, data string, body string, expected int) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewCasesRepository(db)
-		router := gin.Default()
-		router.POST("/cases/count", server.CasesCountHandler(repo))
-
-		req, _ := http.NewRequest("POST", "/cases/count", bytes.NewBuffer([]byte(body)))
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.JSONEq(t, fmt.Sprintf(`{"count":%d}`, expected), w.Body.String())
-	})
-}
-
-func Test_CasesCount(t *testing.T) {
-	body := `{
-			"search_criteria":[]
-		}`
-	assertCasesCount(t, "simple", body, 21)
+	assertSearchCasesHandler(t, "simple", body, expected)
 }
 
 func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
