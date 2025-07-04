@@ -3,18 +3,24 @@ import { action } from '@storybook/addon-actions';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { config as configMock } from './config-mock';
 
 const config: PortalConfig = {
+  ...configMock,
   variant_exploration: {
-    app_id: 'variant_exploration_multi_select_filter',
-    aggregations: [
-      { key: 'chromosome', type: 'multiple' },
-      { key: 'filter', type: 'multiple' },
-      { key: 'zygosity', type: 'multiple' },
-      { key: 'impact_score', type: 'multiple' },
-      { key: 'variant_class', type: 'multiple' },
-      { key: 'symbol', type: 'multiple' },
-    ],
+    ...configMock.variant_exploration,
+    aggregations: {
+      variant: {
+        items: [
+          { key: 'chromosome', type: 'multiple' },
+          { key: 'filter', type: 'multiple' },
+          { key: 'zygosity', type: 'multiple' },
+          { key: 'impact_score', type: 'multiple' },
+          { key: 'variant_class', type: 'multiple' },
+          { key: 'symbol', type: 'multiple' },
+        ],
+      },
+    },
   },
 };
 
@@ -22,7 +28,6 @@ const meta = {
   title: 'Feature/Query Filters/Multi Select',
   component: MultiSelectFilter,
   args: {
-    data: [],
     field: { key: 'chromosome', type: 'multiple' },
     maxVisibleItems: 10,
     searchVisible: true,
@@ -41,35 +46,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {
-    data: [
-      {
-        key: 'Option 1',
-        count: 100,
-      },
-      {
-        key: 'Option 2',
-        count: 200,
-      },
-      {
-        key: 'Option 3',
-        count: 300,
-      },
-      {
-        key: 'Option 4',
-        count: 400,
-      },
-      {
-        key: 'Option 5',
-        count: 500,
-      },
-      {
-        key: 'Option 6',
-        count: 600,
-      },
-    ],
-    appliedItems: [],
-  },
   render: args => {
     return (
       <div className="space-y-6">
@@ -80,34 +56,6 @@ export const Default: Story = {
 };
 
 export const DataAppliedToQueryBuilder: Story = {
-  args: {
-    data: [
-      {
-        key: 'Option6',
-        count: 600,
-      },
-      {
-        key: 'Option5',
-        count: 500,
-      },
-      {
-        key: 'Option4',
-        count: 400,
-      },
-      {
-        key: 'Option3',
-        count: 300,
-      },
-      {
-        key: 'Option2',
-        count: 200,
-      },
-      {
-        key: 'Option1',
-        count: 100,
-      },
-    ],
-  },
   render: args => {
     action('activeQuery')(
       queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
@@ -125,16 +73,6 @@ export const DataAppliedToQueryBuilder: Story = {
 
 export const HiddenSearch: Story = {
   args: {
-    data: [
-      {
-        key: 'Option6',
-        count: 600,
-      },
-      {
-        key: 'Option5',
-        count: 500,
-      },
-    ],
     searchVisible: false,
   },
   render: args => {

@@ -3,18 +3,25 @@ import { action } from '@storybook/addon-actions';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { ToggleFilter } from '@/components/feature/query-filters/toggle-filter';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { config as configMock } from './config-mock';
 
 const config: PortalConfig = {
+  ...configMock,
   variant_exploration: {
-    app_id: 'variant_exploration_toggle_filter',
-    aggregations: [
-      { key: 'chromosome', type: 'multiple' },
-      { key: 'filter', type: 'multiple' },
-      { key: 'zygosity', type: 'multiple' },
-      { key: 'impact_score', type: 'multiple' },
-      { key: 'variant_class', type: 'multiple' },
-      { key: 'symbol', type: 'multiple' },
-    ],
+    ...configMock.variant_exploration,
+    aggregations: {
+      variant: {
+        items: [
+          { key: 'chromosome', type: 'multiple' },
+          { key: 'filter', type: 'multiple' },
+          { key: 'zygosity', type: 'multiple' },
+          { key: 'impact_score', type: 'multiple' },
+          { key: 'variant_class', type: 'multiple' },
+          { key: 'symbol', type: 'multiple' },
+          { key: 'is_canonical', type: 'boolean' },
+        ],
+      },
+    },
   },
 };
 
@@ -23,8 +30,7 @@ const meta = {
   component: ToggleFilter,
 
   args: {
-    data: [],
-    field: { key: 'chromosome', type: 'boolean' },
+    field: { key: 'is_canonical', type: 'boolean' },
   },
   decorators: [
     Story => (
@@ -40,18 +46,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {
-    data: [
-      {
-        key: 'true',
-        count: 10030,
-      },
-      {
-        key: 'false',
-        count: 200,
-      },
-    ],
-  },
   render: args => {
     return (
       <div className="space-y-6">
@@ -62,22 +56,10 @@ export const Default: Story = {
 };
 
 export const DataAppliedToQueryBuilder: Story = {
-  args: {
-    data: [
-      {
-        key: 'Option6',
-        count: 600,
-      },
-      {
-        key: 'Option5',
-        count: 500,
-      },
-    ],
-  },
   render: args => {
     action('activeQuery')(
       queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
-        field: 'chromosome',
+        field: 'is_canonical',
         value: ['true'],
       }),
     );

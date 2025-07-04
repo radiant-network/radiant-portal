@@ -7,31 +7,47 @@ import {
   CommandList,
 } from '@/components/base/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/base/ui/tooltip';
 import { PlusCircle, LucideIcon, Search } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '@/components/base/ui/badge';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Checkbox } from '../ui/checkbox';
 import { Aggregation } from '@/api/api';
 
 // Extended Aggregation type to include optional icon
-export interface AggregationWithIcon extends Aggregation {
+export interface IFilterButtonItem extends Aggregation {
   icon?: LucideIcon;
+  tooltip?: string | React.ReactNode;
+}
+
+export interface IFilterButton {
+  key: string;
+  label: string;
+  isVisible: boolean;
+  isOpen: boolean;
+  selectedItems: string[];
+  options: IFilterButtonItem[];
+  icon?: any;
+  count?: number;
+  optionRenderer?: (option: IFilterButtonItem) => React.ReactNode;
+  withTooltip?: boolean;
 }
 
 type FilterButtonProps = {
   label: string;
-  options: AggregationWithIcon[];
+  options: IFilterButtonItem[];
   selected: string[];
   onSelect: (selected: string[]) => void;
   className?: string;
   placeholder?: string;
-  actionMode?: boolean;
+  actionMode?: boolean; // display as link actions instead of checkbox
   icon?: React.ReactNode;
-  keyValueLabel?: boolean;
   isOpen?: boolean;
   closeOnSelect?: boolean;
+  optionRenderer?: (option: IFilterButtonItem) => React.ReactNode;
+  withTooltip?: boolean; // new prop for tooltip functionality
 };
 
 export default function FilterButton({
@@ -43,9 +59,9 @@ export default function FilterButton({
   placeholder,
   actionMode = false, // if true, there will be now count and no checkboxes
   icon,
-  keyValueLabel = false,
   isOpen: openOnAppear = false,
   closeOnSelect = false,
+  withTooltip = false, // defaults to false
 }: FilterButtonProps) {
   const [open, setOpen] = useState(openOnAppear);
   const [firstOpen, setFirstOpen] = useState(true);
@@ -127,17 +143,27 @@ export default function FilterButton({
                         />
                         <div className="flex w-full items-center gap-1 p-0 overflow-hidden min-w-0">
                           {IconComponent && <IconComponent size={20} />}
-                          {keyValueLabel
-                            ? (<div className="truncate"><span className="flex-1 min-w-0">
-                              {option.key}
+                          { withTooltip ? (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="truncate">
+                                    <span className="flex-1 min-w-0">
+                                      {option.key}
+                                    </span>
+                                    <span className="text-muted-foreground"> - {option.label}</span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {option.tooltip || option.label}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          ) : (
+                            <span className="truncate flex-1 min-w-0">
+                              {option.label}
                             </span>
-                              <span className="text-muted-foreground"> - {option.label}</span>
-                            </div>)
-                            : (
-                              <span className="truncate flex-1 min-w-0">
-                                {option.label}
-                              </span>
-                            )}
+                          )}
                         </div>
                       </div>
                     )}

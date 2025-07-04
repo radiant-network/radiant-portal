@@ -5,41 +5,47 @@ import { NumericalFilter } from '@/components/feature/query-filters/numerical-fi
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 import { RangeOperators } from '@/components/model/sqon';
 import { expect, userEvent, within } from '@storybook/test';
+import { config as configMock } from './config-mock';
 
 const config: PortalConfig = {
+  ...configMock,
   variant_exploration: {
-    app_id: 'variant_exploration_toggle_filter',
-    aggregations: [
-      {
-        key: 'impact_score',
-        type: 'numerical',
-        defaults: {
-          min: 0,
-          max: 100,
-          defaultMin: 0,
-          defaultMax: 100,
-          intervalDecimal: 2,
-          defaultOperator: RangeOperators.GreaterThan,
-        },
+    ...configMock.variant_exploration,
+    aggregations: {
+      variant: {
+        items: [
+          {
+            key: 'impact_score',
+            type: 'numerical',
+            defaults: {
+              min: 0,
+              max: 100,
+              defaultMin: 0,
+              defaultMax: 100,
+              intervalDecimal: 2,
+              defaultOperator: RangeOperators.GreaterThan,
+            },
+          },
+          {
+            key: 'age',
+            type: 'numerical',
+            defaults: {
+              min: 0,
+              max: 120,
+              defaultMin: 0,
+              defaultMax: 120,
+              intervalDecimal: 0,
+              defaultOperator: RangeOperators.Between,
+              rangeTypes: [
+                { key: 'year', name: 'Year' },
+                { key: 'month', name: 'Month' },
+                { key: 'day', name: 'Day' },
+              ],
+            },
+          },
+        ],
       },
-      {
-        key: 'age',
-        type: 'numerical',
-        defaults: {
-          min: 0,
-          max: 120,
-          defaultMin: 0,
-          defaultMax: 120,
-          intervalDecimal: 0,
-          defaultOperator: RangeOperators.Between,
-          rangeTypes: [
-            { key: 'year', name: 'Year' },
-            { key: 'month', name: 'Month' },
-            { key: 'day', name: 'Day' },
-          ],
-        },
-      },
-    ],
+    },
   },
 };
 

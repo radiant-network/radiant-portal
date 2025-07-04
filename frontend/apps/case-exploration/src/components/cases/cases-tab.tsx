@@ -2,12 +2,11 @@ import useSWR from 'swr';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import { getCaseExplorationColumns, defaultSettings } from '@/feature/case-table/table-settings';
-import { CasesSearchResponse, ListBodyWithCriteria, SortBody, SortBodyOrderEnum } from '@/api/api';
-import { useEffect, useState } from 'react';
+import { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody, SortBodyOrderEnum } from '@/api/api';
+import { useState } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
-import TableFilters, { FILTER_DEFAULTS, FILTERS_SEARCH_DEFAULTS } from '../table-filters/table-filters';
-import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import TableFilters  from '../table-filters/table-filters';
 
 type CaseListInput = {
   listBodyWithCriteria: ListBodyWithCriteria;
@@ -25,7 +24,6 @@ async function fetchCasesList(input: CaseListInput) {
   return response.data;
 }
 
-type SearchCriterion = { field: string; value: string[] };
 
 function CasesTab() {
   const { t } = useI18n();
@@ -34,52 +32,7 @@ function CasesTab() {
     pageIndex: 0,
     pageSize: 10,
   });
-  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>(
-    'case-exploration-filters',
-    { ...FILTER_DEFAULTS, ...FILTERS_SEARCH_DEFAULTS },
-  );
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
-
-  // Build search_criteria array
-  useEffect(() => {
-    let search_criteria: SearchCriterion[] = [];
-
-    if (filters.priority.length > 0) {
-      search_criteria.push({ field: 'priority_code', value: filters.priority });
-    }
-    if (filters.status.length > 0) {
-      search_criteria.push({ field: 'status_code', value: filters.status });
-    }
-    if (filters.caseAnalysis.length > 0) {
-      search_criteria.push({ field: 'case_analysis_code', value: filters.caseAnalysis });
-    }
-    if (filters.project.length > 0) {
-      search_criteria.push({ field: 'project_code', value: filters.project });
-    }
-    if (filters.performerLab.length > 0) {
-      search_criteria.push({ field: 'performer_lab_code', value: filters.performerLab });
-    }
-    if (filters.requestedBy.length > 0) {
-      search_criteria.push({ field: 'requested_by_code', value: filters.requestedBy });
-    }
-
-    // Add search-based criteria
-    if (filters.case_id && filters.case_id.length > 0) {
-      search_criteria.push({ field: 'case_id', value: filters.case_id });
-    }
-    if (filters.patient_id && filters.patient_id.length > 0) {
-      search_criteria.push({ field: 'patient_id', value: filters.patient_id });
-    }
-    if (filters.mrn && filters.mrn.length > 0) {
-      search_criteria.push({ field: 'mrn', value: filters.mrn });
-    }
-    if (filters.request_id && filters.request_id.length > 0) {
-      search_criteria.push({ field: 'request_id', value: filters.request_id });
-    }
-
-    setSearchCriteria(search_criteria);
-
-  }, [filters]);
 
   const { data, isLoading } = useSWR<CasesSearchResponse, any, CaseListInput>(
     {
@@ -127,8 +80,7 @@ function CasesTab() {
         TableFilters={() => (
           <TableFilters
             loading={isLoading}
-            filters={filters}
-            setFilters={setFilters}
+            setSearchCriteria={setSearchCriteria}
             searchCriteria={searchCriteria}
           />
         )}
