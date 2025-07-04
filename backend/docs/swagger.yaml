@@ -1917,7 +1917,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithCriteria'
-        description: Filters Body
+        description: Search Body with criteria
         required: true
       responses:
         "200":
@@ -1995,7 +1995,7 @@ paths:
   /variants/germline/{locus_id}/cases/uninterpreted:
     post:
       description: Retrieve Germline Variant uninterpreted cases for a given locus
-      operationId: postGermlineVariantUninterpretedCases
+      operationId: getGermlineVariantUninterpretedCases
       parameters:
       - description: Locus ID
         in: path
@@ -2007,8 +2007,8 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FiltersBodyWithCriteria'
-        description: Filters Body
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: Search Body with criteria
         required: true
       responses:
         "200":

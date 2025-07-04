@@ -111,7 +111,7 @@ func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
-// @Param			message	body		types.ListBodyWithCriteria	true	"Filters Body"
+// @Param			message	body		types.ListBodyWithCriteria	true	"Search Body with criteria"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.VariantInterpretedCasesSearchResponse
@@ -157,12 +157,12 @@ func GetGermlineVariantInterpretedCases(repo repository.VariantsDAO) gin.Handler
 
 // GetGermlineVariantUninterpretedCases handles retrieving a variant uninterpreted cases by its locus
 // @Summary Get list of uninterpreted Cases for a germline variant
-// @Id postGermlineVariantUninterpretedCases
+// @Id getGermlineVariantUninterpretedCases
 // @Description Retrieve Germline Variant uninterpreted cases for a given locus
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
-// @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
+// @Param			message	body		types.ListBodyWithCriteria	true	"Search Body with criteria"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.VariantUninterpretedCasesSearchResponse
