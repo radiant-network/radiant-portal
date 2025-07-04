@@ -2,7 +2,7 @@ import useSWR from 'swr';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import { getCaseExplorationColumns, defaultSettings } from '@/feature/case-table/table-settings';
-import { CaseResult, Count, CountBodyWithCriteria, ListBodyWithCriteria, SortBody, SortBodyOrderEnum } from '@/api/api';
+import { CasesSearchResponse, ListBodyWithCriteria, SortBody, SortBodyOrderEnum } from '@/api/api';
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
@@ -10,11 +10,7 @@ import TableFilters, { FILTER_DEFAULTS, FILTERS_SEARCH_DEFAULTS } from '../table
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
 type CaseListInput = {
-  listBody: ListBodyWithCriteria;
-};
-
-type CaseCountInput = {
-  countBody: CountBodyWithCriteria;
+  listBodyWithCriteria: ListBodyWithCriteria;
 };
 
 const DEFAULT_SORTING = [
@@ -25,12 +21,7 @@ const DEFAULT_SORTING = [
 ];
 
 async function fetchCasesList(input: CaseListInput) {
-  const response = await caseApi.listCases(input.listBody);
-  return response.data;
-}
-
-async function fetchCasesCount(input: CaseCountInput) {
-  const response = await caseApi.countCases(input.countBody);
+  const response = await caseApi.searchCases(input.listBodyWithCriteria);
   return response.data;
 }
 
@@ -48,7 +39,7 @@ function CasesTab() {
     { ...FILTER_DEFAULTS, ...FILTERS_SEARCH_DEFAULTS },
   );
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
-  
+
   // Build search_criteria array
   useEffect(() => {
     let search_criteria: SearchCriterion[] = [];
@@ -71,7 +62,7 @@ function CasesTab() {
     if (filters.requestedBy.length > 0) {
       search_criteria.push({ field: 'requested_by_code', value: filters.requestedBy });
     }
-    
+
     // Add search-based criteria
     if (filters.case_id && filters.case_id.length > 0) {
       search_criteria.push({ field: 'case_id', value: filters.case_id });
@@ -85,24 +76,14 @@ function CasesTab() {
     if (filters.request_id && filters.request_id.length > 0) {
       search_criteria.push({ field: 'request_id', value: filters.request_id });
     }
-    
+
     setSearchCriteria(search_criteria);
 
   }, [filters]);
-  
-  const { data: total, isLoading: totalIsLoading } = useSWR<Count, any, CaseCountInput>(
-    {
-      countBody: { search_criteria: searchCriteria },
-    },
-    fetchCasesCount,
-    {
-      revalidateOnFocus: false,
-    },
-  );
 
-  const { data: list, isLoading: listIsLoading } = useSWR<CaseResult[], any, CaseListInput>(
+  const { data, isLoading } = useSWR<CasesSearchResponse, any, CaseListInput>(
     {
-      listBody: {
+      listBodyWithCriteria: {
         additional_fields: [
           'case_analysis_code',
           'case_analysis_name',
@@ -116,7 +97,8 @@ function CasesTab() {
           'performer_lab_code',
           'performer_lab_name',
           'prescriber',
-          'primary_condition',
+          'primary_condition_id',
+          'primary_condition_name',
           'priority_code',
           'project_code',
           'request_id',
@@ -144,23 +126,23 @@ function CasesTab() {
         columns={getCaseExplorationColumns(t)}
         TableFilters={() => (
           <TableFilters
-            loading={listIsLoading}
+            loading={isLoading}
             filters={filters}
             setFilters={setFilters}
             searchCriteria={searchCriteria}
           />
         )}
-        data={list ?? []}
+        data={data?.list ?? []}
         defaultColumnSettings={defaultSettings}
         defaultServerSorting={DEFAULT_SORTING}
         loadingStates={{
-          total: totalIsLoading,
-          list: listIsLoading,
+          total: isLoading,
+          list: isLoading,
         }}
         pagination={pagination}
         onPaginationChange={setPagination}
         onServerSortingChange={setSorting}
-        total={total?.count ?? 0}
+        total={data?.count ?? 0}
         enableColumnOrdering
         enableFullscreen
         tableIndexResultPosition="bottom"

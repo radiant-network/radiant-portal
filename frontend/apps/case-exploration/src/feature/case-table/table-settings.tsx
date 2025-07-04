@@ -84,9 +84,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       minSize: 124,
     }),
     // Primary Condition
-    columnHelper.accessor(row => row.primary_condition, {
+    columnHelper.accessor(row => row.primary_condition_id, {
       id: 'primary_condition',
-      cell: info => <PhenotypeConditionLinkCell type={PhenotypeType.MONDO} code={info.getValue()} name={info.getValue()} />,
+      cell: info => <PhenotypeConditionLinkCell type={PhenotypeType.MONDO} code={info.getValue()} name={info.row.original.primary_condition_name} />,
       header: t('caseExploration.case.headers.primary_condition'),
       size: 124,
       minSize: 124,
