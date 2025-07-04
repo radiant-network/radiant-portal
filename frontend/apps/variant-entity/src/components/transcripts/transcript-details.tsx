@@ -15,8 +15,14 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
   return (
     <div className="flex [&>div]:p-2 [&>div]:flex-1">
       <div className="space-y-2">
-        {data.transcript_id && <TranscriptIdLink transcriptId={data.transcript_id} isCanonical={data.is_canonical} />}
-        <div className="flex flex-col gap-2 text-muted-foreground text-xs">
+        {data.transcript_id && (
+          <TranscriptIdLink
+            transcriptId={data.transcript_id}
+            linkClassName="font-medium"
+            isCanonical={data.is_canonical}
+          />
+        )}
+        <div className="flex flex-col gap-2 text-muted-foreground text-xs font-mono">
           <span>Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : '-'}</span>
           {data.dna_change && <span>{data.dna_change}</span>}
           <div>
@@ -31,7 +37,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
         <div className="flex items-center gap-2">
           <div className="">
             <ConsequenceLabel vepImpact={data.vep_impact!} consequence={data.consequences?.[0] || ''} size="sm" />
-            <span className="text-sm">{data.aa_change && ` - ${data.aa_change}`}</span> 
+            <span className="text-sm">{data.aa_change && ` - ${data.aa_change}`}</span>
           </div>
         </div>
       </div>
@@ -53,7 +59,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
 }
 
 const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) => {
-  const predictions: { key: string; label: string, value: string }[] = [];
+  const predictions: { key: string; label: string; value: string }[] = [];
   const empties: { key: string; label: string }[] = [];
 
   // sift
@@ -63,27 +69,27 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
       key: 'sift',
       label: t('variant.predictions.sift'),
       value: `${siftPref} (${data?.sift_score})`,
-    })
+    });
   } else {
     empties.push({
       key: 'sift',
       label: t('variant.predictions.sift'),
-    })
+    });
   }
 
   // fathmm
   if (data.fathmm_pred && data.fathmm_score !== undefined) {
-    const fatmmPref = t(`common.filters.labels.fathmm_pred_value.${data.fathmm_pred}`)
+    const fatmmPref = t(`common.filters.labels.fathmm_pred_value.${data.fathmm_pred}`);
     predictions.push({
       key: 'fathmm',
       label: t('variant.predictions.fathmm'),
       value: `${fatmmPref} (${data?.fathmm_score})`,
-    })
+    });
   } else {
     empties.push({
       key: 'fathmm',
       label: t('variant.predictions.fathmm'),
-    })
+    });
   }
 
   // caddraw
@@ -91,8 +97,8 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
     predictions.push({
       key: 'caddraw',
       label: t('variant.predictions.caddRaw'),
-      value: `${data.cadd_score}`
-    })
+      value: `${data.cadd_score}`,
+    });
   } else {
     empties.push({
       key: 'caddraw',
@@ -105,8 +111,8 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
     predictions.push({
       key: 'caddphred',
       label: t('variant.predictions.caddPhred'),
-      value: `${data.cadd_phred}`
-    })
+      value: `${data.cadd_phred}`,
+    });
   } else {
     empties.push({
       key: 'caddphred',
@@ -119,8 +125,8 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
     predictions.push({
       key: 'dann',
       label: t('variant.predictions.dann'),
-      value: `${data.dann_score}`
-    })
+      value: `${data.dann_score}`,
+    });
   } else {
     empties.push({
       key: 'dann',
@@ -130,17 +136,17 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
 
   // lrt
   if (data?.lrt_pred && data.lrt_score !== undefined) {
-    const lrtPred = t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`)
+    const lrtPred = t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`);
     predictions.push({
       key: 'lrt',
       label: t('variant.predictions.lrt'),
       value: `${lrtPred} (${data?.lrt_score})`,
-    })
+    });
   } else {
     empties.push({
       key: 'lrt',
       label: t('variant.predictions.lrt'),
-    })
+    });
   }
 
   // revel
@@ -148,13 +154,13 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
     predictions.push({
       key: 'revel',
       label: t('variant.predictions.revel'),
-      value: `${data.revel_score}`
-    })
+      value: `${data.revel_score}`,
+    });
   } else {
     empties.push({
       key: 'revel',
       label: t('variant.predictions.revel'),
-    })
+    });
   }
 
   // polyphen2_hvar
@@ -163,32 +169,28 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
     predictions.push({
       key: 'polyphen2_hvar',
       label: t('variant.predictions.polyphen2hvar'),
-      value: `${hvarPred} ${data.polyphen2_hvar_score}`
-    })
+      value: `${hvarPred} ${data.polyphen2_hvar_score}`,
+    });
   } else {
     empties.push({
       key: 'polyphen2_hvar',
       label: t('variant.predictions.polyphen2hvar'),
-    })
+    });
   }
 
   return [
     ...predictions.map(({ key, label, value }) => (
       <div key={`psl-${key}`} className="flex gap-2 items-center">
         <span className="text-muted-foreground">{label}:</span>
-        <span>
-          {value}
-        </span>
+        <span>{value}</span>
       </div>
     )),
     ...empties.map(({ key, label }) => (
       <div key={`psl-${key}`} className="flex gap-2 items-center">
-        <span className="text-muted-foreground">{label}:</span>
-        -
+        <span className="text-muted-foreground">{label}:</span>-
       </div>
-    ))
-
-  ]
+    )),
+  ];
 };
 
 export default TranscriptDetails;

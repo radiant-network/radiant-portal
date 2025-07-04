@@ -38,7 +38,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 '-'
               )}
             </div>
-            <div className="text-sm">{'-'}</div>
+            <div className="text-xs font-mono">{'-'}</div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variantEntity.overview.consequence')}</div>
@@ -55,10 +55,13 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="flex flex-wrap items-start gap-1">
               {data?.clinvar?.length
                 ? data?.clinvar.map(clinvar => (
-                  <Link key={clinvar} to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}>
-                    <ClinvarBadge key={clinvar} value={clinvar} />
-                  </Link>
-                ))
+                    <Link
+                      key={clinvar}
+                      to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
+                    >
+                      <ClinvarBadge key={clinvar} value={clinvar} />
+                    </Link>
+                  ))
                 : '-'}
             </div>
           </div>
@@ -72,7 +75,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 <TooltipContent>{t('variantEntity.overview.patientInfoTooltip')}</TooltipContent>
               </Tooltip>
             </div>
-            <div className="font-semibold">
+            <div className="font-semibold font-mono">
               {data?.pc_wgs ? (
                 <Link to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`} className="hover:underline">
                   {`${data.pc_wgs} (${data.pf_wgs.toExponential(2)})`}
@@ -92,7 +95,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 <TooltipContent>{t('variantEntity.overview.gnomADInfoTooltip')}</TooltipContent>
               </Tooltip>
             </div>
-            <div className="font-semibold">
+            <div className="font-semibold font-mono">
               {data?.gnomad_v3_af ? (
                 <a
                   href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
@@ -116,7 +119,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           {data?.exon_rank && data?.exon_total && (
             <>
               <Separator orientation="vertical" className="mx-4 h-5" />
-              <div>
+              <div className="font-mono">
                 {t('variantEntity.overview.exon')}: {data?.exon_rank} / {data?.exon_total}
               </div>
             </>
@@ -124,7 +127,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           {data?.dna_change && (
             <>
               <Separator orientation="vertical" className="mx-4 h-5" />
-              <div>{data?.dna_change}</div>
+              <div className="font-mono">{data?.dna_change}</div>
             </>
           )}
           {data?.rsnumber && (
@@ -132,7 +135,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               <Separator orientation="vertical" className="mx-4 h-5" />
               <a
                 href={`https://www.ncbi.nlm.nih.gov/snp/${data?.rsnumber}`}
-                className="hover:underline"
+                className="hover:underline font-mono"
                 target="_blank"
                 rel="noreferrer"
               >
