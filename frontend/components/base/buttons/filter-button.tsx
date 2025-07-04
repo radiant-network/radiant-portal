@@ -11,7 +11,7 @@ import { PlusCircle, LucideIcon, Search } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '@/components/base/ui/badge';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Checkbox } from '../ui/checkbox';
 import { Aggregation } from '@/api/api';
 
@@ -30,6 +30,8 @@ type FilterButtonProps = {
   actionMode?: boolean;
   icon?: React.ReactNode;
   keyValueLabel?: boolean;
+  isOpen?: boolean;
+  closeOnSelect?: boolean;
 };
 
 export default function FilterButton({
@@ -42,9 +44,21 @@ export default function FilterButton({
   actionMode = false, // if true, there will be now count and no checkboxes
   icon,
   keyValueLabel = false,
+  isOpen: openOnAppear = false,
+  closeOnSelect = false,
 }: FilterButtonProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(openOnAppear);
+  const [firstOpen, setFirstOpen] = useState(true);
   const selectedCount = selected.length;
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (firstOpen && openOnAppear) {
+      setFirstOpen(false);
+      setOpen(openOnAppear);
+    } else {
+      setOpen(newOpen);
+    }
+  };
 
   const handleSelect = (value: string) => {
     const newSelected = selected.includes(value)
@@ -58,8 +72,9 @@ export default function FilterButton({
   };
 
   const variant = actionMode ? 'ghost' : 'outline';
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button variant={variant} className={cn('h-8 py-2 px-3 border-dashed text-sm text-foreground', className)}>
           {icon ? icon : <PlusCircle className="" />}
@@ -85,6 +100,9 @@ export default function FilterButton({
                     key={option.key}
                     onSelect={() => {
                       handleSelect(option.key || '');
+                      if (closeOnSelect) {
+                        setOpen(false);
+                      }
                     }}
                     className="h-[32px] px-0 py-0 overflow-hidden"
                   >
@@ -129,7 +147,7 @@ export default function FilterButton({
             </CommandGroup>
           </CommandList>
         </Command>
-        {selectedCount !== 0 && (
+        {selectedCount !== 0 && !actionMode && (
           <div className="h-[40px] flex-shrink-0">
             <Button
               variant="ghost"

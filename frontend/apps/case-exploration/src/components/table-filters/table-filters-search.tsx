@@ -119,7 +119,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
           }}
           onBlur={() => setTimeout(() => setOpen(false), 100)}
         />
-        {open && (
+        {open && searchInput.length > 0 && (
           <CommandList
             className="absolute max-h-[240px] left-0 top-full z-50 mt-1 w-full overflow-auto rounded-md border bg-background shadow-lg"
             onMouseDown={(e) => e.preventDefault()}

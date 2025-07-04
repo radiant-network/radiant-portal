@@ -19,15 +19,15 @@ export default function App() {
     <main className={`bg-muted/40 h-screen overflow-auto p-6`}>
       <div className="p-6 bg-background border rounded-lg">
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
-          <Container>
-            <TabsList className="pt-6 px-3 bg-background" contentClassName="min-[1440px]:px-3 max-w-8xl mx-auto">
+          <Container className="w-full max-w-full">
+            <TabsList className="pt-6 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
               <TabsListItem value={CaseExplorationTabs.Case}>{t('caseExploration.case.title')}</TabsListItem>
               {/* @TODO:Only cases if needed for the first release  */}
               {/* <TabsListItem value={CaseExplorationTabs.Assays}>{t('caseExploration.assays.title')}</TabsListItem> */}
             </TabsList>
           </Container>
-          <Container>
-            <TabsContent value={CaseExplorationTabs.Case} className="py-6">
+          <Container className="w-full max-w-full">
+            <TabsContent value={CaseExplorationTabs.Case} className="py-6 w-full">
               <CasesTab />
             </TabsContent>
             {/* @TODO:Only cases if needed for the first release  */}
