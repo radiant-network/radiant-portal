@@ -207,9 +207,12 @@ func Test_GetVariantUninterpretedCases_NoResult(t *testing.T) {
 func Test_GetVariantCasesCount(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		count, err := repo.GetVariantCasesCount(1000)
+		counts, err := repo.GetVariantCasesCount(1000)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(4), count)
+		assert.Equal(t, int64(4), counts.CountTotalCases)
+		assert.Equal(t, int64(1), counts.CountInterpretedCases)
+		assert.Equal(t, int64(3), counts.CountUninterpretedCases)
+		assert.Equal(t, int64(3), counts.CountInterpretations)
 	})
 }
 

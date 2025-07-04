@@ -1697,6 +1697,37 @@ export interface UserSet {
 /**
  * 
  * @export
+ * @interface VariantCasesCount
+ */
+export interface VariantCasesCount {
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
+    'count_interpretations': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
+    'count_interpreted_cases': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
+    'count_total_cases': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
+    'count_uninterpreted_cases': number;
+}
+/**
+ * 
+ * @export
  * @interface VariantCasesFilters
  */
 export interface VariantCasesFilters {
@@ -4397,7 +4428,7 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
          * Retrieve Germline Variant interpreted cases for a given locus
          * @summary Get list of interpreted Cases for a germline variant
          * @param {string} locusId Locus ID
-         * @param {ListBodyWithCriteria} listBodyWithCriteria Filters Body
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4479,15 +4510,15 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
          * Retrieve Germline Variant uninterpreted cases for a given locus
          * @summary Get list of uninterpreted Cases for a germline variant
          * @param {string} locusId Locus ID
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postGermlineVariantUninterpretedCases: async (locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantUninterpretedCases: async (locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('postGermlineVariantUninterpretedCases', 'locusId', locusId)
-            // verify required parameter 'filtersBodyWithCriteria' is not null or undefined
-            assertParamExists('postGermlineVariantUninterpretedCases', 'filtersBodyWithCriteria', filtersBodyWithCriteria)
+            assertParamExists('getGermlineVariantUninterpretedCases', 'locusId', locusId)
+            // verify required parameter 'listBodyWithCriteria' is not null or undefined
+            assertParamExists('getGermlineVariantUninterpretedCases', 'listBodyWithCriteria', listBodyWithCriteria)
             const localVarPath = `/variants/germline/{locus_id}/cases/uninterpreted`
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -4512,7 +4543,7 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(filtersBodyWithCriteria, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(listBodyWithCriteria, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4551,7 +4582,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+        async getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantCasesCount>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantCasesCount(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantCasesCount']?.[localVarOperationServerIndex]?.url;
@@ -4599,7 +4630,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * Retrieve Germline Variant interpreted cases for a given locus
          * @summary Get list of interpreted Cases for a germline variant
          * @param {string} locusId Locus ID
-         * @param {ListBodyWithCriteria} listBodyWithCriteria Filters Body
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4626,14 +4657,14 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * Retrieve Germline Variant uninterpreted cases for a given locus
          * @summary Get list of uninterpreted Cases for a germline variant
          * @param {string} locusId Locus ID
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postGermlineVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantUninterpretedCasesSearchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postGermlineVariantUninterpretedCases(locusId, filtersBodyWithCriteria, options);
+        async getGermlineVariantUninterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantUninterpretedCasesSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantUninterpretedCases(locusId, listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['VariantApi.postGermlineVariantUninterpretedCases']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantUninterpretedCases']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -4665,7 +4696,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+        getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantCasesCount> {
             return localVarFp.getGermlineVariantCasesCount(locusId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4701,7 +4732,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * Retrieve Germline Variant interpreted cases for a given locus
          * @summary Get list of interpreted Cases for a germline variant
          * @param {string} locusId Locus ID
-         * @param {ListBodyWithCriteria} listBodyWithCriteria Filters Body
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4722,12 +4753,12 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * Retrieve Germline Variant uninterpreted cases for a given locus
          * @summary Get list of uninterpreted Cases for a germline variant
          * @param {string} locusId Locus ID
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
+         * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postGermlineVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<VariantUninterpretedCasesSearchResponse> {
-            return localVarFp.postGermlineVariantUninterpretedCases(locusId, filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
+        getGermlineVariantUninterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<VariantUninterpretedCasesSearchResponse> {
+            return localVarFp.getGermlineVariantUninterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -4804,7 +4835,7 @@ export class VariantApi extends BaseAPI {
      * Retrieve Germline Variant interpreted cases for a given locus
      * @summary Get list of interpreted Cases for a germline variant
      * @param {string} locusId Locus ID
-     * @param {ListBodyWithCriteria} listBodyWithCriteria Filters Body
+     * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
@@ -4829,13 +4860,13 @@ export class VariantApi extends BaseAPI {
      * Retrieve Germline Variant uninterpreted cases for a given locus
      * @summary Get list of uninterpreted Cases for a germline variant
      * @param {string} locusId Locus ID
-     * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
+     * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public postGermlineVariantUninterpretedCases(locusId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).postGermlineVariantUninterpretedCases(locusId, filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantUninterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantUninterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

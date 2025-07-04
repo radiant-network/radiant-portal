@@ -811,7 +811,7 @@ func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected
 }
 
 func Test_GetVariantCasesCount(t *testing.T) {
-	expected := `{"count":4}`
+	expected := `{"count_total_cases":4, "count_interpreted_cases": 1, "count_uninterpreted_cases": 3, "count_interpretations": 3}`
 	assertGetVariantCasesCount(t, "simple", 1000, expected)
 }
 

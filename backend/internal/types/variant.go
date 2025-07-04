@@ -136,6 +136,13 @@ type VariantCasesFilters = struct {
 	PerformerLab   []Aggregation `json:"performer_lab" validate:"required"`
 } // @name VariantCasesFilters
 
+type VariantCasesCount struct {
+	CountTotalCases         int64 `json:"count_total_cases" validate:"required"`
+	CountInterpretedCases   int64 `json:"count_interpreted_cases" validate:"required"`
+	CountUninterpretedCases int64 `json:"count_uninterpreted_cases" validate:"required"`
+	CountInterpretations    int64 `json:"count_interpretations" validate:"required"`
+} // @name VariantCasesCount
+
 var VariantTable = Table{
 	Name:  "germline__snv__variant",
 	Alias: "v",

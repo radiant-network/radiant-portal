@@ -18,6 +18,7 @@ type VariantInterpretedCase = types.VariantInterpretedCase
 type VariantUninterpretedCase = types.VariantUninterpretedCase
 type VariantExpendedInterpretedCase = types.VariantExpendedInterpretedCase
 type VariantCasesFilters = types.VariantCasesFilters
+type VariantCasesCount = types.VariantCasesCount
 
 type VariantsRepository struct {
 	db *gorm.DB
@@ -30,7 +31,7 @@ type VariantsDAO interface {
 	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error)
 	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error)
 	GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error)
-	GetVariantCasesCount(locusId int) (int64, error)
+	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
 }
 
@@ -230,16 +231,40 @@ func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqI
 	return &variantExpendedInterpretedCase, nil
 }
 
-func (r *VariantsRepository) GetVariantCasesCount(locusId int) (int64, error) {
-	tx := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
-	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
-	tx = tx.Where("o.locus_id = ?", locusId)
-	tx = tx.Distinct("s.case_id")
-	var count int64
-	if err := tx.Count(&count).Error; err != nil {
-		return 0, fmt.Errorf("error counting variant cases: %w", err)
+func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCount, error) {
+	var countTotal int64
+	var countInterpreted int64
+	var countInterpretations int64
+
+	locusIdString := fmt.Sprintf("%d", locusId)
+	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline i")
+	txInterpreted = txInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = i.sequencing_id")
+	txInterpreted = txInterpreted.Distinct("s.case_id")
+	txInterpreted = txInterpreted.Where("i.locus_id = ?", locusIdString)
+	if err := txInterpreted.Count(&countInterpreted).Error; err != nil {
+		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
 	}
-	return count, nil
+
+	txInterpretations := r.db.Table("radiant_jdbc.public.interpretation_germline i")
+	txInterpretations = txInterpretations.Where("i.locus_id = ?", locusIdString)
+	txInterpretations = txInterpretations.Distinct("i.sequencing_id, i.transcript_id")
+	if err := txInterpretations.Count(&countInterpretations).Error; err != nil {
+		return nil, fmt.Errorf("error counting variant interpretations: %w", err)
+	}
+
+	txTotal := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
+	txTotal = txTotal.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
+	txTotal = txTotal.Where("o.locus_id = ?", locusId)
+	txTotal = txTotal.Distinct("s.case_id")
+
+	if err := txTotal.Count(&countTotal).Error; err != nil {
+		return nil, fmt.Errorf("error counting variant all cases: %w", err)
+	}
+	return &VariantCasesCount{
+		CountTotalCases:         countTotal,
+		CountInterpretedCases:   countInterpreted,
+		CountUninterpretedCases: countTotal - countInterpreted,
+		CountInterpretations:    countInterpretations}, nil
 }
 
 func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, error) {
