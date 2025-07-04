@@ -1697,6 +1697,37 @@ export interface UserSet {
 /**
  * 
  * @export
+ * @interface VariantCasesCount
+ */
+export interface VariantCasesCount {
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
+    'count_interpretations': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
+    'count_interpreted_cases': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
+    'count_total_cases': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
+    'count_uninterpreted_cases': number;
+}
+/**
+ * 
+ * @export
  * @interface VariantCasesFilters
  */
 export interface VariantCasesFilters {
@@ -4551,7 +4582,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+        async getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantCasesCount>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantCasesCount(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantCasesCount']?.[localVarOperationServerIndex]?.url;
@@ -4665,7 +4696,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+        getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantCasesCount> {
             return localVarFp.getGermlineVariantCasesCount(locusId, options).then((request) => request(axios, basePath));
         },
         /**

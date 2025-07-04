@@ -137,9 +137,10 @@ type VariantCasesFilters = struct {
 } // @name VariantCasesFilters
 
 type VariantCasesCount struct {
-	CountTotal         int64 `json:"count_total" validate:"required"`
-	CountInterpreted   int64 `json:"count_interpreted" validate:"required"`
-	CountUninterpreted int64 `json:"count_uninterpreted" validate:"required"`
+	CountTotalCases         int64 `json:"count_total_cases" validate:"required"`
+	CountInterpretedCases   int64 `json:"count_interpreted_cases" validate:"required"`
+	CountUninterpretedCases int64 `json:"count_uninterpreted_cases" validate:"required"`
+	CountInterpretations    int64 `json:"count_interpretations" validate:"required"`
 } // @name VariantCasesCount
 
 var VariantTable = Table{

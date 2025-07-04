@@ -743,6 +743,22 @@ components:
         user_id:
           type: string
       type: object
+    VariantCasesCount:
+      properties:
+        count_interpretations:
+          type: integer
+        count_interpreted_cases:
+          type: integer
+        count_total_cases:
+          type: integer
+        count_uninterpreted_cases:
+          type: integer
+      required:
+      - count_interpretations
+      - count_interpreted_cases
+      - count_total_cases
+      - count_uninterpreted_cases
+      type: object
     VariantCasesFilters:
       properties:
         case_analysis:
@@ -1882,7 +1898,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Count'
+                $ref: '#/components/schemas/VariantCasesCount'
           description: OK
         "404":
           content:

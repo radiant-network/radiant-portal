@@ -254,7 +254,7 @@ func GetExpendedGermlineVariantInterpretedCase(repo repository.VariantsDAO) gin.
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
 // @Produce json
-// @Success 200 {object} types.Count
+// @Success 200 {object} types.VariantCasesCount
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/cases/count [get]
@@ -265,13 +265,12 @@ func GetGermlineVariantCasesCount(repo repository.VariantsDAO) gin.HandlerFunc {
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		count, err := repo.GetVariantCasesCount(locusId)
+		counts, err := repo.GetVariantCasesCount(locusId)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		countResponse := types.Count{Count: count}
-		c.JSON(http.StatusOK, countResponse)
+		c.JSON(http.StatusOK, counts)
 	}
 }
 

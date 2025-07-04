@@ -111,8 +111,13 @@ func (m *MockRepository) GetVariantExpendedInterpretedCase(int, int, string) (*t
 	}, nil
 }
 
-func (m *MockRepository) GetVariantCasesCount(int) (int64, error) {
-	return int64(4), nil
+func (m *MockRepository) GetVariantCasesCount(int) (*types.VariantCasesCount, error) {
+	return &types.VariantCasesCount{
+		CountTotalCases:         int64(4),
+		CountInterpretedCases:   int64(1),
+		CountUninterpretedCases: int64(3),
+		CountInterpretations:    int64(3),
+	}, nil
 }
 
 func (m *MockRepository) GetVariantCasesFilters() (*types.VariantCasesFilters, error) {
@@ -354,7 +359,7 @@ func Test_GetGermlineVariantCasesCountHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"count":4}`, w.Body.String())
+	assert.JSONEq(t, `{"count_total_cases":4, "count_interpreted_cases": 1, "count_uninterpreted_cases": 3, "count_interpretations": 3}`, w.Body.String())
 }
 
 func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {
