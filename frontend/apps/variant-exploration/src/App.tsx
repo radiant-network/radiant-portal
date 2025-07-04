@@ -177,11 +177,9 @@ function App() {
               onFacetClick: filter => {
                 const fields = Object.values(config.variant_exploration.aggregations)
                   .flatMap(f => f.items)
-                  .find(f => f.key === filter.content.field)!
+                  .find(f => f.key === filter.content.field)!;
 
-                return (
-                  <FilterComponent field={fields} isOpen={true} />
-                )
+                return <FilterComponent field={fields} isOpen={true} />;
               },
             }}
           />
@@ -199,7 +197,7 @@ function App() {
           pagination={pagination}
           onPaginationChange={setPagination}
           onServerSortingChange={setSorting}
-          subComponent={(data: Occurrence) => <OccurrenceExpend occurrence={data} />}
+          subComponent={data => <OccurrenceExpend occurrence={data} />}
           total={total?.count ?? 0}
           enableColumnOrdering
           enableFullscreen

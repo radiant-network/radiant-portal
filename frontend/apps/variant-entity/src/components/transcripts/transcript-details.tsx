@@ -18,12 +18,13 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
         {data.transcript_id && (
           <TranscriptIdLink
             transcriptId={data.transcript_id}
+            linkClassName="font-medium"
             isCanonical={data.is_canonical}
             isManePlus={data.is_mane_plus}
             isManeSelect={data.is_mane_select}
           />
         )}
-        <div className="flex flex-col gap-2 text-muted-foreground text-xs">
+        <div className="flex flex-col gap-2 text-muted-foreground text-xs font-mono">
           <span>Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : '-'}</span>
           {data.dna_change && <span>{data.dna_change}</span>}
           <div>

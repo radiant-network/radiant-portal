@@ -243,11 +243,11 @@ function getRowPinningCellExtraCN(row: Row<any>): string {
  * Reusable flex row function
  * Used to render top, centered or bottom rows
  */
-function getRowFlexRender({
+function getRowFlexRender<T>({
   subComponent,
   containerWidth,
 }: {
-  subComponent?: SubComponentProps<any>;
+  subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
   return function (row: Row<any>) {
@@ -447,7 +447,7 @@ function TranstackTable<T>({
 
   // Cache our row flexRender method
   const rowFlexRender = useMemo(() => {
-    return getRowFlexRender({ subComponent, containerWidth });
+    return getRowFlexRender<T>({ subComponent, containerWidth });
   }, [subComponent, containerWidth]);
 
   /*

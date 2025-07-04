@@ -4,61 +4,69 @@ import { useState } from 'react';
 import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table-settings';
 import { PaginationState } from '@tanstack/table-core';
 import InterpretedCasesExpend from './interpreted-cases-expend';
+import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './interpreted-cases-filters';
+import { useParams } from 'react-router';
+import { ApiError, ListBodyWithCriteria, VariantInterpretedCasesSearchResponse } from '@/api/api';
+import { variantsApi } from '@/utils/api';
+import useSWR from 'swr';
+
+type InterpretedCasesSearchInput = {
+  key: string;
+  locusId: string;
+  criteria: ListBodyWithCriteria;
+};
+
+async function fetchInterpretedCases(input: InterpretedCasesSearchInput) {
+  const response = await variantsApi.getGermlineVariantInterpretedCases(input.locusId, input.criteria);
+  return response.data;
+}
 
 function InterpretedCasesTable() {
   const { t } = useI18n();
+  const params = useParams<{ locusId: string }>();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const fakeData: any[] = [
+  const [initialFilters, setInitialFilters] = useState<InterpretedCasesFiltersState>({
+    mondo: '',
+    institution: '', // todo
+    test: '', // todo
+    classification: '', // todo
+  });
+
+  const { data, isLoading } = useSWR<VariantInterpretedCasesSearchResponse, ApiError, InterpretedCasesSearchInput>(
     {
-      case: '123456',
-      date: '2025-05-30T15:26:46.139Z',
-      mondo: 'Kidney angiomyolipoma',
-      classification: 'likely_pathogenic',
-      zygosity: 'Het',
-      inheritance: 'De novo',
-      institution: 'CHUSJ',
-      test: 'RGDI',
-      status: 'Active',
+      key: 'interpreted-cases',
+      locusId: params.locusId!,
+      criteria: {},
     },
+    fetchInterpretedCases,
     {
-      case: '123457',
-      date: '2025-05-30T15:26:46.139Z',
-      mondo: 'Retard de développement neurologique',
-      classification: 'Pathogenic',
-      zygosity: 'Hom',
-      inheritance: 'Maternal',
-      institution: 'CHUSJ',
-      test: 'RGDI',
-      status: 'Completed',
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
     },
-  ]; // Placeholder for actual data
+  );
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">
-        {t('variantEntity.cases.interpreted-table.title', {
-          count: 0,
-        })}
-      </h1>
+    <div className="space-y-6 mt-2">
+      <InterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="interpreted-cases"
         columns={getInterpretedCasesColumns(t)}
-        data={fakeData}
+        data={data?.list || []}
         defaultColumnSettings={interpretedCasesDefaultSettings}
         defaultServerSorting={[]}
         loadingStates={{
-          total: false,
-          list: false,
+          total: isLoading,
+          list: isLoading,
         }}
-        total={fakeData.length}
+        total={data?.count || 0}
         pagination={pagination}
         onPaginationChange={setPagination}
         onServerSortingChange={() => {}}
-        subComponent={data => <InterpretedCasesExpend data={data} />}
+        subComponent={data => <InterpretedCasesExpend locusId={params.locusId!} data={data} />}
         tableIndexResultPosition="bottom"
       />
     </div>

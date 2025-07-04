@@ -16,6 +16,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
         <AnchorLink
           size="sm"
           href={`https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_name}`}
+          variant="secondary"
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-1 hover:underline"
@@ -26,6 +27,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
         <AnchorLink
           size="sm"
           href={`https://gnomad.broadinstitute.org/variant/${data?.locus}?dataset=gnomad_r3`}
+          variant="secondary"
           target="_blank"
           rel="noreferrer"
           external
@@ -35,6 +37,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
         <AnchorLink
           size="sm"
           href={`https://www.ncbi.nlm.nih.gov/snp/${data?.rsnumber}`}
+          variant="secondary"
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-1 hover:underline"

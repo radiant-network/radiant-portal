@@ -28,7 +28,7 @@ function TranscriptIdLink({
       <AnchorLink
         size="sm"
         href={`https://www.ensembl.org/id/${transcriptId}`}
-        className={linkClassName}
+        className={cn('hover:underline font-mono', linkClassName)}
         target="_blank"
         rel="noreferrer"
       >

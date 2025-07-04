@@ -17,7 +17,7 @@ function QueryBarDeleteAction() {
         </Button>
       </PopoverTrigger>
       <PopoverContent side="left" className="w-[200px] space-y-3">
-        <span className="text-sm">{dict.queryBar.deletePopover.title}</span>
+        <div className="text-sm">{dict.queryBar.deletePopover.title}</div>
         <div className="flex gap-1 justify-end">
           <PopoverClose asChild>
             <Button size="xs" variant="outline">
