@@ -14,7 +14,7 @@
   --color-radiant-950: oklch(0.31 0.06 236.35 / 1);
 
   --background: var(--color-white);
-  --foreground: var(--color-slate-950);
+  --foreground: var(--color-radiant-950);
   --primary: var(--color-radiant-700);
   --primary-foreground: var(--color-slate-50);
   --secondary: var(--color-slate-100);

@@ -8,6 +8,14 @@ import { IdCardIcon } from 'lucide-react';
 const meta = {
   title: 'Buttons/Button',
   component: Button,
+  argTypes: {
+    size: {
+      options: buttonSizes,
+      control: {
+        type: 'select',
+      },
+    },
+  },
   args: { onClick: fn(), loading: false, disabled: false, iconOnly: false },
 } satisfies Meta<typeof Button>;
 
