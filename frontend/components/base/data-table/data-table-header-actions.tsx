@@ -81,7 +81,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
 
   return (
     <div
-      className={cn('hidden items-center gap-0.5 group-hover:flex', {
+      className={cn('hidden items-center gap-0.5 group-hover/header:flex', {
         flex: isPinningDropdownActive,
       })}
     >

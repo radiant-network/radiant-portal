@@ -615,7 +615,7 @@ function TranstackTable<T>({
                   {headerGroup.headers.map(header => (
                     <TableHead
                       key={header.id}
-                      className={cn('group', getColumnPinningExtraCN(header.column))}
+                      className={cn('group/header', getColumnPinningExtraCN(header.column))}
                       style={{
                         width: `calc(var(--header-${header?.id}-size) * 1px)`,
                         ...getColumnPinningExtraStyles(header.column),
