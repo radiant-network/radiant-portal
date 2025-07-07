@@ -1935,6 +1935,12 @@ export interface VariantInterpretedCase {
     'interpretation_updated_on': string;
     /**
      * 
+     * @type {Array<Term>}
+     * @memberof VariantInterpretedCase
+     */
+    'observed_phenotypes'?: Array<Term>;
+    /**
+     * 
      * @type {string}
      * @memberof VariantInterpretedCase
      */
@@ -2244,6 +2250,12 @@ export interface VariantUninterpretedCase {
      * @memberof VariantUninterpretedCase
      */
     'created_on': string;
+    /**
+     * 
+     * @type {Array<Term>}
+     * @memberof VariantUninterpretedCase
+     */
+    'observed_phenotypes'?: Array<Term>;
     /**
      * 
      * @type {string}

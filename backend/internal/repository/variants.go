@@ -3,9 +3,8 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
-
 	"github.com/radiant-network/radiant-api/internal/utils"
+	"log"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -157,6 +156,11 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 		}
 	}
 
+	for i, interpreted := range variantInterpretedCases {
+		phenotypes := utils.PhenotypeUnparsedToJsonArrayOfTerms(interpreted.PhenotypesUnparsed)
+		variantInterpretedCases[i].Phenotypes = phenotypes
+	}
+
 	return &variantInterpretedCases, &count, nil
 }
 
@@ -204,6 +208,11 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		} else {
 			return nil, nil, nil
 		}
+	}
+
+	for i, uninterpreted := range variantUninterpretedCases {
+		phenotypes := utils.PhenotypeUnparsedToJsonArrayOfTerms(uninterpreted.PhenotypesUnparsed)
+		variantUninterpretedCases[i].Phenotypes = phenotypes
 	}
 
 	return &variantUninterpretedCases, &count, nil

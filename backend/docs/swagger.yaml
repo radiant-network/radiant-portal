@@ -873,6 +873,11 @@ components:
           type: string
         interpretation_updated_on:
           type: string
+        observed_phenotypes:
+          items:
+            $ref: '#/components/schemas/Term'
+          type: array
+          uniqueItems: false
         performer_lab_code:
           type: string
         performer_lab_name:
@@ -1015,6 +1020,11 @@ components:
           type: integer
         created_on:
           type: string
+        observed_phenotypes:
+          items:
+            $ref: '#/components/schemas/Term'
+          type: array
+          uniqueItems: false
         performer_lab_code:
           type: string
         performer_lab_name:
