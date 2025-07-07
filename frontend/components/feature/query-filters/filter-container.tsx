@@ -28,7 +28,7 @@ export function AccordionContainer({ field, isOpen, children, searchHandler }: A
 
   function renderTrigger() {
     return (
-      <div className="flex items-center justify-between w-full text-base">
+      <div className="flex items-center justify-between w-full text-sm">
         <span>{label}</span>
         {isOpen && searchHandler && (
           <SearchIcon size={18} className="z-40" aria-hidden onClick={searchHandler} />

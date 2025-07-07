@@ -43,7 +43,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
-  
+
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
     let prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
@@ -69,19 +69,25 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
 
       return aSelected ? -1 : 1;
     });
-    
+
     aggregationData?.forEach(item => {
       item.label = item.key?.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())
     })
 
     setItems(aggregationData || []);
     setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));
-  }, [aggregationData, items]);
+  }, [aggregationData, appId, field.key, maxVisibleItems]);
 
   // Memoize these functions with useCallback
   //
   const updateSearch = useCallback(
     (search: string) => {
+      if (!search.trim()) {
+        setItems(aggregationData || []);
+        setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));
+        return;
+      }
+
       const results = searchOptions(search, aggregationData!);
       if (maxVisibleItems > results.length) {
         setVisibleItemsCount(results.length);
@@ -90,7 +96,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
       }
       setItems(results);
     },
-    [items, visibleItemsCount, aggregationData],
+    [aggregationData, maxVisibleItems],
   );
 
   const showMore = useCallback(() => {
@@ -197,26 +203,26 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
             </div>
           ))
         ) : items.length === 0 ? (
-          <div className="text-muted-foreground text-center py-4">{t('common.filters.noValuesFound')}</div>
+          <div className="text-muted-foreground py-4">{t('common.filters.noValuesFound')}</div>
         ) : (
           // Actual content
           Array.from({ length: visibleItemsCount }, (_, i) => (
-            <div className="space-y-3 pt-2" key={items[i].key}>
-              <div className="flex justify-between items-top">
-                <label className="flex items-center space-x-2 overflow-hidden">
+            <div className="gap-3 py-1.5" key={items[i].key}>
+              <div className="flex justify-between">
+                <label className="flex gap-2 overflow-hidden items-start py-0.5">
                   <Checkbox
-                    className="w-4 h-4"
+                    className="w-4 h-4 py-0.5"
                     checked={selectedItems.some(f => f === items[i].key)}
                     onCheckedChange={() => itemSelected(items[i])}
                   />
-                  <div className="overflow-hidden text-xs whitespace-normal break-words">
-                    {t(`common.filters.labels.${field.key}_value.${items[i].key}`, 
+                  <div className="overflow-hidden whitespace-normal break-words text-xs">
+                    {t(`common.filters.labels.${field.key}_value.${items[i].key}`,
                       { defaultValue: items[i].label }
                     )}
                   </div>
                   <span className="checkmark"></span>
                 </label>
-                <span className="bg-accent px-2 pb-1 rounded-md text-xs items-top">{numberFormat(items[i].count || 0)}</span>
+                <span className="bg-accent px-2 h-5 rounded-md text-xs flex items-center">{numberFormat(items[i].count || 0)}</span>
               </div>
             </div>
           ))
