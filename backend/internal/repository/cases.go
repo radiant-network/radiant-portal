@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -81,7 +82,7 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 
 	subQueryMrn := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
 	subQueryMrn = subQueryMrn.Select("\"mrn\" as type, mrn as value")
-	subQueryMrn = subQueryMrn.Where("mrn LIKE ?", searchInput)
+	subQueryMrn = subQueryMrn.Where("LOWER(mrn) LIKE ?", strings.ToLower(searchInput))
 
 	//subQueryRequestId := r.db.Table(fmt.Sprintf("%s %s", types.RequestTable.Name, types.RequestTable.Alias))
 	//subQueryRequestId = subQueryRequestId.Select("\"request_id\" as type, id as value")
