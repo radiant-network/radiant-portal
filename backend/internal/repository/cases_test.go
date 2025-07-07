@@ -89,6 +89,22 @@ func Test_SearchById(t *testing.T) {
 	})
 }
 
+func Test_SearchById_CaseInsensitive(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		autocompleteResultLower, errLower := repo.SearchById("mrn", 5)
+		autocompleteResultUpper, errUpper := repo.SearchById("MRN", 5)
+		assert.NoError(t, errLower)
+		assert.NoError(t, errUpper)
+		assert.Equal(t, len(*autocompleteResultLower), len(*autocompleteResultUpper))
+		assert.Equal(t, (*autocompleteResultLower)[0].Value, (*autocompleteResultUpper)[0].Value)
+		assert.Equal(t, (*autocompleteResultLower)[1].Value, (*autocompleteResultUpper)[1].Value)
+		assert.Equal(t, (*autocompleteResultLower)[2].Value, (*autocompleteResultUpper)[2].Value)
+		assert.Equal(t, (*autocompleteResultLower)[3].Value, (*autocompleteResultUpper)[3].Value)
+		assert.Equal(t, (*autocompleteResultLower)[4].Value, (*autocompleteResultUpper)[4].Value)
+	})
+}
+
 func Test_GetCasesFilters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
