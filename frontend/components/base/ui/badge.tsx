@@ -5,7 +5,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 
 const badgeVariants = tv({
   slots: {
-    base: 'inline-flex items-center shadow-xs rounded-md transition-colors px-1.5 py-0.5 text-xs [&_svg]:size-3 gap-1 outline-none font-medium',
+    base: 'inline-flex items-center rounded-md transition-colors px-1.5 py-0.5 text-xs [&_svg]:size-3 gap-1 outline-none font-medium',
     closeIcon: '',
   },
   variants: {
