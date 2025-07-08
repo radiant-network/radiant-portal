@@ -234,6 +234,8 @@ components:
           type: boolean
         is_mane_select:
           type: boolean
+        locus:
+          type: string
         locus_id:
           type: string
         mother_calls:
@@ -288,6 +290,7 @@ components:
       - genotype_quality
       - gnomad_v3_af
       - hgvsg
+      - locus
       - locus_id
       - picked_consequences
       type: object

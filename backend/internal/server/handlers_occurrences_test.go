@@ -57,6 +57,7 @@ func (m *MockRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*
 func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurrence, error) {
 	return &types.ExpendedOccurrence{
 		LocusId:      "1000",
+		Locus:        "locus1",
 		Chromosome:   "1",
 		Hgvsg:        "hgvsg1",
 		SiftPred:     "T",
@@ -203,6 +204,7 @@ func Test_GetExpendedOccurrenceHandler(t *testing.T) {
 		"is_mane_plus":false,
 		"is_mane_select":false,
 		"locus_id":"1000",
+		"locus": "locus1",
 		"picked_consequences":["splice acceptor"], 
 		"revel_score":0.1, 
 		"sift_pred":"T", 

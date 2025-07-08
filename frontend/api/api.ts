@@ -518,6 +518,12 @@ export interface ExpendedOccurrence {
      * @type {string}
      * @memberof ExpendedOccurrence
      */
+    'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpendedOccurrence
+     */
     'locus_id': string;
     /**
      * 
