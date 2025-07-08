@@ -2063,6 +2063,57 @@ paths:
       summary: Get list of uninterpreted Cases for a germline variant
       tags:
       - variant
+  /variants/germline/{locus_id}/conditions/{panel_type}:
+    get:
+      description: Retrieve conditions for germline variant entity for a specific
+        gene panel
+      operationId: getGermlineVariantConditions
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Gene panel type
+        in: path
+        name: panel_type
+        required: true
+        schema:
+          enum:
+          - omim
+          - hpo
+          - orphanet
+          type: string
+      - description: Condition filter
+        in: query
+        name: filter
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantCasesFilters'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get conditions for germline variant entity for a specific gene panel
+      tags:
+      - variant
   /variants/germline/{locus_id}/consequences:
     get:
       description: Retrieve germline Variant Consequences for a given locus

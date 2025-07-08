@@ -202,7 +202,9 @@ CREATE TABLE IF NOT EXISTS `germline__snv__variant`
 create table IF NOT EXISTS hpo_gene_panel
 (
     symbol varchar(20)  NOT NULL,
-    panel  varchar(200) NOT NULL
+    panel  varchar(250) NOT NULL,
+    hpo_term_name  varchar(200) NOT NULL,
+    hpo_term_id  varchar(200) NOT NULL
 );
 
 create table IF NOT EXISTS hpo_term
@@ -229,6 +231,14 @@ CREATE TABLE IF NOT EXISTS omim_gene_panel
     `omim_phenotype_id` int NULL COMMENT ""
 ) ENGINE=OLAP
          DUPLICATE KEY(`symbol`, `panel`);
+
+create table orphanet_gene_panel
+(
+    symbol varchar(30)  NOT NULL,
+    panel  varchar(250) NOT NULL,
+    disorder_id bigint NULL,
+    type_of_inheritance array<varchar(200)> NULL
+);
 
 CREATE TABLE IF NOT EXISTS `staging_sequencing_experiment`
 (
@@ -293,6 +303,21 @@ VALUES
 ('BRAF','LEOPARD syndrome 3',164757, 613707, ['AD'], ['Autosomal dominant']),
 ('BRAC', 'Osteosarcoma', 191170, 259500, ['Smu'], ['Somatic mutation']),
 ('TML1', 'Leukemia/lymphoma, T-cell', 603769, 603769, null, null);
+
+INSERT INTO hpo_gene_panel (symbol, panel, hpo_term_name, hpo_term_id)
+VALUES
+    ('TP53', 'Colon cancer(HP:0003003)', 'Colon cancer','HP:0003003'),
+    ('BRAF','Acne(HP:0001061)','Acne', 'HP:0001061'),
+    ('BRAF','Brachydactyly(HP:0001156)','Brachydactyly', 'HP:0001156'),
+    ('BRAF','Epicanthus(HP:0000286)','Epicanthus', 'HP:0000286');
+
+
+INSERT INTO orphanet_gene_panel (symbol, panel, disorder_id, type_of_inheritance)
+VALUES
+    ('TP53', 'Familial pancreatic carcinoma', 3708,['Autosomal dominant','Multigenic/multifactorial']),
+    ('BRAF','Pilomyxoid astrocytoma',19660, ['Not applicable']),
+    ('BRAF','Cardiofaciocutaneous syndrome',1559, ['Autosomal dominant']),
+    ('BRAF','Classic hairy cell leukemia',10778, ['Unknown']);
 
 INSERT INTO mondo_term (id, name, term)
 VALUES
