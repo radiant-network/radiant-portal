@@ -40,13 +40,14 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
       </TooltipContent>
     </Tooltip>
   );
+
   return (
     <DetailSection title={t('occurrenceExpend.frequencies.title')}>
       <DetailItem title={affected} value="-" />
       <DetailItem title={nonAffected} value="-" />
       <DetailItem title={t('occurrenceExpend.frequencies.gnomad')} value={
         data.gnomad_v3_af ?
-          <AnchorLink size="sm" href={`https://gnomad.broadinstitute.org/variant/${data.locus_id}?dataset=gnomad_r3`}>
+          <AnchorLink size="sm" href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`} target="_blank">
             {toExponentialNotationAtThreshold(data.gnomad_v3_af)}
           </AnchorLink>
           : "-"
