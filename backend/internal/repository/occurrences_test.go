@@ -538,7 +538,7 @@ func Test_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_An
 			Content: types.SqonArray{
 				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
 				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
-				{Op: "in", Content: types.LeafContent{Field: "hpo_gene_panel", Value: []interface{}{"hpo_panel1"}}},
+				{Op: "in", Content: types.LeafContent{Field: "hpo_gene_panel", Value: []interface{}{"Colon cancer(HP:0003003)"}}},
 			},
 			Op: "and",
 		}
@@ -565,7 +565,7 @@ func Test_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_pane
 			Content: types.SqonArray{
 				{Op: ">", Content: types.LeafContent{Field: "impact_score", Value: []interface{}{2}}},
 				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
-				{Op: "in", Content: types.LeafContent{Field: "hpo_gene_panel", Value: []interface{}{"hpo_panel1"}}},
+				{Op: "in", Content: types.LeafContent{Field: "hpo_gene_panel", Value: []interface{}{"Colon cancer(HP:0003003)"}}},
 			},
 			Op: "and",
 		}

@@ -295,3 +295,35 @@ func GetGermlineVariantCasesFilters(repo repository.VariantsDAO) gin.HandlerFunc
 		c.JSON(http.StatusOK, filters)
 	}
 }
+
+// GetGermlineVariantConditions handles retrieving conditions for germline variant entity for a specific gene panel
+// @Summary Get conditions for germline variant entity for a specific gene panel
+// @Id getGermlineVariantConditions
+// @Description Retrieve conditions for germline variant entity for a specific gene panel
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Param panel_type path string true "Gene panel type" Enums(omim, hpo, orphanet)
+// @Param filter query string false "Condition filter"
+// @Produce json
+// @Success 200 {object} types.VariantCasesFilters
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/germline/{locus_id}/conditions/{panel_type} [get]
+func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
+		if errLocus != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		panelType := c.Param("panel_type")
+		filter := c.Query("filter")
+		genePanelConditions, err := repo.GetVariantGenePanelConditions(panelType, locusId, filter)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, genePanelConditions)
+	}
+}

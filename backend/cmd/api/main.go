@@ -67,6 +67,7 @@ func main() {
 	repoOccurrences := repository.NewOccurrencesRepository(dbStarrocks)
 	repoTerms := repository.NewTermsRepository(dbStarrocks)
 	repoCases := repository.NewCasesRepository(dbStarrocks)
+	repoGenePanels := repository.NewGenePanelsRepository(dbStarrocks)
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
 
@@ -139,6 +140,7 @@ func main() {
 	variantsGermlineGroup.GET("/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedGermlineVariantInterpretedCase(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repoVariants))
 	variantsGermlineGroup.GET("/cases/filters", server.GetGermlineVariantCasesFilters(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repoGenePanels))
 
 	casesGroup := r.Group("/cases")
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))

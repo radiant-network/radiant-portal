@@ -772,7 +772,7 @@ func assertGetExpendedVariantInterpretedCase(t *testing.T, data string, locusId 
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
-		router.GET("variants/germline/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedGermlineVariantInterpretedCase(repo))
+		router.GET("/variants/germline/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedGermlineVariantInterpretedCase(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/cases/interpreted/%d/%s", locusId, seqId, transcriptId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -801,7 +801,7 @@ func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
-		router.GET("variants/germline/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repo))
+		router.GET("/variants/germline/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/cases/count", locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -821,7 +821,7 @@ func assertGetVariantCasesFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
-		router.GET("variants/germline/cases/filters", server.GetGermlineVariantCasesFilters(repo))
+		router.GET("/variants/germline/cases/filters", server.GetGermlineVariantCasesFilters(repo))
 
 		req, _ := http.NewRequest("GET", "/variants/germline/cases/filters", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -855,6 +855,79 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"}]
 	}`
 	assertGetVariantCasesFilters(t, "simple", expected)
+}
+
+func assertGetGermlineVariantConditions(t *testing.T, data string, locusId int, panelType string, filter string, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewGenePanelsRepository(db)
+		router := gin.Default()
+		router.GET("/variants/germline/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repo))
+
+		filterParam := ""
+
+		if len(filter) > 0 {
+			filterParam = fmt.Sprintf("?filter=%s", filter)
+		}
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/conditions/%s%s", locusId, panelType, filterParam), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetGermlineVariantConditions_Omim(t *testing.T) {
+	expected := `{
+		"count":2, 
+		"conditions": {
+			"BRAF": [
+				{"inheritance_code":["AD"], "panel_id":"1111", "panel_name":"panel1"},
+				{"inheritance_code":["Smu"], "panel_id":"3333", "panel_name":"panel2"}
+			]
+		}
+	}`
+	assertGetGermlineVariantConditions(t, "gene_panels", 1000, "omim", "", expected)
+}
+
+func Test_GetGermlineVariantConditions_Hpo(t *testing.T) {
+	expected := `{
+		"count":3, 
+		"conditions": {
+			"BRAF": [
+				{"panel_id":"HP:0001061", "panel_name":"Acne"}, 
+				{"panel_id":"HP:0001156", "panel_name":"Brachydactyly"}, 
+				{"panel_id":"HP:0000286", "panel_name":"Epicanthus"}
+			]
+		}
+	}`
+	assertGetGermlineVariantConditions(t, "gene_panels", 1000, "hpo", "", expected)
+}
+
+func Test_GetGermlineVariantConditions_Hpo_WithFilter(t *testing.T) {
+	expected := `{
+		"count":1, 
+		"conditions": {
+			"BRAF": [
+				{"panel_id":"HP:0000286", "panel_name":"Epicanthus"}
+			]
+		}
+	}`
+	assertGetGermlineVariantConditions(t, "gene_panels", 1000, "hpo", "Canthus", expected)
+}
+
+func Test_GetGermlineVariantConditions_Orphanet(t *testing.T) {
+	expected := `{
+		"count":2, 
+		"conditions": {
+			"BRAF": [
+				{"inheritance_code":["AD"], "panel_id":"1111", "panel_name":"panel1"},
+				{"inheritance_code":["Smu"], "panel_id":"3333", "panel_name":"panel2"}
+			]
+		}
+	}`
+	assertGetGermlineVariantConditions(t, "gene_panels", 1000, "orphanet", "", expected)
 }
 
 func TestMain(m *testing.M) {

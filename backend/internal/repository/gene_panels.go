@@ -6,16 +6,18 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 	"log"
+	"strings"
 )
 
 type GenePanelCondition = types.GenePanelCondition
+type GenePanelConditions = types.GenePanelConditions
 
 type GenePanelsRepository struct {
 	db *gorm.DB
 }
 
 type GenePanelsDAO interface {
-	GetVariantGenePanelConditions(genePanelTable types.Table, locusId int) (*map[string][]GenePanelCondition, error)
+	GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*GenePanelConditions, error)
 }
 
 func NewGenePanelsRepository(db *gorm.DB) *GenePanelsRepository {
@@ -26,26 +28,30 @@ func NewGenePanelsRepository(db *gorm.DB) *GenePanelsRepository {
 	return &GenePanelsRepository{db: db}
 }
 
-func (r *GenePanelsRepository) GetVariantGenePanelConditions(genePanelTable types.Table, locusId int) (*map[string][]GenePanelCondition, error) {
+func (r *GenePanelsRepository) GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*GenePanelConditions, error) {
 	var genePanelConditions []GenePanelCondition
 	var genePanelConditionsPerSymbol = make(map[string][]GenePanelCondition)
+	like := fmt.Sprintf("%%%s%%", conditionFilter)
+	panelColumnName := "panel"
+
+	table, err := retrieveTableByPanelType(panelType)
+	if err != nil {
+		return nil, fmt.Errorf("error while fetching variant gene panel conditions: %s", err)
+	}
+
 	txGene := r.db.Table(types.ConsequenceTable.Name).Where("locus_id = ?", locusId).Distinct("symbol")
 
-	tx := r.db.Table(genePanelTable.Name)
+	tx := r.db.Table((*table).Name)
 	tx = tx.Where("symbol in (?)", txGene)
 
-	switch genePanelTable {
+	switch *table {
 	case types.OmimGenePanelTable:
 		tx = tx.Select("symbol, panel as panel_name, inheritance_code, omim_phenotype_id as panel_id")
 		break
 
 	case types.HpoGenePanelTable:
 		tx = tx.Select("symbol, hpo_term_name as panel_name, hpo_term_id as panel_id")
-		break
-
-	case types.DddGenePanelTable:
-	case types.CosmicGenePanelTable:
-		tx = tx.Select("symbol, panel as panel_name")
+		panelColumnName = "hpo_term_name"
 		break
 
 	case types.OrphanetGenePanelTable:
@@ -55,6 +61,12 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(genePanelTable type
 	default:
 		return nil, fmt.Errorf("error while fetching variant gene panel conditions: invalid table")
 	}
+
+	if len(conditionFilter) > 0 {
+		tx = tx.Where(fmt.Sprintf("LOWER(%s) like ?", panelColumnName), strings.ToLower(like))
+	}
+
+	tx = tx.Order("panel_name asc")
 
 	if err := tx.Find(&genePanelConditions).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -68,10 +80,28 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(genePanelTable type
 		if value, ok := genePanelConditionsPerSymbol[s.Symbol]; ok {
 			genePanelConditionsPerSymbol[s.Symbol] = append(value, s)
 		} else {
-			//genePanelConditionsList := make([]GenePanelCondition, 0)
-			//genePanelConditionsList = append(genePanelConditionsList, s)
 			genePanelConditionsPerSymbol[s.Symbol] = []GenePanelCondition{s}
 		}
 	}
-	return &genePanelConditionsPerSymbol, nil
+	return &GenePanelConditions{
+		Count:      len(genePanelConditions),
+		Conditions: genePanelConditionsPerSymbol,
+	}, nil
+}
+
+func retrieveTableByPanelType(panelType string) (*types.Table, error) {
+	switch panelType {
+	case "omim":
+		return &types.OmimGenePanelTable, nil
+	case "hpo":
+		return &types.HpoGenePanelTable, nil
+	case "ddd":
+		return &types.DddGenePanelTable, nil
+	case "cosmic":
+		return &types.CosmicGenePanelTable, nil
+	case "orphanet":
+		return &types.OrphanetGenePanelTable, nil
+	default:
+		return nil, fmt.Errorf("error while retrieving gene panel table: invalid panel type")
+	}
 }

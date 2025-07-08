@@ -52,6 +52,11 @@ var GenePanelsTables = []Table{HpoGenePanelTable, OmimGenePanelTable, DddGenePan
 type GenePanelCondition = struct {
 	Symbol          string            `json:"-"`
 	PanelName       string            `json:"panel_name" validate:"required"`
-	InheritanceCode JsonArray[string] `gorm:"type:json" json:"inheritance_code" validate:"required"`
-	PanelID         string            `json:"panel_id"`
+	InheritanceCode JsonArray[string] `gorm:"type:json" json:"inheritance_code,omitempty"`
+	PanelID         string            `json:"panel_id,omitempty"`
+}
+
+type GenePanelConditions = struct {
+	Count      int                             `json:"count" validate:"required"`
+	Conditions map[string][]GenePanelCondition `json:"conditions" validate:"required"`
 }

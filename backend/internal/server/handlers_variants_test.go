@@ -142,6 +142,17 @@ func (m *MockRepository) GetVariantCasesFilters() (*types.VariantCasesFilters, e
 	}, nil
 }
 
+func (m *MockRepository) GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*types.GenePanelConditions, error) {
+	conditions := make(map[string][]types.GenePanelCondition)
+	conditions["BRAF"] = []types.GenePanelCondition{{Symbol: "BRAF", PanelName: "Name 1", PanelID: "1"}, {Symbol: "BRAF", PanelName: "Name 2", PanelID: "2"}}
+	conditions["BRCA2"] = []types.GenePanelCondition{{Symbol: "BRCA2", PanelName: "Name 3", PanelID: "3", InheritanceCode: []string{"AD", "AR"}}}
+
+	return &types.GenePanelConditions{
+		Count:      3,
+		Conditions: conditions,
+	}, nil
+}
+
 func Test_GetVariantHeaderHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -396,5 +407,24 @@ func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {
 			{"count": 0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
 			{"count": 0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		]
+	}`, w.Body.String())
+}
+
+func Test_GetGermlineVariantConditions(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/germline/:locus_id/conditions/:panel_type", GetGermlineVariantConditions(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/conditions/omim", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"count":3, 
+		"conditions": { 
+			"BRAF": [{"panel_id":"1", "panel_name":"Name 1"}, {"panel_id":"2", "panel_name":"Name 2"}], 
+			"BRCA2": [{"panel_id":"3", "panel_name":"Name 3", "inheritance_code": ["AD", "AR"]}]
+		}
 	}`, w.Body.String())
 }
