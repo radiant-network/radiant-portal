@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/radiant-network/radiant-api/internal/types"
+	"strings"
 )
 
 func ConsequenceToTranscript(csq types.Consequence) types.Transcript {
@@ -59,4 +60,16 @@ func ConsequencesToVariantConsequences(consequences []types.Consequence) []types
 	}
 
 	return SortConsequences(variantConsequences)
+}
+
+func PhenotypeUnparsedToJsonArrayOfTerms(unparsedPhenotype string) types.JsonArray[types.Term] {
+	phenotypes := make(types.JsonArray[types.Term], 0)
+	if len(unparsedPhenotype) > 0 {
+		phenotypesUnparsedArray := strings.Split(unparsedPhenotype, "|")
+		for _, phenotypeUnparsed := range phenotypesUnparsedArray {
+			phenotype := strings.Split(phenotypeUnparsed, "__")
+			phenotypes = append(phenotypes, types.Term{ID: phenotype[0], Name: phenotype[1]})
+		}
+	}
+	return phenotypes
 }

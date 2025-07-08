@@ -3,9 +3,8 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
-
 	"github.com/radiant-network/radiant-api/internal/utils"
+	"log"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -120,6 +119,8 @@ func (r *VariantsRepository) GetVariantConsequences(locusId int) (*[]VariantCons
 func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error) {
 	var count int64
 
+	txAggPhenotypes := utils.GetAggregatedPhenotypes(r.db)
+
 	tx := r.db.Table("`radiant_jdbc`.`public`.`interpretation_germline` ig")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON ig.sequencing_id = o.seq_id and ig.locus_id = o.locus_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
@@ -127,6 +128,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = ig.condition")
+	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = c.proband_id", txAggPhenotypes)
 
 	tx = tx.Where("o.locus_id = ?", locusId)
 	if userQuery != nil {
@@ -141,7 +143,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 		}
 	}
 
-	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, ig.classification, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
+	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, ig.classification, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code, agg_phenotypes.phenotypes_term as phenotypes_unparsed")
 
 	utils.AddLimitAndSort(tx, userQuery)
 
@@ -154,6 +156,11 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 		}
 	}
 
+	for i, interpreted := range variantInterpretedCases {
+		phenotypes := utils.PhenotypeUnparsedToJsonArrayOfTerms(interpreted.PhenotypesUnparsed)
+		variantInterpretedCases[i].Phenotypes = phenotypes
+	}
+
 	return &variantInterpretedCases, &count, nil
 }
 
@@ -164,6 +171,8 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		return &[]VariantUninterpretedCase{}, &count, nil
 	}
 
+	txAggPhenotypes := utils.GetAggregatedPhenotypes(r.db)
+
 	locusIdString := fmt.Sprintf("%d", locusId)
 	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline").Select("sequencing_id").Where("locus_id = ?", locusIdString)
 
@@ -173,6 +182,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
+	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = c.proband_id", txAggPhenotypes)
 	tx = tx.Where("o.locus_id = ? AND s.id NOT IN (?)", locusId, txInterpreted)
 
 	if userQuery != nil {
@@ -187,7 +197,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		}
 	}
 
-	tx = tx.Select("c.id as case_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, mondo.name as primary_condition_name, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code")
+	tx = tx.Select("c.id as case_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, mondo.name as primary_condition_name, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code, agg_phenotypes.phenotypes_term as phenotypes_unparsed")
 
 	utils.AddLimitAndSort(tx, userQuery)
 
@@ -198,6 +208,11 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		} else {
 			return nil, nil, nil
 		}
+	}
+
+	for i, uninterpreted := range variantUninterpretedCases {
+		phenotypes := utils.PhenotypeUnparsedToJsonArrayOfTerms(uninterpreted.PhenotypesUnparsed)
+		variantUninterpretedCases[i].Phenotypes = phenotypes
 	}
 
 	return &variantUninterpretedCases, &count, nil

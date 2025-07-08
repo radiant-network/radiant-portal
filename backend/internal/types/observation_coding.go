@@ -21,6 +21,18 @@ var ObservationCodingTable = Table{
 	Name: "radiant_jdbc.public.observation_coding",
 }
 
+var ObservationCodingAggregatedTmpTable = Table{
+	Name:  "agg_phenotypes",
+	Alias: "agg_phenotypes",
+}
+
+var AggregatedPhenotypeTermField = Field{
+	Name:          "phenotypes_term",
+	Alias:         "phenotypes_term",
+	CanBeFiltered: true,
+	Table:         ObservationCodingAggregatedTmpTable,
+}
+
 func (ObservationCoding) TableName() string {
 	return ObservationCodingTable.Name
 }

@@ -106,3 +106,16 @@ func Test_ConsequencesToVariantConsequences(t *testing.T) {
 	assert.Equal(t, "CCC", variantConsequences[2].Symbol)
 	assert.Equal(t, 1, len(variantConsequences[2].Transcripts))
 }
+
+func Test_PhenotypeUnparsedToJsonArrayOfTerms(t *testing.T) {
+	assert.Equal(t, 0, len(PhenotypeUnparsedToJsonArrayOfTerms("")))
+
+	input := "HP:0100622__Maternal seizure|HP:0001562__Oligohydramnios"
+	phenotypes := PhenotypeUnparsedToJsonArrayOfTerms(input)
+
+	assert.Equal(t, 2, len(phenotypes))
+	assert.Equal(t, "HP:0100622", phenotypes[0].ID)
+	assert.Equal(t, "Maternal seizure", phenotypes[0].Name)
+	assert.Equal(t, "HP:0001562", phenotypes[1].ID)
+	assert.Equal(t, "Oligohydramnios", phenotypes[1].Name)
+}
