@@ -624,6 +624,7 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 		expendedOccurrence, err := repo.GetExpendedOccurrence(1, 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, "1000", expendedOccurrence.LocusId)
+		assert.Equal(t, "locus1", expendedOccurrence.Locus)
 		assert.Equal(t, float32(0.1), expendedOccurrence.SiftScore)
 		assert.Equal(t, "T", expendedOccurrence.SiftPred)
 	})

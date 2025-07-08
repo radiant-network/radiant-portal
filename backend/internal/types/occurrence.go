@@ -35,6 +35,7 @@ type Occurrence struct {
 type ExpendedOccurrence = struct {
 	LocusId               string                   `json:"locus_id" validate:"required"`
 	Hgvsg                 string                   `json:"hgvsg" validate:"required"`
+	Locus                 string                   `json:"locus" validate:"required"`
 	Chromosome            string                   `json:"chromosome"`
 	Start                 int64                    `json:"start,omitempty"`
 	End                   int64                    `json:"end,omitempty"`
