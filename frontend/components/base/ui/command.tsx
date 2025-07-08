@@ -48,7 +48,7 @@ function CommandInput({
   return (
     <div
       className={cn(
-        'flex h-9 items-center px-3 bg-background rounded-md border-border border-b rounded-b-none enabled:focus-within:ring-1 enabled:focus-within:ring-ring',
+        'flex h-9 items-center px-3 bg-background rounded-md border enabled:focus-within:ring-1 enabled:focus-within:ring-ring',
         wrapperClassName,
         {
           'cursor-not-allowed opacity-50': disabled,

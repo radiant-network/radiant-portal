@@ -99,10 +99,11 @@ export default function FilterButton({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[229px] max-h-[240px] p-0 flex flex-col" align="start">
-        <Command className="flex flex-col">
+        <Command className="flex flex-col border-border border-0 border-b-none rounded-b-none">
           <CommandInput
             placeholder={placeholder || label || 'Search...'}
             leftAddon={<Search size={16} className="text-muted-foreground mr-1" />}
+            wrapperClassName="shrink-0 h-10 border-t-0 border-l-0 border-b-1 border-r-0 border-color-border rounded-none"
           />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
@@ -166,7 +167,6 @@ export default function FilterButton({
           </CommandList>
         </Command>
         {selectedCount !== 0 && !actionMode && (
-          <div className="px-1 pb-1">
             <Button
               variant="ghost"
               size="sm"
@@ -176,7 +176,6 @@ export default function FilterButton({
             >
               Clear
             </Button>
-          </div>
         )}
       </PopoverContent>
     </Popover>

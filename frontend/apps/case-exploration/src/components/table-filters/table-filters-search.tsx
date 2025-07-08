@@ -104,7 +104,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
         {t('caseExploration.filtersGroup.searchById')}
       </label>
       <Command
-        className="relative h-8 w-[260px] overflow-visible"
+       className="relative h-8 w-[260px] overflow-visible"
         shouldFilter={false}
       >
         <CommandInput
