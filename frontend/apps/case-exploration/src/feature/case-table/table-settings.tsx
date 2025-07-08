@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { CaseResult } from '@/api/api';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import LinkCell from '@/components/base/data-table/cells/link-cell';
+import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import PhenotypeConditionLinkCell, { PhenotypeType } from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import DateCell from '@/components/base/data-table/cells/date-cell';
@@ -20,7 +20,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // case
     columnHelper.accessor(row => row.case_id, {
       id: 'case_id',
-      cell: info => <LinkCell url={`/cases/entity/${info.row.original.case_id}`}>{info.getValue()}</LinkCell>,
+      cell: info => <AnchorLinkCell url={`/cases/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>,
       header: t('caseExploration.case.headers.case_id'),
       size: 124,
       minSize: 124,

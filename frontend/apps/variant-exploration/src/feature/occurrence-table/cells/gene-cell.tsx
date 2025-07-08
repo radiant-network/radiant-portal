@@ -6,6 +6,7 @@ import { queryBuilderRemote } from '@/components/model/query-builder-core/query-
 import { useConfig } from '@/components/model/applications-config';
 import { MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type GeneCellProps = {
   className?: string;
@@ -26,9 +27,9 @@ function GeneCell({ className, symbol }: GeneCellProps) {
 
   return (
     <div className={cn('flex items-center gap-1', className)}>
-      <a href={getOmimOrgUrl({ symbol })} className="underline hover:no-underline" target="_blank">
+      <AnchorLink size="sm" variant='secondary' href={getOmimOrgUrl({ symbol })} target="_blank">
         {symbol}
-      </a>
+      </AnchorLink>
       <Button
         size="xs"
         variant="ghost"

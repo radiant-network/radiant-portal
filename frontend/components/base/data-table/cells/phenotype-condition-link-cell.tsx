@@ -1,3 +1,5 @@
+import AnchorLink from "../../navigation/anchor-link";
+
 const MONDO_URL = 'http://purl.obolibrary.org/obo/MONDO';
 const HPO_URL = '';
 
@@ -23,7 +25,14 @@ function PhenotypeConditionLinkCell({ type, code, name }: PhenotypeConditionLink
   return (
     <span>
       {name}{' '}
-      (<a className="underline" href={getBaseUrl(type, code)} target="_blank">{code}</a>)
+      (<AnchorLink
+        className="inline-flex"
+        size="sm"
+        variant="secondary"
+        href={getBaseUrl(type, code)}
+        target="_blank">
+        {code}
+      </AnchorLink>)
     </span>
   );
 }

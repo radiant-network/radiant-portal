@@ -47,7 +47,7 @@ export const anchorLinkVariants = tv({
   },
 });
 
-type AnchorLinkProps<C extends React.ElementType> = {
+export type AnchorLinkProps<C extends React.ElementType> = {
   component?: C;
   className?: string;
   children: React.ReactNode;
