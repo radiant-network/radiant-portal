@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS omim_gene_panel
 ) ENGINE=OLAP
          DUPLICATE KEY(`symbol`, `panel`);
 
-create table orphanet_gene_panel
+CREATE TABLE IF NOT EXISTS orphanet_gene_panel
 (
     symbol varchar(30)  NOT NULL,
     panel  varchar(250) NOT NULL,
