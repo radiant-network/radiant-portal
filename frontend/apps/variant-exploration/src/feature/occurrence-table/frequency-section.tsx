@@ -5,6 +5,7 @@ import { Diamond } from 'lucide-react';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 
 type FrequencySectionProps = {
   data: ExpendedOccurrence;
@@ -45,7 +46,9 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
       <DetailItem title={nonAffected} value="-" />
       <DetailItem title={t('occurrenceExpend.frequencies.gnomad')} value={
         data.gnomad_v3_af ?
-          <AnchorLink size="sm" href={`https://gnomad.broadinstitute.org/variant/${data.locus_id}?dataset=gnomad_r3`}>{data.gnomad_v3_af}</AnchorLink>
+          <AnchorLink size="sm" href={`https://gnomad.broadinstitute.org/variant/${data.locus_id}?dataset=gnomad_r3`}>
+            {toExponentialNotationAtThreshold(data.gnomad_v3_af)}
+          </AnchorLink>
           : "-"
       } />
     </DetailSection>

@@ -3,14 +3,12 @@ import DetailSection, { DetailItem } from './detail-section';
 import { ExpendedOccurrence } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 
 interface GeneSectionProps {
   data: ExpendedOccurrence;
 }
 
-function formatGnomad(value: number) {
-  return (value < 0.001) ? value.toExponential(2) : value;
-}
 
 export default function GeneSection({ data }: GeneSectionProps) {
   const { t } = useI18n();
@@ -21,7 +19,7 @@ export default function GeneSection({ data }: GeneSectionProps) {
         value={
           data.gnomad_pli ?
             <AnchorLink href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`} target='_blank' size="sm">
-              {formatGnomad(data.gnomad_pli)}
+              {toExponentialNotationAtThreshold(data.gnomad_pli)}
             </AnchorLink>
             : '-'
         }
@@ -31,7 +29,7 @@ export default function GeneSection({ data }: GeneSectionProps) {
         value={
           data.gnomad_loeuf ?
             <AnchorLink href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`} target='_blank' size="sm">
-              {formatGnomad(data.gnomad_loeuf)}
+              {toExponentialNotationAtThreshold(data.gnomad_loeuf)}
             </AnchorLink>
             : '-'
         }
