@@ -76,15 +76,12 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
   const [isPinningDropdownActive, setIsPinningDropdownActive] = useState<boolean>(false);
 
   const hasActions = header.column.getCanPin() || header.column.getCanSort();
+  const isSorted = header.column.getIsSorted();
 
   if (!hasActions) return null;
 
   return (
-    <div
-      className={cn('hidden items-center gap-0.5 group-hover/header:flex', {
-        flex: isPinningDropdownActive,
-      })}
-    >
+    <div className="flex items-center gap-0.5">
       {/* Pin/Unpin column */}
       {header.column.getCanPin() && (
         <DropdownMenu onOpenChange={open => setIsPinningDropdownActive(open)}>
@@ -92,8 +89,8 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6', {
-                'opacity-0 group-hover:opacity-100': !isPinningDropdownActive,
+              className={cn('size-6 hidden group-hover/header:flex', {
+                flex: isPinningDropdownActive,
               })}
             >
               <Pin />
@@ -122,11 +119,18 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
       {header.column.getCanSort() && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" iconOnly className="size-6" onClick={header.column.getToggleSortingHandler()}>
+            <Button
+              variant="ghost"
+              iconOnly
+              className={cn('size-6 hidden group-hover/header:flex', {
+                flex: isSorted,
+              })}
+              onClick={header.column.getToggleSortingHandler()}
+            >
               {{
                 asc: <ArrowDown size={16} />,
                 desc: <ArrowUp size={16} />,
-              }[header.column.getIsSorted() as string] ?? <ArrowDownUp />}
+              }[isSorted as string] ?? <ArrowDownUp />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
