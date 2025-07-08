@@ -53,6 +53,10 @@ export function toExponentialNotation(numberCandidate?: number, fractionDigits =
   return numberCandidate ? numberCandidate.toExponential(fractionDigits) : '';
 }
 
+export function toExponentialNotationAtThreshold(numberCandidate: number, threshold = 0.001, fractionDigits = 2): string {
+  return (numberCandidate < threshold) ? toExponentialNotation(numberCandidate, fractionDigits) : numberCandidate.toString();
+}
+
 export function canQuotientBeComputed(num: number, denum: number): boolean {
   const areNumbers = !isNaN(num) && !isNaN(denum);
   return areNumbers && denum !== 0;
