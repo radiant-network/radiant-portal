@@ -7,7 +7,7 @@ import FilterButton, { IFilterButtonItem } from '@/components/base/buttons/filte
 const meta: Meta<typeof FilterButton> = {
   title: 'Base/Buttons/Filter Button',
   component: FilterButton,
-  args: { 
+  args: {
     label: 'Filter',
     selected: [],
     options: [],
@@ -30,33 +30,37 @@ const basicOptions: IFilterButtonItem[] = [
 
 // Mock data for long text with tooltips
 const longTextOptions: IFilterButtonItem[] = [
-  { 
-    key: 'cardiovascular_disease', 
+  {
+    key: 'cardiovascular_disease',
     label: 'Cardiovascular Disease and Related Conditions Including Hypertension',
-    tooltip: 'This includes all forms of cardiovascular disease including coronary artery disease, heart failure, arrhythmias, and hypertension-related conditions.',
+    tooltip:
+      'This includes all forms of cardiovascular disease including coronary artery disease, heart failure, arrhythmias, and hypertension-related conditions.',
     count: 156,
-    icon: Users
+    icon: Users,
   },
-  { 
-    key: 'diabetes_complications', 
+  {
+    key: 'diabetes_complications',
     label: 'Diabetes Mellitus Type 2 with Complications and Comorbidities',
-    tooltip: 'Type 2 diabetes with various complications such as diabetic nephropathy, retinopathy, neuropathy, and associated cardiovascular risks.',
+    tooltip:
+      'Type 2 diabetes with various complications such as diabetic nephropathy, retinopathy, neuropathy, and associated cardiovascular risks.',
     count: 89,
-    icon: Database
+    icon: Database,
   },
-  { 
-    key: 'respiratory_conditions', 
+  {
+    key: 'respiratory_conditions',
     label: 'Chronic Respiratory Conditions Including COPD and Asthma',
-    tooltip: 'Chronic obstructive pulmonary disease, asthma, and other long-term respiratory conditions requiring ongoing management.',
+    tooltip:
+      'Chronic obstructive pulmonary disease, asthma, and other long-term respiratory conditions requiring ongoing management.',
     count: 67,
-    icon: FileText
+    icon: FileText,
   },
-  { 
-    key: 'neurological_disorders', 
+  {
+    key: 'neurological_disorders',
     label: 'Neurological Disorders and Neurodegenerative Conditions',
-    tooltip: 'Includes Alzheimer\'s disease, Parkinson\'s disease, multiple sclerosis, and other neurological conditions.',
+    tooltip:
+      "Includes Alzheimer's disease, Parkinson's disease, multiple sclerosis, and other neurological conditions.",
     count: 34,
-    icon: Settings
+    icon: Settings,
   },
 ];
 
@@ -71,14 +75,8 @@ const actionOptions: IFilterButtonItem[] = [
 // Interactive wrapper component for state management
 const InteractiveFilterButton = ({ initialSelected = [], ...props }: any) => {
   const [selected, setSelected] = useState<string[]>(initialSelected);
-  
-  return (
-    <FilterButton
-      {...props}
-      selected={selected}
-      onSelect={setSelected}
-    />
-  );
+
+  return <FilterButton {...props} selected={selected} onSelect={setSelected} />;
 };
 
 export const WithCheckboxList: Story = {
@@ -104,7 +102,7 @@ export const WithLongTextAndTooltips: Story = {
         options={longTextOptions}
         placeholder="Search conditions..."
         withTooltip={true}
-        icon={<Users className="w-4 h-4" />}
+        icon={<Users className="size-4" />}
       />
     </div>
   ),
@@ -120,7 +118,7 @@ export const ActionMode: Story = {
         actionMode={true}
         closeOnSelect={true}
         placeholder="Search actions..."
-        icon={<Settings className="w-4 h-4" />}
+        icon={<Settings className="size-4" />}
       />
     </div>
   ),
@@ -135,10 +133,10 @@ export const AllVariants: Story = {
           label="Status"
           options={basicOptions}
           placeholder="Search status..."
-          icon={<Filter className="w-4 h-4" />}
+          icon={<Filter className="size-4" />}
         />
       </div>
-      
+
       <div>
         <h3 className="mb-4 text-lg font-semibold">Long Text with Tooltips</h3>
         <InteractiveFilterButton
@@ -146,10 +144,10 @@ export const AllVariants: Story = {
           options={longTextOptions}
           placeholder="Search conditions..."
           withTooltip={true}
-          icon={<Users className="w-4 h-4" />}
+          icon={<Users className="size-4" />}
         />
       </div>
-      
+
       <div>
         <h3 className="mb-4 text-lg font-semibold">Action Mode</h3>
         <InteractiveFilterButton
@@ -174,7 +172,7 @@ export const WithPreselectedItems: Story = {
         options={basicOptions}
         initialSelected={['option1', 'option3']}
         placeholder="Search status..."
-        icon={<Filter className="w-4 h-4" />}
+        icon={<Filter className="size-4" />}
       />
     </div>
   ),
@@ -189,8 +187,8 @@ export const OpenOnAppear: Story = {
         options={basicOptions}
         isOpen={true}
         placeholder="Search..."
-        icon={<Filter className="w-4 h-4" />}
+        icon={<Filter className="size-4" />}
       />
     </div>
   ),
-}; 
+};
