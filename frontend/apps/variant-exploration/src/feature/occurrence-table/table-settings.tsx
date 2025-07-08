@@ -5,7 +5,7 @@ import RowSelectionCell from '@/components/base/data-table/cells/row-selection-c
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import GeneCell from '@/feature/occurrence-table/cells/gene-cell';
-import LinkCell from '@/components/base/data-table/cells/link-cell';
+import AnchorLinkWithTooltipsCell from '@/components/base/data-table/cells/anchor-link-with-tooltips-cell';
 import ManeCell from '@/feature/occurrence-table/cells/mane-cell';
 import ClinvarCell from '@/feature/occurrence-table/cells/clinvar-cell';
 import ParticipantFrequencyCell from '@/feature/occurrence-table/cells/participant-frequency-cell';
@@ -56,7 +56,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     }),
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
-      cell: info => <LinkCell url={`/variants/entity/${info.row.original.locus_id}`}>{info.getValue()}</LinkCell>,
+      cell: info => <AnchorLinkWithTooltipsCell href={`/variants/entity/${info.row.original.locus_id}`}>{info.getValue()}</AnchorLinkWithTooltipsCell>,
       header: t('variant.headers.hgvsg'),
       size: 150,
       minSize: 120,
