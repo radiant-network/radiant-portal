@@ -1,6 +1,6 @@
-symbol	panel
-BRAF	panel1
-TP53	panel1
-BRAF	panel2
-TP53	panel3
-TML1	panel4
+symbol	panel	omim_phenotype_id	inheritance_code
+BRAF	panel1	1111	["AD"]
+TP53	panel1	2222	["AR"]
+BRAF	panel2	3333	["Smu"]
+TP53	panel3	4444	["AR"]
+TML1	panel4	5555	["AD"]
