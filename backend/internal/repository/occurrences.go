@@ -67,6 +67,7 @@ func (r *OccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQu
 	var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
+	columns = append(columns, "CASE WHEN i.locus_id IS NOT NULL THEN TRUE ELSE FALSE END AS has_interpretation")
 
 	utils.AddLimitAndSort(tx, userQuery)
 	// we build a TOP-N query like :
@@ -75,7 +76,8 @@ func (r *OccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQu
 	//	SELECT o.locus_id FROM germline__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND o.seq_id=? AND o.part=? AND v.locus_id=o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("o.locus_id")
-	tx = r.db.Table("germline__snv__occurrence o, germline__snv__variant v").
+	tx = r.db.Table("(germline__snv__occurrence o, germline__snv__variant v)").
+		Joins("LEFT JOIN (SELECT DISTINCT locus_id FROM radiant_jdbc.public.interpretation_germline) i on i.locus_id = o.locus_id").
 		Select(columns).
 		Where("o.seq_id = ? and part=? and v.locus_id = o.locus_id and o.locus_id in (?)", seqId, part, tx)
 
