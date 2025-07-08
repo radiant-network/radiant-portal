@@ -85,6 +85,7 @@ function App() {
           'symbol',
           'vep_impact',
           'is_mane_select',
+          'is_canonical',
           'omim_inheritance_code',
           'clinvar',
           'pf_wgs',

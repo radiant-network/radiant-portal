@@ -51,6 +51,7 @@ type AnchorLinkProps<C extends React.ElementType> = {
   component?: C;
   className?: string;
   children: React.ReactNode;
+  external?: boolean;
 } & Omit<React.ComponentPropsWithoutRef<C>, 'className' | 'children'> &
   VariantProps<typeof anchorLinkVariants>;
 
@@ -61,6 +62,7 @@ function AnchorLink<C extends React.ElementType = 'a'>({
   size,
   variant,
   mono,
+  external = false,
   ...props
 }: AnchorLinkProps<C>) {
   const Component = component || 'a';
@@ -69,7 +71,8 @@ function AnchorLink<C extends React.ElementType = 'a'>({
   return (
     <Component className={styles.base({ className })} {...props}>
       {children}
-      <ExternalLink className={styles.icon()} />
+      {external && <ExternalLink className={styles.icon()} />}
+
     </Component>
   );
 }

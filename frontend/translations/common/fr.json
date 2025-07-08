@@ -3,6 +3,7 @@
     "date": "yyyy-MM-dd",
     "unspecified": "Indéterminée",
     "noDataAvailable": "Aucune donnée disponible",
+    "save": "Sauvegarder",
     "editor": {
       "headings": {
         "normal": "Normal",
@@ -614,6 +615,10 @@
       "generic": {
         "interpretation": "Interprétation",
         "pubMedPublication": "Publication PubMed",
+        "pubMedPublication_popover": {
+          "enter": "Entrer un",
+          "pmid": "PMID"
+        },
         "pubMedIdNotFound": "PMID invalide ou inconnu",
         "citation-placeholder": "Ex : 25741868",
         "addCitation": "Ajouter une publication"
@@ -624,6 +629,11 @@
         "condition-popover": "Rechercher une condition médicale dans",
         "condition-popover-link": "l'ontologie MONDO",
         "classification": "Classification ACMG/AMP",
+        "classification_popover": {
+          "consult": "Consulter les ",
+          "standards_and_guidelines": "normes et les lignes directrices",
+          "variant_interpretation": "pour l’interprétation des variantes"
+        },
         "classification-options": {
           "pathogenic": "Pathogénique",
           "likelyPathogenic": "Prob. pathogénique",
@@ -905,5 +915,10 @@
       "documentation": "Documentation",
       "contact": "Contact"
     }
+  },
+  "occurence": {
+    "canonical": "Canonical",
+    "mane_select": "Mane Select",
+    "mane_plus": "Mane Plus"
   }
 }

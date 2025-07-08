@@ -16,7 +16,7 @@ export type InterpretationFormProps<T> = {
 };
 
 export const genericInterpretationFormSchema = z.object({
-  interpretation: z.string().min(1, 'Required'),
+  interpretation: z.string().min(1, 'This field is required'),
   pubmed: (
     z.object({
       citation: z.string(),
@@ -31,10 +31,10 @@ export type GenericInterpretationSchemaType = z.infer<typeof genericInterpretati
 
 export const germlineInterpretationFormSchema = (
   z.object({
-    classification: z.string().min(1, 'Required'),
-    classification_criterias: z.string().array().min(1, 'Required'),
-    condition: z.string().min(1, 'Required'),
-    transmission_modes: z.string().array().min(1, 'Required'),
+    classification: z.string().min(1, 'This field is required'),
+    classification_criterias: z.string().array().min(1, 'This field is required'),
+    condition: z.string().min(1, 'This field is required'),
+    transmission_modes: z.string().array().min(1, 'This field is required'),
   }) satisfies ZodSchema<InterpretationGermline>
 ).merge(genericInterpretationFormSchema);
 
@@ -42,10 +42,10 @@ export type GermlineInterpretationSchemaType = z.infer<typeof germlineInterpreta
 
 export const somaticInterpretationFormSchema = (
   z.object({
-    tumoral_type: z.string().min(1, 'Required'),
-    clinical_utility: z.string().min(1, 'Required'),
-    oncogenicity: z.string().min(1, 'Required'),
-    oncogenicity_classification_criterias: z.string().array().min(1, 'Required'),
+    tumoral_type: z.string().min(1, 'This field is required'),
+    clinical_utility: z.string().min(1, 'This field is required'),
+    oncogenicity: z.string().min(1, 'This field is required'),
+    oncogenicity_classification_criterias: z.string().array().min(1, 'This field is required'),
   }) satisfies ZodSchema<InterpretationSomatic>
 ).merge(genericInterpretationFormSchema);
 

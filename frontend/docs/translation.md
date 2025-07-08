@@ -127,6 +127,23 @@ const Header = () => {
    - Use dot notation for nested keys
    - Keep keys short but descriptive
    - Use consistent naming patterns
+   - Use `snake_case` when nesting can be overkill
+```json
+{
+	"field": {
+		"name": "Your Name",
+		"name_tooltips": "Write your name right here"
+	}
+}
+```
+   - Use `snake_case` to match api's variable
+```json
+{
+	"field": {
+		"field_from_api": "Your Name",
+	}
+}
+```
 
 2. **Organization**
    - Group related translations under common keys

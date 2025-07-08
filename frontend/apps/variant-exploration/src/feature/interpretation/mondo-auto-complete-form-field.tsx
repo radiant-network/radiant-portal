@@ -1,5 +1,9 @@
 import { useCallback, useState } from 'react';
-import { GermlineInterpretationSchemaType, SomaticInterpretationSchemaType } from './types';
+import {
+  germlineInterpretationFormSchema,
+  GermlineInterpretationSchemaType,
+  SomaticInterpretationSchemaType,
+} from './types';
 import { useFormContext } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
@@ -48,6 +52,7 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
 
   return (
     <FormField
+      schema={germlineInterpretationFormSchema}
       control={form.control}
       name={name}
       render={({ field }) => (
@@ -56,7 +61,7 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
             infoCardContent={
               <div className="leading-6">
                 {t('variant.interpretationForm.germline.condition-popover')}{' '}
-                <AnchorLink href="https://www.ebi.ac.uk/ols4/ontologies/mondo" target="_blank" size="sm">
+                <AnchorLink href="https://www.ebi.ac.uk/ols4/ontologies/mondo" target="_blank" size="sm" external>
                   {t('variant.interpretationForm.germline.condition-popover-link')}
                 </AnchorLink>
               </div>

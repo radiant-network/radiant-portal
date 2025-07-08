@@ -20,6 +20,7 @@ const meta = {
     },
   },
   args: {
+    external: true,
     size: 'default',
     variant: 'primary',
     mono: false,

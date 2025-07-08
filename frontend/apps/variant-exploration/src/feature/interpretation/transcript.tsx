@@ -1,12 +1,13 @@
-import { Occurrence } from '@/api/api';
 import { Separator } from '@/components/base/ui/separator';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+import { ExpendedOccurrence } from '@/api/api';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type InterpretationTranscriptProps = {
-  occurrence: Occurrence;
+  occurrence?: ExpendedOccurrence;
 };
 
 function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps) {
@@ -15,16 +16,16 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
   return (
     <div className="flex items-center rounded-sm gap-4 border p-3">
       <span className="font-semibold text-base">
-        {occurrence.symbol ? (
-          <a
+        {occurrence?.symbol ? (
+          <AnchorLink
             href={getOmimOrgUrl({ symbol: occurrence.symbol })}
             target="_blank"
             rel="noreferrer"
-            className="hover:underline"
             onClick={e => e.stopPropagation()}
+            size="sm"
           >
             {occurrence.symbol}
-          </a>
+          </AnchorLink>
         ) : (
           '-'
         )}
@@ -46,24 +47,37 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
         <TranscriptIdLink
           transcriptId={occurrence.transcript_id}
           isCanonical={occurrence.is_canonical}
+          isManeSelect={occurrence.is_mane_select}
+          isManePlus={occurrence.is_mane_plus}
           linkClassName="text-sm text-primary"
         />
       )}
       <Separator className="h-5" orientation="vertical" />
       <div className="text-sm">
-        <span className="text-muted-foreground">{t('variant.interpretationForm.transcript.exon')}:</span> <span>-</span>
+        <span className="text-muted-foreground">
+          {t('variant.interpretationForm.transcript.exon')}:{' '}
+          {occurrence?.exon_rank && occurrence?.exon_total
+            ? `${occurrence?.exon_rank} / ${occurrence?.exon_total}`
+            : '-'}
+        </span>
       </div>
-      {occurrence.rsnumber && (
+      {occurrence?.dna_change && (
         <>
           <Separator className="h-5" orientation="vertical" />
-          <a
+          {occurrence.dna_change}
+        </>
+      )}
+      {occurrence?.rsnumber && (
+        <>
+          <Separator className="h-5" orientation="vertical" />
+          <AnchorLink
             href={`https://www.ncbi.nlm.nih.gov/snp/${occurrence.rsnumber}`}
             target="_blank"
             rel="noreferrer"
-            className="text-sm hover:underline"
+            size="sm"
           >
             {occurrence.rsnumber}
-          </a>
+          </AnchorLink>
         </>
       )}
     </div>

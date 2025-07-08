@@ -35,7 +35,15 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
 
     clinicalAssociationValue.push(
       <DetailItem
-        title={oc.panel ? oc.panel : clinicalAssociationTitle}
+        title={
+          oc.panel ? (
+            <AnchorLink href={`https://www.omim.org/entry/${oc.omim_phenotype_id}`} target="_blank" size="sm">
+              {oc.panel}
+            </AnchorLink>
+          ) : (
+            clinicalAssociationTitle
+          )
+        }
         value={
           oc.inheritance_code ? <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div> : '-'
         }

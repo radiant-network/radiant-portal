@@ -4,6 +4,7 @@ import { ExpendedOccurrence } from '@/api/api';
 import { Diamond } from 'lucide-react';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type FrequencySectionProps = {
   data: ExpendedOccurrence;
@@ -15,7 +16,7 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className='inline-flex gap-1 items-center'>
-          {t('occurrenceExpend.frequencies.myOrganization')} 
+          {t('occurrenceExpend.frequencies.myOrganization')}
           <ShapeDiamondIcon className='w-[13px] h-[13px] text-red-500' />
         </span>
       </TooltipTrigger>
@@ -29,7 +30,7 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className='inline-flex gap-1 items-center'>
-          {t('occurrenceExpend.frequencies.myOrganization')} 
+          {t('occurrenceExpend.frequencies.myOrganization')}
           <Diamond className='w-[13px] h-[13px] text-green-500' />
         </span>
       </TooltipTrigger>
@@ -42,7 +43,11 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
     <DetailSection title={t('occurrenceExpend.frequencies.title')}>
       <DetailItem title={affected} value="-" />
       <DetailItem title={nonAffected} value="-" />
-      <DetailItem title={t('occurrenceExpend.frequencies.gnomad')} value="-" />
+      <DetailItem title={t('occurrenceExpend.frequencies.gnomad')} value={
+        data.gnomad_v3_af ?
+          <AnchorLink size="sm" href={`https://gnomad.broadinstitute.org/variant/${data.locus_id}?dataset=gnomad_r3`}>{data.gnomad_v3_af}</AnchorLink>
+          : "-"
+      } />
     </DetailSection>
   );
 }

@@ -1,11 +1,14 @@
-import TranscriptCanonicalIcon from '@/components/base/icons/transcript-canonical-icon';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+import CanonicalBadge from './canonical-badge';
+import ManeSelectBadge from './mane-select-badge';
+import ManePlusBadge from './mane-plus-badge';
 
 interface TranscriptIdLinkProps extends React.HTMLAttributes<HTMLDivElement> {
   transcriptId: string;
   isCanonical: boolean | undefined;
+  isManeSelect: boolean | undefined;
+  isManePlus: boolean | undefined;
   iconSize?: number;
   linkClassName?: string;
 }
@@ -13,35 +16,27 @@ interface TranscriptIdLinkProps extends React.HTMLAttributes<HTMLDivElement> {
 function TranscriptIdLink({
   transcriptId,
   isCanonical,
+  isManePlus,
+  isManeSelect,
   iconSize = 16,
   linkClassName,
   className,
   ...props
 }: TranscriptIdLinkProps) {
-  const { t } = useI18n();
-
   return (
     <div className={cn('flex items-center gap-1', className)} {...props}>
-      <a
+      <AnchorLink
+        size="sm"
         href={`https://www.ensembl.org/id/${transcriptId}`}
-        className={cn('hover:underline', linkClassName)}
+        className={linkClassName}
         target="_blank"
         rel="noreferrer"
       >
         {transcriptId}
-      </a>
-      {isCanonical && (
-        <Tooltip>
-          <TooltipTrigger>
-            <TranscriptCanonicalIcon size={iconSize} className="text-primary" />
-          </TooltipTrigger>
-          <TooltipContent>
-            {t('variant.canonicalTranscript', {
-              defaultValue: 'Canonical transcript',
-            })}
-          </TooltipContent>
-        </Tooltip>
-      )}
+      </AnchorLink>
+      {isCanonical && <CanonicalBadge size={16} />}
+      {isManeSelect && <ManeSelectBadge size={16} />}
+      {isManePlus && <ManePlusBadge size={16} />}
     </div>
   );
 }

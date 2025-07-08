@@ -12,7 +12,7 @@ export default function OccurrenceExpendTranscript({ occurrence }: OccurrenceExp
 
   return (
     <div className="flex items-center gap-3">
-      { occurrence.ensembl_gene_id && (
+      {occurrence.ensembl_gene_id && (
         <>
           <div className="italic"><a href={`https://www.ensembl.org/Homo_sapiens/Transcript/Summary?g=${occurrence.ensembl_gene_id}`} target="_blank">{occurrence.ensembl_gene_id}</a></div>
           <Separator orientation="vertical" className="h-5" />
