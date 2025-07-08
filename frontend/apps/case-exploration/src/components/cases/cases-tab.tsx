@@ -34,7 +34,7 @@ function CasesTab() {
   });
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
 
-  const { data, isLoading } = useSWR<CasesSearchResponse, any, CaseListInput>(
+  const { data, isLoading, isValidating } = useSWR<CasesSearchResponse, any, CaseListInput>(
     {
       listBodyWithCriteria: {
         additional_fields: [
@@ -79,9 +79,8 @@ function CasesTab() {
         columns={getCaseExplorationColumns(t)}
         TableFilters={() => (
           <TableFilters
-            loading={isLoading}
+            loading={isLoading && !isValidating}
             setSearchCriteria={setSearchCriteria}
-            searchCriteria={searchCriteria}
           />
         )}
         data={data?.list ?? []}
