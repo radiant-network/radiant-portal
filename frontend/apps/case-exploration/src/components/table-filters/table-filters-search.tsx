@@ -146,7 +146,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
                         key={result.value}
                         value={`${result.value}-${category}`}
                         onSelect={(value) => {
-                          handleAutocompleteSelect(result.type, value);
+                          handleAutocompleteSelect(result.type, value.split('-')[0]);
                         }}
                       >
                         <IconComponent size={16} className="text-muted-foreground" />
