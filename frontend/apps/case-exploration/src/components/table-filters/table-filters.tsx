@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
 import { ListFilter, X } from 'lucide-react';
@@ -15,11 +15,9 @@ type CaseFiltersInput = {
   search_criteria: Array<SearchCriterion>;
 };
 
-
 type FiltersGroupFormProps = {
   loading?: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
-  searchCriteria: SearchCriterion[];
 };
 
 async function fetchFilters(searchCriteria: CaseFiltersInput) {
@@ -42,7 +40,6 @@ export const FILTERS_SEARCH_DEFAULTS = {
   mrn: [],
   request_id: [],
 }
-
 
 function updateSearchCriteria(filters: StringArrayRecord) {
   let search_criteria: SearchCriterion[] = [];
@@ -84,21 +81,24 @@ function updateSearchCriteria(filters: StringArrayRecord) {
 function FiltersGroupForm({
   loading = true,
   setSearchCriteria,
-  searchCriteria,
 }: FiltersGroupFormProps) {
-  const [filterButtons, setFilterButtons] = useState<IFilterButton[]>([]);
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
+  const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>(
     'case-exploration-filters',
     { ...FILTER_DEFAULTS, ...FILTERS_SEARCH_DEFAULTS },
   );
   const { t } = useI18n();
 
-  const { data: apiFilters } = useSWR<CaseFilters, any, CaseFiltersInput>({ search_criteria: searchCriteria }, fetchFilters, {
+  const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters({ search_criteria: [] }), {
     revalidateOnFocus: false,
+    revalidateOnMount: true,
+    revalidateIfStale: false,
+    revalidateOnReconnect: false,
   });
 
-  const getDefaultFilterButtons = useCallback(() => {
+  // Memoize filter buttons to prevent unnecessary re-renders
+  const filterButtons = useMemo(() => {
     if (!apiFilters) return [];
 
     return Object.keys(apiFilters).map((key) => {
@@ -106,7 +106,7 @@ function FiltersGroupForm({
         key,
         label: t(`caseExploration.case.filters.${key}`),
         isVisible: ['priority', 'status', 'case_analysis'].includes(key), // Show first three by default
-        isOpen: false,
+        isOpen: openFilters[key] || false,
         selectedItems: filters[key] || [],
         options: [],
       };
@@ -141,12 +141,7 @@ function FiltersGroupForm({
           return baseOption;
       }
     }).filter(option => option.options.length > 0);
-  }, [apiFilters, filters, t]);
-
-  // Update filtersOptions when apiFilters changes
-  useEffect(() => {
-    setFilterButtons(getDefaultFilterButtons());
-  }, [apiFilters, getDefaultFilterButtons]);
+  }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
 
   useEffect(() => {
     setSearchCriteria(updateSearchCriteria(filters));
@@ -182,20 +177,17 @@ function FiltersGroupForm({
 
   // Handle showing/hiding additional filters and managing open state
   const makeFiltersVisible = useCallback((selectedKeys: string[]) => {
-    const newFilterButtons = filterButtons.map(option => {
-      if (selectedKeys.includes(option.key)) {
-        // setButtonLayoutChanged(true);
-        setChangedFilterButtons([...changedFilterButtons, option.key]);
-        return {
-          ...option,
-          isOpen: true,
-          isVisible: true
-        }
-      }
-      return option;
-    });
-    setFilterButtons(newFilterButtons);
-  }, [filterButtons, changedFilterButtons, setChangedFilterButtons]);
+    // Update changed filter buttons to make them visible
+    setChangedFilterButtons(prev => [...prev, ...selectedKeys.filter(key => !prev.includes(key))]);
+    
+    // Set selected filters as open
+    const newOpenFilters = selectedKeys.reduce((acc, key) => {
+      acc[key] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+    
+    setOpenFilters(prev => ({ ...prev, ...newOpenFilters }));
+  }, []);
 
   // Get the current search term for display (only one allowed)
   const getSearchTerm = () => {
@@ -215,7 +207,10 @@ function FiltersGroupForm({
     return null;
   };
 
-  const hiddenFilterOptions = filterButtons.filter(option => !option.isVisible);
+  const hiddenFilterOptions = useMemo(() => 
+    filterButtons.filter(option => !option.isVisible), 
+    [filterButtons]
+  );
   const searchTerm = getSearchTerm();
 
   // Check if any filters are active
@@ -231,7 +226,7 @@ function FiltersGroupForm({
       ...FILTERS_SEARCH_DEFAULTS,
     });
     setChangedFilterButtons([]);
-    setFilterButtons(getDefaultFilterButtons());
+    setOpenFilters({});
   };
 
   if (loading) return <FiltersGroupSkeleton />;
