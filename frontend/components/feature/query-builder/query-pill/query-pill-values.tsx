@@ -28,7 +28,14 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
       ) : (
         values.map((val, i) => (
           <div key={`${val}-${i}`}>
-            <span>{t(`common.filters.labels.${valueFilter.content.field}_value.${val}`, { defaultValue: String(val) })}</span>
+            <span>
+              {
+                t(
+                  `common.filters.labels.${valueFilter.content.field}_value.${val}`,
+                  { defaultValue: String(val).replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase()) }
+                )
+              }
+            </span>
             {values.length - 1 > i &&
               (valueFilter.op === SqonOpEnum.All ? (
                 <IntersectionOperator className="px-1" />
