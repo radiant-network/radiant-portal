@@ -174,16 +174,15 @@ function App() {
             queryPillFacetFilterConfig={{
               enable: true,
               blacklistedFacets: ['locus_id'],
-              onFacetClick: filter => (
-                <FilterComponent
-                  isOpen
-                  field={
-                    Object.values(config.variant_exploration.aggregations)
-                      .flatMap(f => f.items)
-                      .find(f => f.key === filter.content.field)!
-                  }
-                />
-              ),
+              onFacetClick: filter => {
+                const fields = Object.values(config.variant_exploration.aggregations)
+                  .flatMap(f => f.items)
+                  .find(f => f.key === filter.content.field)!
+
+                return (
+                  <FilterComponent field={fields} isOpen={true} />
+                )
+              },
             }}
           />
         </div>

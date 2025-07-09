@@ -18,12 +18,13 @@ function QueryPillField({ valueFilter, customPillEditEnabled }: QueryPillFieldPr
   const { query } = useQueryBarContext();
   const { queryPillFacetFilterConfig } = useQueryBuilderContext();
 
+
   const [facetFilterComponent, setFacetFilterComponent] = useState<ReactNode>();
 
   const isFacetFilterEnabled = Boolean(
     !customPillEditEnabled &&
-      queryPillFacetFilterConfig?.enable &&
-      !queryPillFacetFilterConfig?.blacklistedFacets?.includes(valueFilter.content.field),
+    queryPillFacetFilterConfig?.enable &&
+    !queryPillFacetFilterConfig?.blacklistedFacets?.includes(valueFilter.content.field),
   );
 
   const handleFacetClick = useCallback(() => {

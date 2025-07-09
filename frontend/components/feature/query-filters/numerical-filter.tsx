@@ -157,6 +157,9 @@ export function NumericalFilter({ field }: IProps) {
         return;
       }
 
+
+      setHasUnappliedItems(true);
+
       // Handle numeric values
       if (values.length === 2) {
         setSelectedRange(RangeOperators.Between);
