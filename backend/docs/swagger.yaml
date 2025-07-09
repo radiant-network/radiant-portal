@@ -137,16 +137,8 @@ components:
         updated_on:
           type: string
       required:
-      - case_analysis_code
-      - case_analysis_name
-      - case_analysis_type_code
       - case_id
       - created_on
-      - mrn
-      - priority_code
-      - project_code
-      - requested_by_code
-      - requested_by_name
       - status_code
       - updated_on
       type: object
@@ -897,15 +889,11 @@ components:
         zygosity:
           type: string
       required:
-      - case_analysis_code
-      - case_analysis_name
       - case_id
       - classification
       - condition_id
       - condition_name
       - interpretation_updated_on
-      - performer_lab_code
-      - performer_lab_name
       - seq_id
       - status_code
       - transcript_id
@@ -1046,14 +1034,8 @@ components:
         zygosity:
           type: string
       required:
-      - case_analysis_code
-      - case_analysis_name
       - case_id
       - created_on
-      - performer_lab_code
-      - performer_lab_name
-      - primary_condition_id
-      - primary_condition_name
       - status_code
       - updated_on
       - zygosity
