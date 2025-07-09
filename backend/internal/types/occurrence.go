@@ -30,6 +30,7 @@ type Occurrence struct {
 	PickedConsequences  JsonArray[string] `gorm:"type:json" json:"picked_consequences" validate:"required"`
 	TranscriptId        string            `json:"transcript_id,omitempty"`
 	ImpactScore         string            `json:"impact_score,omitempty"`
+	HasInterpretation   bool              `json:"has_interpretation" validate:"required"`
 } // @name Occurrence
 
 type ExpendedOccurrence = struct {

@@ -30,6 +30,7 @@ func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrenc
 			GnomadV3Af:         0.1,
 			Chromosome:         "1",
 			Start:              1,
+			HasInterpretation:  true,
 		},
 	}, nil
 }
@@ -112,7 +113,8 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"aa_change": "p.Arg19His",
 		"picked_consequences": ["splice acceptor"],
 		"genotype_quality": 1,
-		"gnomad_v3_af":0.1
+		"gnomad_v3_af":0.1,
+		"has_interpretation": true
     }]`, w.Body.String())
 }
 

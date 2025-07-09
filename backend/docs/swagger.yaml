@@ -483,6 +483,8 @@ components:
           type: integer
         gnomad_v3_af:
           type: number
+        has_interpretation:
+          type: boolean
         hgvsg:
           type: string
         impact_score:
@@ -534,6 +536,7 @@ components:
       - chromosome
       - genotype_quality
       - gnomad_v3_af
+      - has_interpretation
       - hgvsg
       - locus_id
       - pf_wgs

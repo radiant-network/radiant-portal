@@ -1066,6 +1066,12 @@ export interface Occurrence {
     'gnomad_v3_af': number;
     /**
      * 
+     * @type {boolean}
+     * @memberof Occurrence
+     */
+    'has_interpretation': boolean;
+    /**
+     * 
      * @type {string}
      * @memberof Occurrence
      */
