@@ -68,10 +68,7 @@ components:
           type: array
           uniqueItems: false
       required:
-      - case_analysis_code
-      - case_analysis_name
       - case_id
-      - case_type
       - sequencing_experiments
       type: object
     CaseFilters:

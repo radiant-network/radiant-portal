@@ -54,10 +54,10 @@ type CaseResult struct {
 // @Name CaseEntity
 type CaseEntity struct {
 	CaseID                int                                 `json:"case_id" validate:"required"`
-	CaseAnalysisCode      string                              `json:"case_analysis_code" validate:"required"`
-	CaseAnalysisName      string                              `json:"case_analysis_name" validate:"required"`
+	CaseAnalysisCode      string                              `json:"case_analysis_code,omitempty"`
+	CaseAnalysisName      string                              `json:"case_analysis_name,omitempty"`
 	CaseAnalysisType      string                              `json:"-"`
-	CaseType              string                              `json:"case_type" validate:"required"`
+	CaseType              string                              `json:"case_type,omitempty"`
 	SequencingExperiments JsonArray[CaseSequencingExperiment] `json:"sequencing_experiments" validate:"required"`
 }
 

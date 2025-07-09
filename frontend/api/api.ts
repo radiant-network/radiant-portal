@@ -147,13 +147,13 @@ export interface CaseEntity {
      * @type {string}
      * @memberof CaseEntity
      */
-    'case_analysis_code': string;
+    'case_analysis_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof CaseEntity
      */
-    'case_analysis_name': string;
+    'case_analysis_name'?: string;
     /**
      * 
      * @type {number}
@@ -165,7 +165,7 @@ export interface CaseEntity {
      * @type {string}
      * @memberof CaseEntity
      */
-    'case_type': string;
+    'case_type'?: string;
     /**
      * 
      * @type {Array<CaseSequencingExperiment>}
