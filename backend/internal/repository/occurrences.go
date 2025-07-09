@@ -73,13 +73,13 @@ func (r *OccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQu
 	// we build a TOP-N query like :
 	// SELECT o.locus_id, o.quality, o.ad_ratio, ...., v.variant_class, v.hgvsg..., i.locus_id IS NOT NULL AS has_interpretation
 	// FROM (germline__snv__occurrence o, germline__snv__variant v)
-	// 		LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = o.locus_id AND o.seq_id = i.sequencing_id
+	// 		LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = o.locus_id AND i.sequencing_id = ?
 	// WHERE o.locus_id in (
 	//	SELECT o.locus_id FROM germline__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND o.seq_id=? AND o.part=? AND v.locus_id=o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("o.locus_id")
 	tx = r.db.Table("(germline__snv__occurrence o, germline__snv__variant v)").
-		Joins("LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = o.locus_id AND o.seq_id = i.sequencing_id").
+		Joins("LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = o.locus_id AND i.sequencing_id = ?", fmt.Sprintf("%d", seqId)).
 		Select(columns).
 		Where("o.seq_id = ? and part=? and v.locus_id = o.locus_id and o.locus_id in (?)", seqId, part, tx)
 
