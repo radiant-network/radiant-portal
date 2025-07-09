@@ -115,3 +115,35 @@ func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 		c.JSON(http.StatusOK, filters)
 	}
 }
+
+// CaseEntityHandler handles retrieving a case by its ID
+// @Summary Get types.CaseEntity case entity
+// @Id caseEntity
+// @Description Retrieve types.CaseEntity by its ID
+// @Tags cases
+// @Security bearerauth
+// @Param case_id path string true "Case ID"
+// @Produce json
+// @Success 200 {object} types.CaseEntity
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /cases/{case_id} [get]
+func CaseEntityHandler(repo repository.CasesDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
+		if errCaseId != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		caseEntity, err := repo.GetCaseEntity(caseId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if caseEntity == nil {
+			HandleNotFoundError(c, "case")
+			return
+		}
+		c.JSON(http.StatusOK, caseEntity)
+	}
+}

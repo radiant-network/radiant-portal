@@ -146,6 +146,7 @@ func main() {
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 	casesGroup.POST("/filters", server.CasesFiltersHandler(repoCases))
+	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")
