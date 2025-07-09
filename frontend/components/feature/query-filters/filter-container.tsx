@@ -76,7 +76,34 @@ export function MultiSelectFilterContainer({ field, isOpen }: FilterContainerPro
   );
 }
 
-export function FilterComponent({ field, isOpen }: FilterContainerProps) {
+/**
+ * To be used when only the Filter is needed
+ */
+export function FilterComponent({ field }: FilterContainerProps) {
+  const { t } = useI18n();
+  let filterElement;
+
+  switch (field.type) {
+    case 'multiple':
+      filterElement = <MultiSelectFilter field={field} searchVisible={true} />
+      break;
+    case 'numerical':
+      filterElement = <NumericalFilter field={field} />;
+      break;
+    case 'boolean':
+      filterElement = <ToggleFilter field={field} />;
+      break;
+    default:
+      filterElement = <div>{t('common.filters.unsupportedType', { type: field.type })}</div>;
+  }
+
+  return filterElement;
+}
+
+/**
+ * To be use when the filter needs to be inside an Accordion component
+ */
+export function FilterContainer({ field, isOpen }: FilterContainerProps) {
   const { t } = useI18n();
   const fieldType = field.type;
 
@@ -86,7 +113,7 @@ export function FilterComponent({ field, isOpen }: FilterContainerProps) {
 
   let filterElement;
 
-  switch (field.type) {
+  switch (fieldType) {
     case 'multiple':
       filterElement = <MultiSelectFilterContainer field={field} isOpen={isOpen} />;
       break;
@@ -99,12 +126,5 @@ export function FilterComponent({ field, isOpen }: FilterContainerProps) {
     default:
       filterElement = <div>{t('common.filters.unsupportedType', { type: field.type })}</div>;
   }
-
   return filterElement;
-}
-
-export function FilterContainer({ field, isOpen }: FilterContainerProps) {
-  return (
-    <FilterComponent field={field} isOpen={isOpen} />
-  );
 }

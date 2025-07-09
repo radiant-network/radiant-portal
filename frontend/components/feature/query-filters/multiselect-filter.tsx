@@ -54,6 +54,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
       });
     if (prevSelectedItems) {
       setSelectedItems(prevSelectedItems.content.value as string[]);
+      setHasUnappliedItems(true);
     } else {
       // update data from upstream, maybe querybuilder flush the selection
       setSelectedItems([]);
