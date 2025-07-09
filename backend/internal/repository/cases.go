@@ -225,5 +225,5 @@ func joinPerformerLab(tx *gorm.DB) *gorm.DB {
 }
 
 func joinMondoTerm(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.primary_condition=%s.id", types.MondoTable.Name, types.MondoTable.Alias, types.CaseTable.Alias, types.MondoTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.primary_condition=%s.id", types.MondoTable.Name, types.MondoTable.Alias, types.CaseTable.Alias, types.MondoTable.Alias))
 }
