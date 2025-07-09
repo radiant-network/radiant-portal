@@ -90,6 +90,7 @@ function App() {
           'clinvar',
           'pf_wgs',
           'transcript_id',
+          'has_interpretation',
         ],
         limit: pagination.pageSize,
         page_index: pagination.pageIndex,
