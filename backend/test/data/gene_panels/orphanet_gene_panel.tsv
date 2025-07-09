@@ -1,4 +1,4 @@
-symbol	panel	omim_phenotype_id	inheritance_code
+symbol	panel	disorder_id	type_of_inheritance
 BRAF	panel1	1111	["AD"]
 TP53	panel1	2222	["AR"]
 BRAF	panel2	3333	["Smu"]

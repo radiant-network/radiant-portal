@@ -48,3 +48,15 @@ var OrphanetGenePanelField = Field{
 }
 
 var GenePanelsTables = []Table{HpoGenePanelTable, OmimGenePanelTable, DddGenePanelTable, CosmicGenePanelTable, OrphanetGenePanelTable}
+
+type GenePanelCondition = struct {
+	Symbol          string            `json:"-"`
+	PanelName       string            `json:"panel_name" validate:"required"`
+	InheritanceCode JsonArray[string] `gorm:"type:json" json:"inheritance_code,omitempty"`
+	PanelID         string            `json:"panel_id,omitempty"`
+}
+
+type GenePanelConditions = struct {
+	Count      int                             `json:"count" validate:"required"`
+	Conditions map[string][]GenePanelCondition `json:"conditions" validate:"required"`
+}

@@ -4367,6 +4367,53 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Retrieve conditions for germline variant entity for a specific gene panel
+         * @summary Get conditions for germline variant entity for a specific gene panel
+         * @param {string} locusId Locus ID
+         * @param {GetGermlineVariantConditionsPanelTypeEnum} panelType Gene panel type
+         * @param {string} [filter] Condition filter
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineVariantConditions: async (locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getGermlineVariantConditions', 'locusId', locusId)
+            // verify required parameter 'panelType' is not null or undefined
+            assertParamExists('getGermlineVariantConditions', 'panelType', panelType)
+            const localVarPath = `/variants/germline/{locus_id}/conditions/{panel_type}`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
+                .replace(`{${"panel_type"}}`, encodeURIComponent(String(panelType)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
@@ -4619,6 +4666,21 @@ export const VariantApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve conditions for germline variant entity for a specific gene panel
+         * @summary Get conditions for germline variant entity for a specific gene panel
+         * @param {string} locusId Locus ID
+         * @param {GetGermlineVariantConditionsPanelTypeEnum} panelType Gene panel type
+         * @param {string} [filter] Condition filter
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantCasesFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditions(locusId, panelType, filter, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConditions']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
@@ -4727,6 +4789,18 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getGermlineVariantCasesFilters(options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve conditions for germline variant entity for a specific gene panel
+         * @summary Get conditions for germline variant entity for a specific gene panel
+         * @param {string} locusId Locus ID
+         * @param {GetGermlineVariantConditionsPanelTypeEnum} panelType Gene panel type
+         * @param {string} [filter] Condition filter
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantCasesFilters> {
+            return localVarFp.getGermlineVariantConditions(locusId, panelType, filter, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
@@ -4826,6 +4900,20 @@ export class VariantApi extends BaseAPI {
     }
 
     /**
+     * Retrieve conditions for germline variant entity for a specific gene panel
+     * @summary Get conditions for germline variant entity for a specific gene panel
+     * @param {string} locusId Locus ID
+     * @param {GetGermlineVariantConditionsPanelTypeEnum} panelType Gene panel type
+     * @param {string} [filter] Condition filter
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantConditions(locusId, panelType, filter, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrieve germline Variant Consequences for a given locus
      * @summary Get list of VariantConsequences for a germline variant
      * @param {string} locusId Locus ID
@@ -4888,5 +4976,14 @@ export class VariantApi extends BaseAPI {
     }
 }
 
+/**
+ * @export
+ */
+export const GetGermlineVariantConditionsPanelTypeEnum = {
+    Omim: 'omim',
+    Hpo: 'hpo',
+    Orphanet: 'orphanet'
+} as const;
+export type GetGermlineVariantConditionsPanelTypeEnum = typeof GetGermlineVariantConditionsPanelTypeEnum[keyof typeof GetGermlineVariantConditionsPanelTypeEnum];
 
 

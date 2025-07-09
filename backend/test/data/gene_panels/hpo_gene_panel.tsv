@@ -1,2 +1,5 @@
-symbol	panel
-TP53	hpo_panel1
+symbol	panel	hpo_term_name	hpo_term_id
+TP53	Colon cancer(HP:0003003)	Colon cancer	HP:0003003
+BRAF	Acne(HP:0001061)	Acne	HP:0001061
+BRAF	Brachydactyly(HP:0001156)	Brachydactyly	HP:0001156
+BRAF	Epicanthus(HP:0000286)	Epicanthus	HP:0000286
