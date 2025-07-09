@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/base/ui/tooltip';
 import ThemeProvider from '@/components/feature/theme-toggle/theme-provider';
 import { ConfigProvider, type PortalConfig } from '@/components/model/applications-config';
 import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
+import { I18nProvider } from '@/components/hooks/I18nProvider';
 import { Toaster } from '@/components/base/ui/sonner';
 declare const __PROJECT__: PortalConfig;
 
@@ -33,16 +34,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <ConfigProvider config={__PROJECT__}>
-          <ThemeProvider>
-            <TooltipProvider delayDuration={0}>
-              <AlertDialogProvider>
-                <BetaFeatureProvider>{children}</BetaFeatureProvider>
-              </AlertDialogProvider>
-            </TooltipProvider>
-            <Toaster />
-          </ThemeProvider>
-        </ConfigProvider>
+        <I18nProvider>
+          <ConfigProvider config={__PROJECT__}>
+            <ThemeProvider>
+              <TooltipProvider delayDuration={0}>
+                <AlertDialogProvider>
+                  <BetaFeatureProvider>{children}</BetaFeatureProvider>
+                </AlertDialogProvider>
+              </TooltipProvider>
+              <Toaster />
+            </ThemeProvider>
+          </ConfigProvider>
+        </I18nProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

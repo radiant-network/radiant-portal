@@ -4,23 +4,7 @@ import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { useTranslation } from 'react-i18next';
-
-/**
- * Deep merge two objects, with the second object overriding the first
- */
-const deepMerge = <T extends Record<string, any>>(target: T, source: T): T => {
-  const result = { ...target };
-
-  for (const key in source) {
-    if (source[key] && typeof source[key] === 'object') {
-      result[key] = deepMerge(result[key] || ({} as T[typeof key]), source[key]);
-    } else {
-      result[key] = source[key];
-    }
-  }
-
-  return result;
-};
+import { deepMerge } from '../lib/merge';
 
 // Get the current theme from environment variable
 const getCurrentTheme = () => {
@@ -54,6 +38,7 @@ const loadTranslations = async (lang: string) => {
   }
 };
 
+// Initialize i18next immediately with empty resources
 i18next
   .use(initReactI18next)
   .use(LanguageDetector)
@@ -68,7 +53,7 @@ i18next
 
     // Language detection configuration
     detection: {
-      order: ['querystring', 'cookie', 'localStorage', 'navigator'],
+      order: ['cookie', 'localStorage', 'navigator'],
       caches: ['localStorage', 'cookie'],
       lookupQuerystring: 'lng',
       lookupCookie: 'i18next',
@@ -80,7 +65,7 @@ i18next
       escapeValue: false,
     },
 
-    // Initialize with empty resources
+    // Start with empty resources - translations will be loaded asynchronously
     resources: {
       en: {
         common: {},
@@ -93,11 +78,26 @@ i18next
     },
   });
 
-// Load initial language
-const initialLang = i18next.language;
-loadTranslations(initialLang).then(translations => {
-  i18next.addResourceBundle(initialLang, 'common', translations, true, true);
-});
+// Load translations in the background and update when ready
+const loadInitialTranslations = async () => {
+  const currentLang = i18next.language;
+
+  // Only load translations for the current language to reduce network load
+  try {
+    const translations = await loadTranslations(currentLang);
+    
+    // Add translations to the existing i18next instance
+    i18next.addResourceBundle(currentLang, 'common', translations, true, true);
+    
+    // Trigger a re-render by changing language to apply the loaded translations
+    i18next.changeLanguage(currentLang);
+  } catch (error) {
+    console.warn(`Failed to load initial translations for ${currentLang}`, error);
+  }
+};
+
+// Start loading translations immediately but don't block
+const initPromise = loadInitialTranslations();
 
 export const useI18n = (namespace?: string) => {
   const { t, i18n } = useTranslation(namespace);
@@ -106,11 +106,16 @@ export const useI18n = (namespace?: string) => {
     if (lang === i18n.language) return;
 
     try {
-      // Load translations for the new language
-      const translations = await loadTranslations(lang);
-
-      // Add translations before changing language to prevent flicker
-      i18next.addResourceBundle(lang, 'common', translations, true, true);
+      // Check if we already have translations for this language
+      const hasResources = i18n.getResourceBundle(lang, 'common');
+      
+      if (!hasResources || Object.keys(hasResources).length === 0) {
+        // Load translations for the new language
+        const translations = await loadTranslations(lang);
+        
+        // Add translations before changing language to prevent flicker
+        i18n.addResourceBundle(lang, 'common', translations, true, true);
+      }
 
       // Change the language
       await i18n.changeLanguage(lang);
@@ -130,4 +135,13 @@ export const useI18n = (namespace?: string) => {
   };
 };
 
+// Export the i18next instance (available immediately)
 export { i18next as i18n };
+
+// Export the initialized i18next instance
+export const getI18nInstance = () => {
+  return i18next;
+};
+
+// Export the promise for components that need to wait for initialization
+export const i18nPromise = initPromise;
