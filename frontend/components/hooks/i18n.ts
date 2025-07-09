@@ -38,7 +38,7 @@ const loadTranslations = async (lang: string) => {
   }
 };
 
-// Initialize i18next immediately with empty resources
+// Initialize i18next
 i18next
   .use(initReactI18next)
   .use(LanguageDetector)
@@ -47,101 +47,58 @@ i18next
     debug: import.meta.env.DEV,
     supportedLngs: ['en', 'fr'],
 
-    // Namespaces for different translation layers
     ns: ['common', 'portal'],
     defaultNS: 'common',
-
-    // Language detection configuration
+    
     detection: {
-      order: ['cookie', 'localStorage', 'navigator'],
+      order: ['querystring', 'cookie', 'localStorage', 'navigator'],
       caches: ['localStorage', 'cookie'],
       lookupQuerystring: 'lng',
       lookupCookie: 'i18next',
       lookupLocalStorage: 'i18nextLng',
     },
 
-    // Interpolation configuration
     interpolation: {
       escapeValue: false,
     },
 
-    // Start with empty resources - translations will be loaded asynchronously
-    resources: {
-      en: {
-        common: {},
-        portal: {},
-      },
-      fr: {
-        common: {},
-        portal: {},
-      }
-    },
+    // Start empty - load on demand
+    resources: {},
   });
 
-// Load translations in the background and update when ready
-const loadInitialTranslations = async () => {
-  const currentLang = i18next.language;
-
-  // Only load translations for the current language to reduce network load
-  try {
-    const translations = await loadTranslations(currentLang);
-    
-    // Add translations to the existing i18next instance
-    i18next.addResourceBundle(currentLang, 'common', translations, true, true);
-    
-    // Trigger a re-render by changing language to apply the loaded translations
-    i18next.changeLanguage(currentLang);
-  } catch (error) {
-    console.warn(`Failed to load initial translations for ${currentLang}`, error);
-  }
-};
-
-// Start loading translations immediately but don't block
-const initPromise = loadInitialTranslations();
-
+// Simple hook that loads translations on demand (maintains backward compatibility)
 export const useI18n = (namespace?: string) => {
   const { t, i18n } = useTranslation(namespace);
 
-  const setLanguage = async (lang: string) => {
-    if (lang === i18n.language) return;
-
-    try {
-      // Check if we already have translations for this language
-      const hasResources = i18n.getResourceBundle(lang, 'common');
-      
-      if (!hasResources || Object.keys(hasResources).length === 0) {
-        // Load translations for the new language
+  const changeLanguage = async (lang: string) => {
+    // Check if we already have translations
+    if (!i18n.hasResourceBundle(lang, 'common')) {
+      try {
         const translations = await loadTranslations(lang);
-        
-        // Add translations before changing language to prevent flicker
-        i18n.addResourceBundle(lang, 'common', translations, true, true);
+        i18n.addResourceBundle(lang, 'common', translations);
+      } catch (error) {
+        console.error('Failed to load translations:', error);
       }
-
-      // Change the language
-      await i18n.changeLanguage(lang);
-    } catch (error) {
-      console.error('Failed to change language:', error);
-      // Revert to previous language if change fails
-      await i18n.changeLanguage(i18n.language);
     }
+    
+    await i18n.changeLanguage(lang);
   };
 
   return {
     t,
-    i18n,
-    currentLanguage: i18n.language,
-    setLanguage,
+    changeLanguage,
+    language: i18n.language,
     languages: ['en', 'fr'],
+    // Backward compatibility
+    setLanguage: changeLanguage,
+    currentLanguage: i18n.language,
+    i18n
   };
 };
 
-// Export the i18next instance (available immediately)
+// Load initial translations
+loadTranslations(i18next.language || 'en').then(translations => {
+  i18next.addResourceBundle(i18next.language || 'en', 'common', translations);
+});
+
 export { i18next as i18n };
-
-// Export the initialized i18next instance
-export const getI18nInstance = () => {
-  return i18next;
-};
-
-// Export the promise for components that need to wait for initialization
-export const i18nPromise = initPromise;

@@ -1,4 +1,4 @@
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from 'react-router';
 import stylesheet from './app.css?url';
 import type { Route } from './+types/root';
 import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
@@ -8,7 +8,15 @@ import { ConfigProvider, type PortalConfig } from '@/components/model/applicatio
 import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
 import { I18nProvider } from '@/components/hooks/I18nProvider';
 import { Toaster } from '@/components/base/ui/sonner';
+import { detectLanguageFromRequest } from '@/components/hooks/i18n.server';
 declare const __PROJECT__: PortalConfig;
+
+export async function loader({ request }: Route.LoaderArgs) {
+  // Just detect and return the language for consistent server/client behavior
+  return {
+    language: detectLanguageFromRequest(request),
+  };
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -25,8 +33,10 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const loaderData = useLoaderData<{ language: string }>();
+  
   return (
-    <html lang="en">
+    <html lang={loaderData?.language || 'en'}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -34,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <I18nProvider>
+        <I18nProvider initialLanguage={loaderData?.language}>
           <ConfigProvider config={__PROJECT__}>
             <ThemeProvider>
               <TooltipProvider delayDuration={0}>
