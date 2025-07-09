@@ -28,17 +28,17 @@ type Case struct {
 type CaseResult struct {
 	CaseID                   int       `json:"case_id" validate:"required"`
 	PatientID                int       `json:"patient_id,omitempty"`
-	MRN                      string    `json:"mrn" validate:"required"`
-	PriorityCode             string    `json:"priority_code" validate:"required"`
+	MRN                      string    `json:"mrn,omitempty"`
+	PriorityCode             string    `json:"priority_code,omitempty"`
 	StatusCode               string    `json:"status_code" validate:"required"`
-	CaseAnalysisTypeCode     string    `json:"case_analysis_type_code" validate:"required"`
-	CaseAnalysisCode         string    `json:"case_analysis_code" validate:"required"`
-	CaseAnalysisName         string    `json:"case_analysis_name" validate:"required"`
+	CaseAnalysisTypeCode     string    `json:"case_analysis_type_code,omitempty"`
+	CaseAnalysisCode         string    `json:"case_analysis_code,omitempty"`
+	CaseAnalysisName         string    `json:"case_analysis_name,omitempty"`
 	PrimaryConditionID       string    `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName     string    `json:"primary_condition_name,omitempty"`
-	RequestedByCode          string    `json:"requested_by_code" validate:"required"`
-	RequestedByName          string    `json:"requested_by_name" validate:"required"`
-	ProjectCode              string    `json:"project_code" validate:"required"`
+	RequestedByCode          string    `json:"requested_by_code,omitempty"`
+	RequestedByName          string    `json:"requested_by_name,omitempty"`
+	ProjectCode              string    `json:"project_code,omitempty"`
 	CreatedOn                time.Time `json:"created_on" validate:"required"`
 	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
 	Prescriber               string    `json:"prescriber,omitempty"`

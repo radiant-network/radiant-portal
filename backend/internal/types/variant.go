@@ -95,10 +95,10 @@ type VariantInterpretedCase = struct {
 	ConditionName           string          `json:"condition_name" validate:"required"`
 	Classification          string          `json:"classification" validate:"required"`
 	Zygosity                string          `json:"zygosity" validate:"required"`
-	PerformerLabCode        string          `json:"performer_lab_code" validate:"required"`
-	PerformerLabName        string          `json:"performer_lab_name" validate:"required"`
-	CaseAnalysisCode        string          `json:"case_analysis_code" validate:"required"`
-	CaseAnalysisName        string          `json:"case_analysis_name" validate:"required"`
+	PerformerLabCode        string          `json:"performer_lab_code,omitempty"`
+	PerformerLabName        string          `json:"performer_lab_name,omitempty"`
+	CaseAnalysisCode        string          `json:"case_analysis_code,omitempty"`
+	CaseAnalysisName        string          `json:"case_analysis_name,omitempty"`
 	StatusCode              string          `json:"status_code" validate:"required"`
 	PhenotypesUnparsed      string          `json:"-"`
 	Phenotypes              JsonArray[Term] `json:"observed_phenotypes"`
@@ -108,13 +108,13 @@ type VariantUninterpretedCase = struct {
 	CaseId               int             `json:"case_id" validate:"required"`
 	CreatedOn            time.Time       `json:"created_on" validate:"required"`
 	UpdatedOn            time.Time       `json:"updated_on" validate:"required"`
-	PrimaryConditionId   string          `json:"primary_condition_id" validate:"required"`
-	PrimaryConditionName string          `json:"primary_condition_name" validate:"required"`
+	PrimaryConditionId   string          `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName string          `json:"primary_condition_name,omitempty"`
 	Zygosity             string          `json:"zygosity" validate:"required"`
-	PerformerLabCode     string          `json:"performer_lab_code" validate:"required"`
-	PerformerLabName     string          `json:"performer_lab_name" validate:"required"`
-	CaseAnalysisCode     string          `json:"case_analysis_code" validate:"required"`
-	CaseAnalysisName     string          `json:"case_analysis_name" validate:"required"`
+	PerformerLabCode     string          `json:"performer_lab_code,omitempty"`
+	PerformerLabName     string          `json:"performer_lab_name,omitempty"`
+	CaseAnalysisCode     string          `json:"case_analysis_code,omitempty"`
+	CaseAnalysisName     string          `json:"case_analysis_name,omitempty"`
 	StatusCode           string          `json:"status_code" validate:"required"`
 	PhenotypesUnparsed   string          `json:"-"`
 	Phenotypes           JsonArray[Term] `json:"observed_phenotypes"`

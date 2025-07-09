@@ -190,19 +190,19 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'case_analysis_code': string;
+    'case_analysis_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof CaseResult
      */
-    'case_analysis_name': string;
+    'case_analysis_name'?: string;
     /**
      * 
      * @type {string}
      * @memberof CaseResult
      */
-    'case_analysis_type_code': string;
+    'case_analysis_type_code'?: string;
     /**
      * 
      * @type {number}
@@ -232,7 +232,7 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'mrn': string;
+    'mrn'?: string;
     /**
      * 
      * @type {number}
@@ -274,13 +274,13 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'priority_code': string;
+    'priority_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof CaseResult
      */
-    'project_code': string;
+    'project_code'?: string;
     /**
      * 
      * @type {number}
@@ -292,13 +292,13 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'requested_by_code': string;
+    'requested_by_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof CaseResult
      */
-    'requested_by_name': string;
+    'requested_by_name'?: string;
     /**
      * 
      * @type {string}
@@ -1908,13 +1908,13 @@ export interface VariantInterpretedCase {
      * @type {string}
      * @memberof VariantInterpretedCase
      */
-    'case_analysis_code': string;
+    'case_analysis_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof VariantInterpretedCase
      */
-    'case_analysis_name': string;
+    'case_analysis_name'?: string;
     /**
      * 
      * @type {number}
@@ -1956,13 +1956,13 @@ export interface VariantInterpretedCase {
      * @type {string}
      * @memberof VariantInterpretedCase
      */
-    'performer_lab_code': string;
+    'performer_lab_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof VariantInterpretedCase
      */
-    'performer_lab_name': string;
+    'performer_lab_name'?: string;
     /**
      * 
      * @type {number}
@@ -2243,13 +2243,13 @@ export interface VariantUninterpretedCase {
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'case_analysis_code': string;
+    'case_analysis_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'case_analysis_name': string;
+    'case_analysis_name'?: string;
     /**
      * 
      * @type {number}
@@ -2273,25 +2273,25 @@ export interface VariantUninterpretedCase {
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'performer_lab_code': string;
+    'performer_lab_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'performer_lab_name': string;
+    'performer_lab_name'?: string;
     /**
      * 
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'primary_condition_id': string;
+    'primary_condition_id'?: string;
     /**
      * 
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'primary_condition_name': string;
+    'primary_condition_name'?: string;
     /**
      * 
      * @type {string}
