@@ -755,6 +755,21 @@
       "filter": "Filter"
     }
   },
+  "caseEntity": {
+    "notFound": "Case not found",
+    "notFound.button": "Back to case list",
+    "header": {
+      "cases": "Cases",
+      "germline": "Germline Solo",
+      "case": "Case"
+    },
+    "details": {
+      "title": "Case Details"
+    },
+    "variants": {
+      "title": "Variants"
+    }
+  },
   "variantEntity": {
     "notFound": "Variant not found",
     "notFound.button": "Back to variant list",

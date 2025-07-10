@@ -20,7 +20,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // case
     columnHelper.accessor(row => row.case_id, {
       id: 'case_id',
-      cell: info => <AnchorLinkCell url={`/cases/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>,
+      cell: info => <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>,
       header: t('caseExploration.case.headers.case_id'),
       size: 124,
       minSize: 124,

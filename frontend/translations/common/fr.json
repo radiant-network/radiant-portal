@@ -2,7 +2,6 @@
   "common": {
     "date": "yyyy-MM-dd",
     "unspecified": "Indéterminée",
-    "noDataAvailable": "Aucune donnée disponible",
     "save": "Sauvegarder",
     "editor": {
       "headings": {
@@ -764,6 +763,21 @@
       "totalDepthAltRef": "Profondeur Totale ALT + REF",
       "genotypeQuality": "Qualité du Génotype",
       "filter": "Filtre"
+    }
+  },
+  "caseEntity": {
+    "notFound": "Cas introuvable",
+    "notFound.button": "Retour à la liste de cas",
+    "header": {
+      "cases": "Cas",
+      "germline": "Germline",
+      "case": "Cas"
+    },
+    "details": {
+      "title": "Détails de Cas"
+    },
+    "variants": {
+      "title": "Variants"
     }
   },
   "variantEntity": {
