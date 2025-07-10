@@ -1,32 +1,27 @@
-import { ExpendedOccurrence } from '@/api/api';
+import { ExpendedOccurrence, Occurrence } from '@/api/api';
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
 import { Separator } from '@/components/base/ui/separator';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 
 type OccurrenceExpendTranscriptProps = {
-  occurrence: ExpendedOccurrence;
+  occurrence: Occurrence;
+  expendedOccurrence: ExpendedOccurrence;
 };
 
-export default function OccurrenceExpendTranscript({ occurrence }: OccurrenceExpendTranscriptProps) {
+export default function OccurrenceExpendTranscript({ occurrence, expendedOccurrence }: OccurrenceExpendTranscriptProps) {
   const arn = occurrence.hgvsg.split(':')[1];
 
   return (
     <div className="flex items-center gap-3">
-      {occurrence.ensembl_gene_id && (
-        <>
-          <div className="italic"><a href={`https://www.ensembl.org/Homo_sapiens/Transcript/Summary?g=${occurrence.ensembl_gene_id}`} target="_blank">{occurrence.ensembl_gene_id}</a></div>
-          <Separator orientation="vertical" className="h-5" />
-        </>
-      )}
       {occurrence.is_mane_select && (
         <>
           <div>{occurrence.is_mane_select && <TranscriptManeSelectIcon size={18} className="text-primary" />}</div>
           <Separator orientation="vertical" className="h-5" />
         </>
       )}
-      {occurrence.exon_rank && occurrence.exon_total && (
+      {expendedOccurrence.exon_rank && expendedOccurrence.exon_total && (
         <>
-          <div>Exon: {occurrence.exon_rank} / {occurrence.exon_total}</div>
+          <div>Exon: {expendedOccurrence.exon_rank} / {expendedOccurrence.exon_total}</div>
           <Separator orientation="vertical" className="h-5" />
         </>
       )}
