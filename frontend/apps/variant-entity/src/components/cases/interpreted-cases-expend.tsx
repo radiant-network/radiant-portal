@@ -4,6 +4,7 @@ import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { variantsApi } from '@/utils/api';
+import { sanitizeHtml, decodeHtmlEntities } from '@/utils/helper';
 import { Copy, Mars, Stethoscope, User, Venus } from 'lucide-react';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
@@ -83,7 +84,14 @@ function InterpretedCasesExpend({ locusId, data }: InterpretedCasesExpendProps) 
               <span className="text-sm">{expendedData?.interpreter_name || '-'}</span>
             </div>
           </div>
-          <div className="text-sm whitespace-break-spaces">{expendedData?.interpretation || '-'}</div>
+          <div
+            className="text-sm whitespace-break-spaces"
+            dangerouslySetInnerHTML={{
+              __html: expendedData?.interpretation
+                ? sanitizeHtml(decodeHtmlEntities(expendedData.interpretation))
+                : '-',
+            }}
+          />
         </div>
         <div className="flex-shrink-0">
           <Button variant="outline" size="xs" onClick={handleCopy}>
@@ -115,10 +123,7 @@ function InterpretedCasesExpend({ locusId, data }: InterpretedCasesExpendProps) 
         {expendedData?.patient_sex_code && (
           <div className="flex items-center gap-2">
             <div className="p-1 border rounded">
-              expendedData?.patient_sex_code === 'male' ? (
-              <Mars size={14.4} />
-              ) : (
-              <Venus size={14.4} />)
+              {expendedData?.patient_sex_code === 'male' ? <Mars size={14.4} /> : <Venus size={14.4} />}
             </div>
           </div>
         )}
