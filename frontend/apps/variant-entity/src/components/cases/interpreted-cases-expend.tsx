@@ -22,8 +22,8 @@ type VariantExpendedInterpretedCaseInput = {
 
 async function fetchOccurrenceExpend(input: VariantExpendedInterpretedCaseInput) {
   const response = await variantsApi.getExpendedGermlineVariantInterpretedCase(
-    input.seqId,
     input.locusId,
+    input.seqId,
     input.transcriptId,
   );
   return response.data;

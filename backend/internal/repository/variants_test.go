@@ -53,9 +53,12 @@ func Test_GetVariantInterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *te
 		assert.NoError(t, err)
 		assert.Equal(t, int64(3), *count)
 		assert.Equal(t, 3, len(*interpretedCases))
-		assert.Equal(t, "LA6675-8", (*interpretedCases)[0].Classification)
-		assert.Equal(t, "LA26332-9", (*interpretedCases)[1].Classification)
-		assert.Equal(t, "LA6668-3", (*interpretedCases)[2].Classification)
+		assert.Equal(t, "LA6675-8", (*interpretedCases)[0].ClassificationCode)
+		assert.Equal(t, "benign", (*interpretedCases)[0].Classification)
+		assert.Equal(t, "LA26332-9", (*interpretedCases)[1].ClassificationCode)
+		assert.Equal(t, "likelyPathogenic", (*interpretedCases)[1].Classification)
+		assert.Equal(t, "LA6668-3", (*interpretedCases)[2].ClassificationCode)
+		assert.Equal(t, "pathogenic", (*interpretedCases)[2].Classification)
 	})
 }
 
@@ -68,8 +71,8 @@ func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_DefaultSort(t *te
 		assert.NoError(t, err)
 		assert.Equal(t, int64(3), *count)
 		assert.Equal(t, 2, len(*interpretedCases))
-		assert.Equal(t, "LA6675-8", (*interpretedCases)[0].Classification)
-		assert.Equal(t, "LA26332-9", (*interpretedCases)[1].Classification)
+		assert.Equal(t, "LA6675-8", (*interpretedCases)[0].ClassificationCode)
+		assert.Equal(t, "LA26332-9", (*interpretedCases)[1].ClassificationCode)
 	})
 }
 
@@ -101,7 +104,7 @@ func Test_GetVariantInterpretedCases_WithCriteria_NoPagination_DefaultSort(t *te
 		assert.Equal(t, int64(1), *count)
 		assert.Equal(t, 1, len(*interpretedCases))
 		assert.Equal(t, "MONDO:0000001", (*interpretedCases)[0].ConditionId)
-		assert.Equal(t, "LA26332-9", (*interpretedCases)[0].Classification)
+		assert.Equal(t, "LA26332-9", (*interpretedCases)[0].ClassificationCode)
 	})
 }
 

@@ -143,7 +143,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 		}
 	}
 
-	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, ig.classification, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code, agg_phenotypes.phenotypes_term as phenotypes_unparsed")
+	tx = tx.Select("s.id as seq_id, c.id as case_id, ig.transcript_id as transcript_id, ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, ig.classification as classification_code, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code, agg_phenotypes.phenotypes_term as phenotypes_unparsed")
 
 	utils.AddLimitAndSort(tx, userQuery)
 
@@ -159,6 +159,11 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	for i, interpreted := range variantInterpretedCases {
 		phenotypes := utils.PhenotypeUnparsedToJsonArrayOfTerms(interpreted.PhenotypesUnparsed)
 		variantInterpretedCases[i].Phenotypes = phenotypes
+		classification, err := types.GetLabelFromCode(variantInterpretedCases[i].ClassificationCode)
+		if err != nil {
+			return nil, nil, fmt.Errorf("error while fetching variant interpreted cases: %w", err)
+		}
+		variantInterpretedCases[i].Classification = classification
 	}
 
 	return &variantInterpretedCases, &count, nil
@@ -298,16 +303,8 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 		return nil, fmt.Errorf("error fetching performer lab: %w", err)
 	}
 
-	var classification = []Aggregation{
-		{Bucket: "LA6668-3", Label: "pathogenic"},
-		{Bucket: "LA26332-9", Label: "likelyPathogenic"},
-		{Bucket: "LA26333-7", Label: "vus"},
-		{Bucket: "LA26334-5", Label: "likelyBenign"},
-		{Bucket: "LA6675-8", Label: "benign"},
-	}
-
 	return &VariantCasesFilters{
-		Classification: classification,
+		Classification: types.MapToAggregationArray(),
 		CaseAnalysis:   caseAnalysis,
 		PerformerLab:   performerLab,
 	}, nil
