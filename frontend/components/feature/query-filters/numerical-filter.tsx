@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/base/ui/button';
-import { SqonOpEnum, type Statistics, type StatisticsBody, type SqonContent } from '@/api/api';
+import { SqonOpEnum, type Statistics, type StatisticsBodyWithSqon, type SqonContent } from '@/api/api';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { IFilterRangeConfig, useConfig } from '@/components/model/applications-config';
 import { IValueFilter, MERGE_VALUES_STRATEGIES, RangeOperators, TSqonContentValue } from '@/components/model/sqon';
@@ -23,7 +23,7 @@ import { Skeleton } from '@/components/base/ui/skeleton';
 
 type OccurrenceStatisticsInput = {
   seqId: string;
-  statisticsBody: StatisticsBody;
+  statisticsBody: StatisticsBodyWithSqon;
 };
 
 const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics> => {
@@ -172,7 +172,7 @@ export function NumericalFilter({ field }: IProps) {
         setNumericValue(values[0] as string);
       }
 
-      if (numericFilter.op && !aggConfig?.defaultOperator) {
+      if (numericFilter.op) {
         setSelectedRange(numericFilter.op as RangeOperators);
       }
     } else {
@@ -295,7 +295,7 @@ export function NumericalFilter({ field }: IProps) {
       <div className="space-y-3 pt-2">
         <div className="flex flex-col gap-3">
           <div id={`${fieldKey}_operator`}>
-            <Select defaultValue={`${SqonOpEnum.GreaterThan}`} onValueChange={onRangeValueChanged}>
+            <Select value={selectedRange} onValueChange={onRangeValueChanged}>
               <SelectTrigger>
                 <SelectValue placeholder={t('common.filters.operators.selectOperator')}>
                   {RANGE_OPERATOR_LABELS[selectedRange].display}
