@@ -31,6 +31,14 @@ type OccurrenceCountInput = {
 
 const DEFAULT_SORTING = [
   {
+    field: "max_impact_score",
+    order: SortBodyOrderEnum.Desc
+  },
+  {
+    field: "hgvsg",
+    order: SortBodyOrderEnum.Asc
+  },
+  {
     field: 'pf_wgs',
     order: SortBodyOrderEnum.Asc,
   },
