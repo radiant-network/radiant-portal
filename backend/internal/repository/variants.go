@@ -179,7 +179,9 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	txAggPhenotypes := utils.GetAggregatedPhenotypes(r.db)
 
 	locusIdString := fmt.Sprintf("%d", locusId)
-	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline").Select("sequencing_id").Where("locus_id = ?", locusIdString)
+	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline i")
+	txInterpreted = txInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = i.sequencing_id")
+	txInterpreted = txInterpreted.Distinct("s.case_id").Where("i.locus_id = ?", locusIdString)
 
 	tx := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
@@ -188,7 +190,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = c.proband_id", txAggPhenotypes)
-	tx = tx.Where("o.locus_id = ? AND s.id NOT IN (?)", locusId, txInterpreted)
+	tx = tx.Where("o.locus_id = ? AND s.case_id NOT IN (?)", locusId, txInterpreted)
 
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
