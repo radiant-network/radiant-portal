@@ -711,7 +711,7 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 				"case_analysis_code":"WGA", 
 				"case_analysis_name":"Whole Genome Analysis", 
 				"case_id":1, 
-				"classification":"LA6675-8", 
+				"classification":"benign", 
 				"condition_id":"MONDO:0000002", 
 				"condition_name":"blood vessel neoplasm", 
 				"interpretation_updated_on":"2025-06-30T15:51:29Z", 

@@ -94,6 +94,7 @@ type VariantInterpretedCase = struct {
 	ConditionId             string          `json:"condition_id" validate:"required"`
 	ConditionName           string          `json:"condition_name" validate:"required"`
 	Classification          string          `json:"classification" validate:"required"`
+	ClassificationCode      string          `json:"-"`
 	Zygosity                string          `json:"zygosity" validate:"required"`
 	PerformerLabCode        string          `json:"performer_lab_code,omitempty"`
 	PerformerLabName        string          `json:"performer_lab_name,omitempty"`
