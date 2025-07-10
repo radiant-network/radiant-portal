@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/base/ui/button';
 import { SqonOpEnum, type Statistics, type StatisticsBodyWithSqon, type SqonContent } from '@/api/api';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { DEFAULT_EMPTY_QUERY, queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { IFilterRangeConfig, useConfig } from '@/components/model/applications-config';
-import { IValueFilter, MERGE_VALUES_STRATEGIES, RangeOperators, TSqonContentValue } from '@/components/model/sqon';
+import { ISqonGroupFilter, IValueFilter, MERGE_VALUES_STRATEGIES, RangeOperators, TSqonContentValue } from '@/components/model/sqon';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { Input } from '@/components/base/ui/input';
@@ -32,33 +32,125 @@ const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics
     .then(response => response.data);
 };
 
-function useStatisticsBuilder(field: string, shouldFetch: boolean = false, appId: string) {
-  let data: OccurrenceStatisticsInput | null;
+function useStatisticsBuilder(field: string, appId: string, useEmptyQuery = false) {
+  const data: OccurrenceStatisticsInput = {
+    seqId: '1',
+    statisticsBody: {
+      field: field,
+    },
+  };
 
-  if (!shouldFetch) {
-    data = null;
-  } else {
-    data = {
-      seqId: '1',
-      statisticsBody: {
-        field: field,
-      },
-    };
-  }
-
-  const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
-
-  if (activeQuery && data) {
+  const activeQuery = useEmptyQuery ? DEFAULT_EMPTY_QUERY : queryBuilderRemote.getResolvedActiveQuery(appId);
+  if (activeQuery) {
     data.statisticsBody.sqon = {
       content: activeQuery.content as SqonContent,
       op: activeQuery.op as SqonOpEnum,
     };
   }
 
-  return useSWR<Statistics, any, OccurrenceStatisticsInput | null>(data, statisticsFetcher, {
+  return useSWR<Statistics, any, OccurrenceStatisticsInput>(data, statisticsFetcher, {
     revalidateOnFocus: false,
   });
 }
+
+
+/**
+  * noData
+  * unappliedItems
+  */
+function getNumericalValue(fieldKey: string, activeQuery: ISqonGroupFilter, aggConfig: IFilterRangeConfig, statistics?: Statistics) {
+  let hasUnappliedItems: boolean = false;
+  let selectedRange: RangeOperators = RangeOperators.LessThan;
+  let minValue: string = '0';
+  let maxValue: string = '0';
+  let numericalValue: string = '';
+  let hasNoData: boolean = false;
+
+  // Find the main numeric field filter
+  const numericFilter = activeQuery.content.find((x: TSqonContentValue) => {
+    return 'content' in x && 'field' in x.content ? x.content.field === fieldKey : false;
+  }) as IValueFilter | undefined;
+
+  // Find the unit field filter if it exists
+  const unitFilter = activeQuery.content.find((x: TSqonContentValue) => {
+    if ('content' in x && 'field' in x.content) {
+      return x.content.field === `${fieldKey}_unit`;
+    }
+    return false;
+  }) as IValueFilter | undefined;
+
+  if (numericFilter) {
+    const values = numericFilter.content.value;
+    console.log('[NumericalFilter] values', values);
+    // Check for __missing__ value
+    if (values.includes('__missing__')) {
+      return {
+        hasUnappliedItems,
+        selectedRange,
+        minValue,
+        maxValue,
+        numericalValue,
+        hasNoData: true,
+        selectedUnit: undefined,
+      };
+    }
+
+    hasUnappliedItems = true;
+
+    // Handle numeric values
+    if (values.length === 2) {
+      selectedRange = RangeOperators.Between;
+      minValue = Number(values[0]).toFixed(3);
+      maxValue = Number(values[1]).toFixed(3);
+    } else {
+      // Single value case
+      numericalValue = values[0] as string;
+    }
+
+    if (numericFilter.op) {
+      selectedRange = numericFilter.op as RangeOperators;
+    }
+  } else {
+    console.log('[NumericalFilter else] no filter exists', aggConfig);
+
+    hasNoData = false;
+
+    // Use defaults from config if available
+    if (aggConfig?.defaultMin !== undefined) {
+      minValue = aggConfig.defaultMin.toString();
+      numericalValue = aggConfig.defaultMin.toString()
+    } else if (statistics?.min !== undefined) {
+      minValue = Number(statistics.min.toFixed(3)).toString();
+      numericalValue = Number(statistics.min.toFixed(3)).toString();
+    }
+
+    if (aggConfig?.defaultMax !== undefined) {
+      maxValue = aggConfig.defaultMax.toString();
+    } else if (statistics?.max !== undefined) {
+      maxValue = Number(statistics.max.toFixed(3)).toString();
+    }
+
+    if (aggConfig?.defaultOperator) {
+      selectedRange = RangeOperators[aggConfig.defaultOperator as keyof typeof RangeOperators];
+    }
+  }
+
+  return {
+    hasUnappliedItems,
+    selectedRange,
+    minValue,
+    maxValue,
+    numericalValue,
+    hasNoData,
+    // Handle unit if it exists
+    selectedUnit: unitFilter
+      ? (unitFilter.content.value[0] as string)
+      : aggConfig?.rangeTypes?.length
+        ? aggConfig.rangeTypes[0].key
+        : undefined,
+  }
+}
+
 
 interface IProps {
   field: AggregationConfig;
@@ -106,7 +198,8 @@ export function NumericalFilter({ field }: IProps) {
   };
 
   // Fetch statistics for min/max values
-  const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, true, appId);
+  const { data: defaultStatistics, isLoading: defaultIsLoadingStats } = useStatisticsBuilder(fieldKey, appId, true);
+  const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, appId, false);
 
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
   const [numericValue, setNumericValue] = useState<string>('0');
@@ -135,79 +228,13 @@ export function NumericalFilter({ field }: IProps) {
     const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
     if (!activeQuery?.content) return;
 
-    // Find the main numeric field filter
-    const numericFilter = activeQuery.content.find((x: TSqonContentValue) => {
-      return 'content' in x && 'field' in x.content ? x.content.field === fieldKey : false;
-    }) as IValueFilter | undefined;
-
-    // Find the unit field filter if it exists
-    const unitFilter = activeQuery.content.find((x: TSqonContentValue) => {
-      if ('content' in x && 'field' in x.content) {
-        return x.content.field === `${fieldKey}_unit`;
-      }
-      return false;
-    }) as IValueFilter | undefined;
-
-    if (numericFilter) {
-      const values = numericFilter.content.value;
-      console.log('[NumericalFilter] values', values);
-      // Check for __missing__ value
-      if (values.includes('__missing__')) {
-        setHasNoData(true);
-        return;
-      }
-
-
-      setHasUnappliedItems(true);
-
-      // Handle numeric values
-      if (values.length === 2) {
-        setSelectedRange(RangeOperators.Between);
-        const minValue = Number(values[0]).toFixed(3);
-        const maxValue = Number(values[1]).toFixed(3);
-        setMinValue(minValue);
-        setMaxValue(maxValue);
-      } else {
-        // Single value case
-        setNumericValue(values[0] as string);
-      }
-
-      if (numericFilter.op) {
-        setSelectedRange(numericFilter.op as RangeOperators);
-      }
-    } else {
-      console.log('[NumericalFilter else] no filter exists', aggConfig);
-      // Reset values if no filter exists
-      setHasNoData(false);
-
-      // Use defaults from config if available
-      if (aggConfig?.defaultMin !== undefined) {
-        setMinValue(aggConfig.defaultMin.toString());
-        setNumericValue(aggConfig.defaultMin.toString());
-      } else if (statistics?.min !== undefined) {
-        setMinValue(Number(statistics.min.toFixed(3)).toString());
-        setNumericValue(Number(statistics.min.toFixed(3)).toString());
-      }
-
-      if (aggConfig?.defaultMax !== undefined) {
-        setMaxValue(aggConfig.defaultMax.toString());
-      } else if (statistics?.max !== undefined) {
-        setMaxValue(Number(statistics.max.toFixed(3)).toString());
-      }
-
-      if (aggConfig?.defaultOperator) {
-        setSelectedRange(RangeOperators[aggConfig.defaultOperator as keyof typeof RangeOperators]);
-      }
-    }
-
-    // Handle unit if it exists
-    setSelectedUnit(
-      unitFilter
-        ? (unitFilter.content.value[0] as string)
-        : aggConfig?.rangeTypes?.length
-          ? aggConfig.rangeTypes[0].key
-          : undefined,
-    );
+    var result = getNumericalValue(fieldKey, activeQuery, aggConfig, statistics);
+    setHasNoData(result.hasNoData);
+    setMinValue(result.minValue);
+    setMaxValue(result.maxValue);
+    setHasUnappliedItems(result.hasUnappliedItems);
+    setSelectedRange(result.selectedRange);
+    setNumericValue(result.numericalValue);
   }, [appId, fieldKey, aggConfig, statistics]);
 
   // Update min/max values when statistics are loaded
@@ -230,10 +257,16 @@ export function NumericalFilter({ field }: IProps) {
     setHasUnappliedItems(true);
   }, []);
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setHasUnappliedItems(false);
-    initializeForm();
-  }, [initializeForm]);
+    var result = getNumericalValue(fieldKey, DEFAULT_EMPTY_QUERY, aggConfig, defaultStatistics);
+    setHasNoData(result.hasNoData);
+    setMinValue(result.minValue);
+    setMaxValue(result.maxValue);
+    setHasUnappliedItems(result.hasUnappliedItems);
+    setSelectedRange(result.selectedRange);
+    setNumericValue(result.numericalValue);
+  };
 
   const apply = useCallback(() => {
     setHasUnappliedItems(false);
@@ -274,7 +307,7 @@ export function NumericalFilter({ field }: IProps) {
   }, [appId, fieldKey, selectedRange, numericValue, minValue, maxValue, hasNoData, selectedUnit]);
 
   const RangeChoices = Object.entries(RangeOperators)
-    .map(([key, op]) => {
+    .map(([_key, op]) => {
       if (op in RANGE_OPERATOR_LABELS) {
         const Icon = RANGE_OPERATOR_LABELS[op as RangeOperators].icon;
         return (
@@ -312,7 +345,6 @@ export function NumericalFilter({ field }: IProps) {
                 value={minValue}
                 onChange={e => {
                   const value = e.target.value;
-                  console.log('value', value);
                   if (isNaN(Number(value))) return;
                   setMinValue(value);
                   setHasUnappliedItems(true);
@@ -366,7 +398,7 @@ export function NumericalFilter({ field }: IProps) {
 
         {aggConfig?.rangeTypes && aggConfig.rangeTypes.length > 0 && (
           <div id={`${fieldKey}_range_type_container`}>
-            {isLoadingStats ? (
+            {isLoadingStats && defaultIsLoadingStats ? (
               <>
                 <Skeleton className="h-5 w-16 mb-1" id={`${fieldKey}_unit_label_skeleton`} />
                 <Skeleton className="h-9 w-full" id={`${fieldKey}_select_skeleton`} />
