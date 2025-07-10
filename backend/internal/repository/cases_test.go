@@ -125,3 +125,30 @@ func Test_GetCasesFilters(t *testing.T) {
 		assert.Equal(t, len((*filters).RequestedBy), 6)
 	})
 }
+
+func Test_GetCaseEntity(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		caseEntity, err := repo.GetCaseEntity(1)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, (*caseEntity).CaseID)
+		assert.Equal(t, "WGA", (*caseEntity).CaseAnalysisCode)
+		assert.Equal(t, "Whole Genome Analysis", (*caseEntity).CaseAnalysisName)
+		assert.Equal(t, "germline_family", (*caseEntity).CaseType)
+		assert.Equal(t, 3, len((*caseEntity).SequencingExperiments))
+
+		// Proband first
+		assert.Equal(t, "", (*caseEntity).SequencingExperiments[0].RelationshipToProband)
+		assert.Equal(t, 1, (*caseEntity).SequencingExperiments[0].SeqID)
+		assert.Equal(t, 3, (*caseEntity).SequencingExperiments[0].PatientID)
+
+		// Father then Mother then Siblings
+		assert.Equal(t, "father", (*caseEntity).SequencingExperiments[1].RelationshipToProband)
+		assert.Equal(t, 3, (*caseEntity).SequencingExperiments[1].SeqID)
+		assert.Equal(t, 2, (*caseEntity).SequencingExperiments[1].PatientID)
+
+		assert.Equal(t, "mother", (*caseEntity).SequencingExperiments[2].RelationshipToProband)
+		assert.Equal(t, 2, (*caseEntity).SequencingExperiments[2].SeqID)
+		assert.Equal(t, 1, (*caseEntity).SequencingExperiments[2].PatientID)
+	})
+}

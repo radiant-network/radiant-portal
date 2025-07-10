@@ -49,6 +49,27 @@ type CaseResult struct {
 	ManagingOrganizationName string    `json:"managing_organization_name,omitempty"`
 }
 
+// CaseEntity - Case Entity data
+// @Description Data for Case Entity Page
+// @Name CaseEntity
+type CaseEntity struct {
+	CaseID                int                                 `json:"case_id" validate:"required"`
+	CaseAnalysisCode      string                              `json:"case_analysis_code,omitempty"`
+	CaseAnalysisName      string                              `json:"case_analysis_name,omitempty"`
+	CaseAnalysisType      string                              `json:"-"`
+	CaseType              string                              `json:"case_type,omitempty"`
+	SequencingExperiments JsonArray[CaseSequencingExperiment] `json:"sequencing_experiments" validate:"required"`
+}
+
+// CaseSequencingExperiment - Sequencing Experiment to display in a Case
+// @Description Sequencing Experiment to display in a Case
+// @Name CaseSequencingExperiment
+type CaseSequencingExperiment struct {
+	SeqID                 int    `json:"seq_id" validate:"required"`
+	PatientID             int    `json:"patient_id" validate:"required"`
+	RelationshipToProband string `json:"relationship_to_proband" validate:"required"`
+}
+
 var CaseTable = Table{
 	Name:  "`radiant_jdbc`.`public`.`cases`",
 	Alias: "c",

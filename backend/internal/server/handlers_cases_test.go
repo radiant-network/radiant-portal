@@ -85,6 +85,20 @@ func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilte
 	return &result, nil
 }
 
+func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
+	return &types.CaseEntity{
+		CaseID:           1,
+		CaseAnalysisCode: "WGA",
+		CaseAnalysisName: "Whole Genome Analysis",
+		CaseType:         "germline_family",
+		SequencingExperiments: types.JsonArray[types.CaseSequencingExperiment]{
+			{SeqID: 1, PatientID: 3, RelationshipToProband: ""},
+			{SeqID: 3, PatientID: 2, RelationshipToProband: "father"},
+			{SeqID: 2, PatientID: 1, RelationshipToProband: "mother"},
+		},
+	}, nil
+}
+
 func Test_SearchCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -180,6 +194,29 @@ func Test_CasesFiltersHandler(t *testing.T) {
 			{"count":0, "key":"draft", "label":"Draft"},
 			{"count":0, "key":"active", "label":"Active"},
 			{"count":0, "key":"revoke", "label":"Revoke"}
+		]
+	}`, w.Body.String())
+}
+
+func Test_CaseEntityHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/cases/:case_id", CaseEntityHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"case_id": 1,
+		"case_analysis_code": "WGA",
+		"case_analysis_name": "Whole Genome Analysis",
+		"case_type": "germline_family",
+		"sequencing_experiments": [
+			{"seq_id": 1, "patient_id": 3, "relationship_to_proband": ""},
+			{"seq_id": 3, "patient_id": 2, "relationship_to_proband": "father"},
+			{"seq_id": 2, "patient_id": 1, "relationship_to_proband": "mother"}
 		]
 	}`, w.Body.String())
 }

@@ -13,7 +13,8 @@ type Family struct {
 }
 
 var FamilyTable = Table{
-	Name: "radiant_jdbc.public.family",
+	Name:  "radiant_jdbc.public.family",
+	Alias: "f",
 }
 
 func (Family) TableName() string {

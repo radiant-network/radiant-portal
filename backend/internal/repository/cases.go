@@ -15,6 +15,8 @@ type Case = types.Case
 type CaseResult = types.CaseResult
 type AutocompleteResult = types.AutocompleteResult
 type CaseFilters = types.CaseFilters
+type CaseEntity = types.CaseEntity
+type CaseSequencingExperiment = types.CaseSequencingExperiment
 
 type CasesRepository struct {
 	db *gorm.DB
@@ -24,6 +26,7 @@ type CasesDAO interface {
 	SearchCases(userQuery types.ListQuery) (*[]CaseResult, *int64, error)
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 	GetCasesFilters(userQuery types.AggQuery) (*CaseFilters, error)
+	GetCaseEntity(caseId int) (*CaseEntity, error)
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
@@ -175,6 +178,45 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 		PerformerLab: performerLab,
 		RequestedBy:  requestedBy,
 	}, nil
+}
+
+func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
+	var caseEntity CaseEntity
+	var sequencingExperiments types.JsonArray[CaseSequencingExperiment]
+	var familyMembersCount int64
+
+	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	txCase = joinWithCaseAnalysis(txCase)
+	txCase = txCase.Select("c.id as case_id, ca.code as case_analysis_code, ca.name as case_analysis_name, ca.type_code as case_analysis_type")
+	txCase = txCase.Where("c.id = ?", caseId)
+	if err := txCase.Find(&caseEntity).Error; err != nil {
+		return nil, fmt.Errorf("error fetching case entity: %w", err)
+	}
+
+	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON s.patient_id = f.family_member_id AND s.case_id = f.case_id")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, s.patient_id as patient_id, COALESCE(f.relationship_to_proband_code, '') as relationship_to_proband")
+	txSeqExp = txSeqExp.Where("s.case_id = ?", caseId)
+	txSeqExp = txSeqExp.Order("relationship_to_proband asc, s.run_date desc")
+	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {
+		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
+	}
+
+	txCountFamily := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
+	txCountFamily = txCountFamily.Where("f.case_id = ?", caseId)
+	if err := txCountFamily.Count(&familyMembersCount).Error; err != nil {
+		return nil, fmt.Errorf("error counting family members: %w", err)
+	}
+
+	caseEntity.SequencingExperiments = sequencingExperiments
+
+	if caseEntity.CaseAnalysisType == "somatic" || familyMembersCount == 0 {
+		caseEntity.CaseType = caseEntity.CaseAnalysisType
+	} else {
+		caseEntity.CaseType = fmt.Sprintf("%s_family", caseEntity.CaseAnalysisType)
+	}
+
+	return &caseEntity, nil
 }
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {

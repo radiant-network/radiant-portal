@@ -930,6 +930,36 @@ func Test_GetGermlineVariantConditions_Orphanet(t *testing.T) {
 	assertGetGermlineVariantConditions(t, "gene_panels", 1000, "orphanet", "", expected)
 }
 
+func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewCasesRepository(db)
+		router := gin.Default()
+		router.GET("/cases/:case_id", server.CaseEntityHandler(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/cases/%d", caseId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CaseEntityHandler(t *testing.T) {
+	expected := `{
+		"case_id": 1,
+		"case_analysis_code": "WGA",
+		"case_analysis_name": "Whole Genome Analysis",
+		"case_type": "germline_family",
+		"sequencing_experiments": [
+			{"seq_id": 1, "patient_id": 3, "relationship_to_proband": ""},
+			{"seq_id": 3, "patient_id": 2, "relationship_to_proband": "father"},
+			{"seq_id": 2, "patient_id": 1, "relationship_to_proband": "mother"}
+		]
+	}`
+	assertCaseEntityHandler(t, "simple", 1, expected)
+}
+
 func TestMain(m *testing.M) {
 	testutils.StartAllContainers()
 	code := m.Run()

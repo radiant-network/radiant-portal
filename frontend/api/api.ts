@@ -137,6 +137,43 @@ export interface AutocompleteResult {
     'value': string;
 }
 /**
+ * Data for Case Entity Page
+ * @export
+ * @interface CaseEntity
+ */
+export interface CaseEntity {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_analysis_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_analysis_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseEntity
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_type'?: string;
+    /**
+     * 
+     * @type {Array<CaseSequencingExperiment>}
+     * @memberof CaseEntity
+     */
+    'sequencing_experiments': Array<CaseSequencingExperiment>;
+}
+/**
  * 
  * @export
  * @interface CaseFilters
@@ -311,6 +348,31 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'updated_on': string;
+}
+/**
+ * Sequencing Experiment to display in a Case
+ * @export
+ * @interface CaseSequencingExperiment
+ */
+export interface CaseSequencingExperiment {
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'relationship_to_proband': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'seq_id': number;
 }
 /**
  * 
@@ -2400,6 +2462,44 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Retrieve CaseEntity by its ID
+         * @summary Get CaseEntity case entity
+         * @param {string} caseId Case ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        caseEntity: async (caseId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('caseEntity', 'caseId', caseId)
+            const localVarPath = `/cases/{case_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
@@ -2504,6 +2604,19 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve CaseEntity by its ID
+         * @summary Get CaseEntity case entity
+         * @param {string} caseId Case ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async caseEntity(caseId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseEntity>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntity(caseId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntity']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
@@ -2551,6 +2664,16 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.autocompleteCases(prefix, limit, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve CaseEntity by its ID
+         * @summary Get CaseEntity case entity
+         * @param {string} caseId Case ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        caseEntity(caseId: string, options?: RawAxiosRequestConfig): AxiosPromise<CaseEntity> {
+            return localVarFp.caseEntity(caseId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
@@ -2591,6 +2714,18 @@ export class CasesApi extends BaseAPI {
      */
     public autocompleteCases(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).autocompleteCases(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve CaseEntity by its ID
+     * @summary Get CaseEntity case entity
+     * @param {string} caseId Case ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public caseEntity(caseId: string, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseEntity(caseId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
