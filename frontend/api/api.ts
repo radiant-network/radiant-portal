@@ -1140,12 +1140,6 @@ export interface Occurrence {
     'hgvsg': string;
     /**
      * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'impact_score'?: string;
-    /**
-     * 
      * @type {boolean}
      * @memberof Occurrence
      */
@@ -1168,6 +1162,12 @@ export interface Occurrence {
      * @memberof Occurrence
      */
     'locus_id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Occurrence
+     */
+    'max_impact_score': number;
     /**
      * 
      * @type {Array<string>}

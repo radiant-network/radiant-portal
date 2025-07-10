@@ -327,6 +327,7 @@ var PickedTranscriptIdField = Field{
 
 var PickedImpactScoreField = Field{
 	Name:          "impact_score",
+	Alias:         "max_impact_score",
 	CanBeSelected: true,
 	CanBeFiltered: false,
 	CanBeSorted:   true,
