@@ -53,6 +53,10 @@ type SetLocalQBStateWithEvent = QueryBuilderEventParams & {
 
 export const QUERY_BUILDER_UPDATE_EVENT_KEY = "QBCacheUpdate";
 export const QUERY_BUILDER_STATE_CACHE_KEY_PREFIX = "query-builder-cache";
+export const DEFAULT_EMPTY_QUERY = {
+  content: [],
+  op: "and"
+}
 
 export type QueryBuilderRemoteState = Pick<
   QueryBuilderState,
@@ -208,11 +212,11 @@ const addQuery = (
           : (qbState?.activeQueryId ?? query.id),
       queries: hasEmptyQuery
         ? queries.map((q) => {
-            if (isEmptySqon(q)) {
-              return query;
-            }
-            return q;
-          })
+          if (isEmptySqon(q)) {
+            return query;
+          }
+          return q;
+        })
         : [...queries, query],
     },
   });
@@ -229,7 +233,7 @@ const getResolvedActiveQuery = (
 
   return resolveSyntheticSqonFunc(
     qbState?.queries?.find(({ id }) => id === qbState.activeQueryId) ??
-      getDefaultSyntheticSqon(),
+    getDefaultSyntheticSqon(),
     qbState.queries
   );
 };
@@ -308,16 +312,16 @@ const updateActiveQueryField = (
     isEmpty(value)
       ? removeFieldFromSqon(field, activeQuery)
       : deepMergeFieldInQuery({
-          sqon: activeQuery,
-          field,
-          index,
-          isUploadedList,
-          merge_strategy,
-          operator,
-          overrideValuesName,
-          remoteComponent,
-          value,
-        })
+        sqon: activeQuery,
+        field,
+        index,
+        isUploadedList,
+        merge_strategy,
+        operator,
+        overrideValuesName,
+        remoteComponent,
+        value,
+      })
   );
 };
 
@@ -424,12 +428,12 @@ const updateQueryByTableFilter = (
     queryBuilderId,
     params.selectedFilters.length > 0
       ? getUpdatedActiveQuery(queryBuilderId, {
-          field: params.field,
-          sqonContent: createInlineFilters(
-            params.field,
-            params.selectedFilters
-          ),
-        })
+        field: params.field,
+        sqonContent: createInlineFilters(
+          params.field,
+          params.selectedFilters
+        ),
+      })
       : removeFieldFromSqon(params.field, getActiveQuery(queryBuilderId))
   );
 
