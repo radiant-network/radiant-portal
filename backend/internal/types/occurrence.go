@@ -29,7 +29,7 @@ type Occurrence struct {
 	RsNumber            string            `json:"rsnumber,omitempty"`
 	PickedConsequences  JsonArray[string] `gorm:"type:json" json:"picked_consequences" validate:"required"`
 	TranscriptId        string            `json:"transcript_id,omitempty"`
-	ImpactScore         string            `json:"impact_score,omitempty"`
+	MaxImpactScore      int               `json:"max_impact_score" validate:"required"`
 	HasInterpretation   bool              `json:"has_interpretation" validate:"required"`
 } // @name Occurrence
 
@@ -246,6 +246,7 @@ var OccurrencesDefaultFields = []Field{
 	PickedIsManeSelectField,
 	PickedIsManePlusField,
 	PickedVepImpactField,
+	PickedImpactScoreField,
 	PickedSymbolField,
 	ChromosomeField,
 	StartField,

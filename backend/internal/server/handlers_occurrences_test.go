@@ -31,6 +31,7 @@ func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrenc
 			Chromosome:         "1",
 			Start:              1,
 			HasInterpretation:  true,
+			MaxImpactScore:     4,
 		},
 	}, nil
 }
@@ -114,7 +115,8 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"picked_consequences": ["splice acceptor"],
 		"genotype_quality": 1,
 		"gnomad_v3_af":0.1,
-		"has_interpretation": true
+		"has_interpretation": true,
+		"max_impact_score":4
     }]`, w.Body.String())
 }
 
