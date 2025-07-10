@@ -513,8 +513,6 @@ components:
           type: boolean
         hgvsg:
           type: string
-        impact_score:
-          type: string
         is_canonical:
           type: boolean
         is_mane_plus:
@@ -523,6 +521,8 @@ components:
           type: boolean
         locus_id:
           type: string
+        max_impact_score:
+          type: integer
         omim_inheritance_code:
           items:
             type: string
@@ -565,6 +565,7 @@ components:
       - has_interpretation
       - hgvsg
       - locus_id
+      - max_impact_score
       - pf_wgs
       - picked_consequences
       - seq_id
