@@ -165,15 +165,19 @@ components:
     CaseSequencingExperiment:
       description: Sequencing Experiment to display in a Case
       properties:
+        affected_status_code:
+          type: string
         patient_id:
           type: integer
         relationship_to_proband:
           type: string
+        sample_id:
+          type: integer
         seq_id:
           type: integer
       required:
       - patient_id
-      - relationship_to_proband
+      - sample_id
       - seq_id
       type: object
     CasesSearchResponse:

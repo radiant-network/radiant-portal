@@ -357,6 +357,12 @@ export interface CaseResult {
 export interface CaseSequencingExperiment {
     /**
      * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'affected_status_code'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof CaseSequencingExperiment
      */
@@ -366,7 +372,13 @@ export interface CaseSequencingExperiment {
      * @type {string}
      * @memberof CaseSequencingExperiment
      */
-    'relationship_to_proband': string;
+    'relationship_to_proband'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'sample_id': number;
     /**
      * 
      * @type {number}
