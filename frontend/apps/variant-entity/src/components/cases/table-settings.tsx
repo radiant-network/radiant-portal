@@ -4,14 +4,13 @@ import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import { TFunction } from 'i18next';
-import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
 import { Badge } from '@/components/base/ui/badge';
-import { formatDate } from 'date-fns';
 import { EllipsisVertical } from 'lucide-react';
 import { Button } from '@/components/base/ui/button';
+import { VariantInterpretedCase, VariantUninterpretedCase } from '@/api/api';
 
-const interpretedCasesColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
-const otherCasesColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
+const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>(); // todo replace with correct type when api is updated
+const otherCasesColumnHelper = createColumnHelper<VariantUninterpretedCase>(); // todo replace with correct type when api is updated
 
 function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
   return [
@@ -22,17 +21,17 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       enableResizing: false,
       enablePinning: false,
     },
-    interpretedCasesColumnHelper.accessor(row => row.case, {
-      id: 'case',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+    interpretedCasesColumnHelper.accessor(row => row.case_id, {
+      id: 'case_id',
+      cell: info => <div className="font-mono text-xs">{info.getValue()}</div>,
       header: t('variantEntity.cases.interpreted-table.headers.case'),
       size: 120,
       minSize: 80,
       maxSize: 150,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.date, {
-      id: 'date',
+    interpretedCasesColumnHelper.accessor(row => row.interpretation_updated_on, {
+      id: 'interpretation_updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
         <TooltipsHeader tooltips={t('variantEntity.cases.interpreted-table.headers.date.tooltip')}>
@@ -43,9 +42,14 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       minSize: 80,
       maxSize: 150,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.mondo, {
-      id: 'mondo',
-      cell: info => <div className="font-medium">{info.getValue()}</div>,
+    interpretedCasesColumnHelper.accessor(row => row.condition_name, {
+      id: 'condition_name',
+      cell: info => (
+        <div className="font-medium">
+          {info.getValue()}{' '}
+          <span className="font-mono text-xs text-muted-foreground">({info.row.original.condition_id})</span>
+        </div>
+      ),
       header: t('variantEntity.cases.interpreted-table.headers.mondo'),
       minSize: 120,
       maxSize: 350,
@@ -53,7 +57,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.classification, {
       id: 'classification',
-      cell: info => <ClinVarBadge value={info.getValue()} />,
+      cell: info => <div>{info.getValue()}</div>,
       header: t('variantEntity.cases.interpreted-table.headers.classification'),
       minSize: 150,
       maxSize: 250,
@@ -67,17 +71,17 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       maxSize: 150,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.inheritance, {
+    interpretedCasesColumnHelper.accessor(row => row.transcript_id, {
       id: 'inheritance',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+      cell: info => <div className="text-muted-foreground">{'-'}</div>,
       header: t('variantEntity.cases.interpreted-table.headers.inheritance'),
       size: 130,
       minSize: 130,
       maxSize: 250,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.institution, {
-      id: 'institution',
+    interpretedCasesColumnHelper.accessor(row => row.performer_lab_code, {
+      id: 'performer_lab_code',
       cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
       header: t('variantEntity.cases.interpreted-table.headers.institution'),
       minSize: 100,
@@ -85,8 +89,8 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.test, {
-      id: 'test',
+    interpretedCasesColumnHelper.accessor(row => row.case_analysis_code, {
+      id: 'case_analysis_code',
       cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
       header: t('variantEntity.cases.interpreted-table.headers.test'),
       minSize: 80,
@@ -94,11 +98,11 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.status, {
-      id: 'status',
+    interpretedCasesColumnHelper.accessor(row => row.status_code, {
+      id: 'status_code',
       cell: info => {
         const status = info.getValue();
-        return <Badge variant={status === 'Active' ? 'neutral' : 'default'}>{status}</Badge>;
+        return <Badge variant={status === 'active' ? 'neutral' : 'default'}>{status}</Badge>;
       },
       header: t('variantEntity.cases.interpreted-table.headers.status'),
       minSize: 100,
@@ -120,13 +124,13 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       enablePinning: false,
       enableResizing: false,
     }),
-  ] as TableColumnDef<any, any>[]; // todo replace with correct type when api is updated
+  ] as TableColumnDef<VariantInterpretedCase, any>[]; // todo replace with correct type when api is updated
 }
 
 function getOtherCasesColumns(t: TFunction<string, undefined>) {
   return [
-    otherCasesColumnHelper.accessor(row => row.case, {
-      id: 'case',
+    otherCasesColumnHelper.accessor(row => row.case_id, {
+      id: 'case_id',
       cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
       header: t('variantEntity.cases.other-table.headers.case'),
       minSize: 80,
@@ -134,9 +138,9 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.date, {
-      id: 'date',
-      cell: info => <div className="text-muted-foreground">{formatDate(info.getValue(), 'yyyy-MM-dd')}</div>,
+    otherCasesColumnHelper.accessor(row => row.created_on, {
+      id: 'created_on',
+      cell: info => <DateCell date={info.getValue()} />,
       header: () => (
         <TooltipsHeader tooltips={t('variantEntity.cases.other-table.headers.date.tooltip')}>
           {t('variantEntity.cases.other-table.headers.date')}
@@ -146,9 +150,14 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       minSize: 80,
       maxSize: 150,
     }),
-    otherCasesColumnHelper.accessor(row => row.hpo, {
-      id: 'hpo',
-      cell: info => <div className="font-medium">{info.getValue()}</div>,
+    otherCasesColumnHelper.accessor(row => row.primary_condition_name, {
+      id: 'primary_condition_name',
+      cell: info => (
+        <div className="font-medium">
+          {info.getValue()}{' '}
+          <span className="font-mono text-xs text-muted-foreground">({info.row.original.primary_condition_id})</span>
+        </div>
+      ),
       header: t('variantEntity.cases.other-table.headers.phenotypesHpo'),
       minSize: 120,
       maxSize: 350,
@@ -163,17 +172,17 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       maxSize: 150,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.inheritance, {
+    otherCasesColumnHelper.accessor(row => row, {
       id: 'inheritance',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+      cell: info => <div className="text-muted-foreground">{'-'}</div>,
       header: t('variantEntity.cases.other-table.headers.inheritance'),
       size: 130,
       minSize: 130,
       maxSize: 250,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.institution, {
-      id: 'institution',
+    otherCasesColumnHelper.accessor(row => row.performer_lab_code, {
+      id: 'performer_lab_code',
       cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
       header: t('variantEntity.cases.other-table.headers.institution'),
       minSize: 100,
@@ -181,8 +190,8 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.test, {
-      id: 'test',
+    otherCasesColumnHelper.accessor(row => row.case_analysis_code, {
+      id: 'case_analysis_code',
       cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
       header: t('variantEntity.cases.other-table.headers.test'),
       minSize: 80,
@@ -190,18 +199,22 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.status, {
-      id: 'status',
+    otherCasesColumnHelper.accessor(row => row.status_code, {
+      id: 'status_code',
       cell: info => {
         const status = info.getValue();
-        return <Badge variant={status === 'Active' ? 'neutral' : 'default'}>{status}</Badge>;
+        return (
+          <Badge variant={status === 'active' ? 'neutral' : 'default'}>
+            {t(`variantEntity.cases.status.${status}`)}
+          </Badge>
+        );
       },
       header: t('variantEntity.cases.other-table.headers.status'),
       minSize: 100,
       maxSize: 150,
       size: 120,
     }),
-  ] as TableColumnDef<any, any>[]; // todo replace with correct type when api is updated
+  ] as TableColumnDef<VariantUninterpretedCase, any>[]; // todo replace with correct type when api is updated
 }
 
 const interpretedCasesDefaultSettings = createColumnSettings([
@@ -211,15 +224,15 @@ const interpretedCasesDefaultSettings = createColumnSettings([
     fixed: true,
   },
   {
-    id: 'case',
+    id: 'case_id',
     visible: true,
   },
   {
-    id: 'date',
+    id: 'interpretation_updated_on',
     visible: true,
   },
   {
-    id: 'mondo',
+    id: 'condition_name',
     visible: true,
     label: 'variant.headers.mondo',
   },
@@ -239,35 +252,40 @@ const interpretedCasesDefaultSettings = createColumnSettings([
     label: 'variant.headers.inheritance',
   },
   {
-    id: 'institution',
+    id: 'performer_lab_code',
     visible: true,
     label: 'variant.headers.institution',
   },
   {
-    id: 'test',
+    id: 'case_analysis_code',
     visible: true,
     label: 'variant.headers.test',
   },
   {
-    id: 'status',
+    id: 'status_code',
     visible: true,
     label: 'variant.headers.status',
+  },
+  {
+    id: 'action',
+    visible: false,
+    label: '',
   },
 ]);
 
 const otherCasesDefaultSettings = createColumnSettings([
   {
-    id: 'case',
+    id: 'case_id',
     visible: true,
-    label: 'variant.headers.case',
+    label: 'variant.headers.case_id',
   },
   {
-    id: 'date',
+    id: 'created_on',
     visible: true,
     label: 'variant.headers.date',
   },
   {
-    id: 'hpo',
+    id: 'primary_condition_name',
     visible: true,
     label: 'variant.headers.hpo',
   },
@@ -282,17 +300,17 @@ const otherCasesDefaultSettings = createColumnSettings([
     label: 'variant.headers.inheritance',
   },
   {
-    id: 'institution',
+    id: 'performer_lab_code',
     visible: true,
     label: 'variant.headers.institution',
   },
   {
-    id: 'test',
+    id: 'case_analysis_code',
     visible: true,
     label: 'variant.headers.test',
   },
   {
-    id: 'status',
+    id: 'status_code',
     visible: true,
     label: 'variant.headers.status',
   },

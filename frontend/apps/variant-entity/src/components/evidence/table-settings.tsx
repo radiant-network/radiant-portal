@@ -7,9 +7,8 @@ import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
 import NumberBadge from '@/components/base/number-badge';
 import Rating from '@/components/base/rating';
 import { Badge } from '@/components/base/ui/badge';
-import { Button } from '@/components/base/ui/button';
-import { ExternalLink } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 const pathogenicEvidenceColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
 const conditionPhenotypeColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
@@ -81,9 +80,9 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
       id: 'action',
       cell: info => (
         <div className="flex justify-end">
-          <Button variant="link" className="p-0 h-auto">
-            {info.getValue()} <ExternalLink />
-          </Button>
+          <AnchorLink href="" size="sm" external>
+            {info.getValue()}
+          </AnchorLink>
         </div>
       ),
       header: '',
@@ -142,9 +141,9 @@ function getConditionPhenotypeColumns(t: TFunction<string, undefined>) {
       header: '',
       cell: info => (
         <div className="flex justify-end">
-          <Button variant="link" className="p-0 h-auto">
-            {info.getValue()} <ExternalLink />
-          </Button>
+          <AnchorLink href="" size="sm" external>
+            {info.getValue()}
+          </AnchorLink>
         </div>
       ),
       maxSize: 200,
@@ -158,32 +157,32 @@ const pathogenicEvidenceDefaultSettings = createColumnSettings([
   {
     id: 'evaluated',
     visible: true,
-    label: 'variant.headers.evaluated'
+    label: 'variant.headers.evaluated',
   },
   {
     id: 'condition',
     visible: true,
-    label: 'variant.headers.condition'
+    label: 'variant.headers.condition',
   },
   {
     id: 'classification',
     visible: true,
-    label: 'variant.headers.classification'
+    label: 'variant.headers.classification',
   },
   {
     id: 'status',
     visible: true,
-    label: 'variant.headers.status'
+    label: 'variant.headers.status',
   },
   {
     id: 'origin',
     visible: true,
-    label: 'variant.headers.origin'
+    label: 'variant.headers.origin',
   },
   {
     id: 'action',
     visible: true,
-    label: 'variant.headers.action'
+    label: 'variant.headers.action',
   },
 ]);
 
@@ -191,17 +190,17 @@ const conditionPhenotypeDefaultSettings = createColumnSettings([
   {
     id: 'condition',
     visible: true,
-    label: 'variant.headers.condition'
+    label: 'variant.headers.condition',
   },
   {
     id: 'inheritence',
     visible: true,
-    label: 'variant.headers.inheritence'
+    label: 'variant.headers.inheritence',
   },
   {
     id: 'action',
     visible: true,
-    label: 'variant.headers.action'
+    label: 'variant.headers.action',
   },
 ]);
 

@@ -2,13 +2,14 @@ import { ColumnSettings } from '@/components/base/data-table/data-table';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
 import { HeaderGroup, PaginationState } from '@tanstack/react-table';
+import { ReactElement } from 'react';
 
 type DataTableSkeletonLoadingProps = {
   loading?: boolean;
   headerGroups: HeaderGroup<any>[];
   pagination: PaginationState;
   columnSettings: ColumnSettings[];
-  children: JSX.Element | JSX.Element[];
+  children: ReactElement | ReactElement[];
 };
 
 /**
@@ -35,7 +36,6 @@ function DataTableSkeletonLoading({
                   <Skeleton className="w-full h-[24px]" />
                 </TableHead>
               ))}
-
             </TableRow>
           ))}
         </TableHeader>

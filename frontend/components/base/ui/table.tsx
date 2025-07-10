@@ -34,7 +34,7 @@ function Table({ containerRef, className, size, ...props }: TableProps) {
   const styles = tableVariants({ size });
 
   return (
-    <div ref={containerRef} className="rounded-sm relative w-full border overflow-auto max-h-[calc(100vh-120px)]">
+    <div ref={containerRef} className="rounded-md relative w-full border overflow-auto max-h-[calc(100vh-120px)]">
       <table className={styles.base({ className })} {...props} />
     </div>
   );
@@ -47,7 +47,7 @@ function TableHeader({ className, ...props }: React.HTMLAttributes<HTMLTableSect
 TableHeader.displayName = 'TableHeader';
 
 function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className={className} {...props} />;
+  return <tbody className={cn('[&>tr:last-child>td]:border-b-0', className)} {...props} />;
 }
 TableBody.displayName = 'TableBody';
 
@@ -83,7 +83,12 @@ function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
 TableHead.displayName = 'TableHead';
 
 function TableCell({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn('align-middle transition-colors', className)} {...props} />;
+  return (
+    <td
+      className={cn('align-middle [&>div]:overflow-hidden [&>div]:text-ellipsis [&>div]:whitespace-nowrap', className)}
+      {...props}
+    />
+  );
 }
 TableCell.displayName = 'TableCell';
 

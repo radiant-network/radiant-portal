@@ -111,7 +111,7 @@ export default function App() {
             {t('variantEntity.evidence.title')}
           </TabsListItem>
           <TabsListItem value={VariantEntityTabs.Transcripts}>{t('variantEntity.transcripts.title')}</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Cases}>{t('variantEntity.cases.title')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Cases}>{t('variantEntity.cases.tab')}</TabsListItem>
         </TabsList>
         <div className="px-6 ">
           <Container>

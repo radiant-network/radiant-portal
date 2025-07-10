@@ -1,31 +1,83 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/ui/card';
-import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import CasesFilters, { CasesCreatedAtSort, CasesFiltersState } from './cases-filters';
 import { useState } from 'react';
 import InterpretedCasesTable from './interpreted-cases-table';
-import OtherCasesTable from './other-cases-table';
+import OtherCasesTable from './uninterpreted-cases-table';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
+import { variantsApi } from '@/utils/api';
+import useSWR from 'swr';
+import { ApiError, VariantCasesCount } from '@/api/api';
+import { useParams } from 'react-router';
+import { Skeleton } from '@/components/base/ui/skeleton';
+
+enum Tabs {
+  InterpretedCases = 'InterpretedCases',
+  OtherCases = 'OtherCases',
+}
+
+type CasesCountInput = {
+  key: string;
+  locusId: string;
+};
+
+async function fetchCasesCount(input: CasesCountInput) {
+  const response = await variantsApi.getGermlineVariantCasesCount(input.locusId);
+  return response.data;
+}
 
 function CasesTab() {
   const { t } = useI18n();
-  const [initialFilters, setInitialFilters] = useState<CasesFiltersState>({
-    createdAtSort: CasesCreatedAtSort.mostRecent,
-    institution: '', // todo
-    test: '', // todo
-    classification: '', // todo
-  });
+  const params = useParams<{ locusId: string }>();
+
+  const [activeTab, setActiveTab] = useState<Tabs>(Tabs.InterpretedCases);
+
+  const { data, isLoading } = useSWR<VariantCasesCount, ApiError, CasesCountInput>(
+    {
+      key: 'cases-count',
+      locusId: params.locusId!,
+    },
+    fetchCasesCount,
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">{t('variantEntity.cases.title')}</CardTitle>
+        <CardTitle className="text-xl font-semibold">
+          {isLoading ? (
+            <Skeleton className="w-20 h-7" />
+          ) : (
+            t('variantEntity.cases.title', {
+              count: data?.count_total_cases,
+            })
+          )}
+        </CardTitle>
         <CardDescription>{t('variantEntity.cases.description')}</CardDescription>
       </CardHeader>
-      <Separator className="m-6" />
       <CardContent className="space-y-6">
-        <CasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
-        <InterpretedCasesTable />
-        <OtherCasesTable />
+        <TabsNav value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsListItem value={Tabs.InterpretedCases}>
+              {t('variantEntity.cases.interpreted-table.title', {
+                count: data?.count_interpretations,
+              })}
+            </TabsListItem>
+            <TabsListItem value={Tabs.OtherCases}>
+              {t('variantEntity.cases.other-table.title', {
+                count: data?.count_uninterpreted_cases,
+              })}
+            </TabsListItem>
+          </TabsList>
+          <TabsContent value={Tabs.InterpretedCases}>
+            <InterpretedCasesTable />
+          </TabsContent>
+          <TabsContent value={Tabs.OtherCases}>
+            <OtherCasesTable />
+          </TabsContent>
+        </TabsNav>
       </CardContent>
     </Card>
   );

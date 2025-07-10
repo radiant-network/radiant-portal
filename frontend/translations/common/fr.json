@@ -845,11 +845,10 @@
       "aminoAcidSubstitution": "Substitution d'acide aminé"
     },
     "cases": {
-      "title": "Cas",
+      "title": "{{count}} Cas",
+      "tab": "Cas",
       "description": "Cas cliniques portant cette variante",
-      "filters": {
-        "label": "Conditions et phénotypes",
-        "searchInputPlaceholder": "Rechercher des conditions et phénotypes",
+      "commonfilters": {
         "classifications": {
           "allClassifications": "Toutes les classifications"
         },
@@ -864,6 +863,10 @@
           "leastRecent": "Plus ancien"
         }
       },
+      "status": {
+        "active": "Actif",
+        "completed": "Complété"
+      },
       "interpreted-table": {
         "title": "Cas interprétés ({{count}})",
         "headers": {
@@ -877,6 +880,10 @@
           "institution": "Institution",
           "test": "Test",
           "status": "Statut"
+        },
+        "filters": {
+          "label": "Conditions",
+          "searchInputPlaceholder": "Filtrer les conditions MONDO"
         }
       },
       "other-table": {
@@ -891,6 +898,10 @@
           "institution": "Institution",
           "test": "Test",
           "status": "Statut"
+        },
+        "filters": {
+          "label": "Phénotypes",
+          "searchInputPlaceholder": "Filtrer les phénotypes HPO"
         }
       }
     }
