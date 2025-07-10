@@ -23,3 +23,14 @@ export function sanitizeHtml(html: string): string {
 
   return div.innerHTML;
 }
+
+/**
+ * Decode HTML entities
+ * @param html - The HTML string to decode
+ * @returns The decoded HTML string
+ */
+export function decodeHtmlEntities(html: string): string {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = html;
+  return textarea.value;
+}

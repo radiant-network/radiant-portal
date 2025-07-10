@@ -4,7 +4,7 @@ import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { variantsApi } from '@/utils/api';
-import { sanitizeHtml } from '@/utils/helper';
+import { sanitizeHtml, decodeHtmlEntities } from '@/utils/helper';
 import { Copy, Mars, Stethoscope, User, Venus } from 'lucide-react';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
@@ -28,13 +28,6 @@ async function fetchOccurrenceExpend(input: VariantExpendedInterpretedCaseInput)
     input.transcriptId,
   );
   return response.data;
-}
-
-// Utility function to decode HTML entities
-function decodeHtmlEntities(html: string): string {
-  const textarea = document.createElement('textarea');
-  textarea.innerHTML = html;
-  return textarea.value;
 }
 
 function InterpretedCasesExpend({ locusId, data }: InterpretedCasesExpendProps) {
