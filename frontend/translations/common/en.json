@@ -769,8 +769,16 @@
     },
     "variants": {
       "title": "Variants",
-      "relation": {
-        "assay": "Assay"
+      "filters": {
+        "assay": "Assay",
+        "proband": "Proband",
+        "sample_id": "Sample ID",
+        "affected_status_code": {
+          "affected": "Affected",
+          "non_affected": "Unaffected",
+          "unknown": "Unknown"
+        },
+        "snv": "SNV"
       }
     }
   },

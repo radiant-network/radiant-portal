@@ -93,7 +93,7 @@ export default function App() {
           </TabsContent>
         </Container>
         <TabsContent value={CaseEntityTabs.Variants} noMargin>
-          <VariantsTab />
+          <VariantsTab caseEntity={data} isLoading={isLoading} />
         </TabsContent>
       </TabsNav>
     </main>
