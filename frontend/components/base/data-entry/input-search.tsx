@@ -56,6 +56,7 @@ function InputSearch({
       <Input
         type={type}
         className={cn('rounded-r-none focus:z-2', className)}
+        wrapperClassName="w-full"
         {...props}
         onKeyDown={e => {
           handleKeyDown(e);
