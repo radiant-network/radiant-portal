@@ -38,7 +38,10 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
   const [isDirty, setIsDirty] = useState(false);
   const gerlimeFormRef = useRef<InterpretationFormRef>(null);
   const somaticFormRef = useRef<InterpretationFormRef>(null);
-  const { fetch: fetchInterpretationHelper, save: saveInterpretationHelper } = useInterpretationHelper(occurrence, isSomatic);
+  const { fetch: fetchInterpretationHelper, save: saveInterpretationHelper } = useInterpretationHelper(
+    occurrence,
+    isSomatic,
+  );
   const { fetch: fetchOccurrenceExpendHelper } = useOccurenceExpandHelper(occurrence);
 
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
