@@ -1,7 +1,7 @@
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/components/lib/utils';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.ComponentProps<'input'> {
   startIcon?: LucideIcon;
   endIcon?: LucideIcon;
   wrapperClassName?: string;
