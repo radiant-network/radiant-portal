@@ -779,8 +779,16 @@
     },
     "variants": {
       "title": "Variants",
-      "relation": { 
-        "assay": "Prescription"
+      "filters": { 
+        "assay": "Prescription",
+        "proband": "Proband",
+        "sample_id": "Sample ID",
+        "affected_status_code": {
+          "affected": "Affecté",
+          "non_affected": "Non-affecté",
+          "unknown": "Inconnu"
+        },
+        "snv": "SNV"
       }
     }
   },

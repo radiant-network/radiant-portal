@@ -1,4 +1,4 @@
-import { Count, CountBodyWithSqon, ListBodyWithSqon, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
+import { CaseEntity, Count, CountBodyWithSqon, ListBodyWithSqon, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
@@ -16,9 +16,9 @@ import { FilterComponent } from '@/components/feature/query-filters/filter-conta
 import { useI18n } from '@/components/hooks/i18n';
 import { X } from 'lucide-react';
 import { cn } from '@/components/lib/utils';
-import VariantsFilter from './variants-filter';
 import OccurrenceExpend from './occurrence-table/occurrence-expend';
 import { defaultSettings, getVariantColumns } from './occurrence-table/table-settings';
+import AssayVariantFilters from './filters/assay-variant-filters';
 
 type OccurrencesListInput = {
   seqId: string;
@@ -55,11 +55,17 @@ async function fetchOccurrencesCount(input: OccurrenceCountInput) {
   return response.data;
 }
 
-const SEQ_ID = '1';
 
-function VariantTab() {
+type VariantTabProps = {
+  caseEntity?: CaseEntity;
+  isLoading: boolean;
+}
+
+function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const config = useConfig();
   const { t } = useI18n();
+
+  const [seqId, setSeqId] = useState<string>(caseEntity?.assays[0]?.seq_id.toString() ?? '');
 
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
@@ -70,9 +76,11 @@ function VariantTab() {
     pageIndex: 0,
     pageSize: 10,
   });
+
+  // Variant count Request
   const { data: total, isLoading: totalIsLoading } = useSWR<Count, any, OccurrenceCountInput>(
     {
-      seqId: SEQ_ID,
+      seqId,
       countBody: { sqon: activeSqon },
     },
     fetchOccurrencesCount,
@@ -86,9 +94,10 @@ function VariantTab() {
 
   const appId = config.variant_exploration.app_id;
 
+  // Variant list request
   const { data: list, isLoading: listIsLoading } = useSWR<Occurrence[], any, OccurrencesListInput>(
     {
-      seqId: SEQ_ID,
+      seqId,
       listBody: {
         additional_fields: [
           'rsnumber',
@@ -134,7 +143,7 @@ function VariantTab() {
 
   return (
     <div className='bg-background flex flex-col'>
-      <VariantsFilter />
+      <AssayVariantFilters isLoading={isLoading} assays={caseEntity?.assays} handleChange={(value: string) => setSeqId(value)} />
       <div className='bg-muted/40 w-full'>
         <div className={`flex flex-1 h-screen overflow-hidden`}>
           <aside className="w-auto min-w-fit h-full shrink-0">
@@ -174,7 +183,7 @@ function VariantTab() {
                 queryCountIcon={<VariantIcon size={14} />}
                 fetchQueryCount={resolvedSqon =>
                   fetchOccurrencesCount({
-                    seqId: SEQ_ID,
+                    seqId,
                     countBody: {
                       sqon: resolvedSqon,
                     },
