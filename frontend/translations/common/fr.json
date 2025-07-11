@@ -775,7 +775,33 @@
       "case": "Cas"
     },
     "details": {
-      "title": "Détails de Cas"
+      "title": "Détails de Cas",
+      "analysisOverview": "Aperçu de l'analyse",
+      "createdOn": "Créé le",
+      "createdOn_tooltips": "aaaa-mm-jj",
+      "lastUpdate": "Dernière mise à jour",
+      "lastUpdate_tooltips": "aaaa-mm-jj",
+      "prescriber": "Prescripteur",
+      "prescribingInst": "Inst. prescriptrice",
+      "diagLab": "Lab. de diagnostic",
+      "requestId": "ID de demande",
+      "priority": "Priorité",
+      "status": "Statut",
+      "assignedTo": "Assigné à",
+      "bioinformatics": "Bio-informatique",
+      "taskId": "ID de tâche",
+      "type": "Type",
+      "noTaskFound": "Aucune tâche trouvée",
+      "statusOptions": {
+        "unknown": "Inconnu",
+        "draft": "Brouillon",
+        "active": "Actif",
+        "revoke": "Révoquer",
+        "completed": "Complété",
+        "on-hold": "En attente",
+        "incomplete": "Incomplet",
+        "submitted": "Soumis"
+      }
     },
     "variants": {
       "title": "Variants",

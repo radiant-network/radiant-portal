@@ -1,13 +1,11 @@
 import { Card, CardContent, CardFooter } from '@/components/base/ui/card';
-import { useParams } from 'react-router';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import AnalysisCard from './analysis-card';
-import PatientInformationCard  from './patient-information-card';
+// import PatientInformationCard  from './patient-information-card';
+import { CaseEntity } from '@/api/api';
 
-function DetailsTab() {
-  const params = useParams<{ caseId: string }>();
-  const data = {};
+function DetailsTab({ data }: { data: CaseEntity }) {
   const isLoading = false;
 
   if (isLoading || !data) {
@@ -15,16 +13,16 @@ function DetailsTab() {
   }
 
   return (
-    <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
-      <AnalysisCard data={data} />
-      <PatientInformationCard data={data} />
+    <div className="gap-6 grid grid-cols-3">
+      <AnalysisCard className="col-span-2" data={data} />
+      {/* <PatientInformationCard data={data} /> */}
     </div>
   );
 }
 
 const CaseEntityDetailsSkeleton = () => {
   return (
-    <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
+    <div className="gap-6 grid grid-cols-2">
       <Card>
         <CardContent>
           <Skeleton className="h-6" />
