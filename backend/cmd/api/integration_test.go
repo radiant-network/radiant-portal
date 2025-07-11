@@ -956,7 +956,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"case_analysis_name":"Whole Genome Analysis",
 		"case_id":1,
 		"case_type":"germline_family", 
-		"created_on":"0001-01-01T00:00:00Z", 
+		"created_on":"2021-09-12T13:08:00Z", 
 		"members":[
 			{
 				"date_of_birth":"1973-03-23T00:00:00Z",
@@ -987,9 +987,19 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"sex_code":"male"
 			}
 		], 
-		"status_code":"", 
+		"note": "Administrative comment",
+		"performer_lab_code": "CQGC",
+		"performer_lab_name": "Quebec Clinical Genomic Center",
+		"prescriber": "Felix Laflamme",
+		"primary_condition_id": "MONDO:0700092",
+		"primary_condition_name": "neurodevelopmental disorder",
+		"priority_code": "routine",
+		"request_id": 1,
+		"requested_by_code": "CHUSJ",
+		"requested_by_name": "Centre hospitalier universitaire Sainte-Justine",
+		"status_code":"active", 
 		"tasks":[],
-		"updated_on":"0001-01-01T00:00:00Z"
+		"updated_on":"2021-09-12T13:08:00Z"
 	}`
 	assertCaseEntityHandler(t, "simple", 1, expected)
 }
