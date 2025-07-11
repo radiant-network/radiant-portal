@@ -104,7 +104,7 @@ export default function App() {
         </Container>
       </div>
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
-        <TabsList className="pt-6 px-3 bg-background" contentClassName="min-[1440px]:px-3 max-w-8xl mx-auto">
+        <TabsList className="pt-6 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
           <TabsListItem value={VariantEntityTabs.Overview}>{t('variantEntity.overview.title')}</TabsListItem>
           <TabsListItem value={VariantEntityTabs.Frequency}>{t('variantEntity.frequency.title')}</TabsListItem>
           <TabsListItem value={VariantEntityTabs.EvidenceAndConditions}>

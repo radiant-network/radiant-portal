@@ -3,7 +3,7 @@ import { cn } from '../lib/utils';
 
 function Container({ className, children, ...props }: ComponentProps<'div'>) {
   return (
-    <div className={cn('max-w-8xl mx-auto', className)} {...props}>
+    <div className={cn('mx-auto', className)} {...props}>
       {children}
     </div>
   );
