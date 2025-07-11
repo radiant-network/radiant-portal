@@ -54,6 +54,7 @@ type CaseResult struct {
 // @Name CaseEntity
 type CaseEntity struct {
 	CaseID               int                                       `json:"case_id" validate:"required"`
+	ProbandID            int                                       `json:"-"`
 	CaseAnalysisCode     string                                    `json:"case_analysis_code,omitempty"`
 	CaseAnalysisName     string                                    `json:"case_analysis_name,omitempty"`
 	CaseAnalysisType     string                                    `json:"-"`
@@ -97,19 +98,17 @@ type CaseAssay struct {
 // @Description Patient clinical information to display in Case Entity
 // @Name CasePatientClinicalInformation
 type CasePatientClinicalInformation struct {
-	RelationshipToProband         string            `json:"relationship_to_proband,omitempty"`
-	AffectedStatusCode            string            `json:"affected_status_code,omitempty"`
-	PatientID                     int               `json:"patient_id" validate:"required"`
-	DateOfBirth                   time.Time         `json:"date_of_birth"`
-	SexCode                       string            `json:"sex_code" validate:"required"`
-	Mrn                           string            `json:"mrn,omitempty"`
-	ManagingOrganizationCode      string            `json:"managing_organization_code,omitempty"`
-	ManagingOrganizationName      string            `json:"managing_organization_name,omitempty"`
-	EthnicityCodes                JsonArray[string] `json:"ethnicity_codes,omitempty"`
-	ObservedPhenotypesUnparsed    string            `json:"-"`
-	ObservedPhenotypes            JsonArray[Term]   `json:"observed_phenotypes,omitempty"`
-	NonObservedPhenotypesUnparsed string            `json:"-"`
-	NonObservedPhenotypes         JsonArray[Term]   `json:"non_observed_phenotypes,omitempty"`
+	RelationshipToProband    string            `json:"relationship_to_proband,omitempty"`
+	AffectedStatusCode       string            `json:"affected_status_code,omitempty"`
+	PatientID                int               `json:"patient_id" validate:"required"`
+	DateOfBirth              time.Time         `json:"date_of_birth"`
+	SexCode                  string            `json:"sex_code" validate:"required"`
+	Mrn                      string            `json:"mrn,omitempty"`
+	ManagingOrganizationCode string            `json:"managing_organization_code,omitempty"`
+	ManagingOrganizationName string            `json:"managing_organization_name,omitempty"`
+	EthnicityCodes           JsonArray[string] `json:"ethnicity_codes,omitempty"` // TODO
+	ObservedPhenotypes       JsonArray[Term]   `json:"observed_phenotypes,omitempty"`
+	NonObservedPhenotypes    JsonArray[Term]   `json:"non_observed_phenotypes,omitempty"`
 }
 
 var CaseTable = Table{

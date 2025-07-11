@@ -949,17 +949,46 @@ func Test_CaseEntityHandler(t *testing.T) {
 	expected := `{
 		"assays":[
 			{"experimental_strategy_code":"wxs", "patient_id":3, "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z"}, 
-			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":1, "relationship_to_proband":"mother", "request_id":23, "sample_id":2, "sample_submitter_id":"S13225", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z"}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":1, "relationship_to_proband":"mother", "request_id":23, "sample_id":2, "sample_submitter_id":"S13225", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z"},
 			{"affected_status_code":"non_affected", "experimental_strategy_code":"wxs", "patient_id":2, "relationship_to_proband":"father", "request_id":24, "sample_id":3, "sample_submitter_id":"S13226", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z"}
-		], 
-		"case_analysis_code":"WGA", 
-		"case_analysis_name":"Whole Genome Analysis", 
-		"case_id":1, 
+		],
+		"case_analysis_code":"WGA",
+		"case_analysis_name":"Whole Genome Analysis",
+		"case_id":1,
 		"case_type":"germline_family", 
 		"created_on":"0001-01-01T00:00:00Z", 
-		"members":[], 
-		"status_code":"",
-		"tasks":[], 
+		"members":[
+			{
+				"date_of_birth":"1973-03-23T00:00:00Z",
+				"managing_organization_code":"CHUSJ", 
+				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"mrn":"MRN-283775", 
+				"patient_id":3, 
+				"sex_code":"male", 
+				"non_observed_phenotypes": [{"id": "HP:0000717", "name": "Autism", "onset_code": "childhood"}, {"id": "HP:0001263", "name": "Global developmental delay", "onset_code": "childhood"}]
+			},
+			{
+				"affected_status_code":"affected", 
+				"date_of_birth":"2012-02-03T00:00:00Z", 
+				"managing_organization_code":"CHUSJ", 
+				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"mrn":"MRN-283773", 
+				"patient_id":1, 
+				"relationship_to_proband":"mother", "sex_code":"female"
+			},
+			{
+				"affected_status_code":"non_affected", 
+				"date_of_birth":"1970-01-30T00:00:00Z", 
+				"managing_organization_code":"CHUSJ", 
+				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"mrn":"MRN-283774", 
+				"patient_id":2, 
+				"relationship_to_proband":"father", 
+				"sex_code":"male"
+			}
+		], 
+		"status_code":"", 
+		"tasks":[],
 		"updated_on":"0001-01-01T00:00:00Z"
 	}`
 	assertCaseEntityHandler(t, "simple", 1, expected)

@@ -17,8 +17,17 @@ type ObservationCoding struct {
 	Note               string
 }
 
+type PhenotypeObservationCoding struct {
+	PatientID          int
+	OnsetCode          string
+	InterpretationCode string
+	PhenotypeID        string
+	PhenotypeName      string
+}
+
 var ObservationCodingTable = Table{
-	Name: "radiant_jdbc.public.observation_coding",
+	Name:  "radiant_jdbc.public.observation_coding",
+	Alias: "obs",
 }
 
 var ObservationCodingAggregatedTmpTable = Table{
