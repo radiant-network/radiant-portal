@@ -273,7 +273,10 @@ func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error)
 
 	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
 	txCase = joinWithCaseAnalysis(txCase)
-	txCase = txCase.Select("c.id as case_id, c.proband_id, ca.code as case_analysis_code, ca.name as case_analysis_name, ca.type_code as case_analysis_type")
+	txCase = joinMondoTerm(txCase)
+	txCase = joinPerformerLab(txCase)
+	txCase = joinWithRequest(txCase)
+	txCase = txCase.Select("c.id as case_id, c.proband_id, ca.code as case_analysis_code, ca.name as case_analysis_name, ca.type_code as case_analysis_type, c.created_on, c.updated_on, c.note, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as performer_lab_code, lab.name as performer_lab_name, c.status_code, order_org.code as requested_by_code, order_org.name as requested_by_name, r.priority_code, r.ordering_physician as prescriber, c.request_id")
 	txCase = txCase.Where("c.id = ?", caseId)
 	if err := txCase.Find(&caseEntity).Error; err != nil {
 		return nil, fmt.Errorf("error fetching case entity: %w", err)
