@@ -92,9 +92,9 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 		CaseAnalysisName: "Whole Genome Analysis",
 		CaseType:         "germline_family",
 		SequencingExperiments: types.JsonArray[types.CaseSequencingExperiment]{
-			{SeqID: 1, PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", SampleID: 1},
-			{SeqID: 3, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3},
-			{SeqID: 2, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2},
+			{SeqID: 1, RequestID: 22, PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", SampleID: 1, SampleSubmitterID: "S13224"},
+			{SeqID: 2, RequestID: 23, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225"},
+			{SeqID: 3, RequestID: 24, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226"},
 		},
 	}, nil
 }
@@ -214,9 +214,9 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"case_analysis_name": "Whole Genome Analysis",
 		"case_type": "germline_family",
 		"sequencing_experiments": [
-			{"seq_id": 1, "patient_id": 3, "sample_id": 1},
-			{"seq_id": 3, "patient_id": 2, "relationship_to_proband": "father", "affected_status_code": "non_affected", "sample_id": 3},
-			{"seq_id": 2, "patient_id": 1, "relationship_to_proband": "mother", "affected_status_code": "affected", "sample_id": 2}
+			{"seq_id": 1, "request_id": 22, "patient_id": 3, "sample_id": 1, "sample_submitter_id": "S13224"},
+			{"seq_id": 2, "request_id": 23, "patient_id": 1, "relationship_to_proband": "mother", "affected_status_code": "affected", "sample_id": 2, "sample_submitter_id": "S13225"},
+			{"seq_id": 3, "request_id": 24, "patient_id": 2, "relationship_to_proband": "father", "affected_status_code": "non_affected", "sample_id": 3, "sample_submitter_id": "S13226"}
 		]
 	}`, w.Body.String())
 }
