@@ -777,7 +777,10 @@
       "title": "Détails de Cas"
     },
     "variants": {
-      "title": "Variants"
+      "title": "Variants",
+      "relation": { 
+        "assay": "Prescription"
+      }
     }
   },
   "variantEntity": {

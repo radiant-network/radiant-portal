@@ -92,10 +92,11 @@ export function TabsListItem<T extends string | number | symbol = string>({
 
 export type TabsContentProps<T> = React.HTMLAttributes<HTMLDivElement> & {
   value: T;
+  noMargin?: boolean;
   ref?: React.Ref<HTMLDivElement>;
 };
 
-export function TabsContent<T>({ ref, value, children, className, ...props }: TabsContentProps<T>) {
+export function TabsContent<T>({ ref, value, children, className, noMargin = false, ...props }: TabsContentProps<T>) {
   const tabsContext = useTabsNavContext();
   const active = tabsContext.value === value;
 
@@ -104,9 +105,9 @@ export function TabsContent<T>({ ref, value, children, className, ...props }: Ta
       <div
         ref={ref}
         className={cn(
-          'py-3',
           {
-            hidden: !active,
+            'py-3': !noMargin,
+            hidden: !active
           },
           className,
         )}

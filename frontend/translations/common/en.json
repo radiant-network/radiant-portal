@@ -767,7 +767,10 @@
       "title": "Case Details"
     },
     "variants": {
-      "title": "Variants"
+      "title": "Variants",
+      "relation": {
+        "assay": "Assay"
+      }
     }
   },
   "variantEntity": {

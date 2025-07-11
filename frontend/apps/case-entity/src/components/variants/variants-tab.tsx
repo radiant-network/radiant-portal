@@ -1,7 +1,14 @@
-import React from 'react';
+import VariantsFilter from './variants-filter';
 
-function FrequencyTab() {
-  return <div>FrequencyTab</div>;
+function VariantTab() {
+  return (
+    <div className='bg-background flex flex-col gap-4'>
+      <VariantsFilter />
+      <div className='bg-muted/40 px-6 w-full'>
+        content
+      </div>
+    </div>
+  );
 }
 
-export default FrequencyTab;
+export default VariantTab;
