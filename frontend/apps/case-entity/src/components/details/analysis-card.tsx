@@ -12,23 +12,32 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
   const { t } = useI18n();
 
   // Mock data based on screenshot
-  const analysisData = data;
-  console.log('>>> analysisData', analysisData);
+  const caseData = data;
 
   // Dropdown options
   const priorityOptions = [
-    { value: 'STAT', label: 'STAT', color: 'bg-red-500' },
+    { value: 'routine', label: t('caseExploration.priority.routine'), color: 'bg-green-500' },
+    { value: 'urgent', label: t('caseExploration.priority.urgent'), color: 'bg-yellow-500' },
+    { value: 'asap', label: t('caseExploration.priority.asap'), color: 'bg-orange-500' },
+    { value: 'stat', label: t('caseExploration.priority.stat'), color: 'bg-red-500' },
   ];
   const statusOptions = [
-    { value: 'In Progress', label: 'In Progress', icon: RotateCcw },
+    { value: 'unknown', label: t('caseEntity.details.statusOptions.unknown'), icon: RotateCcw },
+    { value: 'draft', label: t('caseEntity.details.statusOptions.draft'), icon: RotateCcw },
+    { value: 'active', label: t('caseEntity.details.statusOptions.active'), icon: RotateCcw },
+    { value: 'revoke', label: t('caseEntity.details.statusOptions.revoke'), icon: RotateCcw },
+    { value: 'completed', label: t('caseEntity.details.statusOptions.completed'), icon: RotateCcw },
+    { value: 'on-hold', label: t('caseEntity.details.statusOptions.on-hold'), icon: RotateCcw },
+    { value: 'incomplete', label: t('caseEntity.details.statusOptions.incomplete'), icon: RotateCcw },
+    { value: 'submitted', label: t('caseEntity.details.statusOptions.submitted'), icon: RotateCcw },
   ];
   const assigneeOptions = [
     { value: 'Vincent Ferretti', label: 'Vincent Ferretti' },
   ];
   // State for dropdown values
-  const [priority, setPriority] = useState(priorityOptions[0].value); // useState(analysisData.priority);
-  const [status, setStatus] = useState(statusOptions[0].value); // useState(analysisData.status);
-  const [assignedTo, setAssignedTo] = useState(assigneeOptions[0].value); // useState(analysisData.assigned_to);
+  const [priority, setPriority] = useState(caseData.priority_code || priorityOptions[0].value);
+  const [status, setStatus] = useState(caseData.status_code || statusOptions[0].value); 
+  const [assignedTo, setAssignedTo] = useState(caseData.assigned_to || assigneeOptions[0].value);
 
 
   const selectedPriority = priorityOptions.find(option => option.value === priority);
@@ -44,7 +53,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
       <CardContent className="flex flex-col gap-6">
         {/* Title with codes */}
         <div className="text-base font-medium">
-          {`${analysisData.case_analysis_code} - ${analysisData.case_analysis_name}`}
+          {`${caseData.case_analysis_code} - ${caseData.case_analysis_name}`}
         </div>
 
         {/* Main content grid */}
@@ -60,7 +69,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                   {t('caseEntity.details.createdOn_tooltips')}
                 </TooltipContent>
               </Tooltip>
-              <div>{analysisData.created_on ? formatDate(analysisData.created_on, t('common.date')) : '--'}</div>
+              <div>{caseData.created_on ? formatDate(caseData.created_on, t('common.date')) : '--'}</div>
 
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -70,34 +79,34 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                   {t('caseEntity.details.lastUpdate_tooltips')}
                 </TooltipContent>
               </Tooltip>
-              <div>{analysisData.updated_on ? formatDate(analysisData.updated_on, t('common.date')) : '--'}</div>
+              <div>{caseData.updated_on ? formatDate(caseData.updated_on, t('common.date')) : '--'}</div>
 
               <div className="text-muted-foreground">{t('caseEntity.details.prescriber')}</div>
-              <div>{analysisData.prescriber || '--'}</div>
+              <div>{caseData.prescriber || '--'}</div>
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.prescribingInst')}</div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {analysisData.managing_organization_code || analysisData.managing_organization_code || '--'}
+                  {caseData.managing_organization_code || caseData.managing_organization_code || '--'}
                 </TooltipContent>
               </Tooltip>
-              <div>{analysisData.managing_organization_name || analysisData.managing_organization_code || '--'}</div>
+              <div>{caseData.managing_organization_name || caseData.managing_organization_code || '--'}</div>
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.diagLab')}</div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {analysisData.performer_lab_name || analysisData.performer_lab_code || '--'}
+                  {caseData.performer_lab_name || caseData.performer_lab_code || '--'}
                 </TooltipContent>
               </Tooltip>
               <div>
-                {analysisData.performer_lab_code || '--'}
+                {caseData.performer_lab_code || '--'}
               </div>
               <div className="text-muted-foreground">{t('caseEntity.details.requestId')}</div>
-              <div>{analysisData.request_id || '--'}</div>
+              <div>{caseData.request_id || '--'}</div>
             </div>
           </div>
 
@@ -210,7 +219,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                 </TooltipContent>
               </Tooltip>
             </div>
-            {analysisData.tasks.length > 0 ? analysisData.tasks.map((bioInfo: any, index: number) => (
+            {caseData.tasks.length > 0 ? caseData.tasks.map((bioInfo: any, index: number) => (
               <div key={index} className="grid grid-cols-3 border-b last:border-b-0">
                 <div className="p-3 text-sm">
                   {bioInfo.task_id}

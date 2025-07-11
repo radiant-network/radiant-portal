@@ -791,7 +791,17 @@
       "bioinformatics": "Bio-informatique",
       "taskId": "ID de tâche",
       "type": "Type",
-      "noTaskFound": "Aucune tâche trouvée"
+      "noTaskFound": "Aucune tâche trouvée",
+      "statusOptions": {
+        "unknown": "Inconnu",
+        "draft": "Brouillon",
+        "active": "Actif",
+        "revoke": "Révoquer",
+        "completed": "Complété",
+        "on-hold": "En attente",
+        "incomplete": "Incomplet",
+        "submitted": "Soumis"
+      }
     },
     "variants": {
       "title": "Variants",
