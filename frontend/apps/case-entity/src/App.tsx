@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import BackLink from '@/components/base/navigation/back-link';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import { Badge } from '@/components/base/ui/badge';
 import { Link, useLocation, useParams } from 'react-router';
 import DetailsTab from './components/details/details-tab';
 import VariantsTab from './components/variants/variants-tab';
@@ -9,12 +7,12 @@ import { CaseEntityTabs } from './types';
 import { caseApi } from '@/utils/api';
 import { CaseEntity, ApiError } from '@/api/api';
 import useSWR from 'swr';
-import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 import Result from '@/components/base/result';
 import { Button } from '@/components/base/ui/button';
 import Container from '@/components/base/container';
-import { Users } from 'lucide-react';
+import Header from './components/layout/header';
+import { AudioWaveform, ClipboardList } from 'lucide-react';
 
 type CaseEntityInput = {
   key: string;
@@ -43,8 +41,6 @@ export default function App() {
       shouldRetryOnError: false,
     },
   );
-
-  console.log('>>> data', data);
 
   useEffect(() => {
     // To handle initial load
@@ -85,28 +81,11 @@ export default function App() {
 
   return (
     <main className="bg-muted/40 h-screen overflow-auto">
-      <div className="bg-background">
-        <Container>
-          <div className="flex flex-col gap-4 pt-6 px-6">
-            <Link to="/case-exploration">
-              <BackLink>{t('caseEntity.header.cases')}</BackLink>
-            </Link>
-            {isLoading ? (
-              <Skeleton className="w-96 h-8" />
-            ) : (
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold">{t('caseEntity.header.case')} {data?.case_id}</h1>
-                <Badge variant="secondary"><Users />{t('caseEntity.header.germline')}</Badge>
-                <Badge variant="outline">{data?.case_analysis_code}</Badge>
-              </div>
-            )}
-          </div>
-        </Container>
-      </div>
+      <Header data={data} isLoading={isLoading} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
-        <TabsList className="pt-6 px-3 bg-background" contentClassName="min-[1440px]:px-3 max-w-8xl mx-auto">
-          <TabsListItem value={CaseEntityTabs.Details}>{t('caseEntity.details.title')}</TabsListItem>
-          <TabsListItem value={CaseEntityTabs.Variants}>{t('caseEntity.variants.title')}</TabsListItem>
+        <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 max-w-8xl mx-auto">
+          <TabsListItem value={CaseEntityTabs.Details}><ClipboardList />{t('caseEntity.details.title')}</TabsListItem>
+          <TabsListItem value={CaseEntityTabs.Variants}><AudioWaveform />{t('caseEntity.variants.title')}</TabsListItem>
         </TabsList>
         <Container>
           <TabsContent value={CaseEntityTabs.Details} className="p-6">

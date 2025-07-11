@@ -339,7 +339,7 @@
     "analysis_type_code": {
       "somatic": "Somatique",
       "germline": "Germinal seul",
-      "germline_family": "Germinal familial"
+      "germline_family": "Lignée Germinale Familiale"
     },
     "status": {
       "active": "En cours",
@@ -771,6 +771,7 @@
     "header": {
       "cases": "Cas",
       "germline": "Germline",
+      "germline_family": "Germline Familial",
       "case": "Cas"
     },
     "details": {
