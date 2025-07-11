@@ -1,10 +1,10 @@
 import { ExpendedOccurrence } from '@/api/api';
-import ClassificationSection from '@/feature/occurrence-table/classification-section';
-import PredictionSection from '@/feature/occurrence-table/prediction-section';
-import FrequencySection from '@/feature/occurrence-table/frequency-section';
-import ZygositySection from '@/feature/occurrence-table/zygosity-section';
-import GeneSection from '@/feature/occurrence-table/gene-section';
-import ClinicalAssociationSection from '@/feature/occurrence-table/clinical-association-section';
+import ClassificationSection from '../occurrence-table/classification-section';
+import PredictionSection from '../occurrence-table/prediction-section';
+import FrequencySection from '../occurrence-table/frequency-section';
+import ZygositySection from '../occurrence-table/zygosity-section';
+import GeneSection from '../occurrence-table/gene-section';
+import ClinicalAssociationSection from '../occurrence-table/clinical-association-section';
 
 interface OccurrenceDetailsProps {
   occurrence?: ExpendedOccurrence;

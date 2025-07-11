@@ -60,28 +60,12 @@ const _ProtectedLayout = () => {
               title: t('mainNavbar.links.dashboard'),
               icon: <LayoutDashboardIcon />,
             },
-            // @fixme to uncommented when adding study page
-            // {
-            //   title: t('mainNavbar.links.studies'),
-            //   icon: <BookOpenTextIcon />,
-            // },
             {
               title: t('mainNavbar.links.cases'),
               icon: <FolderIcon />,
               onClick: () => navigate('/case-exploration'),
               active: pathname === '/case-exploration'
             },
-            {
-              title: t('mainNavbar.links.variants'),
-              icon: <AudioWaveformIcon />,
-              onClick: () => navigate('/'),
-              active: pathname === '/',
-            },
-            // @fixme to uncommented when adding analysis page
-            // {
-            //   title: t('mainNavbar.links.analysis'),
-            //   icon: <BlendIcon />,
-            // },
           ]}
           actions={[
             {
