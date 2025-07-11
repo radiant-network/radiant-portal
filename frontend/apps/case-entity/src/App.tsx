@@ -108,18 +108,14 @@ export default function App() {
           <TabsListItem value={CaseEntityTabs.Details}>{t('caseEntity.details.title')}</TabsListItem>
           <TabsListItem value={CaseEntityTabs.Variants}>{t('caseEntity.variants.title')}</TabsListItem>
         </TabsList>
-        <div className="px-6 ">
-          <Container>
-            <div>
-              <TabsContent value={CaseEntityTabs.Details} className="py-6">
-                <DetailsTab />
-              </TabsContent>
-              <TabsContent value={CaseEntityTabs.Variants} className="py-6">
-                <VariantsTab />
-              </TabsContent>
-            </div>
-          </Container>
-        </div>
+        <Container>
+          <TabsContent value={CaseEntityTabs.Details} className="p-6">
+            <DetailsTab />
+          </TabsContent>
+        </Container>
+        <TabsContent value={CaseEntityTabs.Variants} noMargin>
+          <VariantsTab />
+        </TabsContent>
       </TabsNav>
     </main>
   );
