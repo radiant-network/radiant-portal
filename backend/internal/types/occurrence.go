@@ -31,11 +31,11 @@ type Occurrence struct {
 	TranscriptId               string            `json:"transcript_id,omitempty"`
 	MaxImpactScore             int               `json:"max_impact_score" validate:"required"`
 	HasInterpretation          bool              `json:"has_interpretation" validate:"required"`
-	ExomiserMoi                string            `json:"exomiser_moi"`
-	ExomiserAcmgClassification string            `json:"exomiser_acmg_classification"`
-	ExomiserAcmgEvidence       JsonArray[string] `gorm:"type:json" json:"exomiser_acmg_evidence"`
-	ExomiserVariantScore       float64           `json:"exomiser_variant_score"`
-	ExomiserGeneCombinedScore  float64           `json:"exomiser_gene_combined_score"`
+	ExomiserMoi                string            `json:"exomiser_moi" validate:"required"`
+	ExomiserAcmgClassification string            `json:"exomiser_acmg_classification" validate:"required"`
+	ExomiserAcmgEvidence       JsonArray[string] `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
+	ExomiserVariantScore       float64           `json:"exomiser_variant_score" validate:"required"`
+	ExomiserGeneCombinedScore  float64           `json:"exomiser_gene_combined_score" validate:"required"`
 } // @name Occurrence
 
 type ExpendedOccurrence = struct {
@@ -84,8 +84,8 @@ type ExpendedOccurrence = struct {
 	AdTotal                   int32                    `json:"ad_total,omitempty"`
 	Gq                        int32                    `json:"genotype_quality" validate:"required"`
 	Filter                    string                   `json:"filter,omitempty"`
-	ExomiserAcmgEvidence      JsonArray[string]        `gorm:"type:json" json:"exomiser_acmg_evidence"`
-	ExomiserGeneCombinedScore float64                  `json:"exomiser_gene_combined_score"`
+	ExomiserAcmgEvidence      JsonArray[string]        `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
+	ExomiserGeneCombinedScore float64                  `json:"exomiser_gene_combined_score" validate:"required"`
 } // @name ExpendedOccurrence
 
 var OccurrenceTable = Table{
