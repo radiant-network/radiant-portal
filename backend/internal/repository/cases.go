@@ -16,7 +16,7 @@ type CaseResult = types.CaseResult
 type AutocompleteResult = types.AutocompleteResult
 type CaseFilters = types.CaseFilters
 type CaseEntity = types.CaseEntity
-type CaseSequencingExperiment = types.CaseSequencingExperiment
+type CaseAssay = types.CaseAssay
 
 type CasesRepository struct {
 	db *gorm.DB
@@ -182,7 +182,7 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 
 func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	var caseEntity CaseEntity
-	var sequencingExperiments types.JsonArray[CaseSequencingExperiment]
+	var assays types.JsonArray[CaseAssay]
 	var familyMembersCount int64
 
 	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
@@ -197,10 +197,11 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.request r ON r.id = s.request_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON s.patient_id = f.family_member_id AND s.case_id = f.case_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
-	txSeqExp = txSeqExp.Select("s.id as seq_id, r.id as request_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id")
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.experiment exp ON exp.id = s.experiment_id")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, r.id as request_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, s.status_code, s.updated_on, exp.experimental_strategy_code")
 	txSeqExp = txSeqExp.Where("s.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc")
-	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {
+	if err := txSeqExp.Find(&assays).Error; err != nil {
 		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
 	}
 
@@ -210,7 +211,9 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 		return nil, fmt.Errorf("error counting family members: %w", err)
 	}
 
-	caseEntity.SequencingExperiments = sequencingExperiments
+	caseEntity.Assays = assays
+	caseEntity.Members = make(types.JsonArray[types.CasePatientClinicalInformation], 0) //TODO
+	caseEntity.Tasks = make(types.JsonArray[types.Task], 0)                             //TODO
 
 	if caseEntity.CaseAnalysisType == "somatic" || familyMembersCount == 0 {
 		caseEntity.CaseType = caseEntity.CaseAnalysisType

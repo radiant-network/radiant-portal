@@ -137,11 +137,273 @@ export interface AutocompleteResult {
     'value': string;
 }
 /**
+ * 
+ * @export
+ * @interface Case
+ */
+export interface Case {
+    /**
+     * 
+     * @type {CaseAnalysis}
+     * @memberof Case
+     */
+    'caseAnalysis'?: CaseAnalysis;
+    /**
+     * 
+     * @type {number}
+     * @memberof Case
+     */
+    'caseAnalysisID'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Case
+     */
+    'createdOn'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Case
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Case
+     */
+    'note'?: string;
+    /**
+     * 
+     * @type {Organization}
+     * @memberof Case
+     */
+    'performerLab'?: Organization;
+    /**
+     * 
+     * @type {number}
+     * @memberof Case
+     */
+    'performerLabID'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Case
+     */
+    'primaryCondition'?: string;
+    /**
+     * 
+     * @type {Patient}
+     * @memberof Case
+     */
+    'proband'?: Patient;
+    /**
+     * 
+     * @type {number}
+     * @memberof Case
+     */
+    'probandID'?: number;
+    /**
+     * 
+     * @type {Project}
+     * @memberof Case
+     */
+    'project'?: Project;
+    /**
+     * 
+     * @type {number}
+     * @memberof Case
+     */
+    'projectID'?: number;
+    /**
+     * 
+     * @type {Request}
+     * @memberof Case
+     */
+    'request'?: Request;
+    /**
+     * 
+     * @type {number}
+     * @memberof Case
+     */
+    'requestID'?: number;
+    /**
+     * 
+     * @type {Status}
+     * @memberof Case
+     */
+    'status'?: Status;
+    /**
+     * 
+     * @type {string}
+     * @memberof Case
+     */
+    'statusCode'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Case
+     */
+    'updatedOn'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface CaseAnalysis
+ */
+export interface CaseAnalysis {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAnalysis
+     */
+    'code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAnalysis
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAnalysis
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAnalysis
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {Panel}
+     * @memberof CaseAnalysis
+     */
+    'panel'?: Panel;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAnalysis
+     */
+    'panelID'?: number;
+    /**
+     * 
+     * @type {CaseAnalysisType}
+     * @memberof CaseAnalysis
+     */
+    'type'?: CaseAnalysisType;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAnalysis
+     */
+    'typeCode'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface CaseAnalysisType
+ */
+export interface CaseAnalysisType {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAnalysisType
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAnalysisType
+     */
+    'name'?: string;
+}
+/**
+ * Assay to display in a Case
+ * @export
+ * @interface CaseAssay
+ */
+export interface CaseAssay {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
+    'affected_status_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
+    'experimental_strategy_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
+    'histology_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAssay
+     */
+    'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
+    'relationship_to_proband'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAssay
+     */
+    'request_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAssay
+     */
+    'sample_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
+    'sample_submitter_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAssay
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
+    'updated_on': string;
+}
+/**
  * Data for Case Entity Page
  * @export
  * @interface CaseEntity
  */
 export interface CaseEntity {
+    /**
+     * 
+     * @type {Array<CaseAssay>}
+     * @memberof CaseEntity
+     */
+    'assays': Array<CaseAssay>;
     /**
      * 
      * @type {string}
@@ -168,10 +430,94 @@ export interface CaseEntity {
     'case_type'?: string;
     /**
      * 
-     * @type {Array<CaseSequencingExperiment>}
+     * @type {string}
      * @memberof CaseEntity
      */
-    'sequencing_experiments': Array<CaseSequencingExperiment>;
+    'created_on': string;
+    /**
+     * 
+     * @type {Array<CasePatientClinicalInformation>}
+     * @memberof CaseEntity
+     */
+    'members': Array<CasePatientClinicalInformation>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'note'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'performer_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'performer_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'prescriber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'primary_condition_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'priority_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseEntity
+     */
+    'request_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'requested_by_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'requested_by_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {Array<Task>}
+     * @memberof CaseEntity
+     */
+    'tasks': Array<Task>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'updated_on': string;
 }
 /**
  * 
@@ -215,6 +561,79 @@ export interface CaseFilters {
      * @memberof CaseFilters
      */
     'status': Array<Aggregation>;
+}
+/**
+ * Patient clinical information to display in Case Entity
+ * @export
+ * @interface CasePatientClinicalInformation
+ */
+export interface CasePatientClinicalInformation {
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'affected_status_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'date_of_birth'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CasePatientClinicalInformation
+     */
+    'ethnicity_codes'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'managing_organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'managing_organization_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'mrn'?: string;
+    /**
+     * 
+     * @type {Array<Term>}
+     * @memberof CasePatientClinicalInformation
+     */
+    'non_observed_phenotypes'?: Array<Term>;
+    /**
+     * 
+     * @type {Array<Term>}
+     * @memberof CasePatientClinicalInformation
+     */
+    'observed_phenotypes'?: Array<Term>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CasePatientClinicalInformation
+     */
+    'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'relationship_to_proband'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'sex_code': string;
 }
 /**
  * Line represented a case in case list
@@ -350,55 +769,6 @@ export interface CaseResult {
     'updated_on': string;
 }
 /**
- * Sequencing Experiment to display in a Case
- * @export
- * @interface CaseSequencingExperiment
- */
-export interface CaseSequencingExperiment {
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseSequencingExperiment
-     */
-    'affected_status_code'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseSequencingExperiment
-     */
-    'patient_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseSequencingExperiment
-     */
-    'relationship_to_proband'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseSequencingExperiment
-     */
-    'request_id'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseSequencingExperiment
-     */
-    'sample_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseSequencingExperiment
-     */
-    'sample_submitter_id'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseSequencingExperiment
-     */
-    'seq_id': number;
-}
-/**
  * 
  * @export
  * @interface CasesSearchResponse
@@ -442,6 +812,123 @@ export interface CountBodyWithSqon {
      * @memberof CountBodyWithSqon
      */
     'sqon'?: Sqon;
+}
+/**
+ * 
+ * @export
+ * @interface DataCategory
+ */
+export interface DataCategory {
+    /**
+     * 
+     * @type {string}
+     * @memberof DataCategory
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataCategory
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface DataType
+ */
+export interface DataType {
+    /**
+     * 
+     * @type {string}
+     * @memberof DataType
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataType
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Document
+ */
+export interface Document {
+    /**
+     * 
+     * @type {DataCategory}
+     * @memberof Document
+     */
+    'dataCategory'?: DataCategory;
+    /**
+     * 
+     * @type {string}
+     * @memberof Document
+     */
+    'dataCategoryCode'?: string;
+    /**
+     * 
+     * @type {DataType}
+     * @memberof Document
+     */
+    'dataType'?: DataType;
+    /**
+     * 
+     * @type {string}
+     * @memberof Document
+     */
+    'dataTypeCode'?: string;
+    /**
+     * 
+     * @type {FileFormat}
+     * @memberof Document
+     */
+    'fileFormat'?: FileFormat;
+    /**
+     * 
+     * @type {string}
+     * @memberof Document
+     */
+    'fileFormatCode'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Document
+     */
+    'hash'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Document
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Document
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {Array<Patient>}
+     * @memberof Document
+     */
+    'patients'?: Array<Patient>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Document
+     */
+    'size'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Document
+     */
+    'url'?: string;
 }
 /**
  * 
@@ -725,6 +1212,99 @@ export interface ExpendedOccurrence {
 /**
  * 
  * @export
+ * @interface Experiment
+ */
+export interface Experiment {
+    /**
+     * 
+     * @type {string}
+     * @memberof Experiment
+     */
+    'code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Experiment
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {ExperimentalStrategy}
+     * @memberof Experiment
+     */
+    'experimentalStrategy'?: ExperimentalStrategy;
+    /**
+     * 
+     * @type {string}
+     * @memberof Experiment
+     */
+    'experimentalStrategyCode'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Experiment
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Experiment
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {Platform}
+     * @memberof Experiment
+     */
+    'platform'?: Platform;
+    /**
+     * 
+     * @type {string}
+     * @memberof Experiment
+     */
+    'platformCode'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface ExperimentalStrategy
+ */
+export interface ExperimentalStrategy {
+    /**
+     * 
+     * @type {string}
+     * @memberof ExperimentalStrategy
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExperimentalStrategy
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface FileFormat
+ */
+export interface FileFormat {
+    /**
+     * 
+     * @type {string}
+     * @memberof FileFormat
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof FileFormat
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
  * @interface FiltersBodyWithCriteria
  */
 export interface FiltersBodyWithCriteria {
@@ -734,6 +1314,25 @@ export interface FiltersBodyWithCriteria {
      * @memberof FiltersBodyWithCriteria
      */
     'search_criteria'?: Array<SearchCriterion>;
+}
+/**
+ * 
+ * @export
+ * @interface HistologyType
+ */
+export interface HistologyType {
+    /**
+     * 
+     * @type {string}
+     * @memberof HistologyType
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HistologyType
+     */
+    'name'?: string;
 }
 /**
  * 
@@ -1307,6 +1906,261 @@ export interface OmimGenePanel {
 /**
  * 
  * @export
+ * @interface Organization
+ */
+export interface Organization {
+    /**
+     * 
+     * @type {OrganizationCategory}
+     * @memberof Organization
+     */
+    'category'?: OrganizationCategory;
+    /**
+     * 
+     * @type {string}
+     * @memberof Organization
+     */
+    'categoryCode'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Organization
+     */
+    'code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Organization
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Organization
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface OrganizationCategory
+ */
+export interface OrganizationCategory {
+    /**
+     * 
+     * @type {string}
+     * @memberof OrganizationCategory
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OrganizationCategory
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Panel
+ */
+export interface Panel {
+    /**
+     * 
+     * @type {string}
+     * @memberof Panel
+     */
+    'code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Panel
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Panel
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {PanelType}
+     * @memberof Panel
+     */
+    'type'?: PanelType;
+    /**
+     * 
+     * @type {string}
+     * @memberof Panel
+     */
+    'typeCode'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface PanelType
+ */
+export interface PanelType {
+    /**
+     * 
+     * @type {string}
+     * @memberof PanelType
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PanelType
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Patient
+ */
+export interface Patient {
+    /**
+     * 
+     * @type {string}
+     * @memberof Patient
+     */
+    'dateOfBirth'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Patient
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Patient
+     */
+    'managingOrganizationID'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Patient
+     */
+    'mrn'?: string;
+    /**
+     * 
+     * @type {Organization}
+     * @memberof Patient
+     */
+    'organization'?: Organization;
+    /**
+     * 
+     * @type {Sex}
+     * @memberof Patient
+     */
+    'sex'?: Sex;
+    /**
+     * 
+     * @type {string}
+     * @memberof Patient
+     */
+    'sexCode'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Pipeline
+ */
+export interface Pipeline {
+    /**
+     * 
+     * @type {string}
+     * @memberof Pipeline
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Pipeline
+     */
+    'genomeBuild'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Pipeline
+     */
+    'id'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface Platform
+ */
+export interface Platform {
+    /**
+     * 
+     * @type {string}
+     * @memberof Platform
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Platform
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Priority
+ */
+export interface Priority {
+    /**
+     * 
+     * @type {string}
+     * @memberof Priority
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Priority
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Project
+ */
+export interface Project {
+    /**
+     * 
+     * @type {string}
+     * @memberof Project
+     */
+    'code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Project
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Project
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Project
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
  * @interface PubmedCitation
  */
 export interface PubmedCitation {
@@ -1335,6 +2189,166 @@ export interface PubmedCitationDetails {
      * @memberof PubmedCitationDetails
      */
     'format'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Request
+ */
+export interface Request {
+    /**
+     * 
+     * @type {number}
+     * @memberof Request
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Request
+     */
+    'orderNumber'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Request
+     */
+    'orderingOrganizationID'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Request
+     */
+    'orderingPhysician'?: string;
+    /**
+     * 
+     * @type {Organization}
+     * @memberof Request
+     */
+    'organization'?: Organization;
+    /**
+     * 
+     * @type {Priority}
+     * @memberof Request
+     */
+    'priority'?: Priority;
+    /**
+     * 
+     * @type {string}
+     * @memberof Request
+     */
+    'priorityCode'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Sample
+ */
+export interface Sample {
+    /**
+     * 
+     * @type {SampleCategory}
+     * @memberof Sample
+     */
+    'category'?: SampleCategory;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sample
+     */
+    'categoryCode'?: string;
+    /**
+     * 
+     * @type {HistologyType}
+     * @memberof Sample
+     */
+    'histologyType'?: HistologyType;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sample
+     */
+    'histologyTypeCode'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sample
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {Sample}
+     * @memberof Sample
+     */
+    'parentSample'?: Sample;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sample
+     */
+    'parentSampleID'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sample
+     */
+    'submitterSampleId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sample
+     */
+    'tissueType'?: string;
+    /**
+     * 
+     * @type {SampleType}
+     * @memberof Sample
+     */
+    'type'?: SampleType;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sample
+     */
+    'typeCode'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface SampleCategory
+ */
+export interface SampleCategory {
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleCategory
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleCategory
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface SampleType
+ */
+export interface SampleType {
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleType
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleType
+     */
+    'name'?: string;
 }
 /**
  * 
@@ -1467,6 +2481,176 @@ export interface Sequencing {
 /**
  * 
  * @export
+ * @interface SequencingExperiment
+ */
+export interface SequencingExperiment {
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperiment
+     */
+    'aliquot'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperiment
+     */
+    'captureKit'?: string;
+    /**
+     * 
+     * @type {Case}
+     * @memberof SequencingExperiment
+     */
+    'case'?: Case;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperiment
+     */
+    'caseID'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperiment
+     */
+    'createdOn'?: string;
+    /**
+     * 
+     * @type {Experiment}
+     * @memberof SequencingExperiment
+     */
+    'experiment'?: Experiment;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperiment
+     */
+    'experimentID'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperiment
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SequencingExperiment
+     */
+    'isPairedEnd'?: boolean;
+    /**
+     * 
+     * @type {Patient}
+     * @memberof SequencingExperiment
+     */
+    'patient'?: Patient;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperiment
+     */
+    'patientID'?: number;
+    /**
+     * 
+     * @type {Organization}
+     * @memberof SequencingExperiment
+     */
+    'performerLab'?: Organization;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperiment
+     */
+    'performerLabID'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperiment
+     */
+    'readLength'?: number;
+    /**
+     * 
+     * @type {Request}
+     * @memberof SequencingExperiment
+     */
+    'request'?: Request;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperiment
+     */
+    'requestID'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperiment
+     */
+    'runAlias'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperiment
+     */
+    'runDate'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperiment
+     */
+    'runName'?: string;
+    /**
+     * 
+     * @type {Sample}
+     * @memberof SequencingExperiment
+     */
+    'sample'?: Sample;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperiment
+     */
+    'sampleID'?: number;
+    /**
+     * 
+     * @type {Status}
+     * @memberof SequencingExperiment
+     */
+    'status'?: Status;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperiment
+     */
+    'statusCode'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperiment
+     */
+    'updatedOn'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Sex
+ */
+export interface Sex {
+    /**
+     * 
+     * @type {string}
+     * @memberof Sex
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sex
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
  * @interface SortBody
  */
 export interface SortBody {
@@ -1574,6 +2758,105 @@ export interface StatisticsBodyWithSqon {
 /**
  * 
  * @export
+ * @interface Status
+ */
+export interface Status {
+    /**
+     * 
+     * @type {string}
+     * @memberof Status
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Status
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface Task
+ */
+export interface Task {
+    /**
+     * 
+     * @type {string}
+     * @memberof Task
+     */
+    'createdOn'?: string;
+    /**
+     * 
+     * @type {Array<Document>}
+     * @memberof Task
+     */
+    'documents'?: Array<Document>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Task
+     */
+    'id'?: number;
+    /**
+     * 
+     * @type {Pipeline}
+     * @memberof Task
+     */
+    'pipeline'?: Pipeline;
+    /**
+     * 
+     * @type {number}
+     * @memberof Task
+     */
+    'pipelineID'?: number;
+    /**
+     * 
+     * @type {Array<Task>}
+     * @memberof Task
+     */
+    'relatedTasks'?: Array<Task>;
+    /**
+     * 
+     * @type {Array<SequencingExperiment>}
+     * @memberof Task
+     */
+    'sequencingExperiments'?: Array<SequencingExperiment>;
+    /**
+     * 
+     * @type {TaskType}
+     * @memberof Task
+     */
+    'type'?: TaskType;
+    /**
+     * 
+     * @type {string}
+     * @memberof Task
+     */
+    'typeCode'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface TaskType
+ */
+export interface TaskType {
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskType
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskType
+     */
+    'name'?: string;
+}
+/**
+ * 
+ * @export
  * @interface Term
  */
 export interface Term {
@@ -1589,6 +2872,12 @@ export interface Term {
      * @memberof Term
      */
     'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Term
+     */
+    'onset_code'?: string;
     /**
      * 
      * @type {string}
