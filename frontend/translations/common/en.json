@@ -765,7 +765,23 @@
       "case": "Case"
     },
     "details": {
-      "title": "Case Details"
+      "title": "Case Details",
+      "analysisOverview": "Analysis Overview",
+      "createdOn": "Created on",
+      "createdOn_tooltips": "yyyy-mm-dd",
+      "lastUpdate": "Last Update",
+      "lastUpdate_tooltips": "yyyy-mm-dd",
+      "prescriber": "Prescriber",
+      "prescribingInst": "Prescribing Inst.",
+      "diagLab": "Diag. Lab",
+      "requestId": "Request ID",
+      "priority": "Priority",
+      "status": "Status",
+      "assignedTo": "Assigned to",
+      "bioinformatics": "Bioinformatics",
+      "taskId": "Task ID",
+      "type": "Type",
+      "noTaskFound": "No Task Found"
     },
     "variants": {
       "title": "Variants",

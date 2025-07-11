@@ -89,7 +89,7 @@ export default function App() {
         </TabsList>
         <Container>
           <TabsContent value={CaseEntityTabs.Details} className="p-6">
-            <DetailsTab />
+            <DetailsTab data={data} />
           </TabsContent>
         </Container>
         <TabsContent value={CaseEntityTabs.Variants} noMargin>
