@@ -108,8 +108,12 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 			{SeqID: 2, RequestID: 23, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225"},
 			{SeqID: 3, RequestID: 24, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226"},
 		},
-		Tasks:   make(types.JsonArray[types.Task], 0),
-		Members: make(types.JsonArray[types.CasePatientClinicalInformation], 0),
+		Tasks: make(types.JsonArray[types.Task], 0),
+		Members: types.JsonArray[types.CasePatientClinicalInformation]{
+			{PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", Mrn: "MRN-283775", SexCode: "male", ManagingOrganizationCode: "CHUSJ", ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
+			{PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", Mrn: "MRN-283773", SexCode: "female", ManagingOrganizationCode: "CHUSJ", ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC)},
+			{PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", Mrn: "MRN-283774", SexCode: "male", ManagingOrganizationCode: "CHUSJ", ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC)},
+		},
 	}, nil
 }
 
@@ -233,7 +237,36 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"case_id":1,
 		"case_type":"germline_family", 
 		"created_on":"2000-01-01T00:00:00Z", 
-		"members":[], 
+		"members":[
+			{
+				"date_of_birth":"1973-03-23T00:00:00Z",
+				"managing_organization_code":"CHUSJ", 
+				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"mrn":"MRN-283775", 
+				"patient_id":3, 
+				"sex_code":"male", 
+				"non_observed_phenotypes": [{"id": "HP:0000717", "name": "Autism", "onset_code": "childhood"}, {"id": "HP:0001263", "name": "Global developmental delay", "onset_code": "childhood"}]
+			},
+			{
+				"affected_status_code":"affected", 
+				"date_of_birth":"2012-02-03T00:00:00Z", 
+				"managing_organization_code":"CHUSJ", 
+				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"mrn":"MRN-283773", 
+				"patient_id":1, 
+				"relationship_to_proband":"mother", "sex_code":"female"
+			},
+			{
+				"affected_status_code":"non_affected", 
+				"date_of_birth":"1970-01-30T00:00:00Z", 
+				"managing_organization_code":"CHUSJ", 
+				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"mrn":"MRN-283774", 
+				"patient_id":2, 
+				"relationship_to_proband":"father", 
+				"sex_code":"male"
+			}
+		], 
 		"performer_lab_code":"CQGC", 
 		"performer_lab_name":"Quebec Clinical Genomic Center", 
 		"prescriber":"Felix Laflamme", 

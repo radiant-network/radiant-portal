@@ -17,6 +17,7 @@ type AutocompleteResult = types.AutocompleteResult
 type CaseFilters = types.CaseFilters
 type CaseEntity = types.CaseEntity
 type CaseAssay = types.CaseAssay
+type CasePatientClinicalInformation = types.CasePatientClinicalInformation
 
 type CasesRepository struct {
 	db *gorm.DB
@@ -181,47 +182,39 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 }
 
 func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
-	var caseEntity CaseEntity
-	var assays types.JsonArray[CaseAssay]
-	var familyMembersCount int64
-
-	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
-	txCase = joinWithCaseAnalysis(txCase)
-	txCase = txCase.Select("c.id as case_id, ca.code as case_analysis_code, ca.name as case_analysis_name, ca.type_code as case_analysis_type")
-	txCase = txCase.Where("c.id = ?", caseId)
-	if err := txCase.Find(&caseEntity).Error; err != nil {
-		return nil, fmt.Errorf("error fetching case entity: %w", err)
+	var familyMembersIds []int
+	caseEntity, err := r.retrieveCaseLevelData(caseId)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching case level data: %w", err)
 	}
 
-	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.request r ON r.id = s.request_id")
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON s.patient_id = f.family_member_id AND s.case_id = f.case_id")
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.experiment exp ON exp.id = s.experiment_id")
-	txSeqExp = txSeqExp.Select("s.id as seq_id, r.id as request_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, s.status_code, s.updated_on, exp.experimental_strategy_code")
-	txSeqExp = txSeqExp.Where("s.case_id = ?", caseId)
-	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc")
-	if err := txSeqExp.Find(&assays).Error; err != nil {
-		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
+	txFamilyMembersID := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
+	txFamilyMembersID = txFamilyMembersID.Where("f.case_id = ?", caseId)
+	if err := txFamilyMembersID.Distinct("f.family_member_id").Find(&familyMembersIds).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving family members ids: %w", err)
 	}
 
-	txCountFamily := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
-	txCountFamily = txCountFamily.Where("f.case_id = ?", caseId)
-	if err := txCountFamily.Count(&familyMembersCount).Error; err != nil {
-		return nil, fmt.Errorf("error counting family members: %w", err)
+	assays, err := r.retrieveCaseAssays(caseId)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching assays data: %w", err)
 	}
+	caseEntity.Assays = *assays
 
-	caseEntity.Assays = assays
-	caseEntity.Members = make(types.JsonArray[types.CasePatientClinicalInformation], 0) //TODO
-	caseEntity.Tasks = make(types.JsonArray[types.Task], 0)                             //TODO
+	members, err := r.retrieveCasePatients(caseId, append(familyMembersIds, caseEntity.ProbandID))
+	if err != nil {
+		return nil, fmt.Errorf("error fetching members data: %w", err)
+	}
+	caseEntity.Members = *members
 
-	if caseEntity.CaseAnalysisType == "somatic" || familyMembersCount == 0 {
+	caseEntity.Tasks = make(types.JsonArray[types.Task], 0) //TODO
+
+	if caseEntity.CaseAnalysisType == "somatic" || len(familyMembersIds) == 0 {
 		caseEntity.CaseType = caseEntity.CaseAnalysisType
 	} else {
 		caseEntity.CaseType = fmt.Sprintf("%s_family", caseEntity.CaseAnalysisType)
 	}
 
-	return &caseEntity, nil
+	return caseEntity, nil
 }
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
@@ -273,4 +266,88 @@ func joinPerformerLab(tx *gorm.DB) *gorm.DB {
 
 func joinMondoTerm(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.primary_condition=%s.id", types.MondoTable.Name, types.MondoTable.Alias, types.CaseTable.Alias, types.MondoTable.Alias))
+}
+
+func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error) {
+	var caseEntity CaseEntity
+
+	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	txCase = joinWithCaseAnalysis(txCase)
+	txCase = txCase.Select("c.id as case_id, c.proband_id, ca.code as case_analysis_code, ca.name as case_analysis_name, ca.type_code as case_analysis_type")
+	txCase = txCase.Where("c.id = ?", caseId)
+	if err := txCase.Find(&caseEntity).Error; err != nil {
+		return nil, fmt.Errorf("error fetching case entity: %w", err)
+	}
+
+	return &caseEntity, nil
+}
+
+func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
+	var assays []CaseAssay
+
+	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.request r ON r.id = s.request_id")
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON s.patient_id = f.family_member_id AND s.case_id = f.case_id")
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.experiment exp ON exp.id = s.experiment_id")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, r.id as request_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, s.status_code, s.updated_on, exp.experimental_strategy_code")
+	txSeqExp = txSeqExp.Where("s.case_id = ?", caseId)
+	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc")
+	if err := txSeqExp.Find(&assays).Error; err != nil {
+		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
+	}
+	return &assays, nil
+}
+
+func (r *CasesRepository) retrieveCasePatients(caseId int, memberIds []int) (*[]CasePatientClinicalInformation, error) {
+	var members []CasePatientClinicalInformation
+	var phenotypeObservationCodings []types.PhenotypeObservationCoding
+
+	txMembers := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
+	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f on p.id = f.family_member_id")
+	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` mgmt_org on p.managing_organization_id = mgmt_org.id")
+	txMembers = txMembers.Where("p.id in ?", memberIds)
+	txMembers = txMembers.Order("affected_status_code asc")
+	txMembers = txMembers.Select("p.id as patient_id, f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, p.date_of_birth, p.sex_code, p.mrn, mgmt_org.code as managing_organization_code, mgmt_org.name as managing_organization_name")
+	if err := txMembers.Find(&members).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving case members: %w", err)
+	}
+
+	txObservations := r.db.Table(fmt.Sprintf("%s %s", types.ObservationCodingTable.Name, types.ObservationCodingTable.Alias))
+	txObservations = txObservations.Joins("LEFT JOIN hpo_term hpo ON obs.observation_code = 'phenotype' AND hpo.id = obs.code_value")
+	txObservations = txObservations.Where("obs.observation_code = 'phenotype' AND obs.case_id = ?", caseId)
+	txObservations = txObservations.Order("phenotype_name asc")
+	txObservations = txObservations.Select("obs.patient_id, hpo.id as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
+	if err := txObservations.Find(&phenotypeObservationCodings).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving case phenotypes: %w", err)
+	}
+
+	phenotypesPerPatient := utils.GroupByProperty(phenotypeObservationCodings, func(p types.PhenotypeObservationCoding) int {
+		return p.PatientID
+	})
+
+	for i, m := range members {
+		members[i].ObservedPhenotypes = make(types.JsonArray[types.Term], 0)
+		members[i].NonObservedPhenotypes = make(types.JsonArray[types.Term], 0)
+
+		phenotypes, ok := phenotypesPerPatient[m.PatientID]
+
+		if ok {
+			for _, phenotype := range phenotypes {
+				term := types.Term{
+					ID:        phenotype.PhenotypeID,
+					Name:      phenotype.PhenotypeName,
+					OnsetCode: phenotype.OnsetCode,
+				}
+
+				if phenotype.InterpretationCode == "positive" {
+					members[i].ObservedPhenotypes = append(members[i].ObservedPhenotypes, term)
+				} else {
+					members[i].NonObservedPhenotypes = append(members[i].NonObservedPhenotypes, term)
+				}
+			}
+		}
+	}
+
+	return &members, nil
 }

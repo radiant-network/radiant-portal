@@ -132,36 +132,105 @@ func Test_GetCaseEntity(t *testing.T) {
 		caseEntity, err := repo.GetCaseEntity(1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, (*caseEntity).CaseID)
+		assert.Equal(t, "germline_family", (*caseEntity).CaseType)
+		assert.Len(t, (*caseEntity).Assays, 3)
+		assert.Len(t, (*caseEntity).Members, 3)
+	})
+}
+
+func Test_RetrieveCaseLevelData(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		caseEntity, err := repo.retrieveCaseLevelData(1)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, (*caseEntity).CaseID)
 		assert.Equal(t, "WGA", (*caseEntity).CaseAnalysisCode)
 		assert.Equal(t, "Whole Genome Analysis", (*caseEntity).CaseAnalysisName)
-		assert.Equal(t, "germline_family", (*caseEntity).CaseType)
-		assert.Equal(t, 3, len((*caseEntity).Assays))
+	})
+}
+
+func Test_RetrieveCaseAssays(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		assays, err := repo.retrieveCaseAssays(1)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, len(*assays))
 
 		// Proband first
-		assert.Equal(t, "", (*caseEntity).Assays[0].RelationshipToProband)
-		assert.Equal(t, 1, (*caseEntity).Assays[0].SeqID)
-		assert.Equal(t, 22, (*caseEntity).Assays[0].RequestID)
-		assert.Equal(t, 3, (*caseEntity).Assays[0].PatientID)
-		assert.Equal(t, "", (*caseEntity).Assays[0].AffectedStatusCode)
-		assert.Equal(t, 1, (*caseEntity).Assays[0].SampleID)
-		assert.Equal(t, "S13224", (*caseEntity).Assays[0].SampleSubmitterID)
+		assert.Equal(t, "", (*assays)[0].RelationshipToProband)
+		assert.Equal(t, 1, (*assays)[0].SeqID)
+		assert.Equal(t, 22, (*assays)[0].RequestID)
+		assert.Equal(t, 3, (*assays)[0].PatientID)
+		assert.Equal(t, "", (*assays)[0].AffectedStatusCode)
+		assert.Equal(t, 1, (*assays)[0].SampleID)
+		assert.Equal(t, "S13224", (*assays)[0].SampleSubmitterID)
 
 		// Affected then non_affected
-		assert.Equal(t, "mother", (*caseEntity).Assays[1].RelationshipToProband)
-		assert.Equal(t, 2, (*caseEntity).Assays[1].SeqID)
-		assert.Equal(t, 23, (*caseEntity).Assays[1].RequestID)
-		assert.Equal(t, 1, (*caseEntity).Assays[1].PatientID)
-		assert.Equal(t, "affected", (*caseEntity).Assays[1].AffectedStatusCode)
-		assert.Equal(t, 2, (*caseEntity).Assays[1].SampleID)
-		assert.Equal(t, "S13225", (*caseEntity).Assays[1].SampleSubmitterID)
+		assert.Equal(t, "mother", (*assays)[1].RelationshipToProband)
+		assert.Equal(t, 2, (*assays)[1].SeqID)
+		assert.Equal(t, 23, (*assays)[1].RequestID)
+		assert.Equal(t, 1, (*assays)[1].PatientID)
+		assert.Equal(t, "affected", (*assays)[1].AffectedStatusCode)
+		assert.Equal(t, 2, (*assays)[1].SampleID)
+		assert.Equal(t, "S13225", (*assays)[1].SampleSubmitterID)
 
-		assert.Equal(t, "father", (*caseEntity).Assays[2].RelationshipToProband)
-		assert.Equal(t, 3, (*caseEntity).Assays[2].SeqID)
-		assert.Equal(t, 24, (*caseEntity).Assays[2].RequestID)
-		assert.Equal(t, 2, (*caseEntity).Assays[2].PatientID)
-		assert.Equal(t, "non_affected", (*caseEntity).Assays[2].AffectedStatusCode)
-		assert.Equal(t, 3, (*caseEntity).Assays[2].SampleID)
-		assert.Equal(t, "S13226", (*caseEntity).Assays[2].SampleSubmitterID)
+		assert.Equal(t, "father", (*assays)[2].RelationshipToProband)
+		assert.Equal(t, 3, (*assays)[2].SeqID)
+		assert.Equal(t, 24, (*assays)[2].RequestID)
+		assert.Equal(t, 2, (*assays)[2].PatientID)
+		assert.Equal(t, "non_affected", (*assays)[2].AffectedStatusCode)
+		assert.Equal(t, 3, (*assays)[2].SampleID)
+		assert.Equal(t, "S13226", (*assays)[2].SampleSubmitterID)
 
+	})
+}
+
+func Test_RetrieveCasePatients(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		members, err := repo.retrieveCasePatients(1, []int{1, 2, 3})
+		assert.NoError(t, err)
+		assert.Equal(t, 3, len(*members))
+
+		// Proband first
+		assert.Equal(t, "", (*members)[0].RelationshipToProband)
+		assert.Equal(t, 3, (*members)[0].PatientID)
+		assert.Equal(t, "", (*members)[0].AffectedStatusCode)
+		assert.Equal(t, "1973-03-23 00:00:00 +0000 UTC", (*members)[0].DateOfBirth.String())
+		assert.Equal(t, "MRN-283775", (*members)[0].Mrn)
+		assert.Equal(t, "male", (*members)[0].SexCode)
+		assert.Equal(t, "CHUSJ", (*members)[0].ManagingOrganizationCode)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[0].ManagingOrganizationName)
+		assert.Len(t, (*members)[0].ObservedPhenotypes, 0)
+		assert.Len(t, (*members)[0].NonObservedPhenotypes, 2)
+		assert.Equal(t, "HP:0000717", (*members)[0].NonObservedPhenotypes[0].ID)
+		assert.Equal(t, "Autism", (*members)[0].NonObservedPhenotypes[0].Name)
+		assert.Equal(t, "childhood", (*members)[0].NonObservedPhenotypes[0].OnsetCode)
+		assert.Equal(t, "HP:0001263", (*members)[0].NonObservedPhenotypes[1].ID)
+		assert.Equal(t, "Global developmental delay", (*members)[0].NonObservedPhenotypes[1].Name)
+		assert.Equal(t, "childhood", (*members)[0].NonObservedPhenotypes[1].OnsetCode)
+
+		// Affected then non_affected
+		assert.Equal(t, "mother", (*members)[1].RelationshipToProband)
+		assert.Equal(t, 1, (*members)[1].PatientID)
+		assert.Equal(t, "affected", (*members)[1].AffectedStatusCode)
+		assert.Equal(t, "2012-02-03 00:00:00 +0000 UTC", (*members)[1].DateOfBirth.String())
+		assert.Equal(t, "MRN-283773", (*members)[1].Mrn)
+		assert.Equal(t, "female", (*members)[1].SexCode)
+		assert.Equal(t, "CHUSJ", (*members)[1].ManagingOrganizationCode)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[1].ManagingOrganizationName)
+		assert.Len(t, (*members)[1].ObservedPhenotypes, 0)
+		assert.Len(t, (*members)[1].NonObservedPhenotypes, 0)
+
+		assert.Equal(t, "father", (*members)[2].RelationshipToProband)
+		assert.Equal(t, 2, (*members)[2].PatientID)
+		assert.Equal(t, "non_affected", (*members)[2].AffectedStatusCode)
+		assert.Equal(t, "1970-01-30 00:00:00 +0000 UTC", (*members)[2].DateOfBirth.String())
+		assert.Equal(t, "MRN-283774", (*members)[2].Mrn)
+		assert.Equal(t, "male", (*members)[2].SexCode)
+		assert.Equal(t, "CHUSJ", (*members)[2].ManagingOrganizationCode)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[2].ManagingOrganizationName)
+		assert.Len(t, (*members)[2].ObservedPhenotypes, 0)
+		assert.Len(t, (*members)[2].NonObservedPhenotypes, 0)
 	})
 }

@@ -581,7 +581,7 @@ export interface CasePatientClinicalInformation {
      */
     'date_of_birth'?: string;
     /**
-     * 
+     * TODO
      * @type {Array<string>}
      * @memberof CasePatientClinicalInformation
      */

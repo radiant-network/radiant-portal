@@ -256,6 +256,7 @@ components:
         date_of_birth:
           type: string
         ethnicity_codes:
+          description: TODO
           items:
             type: string
           type: array
