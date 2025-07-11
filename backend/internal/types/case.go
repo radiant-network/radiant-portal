@@ -66,9 +66,11 @@ type CaseEntity struct {
 // @Name CaseSequencingExperiment
 type CaseSequencingExperiment struct {
 	SeqID                 int    `json:"seq_id" validate:"required"`
+	RequestID             int    `json:"request_id,omitempty"`
 	PatientID             int    `json:"patient_id" validate:"required"`
 	RelationshipToProband string `json:"relationship_to_proband,omitempty"`
 	SampleID              int    `json:"sample_id" validate:"required"`
+	SampleSubmitterID     string `json:"sample_submitter_id,omitempty"`
 	AffectedStatusCode    string `json:"affected_status_code,omitempty"`
 }
 

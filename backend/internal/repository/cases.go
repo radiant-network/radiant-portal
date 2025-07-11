@@ -194,10 +194,12 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	}
 
 	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.request r ON r.id = s.request_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON s.patient_id = f.family_member_id AND s.case_id = f.case_id")
-	txSeqExp = txSeqExp.Select("s.id as seq_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id")
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, r.id as request_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id")
 	txSeqExp = txSeqExp.Where("s.case_id = ?", caseId)
-	txSeqExp = txSeqExp.Order("relationship_to_proband asc, s.run_date desc")
+	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc")
 	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {
 		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
 	}

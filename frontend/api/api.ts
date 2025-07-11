@@ -378,7 +378,19 @@ export interface CaseSequencingExperiment {
      * @type {number}
      * @memberof CaseSequencingExperiment
      */
+    'request_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
     'sample_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'sample_submitter_id'?: string;
     /**
      * 
      * @type {number}

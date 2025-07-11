@@ -171,8 +171,12 @@ components:
           type: integer
         relationship_to_proband:
           type: string
+        request_id:
+          type: integer
         sample_id:
           type: integer
+        sample_submitter_id:
+          type: string
         seq_id:
           type: integer
       required:

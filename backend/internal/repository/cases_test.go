@@ -140,21 +140,28 @@ func Test_GetCaseEntity(t *testing.T) {
 		// Proband first
 		assert.Equal(t, "", (*caseEntity).SequencingExperiments[0].RelationshipToProband)
 		assert.Equal(t, 1, (*caseEntity).SequencingExperiments[0].SeqID)
+		assert.Equal(t, 22, (*caseEntity).SequencingExperiments[0].RequestID)
 		assert.Equal(t, 3, (*caseEntity).SequencingExperiments[0].PatientID)
 		assert.Equal(t, "", (*caseEntity).SequencingExperiments[0].AffectedStatusCode)
 		assert.Equal(t, 1, (*caseEntity).SequencingExperiments[0].SampleID)
+		assert.Equal(t, "S13224", (*caseEntity).SequencingExperiments[0].SampleSubmitterID)
 
-		// Father then Mother then Siblings
-		assert.Equal(t, "father", (*caseEntity).SequencingExperiments[1].RelationshipToProband)
-		assert.Equal(t, 3, (*caseEntity).SequencingExperiments[1].SeqID)
-		assert.Equal(t, 2, (*caseEntity).SequencingExperiments[1].PatientID)
-		assert.Equal(t, "non_affected", (*caseEntity).SequencingExperiments[1].AffectedStatusCode)
-		assert.Equal(t, 3, (*caseEntity).SequencingExperiments[1].SampleID)
+		// Affected then non_affected
+		assert.Equal(t, "mother", (*caseEntity).SequencingExperiments[1].RelationshipToProband)
+		assert.Equal(t, 2, (*caseEntity).SequencingExperiments[1].SeqID)
+		assert.Equal(t, 23, (*caseEntity).SequencingExperiments[1].RequestID)
+		assert.Equal(t, 1, (*caseEntity).SequencingExperiments[1].PatientID)
+		assert.Equal(t, "affected", (*caseEntity).SequencingExperiments[1].AffectedStatusCode)
+		assert.Equal(t, 2, (*caseEntity).SequencingExperiments[1].SampleID)
+		assert.Equal(t, "S13225", (*caseEntity).SequencingExperiments[1].SampleSubmitterID)
 
-		assert.Equal(t, "mother", (*caseEntity).SequencingExperiments[2].RelationshipToProband)
-		assert.Equal(t, 2, (*caseEntity).SequencingExperiments[2].SeqID)
-		assert.Equal(t, 1, (*caseEntity).SequencingExperiments[2].PatientID)
-		assert.Equal(t, "affected", (*caseEntity).SequencingExperiments[2].AffectedStatusCode)
-		assert.Equal(t, 2, (*caseEntity).SequencingExperiments[2].SampleID)
+		assert.Equal(t, "father", (*caseEntity).SequencingExperiments[2].RelationshipToProband)
+		assert.Equal(t, 3, (*caseEntity).SequencingExperiments[2].SeqID)
+		assert.Equal(t, 24, (*caseEntity).SequencingExperiments[2].RequestID)
+		assert.Equal(t, 2, (*caseEntity).SequencingExperiments[2].PatientID)
+		assert.Equal(t, "non_affected", (*caseEntity).SequencingExperiments[2].AffectedStatusCode)
+		assert.Equal(t, 3, (*caseEntity).SequencingExperiments[2].SampleID)
+		assert.Equal(t, "S13226", (*caseEntity).SequencingExperiments[2].SampleSubmitterID)
+
 	})
 }
