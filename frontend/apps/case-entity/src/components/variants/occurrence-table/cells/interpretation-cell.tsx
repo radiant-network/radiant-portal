@@ -3,8 +3,8 @@ import { Button } from '@/components/base/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
-import InterpretationDialog from '@/feature/interpretation/interpretation-dialog';
 import { ZapIcon } from 'lucide-react';
+import InterpretationDialog from '../../interpretation/interpretation-dialog';
 
 type InterpretationCellProps = {
   occurrence: Occurrence;

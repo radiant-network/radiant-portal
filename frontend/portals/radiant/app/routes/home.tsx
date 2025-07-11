@@ -1,7 +1,7 @@
-import VariantExploration from 'variant-exploration/App';
+import VCaseExploration from './cases/list';
 
 const Home = () => {
-  return <VariantExploration />;
+  return <VCaseExploration />;
 };
 
 export default Home;

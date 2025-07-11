@@ -1,10 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/base/ui/button';
 import { Input } from '@/components/base/ui/input';
-import { Badge } from '@/components/base/ui/badge';
 import { Checkbox } from '@/components/base/ui/checkbox';
 import { useI18n } from '@/components/hooks/i18n';
-import { X } from 'lucide-react';
 
 interface User {
   reference: string;
