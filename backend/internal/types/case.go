@@ -53,25 +53,63 @@ type CaseResult struct {
 // @Description Data for Case Entity Page
 // @Name CaseEntity
 type CaseEntity struct {
-	CaseID                int                                 `json:"case_id" validate:"required"`
-	CaseAnalysisCode      string                              `json:"case_analysis_code,omitempty"`
-	CaseAnalysisName      string                              `json:"case_analysis_name,omitempty"`
-	CaseAnalysisType      string                              `json:"-"`
-	CaseType              string                              `json:"case_type,omitempty"`
-	SequencingExperiments JsonArray[CaseSequencingExperiment] `json:"sequencing_experiments" validate:"required"`
+	CaseID               int                                       `json:"case_id" validate:"required"`
+	CaseAnalysisCode     string                                    `json:"case_analysis_code,omitempty"`
+	CaseAnalysisName     string                                    `json:"case_analysis_name,omitempty"`
+	CaseAnalysisType     string                                    `json:"-"`
+	CaseType             string                                    `json:"case_type,omitempty"`
+	CreatedOn            time.Time                                 `json:"created_on" validate:"required"`
+	UpdatedOn            time.Time                                 `json:"updated_on" validate:"required"`
+	Prescriber           string                                    `json:"prescriber,omitempty"`
+	RequestedByCode      string                                    `json:"requested_by_code,omitempty"`
+	RequestedByName      string                                    `json:"requested_by_name,omitempty"`
+	PerformerLabCode     string                                    `json:"performer_lab_code,omitempty"`
+	PerformerLabName     string                                    `json:"performer_lab_name,omitempty"`
+	RequestID            int                                       `json:"request_id,omitempty"`
+	PriorityCode         string                                    `json:"priority_code,omitempty"`
+	StatusCode           string                                    `json:"status_code" validate:"required"`
+	PrimaryConditionID   string                                    `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName string                                    `json:"primary_condition_name,omitempty"`
+	Note                 string                                    `json:"note,omitempty"`
+	Assays               JsonArray[CaseAssay]                      `json:"assays" validate:"required"`
+	Members              JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
+	Tasks                JsonArray[Task]                           `json:"tasks" validate:"required"`
 }
 
-// CaseSequencingExperiment - Sequencing Experiment to display in a Case
-// @Description Sequencing Experiment to display in a Case
-// @Name CaseSequencingExperiment
-type CaseSequencingExperiment struct {
-	SeqID                 int    `json:"seq_id" validate:"required"`
-	RequestID             int    `json:"request_id,omitempty"`
-	PatientID             int    `json:"patient_id" validate:"required"`
-	RelationshipToProband string `json:"relationship_to_proband,omitempty"`
-	SampleID              int    `json:"sample_id" validate:"required"`
-	SampleSubmitterID     string `json:"sample_submitter_id,omitempty"`
-	AffectedStatusCode    string `json:"affected_status_code,omitempty"`
+// CaseAssay - Assay to display in a Case
+// @Description Assay to display in a Case
+// @Name CaseAssay
+type CaseAssay struct {
+	SeqID                    int       `json:"seq_id" validate:"required"`
+	RequestID                int       `json:"request_id,omitempty"`
+	PatientID                int       `json:"patient_id" validate:"required"`
+	RelationshipToProband    string    `json:"relationship_to_proband,omitempty"`
+	SampleID                 int       `json:"sample_id" validate:"required"`
+	SampleSubmitterID        string    `json:"sample_submitter_id,omitempty"`
+	AffectedStatusCode       string    `json:"affected_status_code,omitempty"`
+	HistologyCode            string    `json:"histology_code,omitempty"`
+	ExperimentalStrategyCode string    `json:"experimental_strategy_code" validate:"required"`
+	StatusCode               string    `json:"status_code" validate:"required"`
+	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
+}
+
+// CasePatientClinicalInformation - Patient clinical information
+// @Description Patient clinical information to display in Case Entity
+// @Name CasePatientClinicalInformation
+type CasePatientClinicalInformation struct {
+	RelationshipToProband         string            `json:"relationship_to_proband,omitempty"`
+	AffectedStatusCode            string            `json:"affected_status_code,omitempty"`
+	PatientID                     int               `json:"patient_id" validate:"required"`
+	DateOfBirth                   time.Time         `json:"date_of_birth"`
+	SexCode                       string            `json:"sex_code" validate:"required"`
+	Mrn                           string            `json:"mrn,omitempty"`
+	ManagingOrganizationCode      string            `json:"managing_organization_code,omitempty"`
+	ManagingOrganizationName      string            `json:"managing_organization_name,omitempty"`
+	EthnicityCodes                JsonArray[string] `json:"ethnicity_codes,omitempty"`
+	ObservedPhenotypesUnparsed    string            `json:"-"`
+	ObservedPhenotypes            JsonArray[Term]   `json:"observed_phenotypes,omitempty"`
+	NonObservedPhenotypesUnparsed string            `json:"-"`
+	NonObservedPhenotypes         JsonArray[Term]   `json:"non_observed_phenotypes,omitempty"`
 }
 
 var CaseTable = Table{

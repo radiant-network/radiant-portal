@@ -947,15 +947,20 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 
 func Test_CaseEntityHandler(t *testing.T) {
 	expected := `{
-		"case_id": 1,
-		"case_analysis_code": "WGA",
-		"case_analysis_name": "Whole Genome Analysis",
-		"case_type": "germline_family",
-		"sequencing_experiments": [
-			{"seq_id": 1, "request_id": 22, "patient_id": 3, "sample_id": 1, "sample_submitter_id": "S13224"},
-			{"seq_id": 2, "request_id": 23, "patient_id": 1, "relationship_to_proband": "mother", "affected_status_code": "affected", "sample_id": 2, "sample_submitter_id": "S13225"},
-			{"seq_id": 3, "request_id": 24, "patient_id": 2, "relationship_to_proband": "father", "affected_status_code": "non_affected", "sample_id": 3, "sample_submitter_id": "S13226"}
-		]
+		"assays":[
+			{"experimental_strategy_code":"wxs", "patient_id":3, "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z"}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":1, "relationship_to_proband":"mother", "request_id":23, "sample_id":2, "sample_submitter_id":"S13225", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z"}, 
+			{"affected_status_code":"non_affected", "experimental_strategy_code":"wxs", "patient_id":2, "relationship_to_proband":"father", "request_id":24, "sample_id":3, "sample_submitter_id":"S13226", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z"}
+		], 
+		"case_analysis_code":"WGA", 
+		"case_analysis_name":"Whole Genome Analysis", 
+		"case_id":1, 
+		"case_type":"germline_family", 
+		"created_on":"0001-01-01T00:00:00Z", 
+		"members":[], 
+		"status_code":"",
+		"tasks":[], 
+		"updated_on":"0001-01-01T00:00:00Z"
 	}`
 	assertCaseEntityHandler(t, "simple", 1, expected)
 }
