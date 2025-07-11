@@ -434,6 +434,13 @@ components:
           type: string
         end:
           type: integer
+        exomiser_acmg_evidence:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        exomiser_gene_combined_score:
+          type: number
         exon_rank:
           type: integer
         exon_total:
@@ -518,6 +525,8 @@ components:
         zygosity:
           type: string
       required:
+      - exomiser_acmg_evidence
+      - exomiser_gene_combined_score
       - genotype_quality
       - gnomad_v3_af
       - hgvsg
@@ -748,6 +757,19 @@ components:
             type: string
           type: array
           uniqueItems: false
+        exomiser_acmg_classification:
+          type: string
+        exomiser_acmg_evidence:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        exomiser_gene_combined_score:
+          type: number
+        exomiser_moi:
+          type: string
+        exomiser_variant_score:
+          type: number
         filter:
           type: string
         genotype_quality:
@@ -805,6 +827,11 @@ components:
       required:
       - ad_ratio
       - chromosome
+      - exomiser_acmg_classification
+      - exomiser_acmg_evidence
+      - exomiser_gene_combined_score
+      - exomiser_moi
+      - exomiser_variant_score
       - genotype_quality
       - gnomad_v3_af
       - has_interpretation

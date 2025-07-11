@@ -1004,6 +1004,18 @@ export interface ExpendedOccurrence {
     'end'?: number;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof ExpendedOccurrence
+     */
+    'exomiser_acmg_evidence': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpendedOccurrence
+     */
+    'exomiser_gene_combined_score': number;
+    /**
+     * 
      * @type {number}
      * @memberof ExpendedOccurrence
      */
@@ -1731,6 +1743,36 @@ export interface Occurrence {
      * @memberof Occurrence
      */
     'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Occurrence
+     */
+    'exomiser_acmg_classification': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Occurrence
+     */
+    'exomiser_acmg_evidence': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Occurrence
+     */
+    'exomiser_gene_combined_score': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Occurrence
+     */
+    'exomiser_moi': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Occurrence
+     */
+    'exomiser_variant_score': number;
     /**
      * 
      * @type {string}

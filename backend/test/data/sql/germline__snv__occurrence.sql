@@ -51,6 +51,11 @@ CREATE TABLE `germline__snv__occurrence`
     mother_calls                    ARRAY<INT>,
     mother_zygosity                 CHAR(3),
     transmission_mode               VARCHAR(50),
-    info_old_record                 VARCHAR(2000)
+    info_old_record                 VARCHAR(2000),
+    exomiser_moi                    VARCHAR(10),
+    exomiser_acmg_classification    VARCHAR(300),
+    exomiser_acmg_evidence          ARRAY<VARCHAR (10)>,
+    exomiser_variant_score          FLOAT,
+    exomiser_gene_combined_score    FLOAT
 ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`)

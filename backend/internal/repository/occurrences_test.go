@@ -111,6 +111,32 @@ func Test_CountOccurrences(t *testing.T) {
 	})
 }
 
+func Test_GetOccurrences_Return_List_Occurrences_When_Filter_By_Exomiser_Gene_Combined_Score(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewOccurrencesRepository(db)
+		sqon := &types.Sqon{
+			Content: types.SqonArray{
+				{Op: ">", Content: types.LeafContent{Field: "exomiser_gene_combined_score", Value: []interface{}{0.5}}},
+			},
+			Op: "and",
+		}
+		sort := []types.SortBody{
+			{Field: "locus_id", Order: "asc"},
+		}
+		selectedFields := []string{"locus_id", "exomiser_gene_combined_score", "exomiser_acmg_evidence"}
+
+		query, err := types.NewListQueryFromSqon(OccurrencesQueryConfigForTest, selectedFields, sqon, nil, sort)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.EqualValues(t, 0.7, occurrences[0].ExomiserGeneCombinedScore)
+			assert.EqualValues(t, []string{"Benign", "Pathogenic"}, occurrences[0].ExomiserAcmgEvidence)
+		}
+	})
+}
+
 func Test_CountOccurrences_Return_Count_That_Match_Filters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
 
@@ -628,5 +654,7 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 		assert.Equal(t, "locus1", expendedOccurrence.Locus)
 		assert.Equal(t, float32(0.1), expendedOccurrence.SiftScore)
 		assert.Equal(t, "T", expendedOccurrence.SiftPred)
+		assert.Equal(t, 0.7, expendedOccurrence.ExomiserGeneCombinedScore)
+		assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, expendedOccurrence.ExomiserAcmgEvidence)
 	})
 }

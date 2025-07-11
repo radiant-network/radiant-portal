@@ -159,7 +159,13 @@ CREATE TABLE IF NOT EXISTS `germline__snv__occurrence`
     mother_calls                    ARRAY<INT>,
     mother_zygosity                 CHAR(3),
     transmission_mode               VARCHAR(50),
-    info_old_record                 VARCHAR(2000)
+    info_old_record                 VARCHAR(2000),
+    exomiser_moi VARCHAR(10),
+    exomiser_acmg_classification  VARCHAR(300),
+    exomiser_acmg_evidence        ARRAY<VARCHAR (10)>,
+    exomiser_variant_score        FLOAT,
+    exomiser_gene_combined_score  FLOAT,
+    INDEX locus_id_index (`locus_id`) USING BITMAP COMMENT ''
     ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`);
 
@@ -279,11 +285,11 @@ VALUES
     (1, 1000, 'csq11', 'BRAC', 3, 'T', true),
     (1, 2000, 'csq20', 'BRAC', 1, 'T', true);
 
-INSERT INTO germline__snv__occurrence (part, seq_id, task_id, locus_id, gq, filter, zygosity, ad_ratio)
+INSERT INTO germline__snv__occurrence (part, seq_id, task_id, locus_id, gq, filter, zygosity, ad_ratio, exomiser_moi, exomiser_acmg_classification, exomiser_acmg_evidence, exomiser_variant_score, exomiser_gene_combined_score)
 VALUES
-    (1, 1, 1, 1000, 100, 'PASS', 'HET', 1.0),
-    (1, 1, 1, 2000, 200, 'PASS', 'HOM', 0.5),
-    (1, 19, 19, 1000, 300, 'PASS', 'HET', 1.0);
+    (1, 1, 1, 1000, 100, 'PASS', 'HET', 1.0, 0, 'Pathogenic', ['PVS1', 'PM2'], 0.9, 0.8),
+    (1, 1, 1, 1000, 150, 'PASS', 'HOM', 0.5, 0, 'Likely pathogenic', ['PP3'], 0.85, 0.75),
+    (1, 19, 19, 2000, 200, 'PASS', 'HET', 1.0, 0, 'Benign', ['BP4'], 0.95, 0.9);
 
 INSERT INTO germline__snv__variant (locus_id, impact_score, pf_wgs, pc_wgs, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
 VALUES
