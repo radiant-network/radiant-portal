@@ -116,7 +116,12 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"genotype_quality": 1,
 		"gnomad_v3_af":0.1,
 		"has_interpretation": true,
-		"max_impact_score":4
+		"max_impact_score":4,
+		"exomiser_moi": "",
+		"exomiser_acmg_classification": "",
+		"exomiser_acmg_evidence": null,
+		"exomiser_gene_combined_score": 0,
+        "exomiser_variant_score": 0
     }]`, w.Body.String())
 }
 
@@ -214,6 +219,8 @@ func Test_GetExpendedOccurrenceHandler(t *testing.T) {
 		"sift_pred":"T", 
 		"sift_score":0.1, 
 		"spliceai_ds":0.1, 
-		"spliceai_type":["AG"]
+		"spliceai_type":["AG"],
+		"exomiser_acmg_evidence": null,
+		"exomiser_gene_combined_score": 0
 	}`, w.Body.String())
 }
