@@ -264,8 +264,8 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 		assert.Equal(t, "2021-10-12 13:08:00 +0000 UTC", (*tasks)[0].CreatedOn.String())
 		assert.Equal(t, int64(3), (*tasks)[0].PatientCount)
 		assert.Equal(t, 3, len((*tasks)[0].Patients))
-		assert.Contains(t, (*tasks)[0].Patients, "mother")
-		assert.Contains(t, (*tasks)[0].Patients, "father")
-		assert.Contains(t, (*tasks)[0].Patients, "proband")
+		assert.Equal(t, "father", (*tasks)[0].Patients[0])
+		assert.Equal(t, "mother", (*tasks)[0].Patients[1])
+		assert.Equal(t, "proband", (*tasks)[0].Patients[2])
 	})
 }

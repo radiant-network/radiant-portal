@@ -999,7 +999,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"requested_by_name": "Centre hospitalier universitaire Sainte-Justine",
 		"status_code":"active", 
 		"tasks":[
-			{"id": 1, "type_code": "ngba", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother", "father", "proband"]}
+			{"id": 1, "type_code": "ngba", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
 		],
 		"updated_on":"2021-09-12T13:08:00Z"
 	}`

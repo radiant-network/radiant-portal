@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -382,6 +383,7 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 		patients := split(task.PatientsUnparsed)
 		if int64(len(patients)) < task.PatientCount {
 			patients = append(patients, "proband")
+			sort.Strings(patients)
 			tasks[i].Patients = patients
 		}
 	}
