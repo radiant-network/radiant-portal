@@ -198,6 +198,12 @@ export interface CaseAssay {
     'sample_submitter_id'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
+    'sample_type_code'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof CaseAssay
      */

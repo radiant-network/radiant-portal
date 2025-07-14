@@ -72,6 +72,8 @@ components:
           type: integer
         sample_submitter_id:
           type: string
+        sample_type_code:
+          type: string
         seq_id:
           type: integer
         status_code:
