@@ -121,6 +121,8 @@ components:
           type: string
         experimental_strategy_code:
           type: string
+        has_variants:
+          type: boolean
         histology_code:
           type: string
         patient_id:
@@ -141,6 +143,7 @@ components:
           type: string
       required:
       - experimental_strategy_code
+      - has_variants
       - patient_id
       - sample_id
       - seq_id

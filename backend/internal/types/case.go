@@ -92,6 +92,7 @@ type CaseAssay struct {
 	ExperimentalStrategyCode string    `json:"experimental_strategy_code" validate:"required"`
 	StatusCode               string    `json:"status_code" validate:"required"`
 	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
+	HasVariants              bool      `json:"has_variants" validate:"required"`
 }
 
 // CasePatientClinicalInformation - Patient clinical information

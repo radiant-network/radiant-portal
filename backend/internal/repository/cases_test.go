@@ -179,6 +179,7 @@ func Test_RetrieveCaseAssays(t *testing.T) {
 		assert.Equal(t, "", (*assays)[0].AffectedStatusCode)
 		assert.Equal(t, 1, (*assays)[0].SampleID)
 		assert.Equal(t, "S13224", (*assays)[0].SampleSubmitterID)
+		assert.True(t, (*assays)[0].HasVariants)
 
 		// Affected then non_affected
 		assert.Equal(t, "mother", (*assays)[1].RelationshipToProband)
@@ -188,6 +189,7 @@ func Test_RetrieveCaseAssays(t *testing.T) {
 		assert.Equal(t, "affected", (*assays)[1].AffectedStatusCode)
 		assert.Equal(t, 2, (*assays)[1].SampleID)
 		assert.Equal(t, "S13225", (*assays)[1].SampleSubmitterID)
+		assert.True(t, (*assays)[1].HasVariants)
 
 		assert.Equal(t, "father", (*assays)[2].RelationshipToProband)
 		assert.Equal(t, 3, (*assays)[2].SeqID)
@@ -196,7 +198,7 @@ func Test_RetrieveCaseAssays(t *testing.T) {
 		assert.Equal(t, "non_affected", (*assays)[2].AffectedStatusCode)
 		assert.Equal(t, 3, (*assays)[2].SampleID)
 		assert.Equal(t, "S13226", (*assays)[2].SampleSubmitterID)
-
+		assert.False(t, (*assays)[2].HasVariants)
 	})
 }
 

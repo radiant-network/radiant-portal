@@ -1,7 +1,7 @@
-case_id	seq_id	task_id	part	analysis_type	affected_status
-1	1	1	1	germline	affected
-1	2	1	1	germline	not_affected
-3	7	7	2	germline	affected
-4	10	10	2	germline	affected
-5	13	13	3	germline	not_affected
-7	19	19	4	germline	affected
+case_id	seq_id	task_id	part	analysis_type	affected_status	ingested_at
+1	1	1	1	germline	affected	1969-12-31 19:00:00.0
+1	2	1	1	germline	not_affected	1969-12-31 19:00:00.0
+3	7	7	2	germline	affected	1969-12-31 19:00:00.0
+4	10	10	2	germline	affected	1969-12-31 19:00:00.0
+5	13	13	3	germline	not_affected	1969-12-31 19:00:00.0
+7	19	19	4	germline	affected	1969-12-31 19:00:00.0
