@@ -300,7 +300,7 @@ func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.experiment exp ON exp.id = s.experiment_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null")
-	txSeqExp = txSeqExp.Select("s.id as seq_id, r.id as request_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, s.status_code, s.updated_on, exp.experimental_strategy_code, se.seq_id is not null as has_variants")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, r.id as request_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, exp.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("s.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc")
 	if err := txSeqExp.Find(&assays).Error; err != nil {
