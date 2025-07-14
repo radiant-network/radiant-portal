@@ -38,17 +38,23 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.id')}</div>
       <div className="font-medium">{member.patient_id || '--'}</div>
 
+      {/* TODO: to be implemented after mvp */}
+      {/* 
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.name')}</div>
-      <div className="font-medium text-muted-foreground">{t('common.notAvailableYet')}</div>
-
+      <div className="font-medium text-muted-foreground">--</div>
+      */}
+      
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.dob')}</div>
       <div>{member.date_of_birth ? formatDate(member.date_of_birth, t('common.date')) : '--'}</div>
 
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.sex')}</div>
       <div className="capitalize">{member.sex_code || '--'}</div>
 
+      {/* TODO: to be implemented after mvp */}
+      {/* 
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.jhn')}</div>
-      <div className="text-muted-foreground">{t('common.notAvailableYet')}</div>
+      <div className="text-muted-foreground">--</div> 
+      */}
 
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.mrn')}</div>
       <div className="flex items-center gap-2">
@@ -71,10 +77,18 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
           </div>
         </TooltipTrigger>
         <TooltipContent>
+          {t('caseEntity.patientInformation.managingOrg_tooltips')}
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+        <div>{member.managing_organization_code || '--'}</div>
+        </TooltipTrigger>
+        <TooltipContent>
           {member.managing_organization_name || '--'}
         </TooltipContent>
       </Tooltip>
-      <div>{member.managing_organization_code || '--'}</div>
+      
     </div>
   );
 }

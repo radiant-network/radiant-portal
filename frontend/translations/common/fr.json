@@ -791,7 +791,8 @@
       "sex": "Sexe",
       "jhn": "JHN",
       "mrn": "Dossier",
-      "managingOrg": "Organisation responsable"
+      "managingOrg": "Organisation responsable",
+      "managingOrg_tooltips": "Organisation responsable du dossier du patient"
     },
     "details": {
       "title": "Détails de Cas",
@@ -810,7 +811,9 @@
       "lastUpdate_tooltips": "aaaa-mm-jj",
       "prescriber": "Prescripteur",
       "prescribingInst": "Inst. prescriptrice",
+      "prescribingInst_tooltips": "Établissement prescripteur",
       "diagLab": "Lab. de diagnostic",
+      "diagLab_tooltips": "Laboratoire de diagnostic moléculaire",
       "requestId": "ID de demande",
       "priority": "Priorité",
       "status": "Statut",

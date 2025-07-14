@@ -781,7 +781,8 @@
       "sex": "Sex",
       "jhn": "JHN",
       "mrn": "MRN",
-      "managingOrg": "Managing Org."
+      "managingOrg": "Managing Org.",
+      "managingOrg_tooltips": "Organization managing the patient’s file"
     },
     "details": {
       "title": "Case Details",
@@ -800,7 +801,9 @@
       "lastUpdate_tooltips": "yyyy-mm-dd",
       "prescriber": "Prescriber",
       "prescribingInst": "Prescribing Inst.",
+      "prescribingInst_tooltips": "Prescribing institution",
       "diagLab": "Diag. Lab",
+      "diagLab_tooltips": "Molecular diagnostic laboratory",
       "requestId": "Request ID",
       "priority": "Priority",
       "status": "Status",
