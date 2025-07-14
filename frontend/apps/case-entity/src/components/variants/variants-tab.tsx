@@ -19,6 +19,7 @@ import { cn } from '@/components/lib/utils';
 import OccurrenceExpend from './occurrence-table/occurrence-expend';
 import { defaultSettings, getVariantColumns } from './occurrence-table/table-settings';
 import AssayVariantFilters from './filters/assay-variant-filters';
+import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
 
 type OccurrencesListInput = {
   seqId: string;
@@ -147,29 +148,31 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
       <div className='bg-muted/40 w-full'>
         <div className={`flex flex-1 h-screen overflow-hidden`}>
           <aside className="w-auto min-w-fit h-full shrink-0">
-            <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
-              <div className="z-10">
-                <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
-              </div>
-              <div
-                className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
-                  'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
-                  'w-0 opacity-0': !selectedSidebarItem,
-                })}
-              >
-                <div className="whitespace-nowrap">
-                  <div className="flex justify-end mb-4">
-                    <button
-                      onClick={() => setSelectedSidebarItem(null)}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                  <FilterList groupKey={selectedSidebarItem} />
+            <AggregateContext value={{ seqId }}>
+              <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
+                <div className="z-10">
+                  <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
                 </div>
-              </div>
-            </SidebarProvider>
+                <div
+                  className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
+                    'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
+                    'w-0 opacity-0': !selectedSidebarItem,
+                  })}
+                >
+                  <div className="whitespace-nowrap">
+                    <div className="flex justify-end mb-4">
+                      <button
+                        onClick={() => setSelectedSidebarItem(null)}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <FilterList groupKey={selectedSidebarItem} />
+                  </div>
+                </div>
+              </SidebarProvider>
+            </AggregateContext>
           </aside>
           <main className="flex-1 flex-shrink-1 p-4 overflow-auto">
             <h1 className="text-2xl font-bold">Variant</h1>
