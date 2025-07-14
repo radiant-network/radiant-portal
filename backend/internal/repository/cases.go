@@ -51,6 +51,7 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 	var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
+	columns = append(columns, "CASE WHEN ca.type_code = 'somatic' OR family_members.family_members_id IS NULL THEN ca.type_code ELSE CONCAT(ca.type_code, '_family') END AS case_type")
 
 	if err = tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
@@ -184,16 +185,14 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 }
 
 func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
-	var familyMembersIds []int
 	caseEntity, err := r.retrieveCaseLevelData(caseId)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching case level data: %w", err)
 	}
 
-	txFamilyMembersID := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
-	txFamilyMembersID = txFamilyMembersID.Where("f.case_id = ?", caseId)
-	if err := txFamilyMembersID.Distinct("f.family_member_id").Find(&familyMembersIds).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving family members ids: %w", err)
+	familyMembersIds, err := r.retrieveCasesFamilyMembersIds(caseId)
+	if err != nil {
+		return nil, fmt.Errorf("error fetchingfamily members ids: %w", err)
 	}
 
 	assays, err := r.retrieveCaseAssays(caseId)
@@ -214,11 +213,8 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	}
 	caseEntity.Tasks = *tasks
 
-	if caseEntity.CaseAnalysisType == "somatic" || len(familyMembersIds) == 0 {
-		caseEntity.CaseType = caseEntity.CaseAnalysisType
-	} else {
-		caseEntity.CaseType = fmt.Sprintf("%s_family", caseEntity.CaseAnalysisType)
-	}
+	caseType := calculateCaseType(*caseEntity, familyMembersIds)
+	caseEntity.CaseType = caseType
 
 	return caseEntity, nil
 }
@@ -229,15 +225,16 @@ func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	tx = joinWithPatient(tx, userQuery)
 	tx = joinWithCaseAnalysis(tx)
 	tx = joinWithProject(tx)
+	tx = joinWithFamilyMembers(tx, r.db)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
 		if userQuery.HasFieldFromTables(types.PerformerLabTable) {
-			tx = joinPerformerLab(tx)
+			tx = joinWithPerformerLab(tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.MondoTable) {
-			tx = joinMondoTerm(tx)
+			tx = joinWithMondoTerm(tx)
 		}
 	}
 	return tx, nil
@@ -266,12 +263,25 @@ func joinWithProject(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.project_id=%s.id", types.ProjectTable.Name, types.ProjectTable.Alias, types.CaseTable.Alias, types.ProjectTable.Alias))
 }
 
-func joinPerformerLab(tx *gorm.DB) *gorm.DB {
+func joinWithPerformerLab(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.performer_lab_id=%s.id", types.PerformerLabTable.Name, types.PerformerLabTable.Alias, types.CaseTable.Alias, types.PerformerLabTable.Alias))
 }
 
-func joinMondoTerm(tx *gorm.DB) *gorm.DB {
+func joinWithMondoTerm(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.primary_condition=%s.id", types.MondoTable.Name, types.MondoTable.Alias, types.CaseTable.Alias, types.MondoTable.Alias))
+}
+
+func joinWithFamilyMembers(tx *gorm.DB, db *gorm.DB) *gorm.DB {
+	txFamilyMembers := getFamilyMembersIds(db)
+	return tx.Joins(fmt.Sprintf("LEFT JOIN (?) family_members ON family_members.case_id=%s.id", types.CaseTable.Alias), txFamilyMembers)
+}
+
+func getFamilyMembersIds(db *gorm.DB) *gorm.DB {
+	tx := db.Table("radiant_jdbc.public.family")
+	tx = tx.Group("case_id")
+	tx = tx.Select("case_id, GROUP_CONCAT(family_member_id) as family_members_id")
+
+	return tx
 }
 
 func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error) {
@@ -279,8 +289,8 @@ func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error)
 
 	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
 	txCase = joinWithCaseAnalysis(txCase)
-	txCase = joinMondoTerm(txCase)
-	txCase = joinPerformerLab(txCase)
+	txCase = joinWithMondoTerm(txCase)
+	txCase = joinWithPerformerLab(txCase)
 	txCase = joinWithRequest(txCase)
 	txCase = txCase.Select("c.id as case_id, c.proband_id, ca.code as case_analysis_code, ca.name as case_analysis_name, ca.type_code as case_analysis_type, c.created_on, c.updated_on, c.note, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as performer_lab_code, lab.name as performer_lab_name, c.status_code, order_org.code as requested_by_code, order_org.name as requested_by_name, r.priority_code, r.ordering_physician as prescriber, c.request_id")
 	txCase = txCase.Where("c.id = ?", caseId)
@@ -389,4 +399,22 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	}
 
 	return &tasks, nil
+}
+
+func (r *CasesRepository) retrieveCasesFamilyMembersIds(caseId int) ([]int, error) {
+	var familyMembersIds []int
+	txFamilyMembersID := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
+	txFamilyMembersID = txFamilyMembersID.Where("f.case_id = ?", caseId)
+	if err := txFamilyMembersID.Distinct("f.family_member_id").Find(&familyMembersIds).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving family members ids: %w", err)
+	}
+	return familyMembersIds, nil
+}
+
+func calculateCaseType(caseEntity CaseEntity, familyMembersIds []int) string {
+	if caseEntity.CaseAnalysisType == "somatic" || len(familyMembersIds) == 0 {
+		return caseEntity.CaseAnalysisType
+	} else {
+		return fmt.Sprintf("%s_family", caseEntity.CaseAnalysisType)
+	}
 }

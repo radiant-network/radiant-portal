@@ -40,7 +40,7 @@ function CasesTab() {
         additional_fields: [
           'case_analysis_code',
           'case_analysis_name',
-          'case_analysis_type_code',
+          'case_type',
           'case_id',
           'created_on',
           'managing_organization_code',

@@ -373,7 +373,7 @@
         "mrn_tooltips": "Patient's medical record number",
         "priority_code": "Priority",
         "status_code": "Status",
-        "case_analysis_type_code": "Type",
+        "case_type": "Type",
         "case_analysis_code": "Analysis",
         "primary_condition": "Primary Condition",
         "requested_by_code": "Req. By",

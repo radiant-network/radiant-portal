@@ -368,7 +368,7 @@
         "mrn_tooltips": "Numéro de dossier médicale du patient",
         "priority_code": "Priorité",
         "status_code": "Status",
-        "case_analysis_type_code": "Type de cas",
+        "case_type": "Type de cas",
         "primary_condition": "Condition principale",
         "case_analysis_code": "Analyse",
         "requested_by_code": "Req. par",

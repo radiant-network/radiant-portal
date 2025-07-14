@@ -484,16 +484,16 @@ export interface CaseResult {
     'case_analysis_name'?: string;
     /**
      * 
-     * @type {string}
-     * @memberof CaseResult
-     */
-    'case_analysis_type_code'?: string;
-    /**
-     * 
      * @type {number}
      * @memberof CaseResult
      */
     'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'case_type'?: string;
     /**
      * 
      * @type {string}
