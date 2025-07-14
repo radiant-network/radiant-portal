@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { tv } from 'tailwind-variants';
 
 import { cn } from '@/lib/utils';
 
@@ -25,8 +26,23 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="card-title" className={cn('leading-none font-semibold', className)} {...props} />;
+const cardTitleVariants = tv({
+  base: 'leading-none font-semibold',
+  variants: {
+    size: {
+      base: 'text-base',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-md',
+      xl: 'text-xl'
+    }
+  }
+});
+type CardTitleProps = React.ComponentProps<'div'> & {
+  size?: 'base' | 'xs' | 'sm' | 'md' | 'xl';
+}
+function CardTitle({ className, size = 'base', ...props }: CardTitleProps) {
+  return <div data-slot="card-title" className={cardTitleVariants({ size })} {...props} />;
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {

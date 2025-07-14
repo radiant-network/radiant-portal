@@ -2,7 +2,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { CaseResult } from '@/api/api';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import PhenotypeConditionLinkCell, { PhenotypeType } from '@/components/base/data-table/cells/phenotype-condition-link-cell';
+import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
@@ -12,6 +12,7 @@ import StatusCell from '../cells/status-cells';
 import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '../cells/analysis-type-code-cell';
 import CaseActionsMenuCell from '../cells/case-actions-menu-cell';
 import RequestIdCell from '../cells/request-id-cell';
+import { PhenotypeType } from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 
 const columnHelper = createColumnHelper<CaseResult>();
 
