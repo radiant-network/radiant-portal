@@ -3,6 +3,7 @@
     "date": "yyyy-MM-dd",
     "unspecified": "Unspecified",
     "noDataAvailable": "No data available",
+    "notAvailableYet": "Not available yet",
     "save": "Save",
     "editor": {
       "headings": {
@@ -763,6 +764,24 @@
       "germline": "Germline Solo",
       "germline_family": "Germline Family",
       "case": "Case"
+    },
+    "patientInformation": {
+      "title": "Patient Information",
+      "proband": "Proband",
+      "mother": "Mother",
+      "father": "Father",
+      "relationships": {
+        "proband": "Proband",
+        "mother": "Mother",
+        "father": "Father"
+      },
+      "id": "ID",
+      "name": "Name (First / Last)",
+      "dob": "DOB",
+      "sex": "Sex",
+      "jhn": "JHN",
+      "mrn": "MRN",
+      "managingOrg": "Managing Org."
     },
     "details": {
       "title": "Case Details",

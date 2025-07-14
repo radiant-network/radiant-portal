@@ -1,6 +1,5 @@
-import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
-import { Separator } from '@/components/base/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { User, RotateCcw } from 'lucide-react';
@@ -36,7 +35,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
   ];
   // State for dropdown values
   const [priority, setPriority] = useState(caseData.priority_code || priorityOptions[0].value);
-  const [status, setStatus] = useState(caseData.status_code || statusOptions[0].value); 
+  const [status, setStatus] = useState(caseData.status_code || statusOptions[0].value);
   const [assignedTo, setAssignedTo] = useState(caseData.assigned_to || assigneeOptions[0].value);
 
 
@@ -46,9 +45,9 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
   return (
     <Card {...props}>
       <CardHeader className="border-b [.border-b]:pb-2">
-        <h2 className="text-xl font-semibold">
+        <CardTitle size="xl">
           {t('caseEntity.details.analysisOverview')}
-        </h2>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         {/* Title with codes */}
@@ -61,7 +60,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
           {/* Left side - Static information */}
           <div className="gap-4">
             <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
-            <Tooltip>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.createdOn')}</div>
                 </TooltipTrigger>
