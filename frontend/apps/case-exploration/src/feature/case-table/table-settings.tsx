@@ -12,7 +12,6 @@ import StatusCell from '../cells/status-cells';
 import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '../cells/analysis-type-code-cell';
 import CaseActionsMenuCell from '../cells/case-actions-menu-cell';
 import RequestIdCell from '../cells/request-id-cell';
-import { PhenotypeType } from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 
 const columnHelper = createColumnHelper<CaseResult>();
 
@@ -87,7 +86,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Primary Condition
     columnHelper.accessor(row => row.primary_condition_id, {
       id: 'primary_condition',
-      cell: info => <PhenotypeConditionLinkCell type={PhenotypeType.MONDO} code={info.getValue()} name={info.row.original.primary_condition_name} />,
+      cell: info => <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.primary_condition_name} />,
       header: t('caseExploration.case.headers.primary_condition'),
       size: 124,
       minSize: 124,

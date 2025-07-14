@@ -3,10 +3,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from "@/components/base/ui/badge";
 import { Separator } from "@/components/base/ui/separator";
 import { DotIcon, FlaskConical } from "lucide-react";
-import AssayVariantFiltersSkeleton from "./assay-variant-filters-skeleton";
 import { CaseAssay } from "@/api/api";
 import { useEffect, useState } from "react";
 import { cn } from "@/components/lib/utils";
+import { Skeleton } from "@/components/base/ui/skeleton";
+import { getBadgeAffectedCodeColor } from "@/components/utils";
 
 
 function AssayVariantFiltersSelectValue({ relationship_to_proband, request_id }: CaseAssay) {
@@ -41,16 +42,6 @@ function AssayVariantFiltersSelectItem(assay: CaseAssay) {
 }
 
 
-function getBadgeAffectedCodeColor(code: string) {
-  switch (code) {
-    case "affected":
-      return "red"
-    default:
-      return "secondary"
-  }
-}
-
-
 type AssayVariantFiltersProps = {
   assays?: CaseAssay[];
   handleChange: (value: string) => void;
@@ -74,7 +65,15 @@ function AssayVariantFilters({ assays = [], handleChange, isLoading }: AssayVari
   }, [isLoading, assays])
 
   if ((isLoading || assays.length === 0 || !selectedAssay)) {
-    return <AssayVariantFiltersSkeleton />;
+    return (
+      <div className="inline-flex gap-4 items-center px-6 py-4">
+        <Skeleton className='w-[100px] h-[32px]' />
+        <Skeleton className='w-[200px] h-[32px]' />
+        <Skeleton className='w-[60px] h-[32px]' />
+        <Separator className="h-6" orientation="vertical" />
+        <Skeleton className='w-[50px] h-[32px]' />
+      </div>
+    )
   }
 
   return (
@@ -102,8 +101,7 @@ function AssayVariantFilters({ assays = [], handleChange, isLoading }: AssayVari
         </SelectContent>
       </Select>
       {selectedAssay?.affected_status_code && (
-        <Badge
-          variant={getBadgeAffectedCodeColor(selectedAssay.affected_status_code)}>
+        <Badge variant={getBadgeAffectedCodeColor(selectedAssay.affected_status_code)}>
           {t(`caseEntity.variants.filters.affected_status_code.${selectedAssay?.affected_status_code}`)}
         </Badge>
       )}
