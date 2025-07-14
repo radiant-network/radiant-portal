@@ -183,7 +183,9 @@
       "collapseAll": "Réduire tout",
       "expandAll": "Développer tout",
       "seeMore": "Plus",
-      "clear": "Effacer"
+      "clear": "Effacer",
+      "copy": "Copier dans le presse-papiers",
+      "copied": "Copié!"
     },
     "languages": {
       "en": "Anglais",
