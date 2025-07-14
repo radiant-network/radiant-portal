@@ -62,16 +62,17 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       minSize: 124,
     }),
     // Type
-    columnHelper.accessor(row => row.case_analysis_type_code, {
-      id: 'case_analysis_type_code',
+    columnHelper.accessor(row => row.case_type, {
+      id: 'case_type',
       cell: info => <AnalysisTypeCodeCell code={info.getValue()} />,
       header: () => (
         <TooltipsHeader tooltips={<AnalysisTypeCodeCellTooltips />}>
-          {t('caseExploration.case.headers.case_analysis_type_code')}
+          {t('caseExploration.case.headers.case_type')}
         </TooltipsHeader>
       ),
       size: 120,
       minSize: 120,
+      enableSorting: false
     }),
     // Analysis
     columnHelper.accessor(row => row.case_analysis_code, {
@@ -221,9 +222,9 @@ const defaultSettings = createColumnSettings([
     label: 'caseExploration.case.headers.status_code',
   },
   {
-    id: 'case_analysis_type_code',
+    id: 'case_type',
     visible: true,
-    label: 'caseExploration.case.headers.case_analysis_type_code',
+    label: 'caseExploration.case.headers.case_type',
   },
   {
     id: 'case_analysis_code',
