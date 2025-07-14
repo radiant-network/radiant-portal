@@ -339,6 +339,12 @@ export interface CaseAssay {
     'experimental_strategy_code': string;
     /**
      * 
+     * @type {boolean}
+     * @memberof CaseAssay
+     */
+    'has_variants': boolean;
+    /**
+     * 
      * @type {string}
      * @memberof CaseAssay
      */
