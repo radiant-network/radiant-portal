@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/base/ui/skeleton';
 import AnalysisCard from './analysis-card';
 // import PatientInformationCard  from './patient-information-card';
 import { CaseEntity } from '@/api/api';
+import ClinicalCard from './clinical-card';
 
 function DetailsTab({ data }: { data: CaseEntity }) {
   const isLoading = false;
@@ -15,6 +16,7 @@ function DetailsTab({ data }: { data: CaseEntity }) {
   return (
     <div className="gap-6 grid grid-cols-3">
       <AnalysisCard className="col-span-2" data={data} />
+      <ClinicalCard className="col-span-6" data={data} />
       {/* <PatientInformationCard data={data} /> */}
     </div>
   );
