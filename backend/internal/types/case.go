@@ -87,6 +87,7 @@ type CaseAssay struct {
 	RelationshipToProband    string    `json:"relationship_to_proband,omitempty"`
 	SampleID                 int       `json:"sample_id" validate:"required"`
 	SampleSubmitterID        string    `json:"sample_submitter_id,omitempty"`
+	SampleTypeCode           string    `json:"sample_type_code,omitempty"`
 	AffectedStatusCode       string    `json:"affected_status_code,omitempty"`
 	HistologyCode            string    `json:"histology_code,omitempty"`
 	ExperimentalStrategyCode string    `json:"experimental_strategy_code" validate:"required"`
