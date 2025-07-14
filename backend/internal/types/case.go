@@ -74,7 +74,7 @@ type CaseEntity struct {
 	Note                 string                                    `json:"note,omitempty"`
 	Assays               JsonArray[CaseAssay]                      `json:"assays" validate:"required"`
 	Members              JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
-	Tasks                JsonArray[Task]                           `json:"tasks" validate:"required"`
+	Tasks                JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
 }
 
 // CaseAssay - Assay to display in a Case
@@ -110,6 +110,15 @@ type CasePatientClinicalInformation struct {
 	EthnicityCodes           JsonArray[string] `json:"ethnicity_codes,omitempty"` // TODO
 	ObservedPhenotypes       JsonArray[Term]   `json:"observed_phenotypes,omitempty"`
 	NonObservedPhenotypes    JsonArray[Term]   `json:"non_observed_phenotypes,omitempty"`
+}
+
+type CaseTask struct {
+	ID               int               `json:"id" validate:"required"`
+	TypeCode         string            `json:"type_code" validate:"required"`
+	CreatedOn        time.Time         `json:"created_on" validate:"required"`
+	PatientsUnparsed string            `json:"-"`
+	Patients         JsonArray[string] `json:"patients" validate:"required"`
+	PatientCount     int64             `json:"-"`
 }
 
 var CaseTable = Table{

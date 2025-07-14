@@ -51,69 +51,6 @@ components:
       - type
       - value
       type: object
-    Case:
-      properties:
-        caseAnalysis:
-          $ref: '#/components/schemas/CaseAnalysis'
-        caseAnalysisID:
-          type: integer
-        createdOn:
-          type: string
-        id:
-          type: integer
-        note:
-          type: string
-        performerLab:
-          $ref: '#/components/schemas/Organization'
-        performerLabID:
-          type: integer
-        primaryCondition:
-          type: string
-        proband:
-          $ref: '#/components/schemas/Patient'
-        probandID:
-          type: integer
-        project:
-          $ref: '#/components/schemas/Project'
-        projectID:
-          type: integer
-        request:
-          $ref: '#/components/schemas/Request'
-        requestID:
-          type: integer
-        status:
-          $ref: '#/components/schemas/Status'
-        statusCode:
-          type: string
-        updatedOn:
-          type: string
-      type: object
-    CaseAnalysis:
-      properties:
-        code:
-          type: string
-        description:
-          type: string
-        id:
-          type: integer
-        name:
-          type: string
-        panel:
-          $ref: '#/components/schemas/Panel'
-        panelID:
-          type: integer
-        type:
-          $ref: '#/components/schemas/CaseAnalysisType'
-        typeCode:
-          type: string
-      type: object
-    CaseAnalysisType:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
     CaseAssay:
       description: Assay to display in a Case
       properties:
@@ -197,7 +134,7 @@ components:
           type: string
         tasks:
           items:
-            $ref: '#/components/schemas/Task'
+            $ref: '#/components/schemas/CaseTask'
           type: array
           uniqueItems: false
         updated_on:
@@ -341,6 +278,25 @@ components:
       - status_code
       - updated_on
       type: object
+    CaseTask:
+      properties:
+        created_on:
+          type: string
+        id:
+          type: integer
+        patients:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        type_code:
+          type: string
+      required:
+      - created_on
+      - id
+      - patients
+      - type_code
+      type: object
     CasesSearchResponse:
       properties:
         count:
@@ -365,50 +321,6 @@ components:
       properties:
         sqon:
           $ref: '#/components/schemas/Sqon'
-      type: object
-    DataCategory:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    DataType:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    Document:
-      properties:
-        dataCategory:
-          $ref: '#/components/schemas/DataCategory'
-        dataCategoryCode:
-          type: string
-        dataType:
-          $ref: '#/components/schemas/DataType'
-        dataTypeCode:
-          type: string
-        fileFormat:
-          $ref: '#/components/schemas/FileFormat'
-        fileFormatCode:
-          type: string
-        hash:
-          type: string
-        id:
-          type: integer
-        name:
-          type: string
-        patients:
-          items:
-            $ref: '#/components/schemas/Patient'
-          type: array
-          uniqueItems: false
-        size:
-          type: integer
-        url:
-          type: string
       type: object
     ExpendedOccurrence:
       properties:
@@ -538,39 +450,6 @@ components:
       - locus_id
       - picked_consequences
       type: object
-    Experiment:
-      properties:
-        code:
-          type: string
-        description:
-          type: string
-        experimentalStrategy:
-          $ref: '#/components/schemas/ExperimentalStrategy'
-        experimentalStrategyCode:
-          type: string
-        id:
-          type: integer
-        name:
-          type: string
-        platform:
-          $ref: '#/components/schemas/Platform'
-        platformCode:
-          type: string
-      type: object
-    ExperimentalStrategy:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    FileFormat:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
     FiltersBodyWithCriteria:
       properties:
         search_criteria:
@@ -578,13 +457,6 @@ components:
             $ref: '#/components/schemas/SearchCriterion'
           type: array
           uniqueItems: false
-      type: object
-    HistologyType:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
       type: object
     InterpretationGermline:
       properties:
@@ -862,97 +734,6 @@ components:
         panel:
           type: string
       type: object
-    Organization:
-      properties:
-        category:
-          $ref: '#/components/schemas/OrganizationCategory'
-        categoryCode:
-          type: string
-        code:
-          type: string
-        id:
-          type: integer
-        name:
-          type: string
-      type: object
-    OrganizationCategory:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    Panel:
-      properties:
-        code:
-          type: string
-        id:
-          type: integer
-        name:
-          type: string
-        type:
-          $ref: '#/components/schemas/PanelType'
-        typeCode:
-          type: string
-      type: object
-    PanelType:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    Patient:
-      properties:
-        dateOfBirth:
-          type: string
-        id:
-          type: integer
-        managingOrganizationID:
-          type: integer
-        mrn:
-          type: string
-        organization:
-          $ref: '#/components/schemas/Organization'
-        sex:
-          $ref: '#/components/schemas/Sex'
-        sexCode:
-          type: string
-      type: object
-    Pipeline:
-      properties:
-        description:
-          type: string
-        genomeBuild:
-          type: string
-        id:
-          type: integer
-      type: object
-    Platform:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    Priority:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    Project:
-      properties:
-        code:
-          type: string
-        description:
-          type: string
-        id:
-          type: integer
-        name:
-          type: string
-      type: object
     PubmedCitation:
       properties:
         id:
@@ -963,62 +744,6 @@ components:
     PubmedCitationDetails:
       properties:
         format:
-          type: string
-      type: object
-    Request:
-      properties:
-        id:
-          type: integer
-        orderNumber:
-          type: string
-        orderingOrganizationID:
-          type: integer
-        orderingPhysician:
-          type: string
-        organization:
-          $ref: '#/components/schemas/Organization'
-        priority:
-          $ref: '#/components/schemas/Priority'
-        priorityCode:
-          type: string
-      type: object
-    Sample:
-      properties:
-        category:
-          $ref: '#/components/schemas/SampleCategory'
-        categoryCode:
-          type: string
-        histologyType:
-          $ref: '#/components/schemas/HistologyType'
-        histologyTypeCode:
-          type: string
-        id:
-          type: integer
-        parentSample:
-          $ref: '#/components/schemas/Sample'
-        parentSampleID:
-          type: integer
-        submitterSampleId:
-          type: string
-        tissueType:
-          type: string
-        type:
-          $ref: '#/components/schemas/SampleType'
-        typeCode:
-          type: string
-      type: object
-    SampleCategory:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    SampleType:
-      properties:
-        id:
-          type: string
-        name:
           type: string
       type: object
     SearchCriterion:
@@ -1066,64 +791,6 @@ components:
         updated_at:
           type: string
         vcf_filepath:
-          type: string
-      type: object
-    SequencingExperiment:
-      properties:
-        aliquot:
-          type: string
-        captureKit:
-          type: string
-        case:
-          $ref: '#/components/schemas/Case'
-        caseID:
-          type: integer
-        createdOn:
-          type: string
-        experiment:
-          $ref: '#/components/schemas/Experiment'
-        experimentID:
-          type: integer
-        id:
-          type: integer
-        isPairedEnd:
-          type: boolean
-        patient:
-          $ref: '#/components/schemas/Patient'
-        patientID:
-          type: integer
-        performerLab:
-          $ref: '#/components/schemas/Organization'
-        performerLabID:
-          type: integer
-        readLength:
-          type: integer
-        request:
-          $ref: '#/components/schemas/Request'
-        requestID:
-          type: integer
-        runAlias:
-          type: string
-        runDate:
-          type: string
-        runName:
-          type: string
-        sample:
-          $ref: '#/components/schemas/Sample'
-        sampleID:
-          type: integer
-        status:
-          $ref: '#/components/schemas/Status'
-        statusCode:
-          type: string
-        updatedOn:
-          type: string
-      type: object
-    Sex:
-      properties:
-        id:
-          type: string
-        name:
           type: string
       type: object
     SortBody:
@@ -1175,50 +842,6 @@ components:
           type: string
         sqon:
           $ref: '#/components/schemas/Sqon'
-      type: object
-    Status:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    Task:
-      properties:
-        createdOn:
-          type: string
-        documents:
-          items:
-            $ref: '#/components/schemas/Document'
-          type: array
-          uniqueItems: false
-        id:
-          type: integer
-        pipeline:
-          $ref: '#/components/schemas/Pipeline'
-        pipelineID:
-          type: integer
-        relatedTasks:
-          items:
-            $ref: '#/components/schemas/Task'
-          type: array
-          uniqueItems: false
-        sequencingExperiments:
-          items:
-            $ref: '#/components/schemas/SequencingExperiment'
-          type: array
-          uniqueItems: false
-        type:
-          $ref: '#/components/schemas/TaskType'
-        typeCode:
-          type: string
-      type: object
-    TaskType:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
       type: object
     Term:
       properties:

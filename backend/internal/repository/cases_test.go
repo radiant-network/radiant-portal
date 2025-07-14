@@ -251,3 +251,21 @@ func Test_RetrieveCasePatients(t *testing.T) {
 		assert.Len(t, (*members)[2].NonObservedPhenotypes, 0)
 	})
 }
+
+func Test_RetrieveCaseTasks(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		tasks, err := repo.retrieveCaseTasks(1)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(*tasks))
+
+		assert.Equal(t, 1, (*tasks)[0].ID)
+		assert.Equal(t, "ngba", (*tasks)[0].TypeCode)
+		assert.Equal(t, "2021-10-12 13:08:00 +0000 UTC", (*tasks)[0].CreatedOn.String())
+		assert.Equal(t, int64(3), (*tasks)[0].PatientCount)
+		assert.Equal(t, 3, len((*tasks)[0].Patients))
+		assert.Contains(t, (*tasks)[0].Patients, "mother")
+		assert.Contains(t, (*tasks)[0].Patients, "father")
+		assert.Contains(t, (*tasks)[0].Patients, "proband")
+	})
+}

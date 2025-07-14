@@ -18,6 +18,7 @@ type CaseFilters = types.CaseFilters
 type CaseEntity = types.CaseEntity
 type CaseAssay = types.CaseAssay
 type CasePatientClinicalInformation = types.CasePatientClinicalInformation
+type CaseTask = types.CaseTask
 
 type CasesRepository struct {
 	db *gorm.DB
@@ -206,7 +207,11 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	}
 	caseEntity.Members = *members
 
-	caseEntity.Tasks = make(types.JsonArray[types.Task], 0) //TODO
+	tasks, err := r.retrieveCaseTasks(caseId)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching tasks: %w", err)
+	}
+	caseEntity.Tasks = *tasks
 
 	if caseEntity.CaseAnalysisType == "somatic" || len(familyMembersIds) == 0 {
 		caseEntity.CaseType = caseEntity.CaseAnalysisType
@@ -354,4 +359,32 @@ func (r *CasesRepository) retrieveCasePatients(caseId int, memberIds []int) (*[]
 	}
 
 	return &members, nil
+}
+
+func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
+	var tasks []CaseTask
+	tx := r.db.Table("radiant_jdbc.public.task_has_sequencing_experiment tse")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task t ON t.id = tse.task_id")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = tse.sequencing_experiment_id")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.family f ON f.family_member_id = s.patient_id AND f.case_id = ?", caseId)
+	tx = tx.Where("s.case_id = ?", caseId)
+	tx = tx.Select("t.id, t.type_code, t.created_on, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct s.patient_id) as patient_count")
+	tx = tx.Group("t.id, t.type_code, t.created_on")
+	tx = tx.Order("t.id asc")
+
+	if err := tx.Find(&tasks).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving case tasks: %w", err)
+	}
+
+	println(len(tasks))
+
+	for i, task := range tasks {
+		patients := split(task.PatientsUnparsed)
+		if int64(len(patients)) < task.PatientCount {
+			patients = append(patients, "proband")
+			tasks[i].Patients = patients
+		}
+	}
+
+	return &tasks, nil
 }
