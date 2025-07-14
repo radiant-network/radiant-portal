@@ -12,8 +12,6 @@ type ClinicalCardProps = ComponentProps<'div'> & {
 function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   const { t } = useI18n();
 
-  console.log('data', data);
-
   return (
     <Card {...props}>
       <CardHeader className="border-b [.border-b]:pb-2">

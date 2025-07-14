@@ -2,6 +2,7 @@
   "common": {
     "date": "yyyy-MM-dd",
     "unspecified": "Indéterminée",
+    "notAvailableYet": "Pas encore disponible",
     "save": "Sauvegarder",
     "editor": {
       "headings": {
@@ -773,6 +774,24 @@
       "germline": "Germline",
       "germline_family": "Germline Familial",
       "case": "Cas"
+    },
+    "patientInformation": {
+      "title": "Information du Patient",
+      "proband": "Proband",
+      "mother": "Mère",
+      "father": "Père",
+      "relationships": {
+        "proband": "Proband",
+        "mother": "Mère",
+        "father": "Père"
+      },
+      "id": "ID",
+      "name": "Nom (Prénom / Nom)",
+      "dob": "Date de naissance",
+      "sex": "Sexe",
+      "jhn": "JHN",
+      "mrn": "Dossier",
+      "managingOrg": "Organisation responsable"
     },
     "details": {
       "title": "Détails de Cas",
