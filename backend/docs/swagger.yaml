@@ -236,10 +236,10 @@ components:
           type: string
         case_analysis_name:
           type: string
-        case_analysis_type_code:
-          type: string
         case_id:
           type: integer
+        case_type:
+          type: string
         created_on:
           type: string
         managing_organization_code:

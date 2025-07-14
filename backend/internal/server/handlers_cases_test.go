@@ -21,6 +21,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 			PriorityCode:         "routine",
 			StatusCode:           "active",
 			CaseAnalysisTypeCode: "germline",
+			CaseType:             "germline_family",
 			CaseAnalysisCode:     "WGA",
 			CaseAnalysisName:     "Whole Genome Analysis",
 			PrimaryConditionID:   "MONDO:0700092",
@@ -135,7 +136,7 @@ func Test_SearchCasesHandler(t *testing.T) {
 		"list": [{
 			"case_analysis_code":"WGA",
 			"case_analysis_name":"Whole Genome Analysis",
-			"case_analysis_type_code":"germline",
+			"case_type": "germline_family",
 			"case_id":1,
 			"created_on":"2000-01-01T00:00:00Z",
 			"managing_organization_code":"CHUSJ",
