@@ -14,17 +14,17 @@ function DetailsTab({ data }: { data: CaseEntity }) {
   }
 
   return (
-    <div className="gap-6 grid grid-cols-3">
-      <AnalysisCard className="col-span-2" data={data} />
-      <PatientInformationCard className="col-span-1" data={data} />
-      <ClinicalCard className="col-span-3" data={data} />
+    <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
+      <AnalysisCard className="lg:col-span-2" data={data} />
+      <PatientInformationCard className="lg:col-span-1" data={data} />
+      <ClinicalCard className="lg:col-span-3" data={data} />
     </div>
   );
 }
 
 const CaseEntityDetailsSkeleton = () => {
   return (
-    <div className="gap-6 grid grid-cols-2">
+    <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
       <Card>
         <CardContent>
           <Skeleton className="h-6" />
@@ -49,7 +49,7 @@ const CaseEntityDetailsSkeleton = () => {
           </div>
         </CardContent>
       </Card>
-      <Card className="shadow-none col-span-1 md:col-span-2">
+      <Card className="shadow-none lg:col-span-2">
         <CardContent>
           <Skeleton className="h-12" />
           <Separator className="my-6" />
