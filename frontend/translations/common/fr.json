@@ -829,6 +829,7 @@
       "bioinformatics": "Bio-informatique",
       "taskId": "ID de tâche",
       "type": "Type",
+      "patient": "Patient",
       "noTaskFound": "Aucune tâche trouvée",
       "statusOptions": {
         "unknown": "Inconnu",
