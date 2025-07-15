@@ -185,7 +185,9 @@
       "collapseAll": "Collapse all",
       "expandAll": "Expand All",
       "seeMore": "See more",
-      "clear": "Clear"
+      "clear": "Clear",
+      "copy": "Copy to clipboard",
+      "copied": "Copied!"
     },
     "languages": {
       "en": "English",
