@@ -788,6 +788,7 @@
       "title": "Case Details",
       "analysisOverview": "Analysis Overview",
       "clinicalOverview": "Clinical",
+      "no_phenotype": "No phenotype reported",
       "view_variants": "View Variants",
       "primary_condition": "Primary Condition",
       "ethnicity": "Ethnicity",
