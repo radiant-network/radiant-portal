@@ -13,6 +13,7 @@ import { Button } from '@/components/base/ui/button';
 import Container from '@/components/base/container';
 import Header from './components/layout/header';
 import { AudioWaveform, ClipboardList } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 type CaseEntityInput = {
   key: string;
@@ -79,13 +80,28 @@ export default function App() {
     return null;
   }
 
+  const hasVariants = (data?.assays ?? []).some(assay => assay.has_variants);
+
   return (
     <main className="bg-muted/40 h-screen overflow-auto">
       <Header data={data} isLoading={isLoading} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
           <TabsListItem value={CaseEntityTabs.Details}><ClipboardList />{t('caseEntity.details.title')}</TabsListItem>
-          <TabsListItem value={CaseEntityTabs.Variants}><AudioWaveform />{t('caseEntity.variants.title')}</TabsListItem>
+          {hasVariants ? (
+            <TabsListItem value={CaseEntityTabs.Variants}>
+              <AudioWaveform />{t('caseEntity.variants.title')}
+            </TabsListItem>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger>
+                <TabsListItem disabled value={CaseEntityTabs.Variants}>
+                  <AudioWaveform />{t('caseEntity.variants.title')}
+                </TabsListItem>
+              </TooltipTrigger>
+              <TooltipContent>{t("caseEntity.details.no_variants")}</TooltipContent>
+            </Tooltip>
+          )}
         </TabsList>
         <Container>
           <TabsContent value={CaseEntityTabs.Details} className="p-6">

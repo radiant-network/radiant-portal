@@ -1,8 +1,7 @@
-import { CaseEntity, Count, CountBodyWithSqon, ListBodyWithSqon, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
+import { CaseEntity, Count, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
-import { occurrencesApi } from '@/utils/api';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
 import { useEffect, useState } from 'react';
 import { SidebarProvider } from '@/components/base/ui/sidebar';
@@ -20,16 +19,8 @@ import OccurrenceExpend from './occurrence-table/occurrence-expend';
 import { defaultSettings, getVariantColumns } from './occurrence-table/table-settings';
 import AssayVariantFilters from './filters/assay-variant-filters';
 import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
-
-type OccurrencesListInput = {
-  seqId: string;
-  listBody: ListBodyWithSqon;
-};
-
-type OccurrenceCountInput = {
-  seqId: string;
-  countBody: CountBodyWithSqon;
-};
+import { OccurrenceCountInput, useOccurencesCountHelper, useOccurencesListHelper } from './hook';
+import { occurrencesApi } from '@/utils/api';
 
 const DEFAULT_SORTING = [
   {
@@ -46,20 +37,14 @@ const DEFAULT_SORTING = [
   },
 ];
 
-async function fetchOccurrencesList(input: OccurrencesListInput) {
-  const response = await occurrencesApi.listGermlineOccurrences(input.seqId, input.listBody);
-  return response.data;
-}
-
-async function fetchOccurrencesCount(input: OccurrenceCountInput) {
-  const response = await occurrencesApi.countGermlineOccurrences(input.seqId, input.countBody);
-  return response.data;
-}
-
-
 type VariantTabProps = {
   caseEntity?: CaseEntity;
   isLoading: boolean;
+}
+
+async function fetchQueryCount(input: OccurrenceCountInput) {
+  const response = await occurrencesApi.countGermlineOccurrences(input.seqId, input.countBody);
+  return response.data;
 }
 
 function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
@@ -79,16 +64,6 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   });
 
   // Variant count Request
-  const { data: total, isLoading: totalIsLoading } = useSWR<Count, any, OccurrenceCountInput>(
-    {
-      seqId,
-      countBody: { sqon: activeSqon },
-    },
-    fetchOccurrencesCount,
-    {
-      revalidateOnFocus: false,
-    },
-  );
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
   const [open, setOpen] = useState(true);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
@@ -96,33 +71,44 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const appId = config.variant_exploration.app_id;
 
   // Variant list request
-  const { data: list, isLoading: listIsLoading } = useSWR<Occurrence[], any, OccurrencesListInput>(
-    {
-      seqId,
-      listBody: {
-        additional_fields: [
-          'rsnumber',
-          'symbol',
-          'vep_impact',
-          'is_mane_select',
-          'is_canonical',
-          'omim_inheritance_code',
-          'clinvar',
-          'pf_wgs',
-          'transcript_id',
-          'has_interpretation',
-        ],
-        limit: pagination.pageSize,
-        page_index: pagination.pageIndex,
-        sort: sorting,
-        sqon: activeSqon,
-      },
+  const { fetch: fetchOccurrencesListHelper } = useOccurencesListHelper({
+    seqId,
+    listBody: {
+      additional_fields: [
+        'rsnumber',
+        'symbol',
+        'vep_impact',
+        'is_mane_select',
+        'is_canonical',
+        'omim_inheritance_code',
+        'clinvar',
+        'pf_wgs',
+        'transcript_id',
+        'has_interpretation',
+      ],
+      limit: pagination.pageSize,
+      page_index: pagination.pageIndex,
+      sort: sorting,
+      sqon: activeSqon,
     },
-    fetchOccurrencesList,
-    {
-      revalidateOnFocus: false,
-    },
-  );
+  });
+
+  const { fetch: fetchOccurrencesCountHelper } = useOccurencesCountHelper({
+    seqId,
+    countBody: { sqon: activeSqon }
+  });
+
+  const fetchOccurrencesList = useSWR<Occurrence[]>('fetch-occurences-list', fetchOccurrencesListHelper, {
+    revalidateOnFocus: false,
+    revalidateOnMount: false,
+    shouldRetryOnError: false,
+  });
+
+  const fetchOccurrencesCount = useSWR<Count>('fetch-occurences-count', fetchOccurrencesCountHelper, {
+    revalidateOnFocus: false,
+    revalidateOnMount: false,
+    shouldRetryOnError: false,
+  });
 
   useEffect(() => {
     const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);
@@ -134,6 +120,13 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     });
     setActiveSqon(queryBuilderRemote.getResolvedActiveQuery(appId) as Sqon);
   }, []);
+
+
+  useEffect(() => {
+    if (seqId === "") return;
+    fetchOccurrencesList.mutate();
+    fetchOccurrencesCount.mutate();
+  }, [seqId, activeSqon]);
 
   useEffect(() => {
     setPagination({
@@ -185,7 +178,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                 enableShowHideLabels
                 queryCountIcon={<VariantIcon size={14} />}
                 fetchQueryCount={resolvedSqon =>
-                  fetchOccurrencesCount({
+                  fetchQueryCount({
                     seqId,
                     countBody: {
                       sqon: resolvedSqon,
@@ -213,18 +206,18 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
             <DataTable
               id="variant-occurrence"
               columns={getVariantColumns(t)}
-              data={list ?? []}
+              data={fetchOccurrencesList.data ?? []}
               defaultColumnSettings={defaultSettings}
               defaultServerSorting={DEFAULT_SORTING}
               loadingStates={{
-                total: totalIsLoading,
-                list: listIsLoading,
+                total: fetchOccurrencesCount.isLoading,
+                list: fetchOccurrencesList.isLoading,
               }}
               pagination={pagination}
               onPaginationChange={setPagination}
               onServerSortingChange={setSorting}
               subComponent={data => <OccurrenceExpend occurrence={data} />}
-              total={total?.count ?? 0}
+              total={fetchOccurrencesCount.data?.count ?? 0}
               enableColumnOrdering
               enableFullscreen
             />

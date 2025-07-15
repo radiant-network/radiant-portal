@@ -162,7 +162,11 @@
         "descending": "Sort Descending",
         "ascending": "Sort Ascending",
         "clear": "Clear"
-      }
+      },
+      "no_result": "No results found",
+      "no_result_description": "Adjust your filters and try again.",
+      "has_error": "Error loading this content",
+      "has_error_description": "Try refreshing the page or try again in a few minutes."
     },
     "pagination": {
       "aria": {
@@ -790,6 +794,7 @@
       "title": "Case Details",
       "analysisOverview": "Analysis Overview",
       "clinicalOverview": "Clinical",
+      "no_variants": "No variants for this case",
       "no_phenotype": "No phenotype reported",
       "view_variants": "View Variants",
       "primary_condition": "Primary Condition",
