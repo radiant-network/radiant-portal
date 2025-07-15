@@ -930,6 +930,22 @@ func Test_GetGermlineVariantConditions_Orphanet(t *testing.T) {
 	assertGetGermlineVariantConditions(t, "gene_panels", 1000, "orphanet", "", expected)
 }
 
+func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewClinvarRCVRepository(db)
+		router := gin.Default()
+		router.GET("/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/conditions/clinvar", 1000), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		expected := `[{"locus_id":"1000","clinvar_id":"123456","accession":"RCV000001","clinical_significance":["Pathogenic"],"date_last_evaluated":"2025-01-01T00:00:00Z","submission_count":1,"review_status":"criteria_provided","review_status_stars":4,"version":1,"traits":["Trait1","Trait2"]},{"locus_id":"1000","clinvar_id":"123457","accession":"RCV000002","clinical_significance":["Likely Pathogenic"],"date_last_evaluated":"2025-01-01T00:00:00Z","submission_count":3,"review_status":"criteria_provided","review_status_stars":3,"version":2,"traits":["Trait3"]}]`
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
