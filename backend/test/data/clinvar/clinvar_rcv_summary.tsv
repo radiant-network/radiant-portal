@@ -1,0 +1,4 @@
+locus_id	clinvar_id	accession	clinical_significance	date_last_evaluated	submission_count	review_status	review_status_stars	version	traits	origins
+1000	123456	RCV000001	["Pathogenic"]	2025-01-01 00:00:00.0	1	criteria_provided	4	1	["Trait1", "Trait2"]	germline
+1000	123457	RCV000002	["Likely Pathogenic"]	2025-01-01 00:00:00.0	3	criteria_provided	3	2	["Trait3"]	germline
+1001	123458	RCV000003	["Benign"]	2025-01-01 00:00:00.0	4	criteria_provided	2	3	["Trait4"]	germline

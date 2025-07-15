@@ -70,6 +70,7 @@ func main() {
 	repoGenePanels := repository.NewGenePanelsRepository(dbStarrocks)
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
+	repoClinvarRCV := repository.NewClinvarRCVRepository(dbStarrocks)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -141,6 +142,7 @@ func main() {
 	variantsGermlineGroup.GET("/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repoVariants))
 	variantsGermlineGroup.GET("/cases/filters", server.GetGermlineVariantCasesFilters(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repoGenePanels))
+	variantsGermlineGroup.GET("/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repoClinvarRCV))
 
 	casesGroup := r.Group("/cases")
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
