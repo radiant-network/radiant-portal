@@ -67,6 +67,7 @@ func main() {
 	repoOccurrences := repository.NewOccurrencesRepository(dbStarrocks)
 	repoTerms := repository.NewTermsRepository(dbStarrocks)
 	repoCases := repository.NewCasesRepository(dbStarrocks)
+	repoAssays := repository.NewAssaysRepository(dbStarrocks)
 	repoGenePanels := repository.NewGenePanelsRepository(dbStarrocks)
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
@@ -149,6 +150,9 @@ func main() {
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 	casesGroup.POST("/filters", server.CasesFiltersHandler(repoCases))
 	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
+
+	assaysGroup := r.Group("/assays")
+	assaysGroup.GET("/:seq_id", server.GetAssayBySeqIdHandler(repoAssays))
 
 	r.Use(gin.Recovery())
 	r.Run(":8090")

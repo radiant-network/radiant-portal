@@ -34,6 +34,59 @@ components:
       - message
       - status
       type: object
+    Assay:
+      properties:
+        aliquot:
+          type: string
+        capture_kit:
+          type: string
+        category_code:
+          type: string
+        created_on:
+          type: string
+        experiment_description:
+          type: string
+        experimental_strategy_code:
+          type: string
+        experimental_strategy_name:
+          type: string
+        histology_code:
+          type: string
+        is_paired_end:
+          type: boolean
+        performer_lab_code:
+          type: string
+        performer_lab_name:
+          type: string
+        platform_code:
+          type: string
+        read_length:
+          type: integer
+        request_id:
+          type: integer
+        run_alias:
+          type: string
+        run_date:
+          type: string
+        run_name:
+          type: string
+        sample_id:
+          type: integer
+        sample_type_code:
+          type: string
+        seq_id:
+          type: integer
+        status_code:
+          type: string
+        submitter_sample_id:
+          type: string
+        tissue_site:
+          type: string
+        updated_on:
+          type: string
+      required:
+      - is_paired_end
+      type: object
     AutoCompleteTerm:
       properties:
         highlight:
@@ -1309,6 +1362,41 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /assays/{seq_id}:
+    get:
+      description: Get Assay by seq_id
+      operationId: getAssayBySeqId
+      parameters:
+      - description: Seq ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assay'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get Assay by seq_id
+      tags:
+      - assays
   /cases/{case_id}:
     get:
       description: Retrieve CaseEntity by its ID
