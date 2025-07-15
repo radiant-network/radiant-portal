@@ -69,7 +69,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
     const timer = setTimeout(() => {
       setDebouncedSearchInput(searchInput);
     }, 300);
-
+    setOpen(true);
     return () => clearTimeout(timer);
   }, [searchInput]);
 
