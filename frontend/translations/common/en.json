@@ -361,6 +361,7 @@
       "title": "Cases",
       "actions": {
         "view_case": "View Case",
+        "view_assay": "Assay Details",
         "view_variant": "View Variants"
       },
       "filters": {
@@ -794,6 +795,15 @@
       "title": "Case Details",
       "analysisOverview": "Analysis Overview",
       "clinicalOverview": "Clinical",
+      "SequencingAndAssayInformationsOverview": "Assays",
+      "assay_id": "Assay ID",
+      "sample_id": "Sample ID",
+      "sample_type_code": "Sample Type",
+      "histology_code": "Histology",
+      "experimental_strategy_code": "Exp. Strat.",
+      "experimental_strategy_code_tooltips": "Experimental Strategy",
+      "status_code": "Assay Status",
+      "updated_on": "Last Update",
       "no_variants": "No variants for this case",
       "no_phenotype": "No phenotype reported",
       "view_variants": "View Variants",
