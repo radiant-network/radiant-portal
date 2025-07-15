@@ -65,7 +65,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
         </div>
 
         {/* Main content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left side - Static information */}
           <div className="gap-4">
             <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
@@ -151,7 +151,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
           {/* Right side - Status information with dropdowns */}
           <div className="gap-2">
             <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm items-center">
-              <div className="flex text-muted-foreground justify-end">{t('caseEntity.details.priority')}</div>
+              <div className="flex text-muted-foreground md:justify-end justify-start">{t('caseEntity.details.priority')}</div>
               <div>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger className="w-full h-7">
@@ -175,7 +175,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                 </Select>
               </div>
 
-              <div className="flex text-muted-foreground justify-end">{t('caseEntity.details.status')}</div>
+              <div className="flex text-muted-foreground md:justify-end justify-start">{t('caseEntity.details.status')}</div>
               <div>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger className="w-full h-7 bg-blue-100 text-blue-700">
@@ -199,7 +199,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                 </Select>
               </div>
 
-              <div className="flex text-muted-foreground justify-end">{t('caseEntity.details.assignedTo')}</div>
+              <div className="flex text-muted-foreground md:justify-end justify-start">{t('caseEntity.details.assignedTo')}</div>
               <div>
                 <Select value={assignedTo} onValueChange={setAssignedTo}>
                   <SelectTrigger className="w-full h-7">
