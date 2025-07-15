@@ -22,7 +22,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
     { value: 'asap', label: t('caseExploration.priority.asap'), color: 'bg-orange-500' },
     { value: 'stat', label: t('caseExploration.priority.stat'), color: 'bg-red-500' },
   ];
-  
+
   const statusOptionsValues = [
     { "key": "incomplete", "label": "Incomplete" },
     { "key": "draft", "label": "Draft" },
@@ -37,7 +37,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
     label: string;
   }
 
-  const statusOptions: IStatusOption[] = filterItemStatus(statusOptionsValues, t);
+  const statusOptions: IStatusOption[] = filterItemStatus(statusOptionsValues, t) as IStatusOption[];
 
   const assigneeOptions = [
     { value: 'Vincent Ferretti', label: 'Vincent Ferretti' },
@@ -70,49 +70,58 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
           <div className="gap-4">
             <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
               <div className="text-muted-foreground">{t('caseEntity.details.createdOn')}</div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="cursor-help">{caseData.created_on ? formatDate(caseData.created_on, t('common.date')) : '--'}</div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t('caseEntity.details.createdOn_tooltips')}
-                </TooltipContent>
-              </Tooltip>
+              <span className="cursor-help">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      {caseData.created_on ? formatDate(caseData.created_on, t('common.date')) : '--'}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t('caseEntity.details.createdOn_tooltips')}
+                  </TooltipContent>
+                </Tooltip>
+              </span>
 
               <div className="text-muted-foreground">{t('caseEntity.details.lastUpdate')}</div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="cursor-help">{caseData.updated_on ? formatDate(caseData.updated_on, t('common.date')) : '--'}</div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t('caseEntity.details.lastUpdate_tooltips')}
-                </TooltipContent>
-              </Tooltip>
+              <span className="cursor-help">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      {caseData.updated_on ? formatDate(caseData.updated_on, t('common.date')) : '--'}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t('caseEntity.details.lastUpdate_tooltips')}
+                  </TooltipContent>
+                </Tooltip>
+              </span>
 
               <div className="text-muted-foreground">{t('caseEntity.details.prescriber')}</div>
               <div>{caseData.prescriber || '--'}</div>
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
+                  <span className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
                     {t('caseEntity.details.prescribingInst')}
-                  </div>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>
                   {t('caseEntity.details.prescribingInst_tooltips')}
                 </TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    {caseData.managing_organization_code || '--'}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {caseData.managing_organization_name || '--'}
-                </TooltipContent>
-              </Tooltip>
-
+              <span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      {caseData.managing_organization_code || '--'}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {caseData.managing_organization_name || '--'}
+                  </TooltipContent>
+                </Tooltip>
+              </span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.diagLab')}</div>
@@ -121,17 +130,18 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                   {t('caseEntity.details.diagLab_tooltips')}
                 </TooltipContent>
               </Tooltip>
+              <span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div>
+                  <span className="cursor-help">
                     {caseData.performer_lab_code || '--'}
-                  </div>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>
                   {caseData.performer_lab_name || '--'}
                 </TooltipContent>
               </Tooltip>
-
+              </span>
 
               <div className="text-muted-foreground">{t('caseEntity.details.requestId')}</div>
               <div>{caseData.request_id || '--'}</div>
@@ -226,26 +236,28 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
           <div className="border rounded-lg overflow-hidden">
             <div className="grid grid-cols-3">
               <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.taskId')}</div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="p-3 text-sm font-medium text-muted-foreground text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
-                    {t('caseEntity.details.type')}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t('caseEntity.details.createdOn_tooltips')}
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-end p-3 text-sm font-medium text-muted-foreground text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
-                    {t('caseEntity.details.createdOn')}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t('caseEntity.details.createdOn_tooltips')}
-                </TooltipContent>
-              </Tooltip>
+              <div className="p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>{t('caseEntity.details.type')}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t('caseEntity.details.createdOn_tooltips')}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="text-end p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      {t('caseEntity.details.createdOn')}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t('caseEntity.details.createdOn_tooltips')}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
             {caseData.tasks.length > 0 ? caseData.tasks.map((bioInfo: any, index: number) => (
               <div key={index} className="grid grid-cols-3 border-b last:border-b-0">
@@ -253,7 +265,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                   {bioInfo.task_id}
                 </div>
                 <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type}</Badge></div>
-                <div className="text-end p-3 text-sm">{bioInfo.created_on}</div>
+                <div className="text-end p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '--'}</div>
               </div>
             )) : <div className="p-3 text-sm">{t('caseEntity.details.noTaskFound')}</div>}
           </div>
