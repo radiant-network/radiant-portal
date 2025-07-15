@@ -62,9 +62,10 @@ function AssayVariantFilters({ assays = [], handleChange, isLoading }: AssayVari
   useEffect(() => {
     if (isLoading || assays.length === 0) return;
     setSelectedAssay(assays[0]);
+    handleChange(assays[0].seq_id.toString());
   }, [isLoading, assays])
 
-  if ((isLoading || assays.length === 0 || !selectedAssay)) {
+  if (isLoading || assays.length === 0 || !selectedAssay) {
     return (
       <div className="inline-flex gap-4 items-center px-6 py-4">
         <Skeleton className='w-[100px] h-[32px]' />

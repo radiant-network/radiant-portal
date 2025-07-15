@@ -78,6 +78,53 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Loading: Story = {
+  args: {
+    loadingStates: {
+      list: true,
+      total: true,
+    },
+    data: [],
+    enableColumnOrdering: true,
+    enableFullscreen: true,
+    defaultColumnSettings: occurenceDefaultsSettings,
+  },
+  render: args => <DataTable {...args} />,
+};
+
+
+export const Empty: Story = {
+  args: {
+    loadingStates: {
+      list: false,
+      total: false,
+    },
+    data: [],
+    enableColumnOrdering: true,
+    enableFullscreen: true,
+    defaultColumnSettings: occurenceDefaultsSettings,
+  },
+  render: args => <DataTable {...args} />,
+};
+
+
+export const Error: Story = {
+  args: {
+    loadingStates: {
+      list: false,
+      total: false,
+    },
+    data: [],
+    hasError: true,
+    enableColumnOrdering: true,
+    enableFullscreen: true,
+    defaultColumnSettings: occurenceDefaultsSettings,
+  },
+  render: args => <DataTable {...args} />,
+};
+
+
+
 export const VariantOccurrence: Story = {
   args: {
     id: 'variant-occurence',
@@ -127,20 +174,6 @@ export const Cases: Story = {
       />
     );
   },
-};
-
-export const Loading: Story = {
-  args: {
-    loadingStates: {
-      list: true,
-      total: true,
-    },
-    data: [],
-    enableColumnOrdering: true,
-    enableFullscreen: true,
-    defaultColumnSettings: occurenceDefaultsSettings,
-  },
-  render: args => <DataTable {...args} />,
 };
 
 export const LoadingWithFiltersGroup: Story = {

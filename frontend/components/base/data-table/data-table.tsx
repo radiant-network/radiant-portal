@@ -43,6 +43,10 @@ import {
 } from '@/components/base/data-table/hooks/use-table-localstorage';
 import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
 import DataTableFullscreenButton from '@/components/base/data-table/data-table-fullscreen-button';
+import Empty from '../empty';
+import { Card } from '../ui/card';
+import { useI18n } from '@/components/hooks/i18n';
+import { AlertCircle, SearchIcon } from 'lucide-react';
 
 export const IS_SERVER = typeof window === 'undefined';
 
@@ -68,6 +72,7 @@ export type TableProps<TData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
   data: TData[];
+  hasError?: boolean;
   defaultColumnSettings: ColumnSettings[];
   defaultServerSorting: SortBody[];
   loadingStates?: {
@@ -250,7 +255,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -359,6 +364,7 @@ function TranstackTable<T>({
   defaultServerSorting,
   TableFilters: FiltersGroupForm,
   loadingStates,
+  hasError = false,
   pagination,
   onPaginationChange,
   onServerSortingChange,
@@ -368,6 +374,8 @@ function TranstackTable<T>({
   enableFullscreen = false,
   tableIndexResultPosition = 'top',
 }: TableProps<T>) {
+  const { t } = useI18n();
+
   // default values
   const defaultColumnTableState = useMemo<DefaultColumnTableState>(
     () => ({
@@ -402,6 +410,7 @@ function TranstackTable<T>({
     })) as SortingState,
   );
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
 
   // Initialize tanstack table
   const table = useReactTable({
@@ -444,6 +453,8 @@ function TranstackTable<T>({
       sorting,
     },
   });
+
+  const isEmpty = table.getRowModel().rows.length === 0;
 
   // Cache our row flexRender method
   const rowFlexRender = useMemo(() => {
@@ -531,6 +542,36 @@ function TranstackTable<T>({
   }, [pagination]);
 
   const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
+
+  // Empty and Error state
+  if (loadingStates?.list === false && loadingStates?.total === false) {
+    if (hasError) {
+      return (
+        <Card className='w-full'>
+          <Empty
+            title={t('common.table.has_error')}
+            description={t('common.table.has_error_description')}
+            size='default'
+            iconType='custom'
+            icon={AlertCircle}
+          />
+        </Card>
+      );
+    }
+    else if (isEmpty) {
+      return (
+        <Card className='w-full'>
+          <Empty
+            title={t('common.table.no_result')}
+            description={t('common.table.no_result_description')}
+            size='default'
+            iconType='custom'
+            icon={SearchIcon}
+          />
+        </Card>
+      );
+    }
+  }
 
   return (
     <div
@@ -657,78 +698,82 @@ function TranstackTable<T>({
 
               {/* Render table content */}
               {table.getCenterRows().map(rowFlexRender)}
+
             </TableBody>
           </Table>
         </DataTableSkeletonLoading>
+
       </div>
-      {total > 10 && (
-        <div className={'flex items-center justify-between py-3 '}>
-          <div>
-            {tableIndexResultPosition === 'bottom' && (
-              <TableIndexResult
-                loading={loadingStates?.total}
-                pageIndex={table.getState().pagination.pageIndex + 1}
-                pageSize={table.getState().pagination.pageSize}
-                total={total}
-              />
-            )}
-          </div>
-          <div className="flex items-center gap-2">
+      {
+        total > 10 && (
+          <div className={'flex items-center justify-between py-3 '}>
             <div>
-              {/* PageSize select */}
-              <Select
-                value={String(table.getState().pagination.pageSize)}
-                onValueChange={value => {
-                  table.setPageSize(Number(value));
-                }}
-              >
-                <SelectTrigger className="min-w-[125px] h-8">
-                  <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {[10, 20, 30, 40, 50].map(pageSize => (
-                    <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {tableIndexResultPosition === 'bottom' && (
+                <TableIndexResult
+                  loading={loadingStates?.total}
+                  pageIndex={table.getState().pagination.pageIndex + 1}
+                  pageSize={table.getState().pagination.pageSize}
+                  total={total}
+                />
+              )}
             </div>
-            <div>
-              {/* Pagination */}
-              <Pagination className="w-auto">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      disabled={!table.getCanPreviousPage()}
-                      onClick={() => {
-                        if (!table.getCanPreviousPage()) return;
-                        table.previousPage();
-                      }}
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext
-                      disabled={!table.getCanNextPage()}
-                      onClick={() => {
-                        if (!table.getCanNextPage()) return;
-                        table.nextPage();
-                      }}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+            <div className="flex items-center gap-2">
+              <div>
+                {/* PageSize select */}
+                <Select
+                  value={String(table.getState().pagination.pageSize)}
+                  onValueChange={value => {
+                    table.setPageSize(Number(value));
+                  }}
+                >
+                  <SelectTrigger className="min-w-[125px] h-8">
+                    <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 20, 30, 40, 50].map(pageSize => (
+                      <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
+                        {pageSize}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                {/* Pagination */}
+                <Pagination className="w-auto">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        disabled={!table.getCanPreviousPage()}
+                        onClick={() => {
+                          if (!table.getCanPreviousPage()) return;
+                          table.previousPage();
+                        }}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        disabled={!table.getCanNextPage()}
+                        onClick={() => {
+                          if (!table.getCanNextPage()) return;
+                          table.nextPage();
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
 
