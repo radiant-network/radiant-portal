@@ -819,6 +819,7 @@
       "bioinformatics": "Bioinformatics",
       "taskId": "Task ID",
       "type": "Type",
+      "patient": "Patient",
       "noTaskFound": "No Task Found",
       "statusOptions": {
         "unknown": "Unknown",

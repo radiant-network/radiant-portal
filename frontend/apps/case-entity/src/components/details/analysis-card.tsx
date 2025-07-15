@@ -46,7 +46,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
   // State for dropdown values
   const [priority, setPriority] = useState(caseData.priority_code || priorityOptions[0].value);
   const [status, setStatus] = useState(caseData.status_code || statusOptions[0].key);
-  const [assignedTo, setAssignedTo] = useState(caseData.assigned_to || assigneeOptions[0].value);
+  const [assignedTo, setAssignedTo] = useState(assigneeOptions[0].value);
 
 
   const selectedPriority = priorityOptions.find(option => option.value === priority);
@@ -235,7 +235,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
 
           {/* Table */}
           <div className="border rounded-lg overflow-hidden">
-            <div className="grid grid-cols-3">
+            <div className={`grid ${caseData.members.length > 1 ? 'grid-cols-4' : 'grid-cols-3'}`}>
               <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.taskId')}</div>
               <div className="p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
                 <Tooltip>
@@ -247,7 +247,10 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <div className="text-end p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
+              {caseData.members.length > 1 && (
+                <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.patient')}</div>
+              )}
+              <div className="p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
@@ -261,12 +264,19 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
               </div>
             </div>
             {caseData.tasks.length > 0 ? caseData.tasks.map((bioInfo: CaseTask, index: number) => (
-              <div key={index} className="grid grid-cols-3 border-b last:border-b-0">
+              <div key={index} className={`grid ${caseData.members.length > 1 ? 'grid-cols-4' : 'grid-cols-3'} border-b last:border-b-0`}>
                 <div className="p-3 text-sm">
                   {bioInfo.id}
                 </div>
                 <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge></div>
-                <div className="text-end p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '--'}</div>
+                {caseData.members.length > 1 && (
+                  <div className="p-3 flex items-start flex-col md:flex-row gap-1">
+                    {bioInfo.patients.map((patient: string, index: number) => (
+                      <Badge  key={index} variant="outline" className="text-xs">{t(`caseEntity.patientInformation.relationships.${patient}`)}</Badge>
+                    ))}
+                  </div>
+                )}
+                <div className="p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '--'}</div>
               </div>
             )) : <div className="p-3 text-sm">{t('caseEntity.details.noTaskFound')}</div>}
           </div>
