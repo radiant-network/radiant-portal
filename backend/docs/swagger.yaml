@@ -2376,7 +2376,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClinvarRCV'
+                items:
+                  $ref: '#/components/schemas/ClinvarRCV'
+                type: array
           description: OK
         "404":
           content:

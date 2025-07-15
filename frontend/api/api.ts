@@ -5241,7 +5241,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ClinvarRCV>> {
+        async getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ClinvarRCV>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditionsClinvar(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConditionsClinvar']?.[localVarOperationServerIndex]?.url;
@@ -5374,7 +5374,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ClinvarRCV> {
+        getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ClinvarRCV>> {
             return localVarFp.getGermlineVariantConditionsClinvar(locusId, options).then((request) => request(axios, basePath));
         },
         /**

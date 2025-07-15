@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 	"log"
@@ -26,14 +28,17 @@ func NewClinvarRCVRepository(db *gorm.DB) *ClinvarRCVRepository {
 
 func (r *ClinvarRCVRepository) GetVariantClinvarConditions(locusId int) ([]ClinvarRCV, error) {
 	var clinvarRCV []ClinvarRCV
-	tx := r.db.Table(types.ClinvarRCVTable.Name).Where("locus_id = ?", locusId).Find(&clinvarRCV)
+	tx := r.db.Table(types.ClinvarRCVTable.Name)
+	tx = tx.Select("locus_id, clinvar_id, accession, clinical_significance, date_last_evaluated, submission_count, review_status, review_status_stars, version, traits, origins")
+	tx = tx.Where("locus_id = ?", locusId)
 
-	if tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
+	if err := tx.Find(&clinvarRCV).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil // No record found
+		} else {
+			return nil, fmt.Errorf("error while fetching clinvar RCV: %w", err)
 		}
-		return nil, tx.Error // Return the error if something else went wrong
 	}
 
-	return clinvarRCV, nil // Return the found record
+	return clinvarRCV, nil // Return the found records
 }

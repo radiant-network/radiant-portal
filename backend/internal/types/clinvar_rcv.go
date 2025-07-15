@@ -4,16 +4,6 @@ import (
 	"time"
 )
 
-type Submission struct {
-	Submitter            string    `json:"submitter,omitempty"`
-	Scv                  string    `json:"scv,omitempty"`
-	Version              int       `json:"version,omitempty"`
-	ReviewStatus         string    `json:"review_status,omitempty"`
-	ReviewStatusStars    int       `json:"review_status_stars,omitempty"`
-	ClinicalSignificance string    `json:"clinical_significance,omitempty"`
-	DateLastEvaluated    time.Time `json:"date_last_evaluated,omitempty"`
-}
-
 // ClinvarRCV represents a Reference ClinVar record - data aggregated by variant-condition pair
 // @Description ClinvarRCV represents a Reference ClinVar record - data aggregated by variant-condition pair
 type ClinvarRCV struct {
