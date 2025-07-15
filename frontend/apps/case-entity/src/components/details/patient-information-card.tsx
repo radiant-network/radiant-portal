@@ -1,12 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
-import { ComponentProps, useState, useCallback, useEffect } from 'react';
+import { ComponentProps, useState, useEffect, useCallback } from 'react';
 import { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/ui/tabs';
 import { formatDate } from 'date-fns';
-import { CopyIcon } from 'lucide-react';
-import { Button } from '@/components/base/ui/button';
-import { toast } from 'sonner';
+import { CopyButton } from '@/components/base/buttons/copy-button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 enum CaseType {
@@ -20,14 +18,6 @@ interface PatientInfoDisplayProps {
 
 function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
   const { t } = useI18n();
-
-  const onCopyMRN = useCallback((mrn: string) => {
-      navigator.clipboard.writeText(mrn).then(() => {
-        toast.success('MRN copied to clipboard');
-      }).catch(() => {
-        toast.error('Failed to copy MRN');
-      });
-  }, []);
   
   if (!member) {
     return <div className="text-muted-foreground text-sm">No patient information available</div>;
@@ -38,30 +28,28 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.id')}</div>
       <div className="font-medium">{member.patient_id || '--'}</div>
 
+      {/* TODO: to be implemented after mvp */}
+      {/* 
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.name')}</div>
-      <div className="font-medium text-muted-foreground">{t('common.notAvailableYet')}</div>
-
+      <div className="font-medium text-muted-foreground">--</div>
+      */}
+      
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.dob')}</div>
       <div>{member.date_of_birth ? formatDate(member.date_of_birth, t('common.date')) : '--'}</div>
 
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.sex')}</div>
       <div className="capitalize">{member.sex_code || '--'}</div>
 
+      {/* TODO: to be implemented after mvp */}
+      {/* 
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.jhn')}</div>
-      <div className="text-muted-foreground">{t('common.notAvailableYet')}</div>
+      <div className="text-muted-foreground">--</div> 
+      */}
 
       <div className="text-muted-foreground">{t('caseEntity.patientInformation.mrn')}</div>
-      <div className="flex items-center gap-2">
-        <span>{member.mrn || '--'}</span>
+      <div className="flex items-center">
         {member.mrn && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-1 hover:bg-muted"
-            onClick={() => onCopyMRN(member.mrn!)}
-          >
-            <CopyIcon size={14} />
-          </Button>
+          <CopyButton value={member.mrn} label={member.mrn || '--'} className="-m-2" />
         )}
       </div>
       <Tooltip>
@@ -71,10 +59,18 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
           </div>
         </TooltipTrigger>
         <TooltipContent>
+          {t('caseEntity.patientInformation.managingOrg_tooltips')}
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+        <div>{member.managing_organization_code || '--'}</div>
+        </TooltipTrigger>
+        <TooltipContent>
           {member.managing_organization_name || '--'}
         </TooltipContent>
       </Tooltip>
-      <div>{member.managing_organization_code || '--'}</div>
+      
     </div>
   );
 }

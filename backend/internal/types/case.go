@@ -31,9 +31,10 @@ type CaseResult struct {
 	MRN                      string    `json:"mrn,omitempty"`
 	PriorityCode             string    `json:"priority_code,omitempty"`
 	StatusCode               string    `json:"status_code" validate:"required"`
-	CaseAnalysisTypeCode     string    `json:"case_analysis_type_code,omitempty"`
+	CaseAnalysisTypeCode     string    `json:"-"`
 	CaseAnalysisCode         string    `json:"case_analysis_code,omitempty"`
 	CaseAnalysisName         string    `json:"case_analysis_name,omitempty"`
+	CaseType                 string    `json:"case_type,omitempty"`
 	PrimaryConditionID       string    `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName     string    `json:"primary_condition_name,omitempty"`
 	RequestedByCode          string    `json:"requested_by_code,omitempty"`
@@ -87,6 +88,7 @@ type CaseAssay struct {
 	RelationshipToProband    string    `json:"relationship_to_proband,omitempty"`
 	SampleID                 int       `json:"sample_id" validate:"required"`
 	SampleSubmitterID        string    `json:"sample_submitter_id,omitempty"`
+	SampleTypeCode           string    `json:"sample_type_code,omitempty"`
 	AffectedStatusCode       string    `json:"affected_status_code,omitempty"`
 	HistologyCode            string    `json:"histology_code,omitempty"`
 	ExperimentalStrategyCode string    `json:"experimental_strategy_code" validate:"required"`

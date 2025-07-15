@@ -60,50 +60,70 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
           {/* Left side - Static information */}
           <div className="gap-4">
             <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
+              <div className="text-muted-foreground">{t('caseEntity.details.createdOn')}</div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.createdOn')}</div>
+                  <div className="cursor-help">{caseData.created_on ? formatDate(caseData.created_on, t('common.date')) : '--'}</div>
                 </TooltipTrigger>
                 <TooltipContent>
                   {t('caseEntity.details.createdOn_tooltips')}
                 </TooltipContent>
               </Tooltip>
-              <div>{caseData.created_on ? formatDate(caseData.created_on, t('common.date')) : '--'}</div>
 
+              <div className="text-muted-foreground">{t('caseEntity.details.lastUpdate')}</div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.lastUpdate')}</div>
+                  <div className="cursor-help">{caseData.updated_on ? formatDate(caseData.updated_on, t('common.date')) : '--'}</div>
                 </TooltipTrigger>
                 <TooltipContent>
                   {t('caseEntity.details.lastUpdate_tooltips')}
                 </TooltipContent>
               </Tooltip>
-              <div>{caseData.updated_on ? formatDate(caseData.updated_on, t('common.date')) : '--'}</div>
 
               <div className="text-muted-foreground">{t('caseEntity.details.prescriber')}</div>
               <div>{caseData.prescriber || '--'}</div>
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.prescribingInst')}</div>
+                  <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
+                    {t('caseEntity.details.prescribingInst')}
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {caseData.managing_organization_code || caseData.managing_organization_code || '--'}
+                    {t('caseEntity.details.prescribingInst_tooltips')}
                 </TooltipContent>
               </Tooltip>
-              <div>{caseData.managing_organization_name || caseData.managing_organization_code || '--'}</div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    {caseData.managing_organization_code || '--'}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {caseData.managing_organization_name || '--'}
+                </TooltipContent>
+              </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.diagLab')}</div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {caseData.performer_lab_name || caseData.performer_lab_code || '--'}
+                  {t('caseEntity.details.diagLab_tooltips')}
                 </TooltipContent>
               </Tooltip>
-              <div>
-                {caseData.performer_lab_code || '--'}
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    {caseData.performer_lab_code || '--'}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {caseData.performer_lab_name || '--'}
+                </TooltipContent>
+              </Tooltip>
+
+
               <div className="text-muted-foreground">{t('caseEntity.details.requestId')}</div>
               <div>{caseData.request_id || '--'}</div>
             </div>

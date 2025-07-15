@@ -12,7 +12,6 @@ import StatusCell from '../cells/status-cells';
 import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '../cells/analysis-type-code-cell';
 import CaseActionsMenuCell from '../cells/case-actions-menu-cell';
 import RequestIdCell from '../cells/request-id-cell';
-import { PhenotypeType } from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 
 const columnHelper = createColumnHelper<CaseResult>();
 
@@ -63,16 +62,17 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       minSize: 124,
     }),
     // Type
-    columnHelper.accessor(row => row.case_analysis_type_code, {
-      id: 'case_analysis_type_code',
+    columnHelper.accessor(row => row.case_type, {
+      id: 'case_type',
       cell: info => <AnalysisTypeCodeCell code={info.getValue()} />,
       header: () => (
         <TooltipsHeader tooltips={<AnalysisTypeCodeCellTooltips />}>
-          {t('caseExploration.case.headers.case_analysis_type_code')}
+          {t('caseExploration.case.headers.case_type')}
         </TooltipsHeader>
       ),
       size: 120,
       minSize: 120,
+      enableSorting: false
     }),
     // Analysis
     columnHelper.accessor(row => row.case_analysis_code, {
@@ -87,7 +87,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Primary Condition
     columnHelper.accessor(row => row.primary_condition_id, {
       id: 'primary_condition',
-      cell: info => <PhenotypeConditionLinkCell type={PhenotypeType.MONDO} code={info.getValue()} name={info.row.original.primary_condition_name} />,
+      cell: info => <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.primary_condition_name} />,
       header: t('caseExploration.case.headers.primary_condition'),
       size: 124,
       minSize: 124,
@@ -222,9 +222,9 @@ const defaultSettings = createColumnSettings([
     label: 'caseExploration.case.headers.status_code',
   },
   {
-    id: 'case_analysis_type_code',
+    id: 'case_type',
     visible: true,
-    label: 'caseExploration.case.headers.case_analysis_type_code',
+    label: 'caseExploration.case.headers.case_type',
   },
   {
     id: 'case_analysis_code',

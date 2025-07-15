@@ -21,6 +21,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 			PriorityCode:         "routine",
 			StatusCode:           "active",
 			CaseAnalysisTypeCode: "germline",
+			CaseType:             "germline_family",
 			CaseAnalysisCode:     "WGA",
 			CaseAnalysisName:     "Whole Genome Analysis",
 			PrimaryConditionID:   "MONDO:0700092",
@@ -104,9 +105,9 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 		RequestedByCode:      "CHUSJ",
 		RequestedByName:      "Centre hospitalier universitaire Sainte-Justine",
 		Assays: types.JsonArray[types.CaseAssay]{
-			{SeqID: 1, RequestID: 22, PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", SampleID: 1, SampleSubmitterID: "S13224", HasVariants: true},
-			{SeqID: 2, RequestID: 23, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", HasVariants: true},
-			{SeqID: 3, RequestID: 24, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", HasVariants: false},
+			{SeqID: 1, RequestID: 22, PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 2, RequestID: 23, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 3, RequestID: 24, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: false},
 		},
 		Tasks: types.JsonArray[types.CaseTask]{
 			{ID: 1, TypeCode: "ngba", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
@@ -135,7 +136,7 @@ func Test_SearchCasesHandler(t *testing.T) {
 		"list": [{
 			"case_analysis_code":"WGA",
 			"case_analysis_name":"Whole Genome Analysis",
-			"case_analysis_type_code":"germline",
+			"case_type": "germline_family",
 			"case_id":1,
 			"created_on":"2000-01-01T00:00:00Z",
 			"managing_organization_code":"CHUSJ",
@@ -230,9 +231,9 @@ func Test_CaseEntityHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"assays":[
-			{"experimental_strategy_code":"", "patient_id":3, "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "has_variants": true}, 
-			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "request_id":23, "sample_id":2, "sample_submitter_id":"S13225", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "has_variants": true},
-			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "request_id":24, "sample_id":3, "sample_submitter_id":"S13226", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "has_variants": false}
+			{"experimental_strategy_code":"", "patient_id":3, "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "request_id":23, "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
+			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "request_id":24, "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false}
 		],
 		"case_analysis_code":"WGA",
 		"case_analysis_name":"Whole Genome Analysis",

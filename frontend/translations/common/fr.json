@@ -183,7 +183,9 @@
       "collapseAll": "Réduire tout",
       "expandAll": "Développer tout",
       "seeMore": "Plus",
-      "clear": "Effacer"
+      "clear": "Effacer",
+      "copy": "Copier dans le presse-papiers",
+      "copied": "Copié!"
     },
     "languages": {
       "en": "Anglais",
@@ -368,7 +370,7 @@
         "mrn_tooltips": "Numéro de dossier médicale du patient",
         "priority_code": "Priorité",
         "status_code": "Status",
-        "case_analysis_type_code": "Type de cas",
+        "case_type": "Type de cas",
         "primary_condition": "Condition principale",
         "case_analysis_code": "Analyse",
         "requested_by_code": "Req. par",
@@ -791,13 +793,15 @@
       "sex": "Sexe",
       "jhn": "JHN",
       "mrn": "Dossier",
-      "managingOrg": "Organisation responsable"
+      "managingOrg": "Organisation responsable",
+      "managingOrg_tooltips": "Organisation responsable du dossier du patient"
     },
     "details": {
       "title": "Détails de Cas",
       "analysisOverview": "Aperçu de l'analyse",
       "clinicalOverview": "Clinique",
-      "view_variants": "View Variants",
+      "no_phenotype": "Aucun phenotype reporté",
+      "view_variants": "Voir variants",
       "primary_condition": "Condition principale",
       "ethnicity": "Ethnicité",
       "phenotypes": "Phénotypes",
@@ -810,7 +814,9 @@
       "lastUpdate_tooltips": "aaaa-mm-jj",
       "prescriber": "Prescripteur",
       "prescribingInst": "Inst. prescriptrice",
+      "prescribingInst_tooltips": "Établissement prescripteur",
       "diagLab": "Lab. de diagnostic",
+      "diagLab_tooltips": "Laboratoire de diagnostic moléculaire",
       "requestId": "ID de demande",
       "priority": "Priorité",
       "status": "Statut",

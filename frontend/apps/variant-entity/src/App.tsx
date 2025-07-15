@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import BackLink from '@/components/base/navigation/back-link';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import { Badge } from '@/components/base/ui/badge';
+import { Badge, BadgeProps } from '@/components/base/ui/badge';
 import { Link, useLocation, useParams } from 'react-router';
 import OverviewTab from './components/overview/overview-tab';
 import EvidenceTab from './components/evidence/evidence-tab';
@@ -17,6 +17,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import Result from '@/components/base/result';
 import { Button } from '@/components/base/ui/button';
 import Container from '@/components/base/container';
+import PageHeader from '@/components/base/headers/page-header';
 
 type VariantHeaderInput = {
   key: string;
@@ -78,6 +79,13 @@ export default function App() {
     );
   }
 
+  const pageHeaderBadges: BadgeProps[] = [];
+  if (data?.assembly_version) {
+    pageHeaderBadges.push({ variant: 'outline', children: data?.assembly_version });
+  }
+  pageHeaderBadges.push({ children: t('variantEntity.header.germline') });
+
+
   // To avoid hydration mismatch with hash in ssr
   if (!activeTab) {
     return null;
@@ -85,26 +93,14 @@ export default function App() {
 
   return (
     <main className="bg-muted/40 h-screen overflow-auto">
-      <div className="bg-background">
-        <Container>
-          <div className="flex flex-col gap-4 pt-6 px-6">
-            <Link to="/">
-              <BackLink>{t('variantEntity.header.variants')}</BackLink>
-            </Link>
-            {isLoading ? (
-              <Skeleton className="w-96 h-8" />
-            ) : (
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold">{data?.hgvsg}</h1>
-                {data?.assembly_version && <Badge variant="outline">{data.assembly_version}</Badge>}
-                <Badge>{t('variantEntity.header.germline')}</Badge>
-              </div>
-            )}
-          </div>
-        </Container>
-      </div>
+      <PageHeader
+        isLoading={isLoading}
+        title={data?.hgvsg}
+        breadcrumbs={[{ to: "/", text: t('variantEntity.header.variants') }]}
+        badges={pageHeaderBadges}
+      />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
-        <TabsList className="pt-6 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
+        <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
           <TabsListItem value={VariantEntityTabs.Overview}>{t('variantEntity.overview.title')}</TabsListItem>
           <TabsListItem value={VariantEntityTabs.Frequency}>{t('variantEntity.frequency.title')}</TabsListItem>
           <TabsListItem value={VariantEntityTabs.EvidenceAndConditions}>

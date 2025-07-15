@@ -185,7 +185,9 @@
       "collapseAll": "Collapse all",
       "expandAll": "Expand All",
       "seeMore": "See more",
-      "clear": "Clear"
+      "clear": "Clear",
+      "copy": "Copy to clipboard",
+      "copied": "Copied!"
     },
     "languages": {
       "en": "English",
@@ -373,7 +375,7 @@
         "mrn_tooltips": "Patient's medical record number",
         "priority_code": "Priority",
         "status_code": "Status",
-        "case_analysis_type_code": "Type",
+        "case_type": "Type",
         "case_analysis_code": "Analysis",
         "primary_condition": "Primary Condition",
         "requested_by_code": "Req. By",
@@ -781,12 +783,14 @@
       "sex": "Sex",
       "jhn": "JHN",
       "mrn": "MRN",
-      "managingOrg": "Managing Org."
+      "managingOrg": "Managing Org.",
+      "managingOrg_tooltips": "Organization managing the patient’s file"
     },
     "details": {
       "title": "Case Details",
       "analysisOverview": "Analysis Overview",
       "clinicalOverview": "Clinical",
+      "no_phenotype": "No phenotype reported",
       "view_variants": "View Variants",
       "primary_condition": "Primary Condition",
       "ethnicity": "Ethnicity",
@@ -800,7 +804,9 @@
       "lastUpdate_tooltips": "yyyy-mm-dd",
       "prescriber": "Prescriber",
       "prescribingInst": "Prescribing Inst.",
+      "prescribingInst_tooltips": "Prescribing institution",
       "diagLab": "Diag. Lab",
+      "diagLab_tooltips": "Molecular diagnostic laboratory",
       "requestId": "Request ID",
       "priority": "Priority",
       "status": "Status",
