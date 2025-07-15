@@ -268,6 +268,38 @@ CREATE TABLE IF NOT EXISTS `staging_sequencing_experiment`
     ) ENGINE = OLAP
     PRIMARY KEY(`case_id`,`seq_id`,`task_id`);
 
+
+CREATE TABLE IF NOT EXISTS `clinvar_rcv_summary`
+(
+    `locus_id`              BIGINT(20)   NOT NULL,
+    `clinvar_id`            VARCHAR(32)  NOT NULL,
+    `accession`             VARCHAR(32)  NOT NULL,
+    `clinical_significance` ARRAY<VARCHAR (64)> NULL,
+    `date_last_evaluated`   DATE         NULL,
+    `submission_count`      INT(11)      NULL,
+    `review_status`         VARCHAR(128) NULL,
+    `review_status_stars`   INT(11)      NULL,
+    `version`               INT(11)      NULL,
+    `traits`                ARRAY< VARCHAR (128)> NULL,
+    `origins`               ARRAY< VARCHAR (64)> NULL,
+    `submissions` ARRAY<
+        STRUCT<
+            submitter             VARCHAR(128),
+            scv                   VARCHAR(32),
+            version               INT(11),
+            review_status         VARCHAR(128),
+            review_status_stars   INT(11),
+            clinical_significance VARCHAR(128),
+            date_last_evaluated   DATE
+        >
+    > NULL,
+    `clinical_significance_count` MAP<VARCHAR(64), INT(11)> NULL
+)
+ENGINE = OLAP
+DISTRIBUTED BY HASH(`locus_id`)
+BUCKETS 10;
+
+
 INSERT INTO clinvar (locus_id, chromosome, start, reference, alternate, name)
 VALUES
     (1000, '1', '1111', 'A', 'T', '111111'),
@@ -349,6 +381,13 @@ VALUES
     ('HP:0000479', 'Abnormal retinal morphology', 'HP:0000479 Abnormal retinal morphology'),
     ('HP:0001562', 'Oligohydramnios', 'HP:0001562 Oligohydramnios'),
     ('HP:0001561', 'Polyhydramnios', 'HP:0001561 Polyhydramnios');
+
+INSERT INTO test_db.clinvar_rcv_summary
+(locus_id, clinvar_id, accession, clinical_significance, date_last_evaluated, submission_count, review_status, review_status_stars, version, traits, origins, submissions, clinical_significance_count)
+VALUES
+    (1000,'RCV000000001','SCV000000001',['Pathogenic'], DATE('2023-01-01 00:00:00'),10,'reviewed',4,1, ['Trait1'],['somatic'],
+        [row('Submitter1', 'SCV000000001', 1, 'reviewed', 4, 'Pathogenic', DATE('2023-01-01 00:00:00'))], map{'Pathogenic': 10});
+
 
 CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
 		PROPERTIES

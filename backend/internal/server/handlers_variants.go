@@ -327,3 +327,31 @@ func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc
 		c.JSON(http.StatusOK, genePanelConditions)
 	}
 }
+
+// GetGermlineVariantConditionsClinvar handles retrieving ClinVar conditions for germline variant entity
+// @Summary Get ClinVar conditions for germline variant entity
+// @Id GetGermlineVariantConditionsClinvar
+// @Description Retrieve ClinVar conditions for germline variant entity
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {array} types.ClinvarRCV
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/germline/{locus_id}/conditions/clinvar [get]
+func GetGermlineVariantConditionsClinvar(repo repository.ClinvarRCVDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
+		if errLocus != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		clinvarConditions, err := repo.GetVariantClinvarConditions(locusId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, clinvarConditions)
+	}
+}

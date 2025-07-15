@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -150,6 +151,24 @@ func (m *MockRepository) GetVariantGenePanelConditions(panelType string, locusId
 	return &types.GenePanelConditions{
 		Count:      3,
 		Conditions: conditions,
+	}, nil
+}
+
+func (m *MockRepository) GetVariantClinvarConditions(locusId int) ([]types.ClinvarRCV, error) {
+	return []types.ClinvarRCV{
+		{
+			LocusId:              strconv.Itoa(locusId),
+			ClinvarId:            "123456",
+			Accession:            "RCV000123456",
+			ClinicalSignificance: types.JsonArray[string]{"Pathogenic"},
+			DateLastEvaluated:    time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
+			SubmissionCount:      1,
+			ReviewStatus:         "criteria_provided",
+			ReviewStatusStars:    3,
+			Version:              1,
+			Traits:               types.JsonArray[string]{"Trait1", "Trait2"},
+			Origins:              types.JsonArray[string]{"somatic"},
+		},
 	}, nil
 }
 
@@ -427,4 +446,19 @@ func Test_GetGermlineVariantConditions(t *testing.T) {
 			"BRCA2": [{"panel_id":"3", "panel_name":"Name 3", "inheritance_code": ["AD", "AR"]}]
 		}
 	}`, w.Body.String())
+}
+
+func Test_GetGermlineVariantConditionsClinvar(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/germline/:locus_id/conditions/clinvar", GetGermlineVariantConditionsClinvar(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/conditions/clinvar", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `[{"locus_id":"1000","clinvar_id":"123456","accession":"RCV000123456","clinical_significance":["Pathogenic"],"date_last_evaluated":"2023-01-01T00:00:00Z","submission_count":1,"review_status":"criteria_provided","review_status_stars":3,"version":1,"traits":["Trait1","Trait2"],"origins":["somatic"]}]`
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
 }

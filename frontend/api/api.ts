@@ -648,6 +648,79 @@ export interface CasesSearchResponse {
     'list': Array<CaseResult>;
 }
 /**
+ * ClinvarRCV represents a Reference ClinVar record - data aggregated by variant-condition pair
+ * @export
+ * @interface ClinvarRCV
+ */
+export interface ClinvarRCV {
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
+    'accession'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ClinvarRCV
+     */
+    'clinical_significance'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
+    'clinvar_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
+    'date_last_evaluated'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
+    'locus_id': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ClinvarRCV
+     */
+    'origins'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
+    'review_status'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ClinvarRCV
+     */
+    'review_status_stars'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ClinvarRCV
+     */
+    'submission_count'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ClinvarRCV
+     */
+    'traits'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ClinvarRCV
+     */
+    'version'?: number;
+}
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -4857,6 +4930,44 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Retrieve ClinVar conditions for germline variant entity
+         * @summary Get ClinVar conditions for germline variant entity
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineVariantConditionsClinvar: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getGermlineVariantConditionsClinvar', 'locusId', locusId)
+            const localVarPath = `/variants/germline/{locus_id}/conditions/clinvar`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
@@ -5124,6 +5235,19 @@ export const VariantApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve ClinVar conditions for germline variant entity
+         * @summary Get ClinVar conditions for germline variant entity
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ClinvarRCV>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditionsClinvar(locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConditionsClinvar']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
@@ -5244,6 +5368,16 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getGermlineVariantConditions(locusId, panelType, filter, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve ClinVar conditions for germline variant entity
+         * @summary Get ClinVar conditions for germline variant entity
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ClinvarRCV>> {
+            return localVarFp.getGermlineVariantConditionsClinvar(locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
          * @param {string} locusId Locus ID
@@ -5354,6 +5488,18 @@ export class VariantApi extends BaseAPI {
      */
     public getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantConditions(locusId, panelType, filter, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve ClinVar conditions for germline variant entity
+     * @summary Get ClinVar conditions for germline variant entity
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantConditionsClinvar(locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
