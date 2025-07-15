@@ -73,7 +73,7 @@ function CasesTab() {
   );
 
   return (
-    <div className="bg-background">
+    <div className="bg-background pt-4">
       <DataTable
         id="case-exploration"
         columns={getCaseExplorationColumns(t)}

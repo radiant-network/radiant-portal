@@ -1,35 +1,51 @@
-import { Link } from "react-router-dom";
+import { VariantProps, tv } from 'tailwind-variants';
 import Container from "../container";
 import { Skeleton } from "../ui/skeleton";
-import BackLink from "../navigation/back-link";
 import { Button, ButtonProps } from "../ui/button";
 import { Badge, BadgeProps } from "../ui/badge";
 import { cn } from "@/components/lib/utils";
 
-type breadcrumbsProps = {
-  to: string;
-  text: string;
-}
+const pageHeaderVariants = tv({
+  slots: {
+    container: 'bg-background',
+  },
+  variants: {
+    variant: {
+      navigation: {
+        container: '',
+      },
+      info: {
+        container: 'border-b pb-4',
+      },
+    },
+  },
+  defaultVariants: {
+    variant: 'navigation',
+  },
+});
 
-type EntityHeaderProps = {
+interface EntityHeaderProps
+  extends VariantProps<typeof pageHeaderVariants> {
   isLoading?: boolean;
-  breadcrumbs?: breadcrumbsProps[];
   badges?: BadgeProps[];
   buttons?: ButtonProps[];
   title?: string;
   description?: string;
-};
+}
+
 function PageHeader({
   title,
   badges,
   buttons,
   description,
-  breadcrumbs,
   isLoading = true,
+  variant,
 }: EntityHeaderProps) {
+  const style = pageHeaderVariants({ variant });
+
   if (isLoading) {
     return (
-      <div className="bg-background">
+      <div className={style.container()}>
         <Container>
           <div className="flex flex-col gap-4 pt-4 px-6">
             <Skeleton className="w-48 h-8" />
@@ -41,14 +57,9 @@ function PageHeader({
   }
 
   return (
-    <div className="bg-background">
+    <div className={style.container()}>
       <Container>
         <div className="flex flex-col gap-4 pt-4 px-6">
-          {(breadcrumbs ?? []).map(breadcrumb => (
-            <Link to={breadcrumb.to}>
-              <BackLink>{breadcrumb.text}</BackLink>
-            </Link>
-          ))}
           <div className="flex justify-between">
             <div className={cn("flex flex-col", { 'gap-3': !!description })}>
               <div className="flex items-center gap-2">
