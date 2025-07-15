@@ -8,6 +8,12 @@ import { Badge } from '@/components/base/ui/badge';
 import { EllipsisVertical } from 'lucide-react';
 import { Button } from '@/components/base/ui/button';
 import { VariantInterpretedCase, VariantUninterpretedCase } from '@/api/api';
+import ConditionTableCell from './condition-table-cell';
+import PerformerLabTableCell from './performer-lab-table-cell';
+import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
+import StatusCodeTableCell from './status-code-table-cell';
+import AnalysisTableCell from './analysis-table-cell';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>(); // todo replace with correct type when api is updated
 const otherCasesColumnHelper = createColumnHelper<VariantUninterpretedCase>(); // todo replace with correct type when api is updated
@@ -23,7 +29,11 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     },
     interpretedCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
-      cell: info => <div className="font-mono text-xs">{info.getValue()}</div>,
+      cell: info => (
+        <AnchorLink href={`/case/entity/${info.getValue()}`} className="text-foreground text-xs font-mono">
+          {info.getValue()}
+        </AnchorLink>
+      ),
       header: t('variantEntity.cases.interpreted-table.headers.case'),
       size: 120,
       minSize: 80,
@@ -44,12 +54,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.condition_name, {
       id: 'condition_name',
-      cell: info => (
-        <div className="font-medium">
-          {info.getValue()}{' '}
-          <span className="font-mono text-xs text-muted-foreground">({info.row.original.condition_id})</span>
-        </div>
-      ),
+      cell: info => <ConditionTableCell conditionId={info.row.original.condition_id} conditionName={info.getValue()} />,
       header: t('variantEntity.cases.interpreted-table.headers.mondo'),
       minSize: 120,
       maxSize: 350,
@@ -57,7 +62,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.classification, {
       id: 'classification',
-      cell: info => <div>{info.getValue()}</div>,
+      cell: info => <ClinVarBadge value={info.getValue()} />,
       header: t('variantEntity.cases.interpreted-table.headers.classification'),
       minSize: 150,
       maxSize: 250,
@@ -82,7 +87,12 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.performer_lab_code, {
       id: 'performer_lab_code',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+      cell: info => (
+        <PerformerLabTableCell
+          performerLabCode={info.getValue()}
+          performerLabName={info.row.original.performer_lab_name}
+        />
+      ),
       header: t('variantEntity.cases.interpreted-table.headers.institution'),
       minSize: 100,
       maxSize: 150,
@@ -91,7 +101,9 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+      cell: info => (
+        <AnalysisTableCell analysisCode={info.getValue()} analysisName={info.row.original.case_analysis_name} />
+      ),
       header: t('variantEntity.cases.interpreted-table.headers.test'),
       minSize: 80,
       maxSize: 150,
@@ -100,10 +112,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.status_code, {
       id: 'status_code',
-      cell: info => {
-        const status = info.getValue();
-        return <Badge variant={status === 'active' ? 'neutral' : 'default'}>{status}</Badge>;
-      },
+      cell: info => <StatusCodeTableCell statusCode={info.getValue()} />,
       header: t('variantEntity.cases.interpreted-table.headers.status'),
       minSize: 100,
       maxSize: 150,
@@ -131,7 +140,11 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
   return [
     otherCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+      cell: info => (
+        <AnchorLink href={`/case/entity/${info.getValue()}`} className="text-foreground text-xs font-mono">
+          {info.getValue()}
+        </AnchorLink>
+      ),
       header: t('variantEntity.cases.other-table.headers.case'),
       minSize: 80,
       maxSize: 150,
@@ -153,19 +166,16 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.primary_condition_name, {
       id: 'primary_condition_name',
       cell: info => (
-        <div className="font-medium">
-          {info.getValue()}{' '}
-          <span className="font-mono text-xs text-muted-foreground">({info.row.original.primary_condition_id})</span>
-        </div>
+        <ConditionTableCell conditionId={info.row.original.primary_condition_id} conditionName={info.getValue()} />
       ),
-      header: t('variantEntity.cases.other-table.headers.phenotypesHpo'),
+      header: t('variantEntity.cases.other-table.headers.mondo'),
       minSize: 120,
       maxSize: 350,
       enableSorting: false,
     }),
     otherCasesColumnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+      cell: info => <Badge variant="outline">{info.getValue()}</Badge>,
       header: t('variantEntity.cases.other-table.headers.zygosity'),
       size: 120,
       minSize: 80,
@@ -183,7 +193,12 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     }),
     otherCasesColumnHelper.accessor(row => row.performer_lab_code, {
       id: 'performer_lab_code',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+      cell: info => (
+        <PerformerLabTableCell
+          performerLabCode={info.getValue()}
+          performerLabName={info.row.original.performer_lab_name}
+        />
+      ),
       header: t('variantEntity.cases.other-table.headers.institution'),
       minSize: 100,
       maxSize: 150,
@@ -192,7 +207,9 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     }),
     otherCasesColumnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
-      cell: info => <div className="text-muted-foreground">{info.getValue()}</div>,
+      cell: info => (
+        <AnalysisTableCell analysisCode={info.getValue()} analysisName={info.row.original.case_analysis_name} />
+      ),
       header: t('variantEntity.cases.other-table.headers.test'),
       minSize: 80,
       maxSize: 150,
@@ -201,14 +218,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     }),
     otherCasesColumnHelper.accessor(row => row.status_code, {
       id: 'status_code',
-      cell: info => {
-        const status = info.getValue();
-        return (
-          <Badge variant={status === 'active' ? 'neutral' : 'default'}>
-            {t(`variantEntity.cases.status.${status}`)}
-          </Badge>
-        );
-      },
+      cell: info => <StatusCodeTableCell statusCode={info.getValue()} />,
       header: t('variantEntity.cases.other-table.headers.status'),
       minSize: 100,
       maxSize: 150,

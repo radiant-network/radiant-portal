@@ -2,12 +2,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useI18n } from '@/components/hooks/i18n';
 import { useCasesFilters } from './cases-filters-context';
 
-interface ClassificationSelectFilterProps {
+interface AnalysisSelectFilterProps {
   value?: string;
   onChange?: (value: string) => void;
 }
 
-function ClassificationSelectFilter({ value = 'all', onChange }: ClassificationSelectFilterProps) {
+function AnalysisSelectFilter({ value = 'all', onChange }: AnalysisSelectFilterProps) {
   const { t } = useI18n();
   const { filters } = useCasesFilters();
 
@@ -17,10 +17,10 @@ function ClassificationSelectFilter({ value = 'all', onChange }: ClassificationS
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{t('variantEntity.cases.commonFilters.classifications.allClassifications')}</SelectItem>
-        {filters?.classification.map(classification => (
-          <SelectItem key={classification.key} value={classification.key!}>
-            {classification.label}
+        <SelectItem value="all">{t('variantEntity.cases.commonFilters.tests.allTests')}</SelectItem>
+        {filters?.case_analysis.map(analysis => (
+          <SelectItem key={analysis.key} value={analysis.key!}>
+            {analysis.label}
           </SelectItem>
         ))}
       </SelectContent>
@@ -28,4 +28,4 @@ function ClassificationSelectFilter({ value = 'all', onChange }: ClassificationS
   );
 }
 
-export default ClassificationSelectFilter;
+export default AnalysisSelectFilter;

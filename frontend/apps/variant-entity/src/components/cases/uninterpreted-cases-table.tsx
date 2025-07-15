@@ -1,10 +1,10 @@
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getOtherCasesColumns, otherCasesDefaultSettings } from './table-settings';
 import { PaginationState } from '@tanstack/table-core';
 import OtherCasesFilters, { UninterpretedCasesFiltersState } from './uninterpreted-cases-filters';
-import { ApiError, FiltersBodyWithCriteria, VariantUninterpretedCasesSearchResponse } from '@/api/api';
+import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
 import { variantsApi } from '@/utils/api';
 import useSWR from 'swr';
 import { useParams } from 'react-router';
@@ -12,7 +12,7 @@ import { useParams } from 'react-router';
 type UninterpretedCasesSearchInput = {
   key: string;
   locusId: string;
-  criteria: FiltersBodyWithCriteria;
+  criteria: ListBodyWithCriteria;
 };
 
 async function fetchUninterpretedCases(input: UninterpretedCasesSearchInput) {
@@ -29,15 +29,54 @@ function UninterpretedCasesTable() {
   });
 
   const [initialFilters, setInitialFilters] = useState<UninterpretedCasesFiltersState>({
-    institution: '', // todo
-    test: '', // todo
+    phenotype: '',
+    institution: 'all',
+    test: 'all',
   });
+
+  const searchCriteria: SearchCriterion[] = useMemo(() => {
+    const criteria: SearchCriterion[] = [];
+
+    if (initialFilters.phenotype) {
+      criteria.push({
+        field: 'phenotypes_term',
+        value: [initialFilters.phenotype],
+        operator: 'contains',
+      });
+    }
+
+    if (initialFilters.institution && initialFilters.institution !== 'all') {
+      criteria.push({
+        field: 'performer_lab_code',
+        value: [initialFilters.institution],
+        operator: 'contains',
+      });
+    }
+
+    if (initialFilters.test && initialFilters.test !== 'all') {
+      criteria.push({
+        field: 'case_analysis_code',
+        value: [initialFilters.test],
+        operator: 'contains',
+      });
+    }
+
+    return criteria;
+  }, [initialFilters.phenotype, initialFilters.institution, initialFilters.test]);
 
   const { data, isLoading } = useSWR<VariantUninterpretedCasesSearchResponse, ApiError, UninterpretedCasesSearchInput>(
     {
       key: 'uninterpreted-cases',
       locusId: params.locusId!,
-      criteria: {},
+      criteria: {
+        search_criteria: searchCriteria,
+        sort: [
+          {
+            field: 'updated_on',
+            order: 'desc',
+          },
+        ],
+      },
     },
     fetchUninterpretedCases,
     {

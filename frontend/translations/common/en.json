@@ -587,6 +587,32 @@
       "feature_truncation": "Feature Truncation",
       "intergenic": "Intergenic"
     },
+    "transmission_mode": {
+      "autosomal_dominant_de_novo": "Autosomal Dominant De Novo",
+      "autosomal_dominant_de_novo.abbrev": "AD",
+      "autosomal_dominant": "Autosomal Dominant",
+      "autosomal_dominant.abbrev": "AD",
+      "autosomal_recessive": "Autosomal Recessive",
+      "autosomal_recessive.abbrev": "AR",
+      "x_linked_dominant_de_novo": "X Linked Dominant De Novo",
+      "x_linked_dominant_de_novo.abbrev": "XLD",
+      "x_linked_recessive_de_novo": "X Linked Recessive De Novo",
+      "x_linked_recessive_de_novo.abbrev": "XLR",
+      "x_linked_dominant": "X Linked Dominant",
+      "x_linked_dominant.abbrev": "XLD",
+      "x_linked_recessive": "X Linked Recessive",
+      "x_linked_recessive.abbrev": "XLR",
+      "non_carrier_proband": "Non Carrier Proband",
+      "non_carrier_proband.abbrev": "NCP",
+      "unknown_parents_genotype": "Unknown Parents Genotype",
+      "unknown_parents_genotype.abbrev": "UPG",
+      "unknown_father_genotype": "Unknown Father Genotype",
+      "unknown_father_genotype.abbrev": "UFG",
+      "unknown_mother_genotype": "Unknown Mother Genotype",
+      "unknown_mother_genotype.abbrev": "UMG",
+      "unknown_proband_genotype": "Unknown Proband Genotype",
+      "unknown_proband_genotype.abbrev": "UPG"
+    },
     "predictions": {
       "sift": "SIFT",
       "revel": "REVEL",
@@ -662,21 +688,7 @@
         "classificationCriteria": "Classification criteria",
         "classificationCriteria-placeholder": "e.g. PM1, PS2",
         "modeOfTransmission": "Mode of inheritance",
-        "modeOfTransmission-placeholder": "e.g. Autosomal dominant de novo",
-        "modeOfTransmission-options": {
-          "autosomal_dominant_de_novo": "Autosomal Dominant De Novo",
-          "autosomal_dominant": "Autosomal Dominant",
-          "autosomal_recessive": "Autosomal Recessive",
-          "x_linked_dominant_de_novo": "X Linked Dominant De Novo",
-          "x_linked_recessive_de_novo": "X Linked Recessive De Novo",
-          "x_linked_dominant": "X Linked Dominant",
-          "x_linked_recessive": "X Linked Recessive",
-          "non_carrier_proband": "Non Carrier Proband",
-          "unknown_parents_genotype": "Unknown Parents Genotype",
-          "unknown_father_genotype": "Unknown Father Genotype",
-          "unknown_mother_genotype": "Unknown Mother Genotype",
-          "unknown_proband_genotype": "Unknown Proband Genotype"
-        }
+        "modeOfTransmission-placeholder": "e.g. Autosomal dominant de novo"
       },
       "somatic": {
         "tumoralType": "Tumor type",
@@ -994,10 +1006,10 @@
           "allClassifications": "All Classifications"
         },
         "institutions": {
-          "allInstitutions": "All Institutions"
+          "allInstitutions": "All Diagnostic Labs"
         },
         "tests": {
-          "allTests": "All Tests"
+          "allTests": "All analyzes"
         },
         "createdAt": {
           "mostRecent": "Most recent",
@@ -1014,17 +1026,22 @@
           "case": "Case",
           "date": "Date",
           "date.tooltip": "Last intepretation date",
-          "mondo": "Condition MONDO",
+          "mondo": "Condition (Mondo)",
           "classification": "Classification",
           "zygosity": "Zygosity",
           "inheritance": "Inheritance",
-          "institution": "Institution",
-          "test": "Test",
+          "institution": "Diagnostic Lab",
+          "test": "Analysis",
           "status": "Status"
         },
         "filters": {
-          "label": "Conditions",
-          "searchInputPlaceholder": "Filter MONDO conditions"
+          "label": "Condition",
+          "searchInputPlaceholder": "Filter MONDO condition"
+        },
+        "expend": {
+          "patientId": "Case’s proband ID",
+          "copy": "Copy",
+          "copySuccess": "Copied to clipboard"
         }
       },
       "other-table": {
@@ -1033,16 +1050,17 @@
           "case": "Case",
           "date": "Date",
           "date.tooltip": "Date received",
+          "mondo": "Condition (Mondo)",
           "phenotypesHpo": "Phenotypes HPO",
           "zygosity": "Zygosity",
           "inheritance": "Inheritance",
-          "institution": "Institution",
-          "test": "Test",
+          "institution": "Diagnostic Lab",
+          "test": "Analysis",
           "status": "Status"
         },
         "filters": {
-          "label": "Phenotypes",
-          "searchInputPlaceholder": "Filter HPO phenotypes"
+          "label": "Phenotype",
+          "searchInputPlaceholder": "Filter HPO phenotype"
         }
       }
     }

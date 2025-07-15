@@ -114,7 +114,12 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
         <Separator className="my-6" />
         <div className="flex items-center text-muted-foreground text-sm">
           {data?.transcript_id && (
-            <TranscriptIdLink transcriptId={data.transcript_id} isCanonical={data.is_canonical} />
+            <TranscriptIdLink
+              transcriptId={data.transcript_id}
+              isManeSelect={data.is_mane_select}
+              isManePlus={false}
+              isCanonical={data.is_canonical}
+            />
           )}
           {data?.exon_rank && data?.exon_total && (
             <>

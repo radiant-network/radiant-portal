@@ -603,6 +603,32 @@
       "feature_truncation": "Feature Truncation",
       "intergenic": "Intergenic"
     },
+    "transmission_mode": {
+      "autosomal_dominant_de_novo": "Autosomal dominant de novo",
+      "autosomal_dominant_de_novo.abbrev": "AD",
+      "autosomal_dominant": "Autosomique dominant",
+      "autosomal_dominant.abbrev": "AD",
+      "autosomal_recessive": "Autosomique récessif",
+      "autosomal_recessive.abbrev": "AR",
+      "x_linked_dominant_de_novo": "Lié à l'X dominant de novo",
+      "x_linked_dominant_de_novo.abbrev": "XLD",
+      "x_linked_recessive_de_novo": "Lié à l'X récessif de novo",
+      "x_linked_recessive_de_novo.abbrev": "XLR",
+      "x_linked_dominant": "Lié à l'X dominant",
+      "x_linked_dominant.abbrev": "XLD",
+      "x_linked_recessive": "Lié à l'X récessif",
+      "x_linked_recessive.abbrev": "XLR",
+      "non_carrier_proband": "Probant non porteur",
+      "non_carrier_proband.abbrev": "NCP",
+      "unknown_parents_genotype": "Génotype parental inconnu",
+      "unknown_parents_genotype.abbrev": "UPG",
+      "unknown_father_genotype": "Génotype paternel inconnu",
+      "unknown_father_genotype.abbrev": "UFG",
+      "unknown_mother_genotype": "Génotype maternel inconnu",
+      "unknown_mother_genotype.abbrev": "UMG",
+      "unknown_proband_genotype": "Génotype du probant inconnu",
+      "unknown_proband_genotype.abbrev": "UPG"
+    },
     "predictions": {
       "sift": "SIFT",
       "revel": "REVEL",
@@ -676,21 +702,7 @@
         "classificationCriteria": "Critères de classification",
         "classificationCriteria-placeholder": "Ex : PM1, PS2",
         "modeOfTransmission": "Mode de transmission",
-        "modeOfTransmission-placeholder": "Ex : Autosomal dominant de novo",
-        "modeOfTransmission-options": {
-          "autosomal_dominant_de_novo": "Autosomal dominant de novo",
-          "autosomal_dominant": "Autosomique dominant",
-          "autosomal_recessive": "Autosomique récessif",
-          "x_linked_dominant_de_novo": "Lié à l'X dominant de novo",
-          "x_linked_recessive_de_novo": "Lié à l'X récessif de novo",
-          "x_linked_dominant": "Lié à l'X dominant",
-          "x_linked_recessive": "Lié à l'X récessif",
-          "non_carrier_proband": "Probant non porteur",
-          "unknown_parents_genotype": "Génotype parental inconnu",
-          "unknown_father_genotype": "Génotype paternel inconnu",
-          "unknown_mother_genotype": "Génotype maternel inconnu",
-          "unknown_proband_genotype": "Génotype du probant inconnu"
-        }
+        "modeOfTransmission-placeholder": "Ex : Autosomal dominant de novo"
       },
       "somatic": {
         "tumoralType": "Type tumoral",
@@ -897,7 +909,7 @@
     },
     "variants": {
       "title": "Variants",
-      "filters": { 
+      "filters": {
         "assay": "Prescription",
         "proband": "Proband",
         "sample_id": "Sample ID",
@@ -992,15 +1004,15 @@
       "title": "{{count}} Cas",
       "tab": "Cas",
       "description": "Cas cliniques portant cette variante",
-      "commonfilters": {
+      "commonFilters": {
         "classifications": {
           "allClassifications": "Toutes les classifications"
         },
         "institutions": {
-          "allInstitutions": "Toutes les institutions"
+          "allInstitutions": "Tous les laboratoires de diagnostic"
         },
         "tests": {
-          "allTests": "Tous les tests"
+          "allTests": "Tous les analyses"
         },
         "createdAt": {
           "mostRecent": "Plus récent",
@@ -1017,17 +1029,22 @@
           "case": "Cas",
           "date": "Date",
           "date.tooltip": "Date de dernière interprétation",
-          "mondo": "Condition MONDO",
+          "mondo": "Condition (Mondo)",
           "classification": "Classification",
           "zygosity": "Zygosité",
           "inheritance": "Hérédité",
-          "institution": "Institution",
-          "test": "Test",
+          "institution": "laboratoires de diagnostic",
+          "test": "Analyse",
           "status": "Statut"
         },
         "filters": {
           "label": "Conditions",
           "searchInputPlaceholder": "Filtrer les conditions MONDO"
+        },
+        "expend": {
+          "patientId": "ID du proband du cas",
+          "copy": "Copier",
+          "copySuccess": "Copié dans le presse-papiers"
         }
       },
       "other-table": {
@@ -1039,8 +1056,8 @@
           "phenotypesHpo": "Phénotypes HPO",
           "zygosity": "Zygosité",
           "inheritance": "Hérédité",
-          "institution": "Institution",
-          "test": "Test",
+          "institution": "laboratoires de diagnostic",
+          "test": "Analyse",
           "status": "Statut"
         },
         "filters": {

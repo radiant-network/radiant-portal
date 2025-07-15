@@ -8,62 +8,62 @@ export const getTransmissionModes = (
   color?: string;
 })[] => [
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.autosomal_dominant_de_novo'),
+    label: t('variant.transmission_mode.autosomal_dominant_de_novo'),
     value: 'autosomal_dominant_de_novo',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.autosomal_dominant'),
+    label: t('variant.transmission_mode.autosomal_dominant'),
     value: 'autosomal_dominant',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.autosomal_recessive'),
+    label: t('variant.transmission_mode.autosomal_recessive'),
     value: 'autosomal_recessive',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.x_linked_dominant_de_novo'),
+    label: t('variant.transmission_mode.x_linked_dominant_de_novo'),
     value: 'x_linked_dominant_de_novo',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.x_linked_recessive_de_novo'),
+    label: t('variant.transmission_mode.x_linked_recessive_de_novo'),
     value: 'x_linked_recessive_de_novo',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.x_linked_dominant'),
+    label: t('variant.transmission_mode.x_linked_dominant'),
     value: 'x_linked_dominant',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.x_linked_recessive'),
+    label: t('variant.transmission_mode.x_linked_recessive'),
     value: 'x_linked_recessive',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.non_carrier_proband'),
+    label: t('variant.transmission_mode.non_carrier_proband'),
     value: 'non_carrier_proband',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.unknown_parents_genotype'),
+    label: t('variant.transmission_mode.unknown_parents_genotype'),
     value: 'unknown_parents_genotype',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.unknown_father_genotype'),
+    label: t('variant.transmission_mode.unknown_father_genotype'),
     value: 'unknown_father_genotype',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.unknown_mother_genotype'),
+    label: t('variant.transmission_mode.unknown_mother_genotype'),
     value: 'unknown_mother_genotype',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.germline.modeOfTransmission-options.unknown_proband_genotype'),
+    label: t('variant.transmission_mode.unknown_proband_genotype'),
     value: 'unknown_proband_genotype',
     title: '',
   },
