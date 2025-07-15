@@ -8,8 +8,9 @@ import { Badge } from '@/components/base/ui/badge';
 import { formatDate } from 'date-fns';
 import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import { CaseEntity, CaseTask } from '@/api/api';
 
-function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>) {
+function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
   const { t } = useI18n();
 
   // Mock data based on screenshot
@@ -114,11 +115,11 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="cursor-help">
-                      {caseData.managing_organization_code || '--'}
+                      {caseData.requested_by_code || '--'}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {caseData.managing_organization_name || '--'}
+                    {caseData.requested_by_name || '--'}
                   </TooltipContent>
                 </Tooltip>
               </span>
@@ -259,12 +260,12 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                 </Tooltip>
               </div>
             </div>
-            {caseData.tasks.length > 0 ? caseData.tasks.map((bioInfo: any, index: number) => (
+            {caseData.tasks.length > 0 ? caseData.tasks.map((bioInfo: CaseTask, index: number) => (
               <div key={index} className="grid grid-cols-3 border-b last:border-b-0">
                 <div className="p-3 text-sm">
-                  {bioInfo.task_id}
+                  {bioInfo.id}
                 </div>
-                <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type}</Badge></div>
+                <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge></div>
                 <div className="text-end p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '--'}</div>
               </div>
             )) : <div className="p-3 text-sm">{t('caseEntity.details.noTaskFound')}</div>}
