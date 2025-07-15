@@ -13,6 +13,7 @@ export default defineConfig({
       '@/base': path.resolve(__dirname, '../../components/base'),
       '@/lib': path.resolve(__dirname, '../../components/lib'),
       '@/hooks': path.resolve(__dirname, '../../components/hooks'),
+      '@/case-exploration': path.resolve(__dirname, '../case-exploration/src'),
     },
   },
   build: {

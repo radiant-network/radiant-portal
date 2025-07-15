@@ -2,10 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/c
 import { useI18n } from '@/components/hooks/i18n';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { User, RotateCcw } from 'lucide-react';
+import { User } from 'lucide-react';
 import { ComponentProps, useState } from 'react';
 import { Badge } from '@/components/base/ui/badge';
 import { formatDate } from 'date-fns';
+import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
+import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>) {
   const { t } = useI18n();
@@ -20,27 +22,34 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
     { value: 'asap', label: t('caseExploration.priority.asap'), color: 'bg-orange-500' },
     { value: 'stat', label: t('caseExploration.priority.stat'), color: 'bg-red-500' },
   ];
-  const statusOptions = [
-    { value: 'unknown', label: t('caseEntity.details.statusOptions.unknown'), icon: RotateCcw },
-    { value: 'draft', label: t('caseEntity.details.statusOptions.draft'), icon: RotateCcw },
-    { value: 'active', label: t('caseEntity.details.statusOptions.active'), icon: RotateCcw },
-    { value: 'revoke', label: t('caseEntity.details.statusOptions.revoke'), icon: RotateCcw },
-    { value: 'completed', label: t('caseEntity.details.statusOptions.completed'), icon: RotateCcw },
-    { value: 'on-hold', label: t('caseEntity.details.statusOptions.on-hold'), icon: RotateCcw },
-    { value: 'incomplete', label: t('caseEntity.details.statusOptions.incomplete'), icon: RotateCcw },
-    { value: 'submitted', label: t('caseEntity.details.statusOptions.submitted'), icon: RotateCcw },
+  
+  const statusOptionsValues = [
+    { "key": "incomplete", "label": "Incomplete" },
+    { "key": "draft", "label": "Draft" },
+    { "key": "revoke", "label": "Revoke" },
+    { "key": "active", "label": "Active" },
+    { "key": "completed", "label": "Completed" },
+    { "key": "on-hold", "label": "On-hold" },
+    { "key": "unknown", "label": "Unknown" }
   ];
+  interface IStatusOption extends IFilterButtonItem {
+    key: string;
+    label: string;
+  }
+
+  const statusOptions: IStatusOption[] = filterItemStatus(statusOptionsValues, t);
+
   const assigneeOptions = [
     { value: 'Vincent Ferretti', label: 'Vincent Ferretti' },
   ];
   // State for dropdown values
   const [priority, setPriority] = useState(caseData.priority_code || priorityOptions[0].value);
-  const [status, setStatus] = useState(caseData.status_code || statusOptions[0].value);
+  const [status, setStatus] = useState(caseData.status_code || statusOptions[0].key);
   const [assignedTo, setAssignedTo] = useState(caseData.assigned_to || assigneeOptions[0].value);
 
 
   const selectedPriority = priorityOptions.find(option => option.value === priority);
-  const selectedStatus = statusOptions.find(option => option.value === status);
+  const selectedStatus: IStatusOption | undefined = statusOptions.find(option => option.key === status);
 
   return (
     <Card {...props}>
@@ -90,7 +99,7 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                    {t('caseEntity.details.prescribingInst_tooltips')}
+                  {t('caseEntity.details.prescribingInst_tooltips')}
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -162,16 +171,16 @@ function AnalysisCard({ data, ...props }: { data: any } & ComponentProps<'div'>)
                   <SelectTrigger className="w-full h-7 bg-blue-100 text-blue-700">
                     <SelectValue>
                       <div className="flex items-center gap-2 text-xs">
-                        {selectedStatus && <selectedStatus.icon className="w-4 h-4 text-blue-500" />}
-                        <span>{status}</span>
+                        {selectedStatus && selectedStatus.icon && <selectedStatus.icon className="w-4 h-4 text-blue-500" />}
+                        <span>{selectedStatus?.label}</span>
                       </div>
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {statusOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                      <SelectItem key={option.key} value={option.key}>
                         <div className="flex items-center gap-2 text-xs">
-                          <option.icon className="w-4 h-4 text-blue-700" />
+                          {option.icon && <option.icon className="w-4 h-4 text-blue-700" />}
                           <span>{option.label}</span>
                         </div>
                       </SelectItem>
