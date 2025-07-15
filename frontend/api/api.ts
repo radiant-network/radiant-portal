@@ -101,6 +101,157 @@ export interface ApiError {
 /**
  * 
  * @export
+ * @interface Assay
+ */
+export interface Assay {
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'aliquot'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'capture_kit'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'category_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'created_on'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'experiment_description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'experimental_strategy_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'experimental_strategy_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'histology_code'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Assay
+     */
+    'is_paired_end': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'performer_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'performer_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'platform_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Assay
+     */
+    'read_length'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Assay
+     */
+    'request_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'run_alias'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'run_date'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'run_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Assay
+     */
+    'sample_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sample_type_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Assay
+     */
+    'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'status_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'submitter_sample_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'tissue_site'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'updated_on'?: string;
+}
+/**
+ * 
+ * @export
  * @interface AutoCompleteTerm
  */
 export interface AutoCompleteTerm {
@@ -2781,6 +2932,118 @@ export const VepImpact = {
 } as const;
 
 export type VepImpact = typeof VepImpact[keyof typeof VepImpact];
+
+
+
+/**
+ * AssaysApi - axios parameter creator
+ * @export
+ */
+export const AssaysApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get Assay by seq_id
+         * @summary Get Assay by seq_id
+         * @param {string} seqId Seq ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAssayBySeqId: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getAssayBySeqId', 'seqId', seqId)
+            const localVarPath = `/assays/{seq_id}`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AssaysApi - functional programming interface
+ * @export
+ */
+export const AssaysApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AssaysApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get Assay by seq_id
+         * @summary Get Assay by seq_id
+         * @param {string} seqId Seq ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAssayBySeqId(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Assay>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAssayBySeqId(seqId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AssaysApi.getAssayBySeqId']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AssaysApi - factory interface
+ * @export
+ */
+export const AssaysApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AssaysApiFp(configuration)
+    return {
+        /**
+         * Get Assay by seq_id
+         * @summary Get Assay by seq_id
+         * @param {string} seqId Seq ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAssayBySeqId(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<Assay> {
+            return localVarFp.getAssayBySeqId(seqId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AssaysApi - object-oriented interface
+ * @export
+ * @class AssaysApi
+ * @extends {BaseAPI}
+ */
+export class AssaysApi extends BaseAPI {
+    /**
+     * Get Assay by seq_id
+     * @summary Get Assay by seq_id
+     * @param {string} seqId Seq ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AssaysApi
+     */
+    public getAssayBySeqId(seqId: string, options?: RawAxiosRequestConfig) {
+        return AssaysApiFp(this.configuration).getAssayBySeqId(seqId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
 
 
 
