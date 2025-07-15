@@ -19,7 +19,6 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   const navigate = useNavigate();
   const proband = data.members[0];
   const family = data.members.filter(member => member.relationship_to_proband);
-  const hasPhenotypes = (proband.observed_phenotypes ?? []).length > 0 || (proband.non_observed_phenotypes ?? []).length > 0;
 
   return (
     <Card {...props}>
@@ -44,43 +43,33 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
               <PhenotypeConditionLink code={data.primary_condition_id} name={data.primary_condition_name} />
             </div>
 
-            {hasPhenotypes && (
-              <>
-                {/* Phenotypes */}
-                <div>
-                  <CardTitle>{t('caseEntity.details.phenotypes')}</CardTitle>
+            {/* Phenotypes */}
+            <div className='flex flex-col gap-2'>
+              <CardTitle>{t('caseEntity.details.phenotypes')}</CardTitle>
+
+              {/* Phenotypes Observed */}
+              <CardTitle size="xs" className="font-bold">
+                {t('caseEntity.details.phenotypes_observed')}
+              </CardTitle>
+              {(proband.observed_phenotypes ?? []).map(({ id, name, onset_code }: Term) => (
+                <div key={id}>
+                  <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
                 </div>
+              ))}
+              {!proband.observed_phenotypes && <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>}
 
-                {/* Phenotypes Observed */}
-                {proband.observed_phenotypes && (
-                  <div>
-                    <CardTitle size="xs" className="font-bold">
-                      {t('caseEntity.details.phenotypes_observed')}
-                    </CardTitle>
-                    {(proband.observed_phenotypes ?? []).map(({ id, name, onset_code }: Term) => (
-                      <div key={id}>
-                        <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {/* Phenotypes Non-Observed */}
+              <CardTitle size="xs" className="font-bold">
+                {t('caseEntity.details.phenotypes_non_observed')}
+              </CardTitle>
+              {(proband.non_observed_phenotypes ?? []).map(({ id, name, onset_code }: Term) => (
+                <div key={id}>
+                  <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
+                </div>
+              ))}
+              {!proband.non_observed_phenotypes && <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>}
+            </div>
 
-                {/* Phenotypes Non-Observed */}
-                {proband.non_observed_phenotypes && (
-                  <div>
-                    <CardTitle size="xs" className="font-bold">
-                      {t('caseEntity.details.phenotypes_non_observed')}
-                    </CardTitle>
-                    {(proband.non_observed_phenotypes ?? []).map(({ id, name, onset_code }: Term) => (
-                      <div key={id}>
-                        <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-
-            )}
             {/* Clinical Note */}
             <Card className="p-4 gap-4">
               <CardTitle className="text-base">{t('caseEntity.details.clinical_note')}</CardTitle>
