@@ -310,6 +310,45 @@ components:
       - count
       - list
       type: object
+    ClinvarRCV:
+      description: ClinvarRCV represents a Reference ClinVar record - data aggregated
+        by variant-condition pair
+      properties:
+        accession:
+          type: string
+        clinical_significance:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        clinvar_id:
+          type: string
+        date_last_evaluated:
+          type: string
+        locus_id:
+          type: string
+        origins:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        review_status:
+          type: string
+        review_status_stars:
+          type: integer
+        submission_count:
+          type: integer
+        traits:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        version:
+          type: integer
+      required:
+      - clinvar_id
+      - locus_id
+      type: object
     Count:
       description: Count represents count result
       properties:
@@ -2317,6 +2356,41 @@ paths:
       security:
       - bearerauth: []
       summary: Get conditions for germline variant entity for a specific gene panel
+      tags:
+      - variant
+  /variants/germline/{locus_id}/conditions/clinvar:
+    get:
+      description: Retrieve ClinVar conditions for germline variant entity
+      operationId: GetGermlineVariantConditionsClinvar
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinvarRCV'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get ClinVar conditions for germline variant entity
       tags:
       - variant
   /variants/germline/{locus_id}/consequences:

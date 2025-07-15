@@ -328,7 +328,7 @@ func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc
 	}
 }
 
-// GetGermlineVariantConditions handles retrieving ClinVar conditions for germline variant entity
+// GetGermlineVariantConditionsClinvar handles retrieving ClinVar conditions for germline variant entity
 // @Summary Get ClinVar conditions for germline variant entity
 // @Id GetGermlineVariantConditionsClinvar
 // @Description Retrieve ClinVar conditions for germline variant entity
@@ -336,7 +336,7 @@ func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
 // @Produce json
-// @Success 200 {object} types.VariantCasesFilters
+// @Success 200 {object} types.ClinvarRCV
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/conditions/clinvar [get]
