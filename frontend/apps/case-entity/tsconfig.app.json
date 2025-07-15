@@ -33,6 +33,7 @@
       "@/lib/*": ["../../components/lib/*"],
       "@/hooks/*": ["../../components/hooks/*"],
       "@/themes/*": ["../../themes/*"],
+      "@/case-exploration/*": ["../case-exploration/src/*"],
       "@/*": ["./src/*"]
     }
   },

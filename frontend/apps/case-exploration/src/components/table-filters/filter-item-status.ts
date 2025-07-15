@@ -3,7 +3,7 @@ import { FileQuestion, CircleDashed, Pen, Hourglass, RefreshCcw, Check, OctagonX
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 // Status icon mapping function
-function getStatusIcon(statusKey: string) {
+export function getStatusIcon(statusKey: string) {
   const iconMap: { [key: string]: any } = {
     'draft': Pen,
     'on-hold': Hourglass, // on-hold key == . submitted
