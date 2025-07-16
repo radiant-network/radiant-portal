@@ -19,9 +19,9 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
 
   // Dropdown options
   const priorityOptions = [
-    { value: 'routine', label: t('caseExploration.priority.routine'), color: 'bg-green-500' },
-    { value: 'urgent', label: t('caseExploration.priority.urgent'), color: 'bg-yellow-500' },
-    { value: 'asap', label: t('caseExploration.priority.asap'), color: 'bg-orange-500' },
+    { value: 'routine', label: t('caseExploration.priority.routine'), color: 'bg-gray-500' },
+    { value: 'urgent', label: t('caseExploration.priority.urgent'), color: 'bg-blue-500' },
+    { value: 'asap', label: t('caseExploration.priority.asap'), color: 'bg-amber-500' },
     { value: 'stat', label: t('caseExploration.priority.stat'), color: 'bg-red-500' },
   ];
 
