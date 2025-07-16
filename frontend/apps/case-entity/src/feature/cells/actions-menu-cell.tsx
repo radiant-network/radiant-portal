@@ -12,6 +12,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { CellContext } from '@tanstack/react-table';
 import { EllipsisVertical, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+import { Separator } from '@/components/base/ui/separator';
 
 
 type AssayInformationsDialogProps = {
@@ -23,14 +24,18 @@ function AssayInformationsDialog({ open, onClose }: AssayInformationsDialogProps
 
   return (
     <Dialog open={open} onOpenChange={(value: boolean) => onClose(value)}>
-      <DialogContent>
+      <DialogContent className="min-w-[1050px]">
         <DialogHeader>
           <DialogTitle>{t('caseEntity.details.assayDetailsDialog')}</DialogTitle>
         </DialogHeader>
 
         {/* Status */}
-        <div className="grid grid-cols-3 gap-y-3 gap-x-4 text-sm">
-          <div className='grid grid-cols-2 col-span-1'>
+        <div className="flex w-full justify-between ">
+          <div className='flex flex-col gap-2 flex-1'>
+            <div>
+              <h2 className="text-sm font-semibold">{t('caseEntity.details.assay_id')}</h2>
+            </div>
+
             <InformationField label={t('caseEntity.details.status')}><>todo</></InformationField>
 
             {/* Created On */}
@@ -67,6 +72,14 @@ function AssayInformationsDialog({ open, onClose }: AssayInformationsDialogProps
             <InformationField label={t('caseEntity.details.run_date')}>
               <>todo</>
             </InformationField>
+          </div>
+          <Separator orientation='vertical' className='mx-8' />
+          <div className='flex flex-col gap-2 flex-1'>
+            patate
+          </div>
+          <Separator orientation='vertical' className='mx-8' />
+          <div className='flex flex-col gap-2 flex-1'>
+            patate
           </div>
         </div>
       </DialogContent>
