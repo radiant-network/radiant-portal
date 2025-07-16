@@ -2645,6 +2645,12 @@ export interface VariantOverview {
     'dna_change'?: string;
     /**
      * 
+     * @type {{ [key: string]: number; }}
+     * @memberof VariantOverview
+     */
+    'exomiser_acmg_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
      * @type {number}
      * @memberof VariantOverview
      */

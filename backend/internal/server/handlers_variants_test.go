@@ -172,6 +172,44 @@ func (m *MockRepository) GetVariantClinvarConditions(locusId int) ([]types.Clinv
 	}, nil
 }
 
+type MockExomiserRepository struct{}
+type MockEmptyExomiserRepository struct{}
+
+func (m *MockExomiserRepository) GetExomiser(locusId int) ([]types.Exomiser, error) {
+	return []types.Exomiser{
+		{
+			Part:               1,
+			SeqId:              1,
+			LocusId:            strconv.Itoa(locusId),
+			Id:                 "1",
+			LocusHash:          "hash1",
+			Moi:                "AD",
+			VariantScore:       0.9,
+			GeneCombinedScore:  0.8,
+			VariantRank:        1,
+			Rank:               1,
+			Symbol:             "BRAF",
+			AcmgClassification: "Pathogenic",
+			AcmgEvidence:       types.JsonArray[string]{"PVS1", "PS1"},
+		},
+	}, nil
+}
+
+func (m *MockExomiserRepository) GetExomiserACMGClassificationCounts(locusId int) (map[string]int, error) {
+	return map[string]int{
+		"Benign":     2,
+		"Pathogenic": 1,
+	}, nil
+}
+
+func (m *MockEmptyExomiserRepository) GetExomiser(locusId int) ([]types.Exomiser, error) {
+	return nil, nil
+}
+
+func (m *MockEmptyExomiserRepository) GetExomiserACMGClassificationCounts(locusId int) (map[string]int, error) {
+	return nil, nil
+}
+
 func Test_GetVariantHeaderHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -187,8 +225,9 @@ func Test_GetVariantHeaderHandler(t *testing.T) {
 
 func Test_GetVariantOverviewHandler(t *testing.T) {
 	repo := &MockRepository{}
+	exomiserRepository := &MockEmptyExomiserRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo))
+	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository))
 
 	req, _ := http.NewRequest("GET", "/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -214,6 +253,40 @@ func Test_GetVariantOverviewHandler(t *testing.T) {
 		"sift_score":0.1,
 		"spliceai_ds":0.1,
 		"spliceai_type":["AG"]
+	}`, w.Body.String())
+}
+
+func Test_GetVariantOverviewHandler_With_ExomiserACMGClassificationCounts(t *testing.T) {
+	repo := &MockRepository{}
+	exomiserRepository := &MockExomiserRepository{}
+	router := gin.Default()
+	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository))
+
+	req, _ := http.NewRequest("GET", "/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"cadd_phred":0.1,
+		"cadd_score":0.1,
+		"fathmm_pred":"T",
+		"fathmm_score":0.1,
+		"gnomad_loeuf":0.1,
+		"gnomad_pli":0.1,
+		"gnomad_v3_af":0.01,
+		"is_canonical":false,
+		"is_mane_plus":false,
+		"is_mane_select":false,
+		"locus":"locus1",
+		"pc_wgs":3, "pf_wgs":0.99,
+		"picked_consequences":["splice acceptor"],
+		"revel_score":0.1,
+		"sift_pred":"T",
+		"sift_score":0.1,
+		"spliceai_ds":0.1,
+		"spliceai_type":["AG"],
+		"exomiser_acmg_classification_counts": {"Benign": 2, "Pathogenic": 1}
 	}`, w.Body.String())
 }
 
