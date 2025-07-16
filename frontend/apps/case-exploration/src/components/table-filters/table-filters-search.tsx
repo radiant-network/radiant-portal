@@ -84,8 +84,9 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
 
   // Handle autocomplete item selection
   const handleAutocompleteSelect = useCallback((type: string, value: string) => {
-    onSelect(type, value);
-    setSearchInput(value);
+    const trimedValue = value.trim();
+    onSelect(type, trimedValue);
+    setSearchInput(trimedValue);
     setOpen(false);
   }, [onSelect]);
 
@@ -144,9 +145,9 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
                       <CommandItem
                         className="h-[32px]"
                         key={result.value}
-                        value={`${result.value}-${category}`}
+                        value={`${result.value}::${category}`}
                         onSelect={(value) => {
-                          handleAutocompleteSelect(result.type, value.split('-')[0]);
+                          handleAutocompleteSelect(result.type, value.split('::')[0]);
                         }}
                       >
                         <IconComponent size={16} className="text-muted-foreground" />
