@@ -62,7 +62,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         {/* Title with codes */}
-        <div className="text-base font-medium">
+        <div className="text-base font-semibold">
           {`${caseData.case_analysis_code} - ${caseData.case_analysis_name}`}
         </div>
 
@@ -117,12 +117,12 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
           </div>
 
           {/* Right side - Status information with dropdowns */}
-          <div className="gap-2">
-            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm items-center">
+          <div>
+            <div className="grid md:grid-cols-[1fr_minmax(160px,180px)] grid-cols-2 gap-y-3 gap-x-2 text-sm items-center">
               <div className="flex text-muted-foreground md:justify-end justify-start">{t('caseEntity.details.priority')}</div>
               <div>
                 <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger className="w-full h-7">
+                  <SelectTrigger className="min-w-[160px] max-w-[180px] h-7">
                     <SelectValue>
                       <div className="flex items-center gap-2 text-xs">
                         {selectedPriority && <div className={`w-2 h-2 ${selectedPriority.color} rounded-full`}></div>}
@@ -146,7 +146,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
               <div className="flex text-muted-foreground md:justify-end justify-start">{t('caseEntity.details.status')}</div>
               <div>
                 <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full h-7 bg-blue-100 text-blue-700">
+                  <SelectTrigger className="min-w-[160px] max-w-[180px] h-7 bg-blue-100 text-blue-700">
                     <SelectValue>
                       <div className="flex items-center gap-2 text-xs">
                         {selectedStatus && selectedStatus.icon && <selectedStatus.icon className="w-4 h-4 text-blue-500" />}
@@ -170,7 +170,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
               <div className="flex text-muted-foreground md:justify-end justify-start">{t('caseEntity.details.assignedTo')}</div>
               <div>
                 <Select value={assignedTo} onValueChange={setAssignedTo}>
-                  <SelectTrigger className="w-full h-7">
+                  <SelectTrigger className="min-w-[160px] max-w-[180px] h-7">
                     <SelectValue>
                       <div className="flex items-center gap-2 text-xs">
                         <User className="w-4 h-4 text-muted-foreground" />
