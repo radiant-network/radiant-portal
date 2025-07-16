@@ -1,4 +1,5 @@
 import { Button } from '@/components/base/ui/button';
+import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,7 @@ import { EllipsisVertical, ExternalLink } from 'lucide-react';
 
 function CaseActionsMenuCell({ row }: CellContext<any, any>) {
   const { t } = useI18n();
+  const navigate = useNavigate();
   return (
     <div className="flex items-center justify-center">
       <DropdownMenu>
@@ -25,14 +27,17 @@ function CaseActionsMenuCell({ row }: CellContext<any, any>) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => {
+            navigate(`/case/entity/${row.original.case_id}`);
+          }}>
             <ExternalLink />
             {t('caseExploration.case.actions.view_case')}
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <ExternalLink />
-            {t('caseExploration.case.actions.view_variant')}
-          </DropdownMenuItem>
+          {/* FIXME: Wait for has_variants flag */}
+          {/* <DropdownMenuItem> */}
+          {/*   <ExternalLink /> */}
+          {/*   {t('caseExploration.case.actions.view_variant')} */}
+          {/* </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

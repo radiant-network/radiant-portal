@@ -1,9 +1,10 @@
 import { Indicator, IndicatorProps } from '@/components/base/ui/indicator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import EmptyField from '@/components/base/information/empty-field';
 import { useI18n } from '@/components/hooks/i18n';
 
 type PriorityCellProps = {
-  code: 'asap' | 'routine' | 'stat' | 'urgent';
+  code: 'asap' | 'routine' | 'stat' | 'urgent' | undefined;
 };
 
 const colors: Record<string, IndicatorProps['variant']> = {
@@ -15,6 +16,9 @@ const colors: Record<string, IndicatorProps['variant']> = {
 
 function PriorityCell({ code }: PriorityCellProps) {
   const { t } = useI18n();
+
+  if (!code) return <EmptyField />;
+
   const color = colors[code];
 
   return (
