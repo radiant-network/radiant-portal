@@ -16,6 +16,7 @@ import {
   RowPinningState,
   Row,
   ExpandedState,
+  getSortedRowModel,
 } from '@tanstack/react-table';
 
 import { cn } from '@/lib/utils';
@@ -81,7 +82,7 @@ export type TableProps<TData> = {
   };
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
-  onServerSortingChange: (sorting: SortBody[]) => void;
+  onServerSortingChange?: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProps<TData>;
   TableFilters?: TableFiltersProps;
   total?: number;
@@ -427,6 +428,7 @@ function TranstackTable<T>({
     columnResizeDirection: 'ltr',
     data,
     enableColumnResizing: true,
+    getSortedRowModel: onServerSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -514,6 +516,7 @@ function TranstackTable<T>({
    * Reset pagination at the same time
    */
   useEffect(() => {
+    if (!onServerSortingChange) return;
     if (sorting.length === 0) {
       onServerSortingChange(defaultServerSorting);
     } else {

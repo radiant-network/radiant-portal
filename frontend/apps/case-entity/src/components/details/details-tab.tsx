@@ -5,10 +5,14 @@ import AnalysisCard from './analysis-card';
 import PatientInformationCard from './patient-information-card';
 import { CaseEntity } from '@/api/api';
 import ClinicalCard from './clinical-card';
+import SequencingAndAssayInformationsCard from './sequencing-and-assay-informations-card';
 
-function DetailsTab({ data }: { data: CaseEntity }) {
-  const isLoading = false;
+type DetailsTabProps = {
+  caseEntity?: CaseEntity;
+  isLoading: boolean;
+};
 
+function DetailsTab({ data, isLoading }: DetailsTabProps) {
   if (isLoading || !data) {
     return <CaseEntityDetailsSkeleton />;
   }
@@ -18,6 +22,7 @@ function DetailsTab({ data }: { data: CaseEntity }) {
       <AnalysisCard className="lg:col-span-2" data={data} />
       <PatientInformationCard className="lg:col-span-1" data={data} />
       <ClinicalCard className="lg:col-span-3" data={data} />
+      <SequencingAndAssayInformationsCard className="lg:col-span-3" data={data} />
     </div>
   );
 }
@@ -59,6 +64,25 @@ const CaseEntityDetailsSkeleton = () => {
         <CardFooter className="px-6 py-4">
           <Skeleton className="h-6 w-full" />
         </CardFooter>
+      </Card>
+      <Card>
+        <CardContent>
+          <Skeleton className="h-6" />
+          <Separator className="my-6" />
+          <div className="space-y-4">
+            <Skeleton className="h-4" />
+            <Skeleton className="h-4" />
+            <Skeleton className="h-4" />
+            <Skeleton className="h-4" />
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="shadow-none col-span-1 md:col-span-2">
+        <CardContent>
+          <Skeleton className="h-12" />
+          <Separator className="my-6" />
+          <Skeleton className="h-12" />
+        </CardContent>
       </Card>
     </div>
   );

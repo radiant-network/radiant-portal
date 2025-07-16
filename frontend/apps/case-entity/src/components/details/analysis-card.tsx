@@ -132,16 +132,16 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 </TooltipContent>
               </Tooltip>
               <span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-help">
-                    {caseData.performer_lab_code || '--'}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {caseData.performer_lab_name || '--'}
-                </TooltipContent>
-              </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      {caseData.performer_lab_code || '--'}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {caseData.performer_lab_name || '--'}
+                  </TooltipContent>
+                </Tooltip>
               </span>
 
               <div className="text-muted-foreground">{t('caseEntity.details.requestId')}</div>

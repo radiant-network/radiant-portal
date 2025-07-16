@@ -358,6 +358,11 @@
     },
     "case": {
       "title": "Cas",
+      "actions": {
+        "view_case": "Voir cas",
+        "view_assay": "Détails du test",
+        "view_variant": "Voir variants"
+      },
       "filters": {
         "more_placeholder": "Filtres",
         "priority": "Priorité",
@@ -804,6 +809,15 @@
       "title": "Détails de Cas",
       "analysisOverview": "Aperçu de l'analyse",
       "clinicalOverview": "Clinique",
+      "SequencingAndAssayInformationsOverview": "Assays",
+      "assay_id": "ID Essai",
+      "sample_id": "ID Échantillon",
+      "sample_type_code": "Type d’échantillon",
+      "histology_code": "Histologie",
+      "experimental_strategy_code": "Strat. exp.",
+      "experimental_strategy_code_tooltips_tooltips": "Stratégie Expérimentale",
+      "status_code": "Statut de l’essai",
+      "updated_on": "Dernière modification",
       "no_variants": "Aucun variant pour ce cas",
       "no_phenotype": "Aucun phenotype reporté",
       "view_variants": "Voir variants",
