@@ -168,7 +168,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
 
             {/* Tissue site */}
             <InformationField label={t('caseEntity.details.tissue_site')}>
-              {data?.histology_code}
+              {data?.tissue_site}
             </InformationField>
 
             {/* Histology */}
