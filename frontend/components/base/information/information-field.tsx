@@ -13,33 +13,27 @@ function InformationField({
   children,
   tooltipsText,
 }: PropsWithChildren<InformationFieldProps>) {
+  const labelOrPlaceholder = label !== undefined ? label : '-';
   const labelContent = !labelTooltipsText ? (
-    label !== undefined ? (
-      label
-    ) : (
-      '-'
-    )
+    labelOrPlaceholder
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="underline decoration-dotted underline-offset-4 cursor-help">
-          {label !== undefined ? label : '-'}
+          {labelOrPlaceholder}
         </span>
       </TooltipTrigger>
       <TooltipContent>{labelTooltipsText}</TooltipContent>
     </Tooltip>
   );
 
+  const contentOrPlaceholder = children !== undefined ? children : '-';
   const content = !tooltipsText ? (
-    children !== undefined ? (
-      children
-    ) : (
-      '-'
-    )
+    contentOrPlaceholder
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="cursor-help">{children !== undefined ? children : '-'}</span>
+        <span className="cursor-help">{contentOrPlaceholder}</span>
       </TooltipTrigger>
       <TooltipContent>{tooltipsText}</TooltipContent>
     </Tooltip>
