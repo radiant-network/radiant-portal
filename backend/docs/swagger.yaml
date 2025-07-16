@@ -1226,6 +1226,8 @@ components:
           type: number
         is_canonical:
           type: boolean
+        is_mane_plus:
+          type: boolean
         is_mane_select:
           type: boolean
         locus:
@@ -1279,6 +1281,9 @@ components:
           $ref: '#/components/schemas/VepImpact'
       required:
       - gnomad_v3_af
+      - is_canonical
+      - is_mane_plus
+      - is_mane_select
       - locus
       - pf_wgs
       - picked_consequences

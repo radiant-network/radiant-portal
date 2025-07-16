@@ -2690,13 +2690,19 @@ export interface VariantOverview {
      * @type {boolean}
      * @memberof VariantOverview
      */
-    'is_canonical'?: boolean;
+    'is_canonical': boolean;
     /**
      * 
      * @type {boolean}
      * @memberof VariantOverview
      */
-    'is_mane_select'?: boolean;
+    'is_mane_plus': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VariantOverview
+     */
+    'is_mane_select': boolean;
     /**
      * 
      * @type {string}
