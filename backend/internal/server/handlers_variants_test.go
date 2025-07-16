@@ -276,7 +276,8 @@ func Test_GetVariantOverviewHandler_With_ExomiserACMGClassificationCounts(t *tes
 		"gnomad_pli":0.1,
 		"gnomad_v3_af":0.01,
 		"is_canonical":false,
-		"is_mane_select":false, 
+		"is_mane_plus":false,
+		"is_mane_select":false,
 		"locus":"locus1",
 		"pc_wgs":3, "pf_wgs":0.99,
 		"picked_consequences":["splice acceptor"],
@@ -285,7 +286,7 @@ func Test_GetVariantOverviewHandler_With_ExomiserACMGClassificationCounts(t *tes
 		"sift_score":0.1,
 		"spliceai_ds":0.1,
 		"spliceai_type":["AG"],
-        "exomiser_acmg_classification_counts": {"Benign": 2, "Pathogenic": 1}
+		"exomiser_acmg_classification_counts": {"Benign": 2, "Pathogenic": 1}
 	}`, w.Body.String())
 }
 
