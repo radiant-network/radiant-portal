@@ -319,7 +319,7 @@ ENGINE = OLAP
 DUPLICATE KEY(`part`, `seq_id`, `locus_id`,  `id`)
 PARTITION BY (`part`)
 DISTRIBUTED BY HASH(`locus_id`)
-BUCKETS 10
+BUCKETS 10;
 
 INSERT INTO clinvar (locus_id, chromosome, start, reference, alternate, name)
 VALUES
@@ -415,7 +415,8 @@ INSERT INTO test_db.exomiser
 VALUES
     (1, 1, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Pathogenic', ['PVS1', 'PM2']),
     (2, 2, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Pathogenic', ['PVS1', 'PM2']),
-    (3, 3, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Benign', ['PVS1', 'PM2'])
+    (3, 3, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Benign', ['PVS1', 'PM2']);
+
 
 CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
 		PROPERTIES
