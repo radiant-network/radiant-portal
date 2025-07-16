@@ -255,7 +255,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -410,7 +410,6 @@ function TranstackTable<T>({
     })) as SortingState,
   );
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-
 
   // Initialize tanstack table
   const table = useReactTable({
@@ -615,12 +614,12 @@ function TranstackTable<T>({
 
       {/* Empty State */}
       {loadingStates?.list === false && loadingStates?.total === false && !hasError && isEmpty && (
-        <Card className='shadow-none'>
+        <Card className="shadow-none">
           <Empty
             title={t('common.table.no_result')}
             description={t('common.table.no_result_description')}
-            size='default'
-            iconType='custom'
+            size="default"
+            iconType="custom"
             icon={SearchIcon}
           />
         </Card>
@@ -628,12 +627,12 @@ function TranstackTable<T>({
 
       {/* Error state       */}
       {loadingStates?.list === false && loadingStates?.total === false && hasError && (
-        <Card className='w-full shadow-none'>
+        <Card className="w-full shadow-none">
           <Empty
             title={t('common.table.has_error')}
             description={t('common.table.has_error_description')}
-            size='default'
-            iconType='custom'
+            size="default"
+            iconType="custom"
             icon={AlertCircle}
           />
         </Card>
@@ -696,83 +695,79 @@ function TranstackTable<T>({
 
                 {/* Render table content */}
                 {table.getCenterRows().map(rowFlexRender)}
-
               </TableBody>
             </Table>
           </DataTableSkeletonLoading>
-
         </div>
       )}
-      {
-        total > 10 && (
-          <div className={'flex items-center justify-between py-3 '}>
+      {total > 10 && (
+        <div className={'flex items-center justify-between py-3 '}>
+          <div>
+            {tableIndexResultPosition === 'bottom' && (
+              <TableIndexResult
+                loading={loadingStates?.total}
+                pageIndex={table.getState().pagination.pageIndex + 1}
+                pageSize={table.getState().pagination.pageSize}
+                total={total}
+              />
+            )}
+          </div>
+          <div className="flex items-center gap-2">
             <div>
-              {tableIndexResultPosition === 'bottom' && (
-                <TableIndexResult
-                  loading={loadingStates?.total}
-                  pageIndex={table.getState().pagination.pageIndex + 1}
-                  pageSize={table.getState().pagination.pageSize}
-                  total={total}
-                />
-              )}
+              {/* PageSize select */}
+              <Select
+                value={String(table.getState().pagination.pageSize)}
+                onValueChange={value => {
+                  table.setPageSize(Number(value));
+                }}
+              >
+                <SelectTrigger className="min-w-[125px] h-8">
+                  <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map(pageSize => (
+                    <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex items-center gap-2">
-              <div>
-                {/* PageSize select */}
-                <Select
-                  value={String(table.getState().pagination.pageSize)}
-                  onValueChange={value => {
-                    table.setPageSize(Number(value));
-                  }}
-                >
-                  <SelectTrigger className="min-w-[125px] h-8">
-                    <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[10, 20, 30, 40, 50].map(pageSize => (
-                      <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
-                        {pageSize}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                {/* Pagination */}
-                <Pagination className="w-auto">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        disabled={!table.getCanPreviousPage()}
-                        onClick={() => {
-                          if (!table.getCanPreviousPage()) return;
-                          table.previousPage();
-                        }}
-                      />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationNext
-                        disabled={!table.getCanNextPage()}
-                        onClick={() => {
-                          if (!table.getCanNextPage()) return;
-                          table.nextPage();
-                        }}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
+            <div>
+              {/* Pagination */}
+              <Pagination className="w-auto">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      disabled={!table.getCanPreviousPage()}
+                      onClick={() => {
+                        if (!table.getCanPreviousPage()) return;
+                        table.previousPage();
+                      }}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      disabled={!table.getCanNextPage()}
+                      onClick={() => {
+                        if (!table.getCanNextPage()) return;
+                        table.nextPage();
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           </div>
-        )
-      }
-    </div >
+        </div>
+      )}
+    </div>
   );
 }
 

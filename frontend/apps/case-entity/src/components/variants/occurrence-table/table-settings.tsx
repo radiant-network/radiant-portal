@@ -56,7 +56,14 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     }),
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
-      cell: info => <AnchorLinkWithTooltipsCell href={`/variants/entity/${info.row.original.locus_id}`}>{info.getValue()}</AnchorLinkWithTooltipsCell>,
+      cell: info => (
+        <AnchorLinkWithTooltipsCell
+          href={`/variants/entity/${info.row.original.locus_id}`}
+          className="overflow-hidden text-ellipsis block"
+        >
+          {info.getValue()}
+        </AnchorLinkWithTooltipsCell>
+      ),
       header: t('variant.headers.hgvsg'),
       size: 150,
       minSize: 120,
@@ -95,7 +102,11 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row, {
       id: 'is_mane_select',
       cell: info => (
-        <ManeCell isManePlus={info.getValue().is_mane_plus} isManeSelect={info.getValue().is_mane_select} isCanonical={info.getValue().is_canonical} />
+        <ManeCell
+          isManePlus={info.getValue().is_mane_plus}
+          isManeSelect={info.getValue().is_mane_select}
+          isCanonical={info.getValue().is_canonical}
+        />
       ),
       header: t('variant.headers.is_mane_select'),
       minSize: 120,
@@ -171,68 +182,68 @@ const defaultSettings = createColumnSettings([
     visible: true,
     fixed: true,
     pinningPosition: 'left',
-    label: 'variant.headers.clinical_interpretation'
+    label: 'variant.headers.clinical_interpretation',
   },
   {
     id: 'hgvsg',
     visible: true,
     pinningPosition: 'left',
-    label: 'variant.headers.hgvsg'
+    label: 'variant.headers.hgvsg',
   },
   {
     id: 'variant_class',
     visible: true,
-    label: 'variant.headers.variant_class'
+    label: 'variant.headers.variant_class',
   },
   {
     id: 'symbol',
     visible: true,
-    label: 'variant.headers.symbol'
+    label: 'variant.headers.symbol',
   },
   {
     id: 'picked_consequences',
     visible: true,
-    label: 'variant.headers.picked_consequences'
+    label: 'variant.headers.picked_consequences',
   },
   {
     id: 'is_mane_select',
     visible: true,
-    label: 'variant.headers.is_mane_select'
+    label: 'variant.headers.is_mane_select',
   },
   {
     id: 'omim_inheritance_code',
     visible: true,
-    label: 'variant.headers.omim_inheritance_code'
+    label: 'variant.headers.omim_inheritance_code',
   },
   {
     id: 'clinvar',
     visible: true,
-    label: 'variant.headers.clinvar'
+    label: 'variant.headers.clinvar',
   },
   {
     id: 'gnomad_v3_af',
     visible: true,
-    label: 'variant.headers.gnomad_v3_af'
+    label: 'variant.headers.gnomad_v3_af',
   },
   {
     id: 'pf_wgs',
     visible: true,
-    label: 'variant.headers.pf_wgs'
+    label: 'variant.headers.pf_wgs',
   },
   {
     id: 'genotype_quality',
     visible: true,
-    label: 'variant.headers.genotype_quality'
+    label: 'variant.headers.genotype_quality',
   },
   {
     id: 'zygosity',
     visible: true,
-    label: 'variant.headers.zygosity'
+    label: 'variant.headers.zygosity',
   },
   {
     id: 'ad_ratio',
     visible: true,
-    label: 'variant.headers.ad_ratio'
+    label: 'variant.headers.ad_ratio',
   },
 ]);
 
