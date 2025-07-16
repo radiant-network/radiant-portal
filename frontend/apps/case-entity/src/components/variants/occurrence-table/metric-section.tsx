@@ -1,11 +1,11 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpendedOccurrence } from '@/api/api';
+import { ExpandedOccurrence } from '@/api/api';
 import { Triangle } from 'lucide-react';
 import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
 
 type MetricSectionProps = {
-  data: ExpendedOccurrence;
+  data: ExpandedOccurrence;
 };
 
 export default function MetricSection({ data }: MetricSectionProps) {
@@ -23,12 +23,12 @@ export default function MetricSection({ data }: MetricSectionProps) {
   )
 
   return (
-    <DetailSection title={t('occurrenceExpend.metrics.title')}>
-      <DetailItem title={t('occurrenceExpend.metrics.qualityDepth')} value="-" />
-      <DetailItem title={t('occurrenceExpend.metrics.alleleDepthAlt')} value={data?.ad_alt ? data.ad_alt : '-'} />
-      <DetailItem title={t('occurrenceExpend.metrics.totalDepthAltRef')} value={data?.ad_total || '-'} />
-      <DetailItem title={t('occurrenceExpend.metrics.genotypeQuality')} value={genotypeQualityValue} />
-      <DetailItem title={t('occurrenceExpend.metrics.filter')} value={data?.filter ? data?.filter : '-'} />
+    <DetailSection title={t('occurrenceExpand.metrics.title')}>
+      <DetailItem title={t('occurrenceExpand.metrics.qualityDepth')} value="-" />
+      <DetailItem title={t('occurrenceExpand.metrics.alleleDepthAlt')} value={data?.ad_alt ? data.ad_alt : '-'} />
+      <DetailItem title={t('occurrenceExpand.metrics.totalDepthAltRef')} value={data?.ad_total || '-'} />
+      <DetailItem title={t('occurrenceExpand.metrics.genotypeQuality')} value={genotypeQualityValue} />
+      <DetailItem title={t('occurrenceExpand.metrics.filter')} value={data?.filter ? data?.filter : '-'} />
     </DetailSection>
   );
 }

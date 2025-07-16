@@ -1,14 +1,14 @@
-import { ExpendedOccurrence, Occurrence } from '@/api/api';
+import { ExpandedOccurrence, Occurrence } from '@/api/api';
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
 import { Separator } from '@/components/base/ui/separator';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 
-type OccurrenceExpendTranscriptProps = {
+type OccurrenceExpandTranscriptProps = {
   occurrence: Occurrence;
-  expendedOccurrence: ExpendedOccurrence;
+  expandedOccurrence: ExpandedOccurrence;
 };
 
-export default function OccurrenceExpendTranscript({ occurrence, expendedOccurrence }: OccurrenceExpendTranscriptProps) {
+export default function OccurrenceExpandTranscript({ occurrence, expandedOccurrence }: OccurrenceExpandTranscriptProps) {
   const arn = occurrence.hgvsg.split(':')[1];
 
   return (
@@ -19,9 +19,9 @@ export default function OccurrenceExpendTranscript({ occurrence, expendedOccurre
           <Separator orientation="vertical" className="h-5" />
         </>
       )}
-      {expendedOccurrence.exon_rank && expendedOccurrence.exon_total && (
+      {expandedOccurrence.exon_rank && expandedOccurrence.exon_total && (
         <>
-          <div>Exon: {expendedOccurrence.exon_rank} / {expendedOccurrence.exon_total}</div>
+          <div>Exon: {expandedOccurrence.exon_rank} / {expandedOccurrence.exon_total}</div>
           <Separator orientation="vertical" className="h-5" />
         </>
       )}

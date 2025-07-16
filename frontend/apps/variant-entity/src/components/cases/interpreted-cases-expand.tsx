@@ -1,4 +1,4 @@
-import { VariantExpendedInterpretedCase, VariantInterpretedCase } from '@/api/api';
+import { VariantExpandedInterpretedCase, VariantInterpretedCase } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
@@ -10,19 +10,19 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 
-interface InterpretedCasesExpendProps {
+interface InterpretedCasesExpandProps {
   locusId: string;
   data: VariantInterpretedCase;
 }
 
-type VariantExpendedInterpretedCaseInput = {
+type VariantExpandedInterpretedCaseInput = {
   locusId: string;
   seqId: string;
   transcriptId: string;
 };
 
-async function fetchOccurrenceExpend(input: VariantExpendedInterpretedCaseInput) {
-  const response = await variantsApi.getExpendedGermlineVariantInterpretedCase(
+async function fetchOccurrenceExpand(input: VariantExpandedInterpretedCaseInput) {
+  const response = await variantsApi.getExpandedGermlineVariantInterpretedCase(
     input.locusId,
     input.seqId,
     input.transcriptId,
@@ -30,18 +30,18 @@ async function fetchOccurrenceExpend(input: VariantExpendedInterpretedCaseInput)
   return response.data;
 }
 
-function InterpretedCasesExpend({ locusId, data }: InterpretedCasesExpendProps) {
-  const { data: expendedData, isLoading } = useSWR<
-    VariantExpendedInterpretedCase,
+function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpandProps) {
+  const { data: expandedData, isLoading } = useSWR<
+    VariantExpandedInterpretedCase,
     any,
-    VariantExpendedInterpretedCaseInput
+    VariantExpandedInterpretedCaseInput
   >(
     {
       locusId: locusId.toString(),
       seqId: data.seq_id.toString(),
       transcriptId: data.transcript_id,
     },
-    fetchOccurrenceExpend,
+    fetchOccurrenceExpand,
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -77,18 +77,18 @@ function InterpretedCasesExpend({ locusId, data }: InterpretedCasesExpendProps) 
         <div className="space-y-6 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 text-muted-foreground">
             <div className="flex gap-1 items-center">
-              <User size={16} /> <span className="text-sm">{expendedData?.patient_id || '-'}</span>
+              <User size={16} /> <span className="text-sm">{expandedData?.patient_id || '-'}</span>
             </div>
             <div className="flex gap-1 items-center">
               <Stethoscope size={16} />
-              <span className="text-sm">{expendedData?.interpreter_name || '-'}</span>
+              <span className="text-sm">{expandedData?.interpreter_name || '-'}</span>
             </div>
           </div>
           <div
             className="text-sm whitespace-break-spaces"
             dangerouslySetInnerHTML={{
-              __html: expendedData?.interpretation
-                ? sanitizeHtml(decodeHtmlEntities(expendedData.interpretation))
+              __html: expandedData?.interpretation
+                ? sanitizeHtml(decodeHtmlEntities(expandedData.interpretation))
                 : '-',
             }}
           />
@@ -102,13 +102,13 @@ function InterpretedCasesExpend({ locusId, data }: InterpretedCasesExpendProps) 
       <Separator className="mt-6 mb-4" />
       <div className="flex flex-wrap items-center gap-4 sm:gap-10">
         <div className="flex items-center gap-2">
-          <div className="text-sm font-medium">{expendedData?.gene_symbol || '-'}</div>
+          <div className="text-sm font-medium">{expandedData?.gene_symbol || '-'}</div>
           <div className="text-xs underline hover:cursor-pointer">NM_21360026</div>
         </div>
-        {expendedData?.classification_criterias && expendedData?.classification_criterias.length > 0 && (
+        {expandedData?.classification_criterias && expandedData?.classification_criterias.length > 0 && (
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              {expendedData?.classification_criterias.map(criteria => (
+              {expandedData?.classification_criterias.map(criteria => (
                 <Badge variant="outline" key={criteria}>
                   {criteria}
                 </Badge>
@@ -120,18 +120,18 @@ function InterpretedCasesExpend({ locusId, data }: InterpretedCasesExpendProps) 
           <Badge variant="outline">AD</Badge>
           <Badge variant="outline">XLD</Badge>
         </div>
-        {expendedData?.patient_sex_code && (
+        {expandedData?.patient_sex_code && (
           <div className="flex items-center gap-2">
             <div className="p-1 border rounded">
-              {expendedData?.patient_sex_code === 'male' ? <Mars size={14.4} /> : <Venus size={14.4} />}
+              {expandedData?.patient_sex_code === 'male' ? <Mars size={14.4} /> : <Venus size={14.4} />}
             </div>
           </div>
         )}
         <div className="flex items-center gap-2 text-xs">
           <span>PMID:</span>
-          {expendedData?.pubmed_ids && expendedData?.pubmed_ids.length > 0 ? (
+          {expandedData?.pubmed_ids && expandedData?.pubmed_ids.length > 0 ? (
             <div className="underline hover:cursor-pointer space-x-2">
-              {expendedData?.pubmed_ids.map(pubmed => (
+              {expandedData?.pubmed_ids.map(pubmed => (
                 <div key={pubmed}>{pubmed}</div>
               ))}
             </div>
@@ -144,4 +144,4 @@ function InterpretedCasesExpend({ locusId, data }: InterpretedCasesExpendProps) 
   );
 }
 
-export default InterpretedCasesExpend;
+export default InterpretedCasesExpand;

@@ -715,7 +715,7 @@
       }
     }
   },
-  "occurrenceExpend": {
+  "occurrenceExpand": {
     "actions": {
       "downloadReport": "Télécharger le rapport",
       "openIGV": "Ouvrir IGV",

@@ -104,7 +104,7 @@ func main() {
 	occurrencesGermlineGroup.POST("/:seq_id/list", server.OccurrencesGermlineListHandler(repoOccurrences))
 	occurrencesGermlineGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repoOccurrences))
 	occurrencesGermlineGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repoOccurrences))
-	occurrencesGermlineGroup.GET("/:seq_id/:locus_id/expended", server.GetExpendedGermlineOccurrence(repoOccurrences))
+	occurrencesGermlineGroup.GET("/:seq_id/:locus_id/expanded", server.GetExpandedGermlineOccurrence(repoOccurrences))
 
 	interpretationsGroup := r.Group("/interpretations")
 	interpretationsGroup.Use(roleAccessMiddleware)
@@ -140,7 +140,7 @@ func main() {
 	variantsGermlineGroup.GET("/:locus_id/consequences", server.GetGermlineVariantConsequences(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/interpreted", server.GetGermlineVariantInterpretedCases(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/uninterpreted", server.GetGermlineVariantUninterpretedCases(repoVariants))
-	variantsGermlineGroup.GET("/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpendedGermlineVariantInterpretedCase(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpandedGermlineVariantInterpretedCase(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repoVariants))
 	variantsGermlineGroup.GET("/cases/filters", server.GetGermlineVariantCasesFilters(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repoGenePanels))

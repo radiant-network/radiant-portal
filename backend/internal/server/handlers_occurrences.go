@@ -1,11 +1,12 @@
 package server
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"net/http"
-	"strconv"
 )
 
 // OccurrencesGermlineListHandler handles list of germline occurrences
@@ -201,20 +202,20 @@ func OccurrencesGermlineStatisticsHandler(repo repository.OccurrencesDAO) gin.Ha
 	}
 }
 
-// GetExpendedGermlineOccurrence handles retrieving expended information about germline occurrence
-// @Summary Get a germline ExpendedOccurrence
-// @Id getExpendedGermlineOccurrence
-// @Description Retrieve ExpendedOccurrence data for a given locus ID
+// GetExpandedGermlineOccurrence handles retrieving expanded information about germline occurrence
+// @Summary Get a germline ExpandedOccurrence
+// @Id getExpandedGermlineOccurrence
+// @Description Retrieve ExpandedOccurrence data for a given locus ID
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
-// @Success 200 {object} types.ExpendedOccurrence
+// @Success 200 {object} types.ExpandedOccurrence
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/{seq_id}/{locus_id}/expended [get]
-func GetExpendedGermlineOccurrence(repo repository.OccurrencesDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/{seq_id}/{locus_id}/expanded [get]
+func GetExpandedGermlineOccurrence(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {
@@ -226,15 +227,15 @@ func GetExpendedGermlineOccurrence(repo repository.OccurrencesDAO) gin.HandlerFu
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		expendedOccurrence, err := repo.GetExpendedOccurrence(seqId, locusId)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(seqId, locusId)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		if expendedOccurrence == nil {
+		if expandedOccurrence == nil {
 			HandleNotFoundError(c, "occurrence")
 			return
 		}
-		c.JSON(http.StatusOK, expendedOccurrence)
+		c.JSON(http.StatusOK, expandedOccurrence)
 	}
 }

@@ -3,7 +3,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useState } from 'react';
 import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table-settings';
 import { PaginationState } from '@tanstack/table-core';
-import InterpretedCasesExpend from './interpreted-cases-expend';
+import InterpretedCasesExpand from './interpreted-cases-expand';
 import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './interpreted-cases-filters';
 import { useParams } from 'react-router';
 import { ApiError, ListBodyWithCriteria, VariantInterpretedCasesSearchResponse } from '@/api/api';
@@ -66,7 +66,7 @@ function InterpretedCasesTable() {
         pagination={pagination}
         onPaginationChange={setPagination}
         onServerSortingChange={() => {}}
-        subComponent={data => <InterpretedCasesExpend locusId={params.locusId!} data={data} />}
+        subComponent={data => <InterpretedCasesExpand locusId={params.locusId!} data={data} />}
         tableIndexResultPosition="bottom"
       />
     </div>

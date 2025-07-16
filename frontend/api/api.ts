@@ -900,289 +900,289 @@ export interface CountBodyWithSqon {
 /**
  * 
  * @export
- * @interface ExpendedOccurrence
+ * @interface ExpandedOccurrence
  */
-export interface ExpendedOccurrence {
+export interface ExpandedOccurrence {
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'aa_change'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'ad_alt'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'ad_total'?: number;
     /**
      * TODO
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'af'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'cadd_phred'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'cadd_score'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'chromosome'?: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'clinvar'?: Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'dann_score'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'dna_change'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'end'?: number;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'exomiser_acmg_evidence': Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'exomiser_gene_combined_score': number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'exon_rank'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'exon_total'?: number;
     /**
      * 
      * @type {Array<number>}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'father_calls'?: Array<number>;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'fathmm_pred'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'fathmm_score'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'filter'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'genotype_quality': number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'gnomad_loeuf'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'gnomad_pli'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'gnomad_v3_af': number;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'hgvsg': string;
     /**
      * 
      * @type {boolean}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'is_canonical'?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'is_mane_plus'?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'is_mane_select'?: boolean;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'locus': string;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'locus_id': string;
     /**
      * 
      * @type {Array<number>}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'mother_calls'?: Array<number>;
     /**
      * 
      * @type {Array<OmimGenePanel>}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'omim_conditions'?: Array<OmimGenePanel>;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'parental_origin'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'pf_wgs'?: number;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'picked_consequences': Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'qd'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'revel_score'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'rsnumber'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'sift_pred'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'sift_score'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'spliceai_ds'?: number;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'spliceai_type'?: Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'start'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'symbol'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'transcript_id'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'transmission'?: string;
     /**
      * 
      * @type {VepImpact}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'vep_impact'?: VepImpact;
     /**
      * 
      * @type {string}
-     * @memberof ExpendedOccurrence
+     * @memberof ExpandedOccurrence
      */
     'zygosity'?: string;
 }
@@ -2408,55 +2408,55 @@ export interface VariantConsequence {
 /**
  * 
  * @export
- * @interface VariantExpendedInterpretedCase
+ * @interface VariantExpandedInterpretedCase
  */
-export interface VariantExpendedInterpretedCase {
+export interface VariantExpandedInterpretedCase {
     /**
      * 
      * @type {Array<string>}
-     * @memberof VariantExpendedInterpretedCase
+     * @memberof VariantExpandedInterpretedCase
      */
     'classification_criterias': Array<string>;
     /**
      * 
      * @type {string}
-     * @memberof VariantExpendedInterpretedCase
+     * @memberof VariantExpandedInterpretedCase
      */
     'gene_symbol': string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof VariantExpendedInterpretedCase
+     * @memberof VariantExpandedInterpretedCase
      */
     'inheritances': Array<string>;
     /**
      * 
      * @type {string}
-     * @memberof VariantExpendedInterpretedCase
+     * @memberof VariantExpandedInterpretedCase
      */
     'interpretation': string;
     /**
      * 
      * @type {string}
-     * @memberof VariantExpendedInterpretedCase
+     * @memberof VariantExpandedInterpretedCase
      */
     'interpreter_name': string;
     /**
      * 
      * @type {number}
-     * @memberof VariantExpendedInterpretedCase
+     * @memberof VariantExpandedInterpretedCase
      */
     'patient_id': number;
     /**
      * 
      * @type {string}
-     * @memberof VariantExpendedInterpretedCase
+     * @memberof VariantExpandedInterpretedCase
      */
     'patient_sex_code': string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof VariantExpendedInterpretedCase
+     * @memberof VariantExpandedInterpretedCase
      */
     'pubmed_ids': Array<string>;
 }
@@ -4356,19 +4356,19 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a germline ExpendedOccurrence
+         * Retrieve ExpandedOccurrence data for a given locus ID
+         * @summary Get a germline ExpandedOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpendedGermlineOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getExpandedGermlineOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getExpendedGermlineOccurrence', 'seqId', seqId)
+            assertParamExists('getExpandedGermlineOccurrence', 'seqId', seqId)
             // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getExpendedGermlineOccurrence', 'locusId', locusId)
-            const localVarPath = `/occurrences/germline/{seq_id}/{locus_id}/expended`
+            assertParamExists('getExpandedGermlineOccurrence', 'locusId', locusId)
+            const localVarPath = `/occurrences/germline/{seq_id}/{locus_id}/expanded`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -4524,17 +4524,17 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a germline ExpendedOccurrence
+         * Retrieve ExpandedOccurrence data for a given locus ID
+         * @summary Get a germline ExpandedOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getExpendedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpendedOccurrence>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpendedGermlineOccurrence(seqId, locusId, options);
+        async getExpandedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineOccurrence(seqId, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpendedGermlineOccurrence']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedGermlineOccurrence']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -4598,15 +4598,15 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.countGermlineOccurrences(seqId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve ExpendedOccurrence data for a given locus ID
-         * @summary Get a germline ExpendedOccurrence
+         * Retrieve ExpandedOccurrence data for a given locus ID
+         * @summary Get a germline ExpandedOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpendedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpendedOccurrence> {
-            return localVarFp.getExpendedGermlineOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
+        getExpandedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedOccurrence> {
+            return localVarFp.getExpandedGermlineOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * List germline occurrences for a given sequence ID
@@ -4667,16 +4667,16 @@ export class OccurrencesApi extends BaseAPI {
     }
 
     /**
-     * Retrieve ExpendedOccurrence data for a given locus ID
-     * @summary Get a germline ExpendedOccurrence
+     * Retrieve ExpandedOccurrence data for a given locus ID
+     * @summary Get a germline ExpandedOccurrence
      * @param {string} seqId Sequence ID
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public getExpendedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).getExpendedGermlineOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
+    public getExpandedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getExpandedGermlineOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5040,21 +5040,21 @@ export class UserSetsApi extends BaseAPI {
 export const VariantApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Retrieve germline expended interpreted case for a given locus, sequencing and transcript
-         * @summary Get expended germline interpreted case for a given locus, sequencing and transcript
+         * Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
+         * @summary Get expanded germline interpreted case for a given locus, sequencing and transcript
          * @param {string} locusId Locus ID
          * @param {string} seqId Seq ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpendedGermlineVariantInterpretedCase: async (locusId: string, seqId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getExpandedGermlineVariantInterpretedCase: async (locusId: string, seqId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getExpendedGermlineVariantInterpretedCase', 'locusId', locusId)
+            assertParamExists('getExpandedGermlineVariantInterpretedCase', 'locusId', locusId)
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getExpendedGermlineVariantInterpretedCase', 'seqId', seqId)
+            assertParamExists('getExpandedGermlineVariantInterpretedCase', 'seqId', seqId)
             // verify required parameter 'transcriptId' is not null or undefined
-            assertParamExists('getExpendedGermlineVariantInterpretedCase', 'transcriptId', transcriptId)
+            assertParamExists('getExpandedGermlineVariantInterpretedCase', 'transcriptId', transcriptId)
             const localVarPath = `/variants/germline/{locus_id}/cases/interpreted/{seq_id}/{transcript_id}`
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
@@ -5455,18 +5455,18 @@ export const VariantApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VariantApiAxiosParamCreator(configuration)
     return {
         /**
-         * Retrieve germline expended interpreted case for a given locus, sequencing and transcript
-         * @summary Get expended germline interpreted case for a given locus, sequencing and transcript
+         * Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
+         * @summary Get expanded germline interpreted case for a given locus, sequencing and transcript
          * @param {string} locusId Locus ID
          * @param {string} seqId Seq ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getExpendedGermlineVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantExpendedInterpretedCase>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpendedGermlineVariantInterpretedCase(locusId, seqId, transcriptId, options);
+        async getExpandedGermlineVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantExpandedInterpretedCase>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineVariantInterpretedCase(locusId, seqId, transcriptId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['VariantApi.getExpendedGermlineVariantInterpretedCase']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getExpandedGermlineVariantInterpretedCase']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5600,16 +5600,16 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = VariantApiFp(configuration)
     return {
         /**
-         * Retrieve germline expended interpreted case for a given locus, sequencing and transcript
-         * @summary Get expended germline interpreted case for a given locus, sequencing and transcript
+         * Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
+         * @summary Get expanded germline interpreted case for a given locus, sequencing and transcript
          * @param {string} locusId Locus ID
          * @param {string} seqId Seq ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpendedGermlineVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantExpendedInterpretedCase> {
-            return localVarFp.getExpendedGermlineVariantInterpretedCase(locusId, seqId, transcriptId, options).then((request) => request(axios, basePath));
+        getExpandedGermlineVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantExpandedInterpretedCase> {
+            return localVarFp.getExpandedGermlineVariantInterpretedCase(locusId, seqId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve cases count for a given locus id
@@ -5715,8 +5715,8 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
  */
 export class VariantApi extends BaseAPI {
     /**
-     * Retrieve germline expended interpreted case for a given locus, sequencing and transcript
-     * @summary Get expended germline interpreted case for a given locus, sequencing and transcript
+     * Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
+     * @summary Get expanded germline interpreted case for a given locus, sequencing and transcript
      * @param {string} locusId Locus ID
      * @param {string} seqId Seq ID
      * @param {string} transcriptId Transcript ID
@@ -5724,8 +5724,8 @@ export class VariantApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getExpendedGermlineVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getExpendedGermlineVariantInterpretedCase(locusId, seqId, transcriptId, options).then((request) => request(this.axios, this.basePath));
+    public getExpandedGermlineVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getExpandedGermlineVariantInterpretedCase(locusId, seqId, transcriptId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

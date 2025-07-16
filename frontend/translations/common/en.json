@@ -700,7 +700,7 @@
       }
     }
   },
-  "occurrenceExpend": {
+  "occurrenceExpand": {
     "actions": {
       "downloadReport": "Download report",
       "openIGV": "Open IGV",

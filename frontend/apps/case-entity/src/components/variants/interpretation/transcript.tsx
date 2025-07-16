@@ -3,11 +3,11 @@ import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
-import { ExpendedOccurrence } from '@/api/api';
+import { ExpandedOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type InterpretationTranscriptProps = {
-  occurrence?: ExpendedOccurrence;
+  occurrence?: ExpandedOccurrence;
 };
 
 function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps) {

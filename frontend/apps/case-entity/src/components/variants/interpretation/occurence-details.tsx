@@ -1,4 +1,4 @@
-import { ExpendedOccurrence } from '@/api/api';
+import { ExpandedOccurrence } from '@/api/api';
 import ClassificationSection from '../occurrence-table/classification-section';
 import PredictionSection from '../occurrence-table/prediction-section';
 import FrequencySection from '../occurrence-table/frequency-section';
@@ -7,7 +7,7 @@ import GeneSection from '../occurrence-table/gene-section';
 import ClinicalAssociationSection from '../occurrence-table/clinical-association-section';
 
 interface OccurrenceDetailsProps {
-  occurrence?: ExpendedOccurrence;
+  occurrence?: ExpandedOccurrence;
 }
 
 function OccurrenceDetails({ occurrence }: OccurrenceDetailsProps) {
