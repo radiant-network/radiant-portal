@@ -5,7 +5,7 @@ import AnalysisCard from './analysis-card';
 import PatientInformationCard from './patient-information-card';
 import { CaseEntity } from '@/api/api';
 import ClinicalCard from './clinical-card';
-import SequencingAndAssayInformationsCard from './sequencing-and-assay-informations-card';
+import AssayInformationsCard from './assay-informations-card';
 
 type DetailsTabProps = {
   caseEntity?: CaseEntity;
@@ -22,7 +22,7 @@ function DetailsTab({ data, isLoading }: DetailsTabProps) {
       <AnalysisCard className="lg:col-span-2" data={data} />
       <PatientInformationCard className="lg:col-span-1" data={data} />
       <ClinicalCard className="lg:col-span-3" data={data} />
-      <SequencingAndAssayInformationsCard className="lg:col-span-3" data={data} />
+      <AssayInformationsCard className="lg:col-span-3" data={data} />
     </div>
   );
 }
