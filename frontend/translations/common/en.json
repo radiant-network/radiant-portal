@@ -792,6 +792,7 @@
       "managingOrg_tooltips": "Organization managing the patient’s file"
     },
     "details": {
+      "date_format_tooltips": "yyyy-mm-dd",
       "title": "Case Details",
       "analysisOverview": "Analysis Overview",
       "clinicalOverview": "Clinical",
@@ -815,9 +816,7 @@
       "phenotypes_non_observed": "Non-Observed",
       "clinical_note": "Clinical Note",
       "createdOn": "Created on",
-      "createdOn_tooltips": "yyyy-mm-dd",
       "lastUpdate": "Last Update",
-      "lastUpdate_tooltips": "yyyy-mm-dd",
       "prescriber": "Prescriber",
       "prescribingInst": "Prescribing Inst.",
       "prescribingInst_tooltips": "Prescribing institution",

@@ -5,7 +5,7 @@ import { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/ui/tabs';
 import { formatDate } from 'date-fns';
 import { CopyButton } from '@/components/base/buttons/copy-button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import InformationField from '@/components/base/information/information-field';
 
 enum CaseType {
   germline_solo = 'germline_solo',
@@ -24,53 +24,42 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
-      <div className="text-muted-foreground">{t('caseEntity.patientInformation.id')}</div>
-      <div className="font-medium">{member.patient_id || '--'}</div>
+    <div className="flex w-full justify-between gap-4">
+              
+    <div className="flex flex-col gap-2 flex-1">
+      <InformationField
+        label={t('caseEntity.patientInformation.id')}
+      >
+        {member.patient_id}
+      </InformationField>
 
-      {/* TODO: to be implemented after mvp */}
-      {/* 
-      <div className="text-muted-foreground">{t('caseEntity.patientInformation.name')}</div>
-      <div className="font-medium text-muted-foreground">--</div>
-      */}
-      
-      <div className="text-muted-foreground">{t('caseEntity.patientInformation.dob')}</div>
-      <div>{member.date_of_birth ? formatDate(member.date_of_birth, t('common.date')) : '--'}</div>
+      <InformationField
+        label={t('caseEntity.patientInformation.dob')}
+        tooltipsText={t('caseEntity.details.date_format_tooltips')}
+      >
+        {member.date_of_birth && formatDate(member.date_of_birth, t('common.date'))}
+      </InformationField>
 
-      <div className="text-muted-foreground">{t('caseEntity.patientInformation.sex')}</div>
-      <div className="capitalize">{member.sex_code || '--'}</div>
+      <InformationField label={t('caseEntity.patientInformation.sex')} >
+        {member.sex_code}
+      </InformationField>
 
-      {/* TODO: to be implemented after mvp */}
-      {/* 
-      <div className="text-muted-foreground">{t('caseEntity.patientInformation.jhn')}</div>
-      <div className="text-muted-foreground">--</div> 
-      */}
-
-      <div className="text-muted-foreground">{t('caseEntity.patientInformation.mrn')}</div>
-      <div className="flex items-center">
+      <InformationField 
+        label={t('caseEntity.patientInformation.mrn')}
+      >
         {member.mrn && (
-          <CopyButton value={member.mrn} label={member.mrn || '--'} className="-m-2" />
+          <CopyButton value={member.mrn} label={member.mrn} className="-m-2" />
         )}
-      </div>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
-            {t('caseEntity.patientInformation.managingOrg')}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          {t('caseEntity.patientInformation.managingOrg_tooltips')}
-        </TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-        <div>{member.managing_organization_code || '--'}</div>
-        </TooltipTrigger>
-        <TooltipContent>
-          {member.managing_organization_name || '--'}
-        </TooltipContent>
-      </Tooltip>
-      
+      </InformationField>
+
+      <InformationField
+        label={t('caseEntity.patientInformation.managingOrg')}
+        labelTooltipsText={t('caseEntity.patientInformation.managingOrg_tooltips')}
+        tooltipsText={member.managing_organization_name}
+      >
+        {member.managing_organization_code}
+      </InformationField>
+    </div>
     </div>
   );
 }
