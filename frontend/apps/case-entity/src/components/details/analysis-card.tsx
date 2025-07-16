@@ -9,6 +9,7 @@ import { formatDate } from 'date-fns';
 import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 import { CaseEntity, CaseTask } from '@/api/api';
+import InformationField from '@/components/base/information/information-field';
 
 function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
   const { t } = useI18n();
@@ -68,84 +69,50 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
         {/* Main content grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left side - Static information */}
-          <div className="gap-4">
-            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
-              <div className="text-muted-foreground">{t('caseEntity.details.createdOn')}</div>
-              <span className="cursor-help">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help">
-                      {caseData.created_on ? formatDate(caseData.created_on, t('common.date')) : '--'}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t('caseEntity.details.createdOn_tooltips')}
-                  </TooltipContent>
-                </Tooltip>
-              </span>
+          <div className="flex w-full justify-between gap-4">
+              
+            <div className="flex flex-col gap-2 flex-1">
+              <InformationField
+                label={t('caseEntity.details.createdOn')}
+                tooltipsText={t('caseEntity.details.date_format_tooltips')}
+              >
+                {caseData.created_on && formatDate(caseData.created_on, t('common.date'))}
+              </InformationField>
 
-              <div className="text-muted-foreground">{t('caseEntity.details.lastUpdate')}</div>
-              <span className="cursor-help">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help">
-                      {caseData.updated_on ? formatDate(caseData.updated_on, t('common.date')) : '--'}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t('caseEntity.details.lastUpdate_tooltips')}
-                  </TooltipContent>
-                </Tooltip>
-              </span>
+              <InformationField 
+                label={t('caseEntity.details.lastUpdate')}
+                tooltipsText={t('caseEntity.details.date_format_tooltips')}
+              >
+                {caseData.updated_on && formatDate(caseData.updated_on, t('common.date'))}
+              </InformationField>
 
-              <div className="text-muted-foreground">{t('caseEntity.details.prescriber')}</div>
-              <div>{caseData.prescriber || '--'}</div>
+              <InformationField
+                label={t('caseEntity.details.prescriber')}
+              >
+                {caseData.prescriber}
+              </InformationField>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
-                    {t('caseEntity.details.prescribingInst')}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t('caseEntity.details.prescribingInst_tooltips')}
-                </TooltipContent>
-              </Tooltip>
-              <span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help">
-                      {caseData.requested_by_code || '--'}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {caseData.requested_by_name || '--'}
-                  </TooltipContent>
-                </Tooltip>
-              </span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">{t('caseEntity.details.diagLab')}</div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t('caseEntity.details.diagLab_tooltips')}
-                </TooltipContent>
-              </Tooltip>
-              <span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help">
-                      {caseData.performer_lab_code || '--'}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {caseData.performer_lab_name || '--'}
-                  </TooltipContent>
-                </Tooltip>
-              </span>
+              <InformationField
+                label={t('caseEntity.details.prescribingInst')}
+                labelTooltipsText={t('caseEntity.details.prescribingInst_tooltips')}
+                tooltipsText={caseData.requested_by_name}
+              >
+                {caseData.requested_by_code}
+              </InformationField>
 
-              <div className="text-muted-foreground">{t('caseEntity.details.requestId')}</div>
-              <div>{caseData.request_id || '--'}</div>
+              <InformationField
+                label={t('caseEntity.details.diagLab')}
+                tooltipsText={caseData.performer_lab_name}
+                labelTooltipsText={t('caseEntity.details.diagLab_tooltips')}
+              >
+                {caseData.performer_lab_code}
+              </InformationField>
+
+              <InformationField
+                label={t('caseEntity.details.requestId')}
+              >
+                {caseData.request_id}
+              </InformationField>
             </div>
           </div>
 
@@ -272,11 +239,11 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 {caseData.members.length > 1 && (
                   <div className="p-3 flex items-start flex-col md:flex-row gap-1">
                     {bioInfo.patients.map((patient: string, index: number) => (
-                      <Badge  key={index} variant="outline" className="text-xs">{t(`caseEntity.patientInformation.relationships.${patient}`)}</Badge>
+                      <Badge key={index} variant="outline" className="text-xs">{t(`caseEntity.patientInformation.relationships.${patient}`)}</Badge>
                     ))}
                   </div>
                 )}
-                <div className="p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '--'}</div>
+                <div className="p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '-'}</div>
               </div>
             )) : <div className="p-3 text-sm">{t('caseEntity.details.noTaskFound')}</div>}
           </div>
