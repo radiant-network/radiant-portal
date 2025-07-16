@@ -1,4 +1,4 @@
-import { Configuration, OccurrencesApi, InterpretationsApi, MondoApi, VariantApi, CasesApi } from '../api';
+import { Configuration, OccurrencesApi, InterpretationsApi, MondoApi, VariantApi, CasesApi, AssaysApi } from '../api';
 import { BASE_PATH } from '../api/base';
 import { axiosClient } from './axios';
 
@@ -11,3 +11,4 @@ export const occurrencesApi = new OccurrencesApi(config, BASE_PATH, axiosClient)
 export const interpretationApi = new InterpretationsApi(config, BASE_PATH, axiosClient);
 export const mondoApi = new MondoApi(config, BASE_PATH, axiosClient);
 export const caseApi = new CasesApi(config, BASE_PATH, axiosClient);
+export const assayApi = new AssaysApi(config, BASE_PATH, axiosClient);
