@@ -190,8 +190,9 @@ func Test_OccurrencesStatisticsHandler(t *testing.T) {
 
 func Test_GetExpandedOccurrenceHandler(t *testing.T) {
 	repo := &MockRepository{}
+	exomiserRepository := &MockExomiserRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/:seq_id/:locus_id/expanded", GetExpandedGermlineOccurrence(repo))
+	router.GET("/occurrences/germline/:seq_id/:locus_id/expanded", GetExpandedGermlineOccurrence(repo, exomiserRepository))
 
 	req, _ := http.NewRequest("GET", "/occurrences/germline/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -222,6 +223,7 @@ func Test_GetExpandedOccurrenceHandler(t *testing.T) {
 		"spliceai_ds":0.1, 
 		"spliceai_type":["AG"],
 		"exomiser_acmg_evidence": null,
-		"exomiser_gene_combined_score": 0
+		"exomiser_gene_combined_score": 0,
+		"exomiser_acmg_classification_counts": {"Benign": 2, "Pathogenic": 1}
 	}`, w.Body.String())
 }

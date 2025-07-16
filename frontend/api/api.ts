@@ -971,6 +971,12 @@ export interface ExpandedOccurrence {
     'end'?: number;
     /**
      * 
+     * @type {{ [key: string]: number; }}
+     * @memberof ExpandedOccurrence
+     */
+    'exomiser_acmg_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
      * @type {Array<string>}
      * @memberof ExpandedOccurrence
      */

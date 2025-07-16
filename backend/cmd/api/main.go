@@ -104,7 +104,7 @@ func main() {
 	occurrencesGermlineGroup.POST("/:seq_id/list", server.OccurrencesGermlineListHandler(repoOccurrences))
 	occurrencesGermlineGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repoOccurrences))
 	occurrencesGermlineGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repoOccurrences))
-	occurrencesGermlineGroup.GET("/:seq_id/:locus_id/expanded", server.GetExpandedGermlineOccurrence(repoOccurrences))
+	occurrencesGermlineGroup.GET("/:seq_id/:locus_id/expanded", server.GetExpandedGermlineOccurrence(repoOccurrences, repoExomiser))
 
 	interpretationsGroup := r.Group("/interpretations")
 	interpretationsGroup.Use(roleAccessMiddleware)

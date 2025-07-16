@@ -444,6 +444,10 @@ components:
           type: string
         end:
           type: integer
+        exomiser_acmg_classification_counts:
+          additionalProperties:
+            type: integer
+          type: object
         exomiser_acmg_evidence:
           items:
             type: string
