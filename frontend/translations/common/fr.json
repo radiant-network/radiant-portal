@@ -4,6 +4,7 @@
     "unspecified": "Indéterminée",
     "notAvailableYet": "Pas encore disponible",
     "save": "Sauvegarder",
+    "close": "Fermer",
     "editor": {
       "headings": {
         "normal": "Normal",
@@ -360,7 +361,7 @@
       "title": "Cas",
       "actions": {
         "view_case": "Voir cas",
-        "view_assay": "Détails du test",
+        "view_assay": "Détails de l'essai",
         "view_variant": "Voir variants"
       },
       "filters": {
@@ -838,6 +839,24 @@
       "prescribingInst_tooltips": "Établissement prescripteur",
       "diagLab": "Lab. de diagnostic",
       "diagLab_tooltips": "Laboratoire de diagnostic moléculaire",
+      "aliquot": "Aliquot",
+      "run_name": "Nom du lot",
+      "run_alias": "Alias du lot",
+      "run_date": "Date du lot",
+      "sample": "Échantillon",
+      "assay": "Essai",
+      "experiment": "Détails de l'expérience",
+      "paired_end": "Séquençage en paire",
+      "paired_end_true": "Vrai",
+      "paired_end_false": "Faux",
+      "platform": "Platforme",
+      "capture_kit": "Kit de capture",
+      "read_length": "Longueur de lecture",
+      "description": "Description",
+      "category": "Catégorie",
+      "type": "Type",
+      "tissue_site": "Site tissulaire",
+      "submitter_id": "ID soumissionnaire",
       "requestId": "ID de demande",
       "priority": "Priorité",
       "status": "Statut",
