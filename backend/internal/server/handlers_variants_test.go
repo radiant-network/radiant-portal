@@ -204,6 +204,7 @@ func Test_GetVariantOverviewHandler(t *testing.T) {
 		"gnomad_pli":0.1,
 		"gnomad_v3_af":0.01,
 		"is_canonical":false,
+		"is_mane_plus":false, 
 		"is_mane_select":false, 
 		"locus":"locus1",
 		"pc_wgs":3, "pf_wgs":0.99,

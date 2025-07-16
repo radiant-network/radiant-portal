@@ -55,8 +55,9 @@ type VariantOverview = struct {
 	PnWgs                 int                      `json:"pn_wgs,omitempty"`
 	PfWgs                 float64                  `json:"pf_wgs" validate:"required"`
 	GnomadV3Af            float64                  `json:"gnomad_v3_af" validate:"required"`
-	IsCanonical           bool                     `json:"is_canonical"`
-	IsManeSelect          bool                     `json:"is_mane_select"`
+	IsCanonical           bool                     `json:"is_canonical" validate:"required"`
+	IsManeSelect          bool                     `json:"is_mane_select" validate:"required"`
+	IsManePlus            bool                     `json:"is_mane_plus" validate:"required"`
 	TranscriptId          string                   `json:"transcript_id,omitempty"`
 	ExonRank              int                      `json:"exon_rank,omitempty"`
 	ExonTotal             int                      `json:"exon_total,omitempty"`
