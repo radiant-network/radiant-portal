@@ -59,7 +59,7 @@ func (r *ExomiserRepository) GetExomiserACMGClassificationCounts(locusId int) (m
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		} else {
-			return nil, fmt.Errorf("error while fetching Exomiser: %w", err)
+			return nil, fmt.Errorf("error while fetching Exomiser ACMG Classification Counts: %w", err)
 		}
 	} else if len(exomiser) == 0 {
 		return nil, nil
