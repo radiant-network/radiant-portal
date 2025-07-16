@@ -1,5 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { PropsWithChildren } from 'react';
+import EmptyField from './empty-field';
 
 type InformationFieldProps = {
   label: string;
@@ -13,7 +14,7 @@ function InformationField({
   children,
   tooltipsText,
 }: PropsWithChildren<InformationFieldProps>) {
-  const labelOrPlaceholder = label !== undefined ? label : '-';
+  const labelOrPlaceholder = label !== undefined ? label : <EmptyField />;
   const labelContent = !labelTooltipsText ? (
     labelOrPlaceholder
   ) : (
@@ -27,7 +28,7 @@ function InformationField({
     </Tooltip>
   );
 
-  const contentOrPlaceholder = children !== undefined ? children : '-';
+  const contentOrPlaceholder = children !== undefined ? children : <EmptyField />;
   const content = !tooltipsText ? (
     contentOrPlaceholder
   ) : (
