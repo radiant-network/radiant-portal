@@ -20,6 +20,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   const navigate = useNavigate();
   const proband = data.members[0];
   const family = data.members.filter(member => member.relationship_to_proband);
+  const hasFamily = family.length > 0;
   const hasVariants = data.assays.some(assay => assay.has_variants);
 
   return (
@@ -46,7 +47,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
       <CardContent className="flex flex-col gap-6">
         <div className="gap-6 grid grid-cols-1 md:grid-cols-6">
           {/* Proband */}
-          <div className={cn('flex flex-col gap-6', { 'col-span-3': family.length > 0 })}>
+          <div className={cn('flex flex-col gap-6', { 'col-span-3': hasFamily, 'col-span-6': !hasFamily })}>
             {/* Primary Condition */}
             <div>
               <CardTitle>{t('caseEntity.details.primary_condition')}</CardTitle>
@@ -62,7 +63,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
                 {t('caseEntity.details.phenotypes_observed')}
               </CardTitle>
               {(proband.observed_phenotypes ?? []).map(({ id, name, onset_code }: Term) => (
-                <PhenotypeConditionLink key={id} code={id} name={name} onsetCode={onset_code} />
+                <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
               ))}
               {!proband.observed_phenotypes && (
                 <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
