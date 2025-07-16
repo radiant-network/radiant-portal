@@ -1210,6 +1210,10 @@ components:
           type: number
         dna_change:
           type: string
+        exomiser_acmg_classification_counts:
+          additionalProperties:
+            type: integer
+          type: object
         exon_rank:
           type: integer
         exon_total:
