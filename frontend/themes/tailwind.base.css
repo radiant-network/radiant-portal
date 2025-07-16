@@ -192,6 +192,11 @@
   h6 {
     @apply text-sm;
   }
+  
+  button:not([disabled]),
+  [role="button"]:not([disabled]) {
+    cursor: pointer;
+  }
 }
 
 @keyframes accordion-down {
