@@ -13,7 +13,7 @@ import ExperimentalStrategyCell from '../cells/experimental-strategy-code-cell';
 
 const columnHelper = createColumnHelper<CaseAssay>();
 
-function getSequencingAndAssaysColumns(t: TFunction<string, undefined>) {
+function getColumns(t: TFunction<string, undefined>) {
   return [
     // Assay ID
     columnHelper.accessor(row => row.seq_id, {
@@ -124,4 +124,4 @@ const defaultSettings = createColumnSettings([
 ]);
 
 
-export { getSequencingAndAssaysColumns, defaultSettings };
+export { getColumns, defaultSettings };

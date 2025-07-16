@@ -806,10 +806,12 @@
       "managingOrg_tooltips": "Organisation responsable du dossier du patient"
     },
     "details": {
+      "date_format_tooltips": "aaaa-mm-jj",
       "title": "Détails de Cas",
       "analysisOverview": "Aperçu de l'analyse",
       "clinicalOverview": "Clinique",
-      "SequencingAndAssayInformationsOverview": "Assays",
+      "assayInformationsOverview": "Essais",
+      "assayDetailsDialog": "Details de l'essai",
       "assay_id": "ID Essai",
       "sample_id": "ID Échantillon",
       "sample_type_code": "Type d’échantillon",
