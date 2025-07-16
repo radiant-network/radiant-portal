@@ -1,4 +1,4 @@
-import { CaseEntity, Count, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
+import { CaseAssay, Count, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
@@ -38,7 +38,7 @@ const DEFAULT_SORTING = [
 ];
 
 type VariantTabProps = {
-  caseEntity?: CaseEntity;
+  assaysWithVariants: CaseAssay[];
   isLoading: boolean;
 }
 
@@ -47,11 +47,9 @@ async function fetchQueryCount(input: OccurrenceCountInput) {
   return response.data;
 }
 
-function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
+function VariantTab({ assaysWithVariants, isLoading }: VariantTabProps) {
   const config = useConfig();
   const { t } = useI18n();
-
-  const assaysWithVariants = caseEntity?.assays.filter(a => a.has_variants) || [];
 
   const [seqId, setSeqId] = useState<string>(assaysWithVariants[0]?.seq_id.toString() ?? '');
 

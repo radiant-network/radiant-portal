@@ -80,7 +80,8 @@ export default function App() {
     return null;
   }
 
-  const hasVariants = (data?.assays ?? []).some(assay => assay.has_variants);
+  const assaysWithVariants = (data?.assays ?? []).filter(a => a.has_variants) ?? [];
+  const hasVariants = assaysWithVariants.length > 0;
 
   return (
     <main className="bg-muted/40 h-screen overflow-auto">
@@ -109,7 +110,7 @@ export default function App() {
           </TabsContent>
         </Container>
         <TabsContent value={CaseEntityTabs.Variants} noMargin>
-          <VariantsTab caseEntity={data} isLoading={isLoading} />
+          <VariantsTab isLoading={isLoading} assaysWithVariants={assaysWithVariants} />
         </TabsContent>
       </TabsNav>
     </main>
