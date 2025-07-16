@@ -40,6 +40,8 @@ func (r *ExomiserRepository) GetExomiser(locusId int) ([]Exomiser, error) {
 		} else {
 			return nil, fmt.Errorf("error while fetching Exomiser: %w", err)
 		}
+	} else if len(exomiser) == 0 {
+		return nil, nil
 	}
 
 	return exomiser, nil

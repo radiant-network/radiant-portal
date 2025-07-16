@@ -70,7 +70,7 @@ func Test_GetExomiser_Empty(t *testing.T) {
 		repo := NewExomiserRepository(db)
 		exomiser, err := repo.GetExomiser(42)
 		assert.NoError(t, err)
-		assert.Len(t, exomiser, 0)
+		assert.Nil(t, exomiser)
 	})
 }
 
