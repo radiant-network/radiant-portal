@@ -2,14 +2,15 @@ package server
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func (m *MockRepository) GetVariantHeader(int) (*types.VariantHeader, error) {
@@ -103,8 +104,8 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 	}, &count, nil
 }
 
-func (m *MockRepository) GetVariantExpendedInterpretedCase(int, int, string) (*types.VariantExpendedInterpretedCase, error) {
-	return &types.VariantExpendedInterpretedCase{
+func (m *MockRepository) GetVariantExpandedInterpretedCase(int, int, string) (*types.VariantExpandedInterpretedCase, error) {
+	return &types.VariantExpandedInterpretedCase{
 		PatientID:               3,
 		GeneSymbol:              "BRAF",
 		ClassificationCriterias: types.JsonArray[string]{"PM1", "PM2"},
@@ -382,10 +383,10 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 	}`, w.Body.String())
 }
 
-func Test_GetExpendedGermlineVariantInterpretedCaseHandler(t *testing.T) {
+func Test_GetExpandedGermlineVariantInterpretedCaseHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/cases/interpreted/:seq_id/:transcript_id", GetExpendedGermlineVariantInterpretedCase(repo))
+	router.GET("/variants/germline/:locus_id/cases/interpreted/:seq_id/:transcript_id", GetExpandedGermlineVariantInterpretedCase(repo))
 
 	req, _ := http.NewRequest("GET", "/variants/germline/1000/cases/interpreted/1/T002", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()

@@ -8,11 +8,11 @@ import { Separator } from '@/components/base/ui/separator';
 import { Link } from 'react-router';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
-type OccurrenceExpendHeaderProps = {
+type OccurrenceExpandHeaderProps = {
   occurrence: Occurrence;
 };
 
-export default function OccurrenceExpendHeader({ occurrence }: OccurrenceExpendHeaderProps) {
+export default function OccurrenceExpandHeader({ occurrence }: OccurrenceExpandHeaderProps) {
   const { t } = useI18n();
 
   return (
@@ -26,17 +26,17 @@ export default function OccurrenceExpendHeader({ occurrence }: OccurrenceExpendH
             occurrence={occurrence}
             renderTrigger={handleOpen => (
               <Button size="xs" onClick={handleOpen}>
-                <Edit2Icon /> {t('occurrenceExpend.actions.interpret')}
+                <Edit2Icon /> {t('occurrenceExpand.actions.interpret')}
               </Button>
             )}
           />
           <Button color="primary" size="xs">
             <Download />
-            {t('occurrenceExpend.actions.downloadReport')}
+            {t('occurrenceExpand.actions.downloadReport')}
           </Button>
           <Button color="primary" size="xs">
             <VariantIcon />
-            {t('occurrenceExpend.actions.openIGV')}
+            {t('occurrenceExpand.actions.openIGV')}
           </Button>
         </div>
         <Separator orientation="vertical" className="h-5" />

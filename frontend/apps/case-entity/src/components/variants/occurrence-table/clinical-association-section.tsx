@@ -1,14 +1,14 @@
 import { ReactElement } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpendedOccurrence } from '@/api/api';
+import { ExpandedOccurrence } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
 import { useCallback } from 'react';
 import { Link } from 'react-router';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type ClinicalAssociationSectionProps = {
-  data: ExpendedOccurrence;
+  data: ExpandedOccurrence;
 };
 
 const MAX_CLINICAL_ASSOCIATION = 3; // Maximum number of clinical associations to display before showing "see more"
@@ -52,7 +52,7 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
   });
 
   return (
-    <DetailSection title={t('occurrenceExpend.clinicalAssociation.title')}>
+    <DetailSection title={t('occurrenceExpand.clinicalAssociation.title')}>
       {data.omim_conditions ? (
         clinicalAssociationValue
       ) : (

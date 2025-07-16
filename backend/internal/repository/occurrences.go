@@ -15,7 +15,7 @@ import (
 type Occurrence = types.Occurrence
 type Aggregation = types.Aggregation
 type Statistics = types.Statistics
-type ExpendedOccurrence = types.ExpendedOccurrence
+type ExpandedOccurrence = types.ExpandedOccurrence
 type OmimGenePanel = types.OmimGenePanel
 type Consequence = types.Consequence
 type Transcript = types.Transcript
@@ -29,7 +29,7 @@ type OccurrencesDAO interface {
 	CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error)
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 	GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
-	GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error)
+	GetExpandedOccurrence(seqId int, locusId int) (*ExpandedOccurrence, error)
 }
 
 func NewOccurrencesRepository(db *gorm.DB) *OccurrencesRepository {
@@ -240,7 +240,7 @@ func (r *OccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery ty
 	return &statistics, nil
 }
 
-func (r *OccurrencesRepository) GetExpendedOccurrence(seqId int, locusId int) (*ExpendedOccurrence, error) {
+func (r *OccurrencesRepository) GetExpandedOccurrence(seqId int, locusId int) (*ExpandedOccurrence, error) {
 	tx := r.db.Table("germline__snv__occurrence o")
 	tx = tx.Joins("JOIN germline__snv__consequence c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
 	tx = tx.Joins("JOIN germline__snv__variant v ON o.locus_id=v.locus_id")
@@ -251,10 +251,10 @@ func (r *OccurrencesRepository) GetExpendedOccurrence(seqId int, locusId int) (*
 		"c.dann_score, o.zygosity, o.transmission_mode, o.parental_origin, o.father_calls, o.mother_calls, o.info_qd, o.ad_alt, o.ad_total, o.filter, o.gq," +
 		"o.exomiser_gene_combined_score, o.exomiser_acmg_evidence")
 
-	var expendedOccurrence ExpendedOccurrence
-	if err := tx.First(&expendedOccurrence).Error; err != nil {
+	var expandedOccurrence ExpandedOccurrence
+	if err := tx.First(&expandedOccurrence).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error while fetching expended occurrence: %w", err)
+			return nil, fmt.Errorf("error while fetching expanded occurrence: %w", err)
 		} else {
 			return nil, nil
 		}
@@ -262,7 +262,7 @@ func (r *OccurrencesRepository) GetExpendedOccurrence(seqId int, locusId int) (*
 
 	txOmim := r.db.Table("omim_gene_panel omim")
 	txOmim = txOmim.Select("omim.omim_phenotype_id, omim.panel, omim.inheritance_code")
-	txOmim = txOmim.Where("omim.omim_phenotype_id is not null and omim.symbol = ?", expendedOccurrence.Symbol)
+	txOmim = txOmim.Where("omim.omim_phenotype_id is not null and omim.symbol = ?", expandedOccurrence.Symbol)
 	txOmim = txOmim.Order("omim.omim_phenotype_id asc")
 
 	var omimConditions []OmimGenePanel
@@ -271,9 +271,9 @@ func (r *OccurrencesRepository) GetExpendedOccurrence(seqId int, locusId int) (*
 		if !errors.Is(errOmim, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching omim conditions: %w", errOmim)
 		} else {
-			return &expendedOccurrence, errOmim
+			return &expandedOccurrence, errOmim
 		}
 	}
-	expendedOccurrence.OmimConditions = omimConditions
-	return &expendedOccurrence, nil
+	expandedOccurrence.OmimConditions = omimConditions
+	return &expandedOccurrence, nil
 }

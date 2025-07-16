@@ -3,8 +3,9 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/radiant-network/radiant-api/internal/utils"
 	"log"
+
+	"github.com/radiant-network/radiant-api/internal/utils"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ type VariantOverview = types.VariantOverview
 type VariantConsequence = types.VariantConsequence
 type VariantInterpretedCase = types.VariantInterpretedCase
 type VariantUninterpretedCase = types.VariantUninterpretedCase
-type VariantExpendedInterpretedCase = types.VariantExpendedInterpretedCase
+type VariantExpandedInterpretedCase = types.VariantExpandedInterpretedCase
 type VariantCasesFilters = types.VariantCasesFilters
 type VariantCasesCount = types.VariantCasesCount
 
@@ -29,7 +30,7 @@ type VariantsDAO interface {
 	GetVariantConsequences(locusId int) (*[]VariantConsequence, error)
 	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error)
 	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error)
-	GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error)
+	GetVariantExpandedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error)
 	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
 }
@@ -225,7 +226,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	return &variantUninterpretedCases, &count, nil
 }
 
-func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpendedInterpretedCase, error) {
+func (r *VariantsRepository) GetVariantExpandedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error) {
 	locusIdAsString := fmt.Sprintf("%d", locusId)
 	SeqIdAsString := fmt.Sprintf("%d", seqId)
 	tx := r.db.Table("radiant_jdbc.public.interpretation_germline i")
@@ -237,20 +238,20 @@ func (r *VariantsRepository) GetVariantExpendedInterpretedCase(locusId int, seqI
 	tx = tx.Where("i.locus_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusIdAsString, SeqIdAsString, transcriptId)
 	tx = tx.Select("c.proband_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias_string, i.transmission_modes as inheritances_string, i.pubmed as pubmed_ids_string, p.sex_code as patient_sex_code")
 
-	var variantExpendedInterpretedCase VariantExpendedInterpretedCase
-	if err := tx.Find(&variantExpendedInterpretedCase).Error; err != nil {
+	var variantExpandedInterpretedCase VariantExpandedInterpretedCase
+	if err := tx.Find(&variantExpandedInterpretedCase).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error while fetching variant expended interpreted cases: %w", err)
+			return nil, fmt.Errorf("error while fetching variant expanded interpreted cases: %w", err)
 		} else {
 			return nil, nil
 		}
 	}
 
-	variantExpendedInterpretedCase.ClassificationCriterias = split(variantExpendedInterpretedCase.ClassificationCriteriasString)
-	variantExpendedInterpretedCase.Inheritances = split(variantExpendedInterpretedCase.InheritancesString)
-	variantExpendedInterpretedCase.PubmedIDs = split(variantExpendedInterpretedCase.PubmedIDsString)
+	variantExpandedInterpretedCase.ClassificationCriterias = split(variantExpandedInterpretedCase.ClassificationCriteriasString)
+	variantExpandedInterpretedCase.Inheritances = split(variantExpandedInterpretedCase.InheritancesString)
+	variantExpandedInterpretedCase.PubmedIDs = split(variantExpandedInterpretedCase.PubmedIDsString)
 
-	return &variantExpendedInterpretedCase, nil
+	return &variantExpandedInterpretedCase, nil
 }
 
 func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCount, error) {

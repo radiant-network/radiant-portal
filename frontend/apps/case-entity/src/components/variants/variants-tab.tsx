@@ -15,7 +15,7 @@ import { FilterComponent } from '@/components/feature/query-filters/filter-conta
 import { useI18n } from '@/components/hooks/i18n';
 import { X } from 'lucide-react';
 import { cn } from '@/components/lib/utils';
-import OccurrenceExpend from './occurrence-table/occurrence-expend';
+import OccurrenceExpand from './occurrence-table/occurrence-expand';
 import { defaultSettings, getVariantColumns } from './occurrence-table/table-settings';
 import AssayVariantFilters from './filters/assay-variant-filters';
 import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
@@ -216,7 +216,7 @@ function VariantTab({ assaysWithVariants, isLoading }: VariantTabProps) {
               pagination={pagination}
               onPaginationChange={setPagination}
               onServerSortingChange={setSorting}
-              subComponent={data => <OccurrenceExpend occurrence={data} />}
+              subComponent={data => <OccurrenceExpand occurrence={data} />}
               total={fetchOccurrencesCount.data?.count ?? 0}
               enableColumnOrdering
               enableFullscreen
