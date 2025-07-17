@@ -194,7 +194,6 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
 function ActionsMenuCell({ row }: CellContext<any, any>) {
   const { t } = useI18n();
   const [assayDialogOpen, setAssayDialogOpen] = useState<boolean>(false);
-  console.log('assayDialogOpen', assayDialogOpen);
 
   return (
     <>
