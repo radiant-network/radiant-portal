@@ -97,6 +97,20 @@
             "defaultMin": 0,
             "defaultMax": 100
           } },
+          { "key": "pf_wgs_affected", "type": "numerical", "defaults": {
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "pf_wgs_not_affected", "type": "numerical", "defaults": {
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
           { "key": "frequency_divider_pulic_cohorts", "type": "divider" }, 
           { "key": "gnomad_v3_af", "type": "numerical", "defaults": { 
             "min": 0, 

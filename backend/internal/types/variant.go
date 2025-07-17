@@ -218,6 +218,22 @@ var PnWgsField = Field{
 	Type:          NumericType,
 	Table:         VariantTable,
 }
+var PfWgsAffectedField = Field{
+	Name:          "pf_wgs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          NumericType,
+	Table:         VariantTable,
+}
+var PfWgsNotAffectedField = Field{
+	Name:          "pf_wgs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          NumericType,
+	Table:         VariantTable,
+}
 var VariantClassField = Field{
 	Name:            "variant_class",
 	CanBeSelected:   true,

@@ -230,6 +230,8 @@
         "variant_class": "Variant Type",
         "symbol": "Symbol",
         "pf_wgs": "All Patient Frequency (WGS)",
+        "pf_wgs_affected": "Affected Patient Frequency (WGS)",
+        "pf_wgs_not_affected": "Not Affected Patient Frequency (WGS)",
         "actualInterval": "Actual interval",
         "unit": "Unit",
         "selectUnit": "Select unit",

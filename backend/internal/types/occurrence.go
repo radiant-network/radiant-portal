@@ -232,9 +232,6 @@ var OccurrencesFields = []Field{
 	AdRatioField,
 	AdAltField,
 	AdTotalField,
-	PfWgsField,
-	PnWgsField,
-	PcWgsField,
 	HgvsgField,
 	ClinvarField,
 	ConsequenceField,
@@ -249,10 +246,17 @@ var OccurrencesFields = []Field{
 	PickedIsManePlusField,
 	PickedIsCanonicalField,
 	PickedOmimInheritanceCodeField,
-	GnomadV3AfField,
 	PickedTranscriptIdField,
 	TransmissionModeField,
 	InfoQdField,
+
+	// Frequencies
+	PfWgsField,
+	PnWgsField,
+	PcWgsField,
+	PfWgsAffectedField,
+	PfWgsNotAffectedField,
+	GnomadV3AfField,
 
 	// Variants
 	VariantClassField,
