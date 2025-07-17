@@ -2,6 +2,8 @@ import { cn } from '@/components/lib/utils';
 import * as React from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 
+export type IndicatorVariant = "red" | "amber" | "emerald" | "blue" | "fuchsia" | "grey";
+
 const IndicatorVariants = tv({
   slots: {
     base: 'rounded-sm px-0 py-0 w-2 h-2',

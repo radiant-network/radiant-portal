@@ -14,12 +14,14 @@ import { Badge } from '@/components/base/ui/badge';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Checkbox } from '../ui/checkbox';
-import { Aggregation } from '@/api/api';
 
 // Extended Aggregation type to include optional icon
-export interface IFilterButtonItem extends Aggregation {
+export interface IFilterButtonItem {
+  count?: number;
+  key?: string;
   icon?: LucideIcon;
   tooltip?: string | React.ReactNode;
+  label?: string | React.ReactNode;
 }
 
 export interface IFilterButton {

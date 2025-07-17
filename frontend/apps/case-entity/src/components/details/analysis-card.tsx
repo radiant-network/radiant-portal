@@ -7,8 +7,9 @@ import { ComponentProps, useState } from 'react';
 import { Badge } from '@/components/base/ui/badge';
 import { formatDate } from 'date-fns';
 import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
+import filterItemPriority from '@/case-exploration/components/table-filters/filter-item-priority';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
-import { CaseEntity, CaseTask } from '@/api/api';
+import { CaseEntity, CaseTask, Aggregation } from '@/api/api';
 import InformationField from '@/components/base/information/information-field';
 
 function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
@@ -18,12 +19,14 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
   const caseData = data;
 
   // Dropdown options
-  const priorityOptions = [
-    { value: 'routine', label: t('caseExploration.priority.routine'), color: 'bg-gray-500' },
-    { value: 'urgent', label: t('caseExploration.priority.urgent'), color: 'bg-blue-500' },
-    { value: 'asap', label: t('caseExploration.priority.asap'), color: 'bg-amber-500' },
-    { value: 'stat', label: t('caseExploration.priority.stat'), color: 'bg-red-500' },
+  const priorityOptionsValues: Aggregation[] = [
+    { key: 'routine', label: 'Routine' },
+    { key: 'urgent', label: 'Urgent' },
+    { key: 'stat', label: 'Stat' },
+    { key: 'asap', label: 'ASAP' },
   ];
+  
+  const priorityOptions = filterItemPriority(priorityOptionsValues, t);
 
   const statusOptionsValues = [
     { "key": "incomplete", "label": "Incomplete" },
@@ -45,12 +48,12 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
     { value: 'Vincent Ferretti', label: 'Vincent Ferretti' },
   ];
   // State for dropdown values
-  const [priority, setPriority] = useState(caseData.priority_code || priorityOptions[0].value);
+  const [priority, setPriority] = useState(caseData.priority_code || priorityOptions[0]?.key || 'routine');
   const [status, setStatus] = useState(caseData.status_code || statusOptions[0].key);
   const [assignedTo, setAssignedTo] = useState(assigneeOptions[0].value);
 
 
-  const selectedPriority = priorityOptions.find(option => option.value === priority);
+  const selectedPriority = priorityOptions.find(option => option.key === priority);
   const selectedStatus: IStatusOption | undefined = statusOptions.find(option => option.key === status);
 
   return (
@@ -70,7 +73,6 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left side - Static information */}
           <div className="flex w-full justify-between gap-4">
-              
             <div className="flex flex-col gap-2 flex-1">
               <InformationField
                 label={t('caseEntity.details.createdOn')}
@@ -79,7 +81,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 {caseData.created_on && formatDate(caseData.created_on, t('common.date'))}
               </InformationField>
 
-              <InformationField 
+              <InformationField
                 label={t('caseEntity.details.lastUpdate')}
                 tooltipsText={t('caseEntity.details.date_format_tooltips')}
               >
@@ -124,18 +126,16 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger className="min-w-[160px] max-w-[180px] h-7">
                     <SelectValue>
-                      <div className="flex items-center gap-2 text-xs">
-                        {selectedPriority && <div className={`w-2 h-2 ${selectedPriority.color} rounded-full`}></div>}
-                        <span>{priority}</span>
+                      <div className="text-xs font-medium">
+                        {selectedPriority?.label}
                       </div>
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {priorityOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2 text-xs">
-                          <div className={`w-2 h-2 ${option.color} rounded-full`}></div>
-                          <span>{option.label}</span>
+                      <SelectItem key={option.key} value={option.key || ''}>
+                        <div className="text-xs font-medium">
+                          {option.label}
                         </div>
                       </SelectItem>
                     ))}
@@ -148,7 +148,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger className="min-w-[160px] max-w-[180px] h-7 bg-blue-100 text-blue-700">
                     <SelectValue>
-                      <div className="flex items-center gap-2 text-xs">
+                      <div className="flex items-center gap-2 text-xs font-medium">
                         {selectedStatus && selectedStatus.icon && <selectedStatus.icon className="w-4 h-4 text-blue-500" />}
                         <span>{selectedStatus?.label}</span>
                       </div>
@@ -157,7 +157,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                   <SelectContent>
                     {statusOptions.map((option) => (
                       <SelectItem key={option.key} value={option.key}>
-                        <div className="flex items-center gap-2 text-xs">
+                        <div className="flex items-center gap-2 text-xs font-medium">
                           {option.icon && <option.icon className="w-4 h-4 text-blue-700" />}
                           <span>{option.label}</span>
                         </div>
@@ -172,7 +172,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 <Select value={assignedTo} onValueChange={setAssignedTo}>
                   <SelectTrigger className="min-w-[160px] max-w-[180px] h-7">
                     <SelectValue>
-                      <div className="flex items-center gap-2 text-xs">
+                      <div className="flex items-center gap-2 text-xs font-medium">
                         <User className="w-4 h-4 text-muted-foreground" />
                         <span>{assignedTo}</span>
                       </div>
@@ -181,7 +181,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                   <SelectContent>
                     {assigneeOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2 text-xs">
+                        <div className="flex items-center gap-2 text-xs font-medium">
                           <User className="w-4 h-4 text-muted-foreground" />
                           <span>{option.label}</span>
                         </div>
