@@ -206,6 +206,10 @@
       "labels": {
         "chromosome": "Chromosome",
         "clinvar": "ClinVar",
+        "pathogenicity_exomiser_divider": "Exomiser",
+        "exomiser_acmg_classification": "Exomiser ACMG",
+        "exomiser_acmg_evidence": "Exomiser ACMG Evidences",
+        "exomiser_gene_combined_score": "Exomiser Score",
         "biotype": "Gene Type",
         "cosmic_gene_panel": "COSMIC",
         "cosmic_gene_panel_tooltip": "Catalogue of Somatic Mutations in Cancer",
