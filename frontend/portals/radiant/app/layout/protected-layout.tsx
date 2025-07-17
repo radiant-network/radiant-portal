@@ -8,12 +8,6 @@ import MainNavbar from '@/components/feature/navbar/main-navbar';
 import logo from '@assets/logo/header.svg';
 import { SidebarProvider } from '@/components/base/ui/sidebar';
 import {
-  LayoutDashboardIcon,
-  AudioWaveformIcon,
-  UsersIcon,
-  LightbulbIcon,
-  ExternalLink,
-  MailIcon,
   FolderIcon,
 } from 'lucide-react';
 import { useI18n } from '@/components/hooks/i18n';
@@ -56,11 +50,12 @@ const _ProtectedLayout = () => {
           placement={orientation}
           logo={<img src={logo} alt="Logo" />}
           links={[
-            {
-              title: t('mainNavbar.links.dashboard'),
-              icon: <LayoutDashboardIcon />,
-              as: 'button',
-            },
+            // SJRA-389
+            // {
+            //   title: t('mainNavbar.links.dashboard'),
+            //   icon: <LayoutDashboardIcon />,
+            //   as: 'button',
+            // },
             {
               title: t('mainNavbar.links.cases'),
               icon: <FolderIcon />,
@@ -70,37 +65,38 @@ const _ProtectedLayout = () => {
             },
           ]}
           actions={[
-            {
-              title: t('mainNavbar.actions.community'),
-              icon: <UsersIcon />,
-              as: 'button',
-            },
-            {
-              title: t('mainNavbar.actions.resources'),
-              icon: <LightbulbIcon />,
-              as: 'button',
-              subItems: [
-                {
-                  title: t('mainNavbar.actions.website'),
-                  icon: <ExternalLink />,
-                  as: 'a',
-                  href: 'https://www.radiant-genomics.com',
-                },
-                {
-                  title: t('mainNavbar.actions.documentation'),
-                  icon: <ExternalLink />,
-                  as: 'button',
-                },
-                {
-                  separator: true,
-                },
-                {
-                  title: t('mainNavbar.actions.contact'),
-                  icon: <MailIcon />,
-                  as: 'button',
-                },
-              ],
-            },
+            // SJRA-389
+            // {
+            //   title: t('mainNavbar.actions.community'),
+            //   icon: <UsersIcon />,
+            //   as: 'button',
+            // },
+            // {
+            //   title: t('mainNavbar.actions.resources'),
+            //   icon: <LightbulbIcon />,
+            //   as: 'button',
+            //   subItems: [
+            //     {
+            //       title: t('mainNavbar.actions.website'),
+            //       icon: <ExternalLink />,
+            //       as: 'a',
+            //       href: 'https://www.radiant-genomics.com',
+            //     },
+            //     {
+            //       title: t('mainNavbar.actions.documentation'),
+            //       icon: <ExternalLink />,
+            //       as: 'button',
+            //     },
+            //     {
+            //       separator: true,
+            //     },
+            //     {
+            //       title: t('mainNavbar.actions.contact'),
+            //       icon: <MailIcon />,
+            //       as: 'button',
+            //     },
+            //   ],
+            // },
           ]}
           userDetails={data}
           onLogoutClick={() => navigate('/auth/logout')}

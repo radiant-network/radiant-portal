@@ -141,7 +141,7 @@ function MainSidebar({
           detailsClassName="group-data-[collapsible=icon]:hidden!"
         />
         <SidebarMenu>
-          <SidebarMenuItem key="profile">
+          {/* SJRA-389 <SidebarMenuItem key="profile">
             <SidebarMenuButton asChild variant="default" tooltip="Profile">
               <div>
                 <UserIcon />
@@ -152,7 +152,7 @@ function MainSidebar({
                 </span>
               </div>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
           <SidebarMenuItem key="logout">
             <SidebarMenuButton asChild variant="default" tooltip="Sign out" onClick={onLogoutClick}>
               <div>

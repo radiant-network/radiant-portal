@@ -66,14 +66,14 @@ function MyOrganizationCard({ data }: MyOrganizationCardProps) {
                   </NumberBadge>
                 ))}
               </div>
-              <div className="flex items-center gap-2">
+              {/* SJRA-389 <div className="flex items-center gap-2">
                 <span className="min-w-20 text-muted-foreground">Phenovar</span>
                 <ClinVarBadge value="likely_pathogenic" abbreviated />
               </div>
               <div className="flex items-center gap-2">
                 <span className="min-w-20 text-muted-foreground">Franklin</span>
                 <ClinVarBadge value="pathogenic" abbreviated />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

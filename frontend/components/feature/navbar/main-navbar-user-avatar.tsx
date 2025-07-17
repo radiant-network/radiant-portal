@@ -29,7 +29,7 @@ function NavbarUserAvatar({ userDetails: { name, email }, onLogoutClick, avatarC
     <>
       <div className="block md:hidden">
         <AvatarUserDetails name={name} email={email} avatarClassName={avatarClassName} />
-        <MainNavbarItem title="Profile" as="button" icon={<UserIcon />} className="w-full" onClick={() => {}} />
+        {/* SJRA-389 <MainNavbarItem title="Profile" as="button" icon={<UserIcon />} className="w-full" onClick={() => {}} /> */}
         <MainNavbarItem title="Sign out" as="button" icon={<LogOutIcon />} className="w-full" onClick={onLogoutClick} />
       </div>
       <div className="hidden md:flex">
@@ -43,12 +43,12 @@ function NavbarUserAvatar({ userDetails: { name, email }, onLogoutClick, avatarC
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              {/* SJRA-389 <DropdownMenuItem>
                 <UserIcon />{' '}
                 {t('mainNavbar.userDetails.profile', {
                   defaultValue: 'Profile',
                 })}
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem onClick={onLogoutClick}>
                 <LogOutIcon />{' '}
                 {t('mainNavbar.userDetails.signOut', {
