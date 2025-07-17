@@ -100,6 +100,16 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *OccurrencesRep
 	if userQuery != nil {
 		tx = joinWithVariants(tx)
 
+		if userQuery.HasFieldFromTables(types.TopmedTable) {
+			joinClause := "LEFT JOIN topmed_bravo topmed ON topmed.locus_id=o.locus_id"
+			tx = tx.Joins(joinClause)
+		}
+
+		if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
+			joinClause := "LEFT JOIN 1000_genomes 1000_genomes ON 1000_genomes.locus_id=o.locus_id"
+			tx = tx.Joins(joinClause)
+		}
+
 		if userQuery.Filters() != nil && (userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...)) {
 			if userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 				// In this case we need to build a subquery that join the consequences_filter_partitioned table with the gene panels tables
@@ -189,6 +199,14 @@ func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *Occurrence
 				tx = tx.
 					Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
 			}
+		}
+		if userQuery.HasFieldFromTables(types.TopmedTable) {
+			joinClause := "LEFT JOIN topmed_bravo topmed ON topmed.locus_id=o.locus_id"
+			tx = tx.Joins(joinClause)
+		}
+		if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
+			joinClause := "LEFT JOIN 1000_genomes 1000_genomes ON 1000_genomes.locus_id=o.locus_id"
+			tx = tx.Joins(joinClause)
 		}
 		utils.AddWhere(userQuery, tx)
 

@@ -140,6 +140,24 @@ var TransmissionModeField = Field{
 	CanBeAggregated: true,
 	Table:           OccurrenceTable,
 }
+var ParentalOriginField = Field{
+	Name:            "parental_origin",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OccurrenceTable,
+}
+var MotherZygosityField = Field{
+	Name:            "mother_zygosity",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OccurrenceTable,
+}
+var FatherZygosityField = Field{
+	Name:            "father_zygosity",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OccurrenceTable,
+}
 var GenotypeQualityField = Field{
 	Name:          "gq",
 	Alias:         "genotype_quality",
@@ -232,9 +250,6 @@ var OccurrencesFields = []Field{
 	AdRatioField,
 	AdAltField,
 	AdTotalField,
-	PfWgsField,
-	PnWgsField,
-	PcWgsField,
 	HgvsgField,
 	ClinvarField,
 	ConsequenceField,
@@ -249,10 +264,22 @@ var OccurrencesFields = []Field{
 	PickedIsManePlusField,
 	PickedIsCanonicalField,
 	PickedOmimInheritanceCodeField,
-	GnomadV3AfField,
 	PickedTranscriptIdField,
 	TransmissionModeField,
+	ParentalOriginField,
+	MotherZygosityField,
+	FatherZygosityField,
 	InfoQdField,
+
+	// Frequencies
+	PfWgsField,
+	PnWgsField,
+	PcWgsField,
+	PfWgsAffectedField,
+	PfWgsNotAffectedField,
+	GnomadV3AfField,
+	TopmedAfField,
+	ThousandGenomesAfField,
 
 	// Variants
 	VariantClassField,

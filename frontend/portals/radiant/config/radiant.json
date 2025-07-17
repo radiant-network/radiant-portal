@@ -97,8 +97,36 @@
             "defaultMin": 0,
             "defaultMax": 100
           } },
+          { "key": "pf_wgs_affected", "type": "numerical", "defaults": {
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "pf_wgs_not_affected", "type": "numerical", "defaults": {
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
           { "key": "frequency_divider_pulic_cohorts", "type": "divider" }, 
           { "key": "gnomad_v3_af", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "topmed_af", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "thousand_genome_af", "type": "numerical", "defaults": { 
             "min": 0, 
             "max": 100, 
             "defaultOperator": "LessThan",
@@ -111,6 +139,9 @@
         "items": [
           { "key": "zygosity", "type": "multiple" },
           { "key": "zygosity_divider_parental_analysis", "type": "divider" }, 
+          { "key": "mother_zygosity", "type": "multiple" },
+          { "key": "father_zygosity", "type": "multiple" },
+          { "key": "parental_origin", "type": "multiple" },
           { "key": "transmission_mode", "type": "multiple" },
           { "key": "occurence_metrics_divider", "type": "divider" }, 
           { "key": "filter", "type": "multiple"},
