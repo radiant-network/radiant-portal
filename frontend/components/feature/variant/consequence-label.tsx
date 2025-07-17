@@ -2,6 +2,7 @@ import ImpactIcon from './impact-icon';
 import { useI18n } from '@/components/hooks/i18n';
 import { VepImpact } from '@/api/api';
 import { tv, VariantProps } from 'tailwind-variants';
+import { replaceUnderscore } from '@/components/lib/string-format';
 
 const consequenceVariant = tv({
   slots: {
@@ -38,7 +39,7 @@ function ConsequenceLabel({ consequence, vepImpact, size, className, ...props }:
       <ImpactIcon value={vepImpact} className={styles.icon()} />
       <span className="text-ellipsis overflow-hidden">
         {t(`variant.consequences.${consequence}`, {
-          defaultValue: consequence.replace(/_/g, ' '),
+          defaultValue: replaceUnderscore(consequence),
         })}
       </span>
     </div>
