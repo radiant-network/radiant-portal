@@ -645,16 +645,16 @@ func Test_GetStatisticsOccurrences_Non_Numeric_Field(t *testing.T) {
 	})
 }
 
-func Test_GetExpendedOccurrence(t *testing.T) {
+func Test_GetExpandedOccurrence(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrencesRepository(db)
-		expendedOccurrence, err := repo.GetExpendedOccurrence(1, 1000)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(1, 1000)
 		assert.NoError(t, err)
-		assert.Equal(t, "1000", expendedOccurrence.LocusId)
-		assert.Equal(t, "locus1", expendedOccurrence.Locus)
-		assert.Equal(t, float32(0.1), expendedOccurrence.SiftScore)
-		assert.Equal(t, "T", expendedOccurrence.SiftPred)
-		assert.Equal(t, 0.7, expendedOccurrence.ExomiserGeneCombinedScore)
-		assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, expendedOccurrence.ExomiserAcmgEvidence)
+		assert.Equal(t, "1000", expandedOccurrence.LocusId)
+		assert.Equal(t, "locus1", expandedOccurrence.Locus)
+		assert.Equal(t, float32(0.1), expandedOccurrence.SiftScore)
+		assert.Equal(t, "T", expandedOccurrence.SiftPred)
+		assert.Equal(t, 0.7, expandedOccurrence.ExomiserGeneCombinedScore)
+		assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, expandedOccurrence.ExomiserAcmgEvidence)
 	})
 }

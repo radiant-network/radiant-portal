@@ -2864,6 +2864,18 @@ export interface VariantUninterpretedCase {
     'created_on': string;
     /**
      * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'exomiser_acmg_classification'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantUninterpretedCase
+     */
+    'exomiser_acmg_evidence'?: Array<string>;
+    /**
+     * 
      * @type {Array<Term>}
      * @memberof VariantUninterpretedCase
      */
