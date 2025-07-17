@@ -14,7 +14,7 @@ func Test_GetExomiser(t *testing.T) {
 		expected := []types.Exomiser{
 			{
 				Part:               1,
-				SeqId:              1000,
+				SeqId:              1,
 				LocusId:            "1000",
 				Id:                 "exomiser1000",
 				LocusHash:          "hash1000",
@@ -29,7 +29,7 @@ func Test_GetExomiser(t *testing.T) {
 			},
 			{
 				Part:               2,
-				SeqId:              1001,
+				SeqId:              2,
 				LocusId:            "1000",
 				Id:                 "exomiser1001",
 				LocusHash:          "hash1001",
@@ -44,7 +44,7 @@ func Test_GetExomiser(t *testing.T) {
 			},
 			{
 				Part:               3,
-				SeqId:              1002,
+				SeqId:              3,
 				LocusId:            "1000",
 				Id:                 "exomiser1002",
 				LocusHash:          "hash1002",

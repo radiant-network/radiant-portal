@@ -1,4 +1,4 @@
 part	seq_id	locus_id	id	locus_hash	moi	variant_score	gene_combined_score	variant_rank	rank	symbol	acmg_classification	acmg_evidence
-1	1000	1000	exomiser1000	hash1000	AD	0.95	0.85	1	1	GENE1000	Pathogenic	["PVS1", "PS1"]
-2	1001	1000	exomiser1001	hash1001	AR	0.90	0.80	1	2	GENE1001	Pathogenic	["PS4", "PM2"]
-3	1002	1000	exomiser1002	hash1002	XR	0.80	0.75	1	3	GENE1002	VUS	["PP3", "PM1"]
+1	1	1000	exomiser1000	hash1000	AD	0.95	0.85	1	1	GENE1000	Pathogenic	["PVS1", "PS1"]
+2	2	1000	exomiser1001	hash1001	AR	0.90	0.80	1	2	GENE1001	Pathogenic	["PS4", "PM2"]
+3	3	1000	exomiser1002	hash1002	XR	0.80	0.75	1	3	GENE1002	VUS	["PP3", "PM1"]

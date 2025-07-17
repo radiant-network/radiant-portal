@@ -1316,6 +1316,13 @@ components:
           type: integer
         created_on:
           type: string
+        exomiser_acmg_classification:
+          type: string
+        exomiser_acmg_evidence:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         observed_phenotypes:
           items:
             $ref: '#/components/schemas/Term'

@@ -108,19 +108,21 @@ type VariantInterpretedCase = struct {
 } // @name VariantInterpretedCase
 
 type VariantUninterpretedCase = struct {
-	CaseId               int             `json:"case_id" validate:"required"`
-	CreatedOn            time.Time       `json:"created_on" validate:"required"`
-	UpdatedOn            time.Time       `json:"updated_on" validate:"required"`
-	PrimaryConditionId   string          `json:"primary_condition_id,omitempty"`
-	PrimaryConditionName string          `json:"primary_condition_name,omitempty"`
-	Zygosity             string          `json:"zygosity" validate:"required"`
-	PerformerLabCode     string          `json:"performer_lab_code,omitempty"`
-	PerformerLabName     string          `json:"performer_lab_name,omitempty"`
-	CaseAnalysisCode     string          `json:"case_analysis_code,omitempty"`
-	CaseAnalysisName     string          `json:"case_analysis_name,omitempty"`
-	StatusCode           string          `json:"status_code" validate:"required"`
-	PhenotypesUnparsed   string          `json:"-"`
-	Phenotypes           JsonArray[Term] `json:"observed_phenotypes"`
+	CaseId                     int               `json:"case_id" validate:"required"`
+	CreatedOn                  time.Time         `json:"created_on" validate:"required"`
+	UpdatedOn                  time.Time         `json:"updated_on" validate:"required"`
+	PrimaryConditionId         string            `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName       string            `json:"primary_condition_name,omitempty"`
+	Zygosity                   string            `json:"zygosity" validate:"required"`
+	PerformerLabCode           string            `json:"performer_lab_code,omitempty"`
+	PerformerLabName           string            `json:"performer_lab_name,omitempty"`
+	CaseAnalysisCode           string            `json:"case_analysis_code,omitempty"`
+	CaseAnalysisName           string            `json:"case_analysis_name,omitempty"`
+	StatusCode                 string            `json:"status_code" validate:"required"`
+	PhenotypesUnparsed         string            `json:"-"`
+	Phenotypes                 JsonArray[Term]   `json:"observed_phenotypes"`
+	ExomiserACMGClassification string            `json:"exomiser_acmg_classification,omitempty"`
+	ExomiserACMGEvidence       JsonArray[string] `json:"exomiser_acmg_evidence,omitempty"`
 } // @name VariantUninterpretedCase
 
 type VariantExpandedInterpretedCase = struct {

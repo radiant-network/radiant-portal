@@ -85,14 +85,20 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
 			Zygosity:         "HET",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
-			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "incomplete", Phenotypes: make(types.JsonArray[types.Term], 0)},
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "incomplete", Phenotypes: make(types.JsonArray[types.Term], 0),
+			ExomiserACMGClassification: "Benign",
+			ExomiserACMGEvidence:       types.JsonArray[string]{"PVS1", "PS1"},
+		},
 		{CaseId: 4,
 			PrimaryConditionId: "MONDO:0700092", PrimaryConditionName: "neurodevelopmental disorder",
 			CreatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
 			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
 			Zygosity:         "HOM",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
-			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "incomplete", Phenotypes: make(types.JsonArray[types.Term], 0)},
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "incomplete", Phenotypes: make(types.JsonArray[types.Term], 0),
+			ExomiserACMGClassification: "Pathogenic",
+			ExomiserACMGEvidence:       types.JsonArray[string]{"PVS1", "PS1"},
+		},
 		{CaseId: 5,
 			PrimaryConditionId: "MONDO:0700092", PrimaryConditionName: "neurodevelopmental disorder",
 			CreatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
@@ -100,7 +106,10 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 			Zygosity:         "HOM",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
 			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active",
-			Phenotypes: types.JsonArray[types.Term]{{ID: "HP:0100622", Name: "Maternal seizure"}, {ID: "HP:0001562", Name: "Oligohydramnios"}}},
+			Phenotypes:                 types.JsonArray[types.Term]{{ID: "HP:0100622", Name: "Maternal seizure"}, {ID: "HP:0001562", Name: "Oligohydramnios"}},
+			ExomiserACMGClassification: "Benign",
+			ExomiserACMGEvidence:       types.JsonArray[string]{"PVS2", "PS2"},
+		},
 	}, &count, nil
 }
 
@@ -429,7 +438,9 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 				"primary_condition_name":"neurodevelopmental disorder", 
 				"status_code":"incomplete", 
 				"updated_on":"2021-09-12T12:08:00Z",
-				"zygosity":"HET"
+				"zygosity":"HET",
+				"exomiser_acmg_classification": "Benign",
+				"exomiser_acmg_evidence": ["PVS1", "PS1"]
 			}, {
 				"case_analysis_code":"WGA", 
 				"case_analysis_name":"Whole Genome Analysis", 
@@ -442,7 +453,9 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 				"primary_condition_name":"neurodevelopmental disorder", 
 				"status_code":"incomplete", 
 				"updated_on":"2021-09-12T12:08:00Z",
-				"zygosity":"HOM"
+				"zygosity":"HOM",
+				"exomiser_acmg_classification": "Pathogenic",
+				"exomiser_acmg_evidence": ["PVS1", "PS1"]
 			}, {
 				"case_analysis_code":"WGA", 
 				"case_analysis_name":"Whole Genome Analysis", 
@@ -455,7 +468,9 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 				"primary_condition_name":"neurodevelopmental disorder", 
 				"status_code":"active", 
 				"updated_on":"2021-09-12T12:08:00Z",
-				"zygosity":"HOM"
+				"zygosity":"HOM",
+				"exomiser_acmg_classification": "Benign",
+				"exomiser_acmg_evidence": ["PVS2", "PS2"]
 			}
 		],
 		"count": 3
