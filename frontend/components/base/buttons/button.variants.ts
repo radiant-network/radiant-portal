@@ -7,22 +7,27 @@ export const baseButtonVariants = tv({
   variants: {
     variant: {
       default: {
-        base: 'bg-primary text-primary-foreground shadow-sm enabled:hover:bg-primary/90',
+        base: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
       },
       destructive: {
-        base: 'bg-destructive text-destructive-foreground shadow-xs enabled:hover:bg-destructive/90',
+        base: 'bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
       },
       outline: {
-        base: 'border border-input bg-background text-foreground shadow-xs enabled:hover:bg-accent enabled:hover:text-accent-foreground',
+        base: 'border border-input bg-background text-foreground shadow-xs hover:bg-accent hover:text-accent-foreground',
       },
       secondary: {
-        base: 'bg-secondary text-secondary-foreground shadow-xs enabled:hover:bg-secondary/80',
+        base: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
       },
       ghost: {
-        base: 'enabled:hover:bg-accent enabled:hover:text-accent-foreground',
+        base: 'hover:bg-accent hover:text-accent-foreground',
       },
       link: {
-        base: 'text-primary underline-offset-4 enabled:hover:underline',
+        base: 'text-primary underline-offset-4 hover:underline',
+      },
+    },
+    disabled: {
+      true: {
+        base: 'disabled:pointer-events-none',
       },
     },
     size: {
@@ -118,8 +123,8 @@ export const actionButtonVariants = tv({
     },
     variant: {
       outline: {
-        base: 'enabled:hover:z-2',
-        actionsButton: '-ml-px enabled:hover:z-2',
+        base: 'hover:z-2',
+        actionsButton: '-ml-px hover:z-2',
       },
     },
   },

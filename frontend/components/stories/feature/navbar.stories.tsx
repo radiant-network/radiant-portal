@@ -44,40 +44,55 @@ export const Default: Story = {
       {
         title: 'Dashboard',
         icon: <LayoutDashboardIcon />,
+        as: 'button',
       },
       {
         title: 'Studies',
         icon: <BookOpenTextIcon />,
+        as: 'a',
+        href: 'https://google.com',
       },
       {
         title: 'Data Exploration',
         icon: <TelescopeIcon />,
+        as: 'a',
+        href: 'https://google.com',
       },
       {
         title: 'Variants',
         icon: <AudioWaveformIcon />,
+        as: 'a',
+        href: 'https://google.com',
       },
       {
         title: 'Analysis',
         icon: <BlendIcon />,
+        as: 'a',
+        href: 'https://google.com',
       },
     ],
     actions: [
       {
         title: 'Community',
         icon: <UsersIcon />,
+        as: 'button',
       },
       {
         title: 'Resources',
         icon: <LightbulbIcon />,
+        as: 'button',
         subItems: [
           {
             title: 'Website',
             icon: <ExternalLink />,
+            as: 'a',
+            href: 'https://google.com',
           },
           {
             title: 'Documentation',
             icon: <ExternalLink />,
+            as: 'a',
+            href: 'https://google.com',
           },
           {
             separator: true,
@@ -85,6 +100,7 @@ export const Default: Story = {
           {
             title: 'Contact',
             icon: <MailIcon />,
+            as: 'button',
           },
         ],
       },
