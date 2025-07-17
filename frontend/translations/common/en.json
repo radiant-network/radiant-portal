@@ -726,9 +726,10 @@
     },
     "frequencies": {
       "title": "Frequencies",
-      "myOrganization": "My Organization",
-      "myOrganizationAffectedTooltip": "Affected patients",
-      "myOrganizationNonAffectedTooltip": "Unaffected patients",
+      "affected": "Affected",
+      "nonAffected": "Non-affected",
+      "affectedTooltip": "Affected patients",
+      "nonAffectedTooltip": "Unaffected patients",
       "gnomad": "gnomAD"
     },
     "functionalScores": {

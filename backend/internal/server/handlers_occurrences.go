@@ -215,7 +215,7 @@ func OccurrencesGermlineStatisticsHandler(repo repository.OccurrencesDAO) gin.Ha
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/{seq_id}/{locus_id}/expanded [get]
-func GetExpandedGermlineOccurrence(repo repository.OccurrencesDAO, exomiserRepository repository.ExomiserDAO) gin.HandlerFunc {
+func GetExpandedGermlineOccurrence(repo repository.OccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {
@@ -235,15 +235,6 @@ func GetExpandedGermlineOccurrence(repo repository.OccurrencesDAO, exomiserRepos
 		if expandedOccurrence == nil {
 			HandleNotFoundError(c, "occurrence")
 			return
-		}
-		exomiserACMGClassificationCounts, err := exomiserRepository.GetExomiserACMGClassificationCounts(locusId)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-
-		if exomiserACMGClassificationCounts != nil {
-			expandedOccurrence.ExomiserACMGClassificationCounts = exomiserACMGClassificationCounts
 		}
 		c.JSON(http.StatusOK, expandedOccurrence)
 	}

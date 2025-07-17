@@ -2,7 +2,8 @@ import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
 import { ExpandedOccurrence } from '@/api/api';
 import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
-import NumberBadge from '@/components/base/number-badge';
+import { Badge } from '@/components/base/ui/badge';
+import { getClassificationCriteriaColor } from '../interpretation/data';
 
 type PredictionSectionProps = {
   data: ExpandedOccurrence;
@@ -11,19 +12,29 @@ type PredictionSectionProps = {
 export default function PredictionSection({ data }: PredictionSectionProps) {
   const { t } = useI18n();
 
-  const exomiserCounts = data.exomiser_acmg_classification_counts ?? {};
-
-  const exomiser = Object.keys(exomiserCounts).map(classification => (
-    <NumberBadge count={exomiserCounts[classification]} variant="ghost">
-      <ClinVarBadge id={classification} abbreviated value={classification}>
-        {classification}
-      </ClinVarBadge>
-    </NumberBadge>
-    ));
+  const exomiser = data.exomiser_acmg_classification || data.exomiser_acmg_evidence ? (
+    <div className="flex items-center gap-1">
+      {data.exomiser_acmg_classification && (
+        <ClinVarBadge abbreviated value={data.exomiser_acmg_classification.replace(' ', '_')}>
+          {data.exomiser_acmg_classification}
+        </ClinVarBadge>
+      )}
+      {data.exomiser_acmg_evidence.map(e => (
+        <Badge key={e} variant={getClassificationCriteriaColor(e)}>
+          {e}
+        </Badge>
+      ))}
+    </div>
+  ) : (
+    '-'
+  );
 
   return (
     <DetailSection title={t('occurrenceExpand.predictions.title')}>
-      <DetailItem title={t('occurrenceExpand.predictions.exomiser')} value={exomiser.length ? <div className="flex items-center gap-2">{exomiser}</div> : '-'} />
+      <DetailItem
+        title={t('occurrenceExpand.predictions.exomiser')}
+        value={data.exomiser_acmg_classification ? <div>{exomiser}</div> : '-'}
+      />
     </DetailSection>
   );
 }
