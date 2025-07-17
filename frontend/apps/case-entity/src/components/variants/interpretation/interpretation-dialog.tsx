@@ -7,9 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
+import { toast } from "sonner";
 import { Separator } from '@/components/base/ui/separator';
 import InterpretationFormGermline from './interpretation-form-germline';
-import { ReactNode, useCallback, useRef, useState } from 'react';
+import { ReactNode, useCallback, useContext, useRef, useState } from 'react';
 import { ExpandedOccurrence, Occurrence } from '@/api/api';
 import InterpretationFormSomatic from './interpretation-form-somatic';
 import InterpretationLastUpdatedBanner from './last-updated-banner';
@@ -25,6 +26,7 @@ import { useI18n } from '@/components/hooks/i18n';
 
 type InterpretationDialogButtonProps = {
   occurrence: Occurrence;
+  handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
 };
 
@@ -32,7 +34,7 @@ type InterpretationDialogButtonProps = {
 // In the future, this should be determined based on the occurrence type or other criteria
 const isSomatic = false;
 
-function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialogButtonProps) {
+function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }: InterpretationDialogButtonProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -60,16 +62,23 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
   });
 
   const saveInterpretation = useSWRMutation<
-    Interpretation, // Data
-    any, // Error
-    string, // Key
-    { interpretation: Interpretation }, // ExtraArg
-    Interpretation // SWRData
-  >(interpretationUniqueKey, saveInterpretationHelper, {
-    onSuccess: () => {
-      // close modal or show success message
-    },
-  });
+    Interpretation,
+    any,
+    string,
+    { interpretation: Interpretation },
+    Interpretation>(interpretationUniqueKey, saveInterpretationHelper, {
+      onSuccess: () => {
+        setOpen(false);
+        handleSaveCallback && handleSaveCallback();
+        toast(t('variant.interpretationForm.notification.success'));
+      },
+      onError: () => {
+        setOpen(false);
+        toast(t('variant.interpretationForm.notification.error.title'), {
+          description: t('variant.interpretationForm.notification.error.text')
+        });
+      },
+    });
 
   const handleSave = useCallback(() => {
     if (isSomatic) {
