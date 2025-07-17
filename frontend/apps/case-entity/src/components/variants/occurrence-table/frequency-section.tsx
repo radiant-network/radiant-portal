@@ -13,7 +13,8 @@ type FrequencySectionProps = {
 
 export default function FrequencySection({ data }: FrequencySectionProps) {
   const { t } = useI18n();
-  const affected = (
+  const affectedValue = data.pc_wgs_affected && data.pn_wgs_affected && data.pf_wgs_affected?.toExponential(2) ? `${data.pc_wgs_affected} / ${data.pn_wgs_affected} (${data.pf_wgs_affected?.toExponential(2)})` : '-';
+  const affectedTitle = (
     <Tooltip>
       <TooltipTrigger asChild>
         <span className='inline-flex gap-1 items-center'>
@@ -27,7 +28,8 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
     </Tooltip>
   );
 
-  const nonAffected = (
+  const nonAffectedValue = data.pc_wgs_not_affected && data.pn_wgs_not_affected && data.pf_wgs_not_affected?.toExponential(2) ? `${data.pc_wgs_not_affected} / ${data.pn_wgs_not_affected} (${data.pf_wgs_not_affected?.toExponential(2)})` : '-';
+  const nonAffectedTitle = (
     <Tooltip>
       <TooltipTrigger asChild>
         <span className='inline-flex gap-1 items-center'>
@@ -43,8 +45,8 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
 
   return (
     <DetailSection title={t('occurrenceExpand.frequencies.title')}>
-      <DetailItem title={affected} value={`${data.pc_wgs_affected} / ${data.pn_wgs_affected} (${data.pf_wgs_affected?.toExponential(2)})`} />
-      <DetailItem title={nonAffected} value={`${data.pc_wgs_not_affected} / ${data.pn_wgs_not_affected} (${data.pf_wgs_not_affected?.toExponential(2)})`} />
+      <DetailItem title={affectedTitle} value={affectedValue} />
+      <DetailItem title={nonAffectedTitle} value={nonAffectedValue} />
       <DetailItem title={t('occurrenceExpand.frequencies.gnomad')} value={
         data.gnomad_v3_af ?
           <AnchorLink size="sm" href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`} target="_blank">
