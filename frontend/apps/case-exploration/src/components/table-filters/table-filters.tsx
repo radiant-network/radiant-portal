@@ -10,6 +10,7 @@ import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePe
 import { Button } from '@/components/base/ui/button';
 import TableFiltersSearch from './table-filters-search';
 import filterItemStatus from './filter-item-status';
+import filterItemPriority from './filter-item-priority';
 
 type CaseFiltersInput = {
   search_criteria: Array<SearchCriterion>;
@@ -129,7 +130,7 @@ function FiltersGroupForm({
         case 'priority':
           return {
             ...baseOption,
-            options: apiFilters[key] || []
+            options: filterItemPriority(apiFilters[key] || [], t)
           };
         case 'case_analysis':
           return {
