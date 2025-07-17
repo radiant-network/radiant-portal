@@ -62,7 +62,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <BetaFeatureProvider>{children}</BetaFeatureProvider>
                 </AlertDialogProvider>
               </TooltipProvider>
-              <Toaster />
+              <Toaster position='top-right' />
             </ThemeProvider>
           </ConfigProvider>
         </I18nProvider>

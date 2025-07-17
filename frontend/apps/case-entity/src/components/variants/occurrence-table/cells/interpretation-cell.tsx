@@ -5,22 +5,44 @@ import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 import { ZapIcon } from 'lucide-react';
 import InterpretationDialog from '../../interpretation/interpretation-dialog';
+import { useState } from 'react';
 
+import { toast } from "sonner";
 type InterpretationCellProps = {
   occurrence: Occurrence;
 };
 
+
+/**
+  * If an interpretation is updated, we update the icon localy to prevent 
+  * unecessary call to api
+  */
 function InterpretationCell({ occurrence }: InterpretationCellProps) {
   const { t } = useI18n();
+  const [hasInterpretation, setHasInterpretation] = useState<boolean>(occurrence.has_interpretation);
+  const handleSaveCallback = function() {
+    if (!occurrence.has_interpretation) {
+      setHasInterpretation(true);
+    }
+  }
 
   return (
     <InterpretationDialog
       occurrence={occurrence}
+      handleSaveCallback={handleSaveCallback}
       renderTrigger={handleOpen => (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button iconOnly className={cn("size-6", occurrence.has_interpretation ? 'text-primary' : 'text-muted-foreground')} variant="ghost" onClick={handleOpen}>
-              <ZapIcon className={cn(occurrence.has_interpretation && 'fill-primary')} size={16} />
+            <Button
+              className={cn("size-6", {
+                'text-primary': hasInterpretation,
+                'text-muted-foreground': !hasInterpretation,
+              })}
+              iconOnly
+              variant="ghost"
+              onClick={handleOpen}
+            >
+              <ZapIcon className={cn({ 'fill-primary': hasInterpretation })} size={16} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t('variant.interpretation.tooltips')}</TooltipContent>

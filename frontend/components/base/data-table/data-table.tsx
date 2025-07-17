@@ -25,10 +25,8 @@ import TableIndexResult from '@/components/base/data-table/data-table-index-resu
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationFirst,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from '@/components/base/ui/pagination';
@@ -365,7 +363,10 @@ function TranstackTable<T>({
   defaultColumnSettings,
   defaultServerSorting,
   TableFilters: FiltersGroupForm,
-  loadingStates,
+  loadingStates = {
+    total: true,
+    list: true,
+  },
   hasError = false,
   pagination,
   onPaginationChange,
@@ -400,6 +401,8 @@ function TranstackTable<T>({
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   // table interactions
+  const [isTableEmpty, setIsTableEmpty] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [rowPinning, setRowPinning] = useState<RowPinningState>(tableLocaleStorage.rowPinning.state);
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(tableLocaleStorage.columnVisibility);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(tableLocaleStorage.columnOrder);
@@ -411,7 +414,6 @@ function TranstackTable<T>({
       desc: serverSorting.order === SortBodyOrderEnum.Desc,
     })) as SortingState,
   );
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   // Initialize tanstack table
   const table = useReactTable({
@@ -455,8 +457,6 @@ function TranstackTable<T>({
       sorting,
     },
   });
-
-  const isEmpty = table.getRowModel().rows.length === 0;
 
   // Cache our row flexRender method
   const rowFlexRender = useMemo(() => {
@@ -510,6 +510,15 @@ function TranstackTable<T>({
       observer.disconnect();
     };
   }, []);
+
+  /**
+   * No result found
+   */
+  useEffect(() => {
+    if (loadingStates?.list === false) {
+      setIsTableEmpty(table.getRowCount() === 0);
+    }
+  }, [loadingStates?.list]);
 
   /**
    * Sorting useEffect
@@ -616,8 +625,18 @@ function TranstackTable<T>({
         </div>
       </div>
 
+
+      {/* Skeleton */}
+      {loadingStates?.list === true && (
+        <DataTableSkeletonLoading
+          headerGroups={table.getHeaderGroups()}
+          pagination={pagination}
+          columnSettings={defaultColumnSettings}
+        />
+      )}
+
       {/* Empty State */}
-      {loadingStates?.list === false && loadingStates?.total === false && !hasError && isEmpty && (
+      {loadingStates?.list === false && !hasError && isTableEmpty && (
         <Card className="shadow-none">
           <Empty
             title={t('common.table.no_result')}
@@ -629,8 +648,8 @@ function TranstackTable<T>({
         </Card>
       )}
 
-      {/* Error state       */}
-      {loadingStates?.list === false && loadingStates?.total === false && hasError && (
+      {/* Error state */}
+      {loadingStates?.list === false && hasError && (
         <Card className="w-full shadow-none">
           <Empty
             title={t('common.table.has_error')}
@@ -642,66 +661,59 @@ function TranstackTable<T>({
         </Card>
       )}
 
-      {!hasError && !isEmpty && (
+      {loadingStates?.list === false && !hasError && !isTableEmpty && (
         <div ref={containerRef}>
-          <DataTableSkeletonLoading
-            loading={loadingStates?.list}
-            headerGroups={table.getHeaderGroups()}
-            pagination={pagination}
-            columnSettings={defaultColumnSettings}
-          >
-            <Table id={id} style={{ ...columnSizeVars }}>
-              <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
-                {table.getHeaderGroups().map(headerGroup => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map(header => (
-                      <TableHead
-                        key={header.id}
-                        className={cn('group/header', getColumnPinningExtraCN(header.column))}
-                        style={{
-                          width: `calc(var(--header-${header?.id}-size) * 1px)`,
-                          ...getColumnPinningExtraStyles(header.column),
-                        }}
-                      >
-                        <>
-                          <div className="flex items-center justify-between gap-1">
-                            {/* Header rendering */}
-                            <div className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
-                              {flexRender(header.column.columnDef.header, header.getContext())}
-                            </div>
-
-                            {/* Table Header Actions, only display on hover */}
-                            <TableHeaderActions header={header} />
+          <Table id={id} style={{ ...columnSizeVars }}>
+            <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
+              {table.getHeaderGroups().map(headerGroup => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <TableHead
+                      key={header.id}
+                      className={cn('group/header', getColumnPinningExtraCN(header.column))}
+                      style={{
+                        width: `calc(var(--header-${header?.id}-size) * 1px)`,
+                        ...getColumnPinningExtraStyles(header.column),
+                      }}
+                    >
+                      <>
+                        <div className="flex items-center justify-between gap-1">
+                          {/* Header rendering */}
+                          <div className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                            {flexRender(header.column.columnDef.header, header.getContext())}
                           </div>
 
-                          {/* Resize Grip */}
-                          {header.column.getCanResize() && (
-                            <div
-                              onDoubleClick={() => header.column.resetSize()}
-                              onMouseDown={header.getResizeHandler()}
-                              onTouchStart={header.getResizeHandler()}
-                              className={cn(
-                                'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
-                                table.options.columnResizeDirection,
-                                header.column.getIsResizing() ? 'opacity-100' : '',
-                              )}
-                            />
-                          )}
-                        </>
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {/* Render pinned rows */}
-                {table.getTopRows().map(rowFlexRender)}
+                          {/* Table Header Actions, only display on hover */}
+                          <TableHeaderActions header={header} />
+                        </div>
 
-                {/* Render table content */}
-                {table.getCenterRows().map(rowFlexRender)}
-              </TableBody>
-            </Table>
-          </DataTableSkeletonLoading>
+                        {/* Resize Grip */}
+                        {header.column.getCanResize() && (
+                          <div
+                            onDoubleClick={() => header.column.resetSize()}
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            className={cn(
+                              'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
+                              table.options.columnResizeDirection,
+                              header.column.getIsResizing() ? 'opacity-100' : '',
+                            )}
+                          />
+                        )}
+                      </>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {/* Render pinned rows */}
+              {table.getTopRows().map(rowFlexRender)}
+
+              {/* Render table content */}
+              {table.getCenterRows().map(rowFlexRender)}
+            </TableBody>
+          </Table>
         </div>
       )}
       {total > 10 && (

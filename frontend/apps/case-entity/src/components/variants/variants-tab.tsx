@@ -1,9 +1,9 @@
-import { CaseAssay, Count, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
+import { CaseEntity, Count, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
-import { useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { SidebarProvider } from '@/components/base/ui/sidebar';
 import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
@@ -22,6 +22,8 @@ import { AggregateContext } from '@/components/feature/query-filters/use-aggrega
 import { OccurrenceCountInput, useOccurencesCountHelper, useOccurencesListHelper } from './hook';
 import { occurrencesApi } from '@/utils/api';
 
+export const SeqIDContext = createContext<string>("");
+
 const DEFAULT_SORTING = [
   {
     field: "max_impact_score",
@@ -38,7 +40,7 @@ const DEFAULT_SORTING = [
 ];
 
 type VariantTabProps = {
-  assaysWithVariants: CaseAssay[];
+  caseEntity?: CaseEntity;
   isLoading: boolean;
 }
 
@@ -47,11 +49,11 @@ async function fetchQueryCount(input: OccurrenceCountInput) {
   return response.data;
 }
 
-function VariantTab({ assaysWithVariants, isLoading }: VariantTabProps) {
+function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const config = useConfig();
   const { t } = useI18n();
 
-  const [seqId, setSeqId] = useState<string>(assaysWithVariants[0]?.seq_id.toString() ?? '');
+  const [seqId, setSeqId] = useState<string>(caseEntity?.assays[0]?.seq_id.toString() ?? '');
 
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
@@ -136,95 +138,97 @@ function VariantTab({ assaysWithVariants, isLoading }: VariantTabProps) {
   }, [JSON.stringify(qbState?.queries), qbState?.activeQueryId]);
 
   return (
-    <div className='bg-background flex flex-col'>
-      <AssayVariantFilters isLoading={isLoading} assays={assaysWithVariants} handleChange={(value: string) => setSeqId(value)} />
-      <div className='bg-muted/40 w-full'>
-        <div className={`flex flex-1 h-screen overflow-hidden`}>
-          <aside className="w-auto min-w-fit h-full shrink-0">
-            <AggregateContext value={{ seqId }}>
-              <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
-                <div className="z-10">
-                  <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
-                </div>
-                <div
-                  className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
-                    'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
-                    'w-0 opacity-0': !selectedSidebarItem,
-                  })}
-                >
-                  <div className="whitespace-nowrap">
-                    <div className="flex justify-end mb-4">
-                      <button
-                        onClick={() => setSelectedSidebarItem(null)}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                    <FilterList groupKey={selectedSidebarItem} />
+    <SeqIDContext value={seqId}>
+      <div className='bg-background flex flex-col'>
+        <AssayVariantFilters isLoading={isLoading} assays={caseEntity?.assays} handleChange={(value: string) => setSeqId(value)} />
+        <div className='bg-muted/40 w-full'>
+          <div className={`flex flex-1 h-screen overflow-hidden`}>
+            <aside className="w-auto min-w-fit h-full shrink-0">
+              <AggregateContext value={{ seqId }}>
+                <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
+                  <div className="z-10">
+                    <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
                   </div>
-                </div>
-              </SidebarProvider>
-            </AggregateContext>
-          </aside>
-          <main className="flex-1 flex-shrink-1 p-4 overflow-auto">
-            <h1 className="text-2xl font-bold">Variant</h1>
-            <div className="py-4 space-y-2">
-              <QueryBuilder
-                id={appId}
-                state={qbState}
-                enableCombine
-                enableFavorite
-                enableShowHideLabels
-                queryCountIcon={<VariantIcon size={14} />}
-                fetchQueryCount={resolvedSqon =>
-                  fetchQueryCount({
-                    seqId,
-                    countBody: {
-                      sqon: resolvedSqon,
-                    },
-                  }).then(res => res.count || 0)
-                }
-                resolveSyntheticSqon={resolveSyntheticSqon}
-                onActiveQueryChange={sqon => setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)}
-                onStateChange={state => {
-                  setQbState(state);
-                }}
-                queryPillFacetFilterConfig={{
-                  enable: true,
-                  blacklistedFacets: ['locus_id'],
-                  onFacetClick: filter => {
-                    const fields = Object.values(config.variant_exploration.aggregations)
-                      .flatMap(f => f.items)
-                      .find(f => f.key === filter.content.field)!;
+                  <div
+                    className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
+                      'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
+                      'w-0 opacity-0': !selectedSidebarItem,
+                    })}
+                  >
+                    <div className="whitespace-nowrap">
+                      <div className="flex justify-end mb-4">
+                        <button
+                          onClick={() => setSelectedSidebarItem(null)}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      <FilterList groupKey={selectedSidebarItem} />
+                    </div>
+                  </div>
+                </SidebarProvider>
+              </AggregateContext>
+            </aside>
+            <main className="flex-1 flex-shrink-1 p-4 overflow-auto">
+              <h1 className="text-2xl font-bold">Variant</h1>
+              <div className="py-4 space-y-2">
+                <QueryBuilder
+                  id={appId}
+                  state={qbState}
+                  enableCombine
+                  enableFavorite
+                  enableShowHideLabels
+                  queryCountIcon={<VariantIcon size={14} />}
+                  fetchQueryCount={resolvedSqon =>
+                    fetchQueryCount({
+                      seqId,
+                      countBody: {
+                        sqon: resolvedSqon,
+                      },
+                    }).then(res => res.count || 0)
+                  }
+                  resolveSyntheticSqon={resolveSyntheticSqon}
+                  onActiveQueryChange={sqon => setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)}
+                  onStateChange={state => {
+                    setQbState(state);
+                  }}
+                  queryPillFacetFilterConfig={{
+                    enable: true,
+                    blacklistedFacets: ['locus_id'],
+                    onFacetClick: filter => {
+                      const fields = Object.values(config.variant_exploration.aggregations)
+                        .flatMap(f => f.items)
+                        .find(f => f.key === filter.content.field)!;
 
-                    return <FilterComponent field={fields} isOpen={true} />;
-                  },
+                      return <FilterComponent field={fields} isOpen={true} />;
+                    },
+                  }}
+                />
+              </div>
+              <DataTable
+                id="variant-occurrence"
+                columns={getVariantColumns(t)}
+                data={fetchOccurrencesList.data ?? []}
+                defaultColumnSettings={defaultSettings}
+                defaultServerSorting={DEFAULT_SORTING}
+                loadingStates={{
+                  total: fetchOccurrencesCount.isLoading,
+                  list: fetchOccurrencesList.isLoading,
                 }}
+                pagination={pagination}
+                onPaginationChange={setPagination}
+                onServerSortingChange={setSorting}
+                subComponent={data => <OccurrenceExpand occurrence={data} />}
+                total={fetchOccurrencesCount.data?.count ?? 0}
+                enableColumnOrdering
+                enableFullscreen
               />
-            </div>
-            <DataTable
-              id="variant-occurrence"
-              columns={getVariantColumns(t)}
-              data={fetchOccurrencesList.data ?? []}
-              defaultColumnSettings={defaultSettings}
-              defaultServerSorting={DEFAULT_SORTING}
-              loadingStates={{
-                total: fetchOccurrencesCount.isLoading,
-                list: fetchOccurrencesList.isLoading,
-              }}
-              pagination={pagination}
-              onPaginationChange={setPagination}
-              onServerSortingChange={setSorting}
-              subComponent={data => <OccurrenceExpand occurrence={data} />}
-              total={fetchOccurrencesCount.data?.count ?? 0}
-              enableColumnOrdering
-              enableFullscreen
-            />
-          </main>
+            </main>
+          </div>
         </div>
       </div>
-    </div>
+    </ SeqIDContext>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Link, useLocation, useParams } from 'react-router';
 import DetailsTab from './components/details/details-tab';
@@ -14,6 +14,8 @@ import Container from '@/components/base/container';
 import Header from './components/layout/header';
 import { AudioWaveform, ClipboardList } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+
+export const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
 
 type CaseEntityInput = {
   key: string;
@@ -80,40 +82,44 @@ export default function App() {
     return null;
   }
 
-  const assaysWithVariants = (data?.assays ?? []).filter(a => a.has_variants) ?? [];
-  const hasVariants = assaysWithVariants.length > 0;
-
+  const hasVariants = (data?.assays ?? []).some(assay => assay.has_variants);
   return (
-    <main className="bg-muted/40 h-screen overflow-auto">
-      <Header data={data} isLoading={isLoading} />
-      <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
-        <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
-          <TabsListItem value={CaseEntityTabs.Details}><ClipboardList />{t('caseEntity.details.title')}</TabsListItem>
-          {hasVariants ? (
-            <TabsListItem value={CaseEntityTabs.Variants}>
-              <AudioWaveform />{t('caseEntity.variants.title')}
+    <CaseEntityContext value={data}>
+      <main className="bg-muted/40 h-screen overflow-auto">
+        <Header data={data} isLoading={isLoading} />
+        <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
+          <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
+            <TabsListItem value={CaseEntityTabs.Details}>
+              <ClipboardList />
+              {t('caseEntity.details.title')}
             </TabsListItem>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger>
-                <TabsListItem disabled value={CaseEntityTabs.Variants}>
-                  <AudioWaveform />{t('caseEntity.variants.title')}
-                </TabsListItem>
-              </TooltipTrigger>
-              <TooltipContent>{t("caseEntity.details.no_variants")}</TooltipContent>
-            </Tooltip>
-          )}
-        </TabsList>
-        <Container>
-          <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-6">
-            <DetailsTab caseEntity={data} isLoading={isLoading} />
-          </TabsContent>
-        </Container>
-        <TabsContent value={CaseEntityTabs.Variants} noMargin>
-          <VariantsTab isLoading={isLoading} assaysWithVariants={assaysWithVariants} />
-        </TabsContent>
-      </TabsNav>
-    </main>
+            {hasVariants ? (
+              <TabsListItem value={CaseEntityTabs.Variants}>
+                <AudioWaveform />
+                {t('caseEntity.variants.title')}
+              </TabsListItem>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger>
+                  <TabsListItem disabled value={CaseEntityTabs.Variants}>
+                    <AudioWaveform />
+                    {t('caseEntity.variants.title')}
+                  </TabsListItem>
+                </TooltipTrigger>
+                <TooltipContent>{t('caseEntity.details.no_variants')}</TooltipContent>
+              </Tooltip>
+            )}
+          </TabsList>
+          <Container>
+            <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-6">
+              <DetailsTab caseEntity={data} isLoading={isLoading} />
+            </TabsContent>
+            <TabsContent value={CaseEntityTabs.Variants} noMargin>
+              <VariantsTab isLoading={isLoading} caseEntity={data} />
+            </TabsContent>
+          </Container>
+        </TabsNav>
+      </main>
+    </CaseEntityContext>
   );
 }
-
