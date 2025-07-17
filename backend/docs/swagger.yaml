@@ -444,6 +444,8 @@ components:
           type: string
         end:
           type: integer
+        exomiser_acmg_classification:
+          type: string
         exomiser_acmg_evidence:
           items:
             type: string
@@ -498,13 +500,25 @@ components:
           uniqueItems: false
         parental_origin:
           type: string
+        pc_wgs_affected:
+          type: integer
+        pc_wgs_not_affected:
+          type: integer
         pf_wgs:
+          type: number
+        pf_wgs_affected:
+          type: number
+        pf_wgs_not_affected:
           type: number
         picked_consequences:
           items:
             type: string
           type: array
           uniqueItems: false
+        pn_wgs_affected:
+          type: integer
+        pn_wgs_not_affected:
+          type: integer
         qd:
           type: number
         revel_score:

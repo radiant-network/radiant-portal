@@ -210,14 +210,14 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                     <span>{t('caseEntity.details.type')}</span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {t('caseEntity.details.createdOn_tooltips')}
+                    {t('caseEntity.details.date_format_tooltips')}
                   </TooltipContent>
                 </Tooltip>
               </div>
               {caseData.members.length > 1 && (
                 <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.patient')}</div>
               )}
-              <div className="p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
+              <div className="hidden md:block p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
@@ -225,7 +225,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {t('caseEntity.details.createdOn_tooltips')}
+                    {t('caseEntity.details.date_format_tooltips')}
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -237,13 +237,13 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 </div>
                 <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge></div>
                 {caseData.members.length > 1 && (
-                  <div className="p-3 flex items-start flex-col md:flex-row gap-1">
+                  <div className="p-3 flex items-start flex-col md:flex-row gap-1 flex-wrap">
                     {bioInfo.patients.map((patient: string, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">{t(`caseEntity.patientInformation.relationships.${patient}`)}</Badge>
                     ))}
                   </div>
                 )}
-                <div className="p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '-'}</div>
+                <div className="hidden md:block p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '-'}</div>
               </div>
             )) : <div className="p-3 text-sm">{t('caseEntity.details.noTaskFound')}</div>}
           </div>

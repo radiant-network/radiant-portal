@@ -176,8 +176,14 @@ CREATE TABLE IF NOT EXISTS `germline__snv__variant`
     gnomad_v3_af DOUBLE,
     topmed_af DOUBLE,
     tg_af DOUBLE,
-    pc_wgs                     INT(11),
-    pn_wgs                     INT(11),
+    pc_wgs INT(11),
+    pn_wgs INT(11),
+    pc_wgs_affected INT(11),
+    pn_wgs_affected INT(11),
+    pf_wgs_affected DOUBLE,
+    pc_wgs_not_affected INT(11),
+    pn_wgs_not_affected INT(11),
+    pf_wgs_not_affected DOUBLE,
     chromosome             CHAR(2),
     start                  BIGINT NULL COMMENT '',
     end                    BIGINT NULL COMMENT '',
@@ -344,10 +350,10 @@ VALUES
     (1, 1, 1, 1000, 150, 'PASS', 'HOM', 0.5, 0, 'Likely pathogenic', ['PP3'], 0.85, 0.75),
     (1, 19, 19, 2000, 200, 'PASS', 'HET', 1.0, 0, 'Benign', ['BP4'], 0.95, 0.9);
 
-INSERT INTO germline__snv__variant (locus_id, impact_score, pf_wgs, pc_wgs, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
+INSERT INTO germline__snv__variant (locus_id, impact_score, pf_wgs, pc_wgs, pn_wgs, pc_wgs_affected, pn_wgs_affected, pf_wgs_affected, pc_wgs_not_affected, pn_wgs_not_affected, pf_wgs_not_affected, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
 VALUES
-    (1000, 3, 0.01, 10, 0.01, 'hgvsg1', 'AD', 'class1', 'MODIFIER', 'BRAF', true, true, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
-    (2000, 1, 0.02, 20, 0.02, 'hgvsg2', 'Smu', 'class2', 'MODIFIER', 'BRAC', false, true, ['Pathogenic'], 'rs2222222', 'p.Arg19His', ['splice acceptor'], 'locus_full_2000', '2', 2222, 'C', 'G', 'T002');
+    (1000, 3, 0.01, 10, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 0.01, 'hgvsg1', 'AD', 'class1', 'MODIFIER', 'BRAF', true, true, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
+    (2000, 1, 0.02, 20, 100, 40, 50, 0.80, 20, 50, 0.4, 0.02, 'hgvsg2', 'Smu', 'class2', 'MODIFIER', 'BRAC', false, true, ['Pathogenic'], 'rs2222222', 'p.Arg19His', ['splice acceptor'], 'locus_full_2000', '2', 2222, 'C', 'G', 'T002');
 
 INSERT INTO staging_sequencing_experiment (case_id, seq_id, task_id, part, analysis_type, ingested_at)
 VALUES

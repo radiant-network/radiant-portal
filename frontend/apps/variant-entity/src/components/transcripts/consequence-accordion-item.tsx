@@ -1,12 +1,13 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { Badge } from '@/components/base/ui/badge';
 import { Separator } from '@/components/base/ui/separator';
-import { Fragment, RefAttributes } from 'react';
+import { Fragment } from 'react';
 import TranscriptDetails from './transcript-details';
 import { useI18n } from '@/components/hooks/i18n';
 import { VariantConsequence } from '@/api/api';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { replaceUnderscore } from '@/components/lib/string-format';
 
 interface ConsequenceAccordionItemProps {
   value: string;
@@ -44,7 +45,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
         <div className="flex flex-1">
           <Badge variant="neutral" className="capitalize">
             {t(`variant.biotype`, {
-              defaultValue: data.biotype?.replace(/_/g, ' ') || '-',
+              defaultValue: data.biotype ? replaceUnderscore(data.biotype) : '-',
             })}
           </Badge>
         </div>
