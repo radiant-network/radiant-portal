@@ -83,7 +83,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
 
   if (isFamilyCase && members.length > 1) {
     return (
-      <Card {...props} className="h-auto size-max w-full">
+      <Card {...props}>
         <CardHeader className="border-b [.border-b]:pb-2">
           <CardTitle size="xl">
             {t('caseEntity.patientInformation.title')}
