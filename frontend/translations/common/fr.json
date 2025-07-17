@@ -344,7 +344,7 @@
     "filtersGroup": {
       "searchById": "Recherche par ID",
       "priority_code": "Priorité",
-      "status_code": "Status",
+      "status_code": "Statut",
       "case_analysis_code": "Analyse",
       "search_placeholder": "Cas, analyse, patient, analyse ou MRN",
       "project_code": "Projet",
@@ -384,7 +384,7 @@
       "filters": {
         "more_placeholder": "Filtres",
         "priority": "Priorité",
-        "status": "Status",
+        "status": "Statut",
         "case_analysis": "Analyse",
         "project": "Projet",
         "performer_lab": "Laboratoire de diagnostic",
@@ -396,12 +396,12 @@
         "mrn": "Dossier",
         "mrn_tooltips": "Numéro de dossier médicale du patient",
         "priority_code": "Priorité",
-        "status_code": "Status",
+        "status_code": "Statut",
         "case_type": "Type de cas",
         "primary_condition": "Condition principale",
         "case_analysis_code": "Analyse",
         "requested_by_code": "Req. par",
-        "requested_by_code_tooltips": "Requested by",
+        "requested_by_code_tooltips": "Requête faite par",
         "project_code": "Projet",
         "updated_on": "Dernière modification",
         "updated_on_tooltips": "Date de la dernière modification du cas (aaaa-mm-jj)",
@@ -661,7 +661,7 @@
       "okText": "Sauvegarder",
       "lastUpdate": "Dernière mise à jour : <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
       "header": {
-        "germline": "Germline",
+        "germline": "Germinal",
         "somatic": "Somatic"
       },
       "notification": {
@@ -817,8 +817,8 @@
     "notFound.button": "Retour à la liste de cas",
     "header": {
       "cases": "Cas",
-      "germline": "Germline",
-      "germline_family": "Germline Familial",
+      "germline": "Germinal",
+      "germline_family": "Germinal familial",
       "case": "Cas"
     },
     "patientInformation": {
@@ -897,7 +897,6 @@
       "assignedTo": "Assigné à",
       "bioinformatics": "Bio-informatique",
       "taskId": "ID de tâche",
-      "type": "Type",
       "patient": "Patient",
       "noTaskFound": "Aucune tâche trouvée",
       "statusOptions": {
@@ -931,7 +930,7 @@
     "notFound.button": "Retour à la liste de variants",
     "header": {
       "variants": "Variants",
-      "germline": "Germline"
+      "germline": "Germinal"
     },
     "overview": {
       "title": "Aperçu",
@@ -967,7 +966,7 @@
             "evaluated.tooltip": "La date la plus récente à laquelle un soumissionnaire a évalué cette variante pour la condition dans la base de données ClinVar.",
             "condition": "Condition",
             "classification": "Classification",
-            "status": "Status",
+            "status": "Statut",
             "status.tooltip": "TODO",
             "origin": "Origin"
           }
@@ -986,7 +985,7 @@
             "condition": "Condition (OMIM)",
             "inheritence": "Inheritence",
             "classification": "Classification",
-            "status": "Status",
+            "status": "Statut",
             "status.tooltip": "TODO",
             "origin": "Origin"
           },
