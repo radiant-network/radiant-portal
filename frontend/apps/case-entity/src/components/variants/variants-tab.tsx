@@ -84,6 +84,8 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
         'is_canonical',
         'omim_inheritance_code',
         'clinvar',
+        'exomiser_gene_combined_score',
+        'exomiser_acmg_classification',
         'pf_wgs',
         'transcript_id',
         'has_interpretation',

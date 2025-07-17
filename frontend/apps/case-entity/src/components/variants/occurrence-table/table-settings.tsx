@@ -19,6 +19,7 @@ import GnomadCell from './cells/gnomad-cell';
 import ParticipantFrequencyCell from './cells/participant-frequency-cell';
 import NumberCell from './cells/number-cell';
 import ZygosityCell from './cells/zygosity-cell';
+import ExomiserAcmgCell from "./cells/exomiser-acmg-cell";
 
 const columnHelper = createColumnHelper<Occurrence>();
 
@@ -127,6 +128,26 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       header: t('variant.headers.clinvar'),
       minSize: 120,
     }),
+    columnHelper.accessor(row => row.exomiser_gene_combined_score, {
+      id: 'exomiser_gene_combined_score',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={4} />,
+      header: () => (
+          <TooltipsHeader tooltips={t('variant.headers.exomiser_gene_combined_score_tooltips')}>
+            {t('variant.headers.exomiser_gene_combined_score')}
+          </TooltipsHeader>
+      ),
+      minSize: 100,
+    }),
+    columnHelper.accessor(row => row.exomiser_acmg_classification, {
+      id: 'exomiser_acmg_classification',
+      cell: info => <ExomiserAcmgCell code={info.getValue()} />,
+      header: () => (
+          <TooltipsHeader tooltips={t('variant.headers.exomiser_acmg_classification_tooltips')}>
+            {t('variant.headers.exomiser_acmg_classification')}
+          </TooltipsHeader>
+      ),
+      minSize: 100,
+    }),
     columnHelper.accessor(row => row.gnomad_v3_af, {
       id: 'gnomad_v3_af',
       cell: info => <GnomadCell value={info.getValue()} />,
@@ -219,6 +240,16 @@ const defaultSettings = createColumnSettings([
     id: 'clinvar',
     visible: true,
     label: 'variant.headers.clinvar',
+  },
+  {
+    id: 'exomiser_gene_combined_score',
+    visible: true,
+    label: 'variant.headers.exomiser_gene_combined_score',
+  },
+  {
+    id: 'exomiser_acmg_classification',
+    visible: true,
+    label: 'variant.headers.exomiser_acmg_classification',
   },
   {
     id: 'gnomad_v3_af',
