@@ -1,14 +1,14 @@
 import { useI18n } from '@/components/hooks/i18n';
-import CasesMondoAutocomplete from './cases-mondo-autocomplete';
 import ClassificationSelectFilter from './classification-select-filter';
 import InstitutionSelectFilter from './institution-select-filter';
-import TestSelectFilter from './test-select-filter';
+import AnalysisSelectFilter from './analysis-select-filter';
+import ConditionCasesFilter from './condition-cases-filter';
 
 export interface InterpretedCasesFiltersState {
   mondo: string;
-  institution: string;
-  test: string;
-  classification: string;
+  institution: 'all' | string;
+  test: 'all' | string;
+  classification: 'all' | string;
 }
 
 interface CasesFilterBarProps {
@@ -19,17 +19,24 @@ interface CasesFilterBarProps {
 function InterpretedCasesFilters({ filters, onFiltersChange }: CasesFilterBarProps) {
   const { t } = useI18n();
 
+  const handleFilterChange = (field: keyof InterpretedCasesFiltersState, value: string) => {
+    onFiltersChange({ ...filters, [field]: value });
+  };
+
   return (
     <div className="space-y-2">
       <div className="text-sm">{t('variantEntity.cases.interpreted-table.filters.label')}</div>
       <div className="flex items-center gap-2">
-        <CasesMondoAutocomplete
-          onChange={value => onFiltersChange({ ...filters, mondo: value })}
-          placeholder={t('variantEntity.cases.interpreted-table.filters.searchInputPlaceholder')}
+        <ConditionCasesFilter onChange={value => handleFilterChange('mondo', value)} />
+        <ClassificationSelectFilter
+          value={filters.classification}
+          onChange={value => handleFilterChange('classification', value)}
         />
-        <ClassificationSelectFilter />
-        <InstitutionSelectFilter />
-        <TestSelectFilter />
+        <InstitutionSelectFilter
+          value={filters.institution}
+          onChange={value => handleFilterChange('institution', value)}
+        />
+        <AnalysisSelectFilter value={filters.test} onChange={value => handleFilterChange('test', value)} />
       </div>
     </div>
   );

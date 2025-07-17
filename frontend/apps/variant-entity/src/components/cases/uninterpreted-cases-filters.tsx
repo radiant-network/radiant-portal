@@ -1,11 +1,12 @@
 import { useI18n } from '@/components/hooks/i18n';
-import CasesMondoAutocomplete from './cases-mondo-autocomplete';
 import InstitutionSelectFilter from './institution-select-filter';
-import TestSelectFilter from './test-select-filter';
+import AnalysisSelectFilter from './analysis-select-filter';
+import PhenotypeCasesFilter from './phenotype-cases-filter';
 
 export interface UninterpretedCasesFiltersState {
-  institution: string;
-  test: string;
+  phenotype: string;
+  institution: 'all' | string;
+  test: 'all' | string;
 }
 
 interface CasesFilterBarProps {
@@ -16,16 +17,20 @@ interface CasesFilterBarProps {
 function OtherCasesFilters({ filters, onFiltersChange }: CasesFilterBarProps) {
   const { t } = useI18n();
 
+  const handleFilterChange = (field: keyof UninterpretedCasesFiltersState, value: string) => {
+    onFiltersChange({ ...filters, [field]: value });
+  };
+
   return (
     <div className="space-y-2">
       <div className="text-sm">{t('variantEntity.cases.other-table.filters.label')}</div>
       <div className="flex items-center gap-2">
-        <CasesMondoAutocomplete
-          onChange={console.log}
-          placeholder={t('variantEntity.cases.other-table.filters.searchInputPlaceholder')}
+        <PhenotypeCasesFilter onChange={value => handleFilterChange('phenotype', value)} />
+        <InstitutionSelectFilter
+          value={filters.institution}
+          onChange={value => handleFilterChange('institution', value)}
         />
-        <InstitutionSelectFilter />
-        <TestSelectFilter />
+        <AnalysisSelectFilter value={filters.test} onChange={value => handleFilterChange('test', value)} />
       </div>
     </div>
   );

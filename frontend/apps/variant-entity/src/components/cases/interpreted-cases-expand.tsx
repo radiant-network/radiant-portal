@@ -3,6 +3,9 @@ import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { useI18n } from '@/components/hooks/i18n';
 import { variantsApi } from '@/utils/api';
 import { sanitizeHtml, decodeHtmlEntities } from '@/utils/helper';
 import { Copy, Mars, Stethoscope, User, Venus } from 'lucide-react';
@@ -10,7 +13,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 
-interface InterpretedCasesExpandProps {
+interface InterpretedCasesExpendProps {
   locusId: string;
   data: VariantInterpretedCase;
 }
@@ -30,7 +33,9 @@ async function fetchOccurrenceExpand(input: VariantExpandedInterpretedCaseInput)
   return response.data;
 }
 
-function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpandProps) {
+function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) {
+  const { t } = useI18n();
+
   const { data: expandedData, isLoading } = useSWR<
     VariantExpandedInterpretedCase,
     any,
@@ -49,9 +54,16 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpandProps) 
   );
 
   const handleCopy = useCallback(() => {
-    // TODO - Implement the actual copy logic
-    toast.success('Copied to clipboard');
-  }, []);
+    if (expandedData?.interpretation) {
+      // Create a temporary div to strip HTML tags and get text content
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = sanitizeHtml(decodeHtmlEntities(expandedData.interpretation));
+      const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+      navigator.clipboard.writeText(textContent);
+      toast.success(t('variantEntity.cases.interpreted-table.expend.copySuccess'));
+    }
+  }, [expandedData?.interpretation, t]);
 
   if (isLoading) {
     return (
@@ -77,7 +89,17 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpandProps) 
         <div className="space-y-6 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 text-muted-foreground">
             <div className="flex gap-1 items-center">
-              <User size={16} /> <span className="text-sm">{expandedData?.patient_id || '-'}</span>
+              <User size={16} />{' '}
+              <span className="text-sm">
+                {expandedData?.patient_id ? (
+                  <Tooltip>
+                    <TooltipTrigger>{expandedData?.patient_id}</TooltipTrigger>
+                    <TooltipContent>{t('variantEntity.cases.interpreted-table.expend.patientId')}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  '-'
+                )}
+              </span>
             </div>
             <div className="flex gap-1 items-center">
               <Stethoscope size={16} />
@@ -93,16 +115,33 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpandProps) 
             }}
           />
         </div>
-        <div className="flex-shrink-0">
-          <Button variant="outline" size="xs" onClick={handleCopy}>
-            <Copy /> Copy
-          </Button>
-        </div>
+        {expandedData?.interpretation && (
+          <div className="flex-shrink-0">
+            <Button variant="outline" size="xs" onClick={handleCopy}>
+              <Copy /> {t('variantEntity.cases.interpreted-table.expend.copy')}
+            </Button>
+          </div>
+        )}
       </div>
       <Separator className="mt-6 mb-4" />
       <div className="flex flex-wrap items-center gap-4 sm:gap-10">
         <div className="flex items-center gap-2">
-          <div className="text-sm font-medium">{expandedData?.gene_symbol || '-'}</div>
+          <div className="text-sm font-medium">
+            {expandedData?.gene_symbol ? (
+              <a
+                href={getOmimOrgUrl({
+                  symbol: expandedData.gene_symbol,
+                })}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:underline"
+              >
+                {expandedData.gene_symbol}
+              </a>
+            ) : (
+              '-'
+            )}
+          </div>
           <div className="text-xs underline hover:cursor-pointer">NM_21360026</div>
         </div>
         {expandedData?.classification_criterias && expandedData?.classification_criterias.length > 0 && (
@@ -117,8 +156,16 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpandProps) 
           </div>
         )}
         <div className="flex items-center gap-2">
-          <Badge variant="outline">AD</Badge>
-          <Badge variant="outline">XLD</Badge>
+          {expandedData?.inheritances?.map(inheritance => (
+            <Tooltip key={inheritance}>
+              <TooltipTrigger>
+                <Badge variant="outline" key={inheritance}>
+                  {t(`variant.transmission_mode.${inheritance}.abbrev`)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>{t(`variant.transmission_mode.${inheritance}`)}</TooltipContent>
+            </Tooltip>
+          ))}
         </div>
         {expandedData?.patient_sex_code && (
           <div className="flex items-center gap-2">
@@ -132,7 +179,14 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpandProps) 
           {expandedData?.pubmed_ids && expandedData?.pubmed_ids.length > 0 ? (
             <div className="underline hover:cursor-pointer space-x-2">
               {expandedData?.pubmed_ids.map(pubmed => (
-                <div key={pubmed}>{pubmed}</div>
+                <a
+                  href={`https://pubmed.ncbi.nlm.nih.gov/${pubmed}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:underline"
+                >
+                  {pubmed}
+                </a>
               ))}
             </div>
           ) : (

@@ -255,7 +255,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -520,6 +520,10 @@ function TranstackTable<T>({
     }
   }, [loadingStates?.list]);
 
+  useEffect(() => {
+    setIsTableEmpty(table.getRowCount() === 0);
+  }, [table.getRowCount()]);
+
   /**
    * Sorting useEffect
    * Update server-side calls to use the new sorting settings
@@ -624,7 +628,6 @@ function TranstackTable<T>({
           )}
         </div>
       </div>
-
 
       {/* Skeleton */}
       {loadingStates?.list === true && (
@@ -754,10 +757,7 @@ function TranstackTable<T>({
               <Pagination className="w-auto">
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationFirst
-                      disabled={!table.getCanPreviousPage()}
-                      onClick={() => table.firstPage()}
-                    />
+                    <PaginationFirst disabled={!table.getCanPreviousPage()} onClick={() => table.firstPage()} />
                   </PaginationItem>
                   <PaginationItem>
                     <PaginationPrevious
