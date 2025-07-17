@@ -1,14 +1,20 @@
 /// <reference types="vite/client" />
 
-// Translation JSON modules
+// For translations
 declare module '@translations/common/*.json' {
-  const content: Record<string, any>;
-  export default content;
+  const value: Record<string, any>;
+  export default value;
 }
 
 declare module '@translations/portals/*/*.json' {
-  const content: Record<string, any>;
-  export default content;
+  const value: Record<string, any>;
+  export default value;
+}
+
+// For pre-merged translations (build-time generated)
+declare module '@translations-merged/*.json' {
+  const value: Record<string, any>;
+  export default value;
 }
 
 // theme-declarations.d.ts

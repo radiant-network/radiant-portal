@@ -2,7 +2,6 @@
 
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { deepMerge } from '../lib/merge';
 
 // Get the current theme from environment variable
 const getCurrentTheme = () => {
@@ -47,28 +46,17 @@ export const detectLanguageFromRequest = (request: Request): string => {
   return 'en';
 };
 
-// Load translations based on theme (same as client-side)
+// Load pre-merged translations (same as client-side now)
 export const loadTranslations = async (lang: string) => {
   const theme = getCurrentTheme();
 
   try {
-    // Load translations in parallel but handle errors separately
-    const [commonResult, portalResult] = await Promise.allSettled([
-      import(`../../translations/common/${lang}.json`),
-      import(`../../translations/portals/${theme}/${lang}.json`),
-    ]);
-
-    // Start with common translations
-    let translations = commonResult.status === 'fulfilled' ? commonResult.value.default : {};
-
-    // Add portal translations if available
-    if (portalResult.status === 'fulfilled') {
-      translations = deepMerge(translations, portalResult.value.default);
-    }
-
-    return translations;
+    // Load merged translations directly
+    const mergedPath = `../../translations/merged/${theme}/${lang}.json`;
+    const merged = await import(mergedPath);
+    return merged.default;
   } catch (error) {
-    console.warn(`Failed to load translations for ${lang}, falling back to common translations`);
+    console.warn(`Failed to load merged translations for ${theme}/${lang}, falling back to common`);
     try {
       const common = await import(`../../translations/common/${lang}.json`);
       return common.default;
@@ -88,7 +76,7 @@ export const createServerI18n = async (lng: string = 'en') => {
     lng,
     fallbackLng: 'en',
     debug: false,
-    ns: ['common', 'portal'],
+    ns: ['common'],
     defaultNS: 'common',
     interpolation: {
       escapeValue: false,
@@ -96,7 +84,6 @@ export const createServerI18n = async (lng: string = 'en') => {
     resources: {
       [lng]: {
         common: translations,
-        portal: {},
       }
     },
   });

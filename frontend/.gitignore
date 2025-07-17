@@ -4,3 +4,7 @@ node_modules/
 dist/
 build/
 
+# Build-time generated translations
+translations/merged/
+translations/.merge-lock-*
+
