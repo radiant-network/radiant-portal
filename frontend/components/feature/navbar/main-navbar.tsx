@@ -14,7 +14,7 @@ import { useSidebar } from '@/components/base/ui/sidebar';
 
 const navbarVariant = tv({
   slots: {
-    base: 'flex items-center py-3 border-b bg-background shadow-xs w-full',
+    base: 'flex items-center h-[44px] px-6 hidden md:flex py-2 border-b bg-background shadow-xs w-full',
   },
 });
 
@@ -37,6 +37,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
         icon={<CircleAlert />}
         variant="destructive"
         className="text-destructive-foreground"
+        as="button"
         onClick={() => setBetaSheetOpen(true)}
       />
     ) : null;
@@ -85,9 +86,9 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
             </div>
           )}
           {/* Desktop NavBar */}
-          <div className={navbarStyles.base({ className: 'h-16 px-6 hidden md:flex' })}>
+          <div className={navbarStyles.base()}>
             <div
-              className="flex mr-6 h-9 text-primary"
+              className="flex mr-6 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
               onClick={e => {
                 if (e.metaKey && e.altKey) {
                   setBetaSuperMode(!betaSuperMode);
@@ -102,13 +103,13 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
               ))}
               {betaSuperModeItem}
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
               {actions.map(action => (
                 <MainNavbarItem iconOnly key={action.title} {...action} />
               ))}
-              <MainNavbarUserAvatar userDetails={userDetails} onLogoutClick={onLogoutClick} />
-              <MainNavbarLangSwitcher />
-              <ThemeToggle className="text-muted-foreground [&_svg]:size-5" />
+              <MainNavbarUserAvatar avatarClassName="size-7" userDetails={userDetails} onLogoutClick={onLogoutClick} />
+              <MainNavbarLangSwitcher className="size-7" />
+              <ThemeToggle className="text-muted-foreground size-7 [&_svg]:size-5" />
             </div>
           </div>
         </>
@@ -136,6 +137,7 @@ function MobileNavbar({
         iconOnly
         icon={isOpen ? <XIcon /> : <MenuIcon />}
         onClick={onBurgerClick}
+        as="button"
         responsive={false}
       />
       <div className="flex flex-1 h-8 justify-center text-primary">{logo}</div>

@@ -1,29 +1,77 @@
 import * as React from 'react';
-import { Button, ButtonProps } from '@/components/base/ui/button';
+import { buttonVariants } from '@/components/base/ui/button';
 import { cn } from '@/components/lib/utils';
+import { VariantProps } from 'tailwind-variants';
+import { Link } from 'react-router';
 
-export interface MainNavbarButtonProps extends ButtonProps {
+type MainNavbarAnchorProps = {
+  as: 'a';
+  href: string;
+  to?: never;
+};
+
+type MainNavbarButtonProps = {
+  as: 'button';
+  href?: never;
+  to?: never;
+};
+
+type MainNavbarRouterLinkProps = {
+  as: typeof Link;
+  to: string;
+  href?: never;
+};
+
+export type MainNavbarLinkProps = VariantProps<typeof buttonVariants> & {
+  className?: string;
   title?: string;
   icon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   active?: boolean;
-}
+  onClick?: () => void;
+} & (MainNavbarAnchorProps | MainNavbarButtonProps | MainNavbarRouterLinkProps);
 
-function MainNavbarButton({ icon, rightIcon, title, iconOnly, active, className, ...props }: MainNavbarButtonProps) {
+function MainNavbarLink({
+  icon,
+  rightIcon,
+  title,
+  iconOnly,
+  active,
+  className,
+  variant = 'ghost',
+  size,
+  disabled,
+  as,
+  ...rest
+}: MainNavbarLinkProps) {
+  const styles = buttonVariants({ variant, iconOnly, size, disabled });
+
+  let Component: React.ElementType;
+  if (as === Link) {
+    Component = Link;
+  } else if (as === 'button') {
+    Component = 'button';
+  } else {
+    Component = 'a';
+  }
+
+  const otherProps =
+    as === Link ? { to: rest.to } : as === 'button' ? { type: 'button', onClick: rest.onClick } : { href: rest.href };
+
   return (
-    <Button
-      variant="ghost"
+    <Component
       className={cn(
-        'text-muted-foreground text-base md:text-sm',
+        styles.base(),
+        'enabled text-muted-foreground text-base md:text-sm',
         {
-          'h-10 py-2.5 px-2 md:px-3': !iconOnly,
-          '[&_svg]:size-5': iconOnly,
+          'h-10 md:h-7 py-2.5 md:py-1 px-2': !iconOnly,
+          'md:size-7 [&_svg]:size-5': iconOnly,
           'text-primary': active,
         },
         className,
       )}
-      iconOnly={iconOnly}
-      {...props}
+      {...otherProps}
+      {...rest}
     >
       <span
         className={cn('flex flex-1 gap-2 items-center', {
@@ -34,8 +82,8 @@ function MainNavbarButton({ icon, rightIcon, title, iconOnly, active, className,
         {icon} {iconOnly ? '' : title}
       </span>
       {rightIcon && <span className="[&_svg]:size-5">{rightIcon}</span>}
-    </Button>
+    </Component>
   );
 }
 
-export default MainNavbarButton;
+export default MainNavbarLink;

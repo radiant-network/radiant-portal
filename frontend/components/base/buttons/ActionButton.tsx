@@ -27,7 +27,7 @@ function ActionButton({
   variant,
   ...btnProps
 }: ActionButtonProps) {
-  const style = actionButtonVariants({ size, variant });
+  const style = actionButtonVariants({ size, variant, disabled: btnProps.disabled });
 
   return (
     <div className={cn('flex items-center', className)}>

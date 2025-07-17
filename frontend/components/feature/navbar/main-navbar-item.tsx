@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import useIsMobile from '@/components/hooks/use-is-mobile';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/ui/collapsible';
 import { ChevronRight } from 'lucide-react';
+import { Link } from 'react-router';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,16 +11,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
-import MainNavbarButton, { MainNavbarButtonProps } from './main-navbar-button';
-import { ButtonProps } from '@/components/base/ui/button';
+import MainNavbarLink, { MainNavbarLinkProps } from './main-navbar-button';
 import { cn } from '@/components/lib/utils';
 
-export interface MainNavbarItemProps extends Omit<ButtonProps, 'children'> {
+export interface MainNavbarItemProps extends Omit<MainNavbarLinkProps, 'children'> {
   title: string;
   icon: React.ReactNode;
   active?: boolean;
-  subItems?: ((MainNavbarButtonProps & { separator?: never }) | { separator: true })[];
+  subItems?: ((MainNavbarLinkProps & { separator?: never }) | { separator: true })[];
   responsive?: boolean;
+  onClick?: () => void;
 }
 
 function MainNavbarItem({ responsive = true, icon, title, subItems, ...props }: MainNavbarItemProps) {
@@ -30,12 +31,12 @@ function MainNavbarItem({ responsive = true, icon, title, subItems, ...props }: 
     return subItems?.length ? (
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <MainNavbarButton
+          <MainNavbarLink
             title={title}
             icon={icon}
             data-state={isOpen ? 'open' : 'closed'}
             rightIcon={<ChevronRight className="transition-transform duration-200 group-data-[state=open]:rotate-90" />}
-            {...props}
+            {...(props as any)}
             className={cn('group', props.className)}
           />
         </CollapsibleTrigger>
@@ -43,16 +44,16 @@ function MainNavbarItem({ responsive = true, icon, title, subItems, ...props }: 
           {subItems
             .filter(item => !item.separator)
             .map(item => (
-              <MainNavbarButton key={item.title} {...item} />
+              <MainNavbarLink key={item.title} {...item} />
             ))}
         </CollapsibleContent>
       </Collapsible>
     ) : (
-      <MainNavbarButton title={title} icon={icon} {...props} />
+      <MainNavbarLink title={title} icon={icon} {...(props as any)} />
     );
   }
 
-  const navbarButton = <MainNavbarButton icon={icon} title={title} {...props} />;
+  const navbarButton = <MainNavbarLink icon={icon} title={title} {...(props as any)} />;
 
   if (subItems?.length) {
     return (
@@ -61,17 +62,7 @@ function MainNavbarItem({ responsive = true, icon, title, subItems, ...props }: 
           {navbarButton}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuGroup>
-            {subItems.map(item =>
-              item.separator ? (
-                <DropdownMenuSeparator key="separator" />
-              ) : (
-                <DropdownMenuItem key={item.title}>
-                  {item.icon} {item.title}
-                </DropdownMenuItem>
-              ),
-            )}
-          </DropdownMenuGroup>
+          <DropdownMenuGroup>{subItems.map(renderDropdownItem)}</DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -79,5 +70,43 @@ function MainNavbarItem({ responsive = true, icon, title, subItems, ...props }: 
 
   return navbarButton;
 }
+
+const renderDropdownItem = (item: NonNullable<MainNavbarItemProps['subItems']>[0]) => {
+  if (item.separator) {
+    return <DropdownMenuSeparator key="separator" />;
+  }
+
+  const menuItem = (
+    <DropdownMenuItem key={item.title}>
+      {item.icon} {item.title}
+    </DropdownMenuItem>
+  );
+
+  if (item.as === 'a') {
+    return (
+      <a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer">
+        {menuItem}
+      </a>
+    );
+  }
+
+  if (item.as === 'button') {
+    return (
+      <DropdownMenuItem key={item.title} {...item}>
+        {item.icon} {item.title}
+      </DropdownMenuItem>
+    );
+  }
+
+  if (item.as === Link) {
+    return (
+      <Link key={item.title} to={item.to}>
+        {menuItem}
+      </Link>
+    );
+  }
+
+  return menuItem;
+};
 
 export default MainNavbarItem;
