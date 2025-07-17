@@ -289,7 +289,7 @@
         "info_qd": "Profondeur de Qualité",
         "ad_alt": "ALT Profondeur Allélique",
         "ad_total": "Profondeur Totale ALT + REF",
-        "ad_ration": "Ratio Allélique ALT",
+        "ad_ratio": "Ratio Allélique ALT",
         "genotype_quality": "Qualité du Génotype",
         "project_code": "Projet",
         "performer_lab": "Laboratoire de diagnostic",

@@ -141,7 +141,7 @@
               "defaultMax": 100
             } 
           },
-          { "key": "ad_ration", "type": "numerical", 
+          { "key": "ad_ratio", "type": "numerical",
             "defaults": { 
               "min": 0, 
               "max": 100, 
