@@ -74,7 +74,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
     });
 
     aggregationData?.forEach(item => {
-      item.label = item.key ? replaceUnderscore(item.key).replace(/^\w/, c => c.toUpperCase()) : item.key
+      item.label = item.key ? replaceUnderscore(item.key).toLowerCase().replace(/^\w/, c => c.toUpperCase()) : item.key
     });
 
     setItems(aggregationData || []);
