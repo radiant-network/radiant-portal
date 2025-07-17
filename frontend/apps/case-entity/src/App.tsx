@@ -15,7 +15,7 @@ import Header from './components/layout/header';
 import { AudioWaveform, ClipboardList } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
-export const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
+const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
 
 type CaseEntityInput = {
   key: string;
@@ -89,24 +89,19 @@ export default function App() {
         <Header data={data} isLoading={isLoading} />
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
           <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
-            <TabsListItem value={CaseEntityTabs.Details}>
-              <ClipboardList />
-              {t('caseEntity.details.title')}
-            </TabsListItem>
+            <TabsListItem value={CaseEntityTabs.Details}><ClipboardList />{t('caseEntity.details.title')}</TabsListItem>
             {hasVariants ? (
               <TabsListItem value={CaseEntityTabs.Variants}>
-                <AudioWaveform />
-                {t('caseEntity.variants.title')}
+                <AudioWaveform />{t('caseEntity.variants.title')}
               </TabsListItem>
             ) : (
               <Tooltip>
                 <TooltipTrigger>
                   <TabsListItem disabled value={CaseEntityTabs.Variants}>
-                    <AudioWaveform />
-                    {t('caseEntity.variants.title')}
+                    <AudioWaveform />{t('caseEntity.variants.title')}
                   </TabsListItem>
                 </TooltipTrigger>
-                <TooltipContent>{t('caseEntity.details.no_variants')}</TooltipContent>
+                <TooltipContent>{t("caseEntity.details.no_variants")}</TooltipContent>
               </Tooltip>
             )}
           </TabsList>
@@ -114,12 +109,13 @@ export default function App() {
             <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-6 flex justify-center">
               <DetailsTab caseEntity={data} isLoading={isLoading} />
             </TabsContent>
-            <TabsContent value={CaseEntityTabs.Variants} noMargin>
-              <VariantsTab isLoading={isLoading} caseEntity={data} />
-            </TabsContent>
           </Container>
+          <TabsContent value={CaseEntityTabs.Variants} noMargin>
+            <VariantsTab isLoading={isLoading} caseEntity={data} />
+          </TabsContent>
         </TabsNav>
       </main>
     </CaseEntityContext>
   );
 }
+
