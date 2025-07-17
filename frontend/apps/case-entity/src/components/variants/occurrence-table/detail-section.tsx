@@ -8,6 +8,7 @@ interface DetailSectionProps {
 interface DetailItemProps {
   title: ReactNode;
   value: ReactNode;
+  colon?: boolean;
 }
 
 export default function DetailSection({ title, children }: PropsWithChildren<DetailSectionProps>) {
@@ -19,11 +20,11 @@ export default function DetailSection({ title, children }: PropsWithChildren<Det
   );
 }
 
-export function DetailItem({ title, value }: DetailItemProps) {
+export function DetailItem({ title, value, colon = true }: DetailItemProps) {
   return (
     <div>
       <div className="flex justify-between items-center">
-        <div className="text-sm text-muted-foreground">{title}:</div>
+        <div className="text-sm text-muted-foreground truncate">{title}{colon && ':'}</div>
         <div className="text-sm">{value}</div>
       </div>
       <Separator className="mt-1" />

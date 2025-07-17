@@ -24,7 +24,7 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
   data.omim_conditions?.forEach((oc, index) => {
     if (index === MAX_CLINICAL_ASSOCIATION) {
       clinicalAssociationValue.push(
-        <AnchorLink component={Link} to={`/variants/entity/${data.locus_id}`} className="justify-start" size="sm">
+        <AnchorLink component={Link} to={`/variants/entity/${data.locus_id}#evidenceAndConditions`} className="justify-start" size="sm">
           <span className="max-w-72 overflow-hidden text-ellipsis">{t('common.actions.seeMore')}</span>
         </AnchorLink>,
       );
@@ -47,6 +47,7 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
         value={
           oc.inheritance_code ? <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div> : '-'
         }
+        colon={false}
       />,
     );
   });

@@ -4,7 +4,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 
 export const anchorLinkVariants = tv({
   slots: {
-    base: 'flex items-center gap-1 font-medium hover:underline hover:cursor-pointer underline-offset-3',
+    base: 'font-medium hover:underline hover:cursor-pointer underline-offset-3',
     icon: '',
   },
   variants: {
@@ -12,6 +12,11 @@ export const anchorLinkVariants = tv({
       true: {
         base: 'font-mono',
       },
+    },
+    external: {
+      true: {
+        base: 'flex items-center gap-1'
+      }
     },
     variant: {
       primary: {
@@ -44,6 +49,7 @@ export const anchorLinkVariants = tv({
     size: 'default',
     variant: 'primary',
     mono: false,
+    external: true,
   },
 });
 
@@ -66,7 +72,7 @@ function AnchorLink<C extends React.ElementType = 'a'>({
   ...props
 }: AnchorLinkProps<C>) {
   const Component = component || 'a';
-  const styles = anchorLinkVariants({ size, mono, variant });
+  const styles = anchorLinkVariants({ size, mono, variant, external });
 
   return (
     <Component className={styles.base({ className })} {...props}>
