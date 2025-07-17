@@ -10,7 +10,7 @@ If a translation doesn't exist, a simple default value is displayed. This defaul
 // query-pill-values.tsx
 t(
   `common.filters.labels.${valueFilter.content.field}_value.${val}`,
-  { defaultValue: replaceUnderscore(String(val)).replace(/^\w/, c => c.toUpperCase()) }
+  { defaultValue: replaceUnderscore(String(val)).toLowerCase().replace(/^\w/, c => c.toUpperCase()) }
 )
 ```
 

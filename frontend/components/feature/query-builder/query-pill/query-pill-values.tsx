@@ -34,7 +34,7 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
               {
                 t(
                   `common.filters.labels.${valueFilter.content.field}_value.${val}`,
-                  { defaultValue: replaceUnderscore(String(val)).replace(/^\w/, c => c.toUpperCase()) }
+                  { defaultValue: replaceUnderscore(String(val)).toLowerCase().replace(/^\w/, c => c.toUpperCase()) }
                 )
               }
             </span>
