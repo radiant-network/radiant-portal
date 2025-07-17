@@ -971,6 +971,12 @@ export interface ExpandedOccurrence {
     'end'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof ExpandedOccurrence
+     */
+    'exomiser_acmg_classification'?: string;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof ExpandedOccurrence
      */
@@ -1100,13 +1106,49 @@ export interface ExpandedOccurrence {
      * @type {number}
      * @memberof ExpandedOccurrence
      */
+    'pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedOccurrence
+     */
+    'pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedOccurrence
+     */
     'pf_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedOccurrence
+     */
+    'pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedOccurrence
+     */
+    'pf_wgs_not_affected'?: number;
     /**
      * 
      * @type {Array<string>}
      * @memberof ExpandedOccurrence
      */
     'picked_consequences': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedOccurrence
+     */
+    'pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedOccurrence
+     */
+    'pn_wgs_not_affected'?: number;
     /**
      * 
      * @type {number}

@@ -13,6 +13,8 @@ import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
 import { useAggregationBuilder } from './use-aggregation-builder';
 import { Skeleton } from '@/components/base/ui/skeleton';
+import { replaceUnderscore } from '@/components/lib/string-format';
+
 
 interface IProps {
   field: AggregationConfig;
@@ -72,8 +74,8 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
     });
 
     aggregationData?.forEach(item => {
-      item.label = item.key?.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())
-    })
+      item.label = item.key ? replaceUnderscore(item.key).replace(/^\w/, c => c.toUpperCase()) : item.key
+    });
 
     setItems(aggregationData || []);
     setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));

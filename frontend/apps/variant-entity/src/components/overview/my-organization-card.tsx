@@ -7,14 +7,20 @@ import { Separator } from '@/components/base/ui/separator';
 import NumberBadge from '@/components/base/number-badge';
 import { useI18n } from '@/components/hooks/i18n';
 import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
-import { ComponentProps } from 'react';
+import { VariantOverview } from '@/api/api';
 
-function MyOrganizationCard(props: ComponentProps<'div'>) {
+type MyOrganizationCardProps = {
+  data: VariantOverview;
+};
+
+function MyOrganizationCard({ data }: MyOrganizationCardProps) {
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
 
+  const exomiserCounts = data.exomiser_acmg_classification_counts ?? {};
+
   return (
-    <Card {...props}>
+    <Card>
       <CardContent>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -52,7 +58,13 @@ function MyOrganizationCard(props: ComponentProps<'div'>) {
             <div className="ml-3 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="min-w-20 text-muted-foreground">Exomiser</span>
-                <ClinVarBadge value="pathogenic" abbreviated />
+                {Object.keys(exomiserCounts).map(classification => (
+                  <NumberBadge count={exomiserCounts[classification]} variant="ghost">
+                    <ClinVarBadge id={classification} abbreviated value={classification}>
+                      {classification}
+                    </ClinVarBadge>
+                  </NumberBadge>
+                ))}
               </div>
               <div className="flex items-center gap-2">
                 <span className="min-w-20 text-muted-foreground">Phenovar</span>

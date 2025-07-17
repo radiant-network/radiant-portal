@@ -7,6 +7,8 @@ import UnionOperator from '../operator/operator-union';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import QueryPillValuesContainer, { QueryPillValuesContainerProps } from './query-pill-values-container';
 import { useI18n } from '@/components/hooks/i18n';
+import { replaceUnderscore } from '@/components/lib/string-format';
+
 
 export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canExpand'> & {
   valueFilter: IValueFilter;
@@ -32,7 +34,7 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
               {
                 t(
                   `common.filters.labels.${valueFilter.content.field}_value.${val}`,
-                  { defaultValue: String(val).replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase()) }
+                  { defaultValue: replaceUnderscore(String(val)).replace(/^\w/, c => c.toUpperCase()) }
                 )
               }
             </span>

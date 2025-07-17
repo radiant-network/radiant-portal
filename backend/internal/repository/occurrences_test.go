@@ -656,5 +656,12 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "T", expandedOccurrence.SiftPred)
 		assert.Equal(t, 0.7, expandedOccurrence.ExomiserGeneCombinedScore)
 		assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, expandedOccurrence.ExomiserAcmgEvidence)
+		assert.Equal(t, 3, expandedOccurrence.PcWgsAffected)
+		assert.Equal(t, 3, expandedOccurrence.PnWgsAffected)
+		assert.Equal(t, float64(1.0), expandedOccurrence.PfWgsAffected)
+		assert.Equal(t, 0, expandedOccurrence.PcWgsNotAffected)
+		assert.Equal(t, 0, expandedOccurrence.PnWgsNotAffected)
+		assert.Equal(t, float64(0), expandedOccurrence.PfWgsNotAffected)
+		assert.Equal(t, "UNCERTAIN_SIGNIFICANCE", expandedOccurrence.ExomiserAcmgClassification)
 	})
 }

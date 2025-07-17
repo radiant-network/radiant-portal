@@ -13,38 +13,40 @@ type FrequencySectionProps = {
 
 export default function FrequencySection({ data }: FrequencySectionProps) {
   const { t } = useI18n();
-  const affected = (
+  const affectedValue = data.pc_wgs_affected && data.pn_wgs_affected && data.pf_wgs_affected?.toExponential(2) ? `${data.pc_wgs_affected} / ${data.pn_wgs_affected} (${data.pf_wgs_affected?.toExponential(2)})` : '-';
+  const affectedTitle = (
     <Tooltip>
       <TooltipTrigger asChild>
         <span className='inline-flex gap-1 items-center'>
-          {t('occurrenceExpand.frequencies.myOrganization')}
+          {t('occurrenceExpand.frequencies.affected')}
           <ShapeDiamondIcon className='w-[13px] h-[13px] text-red-500' />
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        {t('occurrenceExpand.frequencies.myOrganizationAffectedTooltip')}
+        {t('occurrenceExpand.frequencies.affectedTooltip')}
       </TooltipContent>
     </Tooltip>
   );
 
-  const nonAffected = (
+  const nonAffectedValue = data.pc_wgs_not_affected && data.pn_wgs_not_affected && data.pf_wgs_not_affected?.toExponential(2) ? `${data.pc_wgs_not_affected} / ${data.pn_wgs_not_affected} (${data.pf_wgs_not_affected?.toExponential(2)})` : '-';
+  const nonAffectedTitle = (
     <Tooltip>
       <TooltipTrigger asChild>
         <span className='inline-flex gap-1 items-center'>
-          {t('occurrenceExpand.frequencies.myOrganization')}
+          {t('occurrenceExpand.frequencies.nonAffected')}
           <Diamond className='w-[13px] h-[13px] text-green-500' />
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        {t('occurrenceExpand.frequencies.myOrganizationNonAffectedTooltip')}
+        {t('occurrenceExpand.frequencies.nonAffectedTooltip')}
       </TooltipContent>
     </Tooltip>
   );
 
   return (
     <DetailSection title={t('occurrenceExpand.frequencies.title')}>
-      <DetailItem title={affected} value="-" />
-      <DetailItem title={nonAffected} value="-" />
+      <DetailItem title={affectedTitle} value={affectedValue} />
+      <DetailItem title={nonAffectedTitle} value={nonAffectedValue} />
       <DetailItem title={t('occurrenceExpand.frequencies.gnomad')} value={
         data.gnomad_v3_af ?
           <AnchorLink size="sm" href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`} target="_blank">
