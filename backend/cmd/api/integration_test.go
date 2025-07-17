@@ -482,13 +482,13 @@ func assertSearchInterpretationSomatic(t *testing.T, repo repository.Interpretat
 	}
 }
 
-func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId int, expected string) {
+func assertGetExpandedOccurrence(t *testing.T, data string, seqId int, locusId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrencesRepository(db)
 		router := gin.Default()
-		router.GET("/occurrences/germline/:seq_id/:locus_id/expended", server.GetExpandedGermlineOccurrence(repo))
+		router.GET("/occurrences/germline/:seq_id/:locus_id/expanded", server.GetExpandedGermlineOccurrence(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/%d/%d/expended", seqId, locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/%d/%d/expanded", seqId, locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -497,9 +497,9 @@ func assertGetExpendedOccurrence(t *testing.T, data string, seqId int, locusId i
 	})
 }
 
-func Test_GetExpendedOccurrence(t *testing.T) {
+func Test_GetExpandedOccurrence(t *testing.T) {
 	expected := `{"aa_change":"p.Arg19His", "cadd_phred":0.1, "cadd_score":0.1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "is_canonical":true, "is_mane_plus":false, "is_mane_select":true, "locus":"locus1", "locus_id":"1000", "is_mane_select":true, "omim_conditions":[{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, {"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}], "pf_wgs":0.99, "picked_consequences":["splice acceptor"], "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "start":1111, "symbol":"BRAF", "vep_impact":"impact1", "zygosity":"HET"}`
-	assertGetExpendedOccurrence(t, "simple", 1, 1000, expected)
+	assertGetExpandedOccurrence(t, "simple", 1, 1000, expected)
 }
 
 func assertGetVariantHeader(t *testing.T, data string, locusId int, expected string) {
@@ -776,7 +776,7 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 	assertGetVariantUninterpretedCases(t, "simple", 1000, body, expected)
 }
 
-func assertGetExpendedVariantInterpretedCase(t *testing.T, data string, locusId int, seqId int, transcriptId string, expected string) {
+func assertGetExpandedVariantInterpretedCase(t *testing.T, data string, locusId int, seqId int, transcriptId string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
@@ -791,7 +791,7 @@ func assertGetExpendedVariantInterpretedCase(t *testing.T, data string, locusId 
 	})
 }
 
-func Test_GetExpendedVariantInterpretedCase(t *testing.T) {
+func Test_GetExpandedVariantInterpretedCase(t *testing.T) {
 	expected := `{
 		"classification_criterias":["PM1","PM2"],
 		"gene_symbol":"BRAF",
@@ -802,7 +802,7 @@ func Test_GetExpendedVariantInterpretedCase(t *testing.T) {
 		"patient_sex_code":"male", 
 		"pubmed_ids":[]
 	}`
-	assertGetExpendedVariantInterpretedCase(t, "simple", 1000, 1, "T002", expected)
+	assertGetExpandedVariantInterpretedCase(t, "simple", 1000, 1, "T002", expected)
 }
 
 func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected string) {
