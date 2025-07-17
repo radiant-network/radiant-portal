@@ -42,7 +42,7 @@ export default function GeneSection({ data }: GeneSectionProps) {
         title={t('occurrenceExpand.gene.spliceAi')}
         value={
           data.spliceai_type ?
-            <AnchorLink href={`https://spliceailookup.broadinstitute.org/#variant=${data.locus_id}&hg=38`} target='_blank' size="sm">
+            <AnchorLink href={`https://spliceailookup.broadinstitute.org/#variant=${data.hgvsg}&hg=38`} target='_blank' size="sm">
               <span className="text-xs text-muted-foreground">
                 {data.spliceai_ds} {data.spliceai_type.map((v) => <Badge>{v}</Badge>)}
               </span>
