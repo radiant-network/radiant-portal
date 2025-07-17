@@ -349,11 +349,11 @@ VALUES
     (1000, 3, 0.01, 10, 0.01, 'hgvsg1', 'AD', 'class1', 'MODIFIER', 'BRAF', true, true, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
     (2000, 1, 0.02, 20, 0.02, 'hgvsg2', 'Smu', 'class2', 'MODIFIER', 'BRAC', false, true, ['Pathogenic'], 'rs2222222', 'p.Arg19His', ['splice acceptor'], 'locus_full_2000', '2', 2222, 'C', 'G', 'T002');
 
-INSERT INTO staging_sequencing_experiment (case_id, seq_id, task_id, part, analysis_type)
+INSERT INTO staging_sequencing_experiment (case_id, seq_id, task_id, part, analysis_type, ingested_at)
 VALUES
-    (1, 1, 1, 1, 'germline'),
-    (1, 2, 1, 1, 'germline'),
-    (7, 19, 19, 1, 'germline');
+    (1, 1, 1, 1, 'germline', '1970-01-01'),
+    (1, 2, 1, 1, 'germline', '1970-01-01'),
+    (7, 19, 19, 1, 'germline', '1970-01-01');
 
 INSERT INTO omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
 VALUES

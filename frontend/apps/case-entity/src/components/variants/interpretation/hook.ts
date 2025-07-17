@@ -65,7 +65,7 @@ export function useInterpretationHelper(occurrence: Occurrence, isSomatic: boole
 
 export function useOccurenceExpandHelper(occurrence: Occurrence) {
   const fetch = useCallback(async () => {
-    return occurrencesApi.getExpendedGermlineOccurrence(
+    return occurrencesApi.getExpandedGermlineOccurrence(
       occurrence.seq_id!.toString(),
       occurrence.locus_id!.toString(),
     )

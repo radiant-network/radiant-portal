@@ -655,6 +655,6 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 		assert.Equal(t, float32(0.1), expendedOccurrence.SiftScore)
 		assert.Equal(t, "T", expendedOccurrence.SiftPred)
 		assert.Equal(t, 0.7, expendedOccurrence.ExomiserGeneCombinedScore)
-		assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, expendedOccurrence.ExomiserAcmgEvidence)
+		assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, expendedOccurrence.ExomiserAcmgEvidence)
 	})
 }

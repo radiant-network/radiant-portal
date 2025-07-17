@@ -171,10 +171,12 @@
     },
     "pagination": {
       "aria": {
+        "first": "Go to first page",
         "previous": "Go to previous page",
         "next": "Go to next page",
         "more": "More pages"
       },
+      "first": "First",
       "previous": "Previous",
       "next": "Next"
     },
@@ -700,7 +702,7 @@
       }
     }
   },
-  "occurrenceExpend": {
+  "occurrenceExpand": {
     "actions": {
       "downloadReport": "Download report",
       "openIGV": "Open IGV",

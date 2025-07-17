@@ -18,23 +18,24 @@ interface NavbarUserAvatarProps {
     name: string;
     email: string;
   };
+  avatarClassName?: string;
   onLogoutClick: () => void;
 }
 
-function NavbarUserAvatar({ userDetails: { name, email }, onLogoutClick }: NavbarUserAvatarProps) {
+function NavbarUserAvatar({ userDetails: { name, email }, onLogoutClick, avatarClassName }: NavbarUserAvatarProps) {
   const { t } = useI18n();
 
   return (
     <>
       <div className="block md:hidden">
-        <AvatarUserDetails name={name} email={email} />
-        <MainNavbarItem title="Profile" icon={<UserIcon />} className="w-full" />
-        <MainNavbarItem title="Sign out" icon={<LogOutIcon />} className="w-full" onClick={onLogoutClick} />
+        <AvatarUserDetails name={name} email={email} avatarClassName={avatarClassName} />
+        <MainNavbarItem title="Profile" as="button" icon={<UserIcon />} className="w-full" onClick={() => {}} />
+        <MainNavbarItem title="Sign out" as="button" icon={<LogOutIcon />} className="w-full" onClick={onLogoutClick} />
       </div>
       <div className="hidden md:flex">
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">
-            <UserAvatar name={name} />
+            <UserAvatar name={name} className={avatarClassName} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <div className="py-1.5 px-2">

@@ -416,7 +416,7 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
-    ExpendedOccurrence:
+    ExpandedOccurrence:
       properties:
         aa_change:
           type: string
@@ -1083,7 +1083,7 @@ components:
           type: array
           uniqueItems: false
       type: object
-    VariantExpendedInterpretedCase:
+    VariantExpandedInterpretedCase:
       properties:
         classification_criterias:
           items:
@@ -1916,10 +1916,10 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
-  /occurrences/germline/{seq_id}/{locus_id}/expended:
+  /occurrences/germline/{seq_id}/{locus_id}/expanded:
     get:
-      description: Retrieve ExpendedOccurrence data for a given locus ID
-      operationId: getExpendedGermlineOccurrence
+      description: Retrieve ExpandedOccurrence data for a given locus ID
+      operationId: getExpandedGermlineOccurrence
       parameters:
       - description: Sequence ID
         in: path
@@ -1938,7 +1938,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExpendedOccurrence'
+                $ref: '#/components/schemas/ExpandedOccurrence'
           description: OK
         "404":
           content:
@@ -1954,7 +1954,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get a germline ExpendedOccurrence
+      summary: Get a germline ExpandedOccurrence
       tags:
       - occurrences
   /occurrences/germline/{seq_id}/aggregate:
@@ -2317,9 +2317,9 @@ paths:
       - variant
   /variants/germline/{locus_id}/cases/interpreted/{seq_id}/{transcript_id}:
     get:
-      description: Retrieve germline expended interpreted case for a given locus,
+      description: Retrieve germline expanded interpreted case for a given locus,
         sequencing and transcript
-      operationId: getExpendedGermlineVariantInterpretedCase
+      operationId: getExpandedGermlineVariantInterpretedCase
       parameters:
       - description: Locus ID
         in: path
@@ -2344,7 +2344,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VariantExpendedInterpretedCase'
+                $ref: '#/components/schemas/VariantExpandedInterpretedCase'
           description: OK
         "404":
           content:
@@ -2360,7 +2360,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get expended germline interpreted case for a given locus, sequencing
+      summary: Get expanded germline interpreted case for a given locus, sequencing
         and transcript
       tags:
       - variant

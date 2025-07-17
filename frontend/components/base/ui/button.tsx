@@ -21,7 +21,7 @@ const Button = function ({
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : 'button';
-  const style = buttonVariants({ variant, size, iconOnly });
+  const style = buttonVariants({ variant, size, iconOnly, disabled: disabled });
 
   return (
     <Comp className={style.base({ className })} disabled={disabled || loading} {...props}>

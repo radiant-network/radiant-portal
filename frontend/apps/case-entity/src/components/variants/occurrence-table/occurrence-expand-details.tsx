@@ -7,13 +7,13 @@ import ZygositySection from './zygosity-section';
 import FamilySection from './family-section';
 import ClinicalAssociationSection from './clinical-association-section';
 import MetricSection from './metric-section';
-import { ExpendedOccurrence } from '@/api/api';
+import { ExpandedOccurrence } from '@/api/api';
 
-type ExpendedOccurrenceDetailsProps = {
-  data: ExpendedOccurrence;
+type ExpandedOccurrenceDetailsProps = {
+  data: ExpandedOccurrence;
 };
 
-export default function OccurrenceExpendDetails({ data }: ExpendedOccurrenceDetailsProps) {
+export default function OccurrenceExpandDetails({ data }: ExpandedOccurrenceDetailsProps) {
   return (
     <>
       <div className="space-y-2.5">

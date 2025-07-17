@@ -64,7 +64,7 @@ export type AlertDialogActionProps = React.ComponentPropsWithoutRef<typeof Alert
   VariantProps<typeof buttonVariants>;
 
 function AlertDialogAction({ className, variant = 'default', size, ...props }: AlertDialogActionProps) {
-  const style = buttonVariants({ variant, size });
+  const style = buttonVariants({ variant, size, disabled: props.disabled });
   return <AlertDialogPrimitive.Action className={style.base({ className })} {...props} />;
 }
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
@@ -73,7 +73,7 @@ export type AlertDialogCancelProps = React.ComponentPropsWithoutRef<typeof Alert
   VariantProps<typeof buttonVariants>;
 
 function AlertDialogCancel({ className, variant = 'outline', size, ...props }: AlertDialogCancelProps) {
-  const style = buttonVariants({ variant, size });
+  const style = buttonVariants({ variant, size, disabled: props.disabled });
   return <AlertDialogPrimitive.Cancel className={cn(style.base(), 'mt-2 sm:mt-0', className)} {...props} />;
 }
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;

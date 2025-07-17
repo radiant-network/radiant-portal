@@ -14,7 +14,7 @@ import {
   getCaseExplorationColumns,
   defaultSettings as caseDefaultsSettings,
 } from '../../../apps/case-exploration/src/feature/case-table/table-settings';
-import OccurrenceExpend from '../../../apps/case-entity/src/components/variants/occurrence-table/occurrence-expend';
+import OccurrenceExpand from '../../../apps/case-entity/src/components/variants/occurrence-table/occurrence-expand';
 
 // Purposely used absolute paths since variant app is not a dependency of the components library
 import { useI18n } from '@/components/hooks/i18n';
@@ -142,7 +142,7 @@ export const VariantOccurrence: Story = {
         }}
         data={occurrencesData}
         columns={getVariantColumns(t)}
-        subComponent={occurrence => <OccurrenceExpend occurrence={occurrence} />}
+        subComponent={occurrence => <OccurrenceExpand occurrence={occurrence} />}
         enableFullscreen
         enableColumnOrdering
       />

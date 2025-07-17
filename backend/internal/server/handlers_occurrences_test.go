@@ -2,12 +2,13 @@ package server
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrence, error) {
@@ -56,8 +57,8 @@ func (m *MockRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*
 		nil
 }
 
-func (m *MockRepository) GetExpendedOccurrence(int, int) (*types.ExpendedOccurrence, error) {
-	return &types.ExpendedOccurrence{
+func (m *MockRepository) GetExpandedOccurrence(int, int) (*types.ExpandedOccurrence, error) {
+	return &types.ExpandedOccurrence{
 		LocusId:      "1000",
 		Locus:        "locus1",
 		Chromosome:   "1",
@@ -187,12 +188,12 @@ func Test_OccurrencesStatisticsHandler(t *testing.T) {
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
-func Test_GetExpendedOccurrenceHandler(t *testing.T) {
+func Test_GetExpandedOccurrenceHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/:seq_id/:locus_id/expended", GetExpendedGermlineOccurrence(repo))
+	router.GET("/occurrences/germline/:seq_id/:locus_id/expanded", GetExpandedGermlineOccurrence(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/1/1000/expended", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/occurrences/germline/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

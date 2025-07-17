@@ -1,10 +1,10 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpendedOccurrence } from '@/api/api';
+import { ExpandedOccurrence } from '@/api/api';
 import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
 
 type ClassificationSectionProps = {
-  data: ExpendedOccurrence;
+  data: ExpandedOccurrence;
 };
 
 export default function ClassificationSection({ data }: ClassificationSectionProps) {
@@ -17,9 +17,9 @@ export default function ClassificationSection({ data }: ClassificationSectionPro
   ));
 
   return (
-    <DetailSection title={t('occurrenceExpend.classifications.title')}>
+    <DetailSection title={t('occurrenceExpand.classifications.title')}>
       <DetailItem
-        title={t('occurrenceExpend.classifications.clinvar')}
+        title={t('occurrenceExpand.classifications.clinvar')}
         value={clinvar?.length ? <div className="flex items-center gap-1">{clinvar}</div> : '-'}
       />
     </DetailSection>

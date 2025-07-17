@@ -1,34 +1,34 @@
-import { ExpendedOccurrence, Occurrence } from '@/api/api';
+import { ExpandedOccurrence, Occurrence } from '@/api/api';
 import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
 import { Separator } from '@/components/base/ui/separator';
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import { Skeleton } from '@/components/base/ui/skeleton';
-import OccurrenceExpendDetails from './occurrence-expend-details';
-import OccurrenceExpendHeader from './occurrence-expend-header';
-import OccurrenceExpendTranscript from './occurrence-expend-transcript';
+import OccurrenceExpandDetails from './occurrence-expand-details';
+import OccurrenceExpandHeader from './occurrence-expand-header';
+import OccurrenceExpandTranscript from './occurrence-expand-transcript';
 
 type GermlineVariantPreviewProps = {
   occurrence: Occurrence;
 };
 
-type OccurrenceExpendInput = {
+type OccurrenceExpandInput = {
   seqId: string;
   locusId: string;
 };
 
-async function fetchOccurrenceExpend(input: OccurrenceExpendInput) {
-  const response = await occurrencesApi.getExpendedGermlineOccurrence(input.seqId, input.locusId);
+async function fetchOccurrenceExpand(input: OccurrenceExpandInput) {
+  const response = await occurrencesApi.getExpandedGermlineOccurrence(input.seqId, input.locusId);
   return response.data;
 }
 
-export default function OccurrenceExpend({ occurrence }: GermlineVariantPreviewProps) {
-  const { data, isLoading } = useSWR<ExpendedOccurrence, any, OccurrenceExpendInput>(
+export default function OccurrenceExpand({ occurrence }: GermlineVariantPreviewProps) {
+  const { data, isLoading } = useSWR<ExpandedOccurrence, any, OccurrenceExpandInput>(
     {
       locusId: occurrence.locus_id.toString(),
       seqId: occurrence.seq_id.toString(),
     },
-    fetchOccurrenceExpend,
+    fetchOccurrenceExpand,
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -38,7 +38,7 @@ export default function OccurrenceExpend({ occurrence }: GermlineVariantPreviewP
   return (
     <Card className="shadow-none py-4 gap-4">
       <CardHeader className="flex px-4">
-        <OccurrenceExpendHeader occurrence={occurrence} />
+        <OccurrenceExpandHeader occurrence={occurrence} />
       </CardHeader>
       <Separator />
       <CardContent className="px-4 space-y-3">
@@ -46,19 +46,19 @@ export default function OccurrenceExpend({ occurrence }: GermlineVariantPreviewP
           {isLoading || data === undefined ? (
             <Skeleton className="w-full h-6" />
           ) : (
-            <OccurrenceExpendTranscript occurrence={occurrence} expendedOccurrence={data}/>
+            <OccurrenceExpandTranscript occurrence={occurrence} expandedOccurrence={data}/>
           )}
         </div>
         <div className="border rounded-sm p-4 gap-10 grid grid-cols-2 2xl:grid-cols-4">
           {isLoading || data === undefined ? (
             <>
-              <OccurrenceExpendSkeleton />
-              <OccurrenceExpendSkeleton />
-              <OccurrenceExpendSkeleton />
-              <OccurrenceExpendSkeleton />
+              <OccurrenceExpandSkeleton />
+              <OccurrenceExpandSkeleton />
+              <OccurrenceExpandSkeleton />
+              <OccurrenceExpandSkeleton />
             </>
           ) : (
-            <OccurrenceExpendDetails data={data} />
+            <OccurrenceExpandDetails data={data} />
           )}
         </div>
       </CardContent>
@@ -66,7 +66,7 @@ export default function OccurrenceExpend({ occurrence }: GermlineVariantPreviewP
   );
 }
 
-function OccurrenceExpendSkeleton() {
+function OccurrenceExpandSkeleton() {
   return (
     <div className="flex flex-col gap-2">
       <Skeleton className="w-full h-4" />

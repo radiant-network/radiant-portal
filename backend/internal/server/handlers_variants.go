@@ -1,11 +1,12 @@
 package server
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"net/http"
-	"strconv"
 )
 
 // GetGermlineVariantHeader handles retrieving a germline variant header by its locus
@@ -217,21 +218,21 @@ func GetGermlineVariantUninterpretedCases(repo repository.VariantsDAO) gin.Handl
 	}
 }
 
-// GetExpendedGermlineVariantInterpretedCase handles retrieving expended interpreted case for a given locus, sequencing and transcript
-// @Summary Get expended germline interpreted case for a given locus, sequencing and transcript
-// @Id getExpendedGermlineVariantInterpretedCase
-// @Description Retrieve germline expended interpreted case for a given locus, sequencing and transcript
+// GetExpandedGermlineVariantInterpretedCase handles retrieving expanded interpreted case for a given locus, sequencing and transcript
+// @Summary Get expanded germline interpreted case for a given locus, sequencing and transcript
+// @Id getExpandedGermlineVariantInterpretedCase
+// @Description Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
 // @Param seq_id path string true "Seq ID"
 // @Param transcript_id path string true "Transcript ID"
 // @Produce json
-// @Success 200 {object} types.VariantExpendedInterpretedCase
+// @Success 200 {object} types.VariantExpandedInterpretedCase
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/cases/interpreted/{seq_id}/{transcript_id} [get]
-func GetExpendedGermlineVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerFunc {
+func GetExpandedGermlineVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {
@@ -244,13 +245,13 @@ func GetExpendedGermlineVariantInterpretedCase(repo repository.VariantsDAO) gin.
 			return
 		}
 		transcriptId := c.Param("transcript_id")
-		cases, err := repo.GetVariantExpendedInterpretedCase(locusId, seqId, transcriptId)
+		cases, err := repo.GetVariantExpandedInterpretedCase(locusId, seqId, transcriptId)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
 		if cases == nil {
-			HandleNotFoundError(c, "variant expended interpreted case")
+			HandleNotFoundError(c, "variant expanded interpreted case")
 			return
 		}
 		c.JSON(http.StatusOK, cases)

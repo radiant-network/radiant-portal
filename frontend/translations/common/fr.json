@@ -169,10 +169,12 @@
     },
     "pagination": {
       "aria": {
+        "first": "Aller à la première page",
         "previous": "Aller à la page précédente",
         "next": "Aller à la page suivante",
         "more": "Plus de pages"
       },
+      "first": "Première",
       "previous": "Précédent",
       "next": "Suivant"
     },
@@ -715,7 +717,7 @@
       }
     }
   },
-  "occurrenceExpend": {
+  "occurrenceExpand": {
     "actions": {
       "downloadReport": "Télécharger le rapport",
       "openIGV": "Ouvrir IGV",

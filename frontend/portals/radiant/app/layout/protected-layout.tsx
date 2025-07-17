@@ -1,4 +1,4 @@
-import { Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
+import { Link, Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
 import { authenticateRequest, getSessionUser, requireAuth } from '~/utils/auth.server';
 import type { Route } from '../+types/root';
 import type { IAuthUser } from '~/utils/auth.types';
@@ -59,30 +59,37 @@ const _ProtectedLayout = () => {
             {
               title: t('mainNavbar.links.dashboard'),
               icon: <LayoutDashboardIcon />,
+              as: 'button',
             },
             {
               title: t('mainNavbar.links.cases'),
               icon: <FolderIcon />,
-              onClick: () => navigate('/case-exploration'),
-              active: pathname === '/case-exploration'
+              to: '/case-exploration',
+              as: Link,
+              active: pathname === '/case-exploration',
             },
           ]}
           actions={[
             {
               title: t('mainNavbar.actions.community'),
               icon: <UsersIcon />,
+              as: 'button',
             },
             {
               title: t('mainNavbar.actions.resources'),
               icon: <LightbulbIcon />,
+              as: 'button',
               subItems: [
                 {
                   title: t('mainNavbar.actions.website'),
                   icon: <ExternalLink />,
+                  as: 'a',
+                  href: 'https://www.radiant-genomics.com',
                 },
                 {
                   title: t('mainNavbar.actions.documentation'),
                   icon: <ExternalLink />,
+                  as: 'button',
                 },
                 {
                   separator: true,
@@ -90,6 +97,7 @@ const _ProtectedLayout = () => {
                 {
                   title: t('mainNavbar.actions.contact'),
                   icon: <MailIcon />,
+                  as: 'button',
                 },
               ],
             },

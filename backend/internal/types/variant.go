@@ -125,7 +125,7 @@ type VariantUninterpretedCase = struct {
 	ExomiserACMGEvidence       JsonArray[string] `json:"exomiser_acmg_evidence,omitempty"`
 } // @name VariantUninterpretedCase
 
-type VariantExpendedInterpretedCase = struct {
+type VariantExpandedInterpretedCase = struct {
 	PatientID                     int               `json:"patient_id" validate:"required"`
 	InterpreterName               string            `json:"interpreter_name" validate:"required"`
 	Interpretation                string            `json:"interpretation" validate:"required"`
@@ -137,7 +137,7 @@ type VariantExpendedInterpretedCase = struct {
 	PatientSexCode                string            `json:"patient_sex_code" validate:"required"`
 	PubmedIDsString               string            `json:"-"`
 	PubmedIDs                     JsonArray[string] `json:"pubmed_ids" validate:"required"`
-} // @name VariantExpendedInterpretedCase
+} // @name VariantExpandedInterpretedCase
 
 type VariantCasesFilters = struct {
 	Classification []Aggregation `json:"classification" validate:"required"`

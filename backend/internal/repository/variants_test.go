@@ -123,16 +123,16 @@ func Test_GetVariantInterpretedCases_NoResult(t *testing.T) {
 	})
 }
 
-func Test_GetVariantExpendedInterpretedCase(t *testing.T) {
+func Test_GetVariantExpandedInterpretedCase(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		expended, err := repo.GetVariantExpendedInterpretedCase(1000, 1, "T002")
+		expanded, err := repo.GetVariantExpandedInterpretedCase(1000, 1, "T002")
 		assert.NoError(t, err)
-		assert.Equal(t, 3, (*expended).PatientID)
-		assert.Equal(t, types.JsonArray[string]{"PM1", "PM2"}, (*expended).ClassificationCriterias)
-		assert.Equal(t, types.JsonArray[string]{"autosomal_dominant_de_novo"}, (*expended).Inheritances)
-		assert.Equal(t, types.JsonArray[string]{}, (*expended).PubmedIDs)
-		assert.Equal(t, "BRAF", (*expended).GeneSymbol)
+		assert.Equal(t, 3, (*expanded).PatientID)
+		assert.Equal(t, types.JsonArray[string]{"PM1", "PM2"}, (*expanded).ClassificationCriterias)
+		assert.Equal(t, types.JsonArray[string]{"autosomal_dominant_de_novo"}, (*expanded).Inheritances)
+		assert.Equal(t, types.JsonArray[string]{}, (*expanded).PubmedIDs)
+		assert.Equal(t, "BRAF", (*expanded).GeneSymbol)
 	})
 }
 func Test_GetVariantUninterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *testing.T) {

@@ -38,7 +38,7 @@ type Occurrence struct {
 	ExomiserGeneCombinedScore  float64           `json:"exomiser_gene_combined_score" validate:"required"`
 } // @name Occurrence
 
-type ExpendedOccurrence = struct {
+type ExpandedOccurrence = struct {
 	LocusId                   string                   `json:"locus_id" validate:"required"`
 	Hgvsg                     string                   `json:"hgvsg" validate:"required"`
 	Locus                     string                   `json:"locus" validate:"required"`
@@ -86,7 +86,7 @@ type ExpendedOccurrence = struct {
 	Filter                    string                   `json:"filter,omitempty"`
 	ExomiserAcmgEvidence      JsonArray[string]        `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
 	ExomiserGeneCombinedScore float64                  `json:"exomiser_gene_combined_score" validate:"required"`
-} // @name ExpendedOccurrence
+} // @name ExpandedOccurrence
 
 var OccurrenceTable = Table{
 	Name:  "germline__snv__occurrence",

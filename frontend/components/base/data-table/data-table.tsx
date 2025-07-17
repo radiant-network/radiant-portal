@@ -26,6 +26,7 @@ import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
+  PaginationFirst,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -256,7 +257,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -741,6 +742,12 @@ function TranstackTable<T>({
               <Pagination className="w-auto">
                 <PaginationContent>
                   <PaginationItem>
+                    <PaginationFirst
+                      disabled={!table.getCanPreviousPage()}
+                      onClick={() => table.firstPage()}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
                     <PaginationPrevious
                       disabled={!table.getCanPreviousPage()}
                       onClick={() => {
@@ -748,12 +755,6 @@ function TranstackTable<T>({
                         table.previousPage();
                       }}
                     />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink onClick={() => table.firstPage()}>1</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationEllipsis />
                   </PaginationItem>
                   <PaginationItem>
                     <PaginationNext

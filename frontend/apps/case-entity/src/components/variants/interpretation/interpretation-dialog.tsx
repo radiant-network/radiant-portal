@@ -10,7 +10,7 @@ import {
 import { Separator } from '@/components/base/ui/separator';
 import InterpretationFormGermline from './interpretation-form-germline';
 import { ReactNode, useCallback, useRef, useState } from 'react';
-import { ExpendedOccurrence, Occurrence } from '@/api/api';
+import { ExpandedOccurrence, Occurrence } from '@/api/api';
 import InterpretationFormSomatic from './interpretation-form-somatic';
 import InterpretationLastUpdatedBanner from './last-updated-banner';
 import InterpretationVariantHeader from './header';
@@ -42,12 +42,12 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
     occurrence,
     isSomatic,
   );
-  const { fetch: fetchOccurrenceExpendHelper } = useOccurenceExpandHelper(occurrence);
+  const { fetch: fetchOccurrenceExpandHelper } = useOccurenceExpandHelper(occurrence);
 
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
   const occurrenceUniqueKey = `occurrence-${occurrence.seq_id}-${occurrence.locus_id}`;
 
-  const fetchOccurrenceExpend = useSWR<ExpendedOccurrence>(occurrenceUniqueKey, fetchOccurrenceExpendHelper, {
+  const fetchOccurrenceExpand = useSWR<ExpandedOccurrence>(occurrenceUniqueKey, fetchOccurrenceExpandHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,
@@ -82,7 +82,7 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
   const handleOpen = useCallback(async () => {
     setOpen(true);
     fetchInterpretation.mutate();
-    fetchOccurrenceExpend.mutate();
+    fetchOccurrenceExpand.mutate();
   }, []);
 
   return (
@@ -92,7 +92,7 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
         className="max-w-[calc(100vw-48px)] min-h-[calc(100vh-48px)] w-[1200px]"
         onEscapeKeyDown={e => e.preventDefault()}
       >
-        {fetchInterpretation.isLoading || fetchOccurrenceExpend.isLoading ? (
+        {fetchInterpretation.isLoading || fetchOccurrenceExpand.isLoading ? (
           <div className="flex items-center justify-center">
             <Spinner size={32} />
           </div>
@@ -105,7 +105,7 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
             <div className="py-6 overflow-scroll space-y-6 h-[calc(95vh-150px)]">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
-              <InterpretationTranscript occurrence={fetchOccurrenceExpend.data} />
+              <InterpretationTranscript occurrence={fetchOccurrenceExpand.data} />
               <div className="grid gap-6 grid-cols-12">
                 <div className="rounded-sm col-span-7 border p-6 bg-muted/40">
                   {isSomatic ? (
@@ -133,7 +133,7 @@ function InterpretationDialog({ occurrence, renderTrigger }: InterpretationDialo
                   )}
                 </div>
                 <div className="rounded-sm col-span-5 border py-4 px-6">
-                  <OccurrenceDetails occurrence={fetchOccurrenceExpend.data} />
+                  <OccurrenceDetails occurrence={fetchOccurrenceExpand.data} />
                 </div>
               </div>
             </div>
