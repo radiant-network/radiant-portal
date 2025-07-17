@@ -123,19 +123,34 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     setActiveSqon(queryBuilderRemote.getResolvedActiveQuery(appId) as Sqon);
   }, []);
 
-
+  /**
+    * Re-fetch count
+    */
   useEffect(() => {
     if (seqId === "") return;
-    fetchOccurrencesList.mutate();
     fetchOccurrencesCount.mutate();
   }, [seqId, activeSqon]);
 
+
+  /**
+    * Re-fetch list
+    */
+  useEffect(() => {
+    if (seqId === "") return;
+    fetchOccurrencesList.mutate();
+  }, [seqId, sorting, pagination]);
+
+
+  /**
+    * Reset pagination on sqon change
+    */
   useEffect(() => {
     setPagination({
       pageIndex: 0,
       pageSize: pagination.pageSize,
     });
-  }, [JSON.stringify(qbState?.queries), qbState?.activeQueryId]);
+  }, [activeSqon]);
+
 
   return (
     <SeqIDContext value={seqId}>
