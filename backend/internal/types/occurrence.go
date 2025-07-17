@@ -146,6 +146,18 @@ var ParentalOriginField = Field{
 	CanBeAggregated: true,
 	Table:           OccurrenceTable,
 }
+var MotherZygosityField = Field{
+	Name:            "mother_zygosity",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OccurrenceTable,
+}
+var FatherZygosityField = Field{
+	Name:            "father_zygosity",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OccurrenceTable,
+}
 var GenotypeQualityField = Field{
 	Name:          "gq",
 	Alias:         "genotype_quality",
@@ -255,6 +267,8 @@ var OccurrencesFields = []Field{
 	PickedTranscriptIdField,
 	TransmissionModeField,
 	ParentalOriginField,
+	MotherZygosityField,
+	FatherZygosityField,
 	InfoQdField,
 
 	// Frequencies

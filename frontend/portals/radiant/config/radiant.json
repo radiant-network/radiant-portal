@@ -139,6 +139,8 @@
         "items": [
           { "key": "zygosity", "type": "multiple" },
           { "key": "zygosity_divider_parental_analysis", "type": "divider" }, 
+          { "key": "mother_zygosity", "type": "multiple" },
+          { "key": "father_zygosity", "type": "multiple" },
           { "key": "parental_origin", "type": "multiple" },
           { "key": "transmission_mode", "type": "multiple" },
           { "key": "occurence_metrics_divider", "type": "divider" }, 

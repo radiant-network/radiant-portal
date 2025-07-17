@@ -225,6 +225,8 @@
         "omim_gene_panel": "OMIM",
         "omim_gene_panel_tooltip": "Online Mendelian Inheritance in Man",
         "orphanet_gene_panel": "Orphanet",
+        "mother_zygosity": "Mother’s Zygosity",
+        "father_zygosity": "Father’s Zygosity",
         "transmission_mode": "Transmission",
         "transmission_mode_tooltip": "Mode of inheritance in the family",
         "parental_origin": "Parental Origin",
