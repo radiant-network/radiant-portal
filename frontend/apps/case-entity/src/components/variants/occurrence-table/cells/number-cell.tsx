@@ -2,13 +2,13 @@ import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 
 type NumberCellProps = {
   value?: number;
-  format?: string;
+  fractionDigits?: number;
 };
 
-function NumberCell({ value }: NumberCellProps) {
+function NumberCell({ value, fractionDigits = 2 }: NumberCellProps) {
   if (value === undefined) return <EmptyCell />;
 
-  return <span>{value.toFixed(2)}</span>;
+  return <span>{value.toFixed(fractionDigits)}</span>;
 }
 
 export default NumberCell;
