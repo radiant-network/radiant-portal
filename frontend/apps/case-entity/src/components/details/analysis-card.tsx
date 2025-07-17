@@ -202,7 +202,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
 
           {/* Table */}
           <div className="border rounded-lg overflow-hidden">
-            <div className={`grid ${caseData.members.length > 1 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+            <div className={`grid grid-cols-3 ${caseData.members.length > 1 && 'md:grid-cols-4'}`}>
               <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.taskId')}</div>
               <div className="p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
                 <Tooltip>
@@ -231,13 +231,13 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
               </div>
             </div>
             {caseData.tasks.length > 0 ? caseData.tasks.map((bioInfo: CaseTask, index: number) => (
-              <div key={index} className={`grid ${caseData.members.length > 1 ? 'grid-cols-4' : 'grid-cols-3'} border-b last:border-b-0`}>
+              <div key={index} className={`grid grid-cols-3 ${caseData.members.length > 1 && 'md:grid-cols-4'} border-b last:border-b-0`}>
                 <div className="p-3 text-sm">
                   {bioInfo.id}
                 </div>
                 <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge></div>
                 {caseData.members.length > 1 && (
-                  <div className="p-3 flex items-start flex-col md:flex-row gap-1 flex-wrap">
+                  <div className="p-3 flex items-start flex-row gap-1 flex-wrap">
                     {bioInfo.patients.map((patient: string, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">{t(`caseEntity.patientInformation.relationships.${patient}`)}</Badge>
                     ))}
