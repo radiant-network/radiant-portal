@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, MoreHorizontal } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button, ButtonProps } from '@/base/ui/button';
@@ -41,6 +41,21 @@ const PaginationLink = ({ className, isActive, size = 'sm', variant = 'outline',
   );
 };
 PaginationLink.displayName = 'PaginationLink';
+
+const PaginationFirst = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => {
+  const { t } = useI18n();
+  return (
+    <PaginationLink
+      aria-label={t('common.pagination.aria.first')}
+      className={cn('gap-1 pl-2.5 border-none shadow-none', className)}
+      {...props}
+    >
+      <ChevronsLeft className="h-4 w-4" />
+      <span>{t('common.pagination.first')}</span>
+    </PaginationLink>
+  );
+};
+PaginationFirst.displayName = 'PaginationFirst';
 
 const PaginationPrevious = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => {
   const { t } = useI18n();
@@ -85,6 +100,7 @@ export {
   PaginationEllipsis,
   PaginationItem,
   PaginationLink,
+  PaginationFirst,
   PaginationNext,
   PaginationPrevious,
 };
