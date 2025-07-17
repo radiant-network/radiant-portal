@@ -140,6 +140,12 @@ var TransmissionModeField = Field{
 	CanBeAggregated: true,
 	Table:           OccurrenceTable,
 }
+var ParentalOriginField = Field{
+	Name:            "parental_origin",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OccurrenceTable,
+}
 var GenotypeQualityField = Field{
 	Name:          "gq",
 	Alias:         "genotype_quality",
@@ -248,6 +254,7 @@ var OccurrencesFields = []Field{
 	PickedOmimInheritanceCodeField,
 	PickedTranscriptIdField,
 	TransmissionModeField,
+	ParentalOriginField,
 	InfoQdField,
 
 	// Frequencies
@@ -257,6 +264,8 @@ var OccurrencesFields = []Field{
 	PfWgsAffectedField,
 	PfWgsNotAffectedField,
 	GnomadV3AfField,
+	TopmedAfField,
+	ThousandGenomesAfField,
 
 	// Variants
 	VariantClassField,

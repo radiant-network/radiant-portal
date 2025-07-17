@@ -118,6 +118,20 @@
             "defaultOperator": "LessThan",
             "defaultMin": 0,
             "defaultMax": 100
+          } },
+          { "key": "topmed_af", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
+          } },
+          { "key": "thousand_genome_af", "type": "numerical", "defaults": { 
+            "min": 0, 
+            "max": 100, 
+            "defaultOperator": "LessThan",
+            "defaultMin": 0,
+            "defaultMax": 100
           } }
         ]
       },
@@ -125,6 +139,7 @@
         "items": [
           { "key": "zygosity", "type": "multiple" },
           { "key": "zygosity_divider_parental_analysis", "type": "divider" }, 
+          { "key": "parental_origin", "type": "multiple" },
           { "key": "transmission_mode", "type": "multiple" },
           { "key": "occurence_metrics_divider", "type": "divider" }, 
           { "key": "filter", "type": "multiple"},
