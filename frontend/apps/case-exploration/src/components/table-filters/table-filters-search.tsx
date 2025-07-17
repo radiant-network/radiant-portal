@@ -110,6 +110,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
       >
         <CommandInput
           className="px-[6px]"
+          wrapperClassName="focus-within:ring-primary focus-visible:outline-none focus-visible:ring-ring focus-visible:ring-offset-0 [&:has(:focus-visible)]:ring-1"
           placeholder={t('caseExploration.filtersGroup.search_placeholder')}
           leftAddon={<Search size={16} />}
           rightAddon={searchInput.length > 0 && <X onClick={handleClear} size={16} />}
