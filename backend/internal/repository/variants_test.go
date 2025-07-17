@@ -252,7 +252,7 @@ func Test_GetVariantUninterpretedCases_WithExomiserACMGClassification_NoPaginati
 		assert.Equal(t, 3, len(*uninterpretedCases))
 		for _, caseItem := range *uninterpretedCases {
 			assert.Equal(t, "Pathogenic", caseItem.ExomiserACMGClassification)
-			assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, caseItem.ExomiserACMGEvidence)
+			assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, caseItem.ExomiserACMGEvidence)
 		}
 	})
 }

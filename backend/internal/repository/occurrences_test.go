@@ -132,7 +132,7 @@ func Test_GetOccurrences_Return_List_Occurrences_When_Filter_By_Exomiser_Gene_Co
 		if assert.Len(t, occurrences, 1) {
 			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.EqualValues(t, 0.7, occurrences[0].ExomiserGeneCombinedScore)
-			assert.EqualValues(t, []string{"Benign", "Pathogenic"}, occurrences[0].ExomiserAcmgEvidence)
+			assert.EqualValues(t, []string{"PS1", "PVS2"}, occurrences[0].ExomiserAcmgEvidence)
 		}
 	})
 }
@@ -655,6 +655,6 @@ func Test_GetExpendedOccurrence(t *testing.T) {
 		assert.Equal(t, float32(0.1), expendedOccurrence.SiftScore)
 		assert.Equal(t, "T", expendedOccurrence.SiftPred)
 		assert.Equal(t, 0.7, expendedOccurrence.ExomiserGeneCombinedScore)
-		assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, expendedOccurrence.ExomiserAcmgEvidence)
+		assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, expendedOccurrence.ExomiserAcmgEvidence)
 	})
 }
