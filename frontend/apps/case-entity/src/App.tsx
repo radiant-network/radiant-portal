@@ -15,7 +15,7 @@ import Header from './components/layout/header';
 import { AudioWaveform, ClipboardList } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
-const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
+export const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
 
 type CaseEntityInput = {
   key: string;
@@ -106,7 +106,7 @@ export default function App() {
             )}
           </TabsList>
           <Container>
-            <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-6 flex justify-center">
+            <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-6">
               <DetailsTab caseEntity={data} isLoading={isLoading} />
             </TabsContent>
           </Container>
