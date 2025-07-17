@@ -35,7 +35,17 @@
         "items": [
           { "key": "clinvar", "type": "multiple" },
           { "key": "vep_impact", "type": "multiple" },
-          { "key": "pathogenicity_predictions_divider", "type": "divider" }, 
+          { "key": "pathogenicity_exomiser_divider", "type": "divider" },
+          { "key": "exomiser_gene_combined_score", "type": "numerical", "defaults": {
+            "min": 0,
+            "max": 1,
+            "defaultOperator": "GreaterThan",
+            "defaultMin": 0,
+            "defaultMax": 1
+          } },
+          { "key": "exomiser_acmg_classification", "type": "multiple" },
+          { "key": "exomiser_acmg_evidence", "type": "multiple" },
+          { "key": "pathogenicity_predictions_divider", "type": "divider" },
           { "key": "cadd_score", "type": "numerical", "defaults": { 
             "min": 0, 
             "max": 100, 
