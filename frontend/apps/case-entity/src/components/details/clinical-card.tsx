@@ -10,7 +10,10 @@ import { cn } from '@/components/lib/utils';
 import { getBadgeAffectedCodeColor } from '../utils';
 import { Badge } from '@/components/base/ui/badge';
 import { Separator } from '@/components/base/ui/separator';
+import { CollapsibleList } from '@/components/base/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+
+const PHENOTYPES_MAX_RENDER = 6;
 
 type ClinicalCardProps = ComponentProps<'div'> & {
   data: CaseEntity;
@@ -62,9 +65,20 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
               <CardTitle size="xs" className="font-bold">
                 {t('caseEntity.details.phenotypes_observed')}
               </CardTitle>
-              {(proband.observed_phenotypes ?? []).map(({ id, name, onset_code }: Term) => (
-                <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
-              ))}
+
+
+              <CollapsibleList
+                list={proband.observed_phenotypes ?? []}
+                render={({ id, name, onset_code }: Term) => (
+                  <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
+                )}
+                limit={PHENOTYPES_MAX_RENDER}
+              />
+
+              {/* {(proband.observed_phenotypes ?? []).slice(0, PHENOTYPES_MAX_RENDER).map(({ id, name, onset_code }: Term) => ( */}
+              {/*   <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} /> */}
+              {/* ))} */}
+
               {!proband.observed_phenotypes && (
                 <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
               )}
@@ -73,9 +87,15 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
               <CardTitle size="xs" className="font-bold">
                 {t('caseEntity.details.phenotypes_non_observed')}
               </CardTitle>
-              {(proband.non_observed_phenotypes ?? []).map(({ id, name, onset_code }: Term) => (
-                <PhenotypeConditionLink key={id} code={id} name={name} onsetCode={onset_code} />
-              ))}
+
+              <CollapsibleList
+                list={proband.non_observed_phenotypes ?? []}
+                render={({ id, name, onset_code }: Term) => (
+                  <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
+                )}
+                limit={PHENOTYPES_MAX_RENDER}
+              />
+
               {!proband.non_observed_phenotypes && (
                 <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
               )}
