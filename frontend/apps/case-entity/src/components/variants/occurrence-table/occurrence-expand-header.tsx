@@ -30,14 +30,14 @@ export default function OccurrenceExpandHeader({ occurrence }: OccurrenceExpandH
               </Button>
             )}
           />
-          <Button color="primary" size="xs">
+          {/* SJRA-389 <Button color="primary" size="xs">
             <Download />
             {t('occurrenceExpand.actions.downloadReport')}
           </Button>
           <Button color="primary" size="xs">
             <VariantIcon />
             {t('occurrenceExpand.actions.openIGV')}
-          </Button>
+          </Button> */}
         </div>
         <Separator orientation="vertical" className="h-5" />
         <div className="flex gap-4 items-center">

@@ -102,7 +102,7 @@ export default function App() {
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
           <TabsListItem value={VariantEntityTabs.Overview}>{t('variantEntity.overview.title')}</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Frequency}>{t('variantEntity.frequency.title')}</TabsListItem>
+          {/* SJRA-389 <TabsListItem value={VariantEntityTabs.Frequency}>{t('variantEntity.frequency.title')}</TabsListItem> */}
           <TabsListItem value={VariantEntityTabs.EvidenceAndConditions}>
             {t('variantEntity.evidence.title')}
           </TabsListItem>
@@ -118,9 +118,9 @@ export default function App() {
               <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="py-6">
                 <EvidenceTab />
               </TabsContent>
-              <TabsContent value={VariantEntityTabs.Frequency} className="py-6">
+              {/* SJRA-389 <TabsContent value={VariantEntityTabs.Frequency} className="py-6">
                 <FrequencyTab />
-              </TabsContent>
+              </TabsContent> */}
               <TabsContent value={VariantEntityTabs.Transcripts} className="py-6">
                 <TranscriptsTab />
               </TabsContent>

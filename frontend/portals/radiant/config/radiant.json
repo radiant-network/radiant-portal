@@ -6,9 +6,6 @@
   "variant_exploration": {
     "app_id": "variant_exploration",
     "aggregations": {
-      "organization": {
-        "items": []
-      },
       "variant": {
         "items": [
           { "key": "variant_class", "type": "multiple" },
