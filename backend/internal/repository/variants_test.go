@@ -239,6 +239,24 @@ func Test_GetVariantUninterpretedCases_WithPhenotypeCriteria_NoPagination_Defaul
 	})
 }
 
+func Test_GetVariantUninterpretedCases_WithExomiserACMGClassification_NoPagination_DefaultSort(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "exomiser", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		criteria := []types.SearchCriterion{
+			{FieldName: types.AggregatedPhenotypeTermField.Alias, Value: []interface{}{"seizure"}, Operator: "contains"},
+		}
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(3), *count)
+		assert.Equal(t, 3, len(*uninterpretedCases))
+		for _, caseItem := range *uninterpretedCases {
+			assert.Equal(t, "Pathogenic", caseItem.ExomiserACMGClassification)
+			assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, caseItem.ExomiserACMGEvidence)
+		}
+	})
+}
+
 func Test_GetVariantUninterpretedCases_NoResult(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)

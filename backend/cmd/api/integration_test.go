@@ -766,7 +766,9 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 				"primary_condition_name":"neurodevelopmental disorder", 
 				"status_code":"active", 
 				"updated_on":"2021-09-12T13:08:00Z",
-				"zygosity":"HOM"
+				"zygosity":"HOM",
+				"exomiser_acmg_classification": "Benign",
+                "exomiser_acmg_evidence": ["PS1", "PVS1"]
 			}
 		],
 		"count": 1

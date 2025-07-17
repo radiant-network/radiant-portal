@@ -204,7 +204,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		}
 	}
 
-	tx = tx.Select("c.id as case_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, mondo.name as primary_condition_name, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code, agg_phenotypes.phenotypes_term as phenotypes_unparsed")
+	tx = tx.Select("c.id as case_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, mondo.name as primary_condition_name, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code, agg_phenotypes.phenotypes_term as phenotypes_unparsed, o.exomiser_acmg_classification, o.exomiser_acmg_evidence")
 
 	utils.AddLimitAndSort(tx, userQuery)
 
