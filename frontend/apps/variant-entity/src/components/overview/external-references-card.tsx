@@ -1,6 +1,7 @@
 import { VariantOverview } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
+import { getDbSnpUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { ComponentProps } from 'react';
 
@@ -34,17 +35,19 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
         >
           {t('variantEntity.overview.gnomAD')}
         </AnchorLink>
-        <AnchorLink
-          size="sm"
-          href={`https://www.ncbi.nlm.nih.gov/snp/${data?.rsnumber}`}
-          variant="secondary"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-1 hover:underline"
-          external
-        >
-          {t('variantEntity.overview.dbSNP')}
-        </AnchorLink>
+        {data?.rsnumber && (
+          <AnchorLink
+            size="sm"
+            href={getDbSnpUrl(data.rsnumber)}
+            variant="secondary"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1 hover:underline"
+            external
+          >
+            {t('variantEntity.overview.dbSNP')}
+          </AnchorLink>
+        )}
       </CardContent>
     </Card>
   );

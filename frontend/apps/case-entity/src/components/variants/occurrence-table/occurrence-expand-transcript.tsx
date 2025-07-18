@@ -1,33 +1,70 @@
 import { ExpandedOccurrence, Occurrence } from '@/api/api';
-import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
 import { Separator } from '@/components/base/ui/separator';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+import {
+  getDbSnpUrl,
+  getEnsemblGeneUrl,
+  getOmimOrgUrl,
+} from '@/components/feature/variant/utils';
+import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 
 type OccurrenceExpandTranscriptProps = {
   occurrence: Occurrence;
   expandedOccurrence: ExpandedOccurrence;
 };
 
-export default function OccurrenceExpandTranscript({ occurrence, expandedOccurrence }: OccurrenceExpandTranscriptProps) {
-  const arn = occurrence.hgvsg.split(':')[1];
-
+export default function OccurrenceExpandTranscript({
+  occurrence,
+  expandedOccurrence,
+}: OccurrenceExpandTranscriptProps) {
   return (
     <div className="flex items-center gap-3">
-      {occurrence.is_mane_select && (
+      {expandedOccurrence.symbol && (
+        <div className="flex items-center gap-2">
+          {expandedOccurrence.symbol && (
+            <AnchorLink
+              size="sm"
+              variant="primary"
+              href={getOmimOrgUrl({ symbol: expandedOccurrence.symbol })}
+              target="_blank"
+            >
+              {expandedOccurrence.symbol}
+            </AnchorLink>
+          )}
+          <div>
+            {'('}
+            <AnchorLink size="xs" variant="primary" href={getEnsemblGeneUrl(expandedOccurrence.symbol)} target="_blank">
+              {'Ensembl'}
+            </AnchorLink>
+            {')'}
+          </div>
+          <Separator orientation="vertical" className="h-5" />
+        </div>
+      )}
+      {occurrence?.transcript_id && (
         <>
-          <div>{occurrence.is_mane_select && <TranscriptManeSelectIcon size={18} className="text-primary" />}</div>
+          <TranscriptIdLink
+            transcriptId={occurrence.transcript_id}
+            isCanonical={occurrence.is_canonical}
+            isManeSelect={occurrence.is_mane_select}
+            isManePlus={occurrence.is_mane_plus}
+            linkClassName="text-sm text-primary"
+          />
           <Separator orientation="vertical" className="h-5" />
         </>
       )}
       {expandedOccurrence.exon_rank && expandedOccurrence.exon_total && (
         <>
-          <div>Exon: {expandedOccurrence.exon_rank} / {expandedOccurrence.exon_total}</div>
+          <div>
+            Exon: {expandedOccurrence.exon_rank} / {expandedOccurrence.exon_total}
+          </div>
           <Separator orientation="vertical" className="h-5" />
         </>
       )}
-      {occurrence.picked_consequences.length > 0 && (
+      {expandedOccurrence.dna_change && (
         <>
-          {arn}
+          {expandedOccurrence.dna_change}
           <Separator orientation="vertical" className="h-5" />
         </>
       )}
@@ -44,7 +81,7 @@ export default function OccurrenceExpandTranscript({ occurrence, expandedOccurre
       {occurrence.rsnumber && (
         <>
           <Separator orientation="vertical" className="h-5" />
-          <a target="_blank" href={`https://www.ncbi.nlm.nih.gov/snp/${occurrence.rsnumber}`}>
+          <a target="_blank" href={getDbSnpUrl(occurrence.rsnumber)}>
             {occurrence.rsnumber}
           </a>
         </>

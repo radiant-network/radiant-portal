@@ -10,3 +10,15 @@ export function getOmimOrgUrl({ omimGeneId, symbol }: GetOmimOrgUrlProps): strin
 
   return `https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${symbol}`;
 }
+
+export function getEnsemblTranscriptUrl(transcriptId: string): string {
+  return `https://www.ensembl.org/id/${transcriptId}`;
+}
+
+export function getEnsemblGeneUrl(symbol: string): string {
+  return `https://useast.ensembl.org/Homo_sapiens/Gene/Summary?g=${symbol}`;
+}
+
+export function getDbSnpUrl(rsnumber: string): string {
+  return `https://www.ncbi.nlm.nih.gov/snp/${rsnumber}`;
+}

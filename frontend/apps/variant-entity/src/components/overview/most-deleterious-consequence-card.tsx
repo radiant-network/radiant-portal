@@ -7,7 +7,7 @@ import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
 import ClinvarBadge from '@/components/feature/variant/clinvar-badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { InfoIcon } from 'lucide-react';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
@@ -139,7 +139,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <>
               <Separator orientation="vertical" className="mx-4 h-5" />
               <a
-                href={`https://www.ncbi.nlm.nih.gov/snp/${data?.rsnumber}`}
+                href={getDbSnpUrl(data.rsnumber)}
                 className="hover:underline font-mono"
                 target="_blank"
                 rel="noreferrer"

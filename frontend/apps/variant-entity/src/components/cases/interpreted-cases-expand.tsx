@@ -142,7 +142,6 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
               '-'
             )}
           </div>
-          <div className="text-xs underline hover:cursor-pointer">NM_21360026</div>
         </div>
         {expandedData?.classification_criterias && expandedData?.classification_criterias.length > 0 && (
           <div className="flex items-center gap-2">

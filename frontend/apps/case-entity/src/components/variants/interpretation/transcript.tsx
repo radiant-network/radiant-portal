@@ -1,6 +1,6 @@
 import { Separator } from '@/components/base/ui/separator';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
-import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 import { ExpandedOccurrence } from '@/api/api';
@@ -71,7 +71,7 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
         <>
           <Separator className="h-5" orientation="vertical" />
           <AnchorLink
-            href={`https://www.ncbi.nlm.nih.gov/snp/${occurrence.rsnumber}`}
+            href={getDbSnpUrl(occurrence.rsnumber)}
             target="_blank"
             rel="noreferrer"
             size="sm"
