@@ -62,7 +62,7 @@ function updateSearchCriteria(filters: StringArrayRecord) {
   if (filters.requested_by?.length > 0) {
     search_criteria.push({ field: 'requested_by_code', value: filters.requested_by });
   }
-  
+
   // Add search-based criteria
   if (filters.case_id && filters.case_id?.length > 0) {
     search_criteria.push({ field: 'case_id', value: filters.case_id });
@@ -123,6 +123,7 @@ function FiltersGroupForm({
         case 'requested_by':
           return {
             ...baseOption,
+            popoverSize: 'lg',
             isVisible: ((filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key)) || false,
             options: apiFilters[key] || [],
             withTooltip: true
@@ -136,6 +137,7 @@ function FiltersGroupForm({
           return {
             ...baseOption,
             options: apiFilters[key] || [],
+            popoverSize: 'lg',
             withTooltip: true
           };
         default:
@@ -180,13 +182,13 @@ function FiltersGroupForm({
   const makeFiltersVisible = useCallback((selectedKeys: string[]) => {
     // Update changed filter buttons to make them visible
     setChangedFilterButtons(prev => [...prev, ...selectedKeys.filter(key => !prev.includes(key))]);
-    
+
     // Set selected filters as open
     const newOpenFilters = selectedKeys.reduce((acc, key) => {
       acc[key] = true;
       return acc;
     }, {} as Record<string, boolean>);
-    
+
     setOpenFilters(prev => ({ ...prev, ...newOpenFilters }));
   }, []);
 
@@ -208,8 +210,8 @@ function FiltersGroupForm({
     return null;
   };
 
-  const hiddenFilterOptions = useMemo(() => 
-    filterButtons.filter(option => !option.isVisible), 
+  const hiddenFilterOptions = useMemo(() =>
+    filterButtons.filter(option => !option.isVisible),
     [filterButtons]
   );
   const searchTerm = getSearchTerm();
@@ -247,6 +249,7 @@ function FiltersGroupForm({
             (
               <FilterButton
                 key={filter.key}
+                popoverSize={filter.popoverSize}
                 label={filter.label}
                 options={filter.options}
                 selected={filter.selectedItems}
