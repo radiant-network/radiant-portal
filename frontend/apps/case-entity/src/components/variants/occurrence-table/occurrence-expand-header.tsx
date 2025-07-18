@@ -1,7 +1,6 @@
 import { Button } from '@/components/base/ui/button';
-import { Download, Edit2Icon } from 'lucide-react';
+import { Edit2Icon } from 'lucide-react';
 import InterpretationDialog from '../interpretation/interpretation-dialog';
-import VariantIcon from '@/components/base/icons/variant-icon';
 import { Occurrence } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
@@ -17,7 +16,7 @@ export default function OccurrenceExpandHeader({ occurrence }: OccurrenceExpandH
 
   return (
     <div className="flex items-center gap-8">
-      <AnchorLink component={Link} to={`/variants/entity/${occurrence.locus_id}`} size="lg" external>
+      <AnchorLink component={Link} to={`/variants/entity/${occurrence.locus_id}`} size="lg" target='_blank' external>
         <span className="max-w-72 overflow-hidden text-ellipsis">{occurrence.hgvsg}</span>
       </AnchorLink>
       <div className="flex items-center gap-5">
