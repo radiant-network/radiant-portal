@@ -104,3 +104,8 @@ var GermlineInterpretationUpdatedOnField = Field{
 	CanBeSorted:   true,
 	Table:         InterpretationGermlineTable,
 }
+
+type ClassificationCounts struct {
+	Classification      string `json:"classification" validate:"required"`
+	ClassificationCount int    `json:"classification_count" validate:"required"`
+}

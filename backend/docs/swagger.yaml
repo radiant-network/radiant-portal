@@ -1242,6 +1242,10 @@ components:
           type: number
         gnomad_v3_af:
           type: number
+        interpretation_classification_counts:
+          additionalProperties:
+            type: integer
+          type: object
         is_canonical:
           type: boolean
         is_mane_plus:

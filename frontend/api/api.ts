@@ -2735,6 +2735,12 @@ export interface VariantOverview {
     'gnomad_v3_af': number;
     /**
      * 
+     * @type {{ [key: string]: number; }}
+     * @memberof VariantOverview
+     */
+    'interpretation_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
      * @type {boolean}
      * @memberof VariantOverview
      */
