@@ -23,7 +23,7 @@ function PriorityCell({ code }: PriorityCellProps) {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
+      <TooltipTrigger>
         <Indicator variant={color}>
           <span>{t(`caseExploration.priority.${code}`)}</span>
         </Indicator>
