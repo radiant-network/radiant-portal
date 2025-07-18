@@ -3,6 +3,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import CanonicalBadge from './canonical-badge';
 import ManeSelectBadge from './mane-select-badge';
 import ManePlusBadge from './mane-plus-badge';
+import { getEnsemblTranscriptUrl } from './utils';
 
 interface TranscriptIdLinkProps extends React.HTMLAttributes<HTMLDivElement> {
   transcriptId: string;
@@ -27,7 +28,7 @@ function TranscriptIdLink({
     <div className={cn('flex items-center gap-1', className)} {...props}>
       <AnchorLink
         size="sm"
-        href={`https://www.ensembl.org/id/${transcriptId}`}
+        href={getEnsemblTranscriptUrl(transcriptId)}
         className={cn('hover:underline font-mono', linkClassName)}
         target="_blank"
         rel="noreferrer"
