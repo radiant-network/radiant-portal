@@ -2,52 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import { deepMerge } from '../../components/lib/merge';
 
-// Check if merged translations are up-to-date
-const areTranslationsUpToDate = (currentTheme: string, rootDir: string): boolean => {
-  const languages = ['en', 'fr'];
-  
-  for (const lang of languages) {
-    const commonPath = path.resolve(rootDir, `../../translations/common/${lang}.json`);
-    const portalPath = path.resolve(rootDir, `../../translations/portals/${currentTheme}/${lang}.json`);
-    const mergedPath = path.resolve(rootDir, `../../translations/merged/${currentTheme}/${lang}.json`);
-    
-    // If merged file doesn't exist, we need to generate it
-    if (!fs.existsSync(mergedPath)) {
-      return false;
-    }
-    
-    // Check if source files are newer than merged file
-    const mergedStat = fs.statSync(mergedPath);
-    
-    if (fs.existsSync(commonPath)) {
-      const commonStat = fs.statSync(commonPath);
-      if (commonStat.mtime > mergedStat.mtime) {
-        return false;
-      }
-    }
-    
-    if (fs.existsSync(portalPath)) {
-      const portalStat = fs.statSync(portalPath);
-      if (portalStat.mtime > mergedStat.mtime) {
-        return false;
-      }
-    }
-  }
-  
-  return true;
-};
-
 export const mergeTranslationsForTheme = (currentTheme: string, rootDir: string) => {
-  // Skip if translations are already up-to-date
-  if (areTranslationsUpToDate(currentTheme, rootDir)) {
-    console.log(`⚡ Translations for ${currentTheme} are up-to-date, skipping merge`);
-    return;
-  }
-  
-  const languages = ['en', 'fr'];
-  
   console.log(`🔄 Merging translations for theme: ${currentTheme}`);
   
+  const languages = ['en', 'fr'];
   for (const lang of languages) {
     try {
       // Read common translations
