@@ -72,7 +72,7 @@ function getColumns(t: TFunction<string, undefined>) {
       id: 'updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('caseEntity.details.lastUpdate_tooltips')}>
+        <TooltipsHeader tooltips={t('caseEntity.details.date_format_tooltips')}>
           {t('caseEntity.details.lastUpdate')}
         </TooltipsHeader>
       ),

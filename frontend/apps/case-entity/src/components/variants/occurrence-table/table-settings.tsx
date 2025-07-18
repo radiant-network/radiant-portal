@@ -61,6 +61,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         <AnchorLinkWithTooltipsCell
           href={`/variants/entity/${info.row.original.locus_id}`}
           className="overflow-hidden text-ellipsis block"
+          target="_blank"
         >
           {info.getValue()}
         </AnchorLinkWithTooltipsCell>
@@ -132,9 +133,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'exomiser_gene_combined_score',
       cell: info => <NumberCell value={info.getValue()} fractionDigits={4} />,
       header: () => (
-          <TooltipsHeader tooltips={t('variant.headers.exomiser_gene_combined_score_tooltips')}>
-            {t('variant.headers.exomiser_gene_combined_score')}
-          </TooltipsHeader>
+        <TooltipsHeader tooltips={t('variant.headers.exomiser_gene_combined_score_tooltips')}>
+          {t('variant.headers.exomiser_gene_combined_score')}
+        </TooltipsHeader>
       ),
       minSize: 100,
     }),
@@ -142,9 +143,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'exomiser_acmg_classification',
       cell: info => <ExomiserAcmgCell code={info.getValue()} />,
       header: () => (
-          <TooltipsHeader tooltips={t('variant.headers.exomiser_acmg_classification_tooltips')}>
-            {t('variant.headers.exomiser_acmg_classification')}
-          </TooltipsHeader>
+        <TooltipsHeader tooltips={t('variant.headers.exomiser_acmg_classification_tooltips')}>
+          {t('variant.headers.exomiser_acmg_classification')}
+        </TooltipsHeader>
       ),
       minSize: 100,
     }),
