@@ -19,7 +19,7 @@ export default function PredictionSection({ data }: PredictionSectionProps) {
           {data.exomiser_acmg_classification}
         </ClinVarBadge>
       )}
-      {data.exomiser_acmg_evidence.map(e => (
+      {data.exomiser_acmg_evidence && data.exomiser_acmg_evidence.map(e => (
         <Badge key={e} variant={getClassificationCriteriaColor(e)}>
           {e}
         </Badge>
