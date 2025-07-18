@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import { Button } from '@/components/base/ui/button';
 
@@ -26,7 +26,7 @@ function ExpandableList<T>({ visibleCount = 3, items, renderItem, onExpand }: Ex
   }, [setCollpase]);
 
   return (
-    <Fragment>
+    <div>
       <ul>
         {slicedData.map((item, index: number) => (
           <li key={index}>{renderItem(item, index)}</li>
@@ -39,7 +39,7 @@ function ExpandableList<T>({ visibleCount = 3, items, renderItem, onExpand }: Ex
           })}
         </Button>
       )}
-    </Fragment>
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 import { CaseEntity, Term } from '@/api/api';
 import { useNavigate } from 'react-router';
+import ExpandableList from '@/components/base/list/expandable-list';
 import { Button } from '@/components/base/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
@@ -10,10 +11,9 @@ import { cn } from '@/components/lib/utils';
 import { getBadgeAffectedCodeColor } from '../utils';
 import { Badge } from '@/components/base/ui/badge';
 import { Separator } from '@/components/base/ui/separator';
-import { CollapsibleList } from '@/components/base/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
-const PHENOTYPES_MAX_RENDER = 6;
+const PHENOTYPES_VISIBLE_COUNT = 6;
 
 type ClinicalCardProps = ComponentProps<'div'> & {
   data: CaseEntity;
@@ -66,18 +66,13 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
                 {t('caseEntity.details.phenotypes_observed')}
               </CardTitle>
 
-
-              <CollapsibleList
-                list={proband.observed_phenotypes ?? []}
-                render={({ id, name, onset_code }: Term) => (
-                  <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
+              <ExpandableList
+                items={proband.observed_phenotypes ?? []}
+                renderItem={(item) => (
+                  <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
                 )}
-                limit={PHENOTYPES_MAX_RENDER}
+                visibleCount={PHENOTYPES_VISIBLE_COUNT}
               />
-
-              {/* {(proband.observed_phenotypes ?? []).slice(0, PHENOTYPES_MAX_RENDER).map(({ id, name, onset_code }: Term) => ( */}
-              {/*   <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} /> */}
-              {/* ))} */}
 
               {!proband.observed_phenotypes && (
                 <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
@@ -88,12 +83,12 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
                 {t('caseEntity.details.phenotypes_non_observed')}
               </CardTitle>
 
-              <CollapsibleList
-                list={proband.non_observed_phenotypes ?? []}
-                render={({ id, name, onset_code }: Term) => (
-                  <PhenotypeConditionLink code={id} name={name} onsetCode={onset_code} />
+              <ExpandableList
+                items={proband.non_observed_phenotypes ?? []}
+                renderItem={(item) => (
+                  <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
                 )}
-                limit={PHENOTYPES_MAX_RENDER}
+                visibleCount={PHENOTYPES_VISIBLE_COUNT}
               />
 
               {!proband.non_observed_phenotypes && (
