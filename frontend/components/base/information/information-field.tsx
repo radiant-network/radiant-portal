@@ -34,7 +34,7 @@ function InformationField({
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="cursor-help">{contentOrPlaceholder}</span>
+        <span className="cursor-pointer">{contentOrPlaceholder}</span>
       </TooltipTrigger>
       <TooltipContent>{tooltipsText}</TooltipContent>
     </Tooltip>
