@@ -189,7 +189,6 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
               </AggregateContext>
             </aside>
             <main className="flex-1 flex-shrink-1 p-4 overflow-auto">
-              <h1 className="text-2xl font-bold">Variant</h1>
               <div className="py-4 space-y-2">
                 <QueryBuilder
                   id={appId}
