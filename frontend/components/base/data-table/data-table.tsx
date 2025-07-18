@@ -79,8 +79,6 @@ export type TableProps<TData> = {
     total?: boolean;
     list?: boolean;
   };
-  pagination: PaginationState;
-  onPaginationChange: OnChangeFn<PaginationState>;
   paginationHidden?: boolean;
   onServerSortingChange?: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProps<TData>;
@@ -89,7 +87,18 @@ export type TableProps<TData> = {
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
-};
+} & (
+  | {
+      paginationHidden?: false;
+      pagination: PaginationState;
+      onPaginationChange: OnChangeFn<PaginationState>;
+    }
+  | {
+      paginationHidden: true;
+      pagination?: PaginationState;
+      onPaginationChange?: OnChangeFn<PaginationState>;
+    }
+);
 
 export interface BaseColumnSettings {
   id: string;
@@ -256,7 +265,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -436,24 +445,24 @@ function TranstackTable<T>({
     getSortedRowModel: onServerSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    getPaginationRowModel: paginationHidden ? undefined : getPaginationRowModel(),
     getRowCanExpand: () => true,
     isMultiSortEvent: _e => true,
     keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
-    manualPagination: true,
+    manualPagination: !paginationHidden,
     onColumnPinningChange: setColumnPinning,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
     onExpandedChange: setExpanded,
-    onPaginationChange,
+    onPaginationChange: paginationHidden ? undefined : onPaginationChange,
     onRowPinningChange: setRowPinning,
     onSortingChange: setSorting,
-    pageCount: getPageCount(pagination, total),
+    pageCount: pagination && !paginationHidden ? getPageCount(pagination, total) : undefined,
     state: {
       columnOrder,
       columnVisibility,
       columnPinning,
-      pagination,
+      pagination: paginationHidden ? undefined : pagination,
       expanded,
       rowPinning,
       sorting,
@@ -513,18 +522,9 @@ function TranstackTable<T>({
     };
   }, []);
 
-  /**
-   * No result found
-   */
   useEffect(() => {
-    if (loadingStates?.list === false) {
-      setIsTableEmpty(table.getRowCount() === 0);
-    }
-  }, [loadingStates?.list]);
-
-  useEffect(() => {
-    setIsTableEmpty(table.getRowCount() === 0);
-  }, [table.getRowCount()]);
+    setIsTableEmpty(table.getRowCount() === 0 && data.length === 0);
+  }, [table.getRowCount(), data.length]);
 
   /**
    * Sorting useEffect
@@ -546,18 +546,22 @@ function TranstackTable<T>({
 
     setExpanded({});
 
-    onPaginationChange({
-      pageIndex: 0,
-      pageSize: pagination.pageSize,
-    });
+    if (!paginationHidden && onPaginationChange) {
+      onPaginationChange({
+        pageIndex: 0,
+        pageSize: pagination?.pageSize || 10,
+      });
+    }
   }, [sorting]);
 
   /**
    * Reset expanded sub-component on pagination change
    */
   useEffect(() => {
-    setExpanded({});
-  }, [pagination]);
+    if (!paginationHidden) {
+      setExpanded({});
+    }
+  }, [pagination, paginationHidden]);
 
   const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
 
@@ -570,12 +574,12 @@ function TranstackTable<T>({
       <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
         {/* Total */}
 
-        {tableIndexResultPosition === 'top' && (
+        {tableIndexResultPosition === 'top' && !paginationHidden && (
           <div className="flex">
             <TableIndexResult
               loading={loadingStates?.total}
-              pageIndex={table.getState().pagination.pageIndex + 1}
-              pageSize={table.getState().pagination.pageSize}
+              pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
+              pageSize={table.getState().pagination?.pageSize ?? 10}
               total={total}
             />
           </div>
@@ -635,7 +639,7 @@ function TranstackTable<T>({
       {loadingStates?.list === true && (
         <DataTableSkeletonLoading
           headerGroups={table.getHeaderGroups()}
-          pagination={pagination}
+          pagination={pagination || { pageIndex: 0, pageSize: 10 }}
           columnSettings={defaultColumnSettings}
         />
       )}
@@ -646,7 +650,6 @@ function TranstackTable<T>({
           <Empty
             title={t('common.table.no_result')}
             description={t('common.table.no_result_description')}
-            size="default"
             iconType="custom"
             icon={SearchIcon}
           />
@@ -727,8 +730,8 @@ function TranstackTable<T>({
             {tableIndexResultPosition === 'bottom' && (
               <TableIndexResult
                 loading={loadingStates?.total}
-                pageIndex={table.getState().pagination.pageIndex + 1}
-                pageSize={table.getState().pagination.pageSize}
+                pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
+                pageSize={table.getState().pagination?.pageSize ?? 10}
                 total={total}
               />
             )}
@@ -737,13 +740,13 @@ function TranstackTable<T>({
             <div>
               {/* PageSize select */}
               <Select
-                value={String(table.getState().pagination.pageSize)}
+                value={String(table.getState().pagination?.pageSize ?? 10)}
                 onValueChange={value => {
                   table.setPageSize(Number(value));
                 }}
               >
                 <SelectTrigger className="min-w-[125px] h-8">
-                  <SelectValue>{table.getState().pagination.pageSize}</SelectValue>
+                  <SelectValue>{table.getState().pagination?.pageSize ?? 10}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {[10, 20, 30, 40, 50].map(pageSize => (

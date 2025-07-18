@@ -10,26 +10,26 @@ interface ClinVarBadgeProps extends BadgeProps {
 
 // TODO: Should be replace with enum with API exposes one
 export const ClinVarValueMap: Record<string, BadgeProps['variant']> = {
-  other: 'slate',
-  association_not_found: 'slate',
+  other: 'neutral',
+  association_not_found: 'neutral',
   uncertain_significance: 'yellow',
   likely_benign: 'lime',
   likely_pathogenic: 'orange',
-  _low_penetrance: 'slate',
-  low_penetrance: 'slate',
-  risk_factor: 'slate',
-  association: 'slate',
-  uncertain_risk_allele: 'slate',
+  _low_penetrance: 'neutral',
+  low_penetrance: 'neutral',
+  risk_factor: 'neutral',
+  association: 'neutral',
+  uncertain_risk_allele: 'neutral',
   pathogenic: 'red',
-  protective: 'slate',
+  protective: 'neutral',
   conflicting_classifications_of_pathogenicity: 'orange',
   conflicting_interpretations_of_pathogenicity: 'yellow',
-  not_provided: 'slate',
-  established_risk_allele: 'slate',
-  likely_risk_allele: 'slate',
-  drug_response: 'slate',
+  not_provided: 'neutral',
+  established_risk_allele: 'neutral',
+  likely_risk_allele: 'neutral',
+  drug_response: 'neutral',
   benign: 'green',
-  confers_sensitivity: 'slate',
+  confers_sensitivity: 'neutral',
 };
 
 function ClinVarBadge({ value, abbreviated, ...props }: ClinVarBadgeProps) {
@@ -47,7 +47,7 @@ function ClinVarBadge({ value, abbreviated, ...props }: ClinVarBadgeProps) {
         </Tooltip>
       )}
     >
-      <Badge variant={color || 'slate'} {...props}>
+      <Badge variant={color || 'neutral'} {...props}>
         {t(`variant.clinVars.${normalizedValue}${abbreviated ? '.abbrev' : ''}`)}
       </Badge>
     </ConditionalWrapper>

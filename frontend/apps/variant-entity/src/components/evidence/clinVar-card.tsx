@@ -5,26 +5,46 @@ import { ExternalLink, Search } from 'lucide-react';
 import { Input } from '@/components/base/ui/input';
 import DataTable from '@/components/base/data-table/data-table';
 import { getPathogenicEvidenceColumns, pathogenicEvidenceDefaultSettings } from './table-settings';
-import { PaginationState } from '@tanstack/table-core';
 import { useState } from 'react';
+import useSWR from 'swr';
+import { variantsApi } from '@/utils/api';
+import { useParams } from 'react-router';
+import { ApiError, ClinvarRCV } from '@/api/api';
+
+type ClinVarConditionsSearchInput = {
+  key: string;
+  locusId: string;
+};
+
+async function fetchClinVarConditions(input: ClinVarConditionsSearchInput) {
+  const response = await variantsApi.getGermlineVariantConditionsClinvar(input.locusId);
+  return response.data;
+}
 
 function ClinVarCard() {
   const { t } = useI18n();
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  const params = useParams<{ locusId: string }>();
+  const [search, setSearch] = useState('');
 
-  const fakeData = [
+  const { data, isLoading } = useSWR<ClinvarRCV[], ApiError, ClinVarConditionsSearchInput>(
     {
-      evaluated: '2025-05-30T15:26:46.139Z',
-      condition: 'Example Condition',
-      classification: 'Pathogenic',
-      status: 'Reviewed',
-      origin: 'Germline',
-      action: 'RCV003328158',
+      key: 'interpreted-cases',
+      locusId: params.locusId!,
     },
-  ];
+    fetchClinVarConditions,
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const filteredData =
+    data?.filter(item => {
+      if (!search.trim()) return true;
+
+      const traits = item.traits || [];
+      return traits.some(trait => trait?.toLowerCase().includes(search.toLowerCase()));
+    }) || [];
 
   return (
     <Card>
@@ -42,21 +62,21 @@ function ClinVarCard() {
           startIcon={Search}
           placeholder={t('variantEntity.evidence.clinVar.filters.searchPlaceholder')}
           wrapperClassName="max-w-[320px]"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
         />
         <DataTable
           id="pathogenic-evidence"
           columns={getPathogenicEvidenceColumns(t)}
-          data={fakeData}
+          data={filteredData}
           defaultColumnSettings={pathogenicEvidenceDefaultSettings}
           defaultServerSorting={[]}
           loadingStates={{
-            total: false,
-            list: false,
+            total: isLoading,
+            list: isLoading,
           }}
-          total={fakeData.length}
-          pagination={pagination}
-          onPaginationChange={setPagination}
-          onServerSortingChange={() => {}}
+          paginationHidden
+          total={filteredData.length}
           tableIndexResultPosition="bottom"
         />
       </CardContent>

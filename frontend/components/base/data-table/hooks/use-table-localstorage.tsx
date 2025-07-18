@@ -73,7 +73,7 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
     setTableCache({
       ...tableCache,
       pagination: {
-        pageSize: state.pagination.pageSize,
+        pageSize: state.pagination?.pageSize,
       },
     });
   }, [state.pagination]);

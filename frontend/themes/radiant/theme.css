@@ -18,7 +18,7 @@
   --primary: var(--color-radiant-700);
   --primary-foreground: var(--color-slate-50);
   --secondary: var(--color-slate-100);
-  --secondary-foreground: var(--color-slate-950);
+  --secondary-foreground: var(--color-radiant-950);
   --accent: var(--color-slate-100);
   --accent-foreground: var(--color-radiant-950);
   --muted: var(--color-slate-100);

@@ -17,19 +17,16 @@ function CaseActionsMenuCell({ row }: CellContext<any, any>) {
     <div className="flex items-center justify-center">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            iconOnly
-            variant="ghost"
-            onClick={row.getToggleExpandedHandler()}
-            className="text-muted-foreground size-6"
-          >
+          <Button iconOnly variant="outline" onClick={row.getToggleExpandedHandler()} className="size-6">
             {<EllipsisVertical />}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => {
-            navigate(`/case/entity/${row.original.case_id}`);
-          }}>
+          <DropdownMenuItem
+            onClick={() => {
+              navigate(`/case/entity/${row.original.case_id}`);
+            }}
+          >
             <ExternalLink />
             {t('caseExploration.case.actions.view_case')}
           </DropdownMenuItem>

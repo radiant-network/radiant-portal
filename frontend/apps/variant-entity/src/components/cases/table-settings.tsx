@@ -122,7 +122,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       id: 'action',
       cell: info => {
         return (
-          <Button iconOnly variant="ghost" className="size-7">
+          <Button iconOnly variant="outline" className="size-6">
             <EllipsisVertical />
           </Button>
         );

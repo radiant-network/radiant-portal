@@ -20,7 +20,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // case
     columnHelper.accessor(row => row.case_id, {
       id: 'case_id',
-      cell: info => <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>,
+      cell: info => (
+        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>
+      ),
       header: t('caseExploration.case.headers.case_id'),
       size: 124,
       minSize: 124,
@@ -72,7 +74,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       ),
       size: 120,
       minSize: 120,
-      enableSorting: false
+      enableSorting: false,
     }),
     // Analysis
     columnHelper.accessor(row => row.case_analysis_code, {
@@ -87,7 +89,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Primary Condition
     columnHelper.accessor(row => row.primary_condition_id, {
       id: 'primary_condition',
-      cell: info => <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.primary_condition_name} />,
+      cell: info => (
+        <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.primary_condition_name} />
+      ),
       header: t('caseExploration.case.headers.primary_condition'),
       size: 124,
       minSize: 124,
@@ -140,9 +144,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Prescriber
     columnHelper.accessor(row => row.prescriber, {
       id: 'prescriber',
-      cell: info => (
-        <TextTooltipsCell tooltipsText={info.getValue()}>{info.getValue()}</TextTooltipsCell>
-      ),
+      cell: info => <TextTooltipsCell tooltipsText={info.getValue()}>{info.getValue()}</TextTooltipsCell>,
       header: () => (
         <TooltipsHeader tooltips={t('caseExploration.case.headers.prescriber_tooltips')}>
           {t('caseExploration.case.headers.prescriber')}
@@ -177,7 +179,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.managing_organization_code, {
       id: 'managing_organization',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.managing_organization_name}>{info.getValue()}</TextTooltipsCell>
+        <TextTooltipsCell tooltipsText={info.row.original.managing_organization_name}>
+          {info.getValue()}
+        </TextTooltipsCell>
       ),
       header: t('caseExploration.case.headers.managing_organization'),
       size: 124,

@@ -961,10 +961,14 @@
             "evaluated.tooltip": "The most recent date that a submitter evaluated this variant for the condition in the ClinVar database.",
             "condition": "Condition",
             "classification": "Classification",
+            "submission_count": "Submission Count",
             "status": "Status",
-            "status.tooltip": "TODO",
             "origin": "Origin"
           }
+        },
+        "origin": {
+          "germline": "Germline",
+          "inherited": "Inherited"
         }
       },
       "gene": {
@@ -977,7 +981,7 @@
         },
         "table": {
           "headers": {
-            "condition": "Condition (OMIM)",
+            "condition": "Condition",
             "inheritence": "Inheritence",
             "classification": "Classification",
             "status": "Status",
@@ -985,8 +989,7 @@
             "origin": "Origin"
           },
           "empty": {
-            "title": "No conditions for this gene",
-            "description": "Try resetting your tabs and filters above."
+            "description": "No conditions for this gene. Try resetting your tabs and filters above."
           }
         }
       }

@@ -20,11 +20,12 @@ const emptyVariants = tv({
     },
     size: {
       mini: {
-        base: 'py-10 gap-3',
+        base: 'py-6 gap-3',
         iconsContainer: '[&_svg]:size-4',
         textContainer: 'space-y-1',
         title: 'text-base',
         description: 'text-xs',
+        customIcon: 'size-8 [&_svg]:size-4',
       },
       default: {
         base: 'py-8 gap-6',
@@ -45,7 +46,7 @@ export type EmptyProps = React.HTMLAttributes<HTMLDivElement> &
   VariantProps<typeof emptyVariants> & {
     showIcon?: boolean;
     title?: string;
-    description: string;
+    description?: string;
   } & (
     | {
         iconType: 'chartRow' | 'chartGrid';
@@ -54,6 +55,11 @@ export type EmptyProps = React.HTMLAttributes<HTMLDivElement> &
     | {
         iconType: 'custom';
         icon: LucideIcon;
+      }
+    | {
+        showIcon: false;
+        iconType?: never;
+        icon?: never;
       }
   );
 
@@ -85,7 +91,7 @@ function Empty({
       ) : null}
       <div className={styles.textContainer()}>
         {title && <h1 className={styles.title()}>{title}</h1>}
-        <div className={styles.description()}>{description}</div>
+        {description && <div className={styles.description()}>{description}</div>}
       </div>
     </div>
   );
