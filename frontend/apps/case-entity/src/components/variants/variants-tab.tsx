@@ -26,16 +26,16 @@ export const SeqIDContext = createContext<string>("");
 
 const DEFAULT_SORTING = [
   {
+    field: 'exomiser_gene_combined_score',
+    order: SortBodyOrderEnum.Desc,
+  },
+  {
     field: "max_impact_score",
     order: SortBodyOrderEnum.Desc
   },
   {
     field: "hgvsg",
     order: SortBodyOrderEnum.Asc
-  },
-  {
-    field: 'pf_wgs',
-    order: SortBodyOrderEnum.Asc,
   },
 ];
 
