@@ -52,13 +52,15 @@ export const loadTranslations = async (lang: string) => {
 
   try {
     // Load merged translations directly
+    // @vite-ignore - We want to keep the merged file approach
     const mergedPath = `../../translations/merged/${theme}/${lang}.json`;
-    const merged = await import(mergedPath);
+    const merged = await import( /* @vite-ignore */ mergedPath);
     return merged.default;
   } catch (error) {
     console.warn(`Failed to load merged translations for ${theme}/${lang}, falling back to common`);
     try {
-      const common = await import(`../../translations/common/${lang}.json`);
+      // @vite-ignore - Fallback to common translations
+      const common = await import( /* @vite-ignore */ `../../translations/common/${lang}.json`);      
       return common.default;
     } catch {
       return {};
