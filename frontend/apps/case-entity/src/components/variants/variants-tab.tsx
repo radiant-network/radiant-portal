@@ -21,6 +21,7 @@ import AssayVariantFilters from './filters/assay-variant-filters';
 import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
 import { OccurrenceCountInput, useOccurencesCountHelper, useOccurencesListHelper } from './hook';
 import { occurrencesApi } from '@/utils/api';
+import { Card, CardContent } from '@/components/base/ui/card';
 
 export const SeqIDContext = createContext<string>("");
 
@@ -223,24 +224,28 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                   }}
                 />
               </div>
-              <DataTable
-                id="variant-occurrence"
-                columns={getVariantColumns(t)}
-                data={fetchOccurrencesList.data ?? []}
-                defaultColumnSettings={defaultSettings}
-                defaultServerSorting={DEFAULT_SORTING}
-                loadingStates={{
-                  total: fetchOccurrencesCount.isLoading,
-                  list: fetchOccurrencesList.isLoading,
-                }}
-                pagination={pagination}
-                onPaginationChange={setPagination}
-                onServerSortingChange={setSorting}
-                subComponent={data => <OccurrenceExpand occurrence={data} />}
-                total={fetchOccurrencesCount.data?.count ?? 0}
-                enableColumnOrdering
-                enableFullscreen
-              />
+              <Card>
+                <CardContent>
+                  <DataTable
+                    id="variant-occurrence"
+                    columns={getVariantColumns(t)}
+                    data={fetchOccurrencesList.data ?? []}
+                    defaultColumnSettings={defaultSettings}
+                    defaultServerSorting={DEFAULT_SORTING}
+                    loadingStates={{
+                      total: fetchOccurrencesCount.isLoading,
+                      list: fetchOccurrencesList.isLoading,
+                    }}
+                    pagination={pagination}
+                    onPaginationChange={setPagination}
+                    onServerSortingChange={setSorting}
+                    subComponent={data => <OccurrenceExpand occurrence={data} />}
+                    total={fetchOccurrencesCount.data?.count ?? 0}
+                    enableColumnOrdering
+                    enableFullscreen
+                  />
+                </CardContent>
+              </Card>
             </main>
           </div>
         </div>

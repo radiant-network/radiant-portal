@@ -111,23 +111,22 @@ type QueryBuilderSharedProps = {
 
 export type QueryBuilderProps = PartialKeys<
   CoreQueryBuilderProps &
-    QueryBuilderSharedProps & {
-      className?: string;
-      /**
-       * Initial state of the show/hide labels feature
-       */
-      initialShowHideLabels?: boolean;
+  QueryBuilderSharedProps & {
+    /**
+     * Initial state of the show/hide labels feature
+     */
+    initialShowHideLabels?: boolean;
 
-      /**
-       * Colors to use for query reference
-       */
-      queryReferenceColors?: ArrayTenOrMore<string>;
+    /**
+     * Colors to use for query reference
+     */
+    queryReferenceColors?: ArrayTenOrMore<string>;
 
-      /**
-       * Dictionary for copies
-       */
-      dictionary?: DeepPartial<QueryBuilderDictionary>;
-    },
+    /**
+     * Dictionary for copies
+     */
+    dictionary?: DeepPartial<QueryBuilderDictionary>;
+  },
   'state'
 >;
 
