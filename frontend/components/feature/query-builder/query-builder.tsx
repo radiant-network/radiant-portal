@@ -9,9 +9,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { QueryBuilderContextType, QueryBuilderProps } from './types';
 import { defaultQueryReferenceColors, useQueryBuilderDictionary } from './data';
 import { deepMerge } from '@/components/lib/merge';
+import { Card } from '@/components/base/ui/card';
 
 function QueryBuilder({
-  className,
   enableCombine = true,
   enableFavorite = false,
   enableShowHideLabels,
@@ -77,25 +77,27 @@ function QueryBuilder({
   return (
     <QueryBuilderDictContext.Provider value={mergeDictionary}>
       <QueryBuilderContext.Provider value={memoedContextValue}>
-        <Accordion type="multiple" defaultValue={['query-builder']} className={className}>
-          <AccordionItem value="query-builder" className="border-none">
-            <AccordionTrigger
-              asChild
-              className="border py-0 px-5 rounded-t data-[state=closed]:rounded-sm hover:cursor-pointer"
-            >
-              <SavedFiltersLeftActions className="py-4 pr-4" />
-              <SavedFiltersRightActions className="ml-auto py-4" />
-            </AccordionTrigger>
-            <AccordionContent className="border-l border-b border-r py-4 px-5 space-y-4 rounded-b">
-              <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
-                {queryBuilder.getQueries().map(query => (
-                  <QueryBar key={query.id} query={query} />
-                ))}
-              </div>
-              <QueryToolbar />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <Card className="py-0">
+          <Accordion type="multiple" defaultValue={['query-builder']}>
+            <AccordionItem value="query-builder" className="border-none">
+              <AccordionTrigger
+                className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
+                asChild
+              >
+                <SavedFiltersLeftActions className="py-4 pr-4" />
+                <SavedFiltersRightActions className="ml-auto py-4" />
+              </AccordionTrigger>
+              <AccordionContent className="py-4 px-6 space-y-4">
+                <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
+                  {queryBuilder.getQueries().map(query => (
+                    <QueryBar key={query.id} query={query} />
+                  ))}
+                </div>
+                <QueryToolbar />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </Card>
       </QueryBuilderContext.Provider>
     </QueryBuilderDictContext.Provider>
   );
