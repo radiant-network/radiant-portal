@@ -9,10 +9,102 @@
 
 :root {
   /* Define colors/variable that are global for all portals */
+
+  /* Extracted Tailwind color variables for light mode */
+  --radiant-amber-500: var(--color-amber-500);
+  --radiant-amber-800: var(--color-amber-800);
+  --radiant-amber-600: var(--color-amber-600);
+  --radiant-amber-400: var(--color-amber-400);
+
+  --radiant-red-400: var(--color-red-400);
+  --radiant-red-700: var(--color-red-700);
+  --radiant-red-500: var(--color-red-500);
+
+  --radiant-orange-400: var(--color-orange-400);
+  --radiant-orange-800: var(--color-orange-800);
+
+  --radiant-yellow-400: var(--color-yellow-400);
+  --radiant-yellow-800: var(--color-yellow-800);
+
+  --radiant-lime-400: var(--color-lime-400);
+  --radiant-lime-800: var(--color-lime-800);
+
+  --radiant-green-300: var(--color-green-300);
+  --radiant-green-800: var(--color-green-800);
+  --radiant-green-600: var(--color-green-600);
+  --radiant-green-400: var(--color-green-400);
+
+  --radiant-cyan-400: var(--color-cyan-400);
+  --radiant-cyan-800: var(--color-cyan-800);
+
+  --radiant-blue-400: var(--color-blue-400);
+  --radiant-blue-700: var(--color-blue-700);
+  --radiant-blue-500: var(--color-blue-500);
+  --radiant-blue-800: var(--color-blue-800);
+
+  --radiant-violet-400: var(--color-violet-400);
+  --radiant-violet-700: var(--color-violet-700);
+  --radiant-violet-800: var(--color-violet-800);
+
+  --radiant-fuchsia-400: var(--color-fuchsia-400);
+  --radiant-fuchsia-700: var(--color-fuchsia-700);
+  --radiant-fuchsia-600: var(--color-fuchsia-600);
+
+  --radiant-slate-400: var(--color-slate-400);
+  --radiant-slate-300: var(--color-slate-300);
+  --radiant-slate-500: var(--color-slate-500);
+
+  --radiant-emerald-600: var(--color-emerald-600);
 }
 
 .dark {
   /* Define colors/variable that are global for all portals in dark mode */
+
+  /* Extracted Tailwind color variables for dark mode */
+  --radiant-amber-500: var(--color-amber-600);
+  --radiant-amber-800: var(--color-amber-400);
+  --radiant-amber-600: var(--color-amber-600);
+  --radiant-amber-400: var(--color-amber-400);
+
+  --radiant-red-400: var(--color-red-700);
+  --radiant-red-700: var(--color-red-400);
+  --radiant-red-500: var(--color-red-500);
+
+  --radiant-orange-400: var(--color-orange-400);
+  --radiant-orange-800: var(--color-orange-400);
+
+  --radiant-yellow-400: var(--color-yellow-400);
+  --radiant-yellow-800: var(--color-yellow-400);
+
+  --radiant-lime-400: var(--color-lime-400);
+  --radiant-lime-800: var(--color-lime-400);
+
+  --radiant-green-300: var(--color-green-400);
+  --radiant-green-800: var(--color-green-300);
+  --radiant-green-600: var(--color-green-600);
+  --radiant-green-400: var(--color-green-400);
+
+  --radiant-cyan-400: var(--color-cyan-400);
+  --radiant-cyan-800: var(--color-cyan-400);
+
+  --radiant-blue-400: var(--color-blue-800);
+  --radiant-blue-700: var(--color-blue-400);
+  --radiant-blue-500: var(--color-blue-500);
+  --radiant-blue-800: var(--color-blue-800);
+
+  --radiant-violet-400: var(--color-violet-800);
+  --radiant-violet-700: var(--color-violet-400);
+  --radiant-violet-800: var(--color-violet-800);
+
+  --radiant-fuchsia-400: var(--color-fuchsia-600);
+  --radiant-fuchsia-700: var(--color-fuchsia-400);
+  --radiant-fuchsia-600: var(--color-fuchsia-600);
+
+  --radiant-slate-400: var(--color-slate-400);
+  --radiant-slate-300: var(--color-slate-500);
+  --radiant-slate-500: var(--color-slate-500);
+
+  --radiant-emerald-600: var(--color-emerald-600);
 }
 
 @theme inline {
@@ -65,93 +157,54 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* Radiant Custom Colors */
-  --color-amber: var(--color-amber-500);
-  --color-amber-foreground: var(--color-amber-800);
+  --color-amber: var(--radiant-amber-500);
+  --color-amber-foreground: var(--radiant-amber-800);
 
-  --color-red: var(--color-red-400);
-  --color-red-foreground: var(--color-red-700);
+  --color-red: var(--radiant-red-400);
+  --color-red-foreground: var(--radiant-red-700);
 
-  --color-orange: var(--color-orange-400);
-  --color-orange-foreground: var(--color-orange-800);
+  --color-orange: var(--radiant-orange-400);
+  --color-orange-foreground: var(--radiant-orange-800);
 
-  --color-yellow: var(--color-yellow-400);
-  --color-yellow-foreground: var(--color-yellow-800);
+  --color-yellow: var(--radiant-yellow-400);
+  --color-yellow-foreground: var(--radiant-yellow-800);
 
-  --color-lime: var(--color-lime-400);
-  --color-lime-foreground: var(--color-lime-800);
+  --color-lime: var(--radiant-lime-400);
+  --color-lime-foreground: var(--radiant-lime-800);
 
-  --color-green: var(--color-green-300);
-  --color-green-foreground: var(--color-green-800);
+  --color-green: var(--radiant-green-300);
+  --color-green-foreground: var(--radiant-green-800);
 
-  --color-cyan: var(--color-cyan-400);
-  --color-cyan-foreground: var(--color-cyan-800);
+  --color-cyan: var(--radiant-cyan-400);
+  --color-cyan-foreground: var(--radiant-cyan-800);
 
-  --color-blue: var(--color-blue-400);
-  --color-blue-foreground: var(--color-blue-700);
+  --color-blue: var(--radiant-blue-400);
+  --color-blue-foreground: var(--radiant-blue-700);
 
-  --color-violet: var(--color-violet-400);
-  --color-violet-foreground: var(--color-violet-700);
+  --color-violet: var(--radiant-violet-400);
+  --color-violet-foreground: var(--radiant-violet-700);
 
-  --color-fuchsia: var(--color-fuchsia-400);
-  --color-fuchsia-foreground: var(--color-fuchsia-700);
+  --color-fuchsia: var(--radiant-fuchsia-400);
+  --color-fuchsia-foreground: var(--radiant-fuchsia-700);
 
   /* Bookmark Colors */
-  --color-bookmark-amber: var(--color-amber-500);
-  --color-bookmark-blue: var(--color-blue-500);
-  --color-bookmark-green: var(--color-green-600);
-  --color-bookmark-red: var(--color-red-500);
-  --color-bookmark-off: var(--color-slate-400);
+  --color-bookmark-amber: var(--radiant-amber-500);
+  --color-bookmark-blue: var(--radiant-blue-500);
+  --color-bookmark-green: var(--radiant-green-600);
+  --color-bookmark-red: var(--radiant-red-500);
+  --color-bookmark-off: var(--radiant-slate-400);
 
   /* Indicator Colors */
-  --color-indicator-red: var(--color-red-500);
-  --color-indicator-amber: var(--color-amber-500);
-  --color-indicator-emerald: var(--color-emerald-600);
-  --color-indicator-blue: var(--color-blue-500);
-  --color-indicator-fuchsia: var(--color-fuchsia-600);
-  --color-indicator-grey: var(--color-slate-300);
+  --color-indicator-red: var(--radiant-red-500);
+  --color-indicator-amber: var(--radiant-amber-500);
+  --color-indicator-emerald: var(--radiant-emerald-600);
+  --color-indicator-blue: var(--radiant-blue-500);
+  --color-indicator-fuchsia: var(--radiant-fuchsia-600);
+  --color-indicator-grey: var(--radiant-slate-300);
 
   /* Table Colors */
   --color-table-accent: var(--table-accent);
   --color-table-active: var(--table-active);
-}
-
-@layer theme {
-  .dark {
-    /* Radiant Custom Colors Dark Mode */
-    --color-amber: var(--color-amber-600);
-    --color-amber-foreground: var(--color-amber-400);
-
-    --color-red: var(--color-red-700);
-    --color-red-foreground: var(--color-red-400);
-
-    --color-orange: var(--color-orange-400);
-    --color-orange-foreground: var(--color-orange-400);
-
-    --color-yellow: var(--color-yellow-400);
-    --color-yellow-foreground: var(--color-yellow-400);
-
-    --color-lime: var(--color-lime-400);
-    --color-lime-foreground: var(--color-lime-400);
-
-    --color-green: var(--color-green-400);
-    --color-green-foreground: var(--color-green-300);
-
-    --color-cyan: var(--color-cyan-400);
-    --color-cyan-foreground: var(--color-cyan-400);
-
-    --color-blue: var(--color-blue-800);
-    --color-blue-foreground: var(--color-blue-400);
-
-    --color-violet: var(--color-violet-800);
-    --color-violet-foreground: var(--color-violet-400);
-
-    --color-fuchsia: var(--color-fuchsia-600);
-    --color-fuchsia-foreground: var(--color-fuchsia-400);
-
-    /* Bookmark Colors */
-    /* Other colors stays the same as light mode */
-    --color-indicator-grey: var(--color-slate-500);
-  }
 }
 
 @layer base {
@@ -192,9 +245,9 @@
   h6 {
     @apply text-sm;
   }
-  
+
   button:not([disabled]),
-  [role="button"]:not([disabled]) {
+  [role='button']:not([disabled]) {
     cursor: pointer;
   }
 }
