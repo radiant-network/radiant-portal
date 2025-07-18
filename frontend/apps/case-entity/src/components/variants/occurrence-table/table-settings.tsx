@@ -1,8 +1,6 @@
-import { createColumnHelper, HeaderContext } from '@tanstack/react-table';
+import { createColumnHelper } from '@tanstack/react-table';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
-import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import AnchorLinkWithTooltipsCell from '@/components/base/data-table/cells/anchor-link-with-tooltips-cell';
 import { Occurrence } from '@/api/api';
@@ -32,14 +30,15 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       enableResizing: false,
       enablePinning: false,
     },
-    {
-      id: 'row_selection',
-      header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
-      cell: info => <RowSelectionCell row={info.row} />,
-      size: 40,
-      enablePinning: false,
-      enableResizing: false,
-    },
+    // TODO: To be enabled when row selection function are implemented
+    // {
+    //   id: 'row_selection',
+    //   header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+    //   cell: info => <RowSelectionCell row={info.row} />,
+    //   size: 40,
+    //   enablePinning: false,
+    //   enableResizing: false,
+    // },
     columnHelper.accessor(row => row, {
       id: 'clinical_interpretation',
       cell: info => <InterpretationCell occurrence={info.getValue()} />,
@@ -193,12 +192,13 @@ const defaultSettings = createColumnSettings([
     fixed: true,
     pinningPosition: 'left',
   },
-  {
-    id: 'row_selection',
-    visible: true,
-    fixed: true,
-    pinningPosition: 'left',
-  },
+  // TODO: To be enabled when row selection function are implemented
+  // {
+  //   id: 'row_selection',
+  //   visible: true,
+  //   fixed: true,
+  //   pinningPosition: 'left',
+  // },
   {
     id: 'clinical_interpretation',
     visible: true,
