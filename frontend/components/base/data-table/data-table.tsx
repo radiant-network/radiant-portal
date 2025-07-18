@@ -81,6 +81,7 @@ export type TableProps<TData> = {
   };
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
+  paginationHidden?: boolean;
   onServerSortingChange?: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProps<TData>;
   TableFilters?: TableFiltersProps;
@@ -255,7 +256,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -369,6 +370,7 @@ function TranstackTable<T>({
   },
   hasError = false,
   pagination,
+  paginationHidden = false,
   onPaginationChange,
   onServerSortingChange,
   subComponent,
@@ -719,7 +721,7 @@ function TranstackTable<T>({
           </Table>
         </div>
       )}
-      {total > 10 && (
+      {!paginationHidden && (
         <div className={'flex items-center justify-between py-3 '}>
           <div>
             {tableIndexResultPosition === 'bottom' && (

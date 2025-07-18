@@ -43,6 +43,7 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
           defaultServerSorting={DEFAULT_SORTING}
           onPaginationChange={setPagination}
           tableIndexResultPosition="hidden"
+          paginationHidden
         />
       </CardContent>
     </Card>
