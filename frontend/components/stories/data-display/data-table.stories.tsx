@@ -140,6 +140,10 @@ export const VariantOccurrence: Story = {
           pageIndex: 0,
           pageSize: 50,
         }}
+        loadingStates={{
+          list: false,
+          total: false
+        }}
         data={occurrencesData}
         columns={getVariantColumns(t)}
         subComponent={occurrence => <OccurrenceExpand occurrence={occurrence} />}
@@ -165,10 +169,46 @@ export const Cases: Story = {
           pageIndex: 0,
           pageSize: 50,
         }}
+        loadingStates={{
+          list: false,
+          total: false
+        }}
         total={12}
         data={casesData}
         columns={getCaseExplorationColumns(t)}
         tableIndexResultPosition="bottom"
+        enableFullscreen
+        enableColumnOrdering
+      />
+    );
+  },
+};
+
+
+export const WithoutPagination: Story = {
+  args: {
+    id: 'variant-occurence-wo-pagination',
+    defaultColumnSettings: occurenceDefaultsSettings,
+
+  },
+  render: args => {
+    const { t } = useI18n();
+
+    return (
+      <DataTable
+        {...args}
+        pagination={{
+          pageIndex: 0,
+          pageSize: 50,
+        }}
+        loadingStates={{
+          list: false,
+          total: false
+        }}
+        data={occurrencesData}
+        columns={getVariantColumns(t)}
+        subComponent={occurrence => <OccurrenceExpand occurrence={occurrence} />}
+        paginationHidden
         enableFullscreen
         enableColumnOrdering
       />
