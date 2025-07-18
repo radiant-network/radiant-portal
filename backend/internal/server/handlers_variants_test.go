@@ -39,6 +39,10 @@ func (m *MockRepository) GetVariantOverview(int) (*types.VariantOverview, error)
 		GnomadLoeuf:  0.1,
 		GnomadV3Af:   0.01,
 		Consequences: []string{"splice acceptor"},
+		InterpretationClassificationCounts: map[string]int{
+			"benign":     2,
+			"pathogenic": 1,
+		},
 	}, nil
 }
 
@@ -252,6 +256,7 @@ func Test_GetVariantOverviewHandler(t *testing.T) {
 		"gnomad_loeuf":0.1,
 		"gnomad_pli":0.1,
 		"gnomad_v3_af":0.01,
+		"interpretation_classification_counts":{"benign":2, "pathogenic":1},
 		"is_canonical":false,
 		"is_mane_plus":false, 
 		"is_mane_select":false, 
@@ -285,6 +290,7 @@ func Test_GetVariantOverviewHandler_With_ExomiserACMGClassificationCounts(t *tes
 		"gnomad_loeuf":0.1,
 		"gnomad_pli":0.1,
 		"gnomad_v3_af":0.01,
+		"interpretation_classification_counts":{"benign":2, "pathogenic":1},
 		"is_canonical":false,
 		"is_mane_plus":false,
 		"is_mane_select":false,

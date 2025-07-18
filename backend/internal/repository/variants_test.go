@@ -32,6 +32,10 @@ func Test_GetVariantOverview(t *testing.T) {
 		assert.Equal(t, "T", variantOverview.SiftPred)
 		assert.Equal(t, 2, len(variantOverview.OmimConditions))
 		assert.False(t, variantOverview.IsManePlus)
+		assert.Len(t, variantOverview.InterpretationClassificationCounts, 3)
+		assert.Equal(t, 1, variantOverview.InterpretationClassificationCounts["likelyPathogenic"])
+		assert.Equal(t, 1, variantOverview.InterpretationClassificationCounts["pathogenic"])
+		assert.Equal(t, 1, variantOverview.InterpretationClassificationCounts["benign"])
 	})
 }
 
