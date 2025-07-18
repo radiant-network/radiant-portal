@@ -15,6 +15,8 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Checkbox } from '../ui/checkbox';
 
+type PopoverSize = 'default' | 'lg';
+
 // Extended Aggregation type to include optional icon
 export interface IFilterButtonItem {
   count?: number;
@@ -30,6 +32,7 @@ export interface IFilterButton {
   isVisible: boolean;
   isOpen: boolean;
   selectedItems: string[];
+  popoverSize?: PopoverSize;
   options: IFilterButtonItem[];
   icon?: any;
   count?: number;
@@ -42,6 +45,7 @@ type FilterButtonProps = {
   options: IFilterButtonItem[];
   selected: string[];
   onSelect: (selected: string[]) => void;
+  popoverSize?: PopoverSize;
   className?: string;
   placeholder?: string;
   actionMode?: boolean; // display as link actions instead of checkbox
@@ -58,6 +62,7 @@ export default function FilterButton({
   selected,
   onSelect,
   className,
+  popoverSize = 'default',
   placeholder,
   actionMode = false, // if true, there will be now count and no checkboxes
   icon,
@@ -100,7 +105,13 @@ export default function FilterButton({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[229px] max-h-[240px] p-0 flex flex-col" align="start">
+      <PopoverContent className={cn(
+        'p-0 flex flex-col', {
+        'w-[229px] max-h-[240px]': popoverSize === 'default',
+        'w-[360px] max-h-[280px]': popoverSize === 'lg',
+      })}
+        align="start"
+      >
         <Command className="flex flex-col border-border border-0 border-b-none rounded-b-none">
           <CommandInput
             placeholder={placeholder || label || 'Search...'}
@@ -169,15 +180,15 @@ export default function FilterButton({
           </CommandList>
         </Command>
         {selectedCount !== 0 && !actionMode && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="size-full"
-              onClick={handleClear}
-              disabled={selectedCount === 0}
-            >
-              Clear
-            </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="size-full"
+            onClick={handleClear}
+            disabled={selectedCount === 0}
+          >
+            Clear
+          </Button>
         )}
       </PopoverContent>
     </Popover>
