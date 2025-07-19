@@ -4,10 +4,11 @@ import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import {
   getDbSnpUrl,
-  getEnsemblGeneUrl,
+  getEnsemblGeneUrl, getEnsemblTranscriptUrl,
   getOmimOrgUrl,
 } from '@/components/feature/variant/utils';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+import {cn} from "@/lib/utils";
 
 type OccurrenceExpandTranscriptProps = {
   occurrence: Occurrence;
@@ -78,12 +79,18 @@ export default function OccurrenceExpandTranscript({
           {occurrence.aa_change && ` - ${occurrence.aa_change}`}
         </div>
       )}
-      {occurrence.rsnumber && (
+      {expandedOccurrence.rsnumber && (
         <>
           <Separator orientation="vertical" className="h-5" />
-          <a target="_blank" href={getDbSnpUrl(occurrence.rsnumber)}>
-            {occurrence.rsnumber}
-          </a>
+          <AnchorLink
+              href={getDbSnpUrl(expandedOccurrence.rsnumber)}
+              target="_blank"
+              rel="noreferrer"
+              size="sm"
+          >
+
+            {expandedOccurrence.rsnumber}
+          </AnchorLink>
         </>
       )}
     </div>
