@@ -119,6 +119,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               isManeSelect={data.is_mane_select}
               isManePlus={false}
               isCanonical={data.is_canonical}
+              linkClassName="text-muted-foreground"
             />
           )}
           {data?.exon_rank && data?.exon_total && (
@@ -151,7 +152,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
         </div>
       </CardContent>
       <Separator />
-      <CardFooter className="px-6 py-4">
+      <CardFooter>
         <div className="text-xs text-muted-foreground">
           {t('variantEntity.overview.mostDeleteriousConsequenceNotice')}
         </div>

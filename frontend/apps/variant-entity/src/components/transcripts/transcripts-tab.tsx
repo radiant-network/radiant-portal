@@ -43,7 +43,7 @@ function TranscriptsTab() {
         <CardTitle className="text-xl font-semibold">{t('variantEntity.transcripts.title')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <Accordion type="single" defaultValue={data.length > 1 ? undefined : '0'} collapsible className="space-y-2">
+        <Accordion type="multiple" defaultValue={data.map((_, idx) => idx.toString())} className="space-y-2">
           {data.map((item, index) => (
             <ConsequenceAccordionItem key={`transcripts-cons-${index}`} value={`${index}`} data={item} />
           ))}

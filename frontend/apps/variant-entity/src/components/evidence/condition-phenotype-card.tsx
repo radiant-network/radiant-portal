@@ -2,35 +2,76 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/c
 import { useI18n } from '@/components/hooks/i18n';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/ui/tabs';
 import { Input } from '@/components/base/ui/input';
-import { Search } from 'lucide-react';
+import { Search, SearchIcon } from 'lucide-react';
 import { Accordion } from '@/components/base/ui/accordion';
-import GeneAccordionItem from './gene-accordion-item';
+import GeneAccordionItem, { GeneAccordionItemData } from './gene-accordion-item';
+import { variantsApi } from '@/utils/api';
+import { ApiError, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+import useSWR from 'swr';
+import { useParams } from 'react-router';
+import { useState, useMemo } from 'react';
+import { Skeleton } from '@/components/base/ui/skeleton';
+import Empty from '@/components/base/empty';
+
+type ConditionByPanelTypeInput = {
+  key: string;
+  locus_id: string;
+  panel_type: GetGermlineVariantConditionsPanelTypeEnum;
+};
+
+async function fetchConditionByPanelType(input: ConditionByPanelTypeInput) {
+  const response = await variantsApi.getGermlineVariantConditions(input.locus_id, input.panel_type);
+  return response.data as any; // TODO: remove any when api is fixed
+}
+
+// TODO: replace with correct type when api is fixed
+type GenePanelConditions = {
+  count: number;
+  conditions: Record<string, GeneAccordionItemData[]>;
+};
 
 function ConditionPhenotypeCard() {
   const { t } = useI18n();
+  const params = useParams<{ locusId: string }>();
+  const [panelType, setPanelType] = useState<GetGermlineVariantConditionsPanelTypeEnum>(
+    GetGermlineVariantConditionsPanelTypeEnum.Omim,
+  );
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const fakeData: any[] = [
+  const { data, isLoading } = useSWR<GenePanelConditions, ApiError, ConditionByPanelTypeInput>(
     {
-      symbol: 'BRAF',
-      vep_impact: 'HIGH',
-      conditions: [
-        {
-          condition: 'Aplastic anemia',
-          inheritence: ['AD'],
-          action: '2345678',
-        },
-        {
-          condition: 'Folate deficiency anemia',
-          inheritence: ['AR'],
-          action: '2345679',
-        },
-      ],
+      key: 'condition-by-panel-type',
+      locus_id: params.locusId!,
+      panel_type: panelType,
     },
+    fetchConditionByPanelType,
     {
-      symbol: 'TP21',
-      conditions: [],
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
     },
-  ];
+  );
+
+  // Filter conditions based on search term
+  const filteredData = useMemo(() => {
+    if (!data?.conditions || !searchTerm.trim()) {
+      return data?.conditions || {};
+    }
+
+    const filtered: Record<string, GeneAccordionItemData[]> = {};
+    const searchLower = searchTerm.toLowerCase();
+
+    Object.entries(data.conditions).forEach(([symbol, conditions]) => {
+      const filteredConditions = conditions.filter(condition =>
+        condition.panel_name.toLowerCase().includes(searchLower),
+      );
+
+      filtered[symbol] = filteredConditions;
+    });
+
+    return filtered;
+  }, [data?.conditions, searchTerm]);
+
+  const isEmpty = Object.keys(filteredData || {}).length === 0;
 
   return (
     <Card>
@@ -39,19 +80,22 @@ function ConditionPhenotypeCard() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center gap-2">
-          <Tabs defaultValue="omim">
+          <Tabs
+            value={panelType}
+            onValueChange={value => setPanelType(value as GetGermlineVariantConditionsPanelTypeEnum)}
+          >
             <TabsList>
-              <TabsTrigger value="omim">
+              <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Omim}>
                 {t('variantEntity.evidence.gene.filters.omim', {
                   count: 20,
                 })}
               </TabsTrigger>
-              <TabsTrigger value="orphanet">
+              <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Orphanet}>
                 {t('variantEntity.evidence.gene.filters.orphanet', {
                   count: 10,
                 })}
               </TabsTrigger>
-              <TabsTrigger value="hpo">
+              <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Hpo}>
                 {' '}
                 {t('variantEntity.evidence.gene.filters.hpo', {
                   count: 54,
@@ -63,13 +107,33 @@ function ConditionPhenotypeCard() {
             startIcon={Search}
             placeholder={t('variantEntity.evidence.gene.filters.searchPlaceholder')}
             wrapperClassName="max-w-[320px] w-full"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
-        <Accordion type="multiple" defaultValue={fakeData.map((_, idx) => `${idx}`)} className="space-y-2">
-          {fakeData.map((item, index) => (
-            <GeneAccordionItem key={`cond-phe-gene-${index}`} value={`${index}`} data={item} />
-          ))}
-        </Accordion>
+        {isLoading ? (
+          <Skeleton className="h-[150px] w-full" />
+        ) : isEmpty ? (
+          <Card className="shadow-none">
+            <Empty
+              title={t('common.table.no_result')}
+              description={t('common.table.no_result_description')}
+              iconType="custom"
+              icon={SearchIcon}
+            />
+          </Card>
+        ) : (
+          <Accordion type="multiple" defaultValue={Object.keys(filteredData || {})} className="space-y-2">
+            {Object.entries(filteredData || {}).map(([symbol, conditions], index) => (
+              <GeneAccordionItem
+                key={`cond-phe-gene-${index}`}
+                symbol={symbol}
+                panelType={panelType}
+                conditions={conditions}
+              />
+            ))}
+          </Accordion>
+        )}
       </CardContent>
     </Card>
   );

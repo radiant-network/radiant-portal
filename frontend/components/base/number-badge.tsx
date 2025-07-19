@@ -5,7 +5,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 export const numberBadgeVariants = tv({
   slots: {
     base: 'relative',
-    badge: 'absolute h-[14px] px-[3px] rounded-xl text-xs leading-[14px]',
+    badge: 'absolute h-[14px] min-w-[14px] px-[3px] rounded-xl text-xs leading-[14px] text-center',
   },
   variants: {
     variant: {
@@ -28,25 +28,36 @@ export const numberBadgeVariants = tv({
 interface NumberBadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof numberBadgeVariants> {
   count: number;
   offsetTop?: number;
+  showZero?: boolean;
 }
 
-function NumberBadge({ count, className, children, offsetTop = 5, variant, ...props }: NumberBadgeProps) {
+function NumberBadge({
+  count,
+  className,
+  children,
+  offsetTop = 5,
+  variant,
+  showZero = false,
+  ...props
+}: NumberBadgeProps) {
   const styles = numberBadgeVariants({ variant });
 
   return (
     <div className={styles.base({ className })} {...props}>
-      <div
-        className={styles.badge({
-          className: cn({
-            'right-[-12px]': count > 9,
-            'right-[-8px]': count <= 9,
-            'right-[-18px]': count > 99,
-          }),
-        })}
-        style={{ top: -1 * offsetTop }}
-      >
-        {count > 99 ? '99+' : count}
-      </div>
+      {(count > 0 || showZero) && (
+        <div
+          className={styles.badge({
+            className: cn({
+              'right-[-12px]': count > 9,
+              'right-[-8px]': count <= 9,
+              'right-[-18px]': count > 99,
+            }),
+          })}
+          style={{ top: -1 * offsetTop }}
+        >
+          {count > 99 ? '99+' : count}
+        </div>
+      )}
       {children}
     </div>
   );

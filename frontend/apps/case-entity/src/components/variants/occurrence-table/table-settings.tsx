@@ -17,7 +17,7 @@ import GnomadCell from './cells/gnomad-cell';
 import ParticipantFrequencyCell from './cells/participant-frequency-cell';
 import NumberCell from './cells/number-cell';
 import ZygosityCell from './cells/zygosity-cell';
-import ExomiserAcmgCell from "./cells/exomiser-acmg-cell";
+import ExomiserAcmgCell from './cells/exomiser-acmg-cell';
 
 const columnHelper = createColumnHelper<Occurrence>();
 
