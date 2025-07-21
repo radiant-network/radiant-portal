@@ -566,6 +566,34 @@ components:
           type: array
           uniqueItems: false
       type: object
+    GenePanelCondition:
+      properties:
+        inheritance_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        panel_id:
+          type: string
+        panel_name:
+          type: string
+      required:
+      - panel_name
+      type: object
+    GenePanelConditions:
+      properties:
+        conditions:
+          additionalProperties:
+            items:
+              $ref: '#/components/schemas/GenePanelCondition'
+            type: array
+          type: object
+        count:
+          type: integer
+      required:
+      - conditions
+      - count
+      type: object
     InterpretationGermline:
       properties:
         classification:
@@ -2463,7 +2491,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VariantCasesFilters'
+                $ref: '#/components/schemas/GenePanelConditions'
           description: OK
         "404":
           content:

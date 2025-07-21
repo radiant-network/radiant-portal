@@ -318,7 +318,7 @@ func GetGermlineVariantCasesFilters(repo repository.VariantsDAO) gin.HandlerFunc
 // @Param panel_type path string true "Gene panel type" Enums(omim, hpo, orphanet)
 // @Param filter query string false "Condition filter"
 // @Produce json
-// @Success 200 {object} types.VariantCasesFilters
+// @Success 200 {object} types.GenePanelConditions
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/conditions/{panel_type} [get]
