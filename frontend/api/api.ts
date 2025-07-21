@@ -1246,6 +1246,50 @@ export interface FiltersBodyWithCriteria {
 /**
  * 
  * @export
+ * @interface GenePanelCondition
+ */
+export interface GenePanelCondition {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GenePanelCondition
+     */
+    'inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GenePanelCondition
+     */
+    'panel_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GenePanelCondition
+     */
+    'panel_name': string;
+}
+/**
+ * 
+ * @export
+ * @interface GenePanelConditions
+ */
+export interface GenePanelConditions {
+    /**
+     * 
+     * @type {{ [key: string]: Array<GenePanelCondition>; }}
+     * @memberof GenePanelConditions
+     */
+    'conditions': { [key: string]: Array<GenePanelCondition>; };
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelConditions
+     */
+    'count': number;
+}
+/**
+ * 
+ * @export
  * @interface InterpretationGermline
  */
 export interface InterpretationGermline {
@@ -5563,7 +5607,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantCasesFilters>> {
+        async getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GenePanelConditions>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditions(locusId, panelType, filter, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConditions']?.[localVarOperationServerIndex]?.url;
@@ -5699,7 +5743,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantCasesFilters> {
+        getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): AxiosPromise<GenePanelConditions> {
             return localVarFp.getGermlineVariantConditions(locusId, panelType, filter, options).then((request) => request(axios, basePath));
         },
         /**
