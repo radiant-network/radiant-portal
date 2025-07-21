@@ -249,7 +249,8 @@ CREATE TABLE IF NOT EXISTS orphanet_gene_panel
     symbol varchar(30)  NOT NULL,
     panel  varchar(250) NOT NULL,
     disorder_id bigint NULL,
-    type_of_inheritance array<varchar(200)> NULL
+    type_of_inheritance array<varchar(200)> NULL,
+    inheritance_code array<varchar(3)> NULL
 );
 
 CREATE TABLE IF NOT EXISTS `staging_sequencing_experiment`
