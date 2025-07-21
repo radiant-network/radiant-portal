@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { deepMerge } from '../../components/lib/merge';
+import chokidar from 'chokidar';
+import type { ResolvedConfig } from 'vite';
 
 export const mergeTranslationsForTheme = (currentTheme: string, rootDir: string) => {
   console.log(`🔄 Merging translations for theme: ${currentTheme}`);
@@ -58,23 +60,25 @@ const getLockFilePath = (rootDir: string, theme: string) =>
 export const createMergeTranslationsPlugin = (theme: string, rootDir: string) => {
   return {
     name: 'merge-translations',
-    configResolved() {
-      // Run only once per build process using a lock file approach
-      const lockFile = getLockFilePath(rootDir, theme);
-      
-      if (!fs.existsSync(lockFile)) {
-        // Create lock file
-        fs.writeFileSync(lockFile, Date.now().toString());
-        
-        // Perform merge
-        mergeTranslationsForTheme(theme, rootDir);
-        
-        // Clean up lock file when process exits
-        process.on('exit', () => {
-          if (fs.existsSync(lockFile)) {
-            fs.unlinkSync(lockFile);
-          }
+    configResolved(config: ResolvedConfig) {
+      const isDev = config.command === 'serve';
+
+      // Always perform merge on configResolved
+      mergeTranslationsForTheme(theme, rootDir);
+
+      // DEV MODE: Watch translation files and re-merge on change
+      if (isDev) {
+        const commonGlob = path.resolve(rootDir, '../../translations/common/*.{json}');
+        const portalGlob = path.resolve(rootDir, `../../translations/portals/${theme}/*.{json}`);
+        const watcher = chokidar.watch([commonGlob, portalGlob], {
+          ignoreInitial: true,
         });
+        watcher.on('all', (event, filePath) => {
+          console.log(`🔄 [merge-translations] Detected ${event} in ${filePath}. Re-merging translations...`);
+          mergeTranslationsForTheme(theme, rootDir);
+        });
+        // Clean up watcher on exit
+        process.on('exit', () => watcher.close());
       }
     }
   };
