@@ -393,9 +393,9 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 		patients := split(task.PatientsUnparsed)
 		if int64(len(patients)) < task.PatientCount {
 			patients = append(patients, "proband")
-			sort.Strings(patients)
-			tasks[i].Patients = patients
 		}
+		sort.Strings(patients)
+		tasks[i].Patients = patients
 	}
 
 	return &tasks, nil
