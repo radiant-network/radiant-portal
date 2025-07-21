@@ -56,7 +56,7 @@ export const anchorLinkVariants = tv({
 export type AnchorLinkProps<C extends React.ElementType> = {
   component?: C;
   className?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   external?: boolean;
 } & Omit<React.ComponentPropsWithoutRef<C>, 'className' | 'children'> &
   VariantProps<typeof anchorLinkVariants>;
