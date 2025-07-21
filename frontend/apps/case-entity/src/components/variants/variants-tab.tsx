@@ -158,7 +158,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   return (
     <SeqIDContext value={seqId}>
       <div className='bg-background flex flex-col'>
-        <AssayVariantFilters isLoading={isLoading} assays={caseEntity?.assays.filter(assay => assay.has_variants)} handleChange={(value: string) => setSeqId(value)} />
+        <AssayVariantFilters isLoading={isLoading} assays={caseEntity?.assays} handleChange={(value: string) => setSeqId(value)} />
         <div className='bg-muted/40 w-full'>
           <div className={`flex flex-1 h-screen overflow-hidden`}>
             <aside className="w-auto min-w-fit h-full shrink-0">
