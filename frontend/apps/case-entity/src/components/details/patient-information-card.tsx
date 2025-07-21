@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/ui/t
 import { formatDate } from 'date-fns';
 import { CopyButton } from '@/components/base/buttons/copy-button';
 import InformationField from '@/components/base/information/information-field';
+import { titleCase } from '@/components/lib/string-format';
 
 enum CaseType {
   germline_solo = 'germline_solo',
@@ -35,13 +36,13 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
 
       <InformationField
         label={t('caseEntity.patientInformation.dob')}
-        tooltipsText={t('caseEntity.details.date_format_tooltips')}
+        labelTooltipsText={t('caseEntity.patientInformation.date_format_tooltips')}
       >
         {member.date_of_birth && formatDate(member.date_of_birth, t('common.date'))}
       </InformationField>
 
       <InformationField label={t('caseEntity.patientInformation.sex')} >
-        {member.sex_code}
+        {titleCase(member.sex_code)}
       </InformationField>
 
       <InformationField 
@@ -51,7 +52,7 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
           <CopyButton value={member.mrn} label={member.mrn} className="-m-2" />
         )}
       </InformationField>
-
+      
       <InformationField
         label={t('caseEntity.patientInformation.managingOrg')}
         labelTooltipsText={t('caseEntity.patientInformation.managingOrg_tooltips')}
