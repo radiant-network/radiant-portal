@@ -55,7 +55,7 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(panelType string, l
 		break
 
 	case types.OrphanetGenePanelTable:
-		tx = tx.Select("symbol, panel as panel_name, disorder_id as panel_id, type_of_inheritance as inheritance_code")
+		tx = tx.Select("symbol, panel as panel_name, disorder_id as panel_id, inheritance_code")
 		break
 
 	default:
