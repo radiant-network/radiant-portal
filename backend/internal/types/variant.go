@@ -62,7 +62,7 @@ type VariantOverview = struct {
 	ExonRank                           int                      `json:"exon_rank,omitempty"`
 	ExonTotal                          int                      `json:"exon_total,omitempty"`
 	DnaChange                          string                   `json:"dna_change,omitempty"`
-	RsNumber                           string                   `json:"rsnumber,omitempty"`
+	Rsnumber                           string                   `json:"rsnumber,omitempty"`
 	SiftPred                           string                   `json:"sift_pred,omitempty"`
 	SiftScore                          float32                  `json:"sift_score,omitempty"`
 	RevelScore                         float32                  `json:"revel_score,omitempty"`

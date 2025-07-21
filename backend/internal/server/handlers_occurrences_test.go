@@ -24,7 +24,7 @@ func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrenc
 			Hgvsg:              "hgvsg1",
 			AdRatio:            1.0,
 			VariantClass:       "class1",
-			RsNumber:           "rs111111111",
+			Rsnumber:           "rs111111111",
 			AaChange:           "p.Arg19His",
 			PickedConsequences: []string{"splice acceptor"},
 			GenotypeQuality:    1,

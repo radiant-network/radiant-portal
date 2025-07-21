@@ -26,7 +26,7 @@ type Occurrence struct {
 	IsManePlus                 bool              `json:"is_mane_plus"`
 	IsCanonical                bool              `json:"is_canonical"`
 	AaChange                   string            `json:"aa_change,omitempty"`
-	RsNumber                   string            `json:"rsnumber,omitempty"`
+	Rsnumber                   string            `json:"rsnumber,omitempty"`
 	PickedConsequences         JsonArray[string] `gorm:"type:json" json:"picked_consequences" validate:"required"`
 	TranscriptId               string            `json:"transcript_id,omitempty"`
 	MaxImpactScore             int               `json:"max_impact_score" validate:"required"`
