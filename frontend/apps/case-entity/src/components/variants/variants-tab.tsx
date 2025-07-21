@@ -54,7 +54,10 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const config = useConfig();
   const { t } = useI18n();
 
-  const [seqId, setSeqId] = useState<string>(caseEntity?.assays[0]?.seq_id.toString() ?? '');
+  // only use assay with variants 
+  const assaysWithVariants = caseEntity?.assays.filter(assay => assay.has_variants) ?? [];
+
+  const [seqId, setSeqId] = useState<string>(assaysWithVariants[0]?.seq_id.toString() ?? '');
 
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
@@ -116,6 +119,16 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   });
 
   useEffect(() => {
+    const assays = caseEntity?.assays ?? [];
+    if (assays.length === 0) return;
+
+    const assaysWithVariants = assays.filter(assay => assay.has_variants);
+    if (assaysWithVariants.length === 0) return;
+
+    setSeqId(assaysWithVariants[0].seq_id.toString());
+  }, [caseEntity?.assays]);
+
+  useEffect(() => {
     const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);
 
     setQbState({
@@ -158,7 +171,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   return (
     <SeqIDContext value={seqId}>
       <div className='bg-background flex flex-col'>
-        <AssayVariantFilters isLoading={isLoading} assays={caseEntity?.assays} handleChange={(value: string) => setSeqId(value)} />
+        <AssayVariantFilters isLoading={isLoading} assays={assaysWithVariants} value={seqId} handleChange={(value: string) => setSeqId(value)} />
         <div className='bg-muted/40 w-full'>
           <div className={`flex flex-1 h-screen overflow-hidden`}>
             <aside className="w-auto min-w-fit h-full shrink-0">

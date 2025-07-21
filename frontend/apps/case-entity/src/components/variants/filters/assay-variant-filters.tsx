@@ -44,28 +44,25 @@ function AssayVariantFiltersSelectItem(assay: CaseAssay) {
 
 type AssayVariantFiltersProps = {
   assays?: CaseAssay[];
+  value?: string;
   handleChange: (value: string) => void;
   isLoading: boolean;
 }
 
 /**
-  * Api return the assay by the following order
+  * Api return the assay by the following order. 
   * 1. Proband first
   * 2. Every relation that has affected_status_code to affected
   * 3. Every relation that has other affected_status_code
+  *
+  * But the order can change if the proband doesn't have variants.
   */
-function AssayVariantFilters({ assays = [], handleChange, isLoading }: AssayVariantFiltersProps) {
+function AssayVariantFilters({ assays = [], value, handleChange, isLoading }: AssayVariantFiltersProps) {
   const { t } = useI18n();
 
-  const [selectedAssay, setSelectedAssay] = useState<CaseAssay>();
+  const selectedAssay = assays.find(assay => assay.seq_id.toString() === value);
 
-  useEffect(() => {
-    if (isLoading || assays.length === 0) return;
-    setSelectedAssay(assays[0]);
-    handleChange(assays[0].seq_id.toString());
-  }, [isLoading, assays])
-
-  if (isLoading || assays.length === 0 || !selectedAssay) {
+  if (isLoading || assays.length === 0) {
     return (
       <div className="inline-flex gap-4 items-center border-b px-6 py-4">
         <Skeleton className='w-[100px] h-[32px]' />
@@ -81,10 +78,8 @@ function AssayVariantFilters({ assays = [], handleChange, isLoading }: AssayVari
     <div className="inline-flex gap-4 items-center border-b px-6 py-4">
       <span>{t('caseEntity.variants.filters.assay')}</span>
       <Select
-        value={selectedAssay?.seq_id.toString()}
+        value={value}
         onValueChange={value => {
-          const newAssay = assays.find(assay => assay.seq_id === Number(value));
-          setSelectedAssay(newAssay);
           handleChange(value);
         }}
       >

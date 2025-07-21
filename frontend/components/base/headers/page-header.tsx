@@ -48,11 +48,10 @@ function PageHeader({
       <div className={style.container()}>
         <Container>
           <div className="flex flex-col gap-4 pt-4 px-6">
-            <Skeleton className="w-48 h-8" />
             <Skeleton className="w-96 h-8" />
           </div>
-        </Container >
-      </div >
+        </Container>
+      </div>
     );
   }
 
