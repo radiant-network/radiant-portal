@@ -20,7 +20,7 @@ function ClassificationSelectFilter({ value = 'all', onChange }: ClassificationS
         <SelectItem value="all">{t('variantEntity.cases.commonFilters.classifications.allClassifications')}</SelectItem>
         {filters?.classification.map(classification => (
           <SelectItem key={classification.key} value={classification.key!}>
-            {classification.label}
+            {t(`variant.interpretation.classifications.${classification.label}`)}
           </SelectItem>
         ))}
       </SelectContent>

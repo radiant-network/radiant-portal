@@ -5,7 +5,7 @@ import { cn } from '../lib/utils';
 
 const emptyVariants = tv({
   slots: {
-    base: 'flex flex-col',
+    base: 'flex flex-col justify-center',
     iconsContainer: 'text-neutral',
     textContainer: '',
     title: 'text-center font-semibold',

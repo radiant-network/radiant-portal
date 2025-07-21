@@ -4,9 +4,14 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/base/ui/tabs';
 import { Input } from '@/components/base/ui/input';
 import { Search, SearchIcon } from 'lucide-react';
 import { Accordion } from '@/components/base/ui/accordion';
-import GeneAccordionItem, { GeneAccordionItemData } from './gene-accordion-item';
+import GeneAccordionItem from './gene-accordion-item';
 import { variantsApi } from '@/utils/api';
-import { ApiError, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+import {
+  ApiError,
+  GenePanelCondition,
+  GenePanelConditions,
+  GetGermlineVariantConditionsPanelTypeEnum,
+} from '@/api/api';
 import useSWR from 'swr';
 import { useParams } from 'react-router';
 import { useState, useMemo } from 'react';
@@ -21,14 +26,8 @@ type ConditionByPanelTypeInput = {
 
 async function fetchConditionByPanelType(input: ConditionByPanelTypeInput) {
   const response = await variantsApi.getGermlineVariantConditions(input.locus_id, input.panel_type);
-  return response.data as any; // TODO: remove any when api is fixed
+  return response.data;
 }
-
-// TODO: replace with correct type when api is fixed
-type GenePanelConditions = {
-  count: number;
-  conditions: Record<string, GeneAccordionItemData[]>;
-};
 
 function ConditionPhenotypeCard() {
   const { t } = useI18n();
@@ -57,7 +56,7 @@ function ConditionPhenotypeCard() {
       return data?.conditions || {};
     }
 
-    const filtered: Record<string, GeneAccordionItemData[]> = {};
+    const filtered: Record<string, GenePanelCondition[]> = {};
     const searchLower = searchTerm.toLowerCase();
 
     Object.entries(data.conditions).forEach(([symbol, conditions]) => {

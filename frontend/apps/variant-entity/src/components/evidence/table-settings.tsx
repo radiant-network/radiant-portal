@@ -10,7 +10,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import { ClinvarRCV, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 
-const pathogenicEvidenceColumnHelper = createColumnHelper<ClinvarRCV>(); // todo replace with correct type when api is updated
+const pathogenicEvidenceColumnHelper = createColumnHelper<ClinvarRCV>();
 const conditionPhenotypeColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
 
 function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
@@ -145,7 +145,7 @@ function getConditionPhenotypeColumns(
                 {code}
               </Badge>
             </TooltipTrigger>
-            <TooltipContent>Todo</TooltipContent>
+            <TooltipContent>{t(`variant.omim.${code}`)}</TooltipContent>
           </Tooltip>
         ));
       },

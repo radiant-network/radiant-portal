@@ -3,21 +3,13 @@ import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { conditionPhenotypeDefaultSettings, getConditionPhenotypeColumns } from './table-settings';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import { useState } from 'react';
-import { PaginationState } from '@tanstack/table-core';
 import Empty from '@/components/base/empty';
-import { GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
-
-export type GeneAccordionItemData = {
-  panel_name: string;
-  panel_id: string;
-  inheritance_code: string[];
-};
+import { GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 
 export interface GeneAccordionItemProps {
   symbol: string;
   panelType: GetGermlineVariantConditionsPanelTypeEnum;
-  conditions: GeneAccordionItemData[];
+  conditions: GenePanelCondition[];
 }
 
 function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemProps) {

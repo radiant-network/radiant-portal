@@ -71,7 +71,13 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                   infoCardContent={
                     <div className="leading-6">
                       {t('variant.interpretationForm.germline.classification_popover.consult')}{' '}
-                      <AnchorLink className='inline-flex' href="https://pubmed.ncbi.nlm.nih.gov/25741868/" target="_blank" size="sm" external>
+                      <AnchorLink
+                        className="inline-flex"
+                        href="https://pubmed.ncbi.nlm.nih.gov/25741868/"
+                        target="_blank"
+                        size="sm"
+                        external
+                      >
                         {t('variant.interpretationForm.germline.classification_popover.standards_and_guidelines')}
                       </AnchorLink>{' '}
                       {t('variant.interpretationForm.germline.classification_popover.variant_interpretation')}
@@ -93,7 +99,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                       value="LA6668-3"
                       className="data-[state=on]:bg-red/20 data-[state=on]:text-red-foreground border data-[state=on]:border-red-foreground data-[state=on]:hover:text-red-foreground"
                     >
-                      {t('variant.interpretationForm.germline.classification-options.pathogenic')}
+                      {t('variant.interpretation.classifications.pathogenic')}
                     </ToggleGroupItem>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -102,12 +108,12 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                             value="LA26332-9"
                             className="data-[state=on]:bg-orange/20 data-[state=on]:text-orange-foreground border data-[state=on]:border-orange-foreground data-[state=on]:hover:text-orange-foreground"
                           >
-                            {t('variant.interpretationForm.germline.classification-options.likelyPathogenic')}
+                            {t('variant.interpretation.classifications.likelyPathogenic')}
                           </ToggleGroupItem>
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {t('variant.interpretationForm.germline.classification-options.likelyPathogenic-tooltip')}
+                        {t('variant.interpretation.classifications.likelyPathogenic-tooltip')}
                       </TooltipContent>
                     </Tooltip>
                     <Tooltip>
@@ -117,13 +123,11 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                             value="LA26333-7"
                             className="data-[state=on]:bg-yellow/20 data-[state=on]:text-yellow-foreground border data-[state=on]:border-yellow-foreground data-[state=on]:hover:text-yellow-foreground"
                           >
-                            {t('variant.interpretationForm.germline.classification-options.vus')}
+                            {t('variant.interpretation.classifications.vus')}
                           </ToggleGroupItem>
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        {t('variant.interpretationForm.germline.classification-options.vus-tooltip')}
-                      </TooltipContent>
+                      <TooltipContent>{t('variant.interpretation.classifications.vus-tooltip')}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -132,19 +136,19 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                             value="LA26334-5"
                             className="data-[state=on]:bg-lime/20 data-[state=on]:text-lime-foreground border data-[state=on]:border-lime-foreground data-[state=on]:hover:text-lime-foreground"
                           >
-                            {t('variant.interpretationForm.germline.classification-options.likelyBenign')}
+                            {t('variant.interpretation.classifications.likelyBenign')}
                           </ToggleGroupItem>
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {t('variant.interpretationForm.germline.classification-options.likelyBenign-tooltip')}
+                        {t('variant.interpretation.classifications.likelyBenign-tooltip')}
                       </TooltipContent>
                     </Tooltip>
                     <ToggleGroupItem
                       value="LA6675-8"
                       className="data-[state=on]:bg-green/20 data-[state=on]:text-green-foreground border data-[state=on]:border-green-foreground data-[state=on]:hover:text-green-foreground"
                     >
-                      {t('variant.interpretationForm.germline.classification-options.benign')}
+                      {t('variant.interpretation.classifications.benign')}
                     </ToggleGroupItem>
                   </ToggleGroup>
                 </FormControl>
