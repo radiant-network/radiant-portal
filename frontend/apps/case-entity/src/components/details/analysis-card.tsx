@@ -238,9 +238,9 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge></div>
                 {caseData.members.length > 1 && (
                   <div className="p-3 flex items-start flex-row gap-1 flex-wrap">
-                    {bioInfo.patients.map((patient: string, index: number) => (
+                    {bioInfo.patients ? bioInfo.patients.map((patient: string, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">{t(`caseEntity.patientInformation.relationships.${patient}`)}</Badge>
-                    ))}
+                    )) : <div className="p-3 text-sm">{t('caseEntity.details.noPatientFound')}</div> }
                   </div>
                 )}
                 <div className="hidden md:block p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '-'}</div>

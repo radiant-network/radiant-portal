@@ -900,6 +900,7 @@
       "taskId": "ID de tâche",
       "patient": "Patient",
       "noTaskFound": "Aucune tâche trouvée",
+      "noPatientFound": "Aucun patient",
       "statusOptions": {
         "unknown": "Inconnu",
         "draft": "Brouillon",

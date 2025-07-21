@@ -886,6 +886,7 @@
       "taskId": "Task ID",
       "patient": "Patients",
       "noTaskFound": "No Task Found",
+      "noPatientFound": "No Patient",
       "statusOptions": {
         "unknown": "Unknown",
         "draft": "Draft",
