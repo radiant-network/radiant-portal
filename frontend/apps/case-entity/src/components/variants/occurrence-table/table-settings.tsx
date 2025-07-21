@@ -18,6 +18,7 @@ import ParticipantFrequencyCell from './cells/participant-frequency-cell';
 import NumberCell from './cells/number-cell';
 import ZygosityCell from './cells/zygosity-cell';
 import ExomiserAcmgCell from './cells/exomiser-acmg-cell';
+import DbSNPCell from './cells/dbsnp-cell';
 
 const columnHelper = createColumnHelper<Occurrence>();
 
@@ -39,6 +40,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     //   enablePinning: false,
     //   enableResizing: false,
     // },
+    // lightning icon
     columnHelper.accessor(row => row, {
       id: 'clinical_interpretation',
       cell: info => <InterpretationCell occurrence={info.getValue()} />,
@@ -54,6 +56,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       enableResizing: false,
       enableSorting: false,
     }),
+    // Variant
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
       cell: info => (
@@ -69,20 +72,31 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       size: 150,
       minSize: 120,
     }),
+    // Type
     columnHelper.accessor(row => row.variant_class, {
       id: 'variant_class',
       cell: info => <VariantClassCell value={info.getValue()} />,
       header: t('variant.headers.variant_class'),
       minSize: 120,
     }),
+    // dbSNP
+    columnHelper.accessor(row => row.rsnumber, {
+      id: 'dbSNP',
+      cell: info => <DbSNPCell rsnumber={info.getValue()} />,
+      header: t('variant.headers.dbSNP'),
+      size: 100,
+      minSize: 100,
+      enableSorting: false
+    }),
+    // Gene
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
       cell: info => <GeneCell symbol={info.getValue()} />,
       header: t('variant.headers.symbol'),
       minSize: 120,
-      sortDescFirst: true,
-      sortUndefined: 'last',
+      enableSorting: false,
     }),
+    // Consequence
     columnHelper.accessor(row => row, {
       id: 'picked_consequences',
       cell: info => (
@@ -98,8 +112,10 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         </TooltipsHeader>
       ),
       size: 225,
+      enableSorting: false,
       minSize: 160,
     }),
+    // Mane
     columnHelper.accessor(row => row, {
       id: 'is_mane_select',
       cell: info => (
@@ -110,8 +126,10 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         />
       ),
       header: t('variant.headers.is_mane_select'),
+      enableSorting: false,
       minSize: 120,
     }),
+    // OMIM
     columnHelper.accessor(row => row.omim_inheritance_code, {
       id: 'omim_inheritance_code',
       cell: info => <OmimCell codes={info.getValue()} />,
@@ -121,13 +139,17 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         </TooltipsHeader>
       ),
       minSize: 120,
+      enableSorting: false,
     }),
+    // ClinVar
     columnHelper.accessor(row => row.clinvar, {
       id: 'clinvar',
       cell: info => <ClinvarCell codes={info.getValue()} />,
       header: t('variant.headers.clinvar'),
       minSize: 120,
+      enableSorting: false,
     }),
+    //Exo.
     columnHelper.accessor(row => row.exomiser_gene_combined_score, {
       id: 'exomiser_gene_combined_score',
       cell: info => <NumberCell value={info.getValue()} fractionDigits={4} />,
@@ -138,6 +160,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       ),
       minSize: 100,
     }),
+    //ACMG. Exo.
     columnHelper.accessor(row => row.exomiser_acmg_classification, {
       id: 'exomiser_acmg_classification',
       cell: info => <ExomiserAcmgCell code={info.getValue()} />,
@@ -148,6 +171,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       ),
       minSize: 100,
     }),
+    // gnomAD
     columnHelper.accessor(row => row.gnomad_v3_af, {
       id: 'gnomad_v3_af',
       cell: info => <GnomadCell value={info.getValue()} />,
@@ -158,9 +182,15 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       ),
       minSize: 120,
     }),
+    // Freq.
     columnHelper.accessor(row => row.pf_wgs, {
       id: 'pf_wgs',
-      cell: info => <ParticipantFrequencyCell value={info.getValue()} />,
+      cell: info => (
+        <ParticipantFrequencyCell
+          locusId={info.row.original.locus_id}
+          value={info.getValue()}
+        />
+      ),
       header: () => (
         <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltips')}>
           {t('variant.headers.pf_wgs')}
@@ -168,17 +198,28 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       ),
       minSize: 120,
     }),
+    // GQ.
     columnHelper.accessor(row => row.genotype_quality, {
       id: 'genotype_quality',
       cell: info => <NumberCell value={info.getValue()} />,
-      header: t('variant.headers.genotype_quality'),
+      header: () => (
+        <TooltipsHeader tooltips={t('variant.headers.genotype_quality_tooltips')}>
+          {t('variant.headers.genotype_quality')}
+        </TooltipsHeader>
+      ),
       minSize: 120,
     }),
+    // Zyg.
     columnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
       cell: info => <ZygosityCell value={info.getValue()} />,
-      header: t('variant.headers.zygosity'),
+      header: () => (
+        <TooltipsHeader tooltips={t('variant.headers.zygosity_tooltips')}>
+          {t('variant.headers.zygosity')}
+        </TooltipsHeader>
+      ),
       minSize: 120,
+      enableSorting: false,
     }),
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'ad_ratio',
@@ -220,6 +261,11 @@ const defaultSettings = createColumnSettings([
     id: 'variant_class',
     visible: true,
     label: 'variant.headers.variant_class',
+  },
+  {
+    id: 'dbSNP',
+    visible: true,
+    label: 'variant.headers.dbSNP',
   },
   {
     id: 'symbol',

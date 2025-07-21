@@ -451,7 +451,8 @@
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltips": "Score Exomiser calculé en fonction des caractéristiques du variant et des phénotypes du patient",
       "clinical_interpretation": "Interprétation Clinique",
-      "genotype_quality": "Qualité du génotype",
+      "genotype_quality": "QG",
+      "genotype_quality_tooltips": "Qualité du génotypage. Seules les occurrences avec une GQ ≥ 20 sont prises en compte pour le calcul des fréquences.",
       "gnomad_v3_af": "gnomAD",
       "gnomadv3_af_tooltips": "gnomAD Génome 3.1.2 (fréquence allélique)",
       "is_mane_select": "MANE",
@@ -463,7 +464,8 @@
       "omim_inheritance_code_tooltips": "Modes d'héritage MIM",
       "symbol": "Gène",
       "variant_class": "Type",
-      "zygosity": "Zygosité"
+      "zygosity": "Zyg.",
+      "zygosity_tooltips": "Zygosité"
     },
     "spliceAi": {
       "AG": "Acceptor Gain",
