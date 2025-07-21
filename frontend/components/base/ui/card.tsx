@@ -2,6 +2,7 @@ import * as React from 'react';
 import { tv } from 'tailwind-variants';
 
 import { cn } from '@/lib/utils';
+import { Separator } from './separator';
 
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -63,10 +64,20 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   return <div data-slot="card-content" className={cn('px-6', className)} {...props} />;
 }
 
+
+function CardSeparator({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div {...props}>
+      <Separator orientation='vertical' />
+      <Separator className="md:hidden" />
+    </div>
+  );
+}
+
 function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div data-slot="card-footer" className={cn('flex items-center px-6 [.border-t]:pt-6', className)} {...props} />
   );
 }
 
-export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent };
+export { Card, CardHeader, CardSeparator, CardFooter, CardTitle, CardAction, CardDescription, CardContent };

@@ -2,7 +2,7 @@ import { CaseEntity, Term } from '@/api/api';
 import { useNavigate } from 'react-router';
 import ExpandableList from '@/components/base/list/expandable-list';
 import { Button } from '@/components/base/ui/button';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
+import { Card, CardAction, CardContent, CardHeader, CardSeparator, CardTitle } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { ArrowUpRightIcon, AudioWaveformIcon } from 'lucide-react';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
@@ -10,7 +10,6 @@ import { ComponentProps } from 'react';
 import { cn } from '@/components/lib/utils';
 import { getBadgeAffectedCodeColor } from '../utils';
 import { Badge } from '@/components/base/ui/badge';
-import { Separator } from '@/components/base/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;
@@ -47,89 +46,94 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
           )}
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div className="gap-6 grid grid-cols-1 md:grid-cols-6">
-          {/* Proband */}
-          <div className={cn('flex flex-col gap-6', { 'col-span-3': hasFamily, 'col-span-6': !hasFamily })}>
-            {/* Primary Condition */}
-            <div>
-              <CardTitle>{t('caseEntity.details.primary_condition')}</CardTitle>
-              <PhenotypeConditionLink code={data.primary_condition_id} name={data.primary_condition_name} />
-            </div>
-
-            {/* Phenotypes */}
-            <div className="flex flex-col gap-2">
-              <CardTitle>{t('caseEntity.details.phenotypes')}</CardTitle>
-
-              {/* Phenotypes Observed */}
-              <CardTitle size="xs" className="font-bold">
-                {t('caseEntity.details.phenotypes_observed')}
-              </CardTitle>
-
-              <ExpandableList
-                items={proband.observed_phenotypes ?? []}
-                renderItem={(item) => (
-                  <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
-                )}
-                visibleCount={PHENOTYPES_VISIBLE_COUNT}
-              />
-
-              {!proband.observed_phenotypes && (
-                <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
-              )}
-
-              {/* Phenotypes Non-Observed */}
-              <CardTitle size="xs" className="font-bold">
-                {t('caseEntity.details.phenotypes_non_observed')}
-              </CardTitle>
-
-              <ExpandableList
-                items={proband.non_observed_phenotypes ?? []}
-                renderItem={(item) => (
-                  <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
-                )}
-                visibleCount={PHENOTYPES_VISIBLE_COUNT}
-              />
-
-              {!proband.non_observed_phenotypes && (
-                <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
-              )}
-            </div>
-
-            {/* Clinical Note */}
-            <Card className="p-4 gap-4">
-              <CardTitle className="text-base">{t('caseEntity.details.clinical_note')}</CardTitle>
-              <p className="text-sm">{data.note}</p>
-            </Card>
+      <CardContent className="flex flex-col gap-6 md:flex-row">
+        {/* Proband */}
+        <div className={cn('flex flex-col gap-6 flex-1')}>
+          {/* Primary Condition */}
+          <div>
+            <CardTitle>{t('caseEntity.details.primary_condition')}</CardTitle>
+            <PhenotypeConditionLink code={data.primary_condition_id} name={data.primary_condition_name} />
           </div>
 
-          {/* Family member */}
-          <div className={cn('flex flex-col gap-4', { 'col-span-3': family.length > 0 })}>
-            <Separator className="my-6 md:hidden" />
-            {family.map(member => (
-              <Card className="p-4 gap-4 flex">
-                {/* Relationship */}
-                <CardTitle>{member.relationship_to_proband}</CardTitle>
+          {/* Phenotypes */}
+          <div className="flex flex-col gap-2">
+            <CardTitle>{t('caseEntity.details.phenotypes')}</CardTitle>
 
-                {/* Affected Status Code */}
-                {member.affected_status_code && (
-                  <div>
-                    <Badge variant={getBadgeAffectedCodeColor(member.affected_status_code)}>
-                      {t(`caseEntity.variants.filters.affected_status_code.${member.affected_status_code}`)}
-                    </Badge>
-                  </div>
-                )}
+            {/* Phenotypes Observed */}
+            <CardTitle size="xs" className="font-bold">
+              {t('caseEntity.details.phenotypes_observed')}
+            </CardTitle>
 
-                {/* Phenotypes Observed */}
-                {(member.observed_phenotypes ?? []).map(({ id, name }: Term) => (
-                  <div key={id}>
-                    <PhenotypeConditionLink code={id} name={name} />
-                  </div>
-                ))}
-              </Card>
-            ))}
+            <ExpandableList
+              items={proband.observed_phenotypes ?? []}
+              renderItem={(item) => (
+                <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
+              )}
+              visibleCount={PHENOTYPES_VISIBLE_COUNT}
+            />
+
+            {!proband.observed_phenotypes && (
+              <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
+            )}
+
+            {/* Phenotypes Non-Observed */}
+            <CardTitle size="xs" className="font-bold">
+              {t('caseEntity.details.phenotypes_non_observed')}
+            </CardTitle>
+
+            <ExpandableList
+              items={proband.non_observed_phenotypes ?? []}
+              renderItem={(item) => (
+                <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
+              )}
+              visibleCount={PHENOTYPES_VISIBLE_COUNT}
+            />
+
+            {!proband.non_observed_phenotypes && (
+              <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
+            )}
           </div>
+
+          {/* Clinical Note */}
+          <Card className="p-4 gap-4">
+            <CardTitle className="text-base">{t('caseEntity.details.clinical_note')}</CardTitle>
+            <p className="text-sm">{data.note}</p>
+          </Card>
         </div>
+
+
+        {/* Family member */}
+        {hasFamily && (
+          <>
+            <CardSeparator />
+
+            <div className={cn('flex flex-col gap-4 flex-1')}>
+              {family.map(member => (
+                <Card className="p-4 gap-4 flex">
+                  {/* Relationship */}
+                  <CardTitle>{member.relationship_to_proband}</CardTitle>
+
+                  {/* Affected Status Code */}
+                  {member.affected_status_code && (
+                    <div>
+                      <Badge variant={getBadgeAffectedCodeColor(member.affected_status_code)}>
+                        {t(`caseEntity.variants.filters.affected_status_code.${member.affected_status_code}`)}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Phenotypes Observed */}
+                  {(member.observed_phenotypes ?? []).map(({ id, name }: Term) => (
+                    <div key={id}>
+                      <PhenotypeConditionLink code={id} name={name} />
+                    </div>
+                  ))}
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
+
       </CardContent>
     </Card>
   );
