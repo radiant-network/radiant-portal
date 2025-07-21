@@ -161,7 +161,11 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.pf_wgs, {
       id: 'pf_wgs',
       cell: info => <ParticipantFrequencyCell value={info.getValue()} />,
-      header: t('variant.headers.pf_wgs'),
+      header: () => (
+        <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltips')}>
+          {t('variant.headers.pf_wgs')}
+        </TooltipsHeader>
+      ),
       minSize: 120,
     }),
     columnHelper.accessor(row => row.genotype_quality, {
