@@ -88,17 +88,17 @@ export type TableProps<TData> = {
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 } & (
-  | {
+    | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-  | {
+    | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-);
+  );
 
 export interface BaseColumnSettings {
   id: string;
@@ -265,7 +265,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -568,7 +568,7 @@ function TranstackTable<T>({
   return (
     <div
       className={cn('w-full', {
-        'absolute top-0 right-0 bottom-0 left-0 bg-white z-50 p-4 overflow-y-scroll': isFullscreen,
+        'absolute top-0 right-0 bottom-0 left-0 bg-background z-50 p-4 overflow-y-scroll': isFullscreen,
       })}
     >
       <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
