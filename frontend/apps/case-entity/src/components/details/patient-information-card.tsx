@@ -36,7 +36,7 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
 
       <InformationField
         label={t('caseEntity.patientInformation.dob')}
-        labelTooltipsText={t('caseEntity.patientInformation.date_format_tooltips')}
+        labelTooltipsText={t('caseEntity.details.date_format_tooltips')}
       >
         {member.date_of_birth && formatDate(member.date_of_birth, t('common.date'))}
       </InformationField>
