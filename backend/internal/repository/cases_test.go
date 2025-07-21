@@ -136,7 +136,7 @@ func Test_GetCaseEntity(t *testing.T) {
 		assert.Equal(t, "germline_family", (*caseEntity).CaseType)
 		assert.Len(t, (*caseEntity).Assays, 3)
 		assert.Len(t, (*caseEntity).Members, 3)
-		assert.Len(t, (*caseEntity).Tasks, 1)
+		assert.Len(t, (*caseEntity).Tasks, 3)
 	})
 }
 
@@ -265,7 +265,7 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 		repo := NewCasesRepository(db)
 		tasks, err := repo.retrieveCaseTasks(1)
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(*tasks))
+		assert.Equal(t, 3, len(*tasks))
 
 		assert.Equal(t, 1, (*tasks)[0].ID)
 		assert.Equal(t, "ngba", (*tasks)[0].TypeCode)
@@ -275,5 +275,9 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 		assert.Equal(t, "father", (*tasks)[0].Patients[0])
 		assert.Equal(t, "mother", (*tasks)[0].Patients[1])
 		assert.Equal(t, "proband", (*tasks)[0].Patients[2])
+		assert.Equal(t, 1, len((*tasks)[1].Patients))
+		assert.Equal(t, "mother", (*tasks)[1].Patients[0])
+		assert.Equal(t, 1, len((*tasks)[2].Patients))
+		assert.Equal(t, "mother", (*tasks)[2].Patients[0])
 	})
 }
