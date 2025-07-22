@@ -20,22 +20,22 @@ const PIN_COLUMN_ACTIONS: {
   position: ColumnPinningPosition;
   icon: React.ReactNode;
 }[] = [
-  {
-    key: 'common.table.pin.left',
-    position: 'left',
-    icon: <PinIcon className="rotate-90" />,
-  },
-  {
-    key: 'common.table.pin.right',
-    position: 'right',
-    icon: <PinIcon className="ransform -rotate-90" />,
-  },
-  {
-    key: 'common.table.pin.unpin',
-    position: false,
-    icon: <PinOff />,
-  },
-];
+    {
+      key: 'common.table.pin.left',
+      position: 'left',
+      icon: <PinIcon className="rotate-90" />,
+    },
+    {
+      key: 'common.table.pin.right',
+      position: 'right',
+      icon: <PinIcon className="ransform -rotate-90" />,
+    },
+    {
+      key: 'common.table.pin.unpin',
+      position: false,
+      icon: <PinOff />,
+    },
+  ];
 
 /**
  * Use header.column.getNextSortingOrder() to display the next action on sort
