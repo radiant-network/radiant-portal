@@ -23,7 +23,22 @@ interface IProps {
 }
 
 function searchOptions(search: string, data: any[]) {
-  return data.filter(option => option.key.toLowerCase().includes(search.toLowerCase()));
+  const terms = search.toLowerCase().split(/\s+/).filter(Boolean);
+  return data.filter(option => {
+    const key = option.key.toLowerCase();
+    const label = option.label.toLowerCase();
+    // Helper to check if all terms appear in order in the string
+    function allTermsInOrder(str: string, terms: string[]) {
+      let lastIndex = 0;
+      for (const term of terms) {
+        const idx = str.indexOf(term, lastIndex);
+        if (idx === -1) return false;
+        lastIndex = idx + term.length;
+      }
+      return true;
+    }
+    return allTermsInOrder(key, terms) || allTermsInOrder(label, terms);
+  });
 }
 
 function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
