@@ -10,10 +10,6 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null, 
     <PageHeader
       isLoading={isLoading}
       title={`${t('caseEntity.header.case')} ${data?.case_id}`}
-      breadcrumbs={[{
-        to: '/case-exploration',
-        text: t('caseEntity.header.cases')
-      }]}
       badges={[{
         variant: "secondary",
         className: "h-5",
@@ -21,7 +17,8 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null, 
       }, {
         variant: "outline",
         className: "h-5",
-        children: data?.case_analysis_code
+        children: data?.case_analysis_code,
+        tooltipsText: data?.case_analysis_name
       }]}
     />
   )
