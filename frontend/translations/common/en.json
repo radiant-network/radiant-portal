@@ -160,9 +160,9 @@
         "unpin": "Unpin"
       },
       "sort": {
-        "descending": "Sort Descending",
-        "ascending": "Sort Ascending",
-        "clear": "Clear"
+        "descending": "Descending",
+        "ascending": "Ascending",
+        "clear": "Sort"
       },
       "no_result": "No results found",
       "no_result_description": "Adjust your filters and try again.",

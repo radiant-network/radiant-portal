@@ -44,7 +44,7 @@ const PIN_COLUMN_ACTIONS: {
  * @param sortingOrder 'asc' | 'desc' | false
  * @returns String
  */
-function getNextSortingOrderHeaderTitle(
+function getSortingHeaderTitle(
   t: TFunction<string, undefined>,
   sortingOrder: SortDirection | boolean,
 ): string {
@@ -89,8 +89,8 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6 invisible group-hover/header:visible', {
-                flex: isPinningDropdownActive,
+              className={cn('size-6 flex invisible group-hover/header:visible', {
+                visible: isPinningDropdownActive,
               })}
             >
               <Pin />
@@ -122,20 +122,20 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6 invisible group-hover/header:visible', {
-                flex: isSorted,
+              className={cn('size-6 flex invisible group-hover/header:visible', {
+                visible: isSorted,
               })}
               onClick={header.column.getToggleSortingHandler()}
             >
               {{
-                asc: <ArrowDown size={16} />,
-                desc: <ArrowUp size={16} />,
+                asc: <ArrowUp size={16} />,
+                desc: <ArrowDown size={16} />,
               }[isSorted as string] ?? <ArrowDownUp />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
             {header.column.getCanSort()
-              ? getNextSortingOrderHeaderTitle(t, header.column.getNextSortingOrder())
+              ? getSortingHeaderTitle(t, isSorted)
               : undefined}
           </TooltipContent>
         </Tooltip>
