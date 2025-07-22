@@ -14,8 +14,7 @@ function ClassificationSection({ title, counts, emptyText, href }: Classificatio
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-1">
-        <span className="font-semibold">{title}</span>
-        <Info size={14} className="opacity-50" />
+        <span className="font-semibold text-sm">{title}</span>
         <Link to={href}>
           <Button iconOnly size="xs" variant="ghost">
             <ArrowUpRight className="size-4!" />

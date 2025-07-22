@@ -30,11 +30,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.traits, {
       id: 'traits',
-      cell: info => (
-        <AnchorLink href="#" variant="secondary" className="capitalize" size="sm">
-          {info.getValue()?.[0]}
-        </AnchorLink>
-      ),
+      cell: info => <div className="font-medium capitalize">{info.getValue()?.[0]}</div>,
       header: t('variantEntity.evidence.clinVar.table.headers.condition'),
       minSize: 85,
       maxSize: 150,
@@ -44,7 +40,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
       id: 'clinical_significance',
       cell: info => (
         <div className="flex overflow-visible!">
-          <ClinVarBadge value={info.getValue()?.[0]?.replace(' ', '_')} />
+          <ClinVarBadge value={info.getValue()?.[0]?.replace(/\s+/g, '_')} />
         </div>
       ),
       header: t('variantEntity.evidence.clinVar.table.headers.classification'),
@@ -56,10 +52,12 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     pathogenicEvidenceColumnHelper.accessor(row => row.submission_count, {
       id: 'submission_count',
       cell: info => <div>{info.getValue()}</div>,
-      header: t('variantEntity.evidence.clinVar.table.headers.submission_count'),
-      minSize: 50,
-      maxSize: 50,
-      size: 50,
+      header: () => (
+        <TooltipsHeader tooltips={t('variantEntity.evidence.clinVar.table.headers.submission_count.tooltip')}>
+          {t('variantEntity.evidence.clinVar.table.headers.submission_count')}
+        </TooltipsHeader>
+      ),
+      size: 80,
       enableSorting: false,
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.review_status_stars, {
@@ -149,7 +147,7 @@ function getConditionPhenotypeColumns(
           </Tooltip>
         ));
       },
-      header: t('variantEntity.evidence.gene.table.headers.inheritence'),
+      header: t('variantEntity.evidence.gene.table.headers.inheritance'),
       enableSorting: false,
     }),
     conditionPhenotypeColumnHelper.accessor(row => row.panel_id, {
@@ -226,7 +224,7 @@ const conditionPhenotypeDefaultSettings = createColumnSettings([
   {
     id: 'inheritance_code',
     visible: true,
-    label: 'variant.headers.inheritence',
+    label: 'variant.headers.inheritance',
   },
   {
     id: 'panel_id',
