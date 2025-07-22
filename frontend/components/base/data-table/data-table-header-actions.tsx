@@ -89,7 +89,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6 hidden group-hover/header:flex', {
+              className={cn('size-6 invisible group-hover/header:visible', {
                 flex: isPinningDropdownActive,
               })}
             >
@@ -122,7 +122,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6 hidden group-hover/header:flex', {
+              className={cn('size-6 invisible group-hover/header:visible', {
                 flex: isSorted,
               })}
               onClick={header.column.getToggleSortingHandler()}
