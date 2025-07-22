@@ -159,8 +159,9 @@
         "unpin": "Désépingler"
       },
       "sort": {
-        "descending": "Trier en ordre décroissant",
-        "ascending": "Trier en ordre croissant"
+        "descending": "Décroissant",
+        "ascending": "Croissant",
+        "clear": "Trier"
       },
       "no_result": "Aucun résultat trouvé",
       "no_result_description": "Ajuster vos filtres et essayer à nouveau.",

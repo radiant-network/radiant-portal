@@ -44,7 +44,7 @@ const PIN_COLUMN_ACTIONS: {
  * @param sortingOrder 'asc' | 'desc' | false
  * @returns String
  */
-function getNextSortingOrderHeaderTitle(
+function getSortingHeaderTitle(
   t: TFunction<string, undefined>,
   sortingOrder: SortDirection | boolean,
 ): string {
@@ -135,7 +135,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
           </TooltipTrigger>
           <TooltipContent>
             {header.column.getCanSort()
-              ? getNextSortingOrderHeaderTitle(t, header.column.getNextSortingOrder())
+              ? getSortingHeaderTitle(t, isSorted)
               : undefined}
           </TooltipContent>
         </Tooltip>
