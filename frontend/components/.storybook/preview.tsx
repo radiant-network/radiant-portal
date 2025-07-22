@@ -6,7 +6,8 @@ import type { Preview } from '@storybook/react';
 import { withThemeByClassName } from '@storybook/addon-themes';
 import { TooltipProvider } from '../base/ui/tooltip';
 import { AlertDialogProvider } from '../base/dialog/alert-dialog-provider';
-import { I18nProvider } from '../hooks/I18nProvider';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './i18n'; // Use the Storybook-specific i18n instance
 import ThemeProvider from '../feature/theme-toggle/theme-provider';
 
 const preview: Preview = {
@@ -27,7 +28,7 @@ const preview: Preview = {
       defaultTheme: 'light',
     }),
     Story => (
-      <I18nProvider>
+      <I18nextProvider i18n={i18n}>
         <ThemeProvider>
           <TooltipProvider delayDuration={0}>
             <AlertDialogProvider>
@@ -35,7 +36,7 @@ const preview: Preview = {
             </AlertDialogProvider>
           </TooltipProvider>
         </ThemeProvider>
-      </I18nProvider>
+      </I18nextProvider>
     ),
   ],
 };
