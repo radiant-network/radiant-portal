@@ -346,11 +346,14 @@ components:
           uniqueItems: false
         type_code:
           type: string
+        type_name:
+          type: string
       required:
       - created_on
       - id
       - patients
       - type_code
+      - type_name
       type: object
     CasesSearchResponse:
       properties:
