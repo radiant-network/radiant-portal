@@ -39,7 +39,6 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
         <div className="flex items-center gap-2">
           <div className="">
             <ConsequenceLabel vepImpact={data.vep_impact!} consequence={data.consequences?.[0] || ''} size="sm" />
-            <span className="text-sm">{data.aa_change && ` - ${data.aa_change}`}</span>
           </div>
         </div>
       </div>
