@@ -971,10 +971,11 @@
         "table": {
           "headers": {
             "evaluated": "Évalué",
-            "evaluated.tooltip": "La date la plus récente à laquelle un soumissionnaire a évalué cette variante pour la condition dans la base de données ClinVar.",
+            "evaluated.tooltip": "Date de la dernière soumission pour ce variant/condition",
             "condition": "Condition",
             "classification": "Classification",
-            "submission_count": "Nombre de soumissions",
+            "submission_count": "Soumissions",
+            "submission_count.tooltip": "Nombre de soumissions pour ce variant/condition (RCV)",
             "status": "Status",
             "origin": "Origin"
           }
@@ -995,7 +996,7 @@
         "table": {
           "headers": {
             "condition": "Condition",
-            "inheritence": "Inheritence",
+            "inheritance": "Hérédité",
             "classification": "Classification",
             "status": "Statut",
             "status.tooltip": "TODO",
