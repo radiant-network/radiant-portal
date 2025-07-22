@@ -1067,19 +1067,13 @@ components:
       type: object
     VariantCasesCount:
       properties:
-        count_interpretations:
+        count_interpreted:
           type: integer
-        count_interpreted_cases:
-          type: integer
-        count_total_cases:
-          type: integer
-        count_uninterpreted_cases:
+        count_uninterpreted:
           type: integer
       required:
-      - count_interpretations
-      - count_interpreted_cases
-      - count_total_cases
-      - count_uninterpreted_cases
+      - count_interpreted
+      - count_uninterpreted
       type: object
     VariantCasesFilters:
       properties:
@@ -1181,6 +1175,8 @@ components:
       type: object
     VariantInterpretedCase:
       properties:
+        affected_status:
+          type: string
         case_analysis_code:
           type: string
         case_analysis_name:
@@ -1200,13 +1196,19 @@ components:
             $ref: '#/components/schemas/Term'
           type: array
           uniqueItems: false
+        patient_id:
+          type: integer
         performer_lab_code:
           type: string
         performer_lab_name:
           type: string
+        relationship_to_proband:
+          type: string
         seq_id:
           type: integer
         status_code:
+          type: string
+        submitter_sample_id:
           type: string
         transcript_id:
           type: string
@@ -1218,6 +1220,7 @@ components:
       - condition_id
       - condition_name
       - interpretation_updated_on
+      - patient_id
       - seq_id
       - status_code
       - transcript_id
@@ -1343,6 +1346,8 @@ components:
       type: object
     VariantUninterpretedCase:
       properties:
+        affected_status:
+          type: string
         case_analysis_code:
           type: string
         case_analysis_name:
@@ -1363,6 +1368,8 @@ components:
             $ref: '#/components/schemas/Term'
           type: array
           uniqueItems: false
+        patient_id:
+          type: integer
         performer_lab_code:
           type: string
         performer_lab_name:
@@ -1371,7 +1378,13 @@ components:
           type: string
         primary_condition_name:
           type: string
+        relationship_to_proband:
+          type: string
+        seq_id:
+          type: integer
         status_code:
+          type: string
+        submitter_sample_id:
           type: string
         updated_on:
           type: string
@@ -1380,6 +1393,8 @@ components:
       required:
       - case_id
       - created_on
+      - patient_id
+      - seq_id
       - status_code
       - updated_on
       - zygosity

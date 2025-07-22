@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/ui/card';
+import { Card, CardContent } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { useState } from 'react';
 import InterpretedCasesTable from './interpreted-cases-table';
@@ -8,7 +8,7 @@ import { variantsApi } from '@/utils/api';
 import useSWR from 'swr';
 import { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
 import { useParams } from 'react-router';
-import { Skeleton } from '@/components/base/ui/skeleton';
+
 import { CasesFiltersProvider } from './cases-filters-context';
 
 enum Tabs {
@@ -54,29 +54,17 @@ function CasesTab() {
   return (
     <CasesFiltersProvider filters={filtersQuery.data} isLoading={filtersQuery.isLoading}>
       <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">
-            {isLoading ? (
-              <Skeleton className="w-20 h-7" />
-            ) : (
-              t('variantEntity.cases.title', {
-                count: data?.count_total_cases,
-              })
-            )}
-          </CardTitle>
-          <CardDescription>{t('variantEntity.cases.description')}</CardDescription>
-        </CardHeader>
         <CardContent className="space-y-6">
           <TabsNav value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsListItem value={Tabs.InterpretedCases}>
                 {t('variantEntity.cases.interpreted-table.title', {
-                  count: data?.count_interpretations,
+                  count: data?.count_interpreted,
                 })}
               </TabsListItem>
               <TabsListItem value={Tabs.OtherCases}>
                 {t('variantEntity.cases.other-table.title', {
-                  count: data?.count_uninterpreted_cases,
+                  count: data?.count_uninterpreted,
                 })}
               </TabsListItem>
             </TabsList>

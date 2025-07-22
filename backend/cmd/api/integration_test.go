@@ -722,10 +722,12 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 				"condition_name":"blood vessel neoplasm", 
 				"interpretation_updated_on":"2025-06-30T15:51:29Z", 
 				"observed_phenotypes":[],
+				"patient_id":3,
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"seq_id":1, 
 				"status_code":"active", 
+				"submitter_sample_id":"S13224",
 				"transcript_id":"T002", 
 				"zygosity":"HET"
 			}
@@ -760,11 +762,14 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 				"case_id":5, 
 				"created_on":"2021-09-12T13:08:00Z", 
 				"observed_phenotypes":[{"id":"HP:0009800", "name":"Maternal diabetes"}, {"id":"HP:0100622", "name":"Maternal seizure"}],
+				"patient_id":15, 
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"primary_condition_id":"MONDO:0700092", 
 				"primary_condition_name":"neurodevelopmental disorder", 
+				"seq_id":13,
 				"status_code":"active", 
+				"submitter_sample_id":"S13236",
 				"updated_on":"2021-09-12T13:08:00Z",
 				"zygosity":"HOM",
 				"exomiser_acmg_classification":"PATHOGENIC",
@@ -821,7 +826,7 @@ func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected
 }
 
 func Test_GetVariantCasesCount(t *testing.T) {
-	expected := `{"count_total_cases":5, "count_interpreted_cases": 1, "count_uninterpreted_cases": 4, "count_interpretations": 3}`
+	expected := `{"count_interpreted":2, "count_uninterpreted":4}`
 	assertGetVariantCasesCount(t, "simple", 1000, expected)
 }
 

@@ -1017,6 +1017,16 @@
       "title": "{{count}} Cases",
       "tab": "Cases",
       "description": "Clinical cases which carry this variant",
+      "affected_status": {
+        "affected": "Affected",
+        "non_affected": "Unaffected",
+        "unknown": "Unknown"
+      },
+      "commonHeaders":{
+        "patient_id": "Patient",
+        "relationship_to_proband": "Relation"
+      },
+
       "commonFilters": {
         "institutions": {
           "allInstitutions": "All Diagnostic Labs"
@@ -1034,7 +1044,7 @@
         "completed": "Completed"
       },
       "interpreted-table": {
-        "title": "Clinical Interpretations ({{count}})",
+        "title": "Interpreted ({{count}})",
         "headers": {
           "case": "Case",
           "date": "Date",
@@ -1058,7 +1068,7 @@
         }
       },
       "other-table": {
-        "title": "Non-interpreted Cases ({{count}})",
+        "title": "Non-interpreted ({{count}})",
         "headers": {
           "case": "Case",
           "date": "Date",
@@ -1069,8 +1079,13 @@
           "inheritance": "Inheritance",
           "institution": "Diagnostic Lab",
           "test": "Analysis",
-          "status": "Status"
+          "status": "Status",
+          "zygosity_tooltips": "Zygosity",
+          "seq_id" : "Assay",
+          "affected_status": "Aff. Status",
+          "submitter_sample_id": "Sample"
         },
+
         "filters": {
           "label": "Phenotype",
           "searchInputPlaceholder": "Filter HPO phenotype"

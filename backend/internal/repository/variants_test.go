@@ -280,10 +280,8 @@ func Test_GetVariantCasesCount(t *testing.T) {
 		repo := NewVariantsRepository(db)
 		counts, err := repo.GetVariantCasesCount(1000)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(5), counts.CountTotalCases)
-		assert.Equal(t, int64(1), counts.CountInterpretedCases)
-		assert.Equal(t, int64(4), counts.CountUninterpretedCases)
-		assert.Equal(t, int64(3), counts.CountInterpretations)
+		assert.Equal(t, int64(2), counts.CountInterpreted)
+		assert.Equal(t, int64(4), counts.CountUninterpreted)
 	})
 }
 

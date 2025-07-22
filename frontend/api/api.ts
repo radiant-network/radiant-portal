@@ -2397,25 +2397,13 @@ export interface VariantCasesCount {
      * @type {number}
      * @memberof VariantCasesCount
      */
-    'count_interpretations': number;
+    'count_interpreted': number;
     /**
      * 
      * @type {number}
      * @memberof VariantCasesCount
      */
-    'count_interpreted_cases': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof VariantCasesCount
-     */
-    'count_total_cases': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof VariantCasesCount
-     */
-    'count_uninterpreted_cases': number;
+    'count_uninterpreted': number;
 }
 /**
  * 
@@ -2588,6 +2576,12 @@ export interface VariantInterpretedCase {
      * @type {string}
      * @memberof VariantInterpretedCase
      */
+    'affected_status'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'case_analysis_code'?: string;
     /**
      * 
@@ -2633,6 +2627,12 @@ export interface VariantInterpretedCase {
     'observed_phenotypes'?: Array<Term>;
     /**
      * 
+     * @type {number}
+     * @memberof VariantInterpretedCase
+     */
+    'patient_id': number;
+    /**
+     * 
      * @type {string}
      * @memberof VariantInterpretedCase
      */
@@ -2645,6 +2645,12 @@ export interface VariantInterpretedCase {
     'performer_lab_name'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'relationship_to_proband'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof VariantInterpretedCase
      */
@@ -2655,6 +2661,12 @@ export interface VariantInterpretedCase {
      * @memberof VariantInterpretedCase
      */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'submitter_sample_id'?: string;
     /**
      * 
      * @type {string}
@@ -2941,6 +2953,12 @@ export interface VariantUninterpretedCase {
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
+    'affected_status'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'case_analysis_code'?: string;
     /**
      * 
@@ -2980,6 +2998,12 @@ export interface VariantUninterpretedCase {
     'observed_phenotypes'?: Array<Term>;
     /**
      * 
+     * @type {number}
+     * @memberof VariantUninterpretedCase
+     */
+    'patient_id': number;
+    /**
+     * 
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
@@ -3007,7 +3031,25 @@ export interface VariantUninterpretedCase {
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
+    'relationship_to_proband'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantUninterpretedCase
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'submitter_sample_id'?: string;
     /**
      * 
      * @type {string}
