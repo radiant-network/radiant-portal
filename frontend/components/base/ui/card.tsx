@@ -4,7 +4,9 @@ import { tv } from 'tailwind-variants';
 import { cn } from '@/lib/utils';
 import { Separator } from './separator';
 
-function Card({ className, ...props }: React.ComponentProps<'div'>) {
+export type CardProps = React.ComponentProps<'div'>;
+
+function Card({ className, ...props }: CardProps) {
   return (
     <div
       data-slot="card"
@@ -19,7 +21,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-header"
       className={cn(
-        '@container/card-header grid auto-rows-min items-start gap-6 sm:gap-1.5 px-6 sm:grid-rows-[auto_auto] sm:has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6',
+        '@container/card-header grid auto-rows-min items-start gap-6 sm:gap-1.5 px-6 sm:grid-rows-[auto_auto] sm:has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-4',
         className,
       )}
       {...props}
@@ -35,13 +37,13 @@ const cardTitleVariants = tv({
       xs: 'text-xs',
       sm: 'text-sm',
       md: 'text-md',
-      xl: 'text-xl'
-    }
-  }
+      xl: 'text-xl',
+    },
+  },
 });
 type CardTitleProps = React.ComponentProps<'div'> & {
   size?: 'base' | 'xs' | 'sm' | 'md' | 'xl';
-}
+};
 function CardTitle({ className, size = 'base', ...props }: CardTitleProps) {
   return <div data-slot="card-title" className={cardTitleVariants({ size })} {...props} />;
 }
@@ -64,11 +66,10 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   return <div data-slot="card-content" className={cn('px-6', className)} {...props} />;
 }
 
-
 function CardSeparator({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div {...props}>
-      <Separator orientation='vertical' />
+      <Separator orientation="vertical" />
       <Separator className="md:hidden" />
     </div>
   );

@@ -83,7 +83,7 @@ export function TabsListItem<T extends string | number | symbol = string>({
         props.onClick?.(e);
       }}
     >
-      <div className="flex items-center has-[svg]:px-4 px-3 py-2 [&_svg]:size-4 gap-2 text-sm text-muted-foreground rounded-sm hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none">
+      <div className="flex items-center has-[svg]:px-4 px-3 py-2 [&_svg]:size-4 gap-2 text-sm text-muted-foreground rounded-sm hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none whitespace-nowrap">
         {children}
       </div>
     </div>
@@ -107,7 +107,7 @@ export function TabsContent<T>({ ref, value, children, className, noMargin = fal
         className={cn(
           {
             'py-3': !noMargin,
-            hidden: !active
+            hidden: !active,
           },
           className,
         )}

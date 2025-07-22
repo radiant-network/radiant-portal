@@ -15,8 +15,8 @@ import StatusCodeTableCell from './status-code-table-cell';
 import AnalysisTableCell from './analysis-table-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
-const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>(); // todo replace with correct type when api is updated
-const otherCasesColumnHelper = createColumnHelper<VariantUninterpretedCase>(); // todo replace with correct type when api is updated
+const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>();
+const otherCasesColumnHelper = createColumnHelper<VariantUninterpretedCase>();
 
 function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
   return [

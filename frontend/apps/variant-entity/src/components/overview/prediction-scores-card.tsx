@@ -1,15 +1,17 @@
-import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
+import { Card, CardContent, CardHeader, CardProps } from '@/components/base/ui/card';
 import { Button } from '@/components/base/ui/button';
 import { VariantOverview } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
 import { useI18n } from '@/components/hooks/i18n';
 import { TFunction } from 'i18next';
-import { ComponentProps, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/base/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import Empty from '@/components/base/empty';
+import { BarChart3 } from 'lucide-react';
 
 const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined>) => {
-  const predictions: { key: string; label: string, value: string | React.ReactElement }[] = [];
+  const predictions: { key: string; label: string; value: string | React.ReactElement }[] = [];
   const empties: { key: string; label: string }[] = [];
 
   // revel
@@ -17,13 +19,13 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
     predictions.push({
       key: 'revel',
       label: t('variant.predictions.revel'),
-      value: `${data.revel_score}`
-    })
+      value: `${data.revel_score}`,
+    });
   } else {
     empties.push({
       key: 'revel',
       label: t('variant.predictions.revel'),
-    })
+    });
   }
 
   // sift
@@ -33,12 +35,12 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
       key: 'sift',
       label: t('variant.predictions.sift'),
       value: `${siftPref} (${data?.sift_score})`,
-    })
+    });
   } else {
     empties.push({
       key: 'sift',
       label: t('variant.predictions.sift'),
-    })
+    });
   }
 
   // loeuf
@@ -47,7 +49,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
       key: 'loeuf',
       label: t('variant.predictions.loeuf'),
       value: `${data.gnomad_loeuf}`,
-    })
+    });
   } else {
     empties.push({
       key: 'loeuf',
@@ -71,8 +73,8 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
             </Tooltip>
           ))}
         </div>
-      )
-    })
+      ),
+    });
   } else {
     empties.push({
       key: 'spliceai',
@@ -82,17 +84,17 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // fathmm
   if (data.fathmm_pred && data.fathmm_score !== undefined) {
-    const fatmmPref = t(`common.filters.labels.fathmm_pred_value.${data.fathmm_pred}`)
+    const fatmmPref = t(`common.filters.labels.fathmm_pred_value.${data.fathmm_pred}`);
     predictions.push({
       key: 'fathmm',
       label: t('variant.predictions.fathmm'),
       value: `${fatmmPref} (${data?.fathmm_score})`,
-    })
+    });
   } else {
     empties.push({
       key: 'fathmm',
       label: t('variant.predictions.fathmm'),
-    })
+    });
   }
 
   // caddraw
@@ -100,8 +102,8 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
     predictions.push({
       key: 'caddraw',
       label: t('variant.predictions.caddRaw'),
-      value: `${data.cadd_score}`
-    })
+      value: `${data.cadd_score}`,
+    });
   } else {
     empties.push({
       key: 'caddraw',
@@ -114,8 +116,8 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
     predictions.push({
       key: 'caddphred',
       label: t('variant.predictions.caddPhred'),
-      value: `${data.cadd_phred}`
-    })
+      value: `${data.cadd_phred}`,
+    });
   } else {
     empties.push({
       key: 'caddphred',
@@ -128,8 +130,8 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
     predictions.push({
       key: 'dann',
       label: t('variant.predictions.dann'),
-      value: `${data.dann_score}`
-    })
+      value: `${data.dann_score}`,
+    });
   } else {
     empties.push({
       key: 'dann',
@@ -139,17 +141,17 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // lrt
   if (data?.lrt_pred && data.lrt_score !== undefined) {
-    const lrtPred = t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`)
+    const lrtPred = t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`);
     predictions.push({
       key: 'lrt',
       label: t('variant.predictions.lrt'),
       value: `${lrtPred} (${data?.lrt_score})`,
-    })
+    });
   } else {
     empties.push({
       key: 'lrt',
       label: t('variant.predictions.lrt'),
-    })
+    });
   }
 
   // polyphen2_hvar
@@ -158,13 +160,13 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
     predictions.push({
       key: 'polyphen2_hvar',
       label: t('variant.predictions.polyphen2hvar'),
-      value: `${hvarPred} ${data.polyphen2_hvar_score}`
-    })
+      value: `${hvarPred} ${data.polyphen2_hvar_score}`,
+    });
   } else {
     empties.push({
       key: 'polyphen2_hvar',
       label: t('variant.predictions.polyphen2hvar'),
-    })
+    });
   }
 
   // phylop17way
@@ -172,13 +174,13 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
     predictions.push({
       key: 'phylop17way',
       label: t('variant.predictions.phylop17way'),
-      value: `${data.phyloP17way_primate}`
-    })
+      value: `${data.phyloP17way_primate}`,
+    });
   } else {
     empties.push({
       key: 'phylop17way',
       label: t('variant.predictions.phylop17way'),
-    })
+    });
   }
 
   // pli
@@ -186,57 +188,80 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
     predictions.push({
       key: 'pli',
       label: t('variant.predictions.pli'),
-      value: `${data?.gnomad_pli?.toExponential(2)}`
-    })
+      value: `${data?.gnomad_pli?.toExponential(2)}`,
+    });
   } else {
     empties.push({
       key: 'pli',
       label: t('variant.predictions.pli'),
-    })
+    });
   }
 
   return [
     ...predictions.map(({ key, label, value }) => (
       <div key={`psl-${key}`} className="flex items-center justify-between">
         <span className="text-muted-foreground">{label}:</span>
-        <span>
-          {value}
-        </span>
+        <span>{value}</span>
       </div>
     )),
     ...empties.map(({ key, label }) => (
       <div key={`psl-${key}`} className="flex items-center justify-between">
-        <span className="text-muted-foreground">{label}:</span>
-        -
+        <span className="text-muted-foreground">{label}:</span>-
       </div>
-    ))
+    )),
   ];
 };
 
-function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & ComponentProps<'div'>) {
+function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
   const predictionScoreList = useMemo(() => getPredictionList(data, t), [data, t]);
+
+  // Check if all prediction scores are empty
+  const hasAnyPredictionScores = useMemo(() => {
+    return !!(
+      data.revel_score ||
+      (data.sift_pred && data.sift_score !== undefined) ||
+      data.gnomad_loeuf ||
+      (data.spliceai_ds && data.spliceai_type?.length) ||
+      (data.fathmm_pred && data.fathmm_score !== undefined) ||
+      data.cadd_score ||
+      data.cadd_phred ||
+      data.dann_score ||
+      (data?.lrt_pred && data.lrt_score !== undefined) ||
+      (data.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined) ||
+      data.phyloP17way_primate ||
+      data.gnomad_pli
+    );
+  }, [data]);
 
   return (
     <>
       <Card {...props}>
         <CardHeader className="flex flex-row justify-between pb-0">
           <div className="font-semibold">{t('variantEntity.overview.predictionScores')}</div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="xs">
-                {t('variantEntity.overview.viewAll')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>{t('variantEntity.overview.predictionScores')}</DialogTitle>
-              </DialogHeader>
-              <div className="text-sm space-y-3">{predictionScoreList}</div>
-            </DialogContent>
-          </Dialog>
+          {hasAnyPredictionScores && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="xs">
+                  {t('variantEntity.overview.viewAll')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>{t('variantEntity.overview.predictionScores')}</DialogTitle>
+                </DialogHeader>
+                <div className="text-sm space-y-3">{predictionScoreList}</div>
+              </DialogContent>
+            </Dialog>
+          )}
         </CardHeader>
-        <CardContent className="text-sm space-y-3">{predictionScoreList.slice(0, 4)}</CardContent>
+        <CardContent className="text-sm space-y-3 h-full">
+          {hasAnyPredictionScores ? (
+            predictionScoreList.slice(0, 4)
+          ) : (
+            <Empty bordered showIcon={false} description={t('variant.noDataForVariant')} className="py-6 h-full" />
+          )}
+        </CardContent>
       </Card>
     </>
   );

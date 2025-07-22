@@ -196,7 +196,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       enableResizing: false,
       enablePinning: false,
     },
-  ] as TableColumnDef<CaseResult, any>[]; // todo replace with correct type when api is updated
+  ] as TableColumnDef<CaseResult, any>[];
 }
 
 const defaultSettings = createColumnSettings([

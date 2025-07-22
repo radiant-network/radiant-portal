@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import BackLink from '@/components/base/navigation/back-link';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import { Badge, BadgeProps } from '@/components/base/ui/badge';
+import { BadgeProps } from '@/components/base/ui/badge';
 import { Link, useLocation, useParams } from 'react-router';
 import OverviewTab from './components/overview/overview-tab';
 import EvidenceTab from './components/evidence/evidence-tab';
-import FrequencyTab from './components/frequency-tab';
 import TranscriptsTab from './components/transcripts/transcripts-tab';
 import CasesTab from './components/cases/cases-tab';
 import { VariantEntityTabs } from './types';
 import { variantsApi } from '@/utils/api';
 import { VariantHeader, ApiError } from '@/api/api';
 import useSWR from 'swr';
-import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 import Result from '@/components/base/result';
 import { Button } from '@/components/base/ui/button';
@@ -85,18 +82,17 @@ export default function App() {
   }
   pageHeaderBadges.push({ children: t('variantEntity.header.germline') });
 
-
   // To avoid hydration mismatch with hash in ssr
   if (!activeTab) {
     return null;
   }
 
   return (
-    <main className="bg-muted/40 h-screen overflow-auto">
+    <main className="bg-muted h-screen overflow-auto">
       <PageHeader
         isLoading={isLoading}
         title={data?.hgvsg}
-        breadcrumbs={[{ to: "/", text: t('variantEntity.header.variants') }]}
+        breadcrumbs={[{ to: '/', text: t('variantEntity.header.variants') }]}
         badges={pageHeaderBadges}
       />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
@@ -109,10 +105,10 @@ export default function App() {
           <TabsListItem value={VariantEntityTabs.Transcripts}>{t('variantEntity.transcripts.title')}</TabsListItem>
           <TabsListItem value={VariantEntityTabs.Cases}>{t('variantEntity.cases.tab')}</TabsListItem>
         </TabsList>
-        <div className="px-6 ">
+        <div className="px-0 sm:px-6">
           <Container>
             <div>
-              <TabsContent value={VariantEntityTabs.Overview} className="py-6">
+              <TabsContent value={VariantEntityTabs.Overview} className="p-0 sm:py-6">
                 <OverviewTab />
               </TabsContent>
               <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="py-6">

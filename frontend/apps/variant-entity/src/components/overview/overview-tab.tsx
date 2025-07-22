@@ -9,7 +9,8 @@ import PredictionScoresCard from './prediction-scores-card';
 import AssociatedConditionsCard from './associated-conditions-card';
 import MostDeleteriousConsequenceCard from './most-deleterious-consequence-card';
 import ExternalReferencesCard from './external-references-card';
-import MyOrganizationCard from './my-organization-card';
+import InterpretationCard from './interpretation-card';
+import ClassificationCard from './classification-card';
 
 type VariantOverviewInput = {
   key: string;
@@ -40,12 +41,23 @@ function OverviewTab() {
   }
 
   return (
-    <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
-      <MyOrganizationCard data={data}/>
-      <MostDeleteriousConsequenceCard data={data} className="flex flex-col col-span-1 md:col-span-2" />
-      <PredictionScoresCard data={data} />
-      <AssociatedConditionsCard data={data} />
-      <ExternalReferencesCard data={data} />
+    <div
+      className={`
+        gap-2 sm:gap-6 grid grid-cols-1 md:grid-cols-12 
+        **:data-[slot=card]:border-0 sm:**:data-[slot=card]:border 
+        **:data-[slot=card]:rounded-none sm:**:data-[slot=card]:rounded-xl 
+        **:data-[slot=card]:shadow-none sm:**:data-[slot=card]:shadow-xs 
+        **:data-[slot=card]:py-4 sm:**:data-[slot=card]:py-6 
+        **:data-[slot=card-header]:px-4 sm:**:data-[slot=card-header]:px-6 
+        **:data-[slot=card-content]:px-4 sm:**:data-[slot=card-content]:px-6
+        `}
+    >
+      <MostDeleteriousConsequenceCard data={data} className="col-span-1 md:col-span-12 2xl:col-span-8" />
+      <InterpretationCard data={data} className="col-span-1 md:col-span-6 2xl:col-span-2" />
+      <ClassificationCard data={data} className="col-span-1 md:col-span-6 2xl:col-span-2" />
+      <PredictionScoresCard data={data} className="col-span-1 md:col-span-6 2xl:col-span-4" />
+      <AssociatedConditionsCard data={data} className="col-span-1 md:col-span-6 2xl:col-span-4" />
+      <ExternalReferencesCard data={data} className="mb-4 sm:mb-0 col-span-1 md:col-span-6 2xl:col-span-4" />
     </div>
   );
 }

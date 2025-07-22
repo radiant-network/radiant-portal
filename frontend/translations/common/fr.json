@@ -442,6 +442,7 @@
     }
   },
   "variant": {
+    "noDataForVariant": "Aucune donnée pour ce variant.",
     "headers": {
       "ad_ratio": "Ratio AD",
       "clin_var": "ClinVar",
@@ -474,7 +475,18 @@
       "DL": "Donor Loss"
     },
     "interpretation": {
-      "tooltips": "Ouvrir l'interprétation clinique"
+      "tooltips": "Ouvrir l'interprétation clinique",
+      "classifications": {
+        "allClassifications": "Toutes les classifications",
+        "pathogenic": "Pathogénique",
+        "likelyPathogenic": "Prob. pathogénique",
+        "likelyPathogenic-tooltip": "Probablement pathogénique",
+        "vus": "VSI",
+        "vus-tooltip": "Variant de signification incertaine",
+        "likelyBenign": "Prob. bénigne",
+        "likelyBenign-tooltip": "Probablement bénigne",
+        "benign": "Bénigne"
+      }
     },
     "omim": {
       "AD": "Dominant Autosomique",
@@ -693,16 +705,6 @@
           "consult": "Consulter les ",
           "standards_and_guidelines": "normes et les lignes directrices",
           "variant_interpretation": "pour l’interprétation des variantes"
-        },
-        "classification-options": {
-          "pathogenic": "Pathogénique",
-          "likelyPathogenic": "Prob. pathogénique",
-          "likelyPathogenic-tooltip": "Probablement pathogénique",
-          "vus": "VSI",
-          "vus-tooltip": "Variant de signification incertaine",
-          "likelyBenign": "Prob. bénigne",
-          "likelyBenign-tooltip": "Probablement bénigne",
-          "benign": "Bénigne"
         },
         "classificationCriteria": "Critères de classification",
         "classificationCriteria-placeholder": "Ex : PM1, PS2",
@@ -935,7 +937,9 @@
     },
     "overview": {
       "title": "Aperçu",
-      "myOrganization": "Mon Organisation",
+      "interpretation": "Interprétation",
+      "classification": "Classifications",
+      "exomiser": "Exomiser",
       "details": "Détails",
       "radiant": "Radiant",
       "consequence": "Conséquence",
@@ -951,7 +955,10 @@
       "viewAll": "Voir tout",
       "associatedConditionsOmim": "Conditions associées (OMIM)",
       "externalReferences": "Références externes",
-      "dbSNP": "dbSNP"
+      "dbSNP": "dbSNP",
+      "noExomiserScore": "Ce variant n'a pas de score Exomiser.",
+      "noInterpretationNetwork": "Ce variant n'a pas été interprété dans votre réseau.",
+      "noClinVarInterpretation": "Ce variant n'a pas été soumis à ClinVar."
     },
     "evidence": {
       "title": "Preuves et conditions",
@@ -981,9 +988,9 @@
         "title": "Affections et phénotypes associés par gène",
         "filters": {
           "searchPlaceholder": "Filtrer par condition ou phenotype",
-          "omim": "OMIM ({{count}})",
-          "orphanet": "Orphanet ({{count}})",
-          "hpo": "HPO ({{count}})"
+          "omim": "OMIM",
+          "orphanet": "Orphanet",
+          "hpo": "HPO"
         },
         "table": {
           "headers": {
@@ -1012,9 +1019,6 @@
       "tab": "Cas",
       "description": "Cas cliniques portant cette variante",
       "commonFilters": {
-        "classifications": {
-          "allClassifications": "Toutes les classifications"
-        },
         "institutions": {
           "allInstitutions": "Tous les laboratoires de diagnostic"
         },
