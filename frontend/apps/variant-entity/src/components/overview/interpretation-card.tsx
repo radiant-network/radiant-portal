@@ -29,12 +29,14 @@ function InterpretationCard({ data, ...props }: InterpretationCardProps) {
           counts={data.interpretation_classification_counts ?? {}}
           emptyText={t('variantEntity.overview.noInterpretationNetwork')}
         />
+        {/*
         <ClassificationSection
           href={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
           title={t('variantEntity.overview.clinVar')}
           counts={data.interpretation_classification_counts ?? {}}
           emptyText={t('variantEntity.overview.noClinVarInterpretation')}
         />
+        */}
       </CardContent>
     </Card>
   );
