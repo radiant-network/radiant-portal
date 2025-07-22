@@ -58,20 +58,20 @@ func (r *MockRepository) GetVariantConsequences(int) (*[]types.VariantConsequenc
 func (m *MockRepository) GetVariantInterpretedCases(int, types.ListQuery) (*[]types.VariantInterpretedCase, *int64, error) {
 	var count = int64(3)
 	return &[]types.VariantInterpretedCase{
-		{CaseId: 1, SeqId: 1, TranscriptId: "T002",
+		{CaseId: 1, SeqId: 1, TranscriptId: "T002", PatientId: 1,
 			InterpretationUpdatedOn: time.Date(2025, 6, 30, 15, 51, 29, 0, time.UTC),
 			ConditionId:             "MONDO:0000002", ConditionName: "blood vessel neoplasm", Classification: "benign",
 			ClassificationCode: "LA6675-8", Zygosity: "HET",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
 			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active",
 			Phenotypes: types.JsonArray[types.Term]{{ID: "HP:0100622", Name: "Maternal seizure"}}},
-		{CaseId: 1, SeqId: 2, TranscriptId: "T001",
+		{CaseId: 1, SeqId: 2, TranscriptId: "T001", PatientId: 2,
 			InterpretationUpdatedOn: time.Date(2025, 6, 27, 19, 51, 0, 0, time.UTC),
 			ConditionId:             "MONDO:0000001", ConditionName: "blood group incompatibility", Classification: "likelyPathogenic",
 			ClassificationCode: "LA26332-9", Zygosity: "HET",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
 			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active", Phenotypes: make(types.JsonArray[types.Term], 0)},
-		{CaseId: 1, SeqId: 1, TranscriptId: "T001",
+		{CaseId: 1, SeqId: 1, TranscriptId: "T001", PatientId: 1,
 			InterpretationUpdatedOn: time.Date(2025, 5, 23, 14, 57, 36, 0, time.UTC),
 			ConditionId:             "MONDO:0000001", ConditionName: "blood group incompatibility", Classification: "pathogenic",
 			ClassificationCode: "LA6668-3", Zygosity: "HET",
@@ -84,6 +84,8 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 	var count = int64(3)
 	return &[]types.VariantUninterpretedCase{
 		{CaseId: 3,
+			SeqId:              1,
+			PatientId:          1,
 			PrimaryConditionId: "MONDO:0700092", PrimaryConditionName: "neurodevelopmental disorder",
 			CreatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
 			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
@@ -94,6 +96,8 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 			ExomiserACMGEvidence:       types.JsonArray[string]{"PVS1", "PS1"},
 		},
 		{CaseId: 4,
+			SeqId:              2,
+			PatientId:          2,
 			PrimaryConditionId: "MONDO:0700092", PrimaryConditionName: "neurodevelopmental disorder",
 			CreatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
 			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
@@ -104,6 +108,8 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 			ExomiserACMGEvidence:       types.JsonArray[string]{"PVS1", "PS1"},
 		},
 		{CaseId: 5,
+			SeqId:              3,
+			PatientId:          3,
 			PrimaryConditionId: "MONDO:0700092", PrimaryConditionName: "neurodevelopmental disorder",
 			CreatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
 			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
@@ -130,10 +136,8 @@ func (m *MockRepository) GetVariantExpandedInterpretedCase(int, int, string) (*t
 
 func (m *MockRepository) GetVariantCasesCount(int) (*types.VariantCasesCount, error) {
 	return &types.VariantCasesCount{
-		CountTotalCases:         int64(4),
-		CountInterpretedCases:   int64(1),
-		CountUninterpretedCases: int64(3),
-		CountInterpretations:    int64(3),
+		CountInterpreted:   int64(1),
+		CountUninterpreted: int64(3),
 	}, nil
 }
 
@@ -356,6 +360,7 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 				"condition_name":"blood vessel neoplasm", 
 				"interpretation_updated_on":"2025-06-30T15:51:29Z", 
 				"observed_phenotypes": [{"id": "HP:0100622", "name": "Maternal seizure"}],
+				"patient_id":1,
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"seq_id":1, 
@@ -371,6 +376,7 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 				"condition_name":"blood group incompatibility", 
 				"interpretation_updated_on":"2025-06-27T19:51:00Z",
 				"observed_phenotypes": [],
+				"patient_id":2,
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"seq_id":2, 
@@ -386,6 +392,7 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 				"condition_name":"blood group incompatibility", 
 				"interpretation_updated_on":"2025-05-23T14:57:36Z",
 				"observed_phenotypes": [],
+				"patient_id":1,
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"seq_id":1, 
@@ -436,6 +443,8 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 				"case_analysis_code":"WGA", 
 				"case_analysis_name":"Whole Genome Analysis", 
 				"case_id":3, 
+				"seq_id": 1,
+				"patient_id": 1,
 				"created_on":"2021-09-12T12:08:00Z", 
 				"observed_phenotypes": [],
 				"performer_lab_code":"CQGC", 
@@ -451,6 +460,8 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 				"case_analysis_code":"WGA", 
 				"case_analysis_name":"Whole Genome Analysis", 
 				"case_id":4, 
+				"seq_id": 2,
+				"patient_id": 2,
 				"created_on":"2021-09-12T12:08:00Z", 
 				"observed_phenotypes": [],
 				"performer_lab_code":"CQGC", 
@@ -466,6 +477,8 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 				"case_analysis_code":"WGA", 
 				"case_analysis_name":"Whole Genome Analysis", 
 				"case_id":5, 
+				"seq_id": 3,
+				"patient_id": 3,
 				"created_on":"2021-09-12T12:08:00Z", 
 				"observed_phenotypes": [{"id": "HP:0100622", "name": "Maternal seizure"}, {"id": "HP:0001562", "name": "Oligohydramnios"}],
 				"performer_lab_code":"CQGC", 
@@ -493,7 +506,7 @@ func Test_GetGermlineVariantCasesCountHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"count_total_cases":4, "count_interpreted_cases": 1, "count_uninterpreted_cases": 3, "count_interpretations": 3}`, w.Body.String())
+	assert.JSONEq(t, `{ "count_interpreted": 1, "count_uninterpreted": 3}`, w.Body.String())
 }
 
 func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {

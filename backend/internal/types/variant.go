@@ -92,11 +92,15 @@ type VariantOverview = struct {
 type VariantInterpretedCase = struct {
 	SeqId                   int             `json:"seq_id" validate:"required"`
 	CaseId                  int             `json:"case_id" validate:"required"`
+	PatientId               int             `json:"patient_id" validate:"required"`
 	TranscriptId            string          `json:"transcript_id" validate:"required"`
 	InterpretationUpdatedOn time.Time       `json:"interpretation_updated_on" validate:"required"`
 	ConditionId             string          `json:"condition_id" validate:"required"`
 	ConditionName           string          `json:"condition_name" validate:"required"`
 	Classification          string          `json:"classification" validate:"required"`
+	SubmitterSampleId       string          `json:"submitter_sample_id,omitempty"`
+	RelationshipToProband   string          `json:"relationship_to_proband,omitempty"`
+	AffectedStatus          string          `json:"affected_status,omitempty"`
 	ClassificationCode      string          `json:"-"`
 	Zygosity                string          `json:"zygosity" validate:"required"`
 	PerformerLabCode        string          `json:"performer_lab_code,omitempty"`
@@ -110,8 +114,13 @@ type VariantInterpretedCase = struct {
 
 type VariantUninterpretedCase = struct {
 	CaseId                     int               `json:"case_id" validate:"required"`
+	SeqId                      int               `json:"seq_id" validate:"required"`
+	PatientId                  int               `json:"patient_id" validate:"required"`
 	CreatedOn                  time.Time         `json:"created_on" validate:"required"`
 	UpdatedOn                  time.Time         `json:"updated_on" validate:"required"`
+	SubmitterSampleId          string            `json:"submitter_sample_id,omitempty"`
+	RelationshipToProband      string            `json:"relationship_to_proband,omitempty"`
+	AffectedStatus             string            `json:"affected_status,omitempty"`
 	PrimaryConditionId         string            `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName       string            `json:"primary_condition_name,omitempty"`
 	Zygosity                   string            `json:"zygosity" validate:"required"`
@@ -147,10 +156,8 @@ type VariantCasesFilters = struct {
 } // @name VariantCasesFilters
 
 type VariantCasesCount struct {
-	CountTotalCases         int64 `json:"count_total_cases" validate:"required"`
-	CountInterpretedCases   int64 `json:"count_interpreted_cases" validate:"required"`
-	CountUninterpretedCases int64 `json:"count_uninterpreted_cases" validate:"required"`
-	CountInterpretations    int64 `json:"count_interpretations" validate:"required"`
+	CountInterpreted   int64 `json:"count_interpreted" validate:"required"`
+	CountUninterpreted int64 `json:"count_uninterpreted" validate:"required"`
 } // @name VariantCasesCount
 
 var VariantTable = Table{
