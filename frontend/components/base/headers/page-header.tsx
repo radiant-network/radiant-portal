@@ -4,6 +4,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Button, ButtonProps } from '../ui/button';
 import { Badge, BadgeProps } from '../ui/badge';
 import { cn } from '@/components/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 const pageHeaderVariants = tv({
   slots: {
@@ -24,9 +25,11 @@ const pageHeaderVariants = tv({
   },
 });
 
+type PageHeaderBadge = BadgeProps & { tooltipsText?: string };
+
 interface EntityHeaderProps extends VariantProps<typeof pageHeaderVariants> {
   isLoading?: boolean;
-  badges?: BadgeProps[];
+  badges?: PageHeaderBadge[];
   buttons?: ButtonProps[];
   title?: string;
   description?: string;
@@ -56,9 +59,21 @@ function PageHeader({ title, badges, buttons, description, isLoading = true, var
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold">{title}</h1>
                 <div className="flex items-center gap-2">
-                  {(badges ?? []).map(badgeProps => (
-                    <Badge {...badgeProps} />
-                  ))}
+                  {(badges ?? []).map(badgeProps => {
+                    if (badgeProps.tooltipsText) {
+                      return (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Badge {...badgeProps} />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {badgeProps.tooltipsText}
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    }
+                    return <Badge {...badgeProps} />;
+                  })}
                 </div>
               </div>
               <h2 className="text-sm text-muted-foreground">{description}</h2>
