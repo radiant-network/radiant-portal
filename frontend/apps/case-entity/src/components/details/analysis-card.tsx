@@ -25,7 +25,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
     { key: 'stat', label: 'Stat' },
     { key: 'asap', label: 'ASAP' },
   ];
-  
+
   const priorityOptions = filterItemPriority(priorityOptionsValues, t);
 
   const statusOptionsValues = [
@@ -204,16 +204,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
           <div className="border rounded-lg overflow-hidden">
             <div className={`grid grid-cols-3 ${caseData.members.length > 1 && 'md:grid-cols-4'}`}>
               <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.taskId')}</div>
-              <div className="p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span>{t('caseEntity.details.type')}</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t('caseEntity.details.date_format_tooltips')}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
+              <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.type')}</div>
               {caseData.members.length > 1 && (
                 <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.patient')}</div>
               )}
@@ -235,7 +226,18 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 <div className="p-3 text-sm">
                   {bioInfo.id}
                 </div>
-                <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge></div>
+                <div className="p-3 text-sm">
+
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {bioInfo.type_name}
+                    </TooltipContent>
+                  </Tooltip>
+
+                </div>
                 {caseData.members.length > 1 && (
                   <div className="p-3 flex items-start flex-row gap-1 flex-wrap">
                     {bioInfo.patients.map((patient: string, index: number) => (
