@@ -778,6 +778,12 @@ export interface CaseTask {
      * @memberof CaseTask
      */
     'type_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTask
+     */
+    'type_name': string;
 }
 /**
  * 

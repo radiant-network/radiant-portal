@@ -117,6 +117,7 @@ type CasePatientClinicalInformation struct {
 type CaseTask struct {
 	ID               int               `json:"id" validate:"required"`
 	TypeCode         string            `json:"type_code" validate:"required"`
+	TypeName         string            `json:"type_name" validate:"required"`
 	CreatedOn        time.Time         `json:"created_on" validate:"required"`
 	PatientsUnparsed string            `json:"-"`
 	Patients         JsonArray[string] `json:"patients" validate:"required"`

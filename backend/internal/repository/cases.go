@@ -376,11 +376,12 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	var tasks []CaseTask
 	tx := r.db.Table("radiant_jdbc.public.task_has_sequencing_experiment tse")
 	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task t ON t.id = tse.task_id")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task_type tt ON t.type_code = tt.code")
 	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = tse.sequencing_experiment_id")
 	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.family f ON f.family_member_id = s.patient_id AND f.case_id = ?", caseId)
 	tx = tx.Where("s.case_id = ?", caseId)
-	tx = tx.Select("t.id, t.type_code, t.created_on, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct s.patient_id) as patient_count")
-	tx = tx.Group("t.id, t.type_code, t.created_on")
+	tx = tx.Select("t.id, t.type_code, t.created_on, tt.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct s.patient_id) as patient_count")
+	tx = tx.Group("t.id, t.type_code, t.created_on, tt.type_name")
 	tx = tx.Order("t.id asc")
 
 	if err := tx.Find(&tasks).Error; err != nil {
