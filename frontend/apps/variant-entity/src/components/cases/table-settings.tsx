@@ -177,7 +177,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
         otherCasesColumnHelper.accessor(row => row.seq_id, {
             id: 'seq_id',
             cell: info => (
-                <div>{info.getValue()}</div>
+                <span>{info.getValue()}</span>
             ),
             header: t('variantEntity.cases.other-table.headers.seq_id'),
             minSize: 80,
@@ -188,7 +188,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
         otherCasesColumnHelper.accessor(row => row.patient_id, {
             id: 'patient_id',
             cell: info => (
-                <div>{info.getValue()}</div>
+                <span>{info.getValue()}</span>
             ),
             header: t('variantEntity.cases.commonHeaders.patient_id'),
             minSize: 80,
@@ -217,7 +217,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
         otherCasesColumnHelper.accessor(row => row.submitter_sample_id, {
             id: 'submitter_sample_id',
             cell: info => (
-                <div>{info.getValue()}</div>
+                <span>{info.getValue()}</span>
             ),
             header: t('variantEntity.cases.other-table.headers.submitter_sample_id'),
             minSize: 80,

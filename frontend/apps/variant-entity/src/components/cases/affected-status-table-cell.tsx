@@ -7,13 +7,13 @@ interface AffectedStatusTableCell {
 function AffectedStatusTableCell({affectedStatus}: AffectedStatusTableCell) {
     const {t} = useI18n();
     if (!affectedStatus) {
-        return <div>-</div>;
+        return <span>-</span>;
     }
 
     return (
-        <div>
+        <span>
             {t(`variantEntity.cases.affected_status.${affectedStatus}`)}
-        </div>
+        </span>
     );
 }
 

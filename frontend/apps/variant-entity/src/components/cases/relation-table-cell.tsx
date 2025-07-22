@@ -5,13 +5,13 @@ interface RelationTableCell {
 function RelationTableCell({relationshipToProband}: RelationTableCell) {
 
     if (!relationshipToProband) {
-        return <div>-</div>;
+        return <span>-</span>;
     }
 
     return (
-        <div>
+        <span>
             { relationshipToProband.charAt(0).toUpperCase() + relationshipToProband.slice(1)}
-        </div>
+        </span>
     );
 }
 
