@@ -11,11 +11,21 @@ import filterItemPriority from '@/case-exploration/components/table-filters/filt
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 import { CaseEntity, CaseTask, Aggregation } from '@/api/api';
 import InformationField from '@/components/base/information/information-field';
+import { Button } from '@/components/base/ui/button';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTrigger } from '@/components/base/ui/alert-dialog';
 
+const TASKS_LIMIT = 4;
+
+// FIXME: this page should refactored. 
+// - Should not using grid for table but flex. Maybe a new component
+// - Export Bioinformatics table to his own component
+// - Manage Bioinformatics Dialog Alert
+// - viewAll translation is duplicated, see where is can be replaced in the project
 function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
   const { t } = useI18n();
 
   // Mock data based on screenshot
+  // FIXME: to remove
   const caseData = data;
 
   // Dropdown options
@@ -25,7 +35,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
     { key: 'stat', label: 'Stat' },
     { key: 'asap', label: 'ASAP' },
   ];
-  
+
   const priorityOptions = filterItemPriority(priorityOptionsValues, t);
 
   const statusOptionsValues = [
@@ -55,6 +65,8 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
 
   const selectedPriority = priorityOptions.find(option => option.key === priority);
   const selectedStatus: IStatusOption | undefined = statusOptions.find(option => option.key === status);
+
+  const { members, tasks } = caseData;
 
   return (
     <Card {...props}>
@@ -202,7 +214,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
 
           {/* Table */}
           <div className="border rounded-lg overflow-hidden">
-            <div className={`grid grid-cols-3 ${caseData.members.length > 1 && 'md:grid-cols-4'}`}>
+            <div className={`grid grid-cols-4 ${members.length > 1 && 'md:grid-cols-5'}`}>
               <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.taskId')}</div>
               <div className="p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
                 <Tooltip>
@@ -214,7 +226,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                   </TooltipContent>
                 </Tooltip>
               </div>
-              {caseData.members.length > 1 && (
+              {members.length > 1 && (
                 <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.patient')}</div>
               )}
               <div className="hidden md:block p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
@@ -229,14 +241,77 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                   </TooltipContent>
                 </Tooltip>
               </div>
+              <div className='p-2 flex justify-end'>
+                <AlertDialog>
+                  <AlertDialogTrigger disabled={tasks.length < TASKS_LIMIT}>
+                    <Button disabled={tasks.length < TASKS_LIMIT} size="sm" variant='outline'>{t('common.viewAll')}</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className='min-h-full min-w-full md:min-w-[80%] md:min-h-[200px]'>
+                    <AlertDialogHeader>{t('caseEntity.details.bioinformatics')}</AlertDialogHeader>
+                    <AlertDialogDescription>
+                      <div className="border">
+                        <div className={`grid grid-cols-3 ${members.length > 1 && 'md:grid-cols-4'}`}>
+                          <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.taskId')}</div>
+                          <div className="p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>{t('caseEntity.details.type')}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {t('caseEntity.details.date_format_tooltips')}
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          {members.length > 1 && (
+                            <div className="p-3 text-sm font-medium text-muted-foreground">{t('caseEntity.details.patient')}</div>
+                          )}
+                          <div className="hidden md:block p-3 text-sm font-medium text-muted-foreground underline decoration-dotted underline-offset-4 cursor-help">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>
+                                  {t('caseEntity.details.createdOn')}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {t('caseEntity.details.date_format_tooltips')}
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </div>
+                      <div className='overflow-auto max-h-[80vh] md:max-h-[400px]'>
+                        {tasks.length > 0 && tasks.map((bioInfo: CaseTask, index: number) => (
+                          <div key={`dialog-${index}`} className={`grid grid-cols-4 ${members.length > 1 && 'md:grid-cols-4'} border-b last:border-b-0`}>
+                            <div className="p-3 text-sm">
+                              {bioInfo.id}
+                            </div>
+                            <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge></div>
+                            {members.length > 1 && (
+                              <div className="p-3 flex items-start flex-row gap-1 flex-wrap">
+                                {bioInfo.patients.map((patient: string, index: number) => (
+                                  <Badge key={index} variant="outline" className="text-xs">{t(`caseEntity.patientInformation.relationships.${patient}`)}</Badge>
+                                ))}
+                              </div>
+                            )}
+                            <div className="hidden md:block p-3 text-sm">{formatDate(bioInfo.created_on, t('common.date')) || '-'}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </AlertDialogDescription>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('common.close')}</AlertDialogCancel>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
-            {caseData.tasks.length > 0 ? caseData.tasks.map((bioInfo: CaseTask, index: number) => (
-              <div key={index} className={`grid grid-cols-3 ${caseData.members.length > 1 && 'md:grid-cols-4'} border-b last:border-b-0`}>
+            {tasks.length > 0 ? tasks.slice(0, TASKS_LIMIT).map((bioInfo: CaseTask, index: number) => (
+              <div key={index} className={`grid grid-cols-4 ${members.length > 1 && 'md:grid-cols-5'} border-b last:border-b-0`}>
                 <div className="p-3 text-sm">
                   {bioInfo.id}
                 </div>
                 <div className="p-3 text-sm"><Badge variant="secondary" className="text-xs">{bioInfo.type_code}</Badge></div>
-                {caseData.members.length > 1 && (
+                {members.length > 1 && (
                   <div className="p-3 flex items-start flex-row gap-1 flex-wrap">
                     {bioInfo.patients.map((patient: string, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">{t(`caseEntity.patientInformation.relationships.${patient}`)}</Badge>
