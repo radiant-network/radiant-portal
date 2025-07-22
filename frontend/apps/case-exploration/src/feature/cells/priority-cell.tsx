@@ -1,6 +1,6 @@
 import { Indicator, IndicatorProps } from '@/components/base/ui/indicator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import EmptyField from '@/components/base/information/empty-field';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { useI18n } from '@/components/hooks/i18n';
 
 type PriorityCellProps = {
@@ -17,7 +17,7 @@ const colors: Record<string, IndicatorProps['variant']> = {
 function PriorityCell({ code }: PriorityCellProps) {
   const { t } = useI18n();
 
-  if (!code) return <EmptyField />;
+  if (!code) return <EmptyCell />;
 
   const color = colors[code];
 

@@ -1,3 +1,5 @@
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+
 interface ConditionTableCellProps {
   conditionId?: string;
   conditionName?: string;
@@ -5,7 +7,7 @@ interface ConditionTableCellProps {
 
 function ConditionTableCell({ conditionId, conditionName }: ConditionTableCellProps) {
   if (!conditionId || !conditionName) {
-    return <div>-</div>;
+    return <EmptyCell />;
   }
 
   return (

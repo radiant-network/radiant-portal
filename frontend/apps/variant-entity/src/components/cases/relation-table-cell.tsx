@@ -1,18 +1,15 @@
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+
 interface RelationTableCell {
-    relationshipToProband?: string;
+  relationshipToProband?: string;
 }
 
-function RelationTableCell({relationshipToProband}: RelationTableCell) {
+function RelationTableCell({ relationshipToProband }: RelationTableCell) {
+  if (!relationshipToProband) {
+    return <EmptyCell />;
+  }
 
-    if (!relationshipToProband) {
-        return <span>-</span>;
-    }
-
-    return (
-        <span>
-            { relationshipToProband.charAt(0).toUpperCase() + relationshipToProband.slice(1)}
-        </span>
-    );
+  return <span>{relationshipToProband.charAt(0).toUpperCase() + relationshipToProband.slice(1)}</span>;
 }
 
 export default RelationTableCell;

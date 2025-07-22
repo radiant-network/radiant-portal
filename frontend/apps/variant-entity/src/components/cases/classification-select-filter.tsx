@@ -17,7 +17,7 @@ function ClassificationSelectFilter({ value = 'all', onChange }: ClassificationS
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{t('variantEntity.cases.commonFilters.classifications.allClassifications')}</SelectItem>
+        <SelectItem value="all">{t('variant.interpretation.classifications.allClassifications')}</SelectItem>
         {filters?.classification.map(classification => (
           <SelectItem key={classification.key} value={classification.key!}>
             {t(`variant.interpretation.classifications.${classification.label}`)}
