@@ -11,7 +11,6 @@ type ClassificationCardProps = CardProps & {
 
 function ClassificationCard({ data, ...props }: ClassificationCardProps) {
   const { t } = useI18n();
-  const params = useParams<{ locusId: string }>();
 
   return (
     <Card {...props}>
@@ -23,7 +22,6 @@ function ClassificationCard({ data, ...props }: ClassificationCardProps) {
       </CardHeader>
       <CardContent>
         <ClassificationSection
-          href={`#`}
           title={t('variantEntity.overview.exomiser')}
           counts={data.exomiser_acmg_classification_counts ?? {}}
           emptyText={t('variantEntity.overview.noExomiserScore')}

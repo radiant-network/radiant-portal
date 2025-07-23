@@ -21,7 +21,7 @@ function AssociatedConditionsCard({ data, ...props }: { data: VariantOverview } 
         )}
         {data?.omim_conditions?.map(condition => (
           <div key={`${condition.panel}${condition.omim_phenotype_id}`} className="flex items-center justify-between">
-            <span className="text-muted-foreground">
+            <span>
               <a
                 href={`https://www.omim.org/entry/${condition.omim_phenotype_id}`}
                 target="_blank"
