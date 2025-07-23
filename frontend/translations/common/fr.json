@@ -1025,7 +1025,18 @@
         },
         "origin": {
           "germline": "Germline",
-          "inherited": "Héréditaire"
+          "inherited": "Héréditaire",
+          "paternal": "Paternel",
+          "biparental": "Biparental",
+          "not_applicable": "Non Applicable",
+          "maternal": "Maternel",
+          "uniparental": "Uniparental",
+          "tested_inconclusive": "Tested inconclusive",
+          "de_novo": "DeNovo",
+          "not_reported": "Non Reporté",
+          "not_provided": "Non Fournie",
+          "unknown": "Inconnu",
+          "somatic": "Somatique"
         }
       },
       "gene": {
