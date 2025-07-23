@@ -76,6 +76,12 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
 
   if (!hasActions) return null;
 
+  /**
+   * If you add a tooltip, dropdown or any menu, you need to add data-[state=closed]:animate-none! to the content
+   * to prevent the content from animating when the menu is closed and causing a flicker.
+   *
+   * This is required because the action items needs to be hidden when the header is not hovered so the title can have more space..
+   */
   return (
     <div className="flex items-center gap-0.5">
       {/* Pin/Unpin column */}
