@@ -1,3 +1,4 @@
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 interface PerformerLabTableCellProps {
@@ -7,7 +8,7 @@ interface PerformerLabTableCellProps {
 
 function PerformerLabTableCell({ performerLabCode, performerLabName }: PerformerLabTableCellProps) {
   if (!performerLabCode || !performerLabName) {
-    return <div>-</div>;
+    return <EmptyCell />;
   }
 
   return (

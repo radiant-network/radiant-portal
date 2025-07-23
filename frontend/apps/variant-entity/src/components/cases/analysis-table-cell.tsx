@@ -1,3 +1,4 @@
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 interface AnalysisTableCellProps {
@@ -7,7 +8,7 @@ interface AnalysisTableCellProps {
 
 const AnalysisTableCell = ({ analysisCode, analysisName }: AnalysisTableCellProps) => {
   if (!analysisCode || !analysisName) {
-    return <div>-</div>;
+    return <EmptyCell />;
   }
 
   return (

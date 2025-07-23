@@ -1,6 +1,6 @@
 import { Button } from '@/components/base/ui/button';
 import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
-import { ArrowUpRight, Info } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router';
 
 type ClassificationSectionProps = {
