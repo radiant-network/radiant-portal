@@ -28,13 +28,14 @@ const tableVariants = tv({
 export type TableProps = React.HTMLAttributes<HTMLTableElement> &
   VariantProps<typeof tableVariants> & {
     containerRef?: React.RefObject<HTMLDivElement>;
+    containerClassName?: string;
   };
 
-function Table({ containerRef, className, size, ...props }: TableProps) {
+function Table({ containerRef, className, containerClassName, size, ...props }: TableProps) {
   const styles = tableVariants({ size });
 
   return (
-    <div ref={containerRef} className="rounded-md relative w-full border overflow-auto max-h-[calc(100vh-120px)]">
+    <div ref={containerRef} className={cn('rounded-md relative w-full border overflow-auto', containerClassName)}>
       <table className={styles.base({ className })} {...props} />
     </div>
   );
@@ -52,7 +53,15 @@ function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectio
 TableBody.displayName = 'TableBody';
 
 function TableFooter({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
-  return <tfoot className={cn('[&_td]:border-t bg-muted/50 font-medium', className)} {...props} />;
+  return (
+    <tfoot
+      className={cn(
+        '[&_th]:border-t [&>tr:last-child>th]:border-b-0 [&>tr>th]:bg-table-accent [&>tr>th]:p-2 [&>tr>th]:font-normal [&>tr>th]:text-foreground',
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 TableFooter.displayName = 'TableFooter';
 

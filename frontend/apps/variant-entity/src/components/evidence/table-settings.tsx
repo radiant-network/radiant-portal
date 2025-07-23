@@ -47,7 +47,6 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
       minSize: 75,
       maxSize: 150,
       size: 120,
-      enableSorting: false,
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.submission_count, {
       id: 'submission_count',
@@ -58,7 +57,6 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
         </TooltipsHeader>
       ),
       size: 80,
-      enableSorting: false,
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.review_status_stars, {
       id: 'review_status_stars',
@@ -70,11 +68,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
           <TooltipContent>{info.row.original.review_status}</TooltipContent>
         </Tooltip>
       ),
-      header: () => (
-        <TooltipsHeader tooltips={t('variantEntity.evidence.clinVar.table.headers.status.tooltip')}>
-          {t('variantEntity.evidence.clinVar.table.headers.status')}
-        </TooltipsHeader>
-      ),
+      header: () => t('variantEntity.evidence.clinVar.table.headers.status'),
       minSize: 60,
       maxSize: 150,
       size: 120,

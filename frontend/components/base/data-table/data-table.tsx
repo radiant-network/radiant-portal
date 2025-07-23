@@ -30,7 +30,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/base/ui/pagination';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 
@@ -88,17 +88,17 @@ export type TableProps<TData> = {
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 } & (
-    | {
+  | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-    | {
+  | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-  );
+);
 
 export interface BaseColumnSettings {
   id: string;
@@ -265,7 +265,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -565,6 +565,21 @@ function TranstackTable<T>({
 
   const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
 
+  const footerGroups = table.getFooterGroups();
+
+  // Check if any columns have footer definitions
+  const hasFooterDefinitions = useMemo(() => {
+    return columns.some(column => column.footer !== undefined);
+  }, [columns]);
+
+  // Determine if pagination should be hidden based on data size vs total
+  const shouldHidePagination = useMemo(() => {
+    if (paginationHidden) return true;
+
+    // Hide pagination if data rows are fewer than total records
+    return total < (pagination?.pageSize || 10);
+  }, [paginationHidden, pagination, total]);
+
   return (
     <div
       className={cn('w-full', {
@@ -574,7 +589,7 @@ function TranstackTable<T>({
       <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
         {/* Total */}
 
-        {tableIndexResultPosition === 'top' && !paginationHidden && (
+        {tableIndexResultPosition === 'top' && !shouldHidePagination && (
           <div className="flex">
             <TableIndexResult
               loading={loadingStates?.total}
@@ -721,13 +736,26 @@ function TranstackTable<T>({
               {/* Render table content */}
               {table.getCenterRows().map(rowFlexRender)}
             </TableBody>
+            {hasFooterDefinitions && (
+              <TableFooter>
+                {footerGroups.map(footerGroup => (
+                  <TableRow key={footerGroup.id}>
+                    {footerGroup.headers.map(header => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableFooter>
+            )}
           </Table>
         </div>
       )}
-      {!paginationHidden && (
+      {!shouldHidePagination && (
         <div className={'flex items-center justify-between py-3 '}>
           <div>
-            {tableIndexResultPosition === 'bottom' && (
+            {tableIndexResultPosition === 'bottom' && !shouldHidePagination && (
               <TableIndexResult
                 loading={loadingStates?.total}
                 pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
