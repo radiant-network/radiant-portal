@@ -86,14 +86,14 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
               variant="ghost"
               iconOnly
               className={cn('size-6 hidden group-hover/header:flex', {
-                visible: isPinningDropdownActive,
+                flex: isPinningDropdownActive,
               })}
             >
               <Pin />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="data-[state=closed]:animate-none!">
               {PIN_COLUMN_ACTIONS.map(pinAction => (
                 <DropdownMenuItem
                   key={`${header.column.id}-${pinAction.key}`}
@@ -119,7 +119,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
               variant="ghost"
               iconOnly
               className={cn('size-6 hidden group-hover/header:flex', {
-                visible: isSorted,
+                flex: isSorted || isPinningDropdownActive,
               })}
               onClick={header.column.getToggleSortingHandler()}
             >
@@ -129,7 +129,9 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
               }[isSorted as string] ?? <ArrowDownUp />}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>{header.column.getCanSort() ? getSortingHeaderTitle(t, isSorted) : undefined}</TooltipContent>
+          <TooltipContent className="data-[state=closed]:animate-none!">
+            {header.column.getCanSort() ? getSortingHeaderTitle(t, isSorted) : undefined}
+          </TooltipContent>
         </Tooltip>
       )}
     </div>
