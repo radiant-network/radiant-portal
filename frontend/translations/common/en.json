@@ -1022,7 +1022,7 @@
         "non_affected": "Unaffected",
         "unknown": "Unknown"
       },
-      "commonHeaders":{
+      "commonHeaders": {
         "patient_id": "Patient",
         "relationship_to_proband": "Relation"
       },
@@ -1081,7 +1081,7 @@
           "test": "Analysis",
           "status": "Status",
           "zygosity_tooltips": "Zygosity",
-          "seq_id" : "Assay",
+          "seq_id": "Assay",
           "affected_status": "Aff. Status",
           "submitter_sample_id": "Sample"
         },

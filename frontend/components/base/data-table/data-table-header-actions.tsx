@@ -8,8 +8,7 @@ import {
   DropdownMenuPortal,
 } from '@/components/base/ui/dropdown-menu';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
-import { TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { Tooltip } from '@radix-ui/react-tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { Button } from '@/components/base/ui/button';
 import { TFunction } from 'i18next';
 import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
@@ -20,22 +19,22 @@ const PIN_COLUMN_ACTIONS: {
   position: ColumnPinningPosition;
   icon: React.ReactNode;
 }[] = [
-    {
-      key: 'common.table.pin.left',
-      position: 'left',
-      icon: <PinIcon className="rotate-90" />,
-    },
-    {
-      key: 'common.table.pin.right',
-      position: 'right',
-      icon: <PinIcon className="ransform -rotate-90" />,
-    },
-    {
-      key: 'common.table.pin.unpin',
-      position: false,
-      icon: <PinOff />,
-    },
-  ];
+  {
+    key: 'common.table.pin.left',
+    position: 'left',
+    icon: <PinIcon className="rotate-90" />,
+  },
+  {
+    key: 'common.table.pin.right',
+    position: 'right',
+    icon: <PinIcon className="ransform -rotate-90" />,
+  },
+  {
+    key: 'common.table.pin.unpin',
+    position: false,
+    icon: <PinOff />,
+  },
+];
 
 /**
  * Use header.column.getNextSortingOrder() to display the next action on sort
@@ -44,10 +43,7 @@ const PIN_COLUMN_ACTIONS: {
  * @param sortingOrder 'asc' | 'desc' | false
  * @returns String
  */
-function getSortingHeaderTitle(
-  t: TFunction<string, undefined>,
-  sortingOrder: SortDirection | boolean,
-): string {
+function getSortingHeaderTitle(t: TFunction<string, undefined>, sortingOrder: SortDirection | boolean): string {
   if (sortingOrder === 'asc') {
     return t('common.table.sort.ascending');
   }
@@ -89,7 +85,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6 flex invisible group-hover/header:visible', {
+              className={cn('size-6 hidden group-hover/header:flex', {
                 visible: isPinningDropdownActive,
               })}
             >
@@ -122,7 +118,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6 flex invisible group-hover/header:visible', {
+              className={cn('size-6 hidden group-hover/header:flex', {
                 visible: isSorted,
               })}
               onClick={header.column.getToggleSortingHandler()}
@@ -133,11 +129,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
               }[isSorted as string] ?? <ArrowDownUp />}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            {header.column.getCanSort()
-              ? getSortingHeaderTitle(t, isSorted)
-              : undefined}
-          </TooltipContent>
+          <TooltipContent>{header.column.getCanSort() ? getSortingHeaderTitle(t, isSorted) : undefined}</TooltipContent>
         </Tooltip>
       )}
     </div>
