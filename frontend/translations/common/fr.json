@@ -980,6 +980,7 @@
     },
     "overview": {
       "title": "Aperçu",
+      "myNetwork": "Mon Réseau",
       "interpretation": "Interprétation",
       "classification": "Classifications",
       "exomiser": "Exomiser",
@@ -1119,7 +1120,7 @@
           "case": "Cas",
           "date": "Date",
           "date.tooltip": "Date de réception",
-          "phenotypesHpo": "Phénotypes HPO",
+          "phenotypesHpo": "Phénotypes (HPO)",
           "zygosity": "Zygosité",
           "inheritance": "Hérédité",
           "institution": "laboratoires de diagnostic",

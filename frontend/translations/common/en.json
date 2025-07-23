@@ -966,6 +966,7 @@
     "overview": {
       "title": "Overview",
       "interpretation": "Interpretation",
+      "myNetwork": "My Network",
       "classification": "Classifications",
       "exomiser": "Exomiser",
       "details": "Details",
@@ -1126,7 +1127,7 @@
           "date": "Date",
           "date.tooltip": "Date received",
           "mondo": "Condition (Mondo)",
-          "phenotypesHpo": "Phenotypes HPO",
+          "phenotypesHpo": "Phenotypes (HPO)",
           "zygosity": "Zygosity",
           "inheritance": "Inheritance",
           "institution": "Diagnostic Lab",

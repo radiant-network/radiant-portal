@@ -34,7 +34,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <AnchorLink href={`/case/entity/${info.getValue()}`} className="text-foreground text-xs font-mono">
+        <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs" variant="secondary">
           {info.getValue()}
         </AnchorLink>
       ),
@@ -163,7 +163,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <AnchorLink href={`/case/entity/${info.getValue()}`} className="text-foreground text-xs font-mono">
+        <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs" variant="secondary">
           {info.getValue()}
         </AnchorLink>
       ),
@@ -246,7 +246,16 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
         return (
           <ExpandableList
             items={items}
-            renderItem={item => <div className="font-medium">{item.name}</div>}
+            renderItem={item => (
+              <AnchorLink
+                href={`https://purl.obolibrary.org/obo/${item.id?.replace(':', '_')}`}
+                size="sm"
+                variant="secondary"
+                target="_blank"
+              >
+                {item.name} <span className="font-mono text-xs text-muted-foreground">({item.id})</span>
+              </AnchorLink>
+            )}
             visibleCount={1}
           />
         );

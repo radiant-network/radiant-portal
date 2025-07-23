@@ -10,6 +10,7 @@ import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { InfoIcon } from 'lucide-react';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 
 function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
@@ -110,14 +111,14 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           </div>
         </div>
         <Separator className="my-6" />
-        <div className="flex items-center gap-6 text-muted-foreground text-sm">
+        <div className="flex items-center gap-6 text-sm">
           {data?.transcript_id && (
             <TranscriptIdLink
               transcriptId={data.transcript_id}
               isManeSelect={data.is_mane_select}
               isManePlus={false}
               isCanonical={data.is_canonical}
-              linkClassName="text-muted-foreground"
+              linkClassName="text-foreground"
             />
           )}
           {data?.exon_rank && data?.exon_total && (
@@ -127,9 +128,9 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           )}
           {data?.dna_change && <div className="font-mono">{data?.dna_change}</div>}
           {data?.rsnumber && (
-            <a href={getDbSnpUrl(data.rsnumber)} className="hover:underline font-mono" target="_blank" rel="noreferrer">
-              <div>{data?.rsnumber}</div>
-            </a>
+            <AnchorLink href={getDbSnpUrl(data.rsnumber)} mono size="sm" target="_blank" rel="noreferrer">
+              {data?.rsnumber}
+            </AnchorLink>
           )}
         </div>
       </CardContent>

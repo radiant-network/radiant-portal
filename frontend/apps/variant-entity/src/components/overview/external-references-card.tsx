@@ -26,7 +26,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
             variant="secondary"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 hover:underline"
+            className="flex items-center gap-1"
             external
           >
             {t('variantEntity.overview.clinVar')}
@@ -51,7 +51,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
             variant="secondary"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 hover:underline"
+            className="flex items-center gap-1"
             external
           >
             {t('variantEntity.overview.dbSNP')}
