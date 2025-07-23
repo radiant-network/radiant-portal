@@ -5,6 +5,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from '@/components/base/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/base/ui/tooltip';
@@ -56,6 +57,85 @@ type FilterButtonProps = {
   withTooltip?: boolean; // new prop for tooltip functionality
 };
 
+const CustomCommandItem = ({
+  option,
+  handleSelect,
+  closeOnSelect,
+  setOpen,
+  actionMode,
+  selected,
+  withTooltip,
+}: {
+  option: IFilterButtonItem;
+  handleSelect: (value: string) => void;
+  closeOnSelect: boolean;
+  setOpen: (open: boolean) => void;
+  actionMode: boolean;
+  selected: string[];
+  withTooltip: boolean;
+}) => {
+  const IconComponent = option.icon;
+  return (
+    <CommandItem
+      key={option.key}
+      onSelect={() => {
+        handleSelect(option.key || '');
+        if (closeOnSelect) {
+          setOpen(false);
+        }
+      }}
+      className="p-0 overflow-hidden"
+    >
+      {actionMode ? (
+        <Button
+          variant="ghost"
+          className="mx-2 my-1.5 p-0 h-full w-full items-center justify-start font-normal"
+        >
+          {option.label}
+        </Button>
+      ) : (
+        <div className="flex row mx-2 my-1.5 p-0 w-full gap-2 items-center overflow-hidden">
+          <Checkbox
+            className="mr-0"
+            checked={selected.includes(option.key || '')}
+            onCheckedChange={() => {
+              handleSelect(option.key || '');
+            }}
+            onMouseDown={e => {
+              e.preventDefault();
+            }}
+          />
+          <div className="flex w-full items-center gap-1 overflow-hidden min-w-0">
+            {IconComponent && <IconComponent size={20} />}
+            {withTooltip ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="truncate">
+                      <span className="flex-1 min-w-0">{option.key}</span>
+                      <span className="text-muted-foreground"> - {option.label}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>{option.tooltip || option.label}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <span className="truncate flex-1 min-w-0">{option.label}</span>
+            )}
+          </div>
+        </div>
+      )}
+    </CommandItem>
+  );
+};
+
+function getSelectedOptions(options: IFilterButtonItem[], selected: string[]) {
+  return options.filter(option => selected.includes(option.key || ''));
+}
+
+function getUnselectedOptions(options: IFilterButtonItem[], selected: string[]) {
+  return options.filter(option => !selected.includes(option.key || ''));
+}
 export default function FilterButton({
   label,
   options,
@@ -74,12 +154,28 @@ export default function FilterButton({
   const [firstOpen, setFirstOpen] = useState(true);
   const selectedCount = selected.length;
 
+  // Store a snapshot of selected/unselected options when popover opens
+  const [optionSnapshot, setOptionSnapshot] = useState<{
+    selectedOptions: IFilterButtonItem[];
+    unselectedOptions: IFilterButtonItem[];
+  }>({
+    selectedOptions: getSelectedOptions(options, selected),
+    unselectedOptions: getUnselectedOptions(options, selected),
+  });
+
+  // When popover opens, update the snapshot
   const handleOpenChange = (newOpen: boolean) => {
     if (firstOpen && openOnAppear) {
       setFirstOpen(false);
       setOpen(openOnAppear);
     } else {
       setOpen(newOpen);
+      if (newOpen) {
+        setOptionSnapshot({
+          selectedOptions: getSelectedOptions(options, selected),
+          unselectedOptions: getUnselectedOptions(options, selected),
+        });
+      }
     }
   };
 
@@ -121,59 +217,35 @@ export default function FilterButton({
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
-              {options.map(option => {
-                const IconComponent = option.icon;
+              {optionSnapshot.selectedOptions.map(option => {
                 return (
-                  <CommandItem
+                  <CustomCommandItem
                     key={option.key}
-                    onSelect={() => {
-                      handleSelect(option.key || '');
-                      if (closeOnSelect) {
-                        setOpen(false);
-                      }
-                    }}
-                    className="p-0 overflow-hidden"
-                  >
-                    {actionMode ? (
-                      <Button
-                        variant="ghost"
-                        className="mx-2 my-1.5 p-0 h-full w-full items-center justify-start font-normal"
-                      >
-                        {option.label}
-                      </Button>
-                    ) : (
-                      <div className="flex row mx-2 my-1.5 p-0 w-full gap-2 items-center overflow-hidden">
-                        <Checkbox
-                          className="mr-0"
-                          checked={selected.includes(option.key || '')}
-                          onCheckedChange={() => {
-                            handleSelect(option.key || '');
-                          }}
-                          onMouseDown={e => {
-                            e.preventDefault();
-                          }}
-                        />
-                        <div className="flex w-full items-center gap-1 overflow-hidden min-w-0">
-                          {IconComponent && <IconComponent size={20} />}
-                          {withTooltip ? (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="truncate">
-                                    <span className="flex-1 min-w-0">{option.key}</span>
-                                    <span className="text-muted-foreground"> - {option.label}</span>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>{option.tooltip || option.label}</TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          ) : (
-                            <span className="truncate flex-1 min-w-0">{option.label}</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </CommandItem>
+                    option={option}
+                    handleSelect={handleSelect}
+                    closeOnSelect={closeOnSelect}
+                    setOpen={setOpen}
+                    actionMode={actionMode}
+                    selected={selected}
+                    withTooltip={withTooltip}
+                  />
+                );
+              })}
+            </CommandGroup>
+            {optionSnapshot.selectedOptions.length > 0 && <CommandSeparator />}
+            <CommandGroup>
+              {optionSnapshot.unselectedOptions.map(option => {
+                return (
+                  <CustomCommandItem
+                    key={option.key}
+                    option={option}
+                    handleSelect={handleSelect}
+                    closeOnSelect={closeOnSelect}
+                    setOpen={setOpen}
+                    actionMode={actionMode}
+                    selected={selected}
+                    withTooltip={withTooltip}
+                  />
                 );
               })}
             </CommandGroup>
@@ -183,7 +255,7 @@ export default function FilterButton({
           <Button
             variant="ghost"
             size="sm"
-            className="size-full"
+            className="size-full border-t-1 rounded-none border-border"
             onClick={handleClear}
             disabled={selectedCount === 0}
           >
