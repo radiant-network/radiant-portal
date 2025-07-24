@@ -5,6 +5,7 @@
     "notAvailableYet": "Pas encore disponible",
     "save": "Sauvegarder",
     "close": "Fermer",
+    "view_all": "Voir tout",
     "editor": {
       "headings": {
         "normal": "Normal",
@@ -996,7 +997,6 @@
       "mostDeleteriousConsequenceNotice": "Ce transcrit a été sélectionné car il représente la conséquence la plus délétère.",
       "viewAllTranscripts": "Voir tous les transcrits",
       "predictionScores": "Scores de prédiction",
-      "viewAll": "Voir tout",
       "associatedConditionsOmim": "Conditions associées (OMIM)",
       "externalReferences": "Références externes",
       "dbSNP": "dbSNP",
