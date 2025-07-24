@@ -149,7 +149,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                   <SelectTrigger className="min-w-[160px] max-w-[180px] h-7 bg-blue-100 text-blue-700">
                     <SelectValue>
                       <div className="flex items-center gap-2 text-xs font-medium">
-                        {selectedStatus && selectedStatus.icon && <selectedStatus.icon className="w-4 h-4 text-blue-500" />}
+                        {selectedStatus && selectedStatus.icon && <selectedStatus.icon className="w-4 h-4 text-blue-700" />}
                         <span>{selectedStatus?.label}</span>
                       </div>
                     </SelectValue>
@@ -158,7 +158,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                     {statusOptions.map((option) => (
                       <SelectItem key={option.key} value={option.key}>
                         <div className="flex items-center gap-2 text-xs font-medium">
-                          {option.icon && <option.icon className="w-4 h-4 text-blue-700" />}
+                          {option.icon && <option.icon className="w-4 h-4" />}
                           <span>{option.label}</span>
                         </div>
                       </SelectItem>
