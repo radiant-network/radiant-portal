@@ -59,8 +59,8 @@ export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TVa
  * Static value for header and row height
  * @note must be update if design change
  */
-const HEADER_HEIGHT = 43;
-const ROW_HEIGHT = 41;
+export const HEADER_HEIGHT = 43;
+export const ROW_HEIGHT = 41;
 
 /**
  * Interface and types
@@ -88,17 +88,17 @@ export type TableProps<TData> = {
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 } & (
-  | {
+    | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-  | {
+    | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-);
+  );
 
 export interface BaseColumnSettings {
   id: string;
@@ -265,7 +265,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -308,7 +308,10 @@ function getRowFlexRender<T>({
 }
 
 /**
- * Table
+ * Data-Table
+ * Should be used for complex and interactive table. 
+ * If you needs to only display data in a table without interaction, local storage or pagination, 
+ * use DisplayTable instead
  *
  * @issue For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
  * @link https://github.com/TanStack/table/issues/4825#issuecomment-1749665597

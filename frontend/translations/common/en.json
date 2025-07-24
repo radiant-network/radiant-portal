@@ -6,6 +6,7 @@
     "notAvailableYet": "Not available yet",
     "save": "Save",
     "close": "Close",
+    "view_all": "View all",
     "editor": {
       "headings": {
         "normal": "Normal",
@@ -980,7 +981,6 @@
       "mostDeleteriousConsequenceNotice": "This transcript was selected because it represents the most deleterious consequence.",
       "viewAllTranscripts": "View all transcripts",
       "predictionScores": "Prediction Scores",
-      "viewAll": "View all",
       "sift": "SIFT",
       "revel": "REVEL",
       "loeuf": "LOEUF",

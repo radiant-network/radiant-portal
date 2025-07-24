@@ -42,16 +42,45 @@ function Table({ containerRef, className, containerClassName, size, ...props }: 
 }
 Table.displayName = 'Table';
 
-function TableHeader({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={className} {...props} />;
+
+/**
+ * TableHeader
+ */
+const tableHeaderVariants = tv({
+  slots: {
+    base: '[&>tr:last-child>td]:border-b-0',
+  },
+  variants: {
+    variant: {
+      default: '',
+    }
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
+
+type TableHeaderType = React.HTMLAttributes<HTMLTableSectionElement> & {
+  variant?: 'default';
+}
+function TableHeader({ className, variant, ...props }: TableHeaderType) {
+  const styles = tableHeaderVariants({ variant });
+  return <thead className={styles.base({ className })} {...props} />;
 }
 TableHeader.displayName = 'TableHeader';
 
+/**
+  * TableBody
+  */
 function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return <tbody className={cn('[&>tr:last-child>td]:border-b-0', className)} {...props} />;
 }
 TableBody.displayName = 'TableBody';
 
+
+/**
+  * TableFooter
+  */
 function TableFooter({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return (
     <tfoot
@@ -65,16 +94,30 @@ function TableFooter({ className, ...props }: React.HTMLAttributes<HTMLTableSect
 }
 TableFooter.displayName = 'TableFooter';
 
-function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) {
-  return (
-    <tr
-      className={cn(
-        'group transition-colors data-[state=selected]:bg-muted [&>td]:border-b [&>th]:border-b hover:bg-table-accent',
-        className,
-      )}
-      {...props}
-    />
-  );
+
+/**
+ * TableRow
+ */
+const tableRowVariants = tv({
+  slots: {
+    base: '',
+  },
+  variants: {
+    variant: {
+      default: 'group transition-colors data-[state=selected]:bg-muted [&>td]:border-b [&>th]:border-b hover:bg-table-accent',
+      borderless: '',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
+type TableRowType = React.HTMLAttributes<HTMLTableRowElement> & {
+  variant?: 'default' | 'borderless';
+}
+function TableRow({ className, variant = 'default', ...props }: TableRowType) {
+  const styles = tableRowVariants({ variant });
+  return <tr className={styles.base({ className })} {...props} />;
 }
 TableRow.displayName = 'TableRow';
 

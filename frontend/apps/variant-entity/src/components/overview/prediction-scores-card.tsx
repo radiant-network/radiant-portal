@@ -243,7 +243,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="xs">
-                  {t('variantEntity.overview.viewAll')}
+                  {t('common.view_all')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
