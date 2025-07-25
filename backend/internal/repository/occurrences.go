@@ -34,7 +34,7 @@ type OccurrencesDAO interface {
 
 func NewOccurrencesRepository(db *gorm.DB) *OccurrencesRepository {
 	if db == nil {
-		log.Fatal("OccurrencesRepository: db is nil")
+		log.Print("OccurrencesRepository: db is nil")
 		return nil
 	}
 	return &OccurrencesRepository{db: db}

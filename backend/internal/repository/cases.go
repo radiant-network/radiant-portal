@@ -34,7 +34,7 @@ type CasesDAO interface {
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
 	if db == nil {
-		log.Fatal("CasesRepository: db is nil")
+		log.Print("CasesRepository: db is nil")
 		return nil
 	}
 	return &CasesRepository{db: db}

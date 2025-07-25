@@ -21,7 +21,7 @@ type SequencingDAO interface {
 
 func NewSequencingRepository(db *gorm.DB) *SequencingRepository {
 	if db == nil {
-		log.Fatal("SequencingRepository: db is nil")
+		log.Print("SequencingRepository: db is nil")
 		return nil
 	}
 	return &SequencingRepository{db: db}

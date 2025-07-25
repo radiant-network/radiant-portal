@@ -21,7 +21,7 @@ type TermsDAO interface {
 
 func NewTermsRepository(db *gorm.DB) *TermsRepository {
 	if db == nil {
-		log.Fatal("TermsRepository: db is nil")
+		log.Print("TermsRepository: db is nil")
 		return nil
 	}
 	return &TermsRepository{db: db}

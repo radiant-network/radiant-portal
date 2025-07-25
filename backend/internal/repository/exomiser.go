@@ -22,7 +22,7 @@ type ExomiserDAO interface {
 
 func NewExomiserRepository(db *gorm.DB) *ExomiserRepository {
 	if db == nil {
-		log.Fatal("ExomiserRepository: db is nil")
+		log.Print("ExomiserRepository: db is nil")
 		return nil
 	}
 	return &ExomiserRepository{db: db}
