@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Button } from '@/components/base/ui/button';
 import { SqonOpEnum, type Statistics, type StatisticsBodyWithSqon, type SqonContent } from '@/api/api';
 import { DEFAULT_EMPTY_QUERY, queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
@@ -20,6 +20,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import { Skeleton } from '@/components/base/ui/skeleton';
+import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
 
 type OccurrenceStatisticsInput = {
   seqId: string;
@@ -32,9 +33,9 @@ const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics
     .then(response => response.data);
 };
 
-function useStatisticsBuilder(field: string, appId: string, useEmptyQuery = false) {
+function useStatisticsBuilder(field: string, appId: string, seqId: string, useEmptyQuery = false) {
   const data: OccurrenceStatisticsInput = {
-    seqId: '1',
+    seqId,
     statisticsBody: {
       field: field,
     },
@@ -52,7 +53,6 @@ function useStatisticsBuilder(field: string, appId: string, useEmptyQuery = fals
     revalidateOnFocus: false,
   });
 }
-
 
 /**
   * noData
@@ -159,6 +159,7 @@ interface IProps {
 export function NumericalFilter({ field }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
+  const { seqId } = useContext(AggregateContext);
   const appId = config.variant_exploration.app_id;
   const fieldKey = field.key;
   const RANGE_OPERATOR_LABELS: Record<
@@ -198,9 +199,8 @@ export function NumericalFilter({ field }: IProps) {
   };
 
   // Fetch statistics for min/max values
-  const { data: defaultStatistics, isLoading: defaultIsLoadingStats } = useStatisticsBuilder(fieldKey, appId, true);
-  const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, appId, false);
-
+  const { data: defaultStatistics, isLoading: defaultIsLoadingStats } = useStatisticsBuilder(fieldKey, appId, seqId, true);
+  const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, appId, seqId, false);
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
   const [numericValue, setNumericValue] = useState<string>('0');
   const [maxValue, setMaxValue] = useState<string>('0');
