@@ -76,6 +76,12 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
 
   if (!hasActions) return null;
 
+  /**
+   * If you add a tooltip, dropdown or any menu, you need to add data-[state=closed]:animate-none! to the content
+   * to prevent the content from animating when the menu is closed and causing a flicker.
+   *
+   * This is required because the action items needs to be hidden when the header is not hovered so the title can have more space..
+   */
   return (
     <div className="flex items-center gap-0.5">
       {/* Pin/Unpin column */}
@@ -86,14 +92,14 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
               variant="ghost"
               iconOnly
               className={cn('size-6 hidden group-hover/header:flex', {
-                visible: isPinningDropdownActive,
+                flex: isPinningDropdownActive,
               })}
             >
               <Pin />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="data-[state=closed]:animate-none!">
               {PIN_COLUMN_ACTIONS.map(pinAction => (
                 <DropdownMenuItem
                   key={`${header.column.id}-${pinAction.key}`}
@@ -119,7 +125,7 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
               variant="ghost"
               iconOnly
               className={cn('size-6 hidden group-hover/header:flex', {
-                visible: isSorted,
+                flex: isSorted || isPinningDropdownActive,
               })}
               onClick={header.column.getToggleSortingHandler()}
             >
@@ -129,7 +135,9 @@ function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
               }[isSorted as string] ?? <ArrowDownUp />}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>{header.column.getCanSort() ? getSortingHeaderTitle(t, isSorted) : undefined}</TooltipContent>
+          <TooltipContent className="data-[state=closed]:animate-none!">
+            {header.column.getCanSort() ? getSortingHeaderTitle(t, isSorted) : undefined}
+          </TooltipContent>
         </Tooltip>
       )}
     </div>
