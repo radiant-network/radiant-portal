@@ -37,7 +37,7 @@ type VariantsDAO interface {
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
 	if db == nil {
-		log.Fatal("VariantsRepository: db is nil")
+		log.Print("VariantsRepository: db is nil")
 		return nil
 	}
 	return &VariantsRepository{db: db}

@@ -19,7 +19,7 @@ type AssaysDAO interface {
 
 func NewAssaysRepository(db *gorm.DB) *AssaysRepository {
 	if db == nil {
-		log.Fatal("AssaysRepository: db is nil")
+		log.Print("AssaysRepository: db is nil")
 		return nil
 	}
 	return &AssaysRepository{db: db}

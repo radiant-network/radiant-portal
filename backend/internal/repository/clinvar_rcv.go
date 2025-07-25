@@ -20,7 +20,7 @@ type ClinvarRCVDAO interface {
 
 func NewClinvarRCVRepository(db *gorm.DB) *ClinvarRCVRepository {
 	if db == nil {
-		log.Fatal("ClinvarRCVRepository: db is nil")
+		log.Print("ClinvarRCVRepository: db is nil")
 		return nil
 	}
 	return &ClinvarRCVRepository{db: db}

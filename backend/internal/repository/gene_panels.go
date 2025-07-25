@@ -22,7 +22,7 @@ type GenePanelsDAO interface {
 
 func NewGenePanelsRepository(db *gorm.DB) *GenePanelsRepository {
 	if db == nil {
-		log.Fatal("GenePanelsRepository: db is nil")
+		log.Print("GenePanelsRepository: db is nil")
 		return nil
 	}
 	return &GenePanelsRepository{db: db}
