@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
+import { useSearchParams } from 'react-router-dom';
 import InformationField from '@/components/base/information/information-field';
 import { useI18n } from '@/components/hooks/i18n';
 import { CellContext } from '@tanstack/react-table';
@@ -16,11 +17,9 @@ import AssayStatusCell, { AssayStatus } from '@/components/base/data-table/cells
 import { assayApi } from '@/utils/api';
 import useSWR from 'swr';
 import { Assay } from '@/api/api';
-import { Skeleton } from '@/components/base/ui/skeleton';
-import DateCell from '@/components/base/data-table/cells/date-cell';
 import { formatDate } from 'date-fns';
-import { Tooltip } from '@/components/base/ui/tooltip';
 import { Badge } from '@/components/base/ui/badge';
+import { CaseEntityTabs } from '@/types';
 
 type AssayInput = {
   seqId: string;
@@ -183,6 +182,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
 
 function ActionsMenuCell({ row }: CellContext<any, any>) {
   const { t } = useI18n();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [assayDialogOpen, setAssayDialogOpen] = useState<boolean>(false);
 
   return (
@@ -200,7 +200,13 @@ function ActionsMenuCell({ row }: CellContext<any, any>) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem disabled={!row.original.has_variants}>
+            <DropdownMenuItem
+              disabled={!row.original.has_variants}
+              onClick={() => {
+                searchParams.set("tab", CaseEntityTabs.Variants);
+                searchParams.set("seq_id", row.original.seq_id);
+                setSearchParams(searchParams, { replace: true });
+              }}>
               <ExternalLink />
               {t('caseExploration.case.actions.view_variant')}
             </DropdownMenuItem>

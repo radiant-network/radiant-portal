@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useState } from 'react';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import { Link, useLocation, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import DetailsTab from './components/details/details-tab';
 import VariantsTab from './components/variants/variants-tab';
 import { CaseEntityTabs } from './types';
@@ -29,9 +29,9 @@ async function fetchCaseEntity(input: CaseEntityInput) {
 
 export default function App() {
   const { t } = useI18n();
-  const location = useLocation();
   const params = useParams<{ caseId: string }>();
-  const [activeTab, setActiveTab] = useState<CaseEntityTabs>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<CaseEntityTabs>(searchParams.get("tab") as CaseEntityTabs ?? CaseEntityTabs.Details);
 
   const { data, error, isLoading } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
     {
@@ -46,19 +46,11 @@ export default function App() {
   );
 
   useEffect(() => {
-    // To handle initial load
-    if (location.hash) {
-      const tab = location.hash.replace('#', '') as CaseEntityTabs;
-      if (Object.values(CaseEntityTabs).includes(tab)) {
-        setActiveTab(tab);
-      }
-    } else {
-      setActiveTab(CaseEntityTabs.Details);
-    }
-  }, [location]);
+    setActiveTab(searchParams.get("tab") as CaseEntityTabs ?? CaseEntityTabs.Details);
+  }, [searchParams])
 
   const handleOnTabChange = useCallback((value: CaseEntityTabs) => {
-    window.history.pushState({}, '', `#${value}`);
+    setSearchParams({ tab: value })
     setActiveTab(value);
   }, []);
 
