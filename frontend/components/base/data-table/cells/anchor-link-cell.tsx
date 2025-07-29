@@ -1,6 +1,29 @@
 import AnchorLink, { AnchorLinkProps } from '../../navigation/anchor-link';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
+import EmptyCell from './empty-cell';
 
-function AnchorLinkCell({ children, ...props }: AnchorLinkProps<any>) {
+
+type AnchorLinkCell = AnchorLinkProps<any> & {
+  tooltip?: React.ReactElement;
+}
+
+
+function AnchorLinkCell({ children, tooltip, ...props }: AnchorLinkProps<any>) {
+  if (!children && !props.href) return <EmptyCell />;
+
+  if (tooltip) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <AnchorLink size='sm' variant='secondary' {...props}>
+            {children}
+          </AnchorLink>
+        </TooltipTrigger>
+        <TooltipContent>{children}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
     <AnchorLink size="sm" variant='secondary' {...props}>
       {children}

@@ -1,25 +1,114 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
-import DataTable from '@/components/base/data-table/data-table';
-import { SortBodyOrderEnum } from '@/api/api';
+import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { SearchCriterion, SortBodyOrderEnum } from '@/api/api';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
-import occurrencesData from './mocks/table-occurences-mock';
-import casesData from './mocks/table-cases-mock';
-
+import TableFilters from '@/apps/case-exploration/src/components/table-filters/table-filters';
+import { createColumnHelper } from '@tanstack/react-table';
 import {
-  getVariantColumns,
-  defaultSettings as occurenceDefaultsSettings,
-} from '../../../apps/case-entity/src/components/variants/occurrence-table/table-settings';
-import {
-  getCaseExplorationColumns,
-  defaultSettings as caseDefaultsSettings,
-} from '../../../apps/case-exploration/src/feature/case-table/table-settings';
-import OccurrenceExpand from '../../../apps/case-entity/src/components/variants/occurrence-table/occurrence-expand';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+  defaultColumnSettings,
+  thirdSetCellColumns,
+  firstSetCellColumns,
+  secondSetCellColumns,
+  secondSetCellData,
+  firstSetCellData,
+  thirdSetCellData,
+  applicationFirstSetCellColumns,
+} from './data-table-mock';
 
-// Purposely used absolute paths since variant app is not a dependency of the components library
-import { useI18n } from '@/components/hooks/i18n';
-import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
+export type MockData = {
+  firstName: string;
+  lastName: string;
+  age: number;
+  visits: number;
+  status: string;
+  progress: number;
+};
+
+const data: MockData[] = [
+  {
+    firstName: 'tanner',
+    lastName: 'linsley',
+    age: 24,
+    visits: 100,
+    status: 'In Relationship',
+    progress: 50,
+  },
+  {
+    firstName: 'tandy',
+    lastName: 'miller',
+    age: 40,
+    visits: 40,
+    status: 'Single',
+    progress: 80,
+  },
+  {
+    firstName: 'joe',
+    lastName: 'dirte',
+    age: 45,
+    visits: 20,
+    status: 'Complicated',
+    progress: 10,
+  },
+  {
+    firstName: 'alice',
+    lastName: 'smith',
+    age: 31,
+    visits: 56,
+    status: 'Single',
+    progress: 76,
+  },
+  {
+    firstName: 'bob',
+    lastName: 'johnson',
+    age: 29,
+    visits: 33,
+    status: 'In Relationship',
+    progress: 40,
+  },
+  {
+    firstName: 'carol',
+    lastName: 'williams',
+    age: 38,
+    visits: 75,
+    status: 'Complicated',
+    progress: 67,
+  },
+  {
+    firstName: 'dave',
+    lastName: 'brown',
+    age: 22,
+    visits: 14,
+    status: 'Single',
+    progress: 91,
+  },
+  {
+    firstName: 'eve',
+    lastName: 'jones',
+    age: 27,
+    visits: 60,
+    status: 'In Relationship',
+    progress: 35,
+  },
+  {
+    firstName: 'frank',
+    lastName: 'garcia',
+    age: 33,
+    visits: 45,
+    status: 'Single',
+    progress: 85,
+  },
+  {
+    firstName: 'grace',
+    lastName: 'martinez',
+    age: 44,
+    visits: 19,
+    status: 'Complicated',
+    progress: 12,
+  },
+];
+
+const columnHelper = createColumnHelper<MockData>();
 
 const config: PortalConfig = {
   variant_entity: {
@@ -43,15 +132,70 @@ const meta = {
   title: 'Data Display/Data Table',
   component: DataTable,
   args: {
-    id: 'variant',
-    columns: [],
-    data: [],
+    id: 'storybook',
+    columns: [
+      columnHelper.accessor('firstName', {
+        cell: info => info.getValue(),
+        header: () => <span>First Name</span>,
+      }),
+      columnHelper.accessor(row => row.lastName, {
+        id: 'lastName',
+        cell: info => <i>{info.getValue()}</i>,
+        header: () => <span>Last Name</span>,
+      }),
+      columnHelper.accessor('age', {
+        header: () => 'Age',
+        cell: info => info.renderValue(),
+      }),
+      columnHelper.accessor('visits', {
+        header: () => <span>Visits</span>,
+      }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+      }),
+      columnHelper.accessor('progress', {
+        header: 'Profile Progress',
+      }),
+    ] as TableColumnDef<MockData, any>[],
+    data,
     defaultServerSorting: [
       {
         field: 'pf_wgs',
         order: SortBodyOrderEnum.Asc,
       },
     ],
+    defaultColumnSettings: createColumnSettings([
+      {
+        id: 'firstName',
+        visible: true,
+        label: 'First Name',
+      },
+      {
+        id: 'lastName',
+        visible: true,
+        label: 'Last Name',
+      },
+      {
+        id: 'age',
+        visible: true,
+        label: 'Age',
+      },
+      {
+        id: 'visits',
+        visible: true,
+        label: 'firstName',
+      },
+      {
+        id: 'status',
+        visible: true,
+        label: 'Status',
+      },
+      {
+        id: 'progress',
+        visible: true,
+        label: 'Profile Progress',
+      },
+    ]),
     loadingStates: {
       total: false,
       list: false,
@@ -60,8 +204,8 @@ const meta = {
       pageIndex: 0,
       pageSize: 10,
     },
-    onPaginationChange: () => {},
-    onServerSortingChange: sorting => {},
+    onPaginationChange: () => { },
+    onServerSortingChange: sorting => { },
     total: 10,
   },
   decorators: [
@@ -73,7 +217,7 @@ const meta = {
       </BrowserRouter>
     ),
   ],
-} satisfies Meta<typeof DataTable>;
+} satisfies Meta<typeof DataTable<any>>;
 
 export default meta;
 
@@ -85,10 +229,6 @@ export const Loading: Story = {
       list: true,
       total: true,
     },
-    data: [],
-    enableColumnOrdering: true,
-    enableFullscreen: true,
-    defaultColumnSettings: occurenceDefaultsSettings,
   },
   render: args => <DataTable {...args} />,
 };
@@ -100,9 +240,6 @@ export const Empty: Story = {
       total: false,
     },
     data: [],
-    enableColumnOrdering: true,
-    enableFullscreen: true,
-    defaultColumnSettings: occurenceDefaultsSettings,
   },
   render: args => <DataTable {...args} />,
 };
@@ -115,228 +252,123 @@ export const Error: Story = {
     },
     data: [],
     hasError: true,
-    enableColumnOrdering: true,
-    enableFullscreen: true,
-    defaultColumnSettings: occurenceDefaultsSettings,
   },
   render: args => <DataTable {...args} />,
 };
 
-export const VariantOccurrence: Story = {
-  args: {
-    id: 'variant-occurence',
-    defaultColumnSettings: occurenceDefaultsSettings,
-  },
-  render: args => {
-    const { t } = useI18n();
 
-    return (
-      <DataTable
-        {...args}
-        pagination={{
-          pageIndex: 0,
-          pageSize: 50,
-        }}
-        loadingStates={{
-          list: false,
-          total: false,
-        }}
-        data={occurrencesData}
-        columns={getVariantColumns(t)}
-        subComponent={occurrence => <OccurrenceExpand occurrence={occurrence} />}
-        enableFullscreen
-        enableColumnOrdering
-      />
-    );
+export const Default: Story = {
+  args: {
+    data: data.slice(0, 10),
+    enableFullscreen: true,
+    enableColumnOrdering: true
   },
+  render: args => <DataTable {...args} />,
 };
 
-export const Cases: Story = {
+export const WithPaginationHidden: Story = {
   args: {
-    id: 'case-exploration',
-    defaultColumnSettings: caseDefaultsSettings,
+    paginationHidden: true,
   },
-  render: args => {
-    const { t } = useI18n();
-
-    return (
-      <DataTable
-        {...args}
-        pagination={{
-          pageIndex: 0,
-          pageSize: 50,
-        }}
-        loadingStates={{
-          list: false,
-          total: false,
-        }}
-        total={12}
-        data={casesData}
-        columns={getCaseExplorationColumns(t)}
-        tableIndexResultPosition="bottom"
-        enableFullscreen
-        enableColumnOrdering
-      />
-    );
-  },
+  render: args => <DataTable {...args} />,
 };
 
-export const WithoutPagination: Story = {
-  args: {
-    id: 'variant-occurence-wo-pagination',
-    defaultColumnSettings: occurenceDefaultsSettings,
-  },
-  render: args => {
-    const { t } = useI18n();
-
-    return (
-      <DataTable
-        {...args}
-        pagination={{
-          pageIndex: 0,
-          pageSize: 50,
-        }}
-        loadingStates={{
-          list: false,
-          total: false,
-        }}
-        data={occurrencesData}
-        columns={getVariantColumns(t)}
-        subComponent={occurrence => <OccurrenceExpand occurrence={occurrence} />}
-        paginationHidden
-        enableFullscreen
-        enableColumnOrdering
-      />
-    );
-  },
-};
-
-export const LoadingWithFiltersGroup: Story = {
+export const WithTableFilters: Story = {
   args: {
     loadingStates: {
-      list: true,
-      total: true,
+      list: false,
+      total: false,
     },
-    data: [],
-    enableColumnOrdering: true,
+    data,
+    enableColumnOrdering: false,
     enableFullscreen: true,
-    defaultColumnSettings: occurenceDefaultsSettings,
     tableIndexResultPosition: 'hidden',
-    TableFilters: FiltersGroupSkeleton,
+    TableFilters: () => (
+      <TableFilters
+        loading={false}
+        setSearchCriteria={() => { }}
+      />
+    )
   },
   render: args => <DataTable {...args} />,
 };
 
 export const WithFooter: Story = {
   args: {
-    id: 'variant-occurence-with-footer',
-    defaultColumnSettings: occurenceDefaultsSettings,
+    columns: [
+      columnHelper.accessor('firstName', {
+        cell: info => info.getValue(),
+        header: () => <span>First Name</span>,
+        footer: () => <span>First Name</span>,
+      }),
+      columnHelper.accessor(row => row.lastName, {
+        id: 'lastName',
+        cell: info => <i>{info.getValue()}</i>,
+        header: () => <span>Last Name</span>,
+        footer: () => <span>Last Name</span>,
+      }),
+      columnHelper.accessor('age', {
+        header: () => 'Age',
+        cell: info => info.renderValue(),
+        footer: () => <span>Age</span>,
+      }),
+      columnHelper.accessor('visits', {
+        header: () => <span>Visits</span>,
+        footer: () => <span>First Name</span>,
+      }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+        footer: () => <span>Status</span>,
+      }),
+      columnHelper.accessor('progress', {
+        header: 'Profile Progress',
+        footer: () => <span>Profile Progress</span>,
+      }),
+    ]
   },
-  render: args => {
-    const { t } = useI18n();
+  render: args => (<DataTable {...args} />)
+};
 
-    // Create columns with footer definitions
-    const columnsWithFooter = [
-      {
-        id: 'row_expand',
-        cell: RowExpandCell,
-        size: 40,
-        enableResizing: false,
-        enablePinning: false,
-      },
-      {
-        id: 'hgvsg',
-        header: 'Variant',
-        accessorKey: 'hgvsg',
-        cell: (info: any) => <div className="overflow-hidden text-ellipsis block">{info.getValue()}</div>,
-        footer: () => <div className="font-medium">Total Variants</div>,
-        size: 150,
-        minSize: 120,
-      },
-      {
-        id: 'symbol',
-        header: 'Gene',
-        accessorKey: 'symbol',
-        cell: (info: any) => <div>{info.getValue()}</div>,
-        footer: () => <div className="font-medium">Gene Count</div>,
-        minSize: 120,
-        enableSorting: false,
-      },
-      {
-        id: 'variant_class',
-        header: 'Type',
-        accessorKey: 'variant_class',
-        cell: (info: any) => <div>{info.getValue()}</div>,
-        footer: () => <div className="font-medium">Type Summary</div>,
-        minSize: 120,
-      },
-      {
-        id: 'pf_wgs',
-        header: 'Frequency',
-        accessorKey: 'pf_wgs',
-        cell: (info: any) => <div>{info.getValue()?.toFixed(6) || 'N/A'}</div>,
-        footer: (info: any) => {
-          const values = info.table
-            .getFilteredRowModel()
-            .rows.map(row => row.getValue('pf_wgs'))
-            .filter(Boolean);
-          const avg = values.length > 0 ? values.reduce((a: number, b: number) => a + b, 0) / values.length : 0;
-          return <div className="font-medium">Avg: {avg.toFixed(6)}</div>;
-        },
-        minSize: 120,
-      },
-      {
-        id: 'genotype_quality',
-        header: 'GQ',
-        accessorKey: 'genotype_quality',
-        cell: (info: any) => <div>{info.getValue()}</div>,
-        footer: (info: any) => {
-          const values = info.table
-            .getFilteredRowModel()
-            .rows.map(row => row.getValue('genotype_quality'))
-            .filter(Boolean);
-          const avg = values.length > 0 ? values.reduce((a: number, b: number) => a + b, 0) / values.length : 0;
-          return <div className="font-medium">Avg: {avg.toFixed(1)}</div>;
-        },
-        minSize: 120,
-      },
-      {
-        id: 'zygosity',
-        header: 'Zygosity',
-        accessorKey: 'zygosity',
-        cell: (info: any) => <div>{info.getValue()}</div>,
-        footer: (info: any) => {
-          const values = info.table.getFilteredRowModel().rows.map(row => row.getValue('zygosity'));
-          const hetCount = values.filter((v: string) => v === 'HET').length;
-          const homCount = values.filter((v: string) => v === 'HOM').length;
-          return (
-            <div className="font-medium">
-              HET: {hetCount}, HOM: {homCount}
-            </div>
-          );
-        },
-        minSize: 120,
-        enableSorting: false,
-      },
-    ];
 
-    return (
+export const BaseCell: Story = {
+  args: {
+    paginationHidden: true
+  },
+  render: args => (
+    <>
       <DataTable
         {...args}
-        pagination={{
-          pageIndex: 0,
-          pageSize: 50,
-        }}
-        loadingStates={{
-          list: false,
-          total: false,
-        }}
-        data={occurrencesData}
-        columns={columnsWithFooter}
-        subComponent={occurrence => <OccurrenceExpand occurrence={occurrence} />}
-        enableFullscreen
-        enableColumnOrdering
+        columns={firstSetCellColumns}
+        data={firstSetCellData}
+        defaultColumnSettings={defaultColumnSettings}
       />
-    );
+      <DataTable
+        {...args}
+        columns={secondSetCellColumns}
+        data={secondSetCellData}
+        defaultColumnSettings={defaultColumnSettings}
+      />
+      <DataTable
+        {...args}
+        columns={thirdSetCellColumns}
+        data={thirdSetCellData}
+        defaultColumnSettings={defaultColumnSettings}
+      />
+    </>
+  )
+};
+
+
+export const ApplicationFeatureCell: Story = {
+  args: {
+    paginationHidden: true
   },
+  render: args => (
+    <DataTable
+      {...args}
+      columns={applicationFirstSetCellColumns}
+      data={secondSetCellColumns}
+      defaultColumnSettings={defaultColumnSettings}
+    />
+  )
 };

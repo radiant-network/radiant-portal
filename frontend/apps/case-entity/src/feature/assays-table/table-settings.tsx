@@ -5,11 +5,10 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
+import SampleIdCell from '@/components/base/data-table/cells/sample-id-cell';
+import ExperimentalStrategyCell from '@/components/base/data-table/cells/experimental-strategy-code-cell';
 import ActionsMenuCell from '../cells/actions-menu-cell';
-import SampleTypeCell from '../cells/sample-type-cell';
-import SampleIdCell from '../cells/sample-id-cell';
-import HistologyCell from '../cells/histology-cell';
-import ExperimentalStrategyCell from '../cells/experimental-strategy-code-cell';
+import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 
 const columnHelper = createColumnHelper<CaseAssay>();
 
@@ -34,7 +33,7 @@ function getColumns(t: TFunction<string, undefined>) {
     // Sample Type 
     columnHelper.accessor(row => row.sample_type_code, {
       id: 'sample_type_code',
-      cell: info => <SampleTypeCell type={info.getValue()} />,
+      cell: info => <BadgeCell className='uppercase' variant='secondary'>{info.getValue()}</BadgeCell>,
       header: t('caseEntity.details.sample_type_code'),
       size: 124,
       minSize: 124,
@@ -42,7 +41,7 @@ function getColumns(t: TFunction<string, undefined>) {
     // Histology
     columnHelper.accessor(row => row.histology_code, {
       id: 'histology_code',
-      cell: info => <HistologyCell code={info.getValue()} />,
+      cell: info => <BadgeCell className='capitalize' variant='secondary'>{info.getValue()}</BadgeCell>,
       header: t('caseEntity.details.histology_code'),
       size: 124,
       minSize: 124,
