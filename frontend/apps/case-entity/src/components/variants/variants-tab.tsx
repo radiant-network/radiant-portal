@@ -22,6 +22,7 @@ import { AggregateContext } from '@/components/feature/query-filters/use-aggrega
 import { OccurrenceCountInput, useOccurencesCountHelper, useOccurencesListHelper } from './hook';
 import { occurrencesApi } from '@/utils/api';
 import { Card, CardContent } from '@/components/base/ui/card';
+import { useSearchParams } from "react-router";
 
 export const SeqIDContext = createContext<string>("");
 
@@ -52,12 +53,17 @@ async function fetchQueryCount(input: OccurrenceCountInput) {
 
 function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const config = useConfig();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useI18n();
 
   // only use assay with variants 
   const assaysWithVariants = caseEntity?.assays.filter(assay => assay.has_variants) ?? [];
 
-  const [seqId, setSeqId] = useState<string>(assaysWithVariants[0]?.seq_id.toString() ?? '');
+  let defaultSeqId = searchParams.get("seq_id") ?? '';
+  if (!defaultSeqId && assaysWithVariants[0]?.seq_id.toString()) {
+    defaultSeqId = assaysWithVariants[0]?.seq_id.toString();
+  }
+  const [seqId, setSeqId] = useState<string>(defaultSeqId);
 
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
@@ -119,6 +125,11 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   });
 
   useEffect(() => {
+    if (searchParams.get("seq_id") != null) {
+      setSeqId(searchParams.get("seq_id") ?? '');
+      return;
+    }
+
     const assays = caseEntity?.assays ?? [];
     if (assays.length === 0) return;
 
@@ -126,7 +137,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     if (assaysWithVariants.length === 0) return;
 
     setSeqId(assaysWithVariants[0].seq_id.toString());
-  }, [caseEntity?.assays]);
+  }, [searchParams]);
 
   useEffect(() => {
     const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);
@@ -171,7 +182,16 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   return (
     <SeqIDContext value={seqId}>
       <div className='bg-background flex flex-col'>
-        <AssayVariantFilters isLoading={isLoading} assays={assaysWithVariants} value={seqId} handleChange={(value: string) => setSeqId(value)} />
+        <AssayVariantFilters
+          isLoading={isLoading}
+          assays={assaysWithVariants}
+          value={seqId}
+          handleChange={(value: string) => {
+            searchParams.set("seq_id", value);
+            setSearchParams(searchParams, { replace: true });
+            setSeqId(value);
+          }}
+        />
         <div className='bg-muted/40 w-full'>
           <div className={`flex flex-1 h-screen overflow-hidden`}>
             <aside className="w-auto min-w-fit h-full shrink-0">
@@ -262,7 +282,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
           </div>
         </div>
       </div>
-    </ SeqIDContext>
+    </SeqIDContext>
   );
 }
 
