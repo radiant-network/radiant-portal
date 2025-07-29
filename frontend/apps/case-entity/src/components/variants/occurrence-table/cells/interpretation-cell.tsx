@@ -7,7 +7,6 @@ import { ZapIcon } from 'lucide-react';
 import InterpretationDialog from '../../interpretation/interpretation-dialog';
 import { useState } from 'react';
 
-import { toast } from "sonner";
 type InterpretationCellProps = {
   occurrence: Occurrence;
 };

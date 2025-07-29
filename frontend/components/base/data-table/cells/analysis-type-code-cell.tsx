@@ -2,9 +2,10 @@ import { Badge } from '@/components/base/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { Biohazard, User, Users } from 'lucide-react';
+import EmptyCell from './empty-cell';
 
 type AnalysisTypeCodeCellProps = {
-  code: 'somatic' | 'germline' | 'germline_family';
+  code: 'somatic' | 'germline' | 'germline_family' | undefined;
   size?: number;
 };
 
@@ -16,6 +17,9 @@ const icons = {
 
 function AnalysisTypeCodeCell({ code, size = 12 }: AnalysisTypeCodeCellProps) {
   const { t } = useI18n();
+
+  if (!code) return <EmptyCell />
+
   const Icon = icons[code];
 
   return (

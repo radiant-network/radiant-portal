@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import EmptyCell from './empty-cell';
 
 type TextTooltipsCell = {
   children: any;
@@ -8,9 +9,9 @@ type TextTooltipsCell = {
 
 function TextTooltipsCell({ children, tooltipsText, asChild = false }: TextTooltipsCell) {
 
-  if (!tooltipsText) {
-    return <span>{children}</span>;
-  }
+  if (!children) return <EmptyCell />;
+
+  if (!tooltipsText) return <span>{children}</span>;
 
   return (
     <Tooltip>

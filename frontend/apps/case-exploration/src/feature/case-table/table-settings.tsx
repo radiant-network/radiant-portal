@@ -7,11 +7,10 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import PriorityCell from '@/components/base/data-table/cells/priority-cell';
+import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import { TFunction } from 'i18next';
-import PriorityCell from '../cells/priority-cell';
-import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '../cells/analysis-type-code-cell';
 import CaseActionsMenuCell from '../cells/case-actions-menu-cell';
-import RequestIdCell from '../cells/request-id-cell';
 
 const columnHelper = createColumnHelper<CaseResult>();
 
@@ -170,7 +169,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Request
     columnHelper.accessor(row => row.request_id, {
       id: 'request_id',
-      cell: info => <RequestIdCell>{info.getValue()}</RequestIdCell>,
+      cell: info => info.getValue(),
       header: t('caseExploration.case.headers.request_id'),
       size: 124,
       minSize: 124,

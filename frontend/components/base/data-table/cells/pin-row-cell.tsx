@@ -3,6 +3,7 @@ import { CellContext } from '@tanstack/react-table';
 import { PinIcon, PinOffIcon } from 'lucide-react';
 
 /**
+ * @FIXME unused at the time
  * Config for TableColumnDef
  * {
  *   id: 'pinRow',

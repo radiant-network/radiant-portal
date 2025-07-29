@@ -1,24 +1,22 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import AnchorLinkWithTooltipsCell from '@/components/base/data-table/cells/anchor-link-with-tooltips-cell';
+import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
+import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import GeneCell from '@/components/base/data-table/cells/gene-cell';
+import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
+import ManeCell from '@/components/base/data-table/cells/mane-cell';
+import OmimCell from '@/components/base/data-table/cells/omim-cell';
+import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
+import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
+import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { Occurrence } from '@/api/api';
 import { TFunction } from 'i18next';
 import { ZapIcon } from 'lucide-react';
 import InterpretationCell from './cells/interpretation-cell';
-import VariantClassCell from './cells/variant-class-cell';
-import GeneCell from './cells/gene-cell';
-import MostDeleteriousConsequenceCell from './cells/most-deleterious-consequence-cell';
-import ManeCell from './cells/mane-cell';
-import OmimCell from './cells/omim-cell';
-import ClinvarCell from './cells/clinvar-cell';
-import GnomadCell from './cells/gnomad-cell';
-import ParticipantFrequencyCell from './cells/participant-frequency-cell';
-import NumberCell from './cells/number-cell';
-import ZygosityCell from './cells/zygosity-cell';
-import ExomiserAcmgCell from './cells/exomiser-acmg-cell';
-import DbSNPCell from './cells/dbsnp-cell';
 
 const columnHelper = createColumnHelper<Occurrence>();
 
@@ -60,13 +58,14 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
       cell: info => (
-        <AnchorLinkWithTooltipsCell
+        <AnchorLinkCell
           href={`/variants/entity/${info.row.original.locus_id}`}
           className="overflow-hidden text-ellipsis block"
           target="_blank"
+          tooltip={info.getValue()}
         >
           {info.getValue()}
-        </AnchorLinkWithTooltipsCell>
+        </AnchorLinkCell>
       ),
       header: t('variant.headers.hgvsg'),
       size: 150,
@@ -75,14 +74,20 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // Type
     columnHelper.accessor(row => row.variant_class, {
       id: 'variant_class',
-      cell: info => <VariantClassCell value={info.getValue()} />,
+      cell: info => <TextTooltipsCell tooltipsText={info.getValue()}>{t(`variant.classes.${info.getValue().toLowerCase()}`)}</TextTooltipsCell>,
       header: t('variant.headers.variant_class'),
       minSize: 120,
     }),
     // dbSNP
     columnHelper.accessor(row => row.rsnumber, {
       id: 'dbSNP',
-      cell: info => <DbSNPCell rsnumber={info.getValue()} />,
+      cell: info => (
+        <AnchorLinkCell
+          href={info.getValue() ? `https://www.ncbi.nlm.nih.gov/snp/${info.getValue()}` : undefined}
+          target="_blank"
+          external
+        />
+      ),
       header: t('variant.headers.dbSNP'),
       size: 100,
       minSize: 100,
@@ -163,7 +168,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     //ACMG. Exo.
     columnHelper.accessor(row => row.exomiser_acmg_classification, {
       id: 'exomiser_acmg_classification',
-      cell: info => <ExomiserAcmgCell code={info.getValue()} />,
+      cell: info => <ClinvarCell codes={[info.getValue()]} />,
       header: () => (
         <TooltipsHeader tooltips={t('variant.headers.exomiser_acmg_classification_tooltips')}>
           {t('variant.headers.exomiser_acmg_classification')}
