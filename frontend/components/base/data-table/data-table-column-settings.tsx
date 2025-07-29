@@ -108,7 +108,7 @@ function TableColumnSettings({
     <span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button iconOnly variant="ghost">
+          <Button iconOnly variant="ghost" className="px-4 py-2 h-8">
             <SettingsIcon />
           </Button>
         </DropdownMenuTrigger>

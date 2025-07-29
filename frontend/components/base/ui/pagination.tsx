@@ -1,9 +1,11 @@
 import * as React from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, MoreHorizontal } from 'lucide-react';
+import { ChevronsLeft, MoreHorizontal } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button, ButtonProps } from '@/base/ui/button';
 import { useI18n } from '@/components/hooks/i18n';
+
+const defaultPaginationStyle = 'gap-1 py-2 px-2.5 h-7 text-xs';
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
@@ -47,7 +49,7 @@ const PaginationFirst = ({ className, ...props }: React.ComponentProps<typeof Pa
   return (
     <PaginationLink
       aria-label={t('common.pagination.aria.first')}
-      className={cn('gap-1 pl-2.5 border-none shadow-none', className)}
+      className={cn(defaultPaginationStyle, 'border-none shadow-none', className)}
       {...props}
     >
       <ChevronsLeft className="h-4 w-4" />
@@ -62,10 +64,9 @@ const PaginationPrevious = ({ className, ...props }: React.ComponentProps<typeof
   return (
     <PaginationLink
       aria-label={t('common.pagination.aria.previous')}
-      className={cn('gap-1 pl-2.5', className)}
+      className={cn(defaultPaginationStyle, className)}
       {...props}
     >
-      <ChevronLeft className="h-4 w-4" />
       <span>{t('common.pagination.previous')}</span>
     </PaginationLink>
   );
@@ -75,9 +76,8 @@ PaginationPrevious.displayName = 'PaginationPrevious';
 const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => {
   const { t } = useI18n();
   return (
-    <PaginationLink aria-label={t('common.pagination.aria.next')} className={cn('gap-1 pr-2.5', className)} {...props}>
+    <PaginationLink aria-label={t('common.pagination.aria.next')} className={cn(defaultPaginationStyle, className)} {...props}>
       <span>{t('common.pagination.next')}</span>
-      <ChevronRight className="h-4 w-4" />
     </PaginationLink>
   );
 };
@@ -103,4 +103,5 @@ export {
   PaginationFirst,
   PaginationNext,
   PaginationPrevious,
+  defaultPaginationStyle,
 };

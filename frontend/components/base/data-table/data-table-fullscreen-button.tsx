@@ -19,7 +19,7 @@ function DataTableFullscreenButton({ active, loading = true, handleClick }: Data
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
-				<Button variant="ghost" iconOnly onClick={() => handleClick(!active)}>
+				<Button className="px-4 py-2 h-8" variant="ghost" iconOnly onClick={() => handleClick(!active)}>
 					{active ? <Minimize /> : <Maximize />}
 				</Button>
 			</TooltipTrigger>
