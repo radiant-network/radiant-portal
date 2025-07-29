@@ -143,7 +143,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Prescriber
     columnHelper.accessor(row => row.prescriber, {
       id: 'prescriber',
-      cell: info => <TextTooltipsCell tooltipsText={info.getValue()}>{info.getValue()}</TextTooltipsCell>,
+      cell: info => info.getValue(),
       header: () => (
         <TooltipsHeader tooltips={t('caseExploration.case.headers.prescriber_tooltips')}>
           {t('caseExploration.case.headers.prescriber')}

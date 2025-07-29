@@ -27,6 +27,7 @@ import PriorityCell from '@/components/base/data-table/cells/priority-cell';
 import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import SampleIdCell from '@/components/base/data-table/cells/sample-id-cell';
+import RatingCell from '@/components/base/data-table/cells/rating-cell';
 
 
 // Settings
@@ -65,6 +66,8 @@ export type BaseCellMockData = {
   case_type?: 'somatic' | 'germline' | 'germline_family';
   sample_id: number;
   relationship_to_proband?: string;
+  review_status_stars?: number;
+  review_status?: string;
 }
 
 const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
@@ -442,6 +445,7 @@ export const secondSetCellData = [
  *   - PriorityCell
  *   - AnalysisTypeCodeCell (AnalysisTypeCodeCellTooltips)
  *   - SampleIdCell
+ *   - RatingCell
  */
 export const thirdSetCellColumns = [
   baseCellColumnHelper.accessor(row => row.priority_code, {
@@ -468,6 +472,14 @@ export const thirdSetCellColumns = [
     cell: info => <SampleIdCell id={info.getValue()} relationship={info.row.original.relationship_to_proband} />,
     header: 'SampleIdCell',
   }),
+  baseCellColumnHelper.accessor(row => row.review_status_stars, {
+    id: 'review_status_stars',
+    cell: (info) => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
+    header: 'RatingCell',
+    minSize: 60,
+    maxSize: 150,
+    size: 120,
+  }),
 ];
 
 
@@ -476,30 +488,40 @@ export const thirdSetCellData = [
     sample_id: 1,
     priority_code: 'asap',
     case_type: 'somatic',
+    review_status_stars: 1,
+    review_status: "review status 1 stars",
   },
   {
     priority_code: 'routine',
     case_type: 'germline',
     sample_id: 2,
     relationship_to_proband: 'mother',
+    review_status_stars: 2,
+    review_status: "review status 2 stars",
   },
   {
     priority_code: 'stat',
     case_type: 'germline_family',
     sample_id: 3,
     relationship_to_proband: 'father',
+    review_status_stars: 3,
+    review_status: "review status 3 stars",
   },
   {
     priority_code: 'urgent',
     case_type: 'germline_family',
     sample_id: 4,
     relationship_to_proband: 'sibling',
+    review_status_stars: 4,
+    review_status: "review status 4 stars",
   },
   {
     priority_code: undefined,
     case_type: undefined,
     sample_id: 4,
     relationship_to_proband: undefined,
+    review_status_stars: undefined,
+    review_status: undefined,
   }
 ];
 

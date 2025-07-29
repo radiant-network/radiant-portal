@@ -2,12 +2,13 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import { TFunction } from 'i18next';
-import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
-import Rating from '@/components/base/rating';
+import RatingCell from 'components/base/data-table/cells/rating-cell';
+import ClinvarCell from 'components/base/data-table/cells/clinvar-cell';
+import AnchorLinkCell from 'components/base/data-table/cells/anchor-link-cell';
 import { Badge } from '@/components/base/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 import DateCell from '@/components/base/data-table/cells/date-cell';
+import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import { ClinvarRCV, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 
 const pathogenicEvidenceColumnHelper = createColumnHelper<ClinvarRCV>();
@@ -38,11 +39,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.clinical_significance, {
       id: 'clinical_significance',
-      cell: info => (
-        <div className="flex overflow-visible!">
-          <ClinVarBadge value={info.getValue()?.[0]?.replace(/\s+/g, '_')} />
-        </div>
-      ),
+      cell: info => <ClinvarCell codes={[info.getValue()?.[0]?.replace(/\s+/g, '_')]} />,
       header: t('variantEntity.evidence.clinVar.table.headers.classification'),
       minSize: 75,
       maxSize: 150,
@@ -60,14 +57,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.review_status_stars, {
       id: 'review_status_stars',
-      cell: info => (
-        <Tooltip>
-          <TooltipTrigger>
-            <Rating rating={info.getValue() || 0} />
-          </TooltipTrigger>
-          <TooltipContent>{info.row.original.review_status}</TooltipContent>
-        </Tooltip>
-      ),
+      cell: (info) => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
       header: () => t('variantEntity.evidence.clinVar.table.headers.status'),
       minSize: 60,
       maxSize: 150,
@@ -76,7 +66,9 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     pathogenicEvidenceColumnHelper.accessor(row => row.origins, {
       id: 'origins',
       cell: info => (
-        <Badge variant="outline">{t(`variantEntity.evidence.clinVar.origin.${info.getValue()?.[0]}`)}</Badge>
+        <BadgeCell variant="outline">
+          {t(`variantEntity.evidence.clinVar.origin.${info.getValue()?.[0]}`)}
+        </BadgeCell>
       ),
       header: t('variantEntity.evidence.clinVar.table.headers.origin'),
       minSize: 60,
@@ -87,8 +79,9 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     pathogenicEvidenceColumnHelper.accessor(row => row.accession, {
       id: 'accession',
       cell: info => (
-        <div className="flex justify-end">
-          <AnchorLink
+        <div className="flex justify-end items-center">
+          <AnchorLinkCell
+            variant="primary"
             href={`https://www.ncbi.nlm.nih.gov/clinvar/${info.getValue()}.${info.row.original.version}`}
             size="xs"
             target="_blank"
@@ -97,7 +90,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
             mono
           >
             {info.getValue()}
-          </AnchorLink>
+          </AnchorLinkCell>
         </div>
       ),
       header: '',
@@ -160,9 +153,9 @@ function getConditionPhenotypeColumns(
 
         return (
           <div className="flex justify-end">
-            <AnchorLink href={href} size="xs" target="_blank" rel="noopener noreferrer" external mono>
+            <AnchorLinkCell href={href} size="xs" target="_blank" rel="noopener noreferrer" external mono>
               {info.getValue()}
-            </AnchorLink>
+            </AnchorLinkCell>
           </div>
         );
       },

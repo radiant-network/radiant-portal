@@ -2,7 +2,7 @@ import { Star } from 'lucide-react';
 import React from 'react';
 import { cn } from '../lib/utils';
 
-interface RatingProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface RatingProps extends React.HTMLAttributes<HTMLDivElement> {
   rating?: number;
   numberOfStars?: number;
   starSize?: number;
