@@ -23,7 +23,7 @@ function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexRes
   }
 
   return (
-    <span className="text-sm text-muted-foreground">
+    <span className="text-xs text-muted-foreground">
       Results {numberWithCommas(from)} - {numberWithCommas(to)} of {numberWithCommas(total)}
     </span>
   );

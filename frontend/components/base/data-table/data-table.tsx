@@ -29,6 +29,7 @@ import {
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
+  defaultPaginationStyle,
 } from '@/components/base/ui/pagination';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
@@ -776,13 +777,13 @@ function TranstackTable<T>({
                   table.setPageSize(Number(value));
                 }}
               >
-                <SelectTrigger className="min-w-[125px] h-8">
-                  <SelectValue>{table.getState().pagination?.pageSize ?? 10}</SelectValue>
+                <SelectTrigger className={cn(defaultPaginationStyle, "min-w-[125px]")}>
+                  <SelectValue>{table.getState().pagination?.pageSize ?? 10} / page</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {[10, 20, 30, 40, 50].map(pageSize => (
-                    <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)}>
-                      {pageSize}
+                    <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)} className="text-xs">
+                      {pageSize} / page
                     </SelectItem>
                   ))}
                 </SelectContent>
