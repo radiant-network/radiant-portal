@@ -8,14 +8,14 @@ type AnchorLinkCell = AnchorLinkProps<any> & {
 }
 
 
-function AnchorLinkCell({ children, tooltip, ...props }: AnchorLinkProps<any>) {
+function AnchorLinkCell({ children, variant = "secondary", tooltip, ...props }: AnchorLinkProps<any>) {
   if (!children && !props.href) return <EmptyCell />;
 
   if (tooltip) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <AnchorLink size='sm' variant='secondary' {...props}>
+          <AnchorLink size='sm' variant={variant} {...props}>
             {children}
           </AnchorLink>
         </TooltipTrigger>
@@ -25,7 +25,7 @@ function AnchorLinkCell({ children, tooltip, ...props }: AnchorLinkProps<any>) {
   }
 
   return (
-    <AnchorLink size="sm" variant='secondary' {...props}>
+    <AnchorLink size="sm" variant={variant} {...props}>
       {children}
     </AnchorLink>
   );
