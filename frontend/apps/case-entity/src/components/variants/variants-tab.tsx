@@ -77,7 +77,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
 
   // Variant count Request
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
 
   const appId = config.variant_exploration.app_id;
