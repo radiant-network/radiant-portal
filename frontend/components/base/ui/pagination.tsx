@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { ChevronsLeft, MoreHorizontal } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, MoreHorizontal } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button, ButtonProps } from '@/base/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { useI18n } from '@/components/hooks/i18n';
 
 const defaultPaginationStyle = 'gap-1 py-2 px-2.5 h-7 text-xs';
@@ -59,6 +60,22 @@ const PaginationFirst = ({ className, ...props }: React.ComponentProps<typeof Pa
 };
 PaginationFirst.displayName = 'PaginationFirst';
 
+const PaginationLast = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => {
+  const { t } = useI18n();
+  return (
+    <PaginationLink
+      aria-label={t('common.pagination.aria.last')}
+      className={cn(defaultPaginationStyle, 'border-none shadow-none', className)}
+      {...props}
+    >
+      <ChevronsRight className="h-4 w-4" />
+      <span>{t('common.pagination.last')}</span>
+    </PaginationLink>
+  );
+};
+PaginationLast.displayName = 'PaginationLast';
+
+
 const PaginationPrevious = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => {
   const { t } = useI18n();
   return (
@@ -94,6 +111,41 @@ const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<'span'
 };
 PaginationEllipsis.displayName = 'PaginationEllipsis';
 
+type PaginationPageSizeProps = {
+  pageSize: number;
+  onPageSizeChange: (pageSize: number) => void;
+  pageSizeOptions?: number[];
+  className?: string;
+};
+
+const PaginationPageSize = ({ 
+  pageSize, 
+  onPageSizeChange, 
+  pageSizeOptions = [10, 20, 30, 40, 50],
+  className 
+}: PaginationPageSizeProps) => {
+  return (
+    <Select
+      value={String(pageSize)}
+      onValueChange={value => {
+        onPageSizeChange(Number(value));
+      }}
+    >
+      <SelectTrigger className={cn(defaultPaginationStyle, "min-w-[125px]", className)}>
+        <SelectValue>{pageSize} / page</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {pageSizeOptions.map(size => (
+          <SelectItem key={`page-size-${size}`} value={String(size)} className="text-xs">
+            {size} / page
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
+PaginationPageSize.displayName = 'PaginationPageSize';
+
 export {
   Pagination,
   PaginationContent,
@@ -101,7 +153,9 @@ export {
   PaginationItem,
   PaginationLink,
   PaginationFirst,
+  PaginationLast,
   PaginationNext,
   PaginationPrevious,
+  PaginationPageSize,
   defaultPaginationStyle,
 };

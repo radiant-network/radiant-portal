@@ -32,7 +32,7 @@ import {
   defaultPaginationStyle,
 } from '@/components/base/ui/pagination';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
+import { PaginationPageSize } from '@/components/base/ui/pagination';
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
@@ -553,7 +553,7 @@ function TranstackTable<T>({
     if (!paginationHidden && onPaginationChange) {
       onPaginationChange({
         pageIndex: 0,
-        pageSize: pagination?.pageSize || 10,
+        pageSize: pagination?.pageSize || 20,
       });
     }
   }, [sorting]);
@@ -581,7 +581,7 @@ function TranstackTable<T>({
     if (paginationHidden) return true;
 
     // Hide pagination if data rows are fewer than total records
-    return total < (pagination?.pageSize || 10);
+    return total < (pagination?.pageSize || 20);
   }, [paginationHidden, pagination, total]);
 
   return (
@@ -598,7 +598,7 @@ function TranstackTable<T>({
             <TableIndexResult
               loading={loadingStates?.total}
               pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
-              pageSize={table.getState().pagination?.pageSize ?? 10}
+              pageSize={table.getState().pagination?.pageSize ?? 20}
               total={total}
             />
           </div>
@@ -658,7 +658,7 @@ function TranstackTable<T>({
       {loadingStates?.list === true && (
         <DataTableSkeletonLoading
           headerGroups={table.getHeaderGroups()}
-          pagination={pagination || { pageIndex: 0, pageSize: 10 }}
+          pagination={pagination || { pageIndex: 0, pageSize: 20 }}
           columnSettings={defaultColumnSettings}
         />
       )}
@@ -763,7 +763,7 @@ function TranstackTable<T>({
               <TableIndexResult
                 loading={loadingStates?.total}
                 pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
-                pageSize={table.getState().pagination?.pageSize ?? 10}
+                pageSize={table.getState().pagination?.pageSize ?? 20}
                 total={total}
               />
             )}
@@ -771,23 +771,12 @@ function TranstackTable<T>({
           <div className="flex items-center gap-2">
             <div>
               {/* PageSize select */}
-              <Select
-                value={String(table.getState().pagination?.pageSize ?? 10)}
-                onValueChange={value => {
-                  table.setPageSize(Number(value));
+              <PaginationPageSize
+                pageSize={table.getState().pagination?.pageSize ?? 20}
+                onPageSizeChange={(pageSize) => {
+                  table.setPageSize(pageSize);
                 }}
-              >
-                <SelectTrigger className={cn(defaultPaginationStyle, "min-w-[125px]")}>
-                  <SelectValue>{table.getState().pagination?.pageSize ?? 10} / page</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {[10, 20, 30, 40, 50].map(pageSize => (
-                    <SelectItem key={`page-size-${pageSize}`} value={String(pageSize)} className="text-xs">
-                      {pageSize} / page
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
             <div>
               {/* Pagination */}

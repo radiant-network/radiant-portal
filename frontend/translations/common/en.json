@@ -175,11 +175,13 @@
         "first": "Go to first page",
         "previous": "Go to previous page",
         "next": "Go to next page",
+        "last": "Go to last page",
         "more": "More pages"
       },
       "first": "First",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "last": "Last"
     },
     "navigation": {
       "dashboard": "Dashboard",
