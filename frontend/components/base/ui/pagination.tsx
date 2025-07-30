@@ -118,12 +118,13 @@ type PaginationPageSizeProps = {
   className?: string;
 };
 
-const PaginationPageSize = ({ 
-  pageSize, 
-  onPageSizeChange, 
+const PaginationPageSize = ({
+  pageSize,
+  onPageSizeChange,
   pageSizeOptions = [10, 20, 30, 40, 50],
-  className 
+  className
 }: PaginationPageSizeProps) => {
+  const { t } = useI18n();
   return (
     <Select
       value={String(pageSize)}
@@ -131,13 +132,13 @@ const PaginationPageSize = ({
         onPageSizeChange(Number(value));
       }}
     >
-      <SelectTrigger className={cn(defaultPaginationStyle, "min-w-[125px]", className)}>
-        <SelectValue>{pageSize} / page</SelectValue>
+      <SelectTrigger className={cn(defaultPaginationStyle, className)}>
+        <SelectValue>{t('common.pagination.size', { size: pageSize })}</SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className='min-w-0 '>
         {pageSizeOptions.map(size => (
           <SelectItem key={`page-size-${size}`} value={String(size)} className="text-xs">
-            {size} / page
+            {t('common.pagination.size', { size })}
           </SelectItem>
         ))}
       </SelectContent>

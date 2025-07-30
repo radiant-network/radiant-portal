@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
 import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import { SearchCriterion, SortBodyOrderEnum } from '@/api/api';
+import { SortBodyOrderEnum } from '@/api/api';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 import TableFilters from '@/apps/case-exploration/src/components/table-filters/table-filters';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -264,6 +264,19 @@ export const Default: Story = {
     enableColumnOrdering: true
   },
   render: args => <DataTable {...args} />,
+};
+
+
+export const WithFullscreen: Story = {
+  args: {
+    enableFullscreen: true,
+  },
+  render: args => (
+    <div>
+      <span><i>Use "Open in new canvas" button at the top right of the screen a better preview</i></span>
+      <DataTable {...args} />
+    </div>
+  ),
 };
 
 export const WithPaginationHidden: Story = {
