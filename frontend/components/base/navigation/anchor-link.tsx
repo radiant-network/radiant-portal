@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react';
+import { ArrowUpRightIcon } from 'lucide-react';
 import React from 'react';
 import { tv, VariantProps } from 'tailwind-variants';
 
@@ -77,7 +77,7 @@ function AnchorLink<C extends React.ElementType = 'a'>({
   return (
     <Component className={styles.base({ className })} {...props}>
       {children}
-      {external && <ExternalLink className={styles.icon()} />}
+      {external && <ArrowUpRightIcon className={styles.icon()} />}
 
     </Component>
   );
