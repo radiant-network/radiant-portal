@@ -29,7 +29,6 @@ import {
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
-  defaultPaginationStyle,
 } from '@/components/base/ui/pagination';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
 import { PaginationPageSize } from '@/components/base/ui/pagination';
@@ -430,6 +429,11 @@ function TranstackTable<T>({
     })) as SortingState,
   );
 
+  // Key Input Map
+  const handleEscEventListener = function() {
+    setIsFullscreen(false);
+  };
+
   // Initialize tanstack table
   const table = useReactTable({
     columns: columns.map(column => {
@@ -504,6 +508,20 @@ function TranstackTable<T>({
     rows: table.getRowModel().rows,
     previousTableCache: tableLocaleStorage,
   });
+
+
+  /**
+   * Add 'Esc' keyboard shortcut for fullscreen mode
+   */
+  useEffect(() => {
+    if (isFullscreen) {
+      document.addEventListener("keydown", handleEscEventListener);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscEventListener);
+    }
+  }, [isFullscreen])
 
   /**
    * Fix scrolling when a subcomponent is open by setting a containerWidth

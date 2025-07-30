@@ -178,6 +178,7 @@
         "more": "Plus de pages"
       },
       "first": "Première",
+      "size": "{{size}} / page",
       "previous": "Précédent",
       "next": "Suivant",
       "last": "Dernière"
