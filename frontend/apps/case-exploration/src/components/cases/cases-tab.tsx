@@ -30,7 +30,7 @@ function CasesTab() {
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
 

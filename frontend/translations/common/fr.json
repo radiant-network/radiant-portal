@@ -174,11 +174,13 @@
         "first": "Aller à la première page",
         "previous": "Aller à la page précédente",
         "next": "Aller à la page suivante",
+        "last": "Aller à la dernière page",
         "more": "Plus de pages"
       },
       "first": "Première",
       "previous": "Précédent",
-      "next": "Suivant"
+      "next": "Suivant",
+      "last": "Dernière"
     },
     "navigation": {
       "dashboard": "Tableau de bord",
