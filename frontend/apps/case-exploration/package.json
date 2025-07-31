@@ -23,7 +23,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "1.8.3",
+    "axios": "1.11.0",
     "components": "file:../../components",
     "lucide-react": "^0.482.0",
     "swr": "^2.3.3",
