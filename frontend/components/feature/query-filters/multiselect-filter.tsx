@@ -88,8 +88,25 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
       return aSelected ? -1 : 1;
     });
 
+    /**
+      * Lowercase the result
+      * Capitalize the First word
+      * Ignore word in parenthese
+      */
     aggregationData?.forEach(item => {
-      item.label = item.key ? replaceUnderscore(item.key).toLowerCase().replace(/^\w/, c => c.toUpperCase()) : item.key
+      item.label = item.key ?
+        replaceUnderscore(item.key)
+          .replace(
+            /\([^)]+\)|[^()]+/g,
+            (part) => {
+              if (part.startsWith('(') && part.endsWith(')')) {
+                return part;
+              }
+              return part.toLowerCase();
+            }
+          )
+          .replace(/^\w/, c => c.toUpperCase())
+        : item.key
     });
 
     setItems(aggregationData || []);
