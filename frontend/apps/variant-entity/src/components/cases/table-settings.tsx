@@ -4,19 +4,18 @@ import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import { TFunction } from 'i18next';
-import { Badge } from '@/components/base/ui/badge';
 import { EllipsisVertical } from 'lucide-react';
 import { Button } from '@/components/base/ui/button';
 import { Term, VariantInterpretedCase, VariantUninterpretedCase } from '@/api/api';
-import ConditionTableCell from './condition-table-cell';
-import PerformerLabTableCell from './performer-lab-table-cell';
-import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
-import StatusCodeTableCell from './status-code-table-cell';
-import AnalysisTableCell from './analysis-table-cell';
+import ConditionCell from '@/components/base/data-table/cells/condition-cell';
+import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
+import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
+import BadgeCell from '@/components/base/data-table/cells/badge-cell';
+import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import AffectedStatusCell from './affected-status-table-cell';
-import RelationCell from './relation-table-cell';
-import ExpandableList from '@/components/base/list/expandable-list';
+import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
+import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 
 const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>();
@@ -34,9 +33,11 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs" variant="secondary">
-          {info.getValue()}
-        </AnchorLink>
+        <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband}>
+          <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs" variant="secondary">
+            {info.getValue()}
+          </AnchorLink>
+        </RelationshipToProbandCell>
       ),
       header: t('variantEntity.cases.interpreted-table.headers.case'),
       size: 120,
@@ -56,27 +57,9 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       minSize: 80,
       maxSize: 150,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.patient_id, {
-      id: 'patient_id',
-      cell: info => <div>{info.getValue()}</div>,
-      header: t('variantEntity.cases.commonHeaders.patient_id'),
-      minSize: 80,
-      maxSize: 150,
-      size: 120,
-      enableSorting: false,
-    }),
-    interpretedCasesColumnHelper.accessor(row => row.relationship_to_proband, {
-      id: 'relationship_to_proband',
-      cell: info => <RelationCell relationshipToProband={info.getValue()} />,
-      header: t('variantEntity.cases.commonHeaders.relationship_to_proband'),
-      minSize: 80,
-      maxSize: 150,
-      size: 120,
-      enableSorting: false,
-    }),
     interpretedCasesColumnHelper.accessor(row => row.condition_name, {
       id: 'condition_name',
-      cell: info => <ConditionTableCell conditionId={info.row.original.condition_id} conditionName={info.getValue()} />,
+      cell: info => <ConditionCell conditionId={info.row.original.condition_id} conditionName={info.getValue()} />,
       header: t('variantEntity.cases.interpreted-table.headers.mondo'),
       minSize: 120,
       maxSize: 350,
@@ -84,14 +67,14 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.classification, {
       id: 'classification',
-      cell: info => <ClinVarBadge value={info.getValue()} />,
+      cell: info => <ClinvarCell codes={[info.getValue()]} />,
       header: t('variantEntity.cases.interpreted-table.headers.classification'),
       minSize: 150,
       maxSize: 250,
     }),
     interpretedCasesColumnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
-      cell: info => <Badge variant="outline">{info.getValue()}</Badge>,
+      cell: info => <BadgeCell variant="outline">{info.getValue()}</BadgeCell>,
       header: t('variantEntity.cases.interpreted-table.headers.zygosity'),
       size: 120,
       minSize: 80,
@@ -100,7 +83,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.transcript_id, {
       id: 'inheritance',
-      cell: info => <div className="text-muted-foreground">{'-'}</div>,
+      cell: info => <EmptyCell />,
       header: t('variantEntity.cases.interpreted-table.headers.inheritance'),
       size: 130,
       minSize: 130,
@@ -110,10 +93,9 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.performer_lab_code, {
       id: 'performer_lab_code',
       cell: info => (
-        <PerformerLabTableCell
-          performerLabCode={info.getValue()}
-          performerLabName={info.row.original.performer_lab_name}
-        />
+        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>
+          {info.getValue()}
+        </TextTooltipsCell>
       ),
       header: t('variantEntity.cases.interpreted-table.headers.institution'),
       minSize: 100,
@@ -124,7 +106,9 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
       cell: info => (
-        <AnalysisTableCell analysisCode={info.getValue()} analysisName={info.row.original.case_analysis_name} />
+        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>
+          {info.getValue()}
+        </TextTooltipsCell>
       ),
       header: t('variantEntity.cases.interpreted-table.headers.test'),
       minSize: 80,
@@ -134,7 +118,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.status_code, {
       id: 'status_code',
-      cell: info => <StatusCodeTableCell statusCode={info.getValue()} />,
+      cell: info => <AssayStatusCell status={info.getValue()} />,
       header: t('variantEntity.cases.interpreted-table.headers.status'),
       minSize: 100,
       maxSize: 150,
@@ -163,9 +147,11 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs" variant="secondary">
-          {info.getValue()}
-        </AnchorLink>
+        <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband} >
+          <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs">
+            {info.getValue()}
+          </AnchorLink>
+        </RelationshipToProbandCell>
       ),
       header: t('variantEntity.cases.other-table.headers.case'),
       minSize: 80,
@@ -182,27 +168,9 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.patient_id, {
-      id: 'patient_id',
-      cell: info => <span>{info.getValue()}</span>,
-      header: t('variantEntity.cases.commonHeaders.patient_id'),
-      minSize: 80,
-      maxSize: 150,
-      size: 120,
-      enableSorting: false,
-    }),
-    otherCasesColumnHelper.accessor(row => row.relationship_to_proband, {
-      id: 'relationship_to_proband',
-      cell: info => <RelationCell relationshipToProband={info.getValue()} />,
-      header: t('variantEntity.cases.commonHeaders.relationship_to_proband'),
-      minSize: 80,
-      maxSize: 150,
-      size: 120,
-      enableSorting: false,
-    }),
     otherCasesColumnHelper.accessor(row => row.affected_status, {
       id: 'affected_status',
-      cell: info => <AffectedStatusCell affectedStatus={info.getValue()} />,
+      cell: info => <AffectedStatusCell status={info.getValue()} />,
       header: t('variantEntity.cases.other-table.headers.affected_status'),
       minSize: 80,
       maxSize: 150,
@@ -239,17 +207,14 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
           return nameA.localeCompare(nameB);
         });
 
-        if (items.length === 0) {
-          return <EmptyCell />;
-        }
-
         return (
-          <ExpandableList
+          <DialogListCell
+            header={t('variantEntity.cases.other-table.headers.phenotypesHpo')}
             items={items}
-            renderItem={item => (
+            renderItem={(item) => (
               <AnchorLink
                 href={`https://purl.obolibrary.org/obo/${item.id?.replace(':', '_')}`}
-                size="sm"
+                size="xs"
                 variant="secondary"
                 target="_blank"
               >
@@ -261,13 +226,13 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
         );
       },
       header: t('variantEntity.cases.other-table.headers.phenotypesHpo'),
-      minSize: 120,
+      minSize: 140,
       maxSize: 350,
       enableSorting: false,
     }),
     otherCasesColumnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
-      cell: info => <Badge variant="outline">{info.getValue()}</Badge>,
+      cell: info => <BadgeCell variant="outline">{info.getValue()}</BadgeCell>,
       header: t('variantEntity.cases.other-table.headers.zygosity'),
       size: 120,
       minSize: 80,
@@ -286,10 +251,9 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.performer_lab_code, {
       id: 'performer_lab_code',
       cell: info => (
-        <PerformerLabTableCell
-          performerLabCode={info.getValue()}
-          performerLabName={info.row.original.performer_lab_name}
-        />
+        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>
+          {info.getValue()}
+        </TextTooltipsCell>
       ),
       header: t('variantEntity.cases.other-table.headers.institution'),
       minSize: 100,
@@ -300,7 +264,9 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
       cell: info => (
-        <AnalysisTableCell analysisCode={info.getValue()} analysisName={info.row.original.case_analysis_name} />
+        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>
+          {info.getValue()}
+        </TextTooltipsCell>
       ),
       header: t('variantEntity.cases.other-table.headers.test'),
       minSize: 80,
@@ -310,7 +276,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     }),
     otherCasesColumnHelper.accessor(row => row.status_code, {
       id: 'status_code',
-      cell: info => <StatusCodeTableCell statusCode={info.getValue()} />,
+      cell: info => <AssayStatusCell status={info.getValue()} />,
       header: t('variantEntity.cases.other-table.headers.status'),
       minSize: 100,
       maxSize: 150,

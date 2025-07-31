@@ -14,6 +14,39 @@ e.g. `InterpretationCell` needs `InterpretationDialog` to works, a component uni
 
 
 
+If the cell is only a basic component, you should still create an cell component equivalent to manage the `EmptyCell` state.
+
+e.g.
+
+```typescript
+// affected-status-badge-cell.tsx
+import AffectedStatusBadge, { AffectedStatusBadgeProps } from '../../badges/affected-status-badge';
+import EmptyCell from './empty-cell';
+
+function AffectedStatusCell({ status, ...props }: AffectedStatusBadgeProps) {
+  if (!status) return <EmptyCell />;
+  return <AffectedStatusBadge status={status} {...props} />;
+}
+
+export default AffectedStatusCell;
+
+// affected-status-badge.tsx
+import AffectedStatusBadge, { AffectedStatusBadgeProps } from '../../badges/affected-status-badge';
+import EmptyCell from './empty-cell';
+
+function AffectedStatusCell({ status, ...props }: AffectedStatusBadgeProps) {
+  if (!status) return <EmptyCell />;
+  return <AffectedStatusBadge status={status} {...props} />;
+}
+
+export default AffectedStatusCell;
+
+```
+
+
+
+
+
 ### Storybook
 
 Every new cell should be place inside data-table storybook. The goal is always to prioritize reusability.

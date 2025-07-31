@@ -5,7 +5,7 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
-import SampleIdCell from '@/components/base/data-table/cells/sample-id-cell';
+import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import ExperimentalStrategyCell from '@/components/base/data-table/cells/experimental-strategy-code-cell';
 import ActionsMenuCell from '../cells/actions-menu-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
@@ -25,7 +25,11 @@ function getColumns(t: TFunction<string, undefined>) {
     // Sample ID
     columnHelper.accessor(row => row.sample_id, {
       id: 'sample_id',
-      cell: info => <SampleIdCell id={info.getValue()} relationship={info.row.original.relationship_to_proband} />,
+      cell: info => (
+        <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband}>
+          <>{info.getValue()}</>
+        </RelationshipToProbandCell>
+      ),
       header: t('caseEntity.details.sample_id'),
       size: 124,
       minSize: 124,

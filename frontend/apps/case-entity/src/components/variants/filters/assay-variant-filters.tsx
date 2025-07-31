@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/components/lib/utils";
 import { Skeleton } from "@/components/base/ui/skeleton";
 import { getBadgeAffectedCodeColor } from "@/components/utils";
+import AffectedStatusBadge, { AffectedStatusProps } from "@/components/base/badges/affected-status-badge";
 
 
 function AssayVariantFiltersSelectValue({ relationship_to_proband, request_id }: CaseAssay) {
@@ -97,9 +98,7 @@ function AssayVariantFilters({ assays = [], value, handleChange, isLoading }: As
         </SelectContent>
       </Select>
       {selectedAssay?.affected_status_code && (
-        <Badge variant={getBadgeAffectedCodeColor(selectedAssay.affected_status_code)}>
-          {t(`caseEntity.variants.filters.affected_status_code.${selectedAssay?.affected_status_code}`)}
-        </Badge>
+        <AffectedStatusBadge status={selectedAssay.affected_status_code as AffectedStatusProps} />
       )}
       <Badge variant="outline"><FlaskConical />{selectedAssay?.sample_id}</Badge>
       <Separator className="h-6" orientation="vertical" />

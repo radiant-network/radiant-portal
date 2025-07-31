@@ -8,7 +8,7 @@ type AnchorLinkCell = AnchorLinkProps<any> & {
 }
 
 
-function AnchorLinkCell({ children, variant = "secondary", tooltip, ...props }: AnchorLinkProps<any>) {
+function AnchorLinkCell({ children, variant = "primary", tooltip, ...props }: AnchorLinkProps<any>) {
   if (!children && !props.href) return <EmptyCell />;
 
   if (tooltip) {

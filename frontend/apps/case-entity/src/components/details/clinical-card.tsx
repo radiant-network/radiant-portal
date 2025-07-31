@@ -8,7 +8,7 @@ import { ArrowUpRightIcon, AudioWaveformIcon } from 'lucide-react';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import { ComponentProps } from 'react';
 import { cn } from '@/components/lib/utils';
-import { getBadgeAffectedCodeColor } from '../utils';
+import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import { Badge } from '@/components/base/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
@@ -116,9 +116,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
                   {/* Affected Status Code */}
                   {member.affected_status_code && (
                     <div>
-                      <Badge variant={getBadgeAffectedCodeColor(member.affected_status_code)}>
-                        {t(`caseEntity.variants.filters.affected_status_code.${member.affected_status_code}`)}
-                      </Badge>
+                      <AffectedStatusBadge status={member.affected_status_code as AffectedStatusProps} />
                     </div>
                   )}
 
