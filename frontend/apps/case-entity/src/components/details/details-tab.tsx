@@ -14,16 +14,29 @@ type DetailsTabProps = {
 
 function DetailsTab({ caseEntity, isLoading }: DetailsTabProps) {
   if (isLoading || !caseEntity) {
-    return <CaseEntityDetailsSkeleton />;
+    return (
+      <div className="max-w-8xl mx-auto w-full">
+        <CaseEntityDetailsSkeleton />
+      </div>
+    );
   }
 
   return (
-    <div className="flex justify-center">
-      <div className="gap-y-2 md:gap-6 grid grid-cols-1 lg:grid-cols-3 lg:grid-cols-[1fr_minmax(auto,480px)] max-w-8xl justify-center">
-        <AnalysisCard className="lg:col-span-2 min-w-0 border-0 rounded-none md:border md:rounded-xl" data={caseEntity} />
-        <PatientInformationCard className="col-span-1 h-auto size-max w-full lg:w-[480px] justify-self-end border-0 rounded-none md:border md:rounded-xl" data={caseEntity} />
+    <div className="max-w-8xl mx-auto w-full">
+      <div className="gap-y-2 md:gap-6 grid grid-cols-1 lg:grid-cols-3 lg:grid-cols-[1fr_minmax(auto,480px)] justify-center">
+        <AnalysisCard
+          className="lg:col-span-2 min-w-0 border-0 rounded-none md:border md:rounded-xl"
+          data={caseEntity}
+        />
+        <PatientInformationCard
+          className="col-span-1 h-auto size-max w-full lg:w-[480px] justify-self-end border-0 rounded-none md:border md:rounded-xl"
+          data={caseEntity}
+        />
         <ClinicalCard className="lg:col-span-3 border-0 rounded-none md:border md:rounded-xl" data={caseEntity} />
-        <AssayInformationsCard className="lg:col-span-3 border-0 rounded-none md:border md:rounded-xl" data={caseEntity} />
+        <AssayInformationsCard
+          className="lg:col-span-3 border-0 rounded-none md:border md:rounded-xl"
+          data={caseEntity}
+        />
       </div>
     </div>
   );

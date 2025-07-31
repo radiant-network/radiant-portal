@@ -10,6 +10,7 @@ import { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
 import { useParams } from 'react-router';
 
 import { CasesFiltersProvider } from './cases-filters-context';
+import { tabContentClassName } from '@/style';
 
 enum Tabs {
   InterpretedCases = 'InterpretedCases',
@@ -52,32 +53,34 @@ function CasesTab() {
   const filtersQuery = useSWR<VariantCasesFilters, ApiError, string>('cases-filters', fetchCasesFilters);
 
   return (
-    <CasesFiltersProvider filters={filtersQuery.data} isLoading={filtersQuery.isLoading}>
-      <Card>
-        <CardContent className="space-y-6">
-          <TabsNav value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsListItem value={Tabs.InterpretedCases}>
-                {t('variantEntity.cases.interpreted-table.title', {
-                  count: data?.count_interpreted,
-                })}
-              </TabsListItem>
-              <TabsListItem value={Tabs.OtherCases}>
-                {t('variantEntity.cases.other-table.title', {
-                  count: data?.count_uninterpreted,
-                })}
-              </TabsListItem>
-            </TabsList>
-            <TabsContent value={Tabs.InterpretedCases}>
-              <InterpretedCasesTable />
-            </TabsContent>
-            <TabsContent value={Tabs.OtherCases}>
-              <UninterpretedCasesTable />
-            </TabsContent>
-          </TabsNav>
-        </CardContent>
-      </Card>
-    </CasesFiltersProvider>
+    <div className={tabContentClassName}>
+      <CasesFiltersProvider filters={filtersQuery.data} isLoading={filtersQuery.isLoading}>
+        <Card>
+          <CardContent className="space-y-6">
+            <TabsNav value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsListItem value={Tabs.InterpretedCases}>
+                  {t('variantEntity.cases.interpreted-table.title', {
+                    count: data?.count_interpreted,
+                  })}
+                </TabsListItem>
+                <TabsListItem value={Tabs.OtherCases}>
+                  {t('variantEntity.cases.other-table.title', {
+                    count: data?.count_uninterpreted,
+                  })}
+                </TabsListItem>
+              </TabsList>
+              <TabsContent value={Tabs.InterpretedCases}>
+                <InterpretedCasesTable />
+              </TabsContent>
+              <TabsContent value={Tabs.OtherCases}>
+                <UninterpretedCasesTable />
+              </TabsContent>
+            </TabsNav>
+          </CardContent>
+        </Card>
+      </CasesFiltersProvider>
+    </div>
   );
 }
 
