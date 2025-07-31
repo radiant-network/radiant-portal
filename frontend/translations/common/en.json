@@ -1072,7 +1072,7 @@
     },
     "cases": {
       "title": "{{count}} Cases",
-      "tab": "Cases",
+      "tab": "Patients",
       "description": "Clinical cases which carry this variant",
       "affected_status": {
         "affected": "Affected",
@@ -1118,7 +1118,7 @@
           "searchInputPlaceholder": "Filter MONDO condition"
         },
         "expend": {
-          "patientId": "Case’s proband ID",
+          "patientId": "Patient ID",
           "copy": "Copy",
           "copySuccess": "Copied to clipboard"
         }

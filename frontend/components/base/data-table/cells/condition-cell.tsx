@@ -1,11 +1,12 @@
+
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 
-interface ConditionTableCellProps {
+interface ConditionCellProps {
   conditionId?: string;
   conditionName?: string;
 }
 
-function ConditionTableCell({ conditionId, conditionName }: ConditionTableCellProps) {
+function ConditionCell({ conditionId, conditionName }: ConditionCellProps) {
   if (!conditionId || !conditionName) {
     return <EmptyCell />;
   }
@@ -34,4 +35,4 @@ function ConditionTableCell({ conditionId, conditionName }: ConditionTableCellPr
   );
 }
 
-export default ConditionTableCell;
+export default ConditionCell;

@@ -1,10 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { User } from 'lucide-react';
 import { ComponentProps, useState } from 'react';
-import { Badge } from '@/components/base/ui/badge';
 import { formatDate } from 'date-fns';
 import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
 import filterItemPriority from '@/case-exploration/components/table-filters/filter-item-priority';

@@ -1,5 +1,5 @@
 
-import { VepImpact } from '@/api/api';
+import { Term, VepImpact } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import AssayStatusCell, { AssayStatus } from '@/components/base/data-table/cells/assay-status-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
@@ -26,8 +26,76 @@ import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-
 import PriorityCell from '@/components/base/data-table/cells/priority-cell';
 import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import SampleIdCell from '@/components/base/data-table/cells/sample-id-cell';
+import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RatingCell from '@/components/base/data-table/cells/rating-cell';
+import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
+import ConditionCell from '@/components/base/data-table/cells/condition-cell';
+import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+
+
+const observed_phenotypes = [
+  {
+    "id": "HP:0001680",
+    "name": "Coarctation of aorta"
+  },
+  {
+    "id": "HP:0000028",
+    "name": "Cryptorchidism"
+  },
+  {
+    "id": "HP:0001998",
+    "name": "Neonatal hypoglycemia"
+  },
+  {
+    "id": "HP:0002197",
+    "name": "Generalized-onset seizure"
+  },
+  {
+    "id": "HP:0010519",
+    "name": "Increased fetal movement"
+  },
+  {
+    "id": "HP:0001631",
+    "name": "Atrial septal defect"
+  },
+  {
+    "id": "HP:0002575",
+    "name": "Tracheoesophageal fistula"
+  },
+  {
+    "id": "HP:0001787",
+    "name": "Abnormal delivery"
+  },
+  {
+    "id": "HP:0000062",
+    "name": "Ambiguous genitalia"
+  },
+  {
+    "id": "HP:0001518",
+    "name": "Small for gestational age"
+  },
+  {
+    "id": "HP:0001562",
+    "name": "Oligohydramnios"
+  },
+  {
+    "id": "HP:0030244",
+    "name": "Maternal fever in pregnancy"
+  },
+  {
+    "id": "HP:0001558",
+    "name": "Decreased fetal movement"
+  },
+  {
+    "id": "HP:0000953",
+    "name": "Hyperpigmentation of the skin"
+  },
+  {
+    "id": "HP:0003517",
+    "name": "Birth length greater than 97th percentile"
+  },
+]
 
 
 // Settings
@@ -68,6 +136,13 @@ export type BaseCellMockData = {
   relationship_to_proband?: string;
   review_status_stars?: number;
   review_status?: string;
+  affected_status: 'affected' | 'non_affected' | 'unknown' | undefined;
+  condition_id?: string;
+  condition_name?: string;
+  observed_phenotypes?: {
+    id: string;
+    name: string;
+  }[]
 }
 
 const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
@@ -444,7 +519,7 @@ export const secondSetCellData = [
  * Third set of cell components
  *   - PriorityCell
  *   - AnalysisTypeCodeCell (AnalysisTypeCodeCellTooltips)
- *   - SampleIdCell
+ *   - RelationshipToProbandCell
  *   - RatingCell
  */
 export const thirdSetCellColumns = [
@@ -469,13 +544,65 @@ export const thirdSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row.sample_id, {
     id: 'sample_id',
-    cell: info => <SampleIdCell id={info.getValue()} relationship={info.row.original.relationship_to_proband} />,
-    header: 'SampleIdCell',
+    cell: info => (
+      <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband}>
+        <>{info.getValue()}</>
+      </RelationshipToProbandCell>
+    ),
+    header: 'RelationshipProbandCell',
   }),
   baseCellColumnHelper.accessor(row => row.review_status_stars, {
     id: 'review_status_stars',
     cell: (info) => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
     header: 'RatingCell',
+    minSize: 60,
+    maxSize: 150,
+    size: 120,
+  }),
+  baseCellColumnHelper.accessor(row => row.affected_status, {
+    id: 'affected_status',
+    cell: (info) => <AffectedStatusCell status={info.getValue()} />,
+    header: 'AffectedStatusCell',
+    minSize: 60,
+    maxSize: 150,
+    size: 120,
+  }),
+  baseCellColumnHelper.accessor(row => row.condition_name, {
+    id: 'condition_name',
+    cell: info => <ConditionCell conditionId={info.row.original.condition_id} conditionName={info.getValue()} />,
+    header: 'ConditionCell',
+    minSize: 60,
+    maxSize: 150,
+    size: 120,
+  }),
+  baseCellColumnHelper.accessor(row => row.observed_phenotypes, {
+    id: 'observed_phenotypes',
+    cell: info => {
+      const items = (info.getValue() as Term[] ?? []).sort((a, b) => {
+        const nameA = a.name || '';
+        const nameB = b.name || '';
+        return nameA.localeCompare(nameB);
+      });
+
+      return (
+        <DialogListCell
+          header={"test"}
+          items={items}
+          renderItem={(item) => (
+            <AnchorLink
+              href={`https://purl.obolibrary.org/obo/${item.id?.replace(':', '_')}`}
+              size="xs"
+              variant="secondary"
+              target="_blank"
+            >
+              {item.name} <span className="font-mono text-xs text-muted-foreground">({item.id})</span>
+            </AnchorLink>
+          )}
+          visibleCount={2}
+        />
+      );
+    },
+    header: 'DialogListCell',
     minSize: 60,
     maxSize: 150,
     size: 120,
@@ -490,6 +617,10 @@ export const thirdSetCellData = [
     case_type: 'somatic',
     review_status_stars: 1,
     review_status: "review status 1 stars",
+    affected_status: 'affected',
+    condition_id: "HP:12345",
+    condition_name: "Abnormal Delivery",
+    observed_phenotypes,
   },
   {
     priority_code: 'routine',
@@ -498,6 +629,10 @@ export const thirdSetCellData = [
     relationship_to_proband: 'mother',
     review_status_stars: 2,
     review_status: "review status 2 stars",
+    affected_status: 'affected',
+    condition_id: "HP:32345",
+    condition_name: "Abnormal Delivery",
+    observed_phenotypes: observed_phenotypes.slice(0, 5),
   },
   {
     priority_code: 'stat',
@@ -506,6 +641,10 @@ export const thirdSetCellData = [
     relationship_to_proband: 'father',
     review_status_stars: 3,
     review_status: "review status 3 stars",
+    affected_status: 'non_affected',
+    condition_id: "HP:32345",
+    condition_name: "Abnormal Delivery",
+    observed_phenotypes: observed_phenotypes.slice(0, 2),
   },
   {
     priority_code: 'urgent',
@@ -514,6 +653,10 @@ export const thirdSetCellData = [
     relationship_to_proband: 'sibling',
     review_status_stars: 4,
     review_status: "review status 4 stars",
+    affected_status: 'unknown',
+    condition_id: "HP:32345",
+    condition_name: "Abnormal Delivery",
+    observed_phenotypes: observed_phenotypes.slice(0, 1),
   },
   {
     priority_code: undefined,
@@ -522,6 +665,9 @@ export const thirdSetCellData = [
     relationship_to_proband: undefined,
     review_status_stars: undefined,
     review_status: undefined,
+    condition_id: undefined,
+    condition_name: undefined,
+    observed_phenotypes: undefined,
   }
 ];
 

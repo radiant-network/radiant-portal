@@ -3,5 +3,5 @@ export enum VariantEntityTabs {
   Frequency = 'frequency',
   EvidenceAndConditions = 'evidenceAndConditions',
   Transcripts = 'transcripts',
-  Cases = 'cases',
+  Cases = 'patients',
 }

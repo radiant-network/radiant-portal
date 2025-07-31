@@ -1075,7 +1075,7 @@
     },
     "cases": {
       "title": "{{count}} Cas",
-      "tab": "Cas",
+      "tab": "Patients",
       "description": "Cas cliniques portant cette variante",
       "commonFilters": {
         "institutions": {
@@ -1112,7 +1112,7 @@
           "searchInputPlaceholder": "Filtrer les conditions MONDO"
         },
         "expend": {
-          "patientId": "ID du proband du cas",
+          "patientId": "ID du patient",
           "copy": "Copier",
           "copySuccess": "Copié dans le presse-papiers"
         }
