@@ -21,6 +21,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 
 import InterpretationCell from './cells/interpretation-cell';
 import OccurenceActionsMenu from './cells/occurence-actions-cell';
+import HgvsgCell from './cells/hgvsg-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
@@ -61,16 +62,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // Variant
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
-      cell: info => (
-        <AnchorLinkCell
-          href={`/variants/entity/${info.row.original.locus_id}`}
-          className="overflow-hidden text-ellipsis block"
-          target="_blank"
-          tooltip={info.getValue()}
-        >
-          {info.getValue()}
-        </AnchorLinkCell>
-      ),
+      cell: info => <HgvsgCell occurrence={info.row.original} />,
       header: t('variant.headers.hgvsg'),
       size: 70,
       minSize: 40,

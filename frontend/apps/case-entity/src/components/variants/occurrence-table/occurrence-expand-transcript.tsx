@@ -15,7 +15,7 @@ export default function OccurrenceExpandTranscript({
   expandedOccurrence,
 }: OccurrenceExpandTranscriptProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3">
       {expandedOccurrence.symbol && (
         <div className="flex items-center gap-2">
           {expandedOccurrence.symbol && (

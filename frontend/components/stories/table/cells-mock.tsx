@@ -364,6 +364,11 @@ export const firstSetCellData = [
  *   - ZygosityCell
  */
 export const secondSetCellColumns = [
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'hgvsg',
+    cell: info => <HgvsgCell occurrence={info.row.original} />,
+    header: 'HgvsgCell',
+  }),
   baseCellColumnHelper.accessor(row => row.clinvar, {
     id: 'clinvar',
     cell: info => <ClassificationCell codes={info.getValue()} />,
@@ -449,6 +454,7 @@ export const secondSetCellData = [
     pf_wgs: 0.5,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
+    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: ['likely_benign', 'likely_pathogenic', '_low_penetrance', 'low_penetrance'],
@@ -463,6 +469,7 @@ export const secondSetCellData = [
     pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HET',
+    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: ['risk_factor', 'association', 'uncertain_risk_allele', 'pathogenic'],
@@ -477,6 +484,7 @@ export const secondSetCellData = [
     pf_wgs: 100,
     locus_id: '-7485572602358923261',
     zygosity: 'HET',
+    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: [
@@ -498,6 +506,7 @@ export const secondSetCellData = [
     pf_wgs: 0.0001,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
+    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: [
@@ -518,6 +527,7 @@ export const secondSetCellData = [
     pf_wgs: 0.01,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
+    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: ['likely_risk_allele', 'drug_response', 'benign', 'confers_sensitivity', ''],
@@ -548,6 +558,7 @@ export const secondSetCellData = [
     pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
+    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: undefined,
@@ -564,6 +575,7 @@ export const secondSetCellData = [
     pf_wgs: undefined,
     locus_id: undefined,
     zygosity: undefined,
+    hgvsg: undefined,
   },
 ];
 

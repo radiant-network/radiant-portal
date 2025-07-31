@@ -23,7 +23,6 @@ import { occurrencesApi } from '@/utils/api';
 
 import AssayVariantFilters from './filters/assay-variant-filters';
 import { defaultSettings, getVariantColumns } from './occurrence-table/occurence-table-settings';
-import OccurrenceExpand from './occurrence-table/occurrence-expand';
 import { OccurrenceCountInput, useOccurencesCountHelper, useOccurencesListHelper } from './hook';
 
 export const SeqIDContext = createContext<string>('');
@@ -282,7 +281,6 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                     pagination={pagination}
                     onPaginationChange={setPagination}
                     onServerSortingChange={setSorting}
-                    subComponent={data => <OccurrenceExpand occurrence={data} />}
                     total={fetchOccurrencesCount.data?.count ?? 0}
                     enableColumnOrdering
                     enableFullscreen
