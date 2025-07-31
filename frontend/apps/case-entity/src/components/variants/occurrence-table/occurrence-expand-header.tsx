@@ -16,7 +16,7 @@ export default function OccurrenceExpandHeader({ occurrence }: OccurrenceExpandH
 
   return (
     <div className="flex items-center gap-8">
-      <AnchorLink component={Link} to={`/variants/entity/${occurrence.locus_id}`} size="lg" target='_blank' external>
+      <AnchorLink component={Link} to={`/variants/entity/${occurrence.locus_id}`} size="lg" target="_blank" external>
         <span className="max-w-72 overflow-hidden text-ellipsis">{occurrence.hgvsg}</span>
       </AnchorLink>
       <div className="flex items-center gap-5">
