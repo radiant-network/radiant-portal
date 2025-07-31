@@ -107,20 +107,20 @@ export default function App() {
         </TabsList>
         <div className="px-0 sm:px-6">
           <Container>
-            <div>
+            <div className="max-w-8xl mx-auto w-full">
               <TabsContent value={VariantEntityTabs.Overview} className="p-0 sm:py-6">
                 <OverviewTab />
               </TabsContent>
-              <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="py-6">
+              <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="p-0 sm:py-6">
                 <EvidenceTab />
               </TabsContent>
               {/* SJRA-389 <TabsContent value={VariantEntityTabs.Frequency} className="py-6">
                 <FrequencyTab />
               </TabsContent> */}
-              <TabsContent value={VariantEntityTabs.Transcripts} className="py-6">
+              <TabsContent value={VariantEntityTabs.Transcripts} className="p-3 sm:py-6">
                 <TranscriptsTab />
               </TabsContent>
-              <TabsContent value={VariantEntityTabs.Cases} className="py-6">
+              <TabsContent value={VariantEntityTabs.Cases} className="p-0 sm:py-6">
                 <CasesTab />
               </TabsContent>
             </div>

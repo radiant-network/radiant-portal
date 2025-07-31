@@ -11,6 +11,7 @@ import MostDeleteriousConsequenceCard from './most-deleterious-consequence-card'
 import ExternalReferencesCard from './external-references-card';
 import InterpretationCard from './interpretation-card';
 import ClassificationCard from './classification-card';
+import { tabContentClassName } from '@/style';
 
 type VariantOverviewInput = {
   key: string;
@@ -41,17 +42,7 @@ function OverviewTab() {
   }
 
   return (
-    <div
-      className={`
-        gap-2 sm:gap-6 grid grid-cols-1 md:grid-cols-12 
-        **:data-[slot=card]:border-0 sm:**:data-[slot=card]:border 
-        **:data-[slot=card]:rounded-none sm:**:data-[slot=card]:rounded-xl 
-        **:data-[slot=card]:shadow-none sm:**:data-[slot=card]:shadow-xs 
-        **:data-[slot=card]:py-4 sm:**:data-[slot=card]:py-6 
-        **:data-[slot=card-header]:px-4 sm:**:data-[slot=card-header]:px-6 
-        **:data-[slot=card-content]:px-4 sm:**:data-[slot=card-content]:px-6
-        `}
-    >
+    <div className={`grid grid-cols-1 md:grid-cols-12 ${tabContentClassName}`}>
       <MostDeleteriousConsequenceCard data={data} className="col-span-1 md:col-span-12 2xl:col-span-8" />
       <InterpretationCard data={data} className="col-span-1 md:col-span-6 2xl:col-span-2" />
       <ClassificationCard data={data} className="col-span-1 md:col-span-6 2xl:col-span-2" />
