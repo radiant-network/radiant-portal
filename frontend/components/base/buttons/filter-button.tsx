@@ -15,6 +15,7 @@ import { Badge } from '@/components/base/ui/badge';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Checkbox } from '../ui/checkbox';
+import { useI18n } from '@/components/hooks/i18n';
 
 type PopoverSize = 'default' | 'lg';
 
@@ -150,6 +151,7 @@ export default function FilterButton({
   closeOnSelect = false,
   withTooltip = false, // defaults to false
 }: FilterButtonProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(openOnAppear);
   const [firstOpen, setFirstOpen] = useState(true);
   const selectedCount = selected.length;
@@ -251,17 +253,19 @@ export default function FilterButton({
             </CommandGroup>
           </CommandList>
         </Command>
-        {selectedCount !== 0 && !actionMode && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="size-full border-t-1 rounded-none border-border"
-            onClick={handleClear}
-            disabled={selectedCount === 0}
-          >
-            Clear
-          </Button>
-        )}
+        <div className="size-full border-t-1 rounded-none border-border p-1">
+          {selectedCount !== 0 && !actionMode && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="size-full"
+              onClick={handleClear}
+              disabled={selectedCount === 0}
+            >
+              {t('common.actions.clear')}
+            </Button>
+          )}
+        </div>
       </PopoverContent>
     </Popover>
   );
