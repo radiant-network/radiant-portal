@@ -4,11 +4,12 @@ import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import {
   getDbSnpUrl,
-  getEnsemblGeneUrl, getEnsemblTranscriptUrl,
+  getEnsemblGeneUrl,
+  getEnsemblTranscriptUrl,
   getOmimOrgUrl,
 } from '@/components/feature/variant/utils';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
-import {cn} from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 type OccurrenceExpandTranscriptProps = {
   occurrence: Occurrence;
@@ -20,7 +21,7 @@ export default function OccurrenceExpandTranscript({
   expandedOccurrence,
 }: OccurrenceExpandTranscriptProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3">
       {expandedOccurrence.symbol && (
         <div className="flex items-center gap-2">
           {expandedOccurrence.symbol && (
@@ -82,13 +83,7 @@ export default function OccurrenceExpandTranscript({
       {expandedOccurrence.rsnumber && (
         <>
           <Separator orientation="vertical" className="h-5" />
-          <AnchorLink
-              href={getDbSnpUrl(expandedOccurrence.rsnumber)}
-              target="_blank"
-              rel="noreferrer"
-              size="sm"
-          >
-
+          <AnchorLink href={getDbSnpUrl(expandedOccurrence.rsnumber)} target="_blank" rel="noreferrer" size="sm">
             {expandedOccurrence.rsnumber}
           </AnchorLink>
         </>

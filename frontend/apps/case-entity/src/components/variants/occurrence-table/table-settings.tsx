@@ -1,7 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
@@ -17,28 +16,12 @@ import { Occurrence } from '@/api/api';
 import { TFunction } from 'i18next';
 import { ZapIcon } from 'lucide-react';
 import InterpretationCell from './cells/interpretation-cell';
+import HgvsgCell from './cells/hgvsg-cell';
 
 const columnHelper = createColumnHelper<Occurrence>();
 
 function getVariantColumns(t: TFunction<string, undefined>) {
   return [
-    {
-      id: 'row_expand',
-      cell: RowExpandCell,
-      size: 40,
-      enableResizing: false,
-      enablePinning: false,
-    },
-    // TODO: To be enabled when row selection function are implemented
-    // {
-    //   id: 'row_selection',
-    //   header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
-    //   cell: info => <RowSelectionCell row={info.row} />,
-    //   size: 40,
-    //   enablePinning: false,
-    //   enableResizing: false,
-    // },
-    // lightning icon
     columnHelper.accessor(row => row, {
       id: 'clinical_interpretation',
       cell: info => <InterpretationCell occurrence={info.getValue()} />,
@@ -57,16 +40,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // Variant
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
-      cell: info => (
-        <AnchorLinkCell
-          href={`/variants/entity/${info.row.original.locus_id}`}
-          className="overflow-hidden text-ellipsis block"
-          target="_blank"
-          tooltip={info.getValue()}
-        >
-          {info.getValue()}
-        </AnchorLinkCell>
-      ),
+      cell: info => <HgvsgCell occurrence={info.row.original} />,
       header: t('variant.headers.hgvsg'),
       size: 150,
       minSize: 120,
@@ -74,7 +48,11 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // Type
     columnHelper.accessor(row => row.variant_class, {
       id: 'variant_class',
-      cell: info => <TextTooltipsCell tooltipsText={info.getValue()}>{t(`variant.classes.${info.getValue().toLowerCase()}`)}</TextTooltipsCell>,
+      cell: info => (
+        <TextTooltipsCell tooltipsText={info.getValue()}>
+          {t(`variant.classes.${info.getValue().toLowerCase()}`)}
+        </TextTooltipsCell>
+      ),
       header: t('variant.headers.variant_class'),
       minSize: 120,
     }),
@@ -91,7 +69,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       header: t('variant.headers.dbSNP'),
       size: 100,
       minSize: 100,
-      enableSorting: false
+      enableSorting: false,
     }),
     // Gene
     columnHelper.accessor(row => row.symbol, {
@@ -190,16 +168,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // Freq.
     columnHelper.accessor(row => row.pf_wgs, {
       id: 'pf_wgs',
-      cell: info => (
-        <ParticipantFrequencyCell
-          locusId={info.row.original.locus_id}
-          value={info.getValue()}
-        />
-      ),
+      cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltips')}>
-          {t('variant.headers.pf_wgs')}
-        </TooltipsHeader>
+        <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltips')}>{t('variant.headers.pf_wgs')}</TooltipsHeader>
       ),
       minSize: 120,
     }),
