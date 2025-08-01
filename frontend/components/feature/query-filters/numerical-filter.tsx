@@ -199,7 +199,6 @@ export function NumericalFilter({ field }: IProps) {
   };
 
   // Fetch statistics for min/max values
-  const { data: defaultStatistics, isLoading: defaultIsLoadingStats } = useStatisticsBuilder(fieldKey, appId, seqId, true);
   const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, appId, seqId, false);
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
   const [numericValue, setNumericValue] = useState<string>('0');
@@ -259,7 +258,7 @@ export function NumericalFilter({ field }: IProps) {
 
   const reset = () => {
     setHasUnappliedItems(false);
-    var result = getNumericalValue(fieldKey, DEFAULT_EMPTY_QUERY, aggConfig, defaultStatistics);
+    var result = getNumericalValue(fieldKey, DEFAULT_EMPTY_QUERY, aggConfig, statistics);
     setHasNoData(result.hasNoData);
     setMinValue(result.minValue);
     setMaxValue(result.maxValue);
