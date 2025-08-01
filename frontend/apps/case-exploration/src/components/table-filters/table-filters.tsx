@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useI18n } from '@/components/hooks/i18n';
 import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
 import { ListFilter, X } from 'lucide-react';
-import FilterButton, { IFilterButton } from '@/components/base/buttons/filter-button';
+import FilterButton, { IFilterButton, IFilterButtonItem } from '@/components/base/buttons/filter-button';
 import { CaseFilters, SearchCriterion } from '@/api/api';
 import useSWR from 'swr';
 import { caseApi } from '@/utils/api';
@@ -79,6 +79,12 @@ function updateSearchCriteria(filters: StringArrayRecord) {
   return search_criteria;
 }
 
+function sortOptions(options: IFilterButtonItem[]) {
+  return options.sort((a, b) => {
+    return (a.label as string).localeCompare(b.label as string);
+  });
+}
+
 function FiltersGroupForm({
   loading = true,
   setSearchCriteria,
@@ -116,7 +122,7 @@ function FiltersGroupForm({
         case 'status':
           return {
             ...baseOption,
-            options: filterItemStatus(apiFilters[key] || [], t)
+            options: sortOptions(filterItemStatus(apiFilters[key] || [], t))
           };
         case 'project':
         case 'performer_lab':
@@ -125,7 +131,7 @@ function FiltersGroupForm({
             ...baseOption,
             popoverSize: 'lg',
             isVisible: ((filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key)) || false,
-            options: apiFilters[key] || [],
+            options: sortOptions(apiFilters[key] || []),
             withTooltip: true
           };
         case 'priority':
@@ -136,7 +142,7 @@ function FiltersGroupForm({
         case 'case_analysis':
           return {
             ...baseOption,
-            options: apiFilters[key] || [],
+            options: sortOptions(apiFilters[key] || []),
             popoverSize: 'lg',
             withTooltip: true
           };
