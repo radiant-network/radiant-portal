@@ -7,7 +7,7 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
-import PriorityCell from '@/components/base/data-table/cells/priority-cell';
+import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
 import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import { TFunction } from 'i18next';
 import CaseActionsMenuCell from '../cells/case-actions-menu-cell';
@@ -49,7 +49,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Priority
     columnHelper.accessor(row => row.priority_code, {
       id: 'priority_code',
-      cell: info => <PriorityCell code={info.getValue()} />,
+      cell: info => <PriorityIndicatorCell code={info.getValue()} />,
       header: t('caseExploration.case.headers.priority_code'),
       size: 124,
       minSize: 124,

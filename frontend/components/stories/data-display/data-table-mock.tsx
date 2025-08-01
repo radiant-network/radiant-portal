@@ -23,7 +23,7 @@ import { createColumnSettings } from '@/components/base/data-table/data-table';
 import { createColumnHelper } from '@tanstack/react-table';
 import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence-table/cells/interpretation-cell';
 import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
-import PriorityCell from '@/components/base/data-table/cells/priority-cell';
+import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
 import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
@@ -517,7 +517,7 @@ export const secondSetCellData = [
 
 /**
  * Third set of cell components
- *   - PriorityCell
+ *   - PriorityIndicatorCell
  *   - AnalysisTypeCodeCell (AnalysisTypeCodeCellTooltips)
  *   - RelationshipToProbandCell
  *   - RatingCell
@@ -525,8 +525,8 @@ export const secondSetCellData = [
 export const thirdSetCellColumns = [
   baseCellColumnHelper.accessor(row => row.priority_code, {
     id: 'priority_code',
-    cell: info => <PriorityCell code={info.getValue()} />,
-    header: 'PriorityCell',
+    cell: info => <PriorityIndicatorCell code={info.getValue()} />,
+    header: 'PriorityIndicatorCell',
     size: 124,
     minSize: 124,
   }),

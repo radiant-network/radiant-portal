@@ -9,7 +9,6 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import { ComponentProps } from 'react';
 import { cn } from '@/components/lib/utils';
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
-import { Badge } from '@/components/base/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;

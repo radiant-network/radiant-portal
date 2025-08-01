@@ -1,37 +1,18 @@
 import { Badge } from '@/components/base/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { Biohazard, User, Users } from 'lucide-react';
 import EmptyCell from './empty-cell';
+import AnalysisTypeCodeBadge, { AnalysisTypeCode } from '../../badges/analysis-type-code-badge';
 
 type AnalysisTypeCodeCellProps = {
-  code: 'somatic' | 'germline' | 'germline_family' | undefined;
-  size?: number;
+  code: AnalysisTypeCode | undefined;
 };
 
-const icons = {
-  somatic: Biohazard,
-  germline: User,
-  germline_family: Users,
-};
-
-function AnalysisTypeCodeCell({ code, size = 12 }: AnalysisTypeCodeCellProps) {
-  const { t } = useI18n();
+function AnalysisTypeCodeCell({ code }: AnalysisTypeCodeCellProps) {
 
   if (!code) return <EmptyCell />
 
-  const Icon = icons[code];
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Badge variant="neutral" iconOnly>
-          <Icon size={size} />
-        </Badge>
-      </TooltipTrigger>
-      <TooltipContent>{t(`caseExploration.analysis_type_code.${code}`)}</TooltipContent>
-    </Tooltip>
-  );
+  return <AnalysisTypeCodeBadge code={code} />;
 }
 
 export function AnalysisTypeCodeCellTooltips() {
