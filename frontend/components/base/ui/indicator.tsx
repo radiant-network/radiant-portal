@@ -32,7 +32,9 @@ const IndicatorVariants = tv({
   },
 });
 
-export interface IndicatorProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof IndicatorVariants> {}
+export interface IndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant: 'red' | 'amber' | 'emerad' | 'blue' | 'fuchsia' | 'grey';
+}
 
 function Indicator({ className, variant, children, ...props }: IndicatorProps) {
   const styles = IndicatorVariants({ variant });
