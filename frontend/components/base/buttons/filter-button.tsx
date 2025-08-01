@@ -84,7 +84,7 @@ const CustomCommandItem = ({
           setOpen(false);
         }
       }}
-      className="p-0 overflow-hidden"
+      className="p-0 overflow-hidden hover:bg-accent hover:text-accent-foreground focus:bg-transparent focus:text-foreground"
     >
       {actionMode ? (
         <Button
@@ -172,7 +172,11 @@ export default function FilterButton({
       setOpen(newOpen);
       if (newOpen) {
         setOptionSnapshot({
-          selectedOptions: getSelectedOptions(options, selected),
+          selectedOptions: getSelectedOptions(options, selected).sort((a, b) => {
+            const labelA = typeof a.label === 'string' ? a.label : '';
+            const labelB = typeof b.label === 'string' ? b.label : '';
+            return labelA.localeCompare(labelB);
+          }),
           unselectedOptions: getUnselectedOptions(options, selected),
         });
       }
@@ -201,14 +205,17 @@ export default function FilterButton({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={cn(
-        'p-0 flex flex-col', {
-        'w-[229px] max-h-[240px]': popoverSize === 'default',
-        'w-[360px] max-h-[280px]': popoverSize === 'lg',
-      })}
+      <PopoverContent
+        className={cn(
+          'p-0 flex flex-col', {
+          'w-[229px] max-h-[240px]': popoverSize === 'default',
+          'w-[360px] max-h-[280px]': popoverSize === 'lg',
+        })}
         align="start"
+        onMouseLeave={() => setOpen(false)}
       >
-        <Command className="flex flex-col border-border border-0 border-b-none rounded-b-none">
+        {/* value prevent the default selection/hover style of the first element in the command list */}
+        <Command className="flex flex-col border-border border-0 border-b-none rounded-b-none" value="">
           <CommandInput
             placeholder={placeholder || label || 'Search...'}
             leftAddon={<Search size={16} className="text-muted-foreground mr-1" />}
