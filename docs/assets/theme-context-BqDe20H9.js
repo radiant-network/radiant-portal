@@ -1,1 +1,0 @@
-import{r as t}from"./index-DQLiH3RP.js";var r=(e=>(e.LIGHT="light",e.DARK="dark",e))(r||{});const o=t.createContext(null),n=()=>{const e=t.useContext(o);if(!e)throw new Error("useTheme must be used within a ThemeProvider");return e};export{r as T,o as a,n as u};
