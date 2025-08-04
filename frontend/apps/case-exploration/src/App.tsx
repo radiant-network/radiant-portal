@@ -1,6 +1,6 @@
 import { useI18n } from '@/components/hooks/i18n';
 import CasesTab from './components/cases/cases-tab';
-import PageHeader from "@/components/base/headers/page-header";
+import PageHeader from '@/components/base/page/page-header';
 import { Card, CardContent } from '@/components/base/ui/card';
 
 export default function App() {
@@ -15,7 +15,7 @@ export default function App() {
             <CasesTab />
           </CardContent>
         </Card>
-      </main >
+      </main>
     </>
   );
 }
