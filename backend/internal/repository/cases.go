@@ -52,42 +52,18 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 
-	// Use a map to avoid duplicates.
-	fieldSet := make(map[string]types.Field)
-
-	for _, field := range userQuery.SelectedFields() {
-		// Use a unique key, such as "<table-alias>.<field-name>"
-		key := fmt.Sprintf("%s.%s", field.Table.Alias, field.Name)
-		fieldSet[key] = field
-	}
-
-	for _, sort := range userQuery.SortedFields() {
-		field := sort.Field
-		key := fmt.Sprintf("%s.%s", field.Table.Alias, field.Name)
-		fieldSet[key] = field
-	}
-
-	var allFields []types.Field
-	for _, field := range fieldSet {
-		allFields = append(allFields, field)
-	}
-
-	groupedColumns := sliceutils.Map(allFields, func(field types.Field, index int, slice []types.Field) string {
-		return fmt.Sprintf("%s.%s", field.Table.Alias, field.Name)
-	})
-
 	columns = append(columns, "CASE WHEN ca.type_code = 'somatic' OR family_members.family_members_id IS NULL THEN ca.type_code ELSE CONCAT(ca.type_code, '_family') END AS case_type")
-	groupedColumns = append(groupedColumns, []string{"ca.type_code", "family_members.family_members_id"}...)
-
-	columns = append(columns, "IF(COUNT(se.seq_id) > 0, TRUE, FALSE) AS has_variants")
+	columns = append(columns, "se.case_id IS NOT NULL AS has_variants")
 	if err = tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
 	}
 
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s seq ON seq.case_id=%s.id", types.SequencingExperimentTable.Name, types.CaseTable.Alias), tx)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN staging_sequencing_experiment se on seq.id = se.seq_id and se.ingested_at is not null"), tx)
+	txSeqExp := r.db.Table("staging_sequencing_experiment")
+	txSeqExp = txSeqExp.Select("DISTINCT(case_id)")
+	txSeqExp = txSeqExp.Where("ingested_at IS NOT NULL")
+
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) se ON se.case_id=%s.id", types.CaseTable.Alias), txSeqExp)
 	tx = tx.Select(columns)
-	tx = tx.Group(strings.Join(groupedColumns, ", "))
 	utils.AddLimitAndSort(tx, userQuery)
 
 	if err = tx.Find(&cases).Error; err != nil {
