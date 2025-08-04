@@ -653,6 +653,12 @@ export interface CaseResult {
     'created_on': string;
     /**
      * 
+     * @type {boolean}
+     * @memberof CaseResult
+     */
+    'has_variants': boolean;
+    /**
+     * 
      * @type {string}
      * @memberof CaseResult
      */
