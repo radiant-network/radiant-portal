@@ -11,10 +11,10 @@ import { variantsApi } from '@/utils/api';
 import { VariantHeader, ApiError } from '@/api/api';
 import useSWR from 'swr';
 import { useI18n } from '@/components/hooks/i18n';
-import Result from '@/components/base/result';
+import PageError from '@/components/base/page/page-error';
 import { Button } from '@/components/base/ui/button';
 import Container from '@/components/base/container';
-import PageHeader from '@/components/base/headers/page-header';
+import PageHeader from '@/components/base/page/page-header';
 
 type VariantHeaderInput = {
   key: string;
@@ -63,7 +63,7 @@ export default function App() {
 
   if (!isLoading && error?.status === 404) {
     return (
-      <Result
+      <PageError
         status="404"
         message={t('variantEntity.notFound')}
         className="h-screen"
@@ -89,12 +89,7 @@ export default function App() {
 
   return (
     <main className="bg-muted h-screen overflow-auto">
-      <PageHeader
-        isLoading={isLoading}
-        title={data?.hgvsg}
-        breadcrumbs={[{ to: '/', text: t('variantEntity.header.variants') }]}
-        badges={pageHeaderBadges}
-      />
+      <PageHeader isLoading={isLoading} title={data?.hgvsg} badges={pageHeaderBadges} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
           <TabsListItem value={VariantEntityTabs.Overview}>{t('variantEntity.overview.title')}</TabsListItem>

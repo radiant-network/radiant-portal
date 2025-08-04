@@ -8,7 +8,7 @@ import { caseApi } from '@/utils/api';
 import { CaseEntity, ApiError } from '@/api/api';
 import useSWR from 'swr';
 import { useI18n } from '@/components/hooks/i18n';
-import Result from '@/components/base/result';
+import PageError from '@/components/base/page/page-error';
 import { Button } from '@/components/base/ui/button';
 import Container from '@/components/base/container';
 import Header from './components/layout/header';
@@ -16,6 +16,8 @@ import { AudioWaveform, ClipboardList } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 
 export const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
+
+const TAB_SEARCH_PARAM = 'tab';
 
 type CaseEntityInput = {
   key: string;
@@ -31,7 +33,9 @@ export default function App() {
   const { t } = useI18n();
   const params = useParams<{ caseId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState<CaseEntityTabs>(searchParams.get("tab") as CaseEntityTabs ?? CaseEntityTabs.Details);
+  const [activeTab, setActiveTab] = useState<CaseEntityTabs>(
+    (searchParams.get(TAB_SEARCH_PARAM) as CaseEntityTabs) ?? CaseEntityTabs.Details,
+  );
 
   const { data, error, isLoading } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
     {
@@ -46,17 +50,17 @@ export default function App() {
   );
 
   useEffect(() => {
-    setActiveTab(searchParams.get("tab") as CaseEntityTabs ?? CaseEntityTabs.Details);
-  }, [searchParams])
+    setActiveTab((searchParams.get(TAB_SEARCH_PARAM) as CaseEntityTabs) ?? CaseEntityTabs.Details);
+  }, [searchParams]);
 
   const handleOnTabChange = useCallback((value: CaseEntityTabs) => {
-    setSearchParams({ tab: value })
+    setSearchParams({ tab: value });
     setActiveTab(value);
   }, []);
 
   if (!isLoading && error?.status === 404) {
     return (
-      <Result
+      <PageError
         status="404"
         message={t('caseEntity.notFound')}
         className="h-screen"
@@ -81,19 +85,24 @@ export default function App() {
         <Header data={data} isLoading={isLoading} />
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
           <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
-            <TabsListItem value={CaseEntityTabs.Details}><ClipboardList />{t('caseEntity.details.title')}</TabsListItem>
+            <TabsListItem value={CaseEntityTabs.Details}>
+              <ClipboardList />
+              {t('caseEntity.details.title')}
+            </TabsListItem>
             {hasVariants ? (
               <TabsListItem value={CaseEntityTabs.Variants}>
-                <AudioWaveform />{t('caseEntity.variants.title')}
+                <AudioWaveform />
+                {t('caseEntity.variants.title')}
               </TabsListItem>
             ) : (
               <Tooltip>
                 <TooltipTrigger>
                   <TabsListItem disabled value={CaseEntityTabs.Variants}>
-                    <AudioWaveform />{t('caseEntity.variants.title')}
+                    <AudioWaveform />
+                    {t('caseEntity.variants.title')}
                   </TabsListItem>
                 </TooltipTrigger>
-                <TooltipContent>{t("caseEntity.details.no_variants")}</TooltipContent>
+                <TooltipContent>{t('caseEntity.details.no_variants')}</TooltipContent>
               </Tooltip>
             )}
           </TabsList>
@@ -110,4 +119,3 @@ export default function App() {
     </CaseEntityContext>
   );
 }
-
