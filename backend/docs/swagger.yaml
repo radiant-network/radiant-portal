@@ -295,6 +295,8 @@ components:
           type: string
         created_on:
           type: string
+        has_variants:
+          type: boolean
         managing_organization_code:
           type: string
         managing_organization_name:
@@ -330,6 +332,7 @@ components:
       required:
       - case_id
       - created_on
+      - has_variants
       - status_code
       - updated_on
       type: object

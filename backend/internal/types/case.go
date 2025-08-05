@@ -48,6 +48,7 @@ type CaseResult struct {
 	RequestID                int       `json:"request_id,omitempty"`
 	ManagingOrganizationCode string    `json:"managing_organization_code,omitempty"`
 	ManagingOrganizationName string    `json:"managing_organization_name,omitempty"`
+	HasVariants              bool      `json:"has_variants" validate:"required"`
 }
 
 // CaseEntity - Case Entity data

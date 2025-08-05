@@ -51,12 +51,18 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 	var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
-	columns = append(columns, "CASE WHEN ca.type_code = 'somatic' OR family_members.family_members_id IS NULL THEN ca.type_code ELSE CONCAT(ca.type_code, '_family') END AS case_type")
 
+	columns = append(columns, "CASE WHEN ca.type_code = 'somatic' OR family_members.family_members_id IS NULL THEN ca.type_code ELSE CONCAT(ca.type_code, '_family') END AS case_type")
+	columns = append(columns, "se.case_id IS NOT NULL AS has_variants")
 	if err = tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
 	}
 
+	txSeqExp := r.db.Table("staging_sequencing_experiment")
+	txSeqExp = txSeqExp.Select("DISTINCT(case_id)")
+	txSeqExp = txSeqExp.Where("ingested_at IS NOT NULL")
+
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) se ON se.case_id=%s.id", types.CaseTable.Alias), txSeqExp)
 	tx = tx.Select(columns)
 	utils.AddLimitAndSort(tx, userQuery)
 

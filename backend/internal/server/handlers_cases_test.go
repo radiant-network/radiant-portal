@@ -39,6 +39,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 			RequestID:                1,
 			ManagingOrganizationCode: "CHUSJ",
 			ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine",
+			HasVariants:              true,
 		},
 	}, &count, nil
 }
@@ -154,7 +155,8 @@ func Test_SearchCasesHandler(t *testing.T) {
 			"requested_by_code":"CHUSJ",
 			"requested_by_name":"Centre hospitalier universitaire Sainte-Justine",
 			"status_code":"active",
-			"updated_on":"2000-02-02T00:00:00Z"
+			"updated_on":"2000-02-02T00:00:00Z",
+			"has_variants": true
 		}],
 		"count": 1
 	}`, w.Body.String())
