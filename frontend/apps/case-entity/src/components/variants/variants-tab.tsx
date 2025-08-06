@@ -137,7 +137,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     if (assaysWithVariants.length === 0) return;
 
     setSeqId(assaysWithVariants[0].seq_id.toString());
-  }, [searchParams]);
+  }, [searchParams, caseEntity]);
 
   useEffect(() => {
     const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);

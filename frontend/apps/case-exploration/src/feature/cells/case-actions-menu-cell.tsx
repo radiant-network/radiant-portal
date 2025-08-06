@@ -9,8 +9,9 @@ import {
 import { useI18n } from '@/components/hooks/i18n';
 import { CellContext } from '@tanstack/react-table';
 import { EllipsisVertical, ExternalLink } from 'lucide-react';
+import { CaseResult } from '@/api/api';
 
-function CaseActionsMenuCell({ row }: CellContext<any, any>) {
+function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
   const { t } = useI18n();
   const navigate = useNavigate();
   return (
@@ -30,11 +31,15 @@ function CaseActionsMenuCell({ row }: CellContext<any, any>) {
             <ExternalLink />
             {t('caseExploration.case.actions.view_case')}
           </DropdownMenuItem>
-          {/* FIXME: Wait for has_variants flag */}
-          {/* <DropdownMenuItem> */}
-          {/*   <ExternalLink /> */}
-          {/*   {t('caseExploration.case.actions.view_variant')} */}
-          {/* </DropdownMenuItem> */}
+          <DropdownMenuItem
+            disabled={!row.original.has_variants}
+            onClick={() => {
+              navigate(`/case/entity/${row.original.case_id}?tab=variants`);
+            }}
+          >
+            <ExternalLink />
+            {t('caseExploration.case.actions.view_variant')}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

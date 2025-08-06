@@ -30,13 +30,13 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
         <CardTitle size="xl">{t('caseEntity.details.clinicalOverview')}</CardTitle>
         <CardAction>
           {hasVariants ? (
-            <Button onClick={() => navigate('#variants')}>
+            <Button onClick={() => navigate('?tab=variants')}>
               <AudioWaveformIcon /> {t('caseEntity.details.view_variants')} <ArrowUpRightIcon />
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger>
-                <Button disabled onClick={() => navigate('#variants')} >
+                <Button disabled>
                   <AudioWaveformIcon /> {t('caseEntity.details.view_variants')} <ArrowUpRightIcon />
                 </Button>
               </TooltipTrigger>
