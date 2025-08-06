@@ -1,7 +1,7 @@
 
 import { Term, VepImpact } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import AssayStatusCell, { AssayStatus } from '@/components/base/data-table/cells/assay-status-cell';
+import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
@@ -32,7 +32,7 @@ import AffectedStatusCell from '@/components/base/data-table/cells/affected-stat
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
 import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-
+import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 
 const observed_phenotypes = [
   {

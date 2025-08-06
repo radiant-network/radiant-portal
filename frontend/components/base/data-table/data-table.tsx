@@ -720,6 +720,7 @@ function TranstackTable<T>({
                         width: `calc(var(--header-${header?.id}-size) * 1px)`,
                         ...getColumnPinningExtraStyles(header.column),
                       }}
+                      colSpan={header.colSpan}
                     >
                       <>
                         <div className="flex items-center justify-between gap-1">

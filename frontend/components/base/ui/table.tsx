@@ -105,6 +105,7 @@ const tableRowVariants = tv({
   variants: {
     variant: {
       default: 'group transition-colors data-[state=selected]:bg-muted [&>td]:border-b [&>th]:border-b hover:bg-table-accent',
+      border: 'group transition-colors data-[state=selected]:bg-muted [&>td:last-child]:border-r-0 [&>th:last-child]:border-r-0 [&>td]:border-r [&>th]:border-r [&>td]:border-b [&>th]:border-b hover:bg-table-accent',
       borderless: '',
     },
   },
@@ -113,7 +114,7 @@ const tableRowVariants = tv({
   },
 });
 type TableRowType = React.HTMLAttributes<HTMLTableRowElement> & {
-  variant?: 'default' | 'borderless';
+  variant?: 'default' | 'borderless' | 'border';
 }
 function TableRow({ className, variant = 'default', ...props }: TableRowType) {
   const styles = tableRowVariants({ variant });

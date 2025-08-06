@@ -72,7 +72,7 @@ function BioinformaticsSection({ tasks }: BioinformaticsSectionProps) {
       <div className="flex items-center gap-2">
         <span className="text-sm font-semibold">{t('caseEntity.details.bioinformatics')}</span>
       </div>
-      <DisplayTable data={tasks.slice(0, MAX_TASKS)} columns={getColumns(t, tasks, tasks.length > MAX_TASKS)} />
+      <DisplayTable variant="borderless" data={tasks.slice(0, MAX_TASKS)} columns={getColumns(t, tasks, tasks.length > MAX_TASKS)} />
     </div>
   );
 };
@@ -88,7 +88,7 @@ function AlertDialogBioinformaticsSection({ tasks }: BioinformaticsSectionProps)
       <AlertDialogContent className="min-w-auto md:min-w-[800px]">
         <AlertDialogHeader>{t('caseEntity.details.bioinformatics')}</AlertDialogHeader>
         <AlertDialogDescription>
-          <DisplayTable data={tasks} columns={getColumns(t, tasks, false)} />
+          <DisplayTable variant="borderless" data={tasks} columns={getColumns(t, tasks, false)} />
         </AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('common.close')}</AlertDialogCancel>

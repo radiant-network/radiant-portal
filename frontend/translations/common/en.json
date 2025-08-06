@@ -198,7 +198,9 @@
       "seeMore": "See more",
       "clear": "Clear",
       "copy": "Copy to clipboard",
-      "copied": "Copied!"
+      "copied": "Copied!",
+      "cancel": "Cancel",
+      "upload": "Upload"
     },
     "languages": {
       "en": "English",
@@ -342,6 +344,25 @@
       "frequency_divider_my_organization": "My Organization",
       "frequency_divider_pulic_cohorts": "Public Cohorts",
       "zygosity_divider_parental_analysis": "Parental Analysis"
+    },
+    "upload_id": {
+      "upload_a_file": "Upload a file",
+      "summary_table": "Summary Table ({{matched}} matched, {{unmatched}} unmatched)",
+      "resume": "{{total}} submitted identifiers mapped to {{unique}} unique system identifiers",
+      "matched": "Matched ({{total}})",
+      "unmatched": "Unmatched ({{total}})",
+      "gene": {
+        "trigger": "Upload a gene list",
+        "dialog_header": "Upload a gene list"
+      },
+      "identifiers": {
+        "label": "Copy-paste a list of identifiers or upload a file",
+        "tooltips": {
+          "identifiers": "Identifiers: Gene Symbol, Gene Alias, Ensembl ID",
+          "separated_by": "Separated by: comma, space, new line",
+          "upload_file_format": "Upload file formats: tsv, csv"
+        }
+      }
     }
   },
   "caseExploration": {

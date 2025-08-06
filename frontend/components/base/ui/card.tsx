@@ -30,7 +30,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 const cardTitleVariants = tv({
-  base: 'leading-none font-semibold',
+  base: 'leading-none font-semibold flex justify-start',
   variants: {
     size: {
       base: 'text-base',
