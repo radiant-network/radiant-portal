@@ -6,7 +6,7 @@ import { replaceUnderscore } from '@/components/lib/string-format';
 
 const consequenceVariant = tv({
   slots: {
-    base: 'flex gap-[6px] overflow-hidden',
+    base: 'capitalize flex gap-[6px] overflow-hidden',
     icon: 'mt-[5.25px]',
   },
   variants: {
