@@ -14,99 +14,9 @@ import {
   firstSetCellData,
   thirdSetCellData,
   applicationFirstSetCellColumns,
-} from './data-table-mock';
+} from './cells-mock';
+import { data, MockData } from './table-mock';
 
-export type MockData = {
-  firstName: string;
-  lastName: string;
-  age: number;
-  visits: number;
-  status: string;
-  progress: number;
-};
-
-const data: MockData[] = [
-  {
-    firstName: 'tanner',
-    lastName: 'linsley',
-    age: 24,
-    visits: 100,
-    status: 'In Relationship',
-    progress: 50,
-  },
-  {
-    firstName: 'tandy',
-    lastName: 'miller',
-    age: 40,
-    visits: 40,
-    status: 'Single',
-    progress: 80,
-  },
-  {
-    firstName: 'joe',
-    lastName: 'dirte',
-    age: 45,
-    visits: 20,
-    status: 'Complicated',
-    progress: 10,
-  },
-  {
-    firstName: 'alice',
-    lastName: 'smith',
-    age: 31,
-    visits: 56,
-    status: 'Single',
-    progress: 76,
-  },
-  {
-    firstName: 'bob',
-    lastName: 'johnson',
-    age: 29,
-    visits: 33,
-    status: 'In Relationship',
-    progress: 40,
-  },
-  {
-    firstName: 'carol',
-    lastName: 'williams',
-    age: 38,
-    visits: 75,
-    status: 'Complicated',
-    progress: 67,
-  },
-  {
-    firstName: 'dave',
-    lastName: 'brown',
-    age: 22,
-    visits: 14,
-    status: 'Single',
-    progress: 91,
-  },
-  {
-    firstName: 'eve',
-    lastName: 'jones',
-    age: 27,
-    visits: 60,
-    status: 'In Relationship',
-    progress: 35,
-  },
-  {
-    firstName: 'frank',
-    lastName: 'garcia',
-    age: 33,
-    visits: 45,
-    status: 'Single',
-    progress: 85,
-  },
-  {
-    firstName: 'grace',
-    lastName: 'martinez',
-    age: 44,
-    visits: 19,
-    status: 'Complicated',
-    progress: 12,
-  },
-];
 
 const columnHelper = createColumnHelper<MockData>();
 
@@ -204,8 +114,8 @@ const meta = {
       pageIndex: 0,
       pageSize: 10,
     },
-    onPaginationChange: () => {},
-    onServerSortingChange: sorting => {},
+    onPaginationChange: () => { },
+    onServerSortingChange: sorting => { },
     total: 10,
   },
   decorators: [
@@ -265,6 +175,58 @@ export const Default: Story = {
   render: args => <DataTable {...args} />,
 };
 
+
+// @TODO:  not functional at the moment
+// export const WithHeaderGroups: Story = {
+//   args: {
+//     data: data.slice(0, 10),
+//     enableFullscreen: true,
+//     enableColumnOrdering: true,
+//     columns: [
+//       columnHelper.group({
+//         id: 'group_1',
+//         header: () => <span>Group 1</span>,
+//         columns: [
+//           columnHelper.accessor('firstName', {
+//             cell: info => info.getValue(),
+//             footer: props => props.column.id,
+//           }),
+//           columnHelper.accessor(row => row.lastName, {
+//             id: 'lastName',
+//             cell: info => info.getValue(),
+//             header: () => <span>Last Name</span>,
+//             footer: props => props.column.id,
+//           }),
+//         ],
+//       }),
+//       columnHelper.group({
+//         header: 'group_2',
+//         columns: [
+//           columnHelper.accessor('age', {
+//             header: () => 'Age',
+//             footer: props => props.column.id,
+//           }),
+//           columnHelper.group({
+//             header: 'More Info',
+//             columns: [
+//               columnHelper.accessor('visits', {
+//                 header: () => <span>Visits</span>,
+//               }),
+//               columnHelper.accessor('status', {
+//                 header: 'Status',
+//               }),
+//               columnHelper.accessor('progress', {
+//                 header: 'Profile Progress',
+//               }),
+//             ],
+//           }),
+//         ],
+//       }),
+//     ] as TableColumnDef<MockData, any>[],
+//   },
+//   render: args => <DataTable {...args} />,
+// };
+
 export const WithFullscreen: Story = {
   args: {
     enableFullscreen: true,
@@ -296,7 +258,7 @@ export const WithTableFilters: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
   },
   render: args => <DataTable {...args} />,
 };

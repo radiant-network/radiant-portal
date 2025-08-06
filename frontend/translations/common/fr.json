@@ -341,6 +341,25 @@
       "frequency_divider_my_organization": "Mon Organisation",
       "frequency_divider_pulic_cohorts": "Cohortes Publiques",
       "zygosity_divider_parental_analysis": "Analyse Parentale"
+    },
+    "upload_id": {
+      "upload_a_file": "Téléverser un fichier",
+      "summary_table": "Tableau récapitulatif ({{matched}} correspondances, {{unmatched}} non correspondantes)",
+      "resume": "{{total}} identifiants soumis correspondant à {{unique}} identifiants système uniques",
+      "matched": "Correspondants ({{total}})",
+      "unmatched": "Non correspondants ({{total}})",
+      "gene": {
+        "trigger": "Téléverser une liste de gènes",
+        "dialog_header": "Téléverser une liste de gènes"
+      },
+      "identifiers": {
+        "label": "Copiez-collez une liste d'identifiants ou téléversez un fichier",
+        "tooltips": {
+          "identifiers": "Identifiants : symbole de gène, alias de gène, identifiant Ensembl",
+          "separated_by": "Séparés par : virgule, espace, saut de ligne",
+          "upload_file_format": "Formats de fichiers acceptés : tsv, csv"
+        }
+      }
     }
   },
   "caseExploration": {
