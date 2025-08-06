@@ -211,7 +211,7 @@ export default function FilterButton({
         className={cn(
           'p-0 flex flex-col', {
           'w-[229px] max-h-[240px]': popoverSize === 'default',
-          'w-[360px] max-h-[280px]': popoverSize === 'lg',
+          'w-[470px] max-h-[280px]': popoverSize === 'lg',
         })}
         align="start"
         onMouseLeave={() => setOpen(false)}
@@ -260,8 +260,8 @@ export default function FilterButton({
             </CommandGroup>
           </CommandList>
         </Command>
-        <div className="size-full border-t-1 rounded-none border-border p-1">
-          {selectedCount !== 0 && !actionMode && (
+        {selectedCount !== 0 && !actionMode && (
+          <div className="size-full border-t-1 rounded-none border-border p-1">
             <Button
               variant="ghost"
               size="sm"
@@ -271,8 +271,8 @@ export default function FilterButton({
             >
               {t('common.actions.clear')}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );
