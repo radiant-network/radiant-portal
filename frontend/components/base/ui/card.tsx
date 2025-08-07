@@ -45,7 +45,7 @@ type CardTitleProps = React.ComponentProps<'div'> & {
   size?: 'base' | 'xs' | 'sm' | 'md' | 'xl';
 };
 function CardTitle({ className, size = 'base', ...props }: CardTitleProps) {
-  return <div data-slot="card-title" className={cardTitleVariants({ size })} {...props} />;
+  return <div data-slot="card-title" className={cn(cardTitleVariants({ size }), className)} {...props} />;
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {

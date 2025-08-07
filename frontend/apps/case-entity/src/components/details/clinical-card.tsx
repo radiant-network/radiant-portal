@@ -110,7 +110,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
               {family.map(member => (
                 <Card className="p-4 gap-4 flex">
                   {/* Relationship */}
-                  <CardTitle>{member.relationship_to_proband}</CardTitle>
+                  <CardTitle className="capitalize">{member.relationship_to_proband}</CardTitle>
 
                   {/* Affected Status Code */}
                   {member.affected_status_code && (
