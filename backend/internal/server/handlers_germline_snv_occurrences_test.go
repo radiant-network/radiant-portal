@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.Occurrence, error) {
-	return []types.Occurrence{
+func (m *MockRepository) GetOccurrences(int, types.ListQuery) ([]types.GermlineSNVOccurrence, error) {
+	return []types.GermlineSNVOccurrence{
 		{
 			SeqId:              1,
 			TaskId:             1,
@@ -57,8 +57,8 @@ func (m *MockRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*
 		nil
 }
 
-func (m *MockRepository) GetExpandedOccurrence(int, int) (*types.ExpandedOccurrence, error) {
-	return &types.ExpandedOccurrence{
+func (m *MockRepository) GetExpandedOccurrence(int, int) (*types.ExpandedGermlineSNVOccurrence, error) {
+	return &types.ExpandedGermlineSNVOccurrence{
 		LocusId:      "1000",
 		Locus:        "locus1",
 		Chromosome:   "1",
@@ -84,7 +84,7 @@ func (m *MockRepository) GetExpandedOccurrence(int, int) (*types.ExpandedOccurre
 func Test_OccurrencesListHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/:seq_id/list", OccurrencesGermlineListHandler(repo))
+	router.POST("/occurrences/germline/:seq_id/list", OccurrencesGermlineSNVListHandler(repo))
 	body := `{
 			"additional_fields":[
 				"seq_id","task_id","locus_id","filter","zygosity","pf_wgs","pc_wgs","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
@@ -129,7 +129,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 func Test_OccurrencesCountHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/:seq_id/count", OccurrencesGermlineCountHandler(repo))
+	router.POST("/occurrences/germline/:seq_id/count", OccurrencesGermlineSNVCountHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/occurrences/germline/1/count", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -142,7 +142,7 @@ func Test_OccurrencesCountHandler(t *testing.T) {
 func Test_OccurrencesAggregateHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/:seq_id/aggregate", OccurrencesGermlineAggregateHandler(repo))
+	router.POST("/occurrences/germline/:seq_id/aggregate", OccurrencesGermlineSNVAggregateHandler(repo))
 
 	body := `{
 			"field": "zygosity",
@@ -167,7 +167,7 @@ func Test_OccurrencesAggregateHandler(t *testing.T) {
 func Test_OccurrencesStatisticsHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/:seq_id/statistics", OccurrencesGermlineStatisticsHandler(repo))
+	router.POST("/occurrences/germline/:seq_id/statistics", OccurrencesGermlineSNVStatisticsHandler(repo))
 
 	body := `{
 			"field": "pf_wgs",
@@ -191,7 +191,7 @@ func Test_OccurrencesStatisticsHandler(t *testing.T) {
 func Test_GetExpandedOccurrenceHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/:seq_id/:locus_id/expanded", GetExpandedGermlineOccurrence(repo))
+	router.GET("/occurrences/germline/:seq_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo))
 
 	req, _ := http.NewRequest("GET", "/occurrences/germline/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()

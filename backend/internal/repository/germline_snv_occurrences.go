@@ -12,42 +12,42 @@ import (
 	"gorm.io/gorm"
 )
 
-type Occurrence = types.Occurrence
+type GermlineSNVOccurrence = types.GermlineSNVOccurrence
 type Aggregation = types.Aggregation
 type Statistics = types.Statistics
-type ExpandedOccurrence = types.ExpandedOccurrence
+type ExpandedGermlineSNVOccurrence = types.ExpandedGermlineSNVOccurrence
 type OmimGenePanel = types.OmimGenePanel
 type Consequence = types.Consequence
 type Transcript = types.Transcript
 
-type OccurrencesRepository struct {
+type GermlineSNVOccurrencesRepository struct {
 	db *gorm.DB
 }
 
-type OccurrencesDAO interface {
-	GetOccurrences(seqId int, userFilter types.ListQuery) ([]Occurrence, error)
+type GermlineSNVOccurrencesDAO interface {
+	GetOccurrences(seqId int, userFilter types.ListQuery) ([]GermlineSNVOccurrence, error)
 	CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error)
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 	GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
-	GetExpandedOccurrence(seqId int, locusId int) (*ExpandedOccurrence, error)
+	GetExpandedOccurrence(seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error)
 }
 
-func NewOccurrencesRepository(db *gorm.DB) *OccurrencesRepository {
+func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRepository {
 	if db == nil {
-		log.Print("OccurrencesRepository: db is nil")
+		log.Print("GermlineSNVOccurrencesRepository: db is nil")
 		return nil
 	}
-	return &OccurrencesRepository{db: db}
+	return &GermlineSNVOccurrencesRepository{db: db}
 }
 
-func addImplicitOccurrencesFilters(seqId int, r *OccurrencesRepository, part int) *gorm.DB {
+func addImplicitOccurrencesFilters(seqId int, r *GermlineSNVOccurrencesRepository, part int) *gorm.DB {
 	tx := r.db.Table("germline__snv__occurrence o").Where("o.seq_id = ? and o.part=?", seqId, part)
 	return tx
 }
 func joinWithVariants(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("JOIN germline__snv__variant v ON v.locus_id=o.locus_id")
 }
-func (r *OccurrencesRepository) GetPart(seqId int) (int, error) { //TODO cache
+func (r *GermlineSNVOccurrencesRepository) GetPart(seqId int) (int, error) { //TODO cache
 	tx := r.db.Table("staging_sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
 	var part int
 	err := tx.Scan(&part).Error
@@ -57,8 +57,8 @@ func (r *OccurrencesRepository) GetPart(seqId int) (int, error) { //TODO cache
 	return part, err
 }
 
-func (r *OccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]Occurrence, error) {
-	var occurrences []Occurrence
+func (r *GermlineSNVOccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
+	var occurrences []GermlineSNVOccurrence
 
 	tx, part, err := prepareListOrCountQuery(seqId, userQuery, r)
 	if err != nil {
@@ -91,7 +91,7 @@ func (r *OccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQu
 	return occurrences, nil
 }
 
-func prepareListOrCountQuery(seqId int, userQuery types.Query, r *OccurrencesRepository) (*gorm.DB, int, error) {
+func prepareListOrCountQuery(seqId int, userQuery types.Query, r *GermlineSNVOccurrencesRepository) (*gorm.DB, int, error) {
 	part, err := r.GetPart(seqId)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
@@ -171,7 +171,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *OccurrencesRep
 	return tx, part, nil
 }
 
-func (r *OccurrencesRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
+func (r *GermlineSNVOccurrencesRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
 	tx, _, err := prepareListOrCountQuery(seqId, userQuery, r)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
@@ -183,7 +183,7 @@ func (r *OccurrencesRepository) CountOccurrences(seqId int, userQuery types.Coun
 	return count, nil
 }
 
-func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *OccurrencesRepository) (*gorm.DB, int, error) {
+func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *GermlineSNVOccurrencesRepository) (*gorm.DB, int, error) {
 	part, err := r.GetPart(seqId)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
@@ -214,7 +214,7 @@ func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *Occurrence
 	return tx, part, nil
 }
 
-func (r *OccurrencesRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
+func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
 	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
 	var aggregation []Aggregation
 	if err != nil {
@@ -243,7 +243,7 @@ func (r *OccurrencesRepository) AggregateOccurrences(seqId int, userQuery types.
 	return aggregation, nil
 }
 
-func (r *OccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
 	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
 	var statistics Statistics
 	if err != nil {
@@ -258,7 +258,7 @@ func (r *OccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery ty
 	return &statistics, nil
 }
 
-func (r *OccurrencesRepository) GetExpandedOccurrence(seqId int, locusId int) (*ExpandedOccurrence, error) {
+func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {
 	tx := r.db.Table("germline__snv__occurrence o")
 	tx = tx.Joins("JOIN germline__snv__consequence c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
 	tx = tx.Joins("JOIN germline__snv__variant v ON o.locus_id=v.locus_id")
@@ -269,7 +269,7 @@ func (r *OccurrencesRepository) GetExpandedOccurrence(seqId int, locusId int) (*
 		"c.dann_score, o.zygosity, o.transmission_mode, o.parental_origin, o.father_calls, o.mother_calls, o.info_qd, o.ad_alt, o.ad_total, o.filter, o.gq," +
 		"o.exomiser_gene_combined_score, o.exomiser_acmg_evidence, o.exomiser_acmg_classification, v.pc_wgs_affected, v.pn_wgs_affected, v.pf_wgs_affected, v.pc_wgs_not_affected, v.pn_wgs_not_affected, v.pf_wgs_not_affected")
 
-	var expandedOccurrence ExpandedOccurrence
+	var expandedOccurrence ExpandedGermlineSNVOccurrence
 	if err := tx.First(&expandedOccurrence).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching expanded occurrence: %w", err)

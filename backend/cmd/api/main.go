@@ -35,7 +35,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoSeqExp := repository.NewSequencingRepository(dbStarrocks)
 	repoVariants := repository.NewVariantsRepository(dbStarrocks)
 	repoExomiser := repository.NewExomiserRepository(dbStarrocks)
-	repoOccurrences := repository.NewOccurrencesRepository(dbStarrocks)
+	repoGermlineSNVOccurrences := repository.NewGermlineSNVOccurrencesRepository(dbStarrocks)
 	repoTerms := repository.NewTermsRepository(dbStarrocks)
 	repoCases := repository.NewCasesRepository(dbStarrocks)
 	repoAssays := repository.NewAssaysRepository(dbStarrocks)
@@ -109,11 +109,13 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	occurrencesGroup := privateRoutes.Group("/occurrences")
 	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
-	occurrencesGermlineGroup.POST("/:seq_id/count", server.OccurrencesGermlineCountHandler(repoOccurrences))
-	occurrencesGermlineGroup.POST("/:seq_id/list", server.OccurrencesGermlineListHandler(repoOccurrences))
-	occurrencesGermlineGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repoOccurrences))
-	occurrencesGermlineGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repoOccurrences))
-	occurrencesGermlineGroup.GET("/:seq_id/:locus_id/expanded", server.GetExpandedGermlineOccurrence(repoOccurrences))
+
+	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")
+	occurrencesGermlineSNVGroup.POST("/:seq_id/count", server.OccurrencesGermlineSNVCountHandler(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.POST("/:seq_id/list", server.OccurrencesGermlineSNVListHandler(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.GET("/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoSeqExp))
