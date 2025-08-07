@@ -1,6 +1,6 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import { Diamond } from 'lucide-react';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
@@ -8,7 +8,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 
 type FrequencySectionProps = {
-  data: ExpandedOccurrence;
+  data: ExpandedGermlineSNVOccurrence;
 };
 
 export default function FrequencySection({ data }: FrequencySectionProps) {

@@ -3,11 +3,11 @@ import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type InterpretationTranscriptProps = {
-  occurrence?: ExpandedOccurrence;
+  occurrence?: ExpandedGermlineSNVOccurrence;
 };
 
 function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps) {

@@ -29,7 +29,7 @@ type OccurrenceStatisticsInput = {
 
 const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics> => {
   return occurrencesApi
-    .statisticsGermlineOccurrences(input.seqId, input.statisticsBody)
+    .statisticsGermlineSNVOccurrences(input.seqId, input.statisticsBody)
     .then(response => response.data);
 };
 

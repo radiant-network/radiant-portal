@@ -18,7 +18,7 @@ type OccurrenceAggregationInput = {
 
 const fetcher = (input: OccurrenceAggregationInput): Promise<Aggregation[]> => {
   return occurrencesApi
-    .aggregateGermlineOccurrences(input.seqId, input.aggregationBody)
+    .aggregateGermlineSNVOccurrences(input.seqId, input.aggregationBody)
     .then(response => response.data);
 };
 

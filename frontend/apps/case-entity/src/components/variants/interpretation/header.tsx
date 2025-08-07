@@ -1,4 +1,4 @@
-import { Occurrence } from '@/api/api';
+import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/ui/badge';
 import { Separator } from '@/components/base/ui/separator';
@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 import { SeqIDContext } from '../variants-tab';
 
 type InterpretationVariantHeaderProps = {
-  occurrence?: Occurrence;
+  occurrence?: GermlineSNVOccurrence;
 };
 
 function InterpretationVariantHeader({ occurrence }: InterpretationVariantHeaderProps) {

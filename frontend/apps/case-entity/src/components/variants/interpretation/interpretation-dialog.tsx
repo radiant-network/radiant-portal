@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Separator } from '@/components/base/ui/separator';
 import InterpretationFormGermline from './interpretation-form-germline';
 import { ReactNode, useCallback, useContext, useRef, useState } from 'react';
-import { ExpandedOccurrence, Occurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
 import InterpretationFormSomatic from './interpretation-form-somatic';
 import InterpretationLastUpdatedBanner from './last-updated-banner';
 import InterpretationVariantHeader from './header';
@@ -25,7 +25,7 @@ import OccurrenceDetails from './occurence-details';
 import { useI18n } from '@/components/hooks/i18n';
 
 type InterpretationDialogButtonProps = {
-  occurrence: Occurrence;
+  occurrence: GermlineSNVOccurrence;
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
 };
@@ -49,7 +49,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
   const occurrenceUniqueKey = `occurrence-${occurrence.seq_id}-${occurrence.locus_id}`;
 
-  const fetchOccurrenceExpand = useSWR<ExpandedOccurrence>(occurrenceUniqueKey, fetchOccurrenceExpandHelper, {
+  const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence>(occurrenceUniqueKey, fetchOccurrenceExpandHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,

@@ -1,4 +1,4 @@
-import { ExpandedOccurrence, Occurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
 import { Separator } from '@/components/base/ui/separator';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import AnchorLink from '@/components/base/navigation/anchor-link';
@@ -11,8 +11,8 @@ import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 import {cn} from "@/lib/utils";
 
 type OccurrenceExpandTranscriptProps = {
-  occurrence: Occurrence;
-  expandedOccurrence: ExpandedOccurrence;
+  occurrence: GermlineSNVOccurrence;
+  expandedOccurrence: ExpandedGermlineSNVOccurrence;
 };
 
 export default function OccurrenceExpandTranscript({

@@ -1,10 +1,10 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
 
 type ClassificationSectionProps = {
-  data: ExpandedOccurrence;
+  data: ExpandedGermlineSNVOccurrence;
 };
 
 export default function ClassificationSection({ data }: ClassificationSectionProps) {

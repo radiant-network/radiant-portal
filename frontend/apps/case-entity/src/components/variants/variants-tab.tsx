@@ -1,4 +1,4 @@
-import { CaseEntity, Count, Occurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
+import { CaseEntity, Count, GermlineSNVOccurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
@@ -47,7 +47,7 @@ type VariantTabProps = {
 }
 
 async function fetchQueryCount(input: OccurrenceCountInput) {
-  const response = await occurrencesApi.countGermlineOccurrences(input.seqId, input.countBody);
+  const response = await occurrencesApi.countGermlineSNVOccurrences(input.seqId, input.countBody);
   return response.data;
 }
 
@@ -112,7 +112,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     countBody: { sqon: activeSqon }
   });
 
-  const fetchOccurrencesList = useSWR<Occurrence[]>('fetch-occurences-list', fetchOccurrencesListHelper, {
+  const fetchOccurrencesList = useSWR<GermlineSNVOccurrence[]>('fetch-occurences-list', fetchOccurrencesListHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,

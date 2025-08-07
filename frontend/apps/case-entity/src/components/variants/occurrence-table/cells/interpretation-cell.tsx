@@ -1,4 +1,4 @@
-import { Occurrence } from '@/api/api';
+import { GermlineSNVOccurrence } from '@/api/api';
 import { Button } from '@/components/base/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
@@ -8,7 +8,7 @@ import InterpretationDialog from '../../interpretation/interpretation-dialog';
 import { useState } from 'react';
 
 type InterpretationCellProps = {
-  occurrence: Occurrence;
+  occurrence: GermlineSNVOccurrence;
 };
 
 

@@ -1,14 +1,14 @@
 import { Button } from '@/components/base/ui/button';
 import { Edit2Icon } from 'lucide-react';
 import InterpretationDialog from '../interpretation/interpretation-dialog';
-import { Occurrence } from '@/api/api';
+import { GermlineSNVOccurrence } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
 import { Link } from 'react-router';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type OccurrenceExpandHeaderProps = {
-  occurrence: Occurrence;
+  occurrence: GermlineSNVOccurrence;
 };
 
 export default function OccurrenceExpandHeader({ occurrence }: OccurrenceExpandHeaderProps) {

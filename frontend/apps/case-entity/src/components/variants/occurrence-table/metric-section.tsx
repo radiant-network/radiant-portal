@@ -1,11 +1,11 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import { Triangle } from 'lucide-react';
 import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
 
 type MetricSectionProps = {
-  data: ExpandedOccurrence;
+  data: ExpandedGermlineSNVOccurrence;
 };
 
 export default function MetricSection({ data }: MetricSectionProps) {
