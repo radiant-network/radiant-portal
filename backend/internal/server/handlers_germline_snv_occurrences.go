@@ -9,22 +9,22 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// OccurrencesGermlineListHandler handles list of germline occurrences
-// @Summary List germline occurrences
-// @Id listGermlineOccurrences
-// @Description List germline occurrences for a given sequence ID
+// OccurrencesGermlineSNVListHandler handles list of germline SNV occurrences
+// @Summary List germline SNV occurrences
+// @Id listGermlineSNVOccurrences
+// @Description List germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
 // @Param			message	body		types.ListBodyWithSqon	true	"List Body"
 // @Accept json
 // @Produce json
-// @Success 200 {array} types.Occurrence
+// @Success 200 {array} types.GermlineSNVOccurrence
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/{seq_id}/list [post]
-func OccurrencesGermlineListHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/snv/{seq_id}/list [post]
+func OccurrencesGermlineSNVListHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBodyWithSqon
@@ -58,10 +58,10 @@ func OccurrencesGermlineListHandler(repo repository.OccurrencesDAO) gin.HandlerF
 	}
 }
 
-// OccurrencesGermlineCountHandler handles counting germline occurrences
-// @Summary Count germline occurrences
-// @Id countGermlineOccurrences
-// @Description Counts germline occurrences for a given sequence ID
+// OccurrencesGermlineSNVCountHandler handles counting germline SNV occurrences
+// @Summary Count germline SNV occurrences
+// @Id countGermlineSNVOccurrences
+// @Description Counts germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
@@ -72,8 +72,8 @@ func OccurrencesGermlineListHandler(repo repository.OccurrencesDAO) gin.HandlerF
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/{seq_id}/count [post]
-func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/snv/{seq_id}/count [post]
+func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBodyWithSqon
@@ -86,7 +86,7 @@ func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.Handler
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewCountQueryFromSqon(body.Sqon, types.OccurrencesFields)
+		query, err := types.NewCountQueryFromSqon(body.Sqon, types.GermlineSNVOccurrencesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -106,10 +106,10 @@ func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.Handler
 	}
 }
 
-// OccurrencesGermlineAggregateHandler handles aggregation of germline occurrences
-// @Summary Aggregate germline occurrences
-// @Id aggregateGermlineOccurrences
-// @Description Aggregate germline occurrences for a given sequence ID
+// OccurrencesGermlineSNVAggregateHandler handles aggregation of germline SNV occurrences
+// @Summary Aggregate germline SNV occurrences
+// @Id aggregateGermlineSNVOccurrences
+// @Description Aggregate germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
@@ -120,8 +120,8 @@ func OccurrencesGermlineCountHandler(repo repository.OccurrencesDAO) gin.Handler
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/{seq_id}/aggregate [post]
-func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/snv/{seq_id}/aggregate [post]
+func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.AggregationBodyWithSqon
@@ -135,7 +135,7 @@ func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.Han
 			return
 		}
 
-		query, err := types.NewAggregationQueryFromSqon(body.Field, body.Sqon, types.OccurrencesFields)
+		query, err := types.NewAggregationQueryFromSqon(body.Field, body.Sqon, types.GermlineSNVOccurrencesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -154,9 +154,9 @@ func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.Han
 	}
 }
 
-// OccurrencesGermlineStatisticsHandler handles statistics of occurrences
-// @Summary Statistics of germline occurrences
-// @Id statisticsGermlineOccurrences
+// OccurrencesGermlineSNVStatisticsHandler handles statistics of germline SNV occurrences
+// @Summary Statistics of germline SNV occurrences
+// @Id statisticsGermlineSNVOccurrences
 // @Description Return statistics about a field for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
@@ -168,8 +168,8 @@ func OccurrencesGermlineAggregateHandler(repo repository.OccurrencesDAO) gin.Han
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/{seq_id}/statistics [post]
-func OccurrencesGermlineStatisticsHandler(repo repository.OccurrencesDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/snv/{seq_id}/statistics [post]
+func OccurrencesGermlineSNVStatisticsHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.StatisticsBodyWithSqon
@@ -183,7 +183,7 @@ func OccurrencesGermlineStatisticsHandler(repo repository.OccurrencesDAO) gin.Ha
 			return
 		}
 
-		query, err := types.NewStatisticsQueryFromSqon(body.Field, body.Sqon, types.OccurrencesFields)
+		query, err := types.NewStatisticsQueryFromSqon(body.Field, body.Sqon, types.GermlineSNVOccurrencesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -202,20 +202,20 @@ func OccurrencesGermlineStatisticsHandler(repo repository.OccurrencesDAO) gin.Ha
 	}
 }
 
-// GetExpandedGermlineOccurrence handles retrieving expanded information about germline occurrence
-// @Summary Get a germline ExpandedOccurrence
-// @Id getExpandedGermlineOccurrence
-// @Description Retrieve ExpandedOccurrence data for a given locus ID
+// GetExpandedGermlineSNVOccurrence handles retrieving expanded information about germline SNV occurrence
+// @Summary Get a germline ExpandedGermlineSNVOccurrence
+// @Id getExpandedGermlineSNVOccurrence
+// @Description Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
-// @Success 200 {object} types.ExpandedOccurrence
+// @Success 200 {object} types.ExpandedGermlineSNVOccurrence
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/{seq_id}/{locus_id}/expanded [get]
-func GetExpandedGermlineOccurrence(repo repository.OccurrencesDAO) gin.HandlerFunc {
+// @Router /occurrences/germline/snv/{seq_id}/{locus_id}/expanded [get]
+func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {

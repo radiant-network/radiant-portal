@@ -22,11 +22,11 @@ import (
 
 func testList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrencesRepository(db)
+		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/:seq_id/list", server.OccurrencesGermlineListHandler(repo))
+		router.POST("/occurrences/germline/snv/:seq_id/list", server.OccurrencesGermlineSNVListHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/1/list", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -36,11 +36,11 @@ func testList(t *testing.T, data string, body string, expected string) {
 }
 func testCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrencesRepository(db)
+		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/:seq_id/count", server.OccurrencesGermlineCountHandler(repo))
+		router.POST("/occurrences/germline/snv/:seq_id/count", server.OccurrencesGermlineSNVCountHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/1/count", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/count", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -50,11 +50,11 @@ func testCount(t *testing.T, data string, body string, expected int) {
 }
 func testAggregation(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrencesRepository(db)
+		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/:seq_id/aggregate", server.OccurrencesGermlineAggregateHandler(repo))
+		router.POST("/occurrences/germline/snv/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/1/aggregate", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/aggregate", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -64,11 +64,11 @@ func testAggregation(t *testing.T, data string, body string, expected string) {
 }
 func testStatistics(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrencesRepository(db)
+		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/:seq_id/statistics", server.OccurrencesGermlineStatisticsHandler(repo))
+		router.POST("/occurrences/germline/snv/:seq_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/1/statistics", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/statistics", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -486,11 +486,11 @@ func assertSearchInterpretationSomatic(t *testing.T, repo repository.Interpretat
 
 func assertGetExpandedOccurrence(t *testing.T, data string, seqId int, locusId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrencesRepository(db)
+		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.GET("/occurrences/germline/:seq_id/:locus_id/expanded", server.GetExpandedGermlineOccurrence(repo))
+		router.GET("/occurrences/germline/snv/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/%d/%d/expanded", seqId, locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/snv/%d/%d/expanded", seqId, locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -1132,7 +1132,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"interpretations/germline/1/1/1",
 			"interpretations/somatic/1/1/1",
 			"mondo/autocomplete",
-			"occurrences/germline/1/1/expanded",
+			"occurrences/germline/snv/1/1/expanded",
 			"sequencing/1",
 			"users/sets/1",
 			"variants/germline/1/header",
@@ -1155,10 +1155,10 @@ func Test_SecureRoutes(t *testing.T) {
 			"cases/filters",
 			"interpretations/germline/1/1/1",
 			"interpretations/somatic/1/1/1",
-			"occurrences/germline/1/count",
-			"occurrences/germline/1/list",
-			"occurrences/germline/1/aggregate",
-			"occurrences/germline/1/statistics",
+			"occurrences/germline/snv/1/count",
+			"occurrences/germline/snv/1/list",
+			"occurrences/germline/snv/1/aggregate",
+			"occurrences/germline/snv/1/statistics",
 			"variants/germline/1/cases/interpreted",
 			"variants/germline/1/cases/uninterpreted",
 		} {

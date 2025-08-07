@@ -1,8 +1,8 @@
 package types
 
-// Occurrence represents an occurrence
-// @Description Occurrence represents an occurrence
-type Occurrence struct {
+// GermlineSNVOccurrence represents a germline SNV occurrence
+// @Description GermlineSNVOccurrence represents a germline SNV occurrence
+type GermlineSNVOccurrence struct {
 	SeqId                      int               `json:"seq_id" validate:"required"`
 	TaskId                     int               `json:"task_id" validate:"required"`
 	Chromosome                 string            `json:"chromosome" validate:"required"`
@@ -36,9 +36,9 @@ type Occurrence struct {
 	ExomiserAcmgEvidence       JsonArray[string] `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
 	ExomiserVariantScore       float64           `json:"exomiser_variant_score" validate:"required"`
 	ExomiserGeneCombinedScore  float64           `json:"exomiser_gene_combined_score" validate:"required"`
-} // @name Occurrence
+} // @name GermlineSNVOccurrence
 
-type ExpandedOccurrence = struct {
+type ExpandedGermlineSNVOccurrence = struct {
 	LocusId                    string                   `json:"locus_id" validate:"required"`
 	Hgvsg                      string                   `json:"hgvsg" validate:"required"`
 	Locus                      string                   `json:"locus" validate:"required"`
@@ -93,9 +93,9 @@ type ExpandedOccurrence = struct {
 	ExomiserAcmgEvidence       JsonArray[string]        `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
 	ExomiserGeneCombinedScore  float64                  `json:"exomiser_gene_combined_score" validate:"required"`
 	ExomiserAcmgClassification string                   `json:"exomiser_acmg_classification,omitempty"`
-} // @name ExpandedOccurrence
+} // @name ExpandedGermlineSNVOccurrence
 
-var OccurrenceTable = Table{
+var GermlineSNVOccurrenceTable = Table{
 	Name:  "germline__snv__occurrence",
 	Alias: "o",
 }
@@ -105,26 +105,26 @@ var FilterField = Field{
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var SeqIdField = Field{
 	Name:          "seq_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var TaskIdField = Field{
 	Name:          "task_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var LocusIdField = Field{
 	Name:          "locus_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var ZygosityField = Field{
 	Name:            "zygosity",
@@ -132,31 +132,31 @@ var ZygosityField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var TransmissionModeField = Field{
 	Name:            "transmission_mode",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var ParentalOriginField = Field{
 	Name:            "parental_origin",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var MotherZygosityField = Field{
 	Name:            "mother_zygosity",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var FatherZygosityField = Field{
 	Name:            "father_zygosity",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var GenotypeQualityField = Field{
 	Name:          "gq",
@@ -165,7 +165,7 @@ var GenotypeQualityField = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var AdRatioField = Field{
 	Name:          "ad_ratio",
@@ -173,7 +173,7 @@ var AdRatioField = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var AdAltField = Field{
 	Name:          "ad_alt",
@@ -181,7 +181,7 @@ var AdAltField = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var AdTotalField = Field{
 	Name:          "ad_total",
@@ -189,7 +189,7 @@ var AdTotalField = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var InfoQdField = Field{
 	Name:          "info_qd",
@@ -197,7 +197,7 @@ var InfoQdField = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var ExomiserMoiField = Field{
 	Name:            "exomiser_moi",
@@ -205,7 +205,7 @@ var ExomiserMoiField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var ExomiserAcmgClassificationField = Field{
 	Name:            "exomiser_acmg_classification",
@@ -213,7 +213,7 @@ var ExomiserAcmgClassificationField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var ExomiserAcmgEvidenceField = Field{
 	Name:            "exomiser_acmg_evidence",
@@ -222,7 +222,7 @@ var ExomiserAcmgEvidenceField = Field{
 	CanBeSorted:     true,
 	CanBeAggregated: true,
 	Type:            ArrayType,
-	Table:           OccurrenceTable,
+	Table:           GermlineSNVOccurrenceTable,
 }
 var ExomiserVariantScoreField = Field{
 	Name:          "exomiser_variant_score",
@@ -230,7 +230,7 @@ var ExomiserVariantScoreField = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 var ExomiserGeneCombinedScoreField = Field{
 	Name:          "exomiser_gene_combined_score",
@@ -238,10 +238,10 @@ var ExomiserGeneCombinedScoreField = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          NumericType,
-	Table:         OccurrenceTable,
+	Table:         GermlineSNVOccurrenceTable,
 }
 
-var OccurrencesFields = []Field{
+var GermlineSNVOccurrencesFields = []Field{
 	SeqIdField,
 	TaskIdField,
 	LocusIdField,
@@ -319,7 +319,7 @@ var OccurrencesFields = []Field{
 	ExomiserVariantScoreField,
 }
 
-var OccurrencesDefaultFields = []Field{
+var GermlineSNVOccurrencesDefaultFields = []Field{
 	SeqIdField,
 	TaskIdField,
 	LocusIdField,
@@ -347,11 +347,11 @@ var OccurrencesDefaultFields = []Field{
 	ExomiserVariantScoreField,
 }
 
-var OccurrencesDefaultSort = []SortField{{Field: PickedImpactScoreField, Order: "desc"}}
+var GermlineSNVOccurrencesDefaultSort = []SortField{{Field: PickedImpactScoreField, Order: "desc"}}
 
 var OccurrencesQueryConfig = QueryConfig{
-	AllFields:     OccurrencesFields,
-	DefaultFields: OccurrencesDefaultFields,
-	DefaultSort:   OccurrencesDefaultSort,
+	AllFields:     GermlineSNVOccurrencesFields,
+	DefaultFields: GermlineSNVOccurrencesDefaultFields,
+	DefaultSort:   GermlineSNVOccurrencesDefaultSort,
 	IdField:       LocusIdField,
 }

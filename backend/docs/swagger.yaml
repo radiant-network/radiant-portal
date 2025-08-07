@@ -422,7 +422,7 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
-    ExpandedOccurrence:
+    ExpandedGermlineSNVOccurrence:
       properties:
         aa_change:
           type: string
@@ -600,6 +600,109 @@ components:
       - conditions
       - count
       type: object
+    GermlineSNVOccurrence:
+      description: GermlineSNVOccurrence represents a germline SNV occurrence
+      properties:
+        aa_change:
+          type: string
+        ad_ratio:
+          type: number
+        chromosome:
+          type: string
+        clinvar:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        exomiser_acmg_classification:
+          type: string
+        exomiser_acmg_evidence:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        exomiser_gene_combined_score:
+          type: number
+        exomiser_moi:
+          type: string
+        exomiser_variant_score:
+          type: number
+        filter:
+          type: string
+        genotype_quality:
+          type: integer
+        gnomad_v3_af:
+          type: number
+        has_interpretation:
+          type: boolean
+        hgvsg:
+          type: string
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
+        locus_id:
+          type: string
+        max_impact_score:
+          type: integer
+        omim_inheritance_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        pc_wgs:
+          type: integer
+        pf_wgs:
+          type: number
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        pn_wgs:
+          type: integer
+        rsnumber:
+          type: string
+        seq_id:
+          type: integer
+        start:
+          type: integer
+        symbol:
+          type: string
+        task_id:
+          type: integer
+        transcript_id:
+          type: string
+        variant_class:
+          type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
+        zygosity:
+          type: string
+      required:
+      - ad_ratio
+      - chromosome
+      - exomiser_acmg_classification
+      - exomiser_acmg_evidence
+      - exomiser_gene_combined_score
+      - exomiser_moi
+      - exomiser_variant_score
+      - genotype_quality
+      - gnomad_v3_af
+      - has_interpretation
+      - hgvsg
+      - locus_id
+      - max_impact_score
+      - pf_wgs
+      - picked_consequences
+      - seq_id
+      - start
+      - task_id
+      - variant_class
+      - zygosity
+      type: object
     InterpretationGermline:
       properties:
         classification:
@@ -760,109 +863,6 @@ components:
           uniqueItems: false
         sqon:
           $ref: '#/components/schemas/Sqon'
-      type: object
-    Occurrence:
-      description: Occurrence represents an occurrence
-      properties:
-        aa_change:
-          type: string
-        ad_ratio:
-          type: number
-        chromosome:
-          type: string
-        clinvar:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        exomiser_acmg_classification:
-          type: string
-        exomiser_acmg_evidence:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        exomiser_gene_combined_score:
-          type: number
-        exomiser_moi:
-          type: string
-        exomiser_variant_score:
-          type: number
-        filter:
-          type: string
-        genotype_quality:
-          type: integer
-        gnomad_v3_af:
-          type: number
-        has_interpretation:
-          type: boolean
-        hgvsg:
-          type: string
-        is_canonical:
-          type: boolean
-        is_mane_plus:
-          type: boolean
-        is_mane_select:
-          type: boolean
-        locus_id:
-          type: string
-        max_impact_score:
-          type: integer
-        omim_inheritance_code:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        pc_wgs:
-          type: integer
-        pf_wgs:
-          type: number
-        picked_consequences:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        pn_wgs:
-          type: integer
-        rsnumber:
-          type: string
-        seq_id:
-          type: integer
-        start:
-          type: integer
-        symbol:
-          type: string
-        task_id:
-          type: integer
-        transcript_id:
-          type: string
-        variant_class:
-          type: string
-        vep_impact:
-          $ref: '#/components/schemas/VepImpact'
-        zygosity:
-          type: string
-      required:
-      - ad_ratio
-      - chromosome
-      - exomiser_acmg_classification
-      - exomiser_acmg_evidence
-      - exomiser_gene_combined_score
-      - exomiser_moi
-      - exomiser_variant_score
-      - genotype_quality
-      - gnomad_v3_af
-      - has_interpretation
-      - hgvsg
-      - locus_id
-      - max_impact_score
-      - pf_wgs
-      - picked_consequences
-      - seq_id
-      - start
-      - task_id
-      - variant_class
-      - zygosity
       type: object
     OmimGenePanel:
       properties:
@@ -1990,10 +1990,10 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
-  /occurrences/germline/{seq_id}/{locus_id}/expanded:
+  /occurrences/germline/snv/{seq_id}/{locus_id}/expanded:
     get:
-      description: Retrieve ExpandedOccurrence data for a given locus ID
-      operationId: getExpandedGermlineOccurrence
+      description: Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
+      operationId: getExpandedGermlineSNVOccurrence
       parameters:
       - description: Sequence ID
         in: path
@@ -2012,7 +2012,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExpandedOccurrence'
+                $ref: '#/components/schemas/ExpandedGermlineSNVOccurrence'
           description: OK
         "404":
           content:
@@ -2028,13 +2028,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Get a germline ExpandedOccurrence
+      summary: Get a germline ExpandedGermlineSNVOccurrence
       tags:
       - occurrences
-  /occurrences/germline/{seq_id}/aggregate:
+  /occurrences/germline/snv/{seq_id}/aggregate:
     post:
-      description: Aggregate germline occurrences for a given sequence ID
-      operationId: aggregateGermlineOccurrences
+      description: Aggregate germline SNV occurrences for a given sequence ID
+      operationId: aggregateGermlineSNVOccurrences
       parameters:
       - description: Sequence ID
         in: path
@@ -2078,13 +2078,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Aggregate germline occurrences
+      summary: Aggregate germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/{seq_id}/count:
+  /occurrences/germline/snv/{seq_id}/count:
     post:
-      description: Counts germline occurrences for a given sequence ID
-      operationId: countGermlineOccurrences
+      description: Counts germline SNV occurrences for a given sequence ID
+      operationId: countGermlineSNVOccurrences
       parameters:
       - description: Sequence ID
         in: path
@@ -2126,13 +2126,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Count germline occurrences
+      summary: Count germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/{seq_id}/list:
+  /occurrences/germline/snv/{seq_id}/list:
     post:
-      description: List germline occurrences for a given sequence ID
-      operationId: listGermlineOccurrences
+      description: List germline SNV occurrences for a given sequence ID
+      operationId: listGermlineSNVOccurrences
       parameters:
       - description: Sequence ID
         in: path
@@ -2153,7 +2153,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Occurrence'
+                  $ref: '#/components/schemas/GermlineSNVOccurrence'
                 type: array
           description: OK
         "400":
@@ -2176,13 +2176,13 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: List germline occurrences
+      summary: List germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/{seq_id}/statistics:
+  /occurrences/germline/snv/{seq_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
-      operationId: statisticsGermlineOccurrences
+      operationId: statisticsGermlineSNVOccurrences
       parameters:
       - description: Sequence ID
         in: path
@@ -2224,7 +2224,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Statistics of germline occurrences
+      summary: Statistics of germline SNV occurrences
       tags:
       - occurrences
   /sequencing/{seq_id}:

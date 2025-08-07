@@ -912,331 +912,331 @@ export interface CountBodyWithSqon {
 /**
  * 
  * @export
- * @interface ExpandedOccurrence
+ * @interface ExpandedGermlineSNVOccurrence
  */
-export interface ExpandedOccurrence {
+export interface ExpandedGermlineSNVOccurrence {
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'aa_change'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'ad_alt'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'ad_total'?: number;
     /**
      * TODO
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'af'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'cadd_phred'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'cadd_score'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'chromosome'?: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'clinvar'?: Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'dann_score'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'dna_change'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'end'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'exomiser_acmg_classification'?: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'exomiser_acmg_evidence': Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'exomiser_gene_combined_score': number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'exon_rank'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'exon_total'?: number;
     /**
      * 
      * @type {Array<number>}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'father_calls'?: Array<number>;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'fathmm_pred'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'fathmm_score'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'filter'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'genotype_quality': number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'gnomad_loeuf'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'gnomad_pli'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'gnomad_v3_af': number;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'hgvsg': string;
     /**
      * 
      * @type {boolean}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'is_canonical'?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'is_mane_plus'?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'is_mane_select'?: boolean;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'locus': string;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'locus_id': string;
     /**
      * 
      * @type {Array<number>}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'mother_calls'?: Array<number>;
     /**
      * 
      * @type {Array<OmimGenePanel>}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'omim_conditions'?: Array<OmimGenePanel>;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'parental_origin'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'pc_wgs_affected'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'pc_wgs_not_affected'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'pf_wgs'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'pf_wgs_affected'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'pf_wgs_not_affected'?: number;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'picked_consequences': Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'pn_wgs_affected'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'pn_wgs_not_affected'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'qd'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'revel_score'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'rsnumber'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'sift_pred'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'sift_score'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'spliceai_ds'?: number;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'spliceai_type'?: Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'start'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'symbol'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'transcript_id'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'transmission'?: string;
     /**
      * 
      * @type {VepImpact}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'vep_impact'?: VepImpact;
     /**
      * 
      * @type {string}
-     * @memberof ExpandedOccurrence
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'zygosity'?: string;
 }
@@ -1299,6 +1299,213 @@ export interface GenePanelConditions {
      */
     'count': number;
 }
+/**
+ * GermlineSNVOccurrence represents a germline SNV occurrence
+ * @export
+ * @interface GermlineSNVOccurrence
+ */
+export interface GermlineSNVOccurrence {
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'ad_ratio': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'chromosome': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineSNVOccurrence
+     */
+    'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'exomiser_acmg_classification': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineSNVOccurrence
+     */
+    'exomiser_acmg_evidence': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'exomiser_gene_combined_score': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'exomiser_moi': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'exomiser_variant_score': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'filter'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'genotype_quality': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'gnomad_v3_af': number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'has_interpretation': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'hgvsg': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'is_canonical'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'is_mane_select'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'locus_id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'max_impact_score': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineSNVOccurrence
+     */
+    'omim_inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'pf_wgs': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineSNVOccurrence
+     */
+    'picked_consequences': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'pn_wgs'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'rsnumber'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'start': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'symbol'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'task_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'variant_class': string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof GermlineSNVOccurrence
+     */
+    'vep_impact'?: VepImpact;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'zygosity': string;
+}
+
+
 /**
  * 
  * @export
@@ -1666,213 +1873,6 @@ export interface ListBodyWithSqon {
      */
     'sqon'?: Sqon;
 }
-/**
- * Occurrence represents an occurrence
- * @export
- * @interface Occurrence
- */
-export interface Occurrence {
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'aa_change'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'ad_ratio': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'chromosome': string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Occurrence
-     */
-    'clinvar'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'exomiser_acmg_classification': string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Occurrence
-     */
-    'exomiser_acmg_evidence': Array<string>;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'exomiser_gene_combined_score': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'exomiser_moi': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'exomiser_variant_score': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'filter'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'genotype_quality': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'gnomad_v3_af': number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Occurrence
-     */
-    'has_interpretation': boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'hgvsg': string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Occurrence
-     */
-    'is_canonical'?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Occurrence
-     */
-    'is_mane_plus'?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Occurrence
-     */
-    'is_mane_select'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'locus_id': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'max_impact_score': number;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Occurrence
-     */
-    'omim_inheritance_code'?: Array<string>;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'pc_wgs'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'pf_wgs': number;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Occurrence
-     */
-    'picked_consequences': Array<string>;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'pn_wgs'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'rsnumber'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'seq_id': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'start': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'symbol'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Occurrence
-     */
-    'task_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'transcript_id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'variant_class': string;
-    /**
-     * 
-     * @type {VepImpact}
-     * @memberof Occurrence
-     */
-    'vep_impact'?: VepImpact;
-    /**
-     * 
-     * @type {string}
-     * @memberof Occurrence
-     */
-    'zygosity': string;
-}
-
-
 /**
  * 
  * @export
@@ -4426,19 +4426,19 @@ export class MondoApi extends BaseAPI {
 export const OccurrencesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Aggregate germline occurrences for a given sequence ID
-         * @summary Aggregate germline occurrences
+         * Aggregate germline SNV occurrences for a given sequence ID
+         * @summary Aggregate germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineOccurrences: async (seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateGermlineSNVOccurrences: async (seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('aggregateGermlineOccurrences', 'seqId', seqId)
+            assertParamExists('aggregateGermlineSNVOccurrences', 'seqId', seqId)
             // verify required parameter 'aggregationBodyWithSqon' is not null or undefined
-            assertParamExists('aggregateGermlineOccurrences', 'aggregationBodyWithSqon', aggregationBodyWithSqon)
-            const localVarPath = `/occurrences/germline/{seq_id}/aggregate`
+            assertParamExists('aggregateGermlineSNVOccurrences', 'aggregationBodyWithSqon', aggregationBodyWithSqon)
+            const localVarPath = `/occurrences/germline/snv/{seq_id}/aggregate`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -4470,19 +4470,19 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * Counts germline occurrences for a given sequence ID
-         * @summary Count germline occurrences
+         * Counts germline SNV occurrences for a given sequence ID
+         * @summary Count germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineOccurrences: async (seqId: string, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        countGermlineSNVOccurrences: async (seqId: string, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('countGermlineOccurrences', 'seqId', seqId)
+            assertParamExists('countGermlineSNVOccurrences', 'seqId', seqId)
             // verify required parameter 'countBodyWithSqon' is not null or undefined
-            assertParamExists('countGermlineOccurrences', 'countBodyWithSqon', countBodyWithSqon)
-            const localVarPath = `/occurrences/germline/{seq_id}/count`
+            assertParamExists('countGermlineSNVOccurrences', 'countBodyWithSqon', countBodyWithSqon)
+            const localVarPath = `/occurrences/germline/snv/{seq_id}/count`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -4514,19 +4514,19 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * Retrieve ExpandedOccurrence data for a given locus ID
-         * @summary Get a germline ExpandedOccurrence
+         * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
+         * @summary Get a germline ExpandedGermlineSNVOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpandedGermlineOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getExpandedGermlineSNVOccurrence: async (seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getExpandedGermlineOccurrence', 'seqId', seqId)
+            assertParamExists('getExpandedGermlineSNVOccurrence', 'seqId', seqId)
             // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getExpandedGermlineOccurrence', 'locusId', locusId)
-            const localVarPath = `/occurrences/germline/{seq_id}/{locus_id}/expanded`
+            assertParamExists('getExpandedGermlineSNVOccurrence', 'locusId', locusId)
+            const localVarPath = `/occurrences/germline/snv/{seq_id}/{locus_id}/expanded`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -4556,19 +4556,19 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * List germline occurrences for a given sequence ID
-         * @summary List germline occurrences
+         * List germline SNV occurrences for a given sequence ID
+         * @summary List germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineOccurrences: async (seqId: string, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listGermlineSNVOccurrences: async (seqId: string, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('listGermlineOccurrences', 'seqId', seqId)
+            assertParamExists('listGermlineSNVOccurrences', 'seqId', seqId)
             // verify required parameter 'listBodyWithSqon' is not null or undefined
-            assertParamExists('listGermlineOccurrences', 'listBodyWithSqon', listBodyWithSqon)
-            const localVarPath = `/occurrences/germline/{seq_id}/list`
+            assertParamExists('listGermlineSNVOccurrences', 'listBodyWithSqon', listBodyWithSqon)
+            const localVarPath = `/occurrences/germline/snv/{seq_id}/list`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -4601,18 +4601,18 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         },
         /**
          * Return statistics about a field for a given sequence ID
-         * @summary Statistics of germline occurrences
+         * @summary Statistics of germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineOccurrences: async (seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        statisticsGermlineSNVOccurrences: async (seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('statisticsGermlineOccurrences', 'seqId', seqId)
+            assertParamExists('statisticsGermlineSNVOccurrences', 'seqId', seqId)
             // verify required parameter 'statisticsBodyWithSqon' is not null or undefined
-            assertParamExists('statisticsGermlineOccurrences', 'statisticsBodyWithSqon', statisticsBodyWithSqon)
-            const localVarPath = `/occurrences/germline/{seq_id}/statistics`
+            assertParamExists('statisticsGermlineSNVOccurrences', 'statisticsBodyWithSqon', statisticsBodyWithSqon)
+            const localVarPath = `/occurrences/germline/snv/{seq_id}/statistics`
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -4654,73 +4654,73 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = OccurrencesApiAxiosParamCreator(configuration)
     return {
         /**
-         * Aggregate germline occurrences for a given sequence ID
-         * @summary Aggregate germline occurrences
+         * Aggregate germline SNV occurrences for a given sequence ID
+         * @summary Aggregate germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateGermlineOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineOccurrences(seqId, aggregationBodyWithSqon, options);
+        async aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineOccurrences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Counts germline occurrences for a given sequence ID
-         * @summary Count germline occurrences
+         * Counts germline SNV occurrences for a given sequence ID
+         * @summary Count germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countGermlineOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineOccurrences(seqId, countBodyWithSqon, options);
+        async countGermlineSNVOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineSNVOccurrences(seqId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineOccurrences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve ExpandedOccurrence data for a given locus ID
-         * @summary Get a germline ExpandedOccurrence
+         * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
+         * @summary Get a germline ExpandedGermlineSNVOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getExpandedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedOccurrence>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineOccurrence(seqId, locusId, options);
+        async getExpandedGermlineSNVOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedGermlineSNVOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineSNVOccurrence(seqId, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedGermlineOccurrence']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedGermlineSNVOccurrence']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List germline occurrences for a given sequence ID
-         * @summary List germline occurrences
+         * List germline SNV occurrences for a given sequence ID
+         * @summary List germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listGermlineOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Occurrence>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineOccurrences(seqId, listBodyWithSqon, options);
+        async listGermlineSNVOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineSNVOccurrence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineSNVOccurrences(seqId, listBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineOccurrences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Return statistics about a field for a given sequence ID
-         * @summary Statistics of germline occurrences
+         * @summary Statistics of germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async statisticsGermlineOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineOccurrences(seqId, statisticsBodyWithSqon, options);
+        async statisticsGermlineSNVOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineSNVOccurrences(seqId, statisticsBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsGermlineOccurrences']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -4734,59 +4734,59 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
     const localVarFp = OccurrencesApiFp(configuration)
     return {
         /**
-         * Aggregate germline occurrences for a given sequence ID
-         * @summary Aggregate germline occurrences
+         * Aggregate germline SNV occurrences for a given sequence ID
+         * @summary Aggregate germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
-            return localVarFp.aggregateGermlineOccurrences(seqId, aggregationBodyWithSqon, options).then((request) => request(axios, basePath));
+        aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+            return localVarFp.aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
-         * Counts germline occurrences for a given sequence ID
-         * @summary Count germline occurrences
+         * Counts germline SNV occurrences for a given sequence ID
+         * @summary Count germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
-            return localVarFp.countGermlineOccurrences(seqId, countBodyWithSqon, options).then((request) => request(axios, basePath));
+        countGermlineSNVOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countGermlineSNVOccurrences(seqId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve ExpandedOccurrence data for a given locus ID
-         * @summary Get a germline ExpandedOccurrence
+         * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
+         * @summary Get a germline ExpandedGermlineSNVOccurrence
          * @param {string} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpandedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedOccurrence> {
-            return localVarFp.getExpandedGermlineOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
+        getExpandedGermlineSNVOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedGermlineSNVOccurrence> {
+            return localVarFp.getExpandedGermlineSNVOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
-         * List germline occurrences for a given sequence ID
-         * @summary List germline occurrences
+         * List germline SNV occurrences for a given sequence ID
+         * @summary List germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Occurrence>> {
-            return localVarFp.listGermlineOccurrences(seqId, listBodyWithSqon, options).then((request) => request(axios, basePath));
+        listGermlineSNVOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineSNVOccurrence>> {
+            return localVarFp.listGermlineSNVOccurrences(seqId, listBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
-         * @summary Statistics of germline occurrences
+         * @summary Statistics of germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
-            return localVarFp.statisticsGermlineOccurrences(seqId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
+        statisticsGermlineSNVOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
+            return localVarFp.statisticsGermlineSNVOccurrences(seqId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -4799,68 +4799,68 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
  */
 export class OccurrencesApi extends BaseAPI {
     /**
-     * Aggregate germline occurrences for a given sequence ID
-     * @summary Aggregate germline occurrences
+     * Aggregate germline SNV occurrences for a given sequence ID
+     * @summary Aggregate germline SNV occurrences
      * @param {string} seqId Sequence ID
      * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateGermlineOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).aggregateGermlineOccurrences(seqId, aggregationBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Counts germline occurrences for a given sequence ID
-     * @summary Count germline occurrences
+     * Counts germline SNV occurrences for a given sequence ID
+     * @summary Count germline SNV occurrences
      * @param {string} seqId Sequence ID
      * @param {CountBodyWithSqon} countBodyWithSqon Count Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public countGermlineOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).countGermlineOccurrences(seqId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public countGermlineSNVOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).countGermlineSNVOccurrences(seqId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Retrieve ExpandedOccurrence data for a given locus ID
-     * @summary Get a germline ExpandedOccurrence
+     * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
+     * @summary Get a germline ExpandedGermlineSNVOccurrence
      * @param {string} seqId Sequence ID
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public getExpandedGermlineOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).getExpandedGermlineOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
+    public getExpandedGermlineSNVOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * List germline occurrences for a given sequence ID
-     * @summary List germline occurrences
+     * List germline SNV occurrences for a given sequence ID
+     * @summary List germline SNV occurrences
      * @param {string} seqId Sequence ID
      * @param {ListBodyWithSqon} listBodyWithSqon List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listGermlineOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).listGermlineOccurrences(seqId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public listGermlineSNVOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listGermlineSNVOccurrences(seqId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Return statistics about a field for a given sequence ID
-     * @summary Statistics of germline occurrences
+     * @summary Statistics of germline SNV occurrences
      * @param {string} seqId Sequence ID
      * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public statisticsGermlineOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).statisticsGermlineOccurrences(seqId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public statisticsGermlineSNVOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).statisticsGermlineSNVOccurrences(seqId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
