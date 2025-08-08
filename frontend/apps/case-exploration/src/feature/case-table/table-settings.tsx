@@ -190,10 +190,10 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     {
       id: 'actions_menu',
       cell: CaseActionsMenuCell,
-      size: 64,
-      maxSize: 64,
+      size: 44,
+      maxSize: 44,
       enableResizing: false,
-      enablePinning: false,
+      enablePinning: true,
     },
   ] as TableColumnDef<CaseResult, any>[];
 }
