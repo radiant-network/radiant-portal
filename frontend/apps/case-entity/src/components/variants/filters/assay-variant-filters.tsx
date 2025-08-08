@@ -4,10 +4,8 @@ import { Badge } from "@/components/base/ui/badge";
 import { Separator } from "@/components/base/ui/separator";
 import { DotIcon, FlaskConical } from "lucide-react";
 import { CaseAssay } from "@/api/api";
-import { useEffect, useState } from "react";
 import { cn } from "@/components/lib/utils";
 import { Skeleton } from "@/components/base/ui/skeleton";
-import { getBadgeAffectedCodeColor } from "@/components/utils";
 import AffectedStatusBadge, { AffectedStatusProps } from "@/components/base/badges/affected-status-badge";
 
 
