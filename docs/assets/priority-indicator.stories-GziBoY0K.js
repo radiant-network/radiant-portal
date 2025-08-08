@@ -1,6 +1,0 @@
-import{j as r}from"./jsx-runtime-D_zvdyIk.js";import{P as s}from"./priority-indicator-BeLf__S0.js";import{C as p}from"./applications-config-viUeW4FZ.js";import{B as d}from"./chunk-C37GKA54-BLoCeHu7.js";import"./indicator-BUUtuDcG.js";import"./utils-D-KgF5mV.js";import"./index-C66Dxnp2.js";import"./i18n-cmj2REci.js";import"./iframe-n-BDsKq2.js";import"./context-DkqwYzW-.js";import"./index-CGj_12n1.js";const m={variant_entity:{app_id:"variant_entity"},variant_exploration:{app_id:"variant_exploration_multi_select_filter",aggregations:[]},admin:{admin_code:"admin",app_id:"admin"},portal:{name:"",navigation:{}}},I={title:"Indicators/PriorityIndicator",component:s,args:{},decorators:[t=>r.jsx(d,{children:r.jsx(p,{config:m,children:r.jsx(t,{})})})]},a={args:{},render:t=>r.jsx("div",{className:"flex flex-col gap-2",children:["asap","routine","stat","urgent"].map(n=>r.jsx(s,{code:n}))})};var o,i,e;a.parameters={...a.parameters,docs:{...(o=a.parameters)==null?void 0:o.docs,source:{originalSource:`{
-  args: {},
-  render: args => <div className="flex flex-col gap-2">
-      {['asap', 'routine', 'stat', 'urgent'].map(code => <PriorityIndicator code={code as PriorityIndicatorCode} />)}
-    </div>
-}`,...(e=(i=a.parameters)==null?void 0:i.docs)==null?void 0:e.source}}};const h=["Default"];export{a as Default,h as __namedExportsOrder,I as default};
