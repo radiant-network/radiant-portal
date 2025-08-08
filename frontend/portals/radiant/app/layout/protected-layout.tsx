@@ -59,9 +59,9 @@ const _ProtectedLayout = () => {
             {
               title: t('mainNavbar.links.cases'),
               icon: <FolderIcon />,
-              to: '/case-exploration',
+              to: '/case',
               as: Link,
-              active: pathname === '/case-exploration',
+              active: pathname === '/case',
             },
           ]}
           actions={[
