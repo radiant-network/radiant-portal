@@ -86,10 +86,10 @@ function getColumns(t: TFunction<string, undefined>) {
     {
       id: 'actions_menu',
       cell: ActionsMenuCell,
-      size: 64,
-      maxSize: 64,
+      size: 44,
+      maxSize: 44,
       enableResizing: false,
-      enablePinning: false,
+      enablePinning: true,
     },
   ] as TableColumnDef<CaseAssay, any>[];
 }

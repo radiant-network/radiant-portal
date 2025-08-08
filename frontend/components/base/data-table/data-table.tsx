@@ -201,8 +201,8 @@ function getColumnPinningExtraCN(column: Column<any>): string {
 
   return cn({
     'sticky z-10 bg-background group-data-[state=selected]:bg-table-active': isPinned,
-    'border-r': isLastLeftPinnedColumn,
-    'border-l': isFirstRightPinnedColumn,
+    'border-r-[3px]': isLastLeftPinnedColumn,
+    'border-l-[3px]': isFirstRightPinnedColumn,
   });
 }
 

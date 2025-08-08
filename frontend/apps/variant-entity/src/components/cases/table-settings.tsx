@@ -136,7 +136,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       header: '',
       size: 50,
       enableSorting: false,
-      enablePinning: false,
+      enablePinning: true,
       enableResizing: false,
     }),
   ] as TableColumnDef<VariantInterpretedCase, any>[]; // todo replace with correct type when api is updated
