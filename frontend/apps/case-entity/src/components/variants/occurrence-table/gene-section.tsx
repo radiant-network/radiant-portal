@@ -1,12 +1,12 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 
 interface GeneSectionProps {
-  data: ExpandedOccurrence;
+  data: ExpandedGermlineSNVOccurrence;
 }
 
 

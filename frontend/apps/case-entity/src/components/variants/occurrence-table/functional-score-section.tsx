@@ -1,9 +1,9 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 
 interface FunctionalScoreSectionProps {
-  data: ExpandedOccurrence;
+  data: ExpandedGermlineSNVOccurrence;
 }
 
 export default function FunctionalScoreSection({ data }: FunctionalScoreSectionProps) {

@@ -15,7 +15,7 @@ export type OccurrenceCountInput = {
 
 export function useOccurencesListHelper(input: OccurrencesListInput) {
   const fetch = useCallback(async () => {
-    return occurrencesApi.listGermlineOccurrences(input.seqId, input.listBody)
+    return occurrencesApi.listGermlineSNVOccurrences(input.seqId, input.listBody)
       .then(response => response.data);
   }, [input]);
 
@@ -27,7 +27,7 @@ export function useOccurencesListHelper(input: OccurrencesListInput) {
 
 export function useOccurencesCountHelper(input: OccurrenceCountInput) {
   const fetch = useCallback(async () => {
-    return occurrencesApi.countGermlineOccurrences(input.seqId, input.countBody)
+    return occurrencesApi.countGermlineSNVOccurrences(input.seqId, input.countBody)
       .then(response => response.data);
   }, [input]);
 

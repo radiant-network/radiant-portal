@@ -7,10 +7,10 @@ import ZygositySection from './zygosity-section';
 import FamilySection from './family-section';
 import ClinicalAssociationSection from './clinical-association-section';
 import MetricSection from './metric-section';
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 
 type ExpandedOccurrenceDetailsProps = {
-  data: ExpandedOccurrence;
+  data: ExpandedGermlineSNVOccurrence;
 };
 
 export default function OccurrenceExpandDetails({ data }: ExpandedOccurrenceDetailsProps) {

@@ -1,4 +1,4 @@
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import ClassificationSection from '../occurrence-table/classification-section';
 import PredictionSection from '../occurrence-table/prediction-section';
 import FrequencySection from '../occurrence-table/frequency-section';
@@ -7,7 +7,7 @@ import GeneSection from '../occurrence-table/gene-section';
 import ClinicalAssociationSection from '../occurrence-table/clinical-association-section';
 
 interface OccurrenceDetailsProps {
-  occurrence?: ExpandedOccurrence;
+  occurrence?: ExpandedGermlineSNVOccurrence;
 }
 
 function OccurrenceDetails({ occurrence }: OccurrenceDetailsProps) {

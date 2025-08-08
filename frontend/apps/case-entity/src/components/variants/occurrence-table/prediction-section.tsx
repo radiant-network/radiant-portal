@@ -1,12 +1,12 @@
 import { useI18n } from '@/components/hooks/i18n';
 import DetailSection, { DetailItem } from './detail-section';
-import { ExpandedOccurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
 import { Badge } from '@/components/base/ui/badge';
 import { getClassificationCriteriaColor } from '../interpretation/data';
 
 type PredictionSectionProps = {
-  data: ExpandedOccurrence;
+  data: ExpandedGermlineSNVOccurrence;
 };
 
 export default function PredictionSection({ data }: PredictionSectionProps) {

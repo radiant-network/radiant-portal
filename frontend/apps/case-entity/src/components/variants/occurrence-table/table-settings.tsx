@@ -13,12 +13,12 @@ import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
-import { Occurrence } from '@/api/api';
+import { GermlineSNVOccurrence } from '@/api/api';
 import { TFunction } from 'i18next';
 import { ZapIcon } from 'lucide-react';
 import InterpretationCell from './cells/interpretation-cell';
 
-const columnHelper = createColumnHelper<Occurrence>();
+const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
 function getVariantColumns(t: TFunction<string, undefined>) {
   return [
@@ -232,7 +232,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       header: t('variant.headers.ad_ratio'),
       minSize: 120,
     }),
-  ] as TableColumnDef<Occurrence, any>[];
+  ] as TableColumnDef<GermlineSNVOccurrence, any>[];
 }
 
 const defaultSettings = createColumnSettings([

@@ -1,4 +1,4 @@
-import { ExpandedOccurrence, Occurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
 import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
 import { Separator } from '@/components/base/ui/separator';
 import useSWR from 'swr';
@@ -9,7 +9,7 @@ import OccurrenceExpandHeader from './occurrence-expand-header';
 import OccurrenceExpandTranscript from './occurrence-expand-transcript';
 
 type GermlineVariantPreviewProps = {
-  occurrence: Occurrence;
+  occurrence: GermlineSNVOccurrence;
 };
 
 type OccurrenceExpandInput = {
@@ -18,12 +18,12 @@ type OccurrenceExpandInput = {
 };
 
 async function fetchOccurrenceExpand(input: OccurrenceExpandInput) {
-  const response = await occurrencesApi.getExpandedGermlineOccurrence(input.seqId, input.locusId);
+  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(input.seqId, input.locusId);
   return response.data;
 }
 
 export default function OccurrenceExpand({ occurrence }: GermlineVariantPreviewProps) {
-  const { data, isLoading } = useSWR<ExpandedOccurrence, any, OccurrenceExpandInput>(
+  const { data, isLoading } = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
       locusId: occurrence.locus_id.toString(),
       seqId: occurrence.seq_id.toString(),
