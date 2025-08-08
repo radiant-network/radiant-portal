@@ -5,7 +5,7 @@ export default [
   layout('./layout/protected-layout.tsx', [
     index('./routes/home.tsx'),
     route('variants/entity/:locusId', './routes/variants/entity.tsx'),
-    route('case-exploration/', './routes/cases/list.tsx'),
+    route('case/', './routes/cases/list.tsx'),
     route('case/entity/:caseId', './routes/cases/entity.tsx'),
     route('admin/features', './routes/admin/beta-features.tsx'),
   ]),
