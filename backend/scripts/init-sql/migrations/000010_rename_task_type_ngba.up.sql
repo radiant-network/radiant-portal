@@ -1,0 +1,1 @@
+UPDATE "task_type" SET name_en = 'Normal Germline Bioinformatics Analysis' where code = 'ngba';
