@@ -1,0 +1,19 @@
+{
+  "name": "radiant-portal",
+  "version": "1.0.0",
+  "description": "[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0) [![Build Status](https://github.com/radiant-network/radiant-portal/actions/workflows/build_and_push.yml/badge.svg)](https://github.com/radiant-network/radiant-portal/actions/workflows/build_and_push.yml) [![Build Storybook](https://github.com/radiant-network/radiant-portal/actions/workflows/storybook.yml/badge.svg)](https://github.com/radiant-network/radiant-portal/actions/workflows/storybook.yml)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@testquality/cli": "^1.2.4",
+    "@types/node": "^24.2.1",
+    "cypress": "^13.17.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
