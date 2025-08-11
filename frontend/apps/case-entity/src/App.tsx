@@ -81,7 +81,7 @@ export default function App() {
   const hasVariants = (data?.assays ?? []).some(assay => assay.has_variants);
   return (
     <CaseEntityContext value={data}>
-      <main className="bg-muted/40 h-screen overflow-auto">
+      <main className="bg-muted h-screen overflow-auto">
         <Header data={data} isLoading={isLoading} />
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
           <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
