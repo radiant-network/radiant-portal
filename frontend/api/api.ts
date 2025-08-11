@@ -1300,6 +1300,139 @@ export interface GenePanelConditions {
     'count': number;
 }
 /**
+ * GermlineCNVOccurrence represents a germline CNV occurrence
+ * @export
+ * @interface GermlineCNVOccurrence
+ */
+export interface GermlineCNVOccurrence {
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'aliquot'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'bc'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'calls'?: Array<number>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'chromosome'?: string;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'ciend'?: Array<number>;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'cipos'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'cn'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'end'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'filter'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'length'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'pe'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'quality'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'reflen'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'seq_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'sm'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'start'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'svlen'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'svtype'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'type'?: string;
+}
+/**
  * GermlineSNVOccurrence represents a germline SNV occurrence
  * @export
  * @interface GermlineSNVOccurrence
@@ -4470,6 +4603,50 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Counts germline CNV occurrences for a given sequence ID
+         * @summary Count germline CNV occurrences
+         * @param {string} seqId Sequence ID
+         * @param {CountBodyWithSqon} countBodyWithSqon Count Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        countGermlineCNVOccurrences: async (seqId: string, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('countGermlineCNVOccurrences', 'seqId', seqId)
+            // verify required parameter 'countBodyWithSqon' is not null or undefined
+            assertParamExists('countGermlineCNVOccurrences', 'countBodyWithSqon', countBodyWithSqon)
+            const localVarPath = `/occurrences/germline/cnv/{seq_id}/count`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(countBodyWithSqon, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
          * @param {string} seqId Sequence ID
@@ -4549,6 +4726,50 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List germline CNV occurrences for a given sequence ID
+         * @summary List germline CNV occurrences
+         * @param {string} seqId Sequence ID
+         * @param {ListBodyWithSqon} listBodyWithSqon List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listGermlineCNVOccurrences: async (seqId: string, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('listGermlineCNVOccurrences', 'seqId', seqId)
+            // verify required parameter 'listBodyWithSqon' is not null or undefined
+            assertParamExists('listGermlineCNVOccurrences', 'listBodyWithSqon', listBodyWithSqon)
+            const localVarPath = `/occurrences/germline/cnv/{seq_id}/list`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(listBodyWithSqon, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4668,6 +4889,20 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Counts germline CNV occurrences for a given sequence ID
+         * @summary Count germline CNV occurrences
+         * @param {string} seqId Sequence ID
+         * @param {CountBodyWithSqon} countBodyWithSqon Count Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async countGermlineCNVOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineCNVOccurrences(seqId, countBodyWithSqon, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
          * @param {string} seqId Sequence ID
@@ -4693,6 +4928,20 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineSNVOccurrence(seqId, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedGermlineSNVOccurrence']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List germline CNV occurrences for a given sequence ID
+         * @summary List germline CNV occurrences
+         * @param {string} seqId Sequence ID
+         * @param {ListBodyWithSqon} listBodyWithSqon List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listGermlineCNVOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineCNVOccurrence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineCNVOccurrences(seqId, listBodyWithSqon, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -4745,6 +4994,17 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
+         * Counts germline CNV occurrences for a given sequence ID
+         * @summary Count germline CNV occurrences
+         * @param {string} seqId Sequence ID
+         * @param {CountBodyWithSqon} countBodyWithSqon Count Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        countGermlineCNVOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countGermlineCNVOccurrences(seqId, countBodyWithSqon, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
          * @param {string} seqId Sequence ID
@@ -4765,6 +5025,17 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          */
         getExpandedGermlineSNVOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedGermlineSNVOccurrence> {
             return localVarFp.getExpandedGermlineSNVOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List germline CNV occurrences for a given sequence ID
+         * @summary List germline CNV occurrences
+         * @param {string} seqId Sequence ID
+         * @param {ListBodyWithSqon} listBodyWithSqon List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listGermlineCNVOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineCNVOccurrence>> {
+            return localVarFp.listGermlineCNVOccurrences(seqId, listBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * List germline SNV occurrences for a given sequence ID
@@ -4812,6 +5083,19 @@ export class OccurrencesApi extends BaseAPI {
     }
 
     /**
+     * Counts germline CNV occurrences for a given sequence ID
+     * @summary Count germline CNV occurrences
+     * @param {string} seqId Sequence ID
+     * @param {CountBodyWithSqon} countBodyWithSqon Count Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public countGermlineCNVOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).countGermlineCNVOccurrences(seqId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Counts germline SNV occurrences for a given sequence ID
      * @summary Count germline SNV occurrences
      * @param {string} seqId Sequence ID
@@ -4835,6 +5119,19 @@ export class OccurrencesApi extends BaseAPI {
      */
     public getExpandedGermlineSNVOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List germline CNV occurrences for a given sequence ID
+     * @summary List germline CNV occurrences
+     * @param {string} seqId Sequence ID
+     * @param {ListBodyWithSqon} listBodyWithSqon List Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public listGermlineCNVOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listGermlineCNVOccurrences(seqId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
