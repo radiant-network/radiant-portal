@@ -213,6 +213,7 @@
         "exomiser_acmg_classification": "ACMG de Exomiser",
         "exomiser_acmg_evidence": "Critères ACMG de Exomiser",
         "exomiser_gene_combined_score": "Score Exomiser",
+        "exomiser_gene_combined_score_tooltip": "Score Exomiser basé sur les propriétés des variantes et les phénotypes des patients",
         "biotype": "Gene Type",
         "cosmic_gene_panel": "COSMIC",
         "cosmic_gene_panel_tooltip": "Catalogue of Somatic Mutations in Cancer",
