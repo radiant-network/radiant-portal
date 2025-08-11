@@ -74,6 +74,8 @@ type CaseEntity struct {
 	PrimaryConditionID   string                                    `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName string                                    `json:"primary_condition_name,omitempty"`
 	Note                 string                                    `json:"note,omitempty"`
+	ProjectCode          string                                    `json:"project_code,omitempty"`
+	ProjectName          string                                    `json:"project_name,omitempty"`
 	Assays               JsonArray[CaseAssay]                      `json:"assays" validate:"required"`
 	Members              JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
 	Tasks                JsonArray[CaseTask]                       `json:"tasks" validate:"required"`

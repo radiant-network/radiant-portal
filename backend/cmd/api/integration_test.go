@@ -1133,6 +1133,8 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"primary_condition_id": "MONDO:0700092",
 		"primary_condition_name": "neurodevelopmental disorder",
 		"priority_code": "routine",
+		"project_code": "N1",
+		"project_name": "NeuroDev Phase I",
 		"request_id": 1,
 		"requested_by_code": "CHUSJ",
 		"requested_by_name": "Centre hospitalier universitaire Sainte-Justine",

@@ -106,6 +106,8 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 		PrimaryConditionName: "neurodevelopmental disorder",
 		RequestedByCode:      "CHUSJ",
 		RequestedByName:      "Centre hospitalier universitaire Sainte-Justine",
+		ProjectCode:          "N1",
+		ProjectName:          "NeuroDev Phase I",
 		Assays: types.JsonArray[types.CaseAssay]{
 			{SeqID: 1, RequestID: 22, PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
 			{SeqID: 2, RequestID: 23, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
@@ -278,6 +280,8 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"prescriber":"Felix Laflamme", 
 		"primary_condition_id":"MONDO:0700092", 
 		"primary_condition_name":"neurodevelopmental disorder", 
+		"project_code": "N1",
+		"project_name": "NeuroDev Phase I",
 		"request_id":1, 
 		"requested_by_code":"CHUSJ", 
 		"requested_by_name":"Centre hospitalier universitaire Sainte-Justine", 
