@@ -16,7 +16,7 @@ const tableVariants = tv({
         base: 'text-base [&>tbody>tr>td]:py-4',
       },
       lg: {
-        base: 'text-lg [&>tbody>tr>td]:py-6',
+        base: 'text-lg [&>tbody>tr>td]:py-3',
       },
     },
   },
@@ -42,7 +42,6 @@ function Table({ containerRef, className, containerClassName, size, ...props }: 
 }
 Table.displayName = 'Table';
 
-
 /**
  * TableHeader
  */
@@ -53,7 +52,7 @@ const tableHeaderVariants = tv({
   variants: {
     variant: {
       default: '',
-    }
+    },
   },
   defaultVariants: {
     variant: 'default',
@@ -62,7 +61,7 @@ const tableHeaderVariants = tv({
 
 type TableHeaderType = React.HTMLAttributes<HTMLTableSectionElement> & {
   variant?: 'default';
-}
+};
 function TableHeader({ className, variant, ...props }: TableHeaderType) {
   const styles = tableHeaderVariants({ variant });
   return <thead className={styles.base({ className })} {...props} />;
@@ -70,17 +69,16 @@ function TableHeader({ className, variant, ...props }: TableHeaderType) {
 TableHeader.displayName = 'TableHeader';
 
 /**
-  * TableBody
-  */
+ * TableBody
+ */
 function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return <tbody className={cn('[&>tr:last-child>td]:border-b-0', className)} {...props} />;
 }
 TableBody.displayName = 'TableBody';
 
-
 /**
-  * TableFooter
-  */
+ * TableFooter
+ */
 function TableFooter({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return (
     <tfoot
@@ -94,7 +92,6 @@ function TableFooter({ className, ...props }: React.HTMLAttributes<HTMLTableSect
 }
 TableFooter.displayName = 'TableFooter';
 
-
 /**
  * TableRow
  */
@@ -104,8 +101,10 @@ const tableRowVariants = tv({
   },
   variants: {
     variant: {
-      default: 'group transition-colors data-[state=selected]:bg-muted [&>td]:border-b [&>th]:border-b hover:bg-table-accent',
-      border: 'group transition-colors data-[state=selected]:bg-muted [&>td:last-child]:border-r-0 [&>th:last-child]:border-r-0 [&>td]:border-r [&>th]:border-r [&>td]:border-b [&>th]:border-b hover:bg-table-accent',
+      default:
+        'group transition-colors data-[state=selected]:bg-muted [&>td]:border-b [&>th]:border-b hover:bg-table-accent',
+      border:
+        'group transition-colors data-[state=selected]:bg-muted [&>td:last-child]:border-r-0 [&>th:last-child]:border-r-0 [&>td]:border-r [&>th]:border-r [&>td]:border-b [&>th]:border-b hover:bg-table-accent',
       borderless: '',
     },
   },
@@ -115,7 +114,7 @@ const tableRowVariants = tv({
 });
 type TableRowType = React.HTMLAttributes<HTMLTableRowElement> & {
   variant?: 'default' | 'borderless' | 'border';
-}
+};
 function TableRow({ className, variant = 'default', ...props }: TableRowType) {
   const styles = tableRowVariants({ variant });
   return <tr className={styles.base({ className })} {...props} />;

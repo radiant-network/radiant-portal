@@ -14,7 +14,7 @@ import { useSidebar } from '@/components/base/ui/sidebar';
 
 const navbarVariant = tv({
   slots: {
-    base: 'flex items-center h-[44px] px-6 hidden md:flex py-2 border-b bg-background shadow-xs w-full',
+    base: 'flex items-center h-[44px] px-3 hidden md:flex py-2 border-b bg-background shadow-xs w-full',
   },
 });
 
@@ -88,7 +88,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
           {/* Desktop NavBar */}
           <div className={navbarStyles.base()}>
             <div
-              className="flex mr-6 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
+              className="flex mr-3 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
               onClick={e => {
                 if (e.metaKey && e.altKey) {
                   setBetaSuperMode(!betaSuperMode);

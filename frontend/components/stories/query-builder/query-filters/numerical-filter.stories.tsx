@@ -83,7 +83,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: args => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <NumericalFilter {...args} />
       </div>
     );
@@ -112,7 +112,7 @@ export const NoDataToggle: Story = {
       }),
     );
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <NumericalFilter {...args} />
       </div>
     );
@@ -131,7 +131,7 @@ export const NoDataToggleHidden: Story = {
   },
   render: args => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <NumericalFilter {...args} />
       </div>
     );
@@ -161,7 +161,7 @@ export const RangeFilterWithInterval: Story = {
       }),
     );
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <NumericalFilter {...args} />
       </div>
     );
@@ -204,7 +204,7 @@ export const RangeFilterWithRangeTypes: Story = {
       }),
     );
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <NumericalFilter {...args} />
       </div>
     );

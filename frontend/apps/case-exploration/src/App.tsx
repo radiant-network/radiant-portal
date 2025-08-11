@@ -9,8 +9,8 @@ export default function App() {
   return (
     <>
       <PageHeader isLoading={false} title={t('caseExploration.case.title')} variant="info" />
-      <main className={`bg-muted/40 h-screen overflow-auto p-6`}>
-        <Card className="h-auto size-max w-full p-6 m-0">
+      <main className={`bg-muted/40 h-screen overflow-auto p-3`}>
+        <Card className="h-auto size-max w-full p-3 m-0">
           <CardContent className="p-0">
             <CasesTab />
           </CardContent>

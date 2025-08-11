@@ -17,7 +17,7 @@ function AssociatedConditionsCard({ data, ...props }: { data: VariantOverview } 
       </CardHeader>
       <CardContent className="text-sm space-y-3 h-full">
         {isEmpty && (
-          <Empty bordered showIcon={false} description={t('variant.noDataForVariant')} className="py-6 h-full" />
+          <Empty bordered showIcon={false} description={t('variant.noDataForVariant')} className="py-3 h-full" />
         )}
         {data?.omim_conditions?.map(condition => (
           <div key={`${condition.panel}${condition.omim_phenotype_id}`} className="flex items-center justify-between">

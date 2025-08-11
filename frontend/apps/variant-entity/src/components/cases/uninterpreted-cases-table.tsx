@@ -89,7 +89,7 @@ function UninterpretedCasesTable() {
   );
 
   return (
-    <div className="space-y-6 mt-2">
+    <div className="space-y-3 mt-2">
       <OtherCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="uninterpreted-cases"

@@ -72,7 +72,7 @@ function BetaFeatures() {
   }
 
   return (
-    <section className="mt-6">
+    <section className="mt-3">
       {Object.entries(featureDefinitions).map(([key, definition]) => renderFeature(key, definition))}
     </section>
   );

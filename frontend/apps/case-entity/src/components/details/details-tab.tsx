@@ -23,7 +23,7 @@ function DetailsTab({ caseEntity, isLoading }: DetailsTabProps) {
 
   return (
     <div className="max-w-8xl mx-auto w-full">
-      <div className="gap-y-2 md:gap-6 grid grid-cols-1 lg:grid-cols-3 lg:grid-cols-[1fr_minmax(auto,480px)] justify-center">
+      <div className="gap-y-2 md:gap-3 grid grid-cols-1 lg:grid-cols-3 lg:grid-cols-[1fr_minmax(auto,480px)] justify-center">
         <AnalysisCard
           className="lg:col-span-2 min-w-0 border-0 rounded-none md:border md:rounded-xl"
           data={caseEntity}
@@ -44,7 +44,7 @@ function DetailsTab({ caseEntity, isLoading }: DetailsTabProps) {
 
 const CaseEntityDetailsSkeleton = () => {
   return (
-    <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
+    <div className="gap-3 grid grid-cols-1 lg:grid-cols-3">
       <Card className="lg:col-span-2">
         <CardContent>
           <Skeleton className="h-6" />

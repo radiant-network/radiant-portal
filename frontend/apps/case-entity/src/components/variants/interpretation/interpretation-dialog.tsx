@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
-import { toast } from "sonner";
+import { toast } from 'sonner';
 import { Separator } from '@/components/base/ui/separator';
 import InterpretationFormGermline from './interpretation-form-germline';
 import { ReactNode, useCallback, useContext, useRef, useState } from 'react';
@@ -49,11 +49,15 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
   const occurrenceUniqueKey = `occurrence-${occurrence.seq_id}-${occurrence.locus_id}`;
 
-  const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence>(occurrenceUniqueKey, fetchOccurrenceExpandHelper, {
-    revalidateOnFocus: false,
-    revalidateOnMount: false,
-    shouldRetryOnError: false,
-  });
+  const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence>(
+    occurrenceUniqueKey,
+    fetchOccurrenceExpandHelper,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
 
   const fetchInterpretation = useSWR<Interpretation>(interpretationUniqueKey, fetchInterpretationHelper, {
     revalidateOnFocus: false,
@@ -66,19 +70,20 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
     any,
     string,
     { interpretation: Interpretation },
-    Interpretation>(interpretationUniqueKey, saveInterpretationHelper, {
-      onSuccess: () => {
-        setOpen(false);
-        handleSaveCallback && handleSaveCallback();
-        toast(t('variant.interpretationForm.notification.success'));
-      },
-      onError: () => {
-        setOpen(false);
-        toast(t('variant.interpretationForm.notification.error.title'), {
-          description: t('variant.interpretationForm.notification.error.text')
-        });
-      },
-    });
+    Interpretation
+  >(interpretationUniqueKey, saveInterpretationHelper, {
+    onSuccess: () => {
+      setOpen(false);
+      handleSaveCallback && handleSaveCallback();
+      toast(t('variant.interpretationForm.notification.success'));
+    },
+    onError: () => {
+      setOpen(false);
+      toast(t('variant.interpretationForm.notification.error.title'), {
+        description: t('variant.interpretationForm.notification.error.text'),
+      });
+    },
+  });
 
   const handleSave = useCallback(() => {
     if (isSomatic) {
@@ -110,13 +115,13 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
             <DialogHeader>
               <DialogTitle>{t('variant.interpretationForm.title')}</DialogTitle>
             </DialogHeader>
-            <Separator className="mt-6" />
-            <div className="py-6 overflow-scroll space-y-6 h-[calc(95vh-150px)]">
+            <Separator className="mt-3" />
+            <div className="py-3 overflow-scroll space-y-3 h-[calc(95vh-150px)]">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
               <InterpretationTranscript occurrence={fetchOccurrenceExpand.data} />
-              <div className="grid gap-6 grid-cols-12">
-                <div className="rounded-sm col-span-7 border p-6 bg-muted/40">
+              <div className="grid gap-3 grid-cols-12">
+                <div className="rounded-sm col-span-7 border p-3 bg-muted/40">
                   {isSomatic ? (
                     <InterpretationFormSomatic
                       ref={somaticFormRef}
@@ -141,12 +146,12 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
                     />
                   )}
                 </div>
-                <div className="rounded-sm col-span-5 border py-4 px-6">
+                <div className="rounded-sm col-span-5 border py-4 px-3">
                   <OccurrenceDetails occurrence={fetchOccurrenceExpand.data} />
                 </div>
               </div>
             </div>
-            <Separator className="mb-6" />
+            <Separator className="mb-3" />
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">{t('variant.interpretationForm.cancelText')}</Button>

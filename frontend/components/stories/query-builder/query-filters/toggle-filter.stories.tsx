@@ -48,7 +48,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: args => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <ToggleFilter {...args} />
       </div>
     );
@@ -64,7 +64,7 @@ export const DataAppliedToQueryBuilder: Story = {
       }),
     );
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <ToggleFilter {...args} />
       </div>
     );

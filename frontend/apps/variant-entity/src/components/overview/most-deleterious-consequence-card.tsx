@@ -18,8 +18,8 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
 
   return (
     <Card {...props}>
-      <CardContent className="px-4 md:px-6 py-0 2xl:py-12 grow">
-        <div className="flex items-start flex-wrap md:flex-nowrap md:[&>div]:w-40 md:justify-between gap-6">
+      <CardContent className="px-4 md:px-3 py-0 2xl:py-12 grow">
+        <div className="flex items-start flex-wrap md:flex-nowrap md:[&>div]:w-40 md:justify-between gap-3">
           <div className="flex flex-col gap-2">
             <div className="text-2xl font-semibold uppercase">
               {data.symbol ? (
@@ -110,8 +110,8 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
           </div>
         </div>
-        <Separator className="my-6" />
-        <div className="flex items-center gap-6 text-sm">
+        <Separator className="my-3" />
+        <div className="flex items-center gap-3 text-sm">
           {data?.transcript_id && (
             <TranscriptIdLink
               transcriptId={data.transcript_id}

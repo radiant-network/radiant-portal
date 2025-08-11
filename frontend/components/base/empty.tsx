@@ -20,7 +20,7 @@ const emptyVariants = tv({
     },
     size: {
       mini: {
-        base: 'py-6 gap-3',
+        base: 'py-3 gap-3',
         iconsContainer: '[&_svg]:size-4',
         textContainer: 'space-y-1',
         title: 'text-base',
@@ -28,7 +28,7 @@ const emptyVariants = tv({
         customIcon: 'size-8 [&_svg]:size-4',
       },
       default: {
-        base: 'py-8 gap-6',
+        base: 'py-8 gap-3',
         iconsContainer: '[&_svg]:size-6',
         textContainer: 'space-y-2',
         title: 'text-lg',

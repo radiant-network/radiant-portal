@@ -121,7 +121,7 @@ function QueryPillCustomEditDialog({
             <span className="italic">TODO Insert filters</span>
           </aside>
           <div className="w-full">
-            <div className="flex flex-col gap-6 p-6">
+            <div className="flex flex-col gap-3 p-3">
               <DialogHeader>
                 <DialogTitle>{dict.queryPill.customPill.editDialog.title}</DialogTitle>
               </DialogHeader>

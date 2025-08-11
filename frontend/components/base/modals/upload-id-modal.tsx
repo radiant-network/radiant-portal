@@ -1,29 +1,35 @@
-import { useI18n } from "@/components/hooks/i18n";
-import { Button } from "../ui/button";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { Form, FormItem, FormLabel } from "../ui/form";
-import { Textarea } from "../ui/textarea";
-import { useForm } from "react-hook-form";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { useState } from "react";
-import { Paperclip, UploadIcon } from "lucide-react";
-import CollapsibleCard from "../cards/collapsible-card";
+import { useI18n } from '@/components/hooks/i18n';
+import { Button } from '../ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
+import { Form, FormItem, FormLabel } from '../ui/form';
+import { Textarea } from '../ui/textarea';
+import { useForm } from 'react-hook-form';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { useState } from 'react';
+import { Paperclip, UploadIcon } from 'lucide-react';
+import CollapsibleCard from '../cards/collapsible-card';
 import { createColumnHelper } from '@tanstack/react-table';
-import DisplayTable from "../data-table/display-table";
-import { uniqBy } from "lodash";
-import { TableColumnDef } from "../data-table/data-table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import DisplayTable from '../data-table/display-table';
+import { uniqBy } from 'lodash';
+import { TableColumnDef } from '../data-table/data-table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 type UploadIdTableEntry = {
   entry: string;
   symbol: string;
   omim_gene_id: string;
-}
+};
 
-const data = [
-  { entry: 'entry', symbol: 'symbol', omim_gene_id: 'omim_gene_id' }
-]
+const data = [{ entry: 'entry', symbol: 'symbol', omim_gene_id: 'omim_gene_id' }];
 
 const columnHelper = createColumnHelper<UploadIdTableEntry>();
 
@@ -46,34 +52,32 @@ const columns = [
   }),
 ] as TableColumnDef<UploadIdTableEntry, any>[];
 
-
 const MOCK: UploadIdTableEntry[] = [1, 1, 2, 2, 5, 6, 7, 8, 9, 10].map(index => ({
   entry: `entry_${index}`,
   symbol: `symbol_${index}`,
   omim_gene_id: `symbol_${index}`,
 }));
 
-
 type UploadIdModalProps = {
   variant: 'gene';
 };
 
 /**
-  * Async function to read .txt, .csv and .tsv file
-  */
+ * Async function to read .txt, .csv and .tsv file
+ */
 async function readFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload = e => {
       if (!e.target || typeof e.target.result !== 'string') {
-        reject(new Error("Failed to read file content."));
+        reject(new Error('Failed to read file content.'));
         return;
       }
       resolve(e.target.result);
     };
 
-    reader.onerror = (error) => {
+    reader.onerror = error => {
       reject(error);
     };
 
@@ -81,14 +85,13 @@ async function readFile(file: File): Promise<string> {
   });
 }
 
-
 /**
-  * @TODO:Wait for api to add
-  * - Live api validation when a user write inside the textarea (with debounce)
-  * - Api validation when uploading multiples files 
-  * - Update Matched and Unmachted
-  * - Create table
-  */
+ * @TODO:Wait for api to add
+ * - Live api validation when a user write inside the textarea (with debounce)
+ * - Api validation when uploading multiples files
+ * - Update Matched and Unmachted
+ * - Create table
+ */
 function UploadIdModal({ variant }: UploadIdModalProps) {
   const { t } = useI18n();
   const form = useForm();
@@ -103,13 +106,17 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
     setIsLoading(true);
     const uploadedFiles = Array.from(e.target.files);
 
-    Promise.all(uploadedFiles.map(readFile)).then((filesContent) => {
+    Promise.all(uploadedFiles.map(readFile)).then(filesContent => {
       // @TODO: use result to get files content
-      const result = filesContent.flatMap(content => content
-        .split(/[\n,]+/) // split on newlines and commas
-        .map(entry => entry.trim()) // trim whitespace
-        .map(entry => entry.replace(/^"+|"+$/g, '')) // remove surrounding quotes
-      ).filter(entry => entry.length > 0) // remove empty strings
+      const result = filesContent
+        .flatMap(
+          content =>
+            content
+              .split(/[\n,]+/) // split on newlines and commas
+              .map(entry => entry.trim()) // trim whitespace
+              .map(entry => entry.replace(/^"+|"+$/g, '')), // remove surrounding quotes
+        )
+        .filter(entry => entry.length > 0); // remove empty strings
       setIsLoading(false);
       setFiles(uploadedFiles);
 
@@ -123,7 +130,10 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
   return (
     <Dialog>
       <DialogTrigger>
-        <Button><UploadIcon />{t(`common.upload_id.${variant}.trigger`)}</Button>
+        <Button>
+          <UploadIcon />
+          {t(`common.upload_id.${variant}.trigger`)}
+        </Button>
       </DialogTrigger>
       <DialogContent className="md:min-w-[800px]">
         <DialogHeader>
@@ -171,19 +181,25 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
             <>
               <div className="flex flex-col gap-1">
                 {files.map((file, index) => (
-                  <div key={index} className="flex items-center gap-1"><Paperclip size={14} /> {file.name}</div>
+                  <div key={index} className="flex items-center gap-1">
+                    <Paperclip size={14} /> {file.name}
+                  </div>
                 ))}
               </div>
               <div>
-                <CollapsibleCard title={t('common.upload_id.summary_table', {
-                  matched: matched.length,
-                  unmatched: unmatched.length
-                })}>
-                  <div className="flex flex-col gap-6">
-                    <span>{t('common.upload_id.resume', {
-                      total: items.length,
-                      unique: uniqBy(items, "entry").length
-                    })}</span>
+                <CollapsibleCard
+                  title={t('common.upload_id.summary_table', {
+                    matched: matched.length,
+                    unmatched: unmatched.length,
+                  })}
+                >
+                  <div className="flex flex-col gap-3">
+                    <span>
+                      {t('common.upload_id.resume', {
+                        total: items.length,
+                        unique: uniqBy(items, 'entry').length,
+                      })}
+                    </span>
                     <Tabs defaultValue="matched">
                       <TabsList>
                         <TabsTrigger value="matched">
@@ -198,16 +214,10 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
                         </TabsTrigger>
                       </TabsList>
                       <TabsContent value="matched">
-                        <DisplayTable
-                          data={matched}
-                          columns={columns}
-                        />
+                        <DisplayTable data={matched} columns={columns} />
                       </TabsContent>
                       <TabsContent value="unmatched">
-                        <DisplayTable
-                          data={unmatched}
-                          columns={columns}
-                        />
+                        <DisplayTable data={unmatched} columns={columns} />
                       </TabsContent>
                     </Tabs>
                   </div>
@@ -225,5 +235,5 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
       </DialogContent>
     </Dialog>
   );
-};
+}
 export default UploadIdModal;

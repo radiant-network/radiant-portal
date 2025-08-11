@@ -13,7 +13,7 @@ export const Variants: Story = {
   render: () => {
     return (
       <div className="space-y-12">
-        <div className="grid grid-cols-6 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <Color color="background" colorClass="bg-background" />
           <Color color="foreground" colorClass="bg-foreground" />
           <Color color="card" colorClass="bg-card" />
@@ -42,7 +42,7 @@ export const Variants: Story = {
           <Color color="sidebar border" colorClass="bg-sidebar-border" />
           <Color color="sidebar ring" colorClass="bg-sidebar-ring" />
         </div>
-        <div className="grid grid-cols-6 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <Color color="red" colorClass="bg-red" />
           <Color color="orange" colorClass="bg-orange" />
           <Color color="yellow" colorClass="bg-yellow" />
@@ -53,7 +53,7 @@ export const Variants: Story = {
           <Color color="fuchsia" colorClass="bg-fuchsia" />
           <Color color="neutral" colorClass="bg-neutral" />
         </div>
-        <div className="grid grid-cols-6 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <Color color="bookmark amber" colorClass="bg-bookmark-amber" />
           <Color color="bookmark blue" colorClass="bg-bookmark-blue" />
           <Color color="bookmark green" colorClass="bg-bookmark-green" />
