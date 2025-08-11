@@ -165,6 +165,7 @@
         "ascending": "Ascending",
         "clear": "Sort"
       },
+      "reset": "Reset",
       "no_result": "No results found",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",

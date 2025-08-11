@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
 import { Skeleton } from '../ui/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
 
 /**
  * Read user config to return column order (in asc)
@@ -77,6 +78,7 @@ function TableColumnSettings({
   handleReset,
   handleOrderChange,
 }: TableColumnSettingsProps) {
+  const { t } = useI18n();
   const fixedColumns = deserializeColumnsFixed(defaultSettings);
   const columnsLeft = (columnPinning.left ?? []).map(filterColumnById(defaultSettings));
   const columnsRight = (columnPinning.right ?? []).map(filterColumnById(defaultSettings));
@@ -108,7 +110,7 @@ function TableColumnSettings({
     <span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button iconOnly variant="ghost" className="px-4 py-2 h-8">
+          <Button iconOnly variant="ghost" className="w-8 h-8">
             <SettingsIcon />
           </Button>
         </DropdownMenuTrigger>
@@ -177,7 +179,7 @@ function TableColumnSettings({
                 handleReset();
               }}
             >
-              Reset
+              {t('common.table.reset')}
             </Button>
           </DropdownMenuContent>
         </DropdownMenuPortal>
