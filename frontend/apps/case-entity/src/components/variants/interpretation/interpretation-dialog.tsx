@@ -121,7 +121,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
               <InterpretationVariantHeader occurrence={occurrence} />
               <InterpretationTranscript occurrence={fetchOccurrenceExpand.data} />
               <div className="grid gap-3 grid-cols-12">
-                <div className="rounded-sm col-span-7 border p-3 bg-muted/40">
+                <div className="rounded-sm col-span-7 border p-3 bg-muted">
                   {isSomatic ? (
                     <InterpretationFormSomatic
                       ref={somaticFormRef}
