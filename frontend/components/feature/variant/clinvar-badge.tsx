@@ -30,11 +30,12 @@ export const ClinVarValueMap: Record<string, BadgeProps['variant']> = {
   drug_response: 'neutral',
   benign: 'green',
   confers_sensitivity: 'neutral',
+  no_data: 'neutral'
 };
 
 function ClinVarBadge({ value, abbreviated, ...props }: ClinVarBadgeProps) {
   const { t } = useI18n();
-  const normalizedValue = value.toLowerCase();
+  let normalizedValue = value ? value.toLowerCase() : "no_data";
   const color = ClinVarValueMap[normalizedValue];
 
   return (
@@ -43,7 +44,7 @@ function ClinVarBadge({ value, abbreviated, ...props }: ClinVarBadgeProps) {
       wrapper={children => (
         <Tooltip>
           <TooltipTrigger className="flex">{children}</TooltipTrigger>
-          <TooltipContent>{t(`variant.clinVars.${value.toLowerCase()}.tooltip`)}</TooltipContent>
+          <TooltipContent>{t(`variant.clinVars.${normalizedValue}.tooltip`)}</TooltipContent>
         </Tooltip>
       )}
     >
