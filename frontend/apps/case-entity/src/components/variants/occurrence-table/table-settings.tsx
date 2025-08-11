@@ -157,7 +157,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     //Exo.
     columnHelper.accessor(row => row.exomiser_gene_combined_score, {
       id: 'exomiser_gene_combined_score',
-      cell: info => <NumberCell value={info.getValue()} fractionDigits={4} />,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={3} />,
       header: () => (
         <TooltipsHeader tooltips={t('variant.headers.exomiser_gene_combined_score_tooltips')}>
           {t('variant.headers.exomiser_gene_combined_score')}
