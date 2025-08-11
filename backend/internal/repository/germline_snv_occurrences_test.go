@@ -16,14 +16,14 @@ var allOccurrencesFields = sliceutils.Map(types.GermlineSNVOccurrencesFields, fu
 })
 
 var defaultOccurrencesFieldsForTest = []types.Field{
-	types.LocusIdField,
+	types.GermlineSNVLocusIdField,
 }
 
 var OccurrencesQueryConfigForTest = types.QueryConfig{
 	AllFields:     types.GermlineSNVOccurrencesFields,
 	DefaultFields: defaultOccurrencesFieldsForTest,
 	DefaultSort:   types.GermlineSNVOccurrencesDefaultSort,
-	IdField:       types.LocusIdField,
+	IdField:       types.GermlineSNVLocusIdField,
 }
 
 func Test_GetOccurrences(t *testing.T) {

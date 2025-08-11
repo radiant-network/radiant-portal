@@ -38,7 +38,7 @@ func OccurrencesGermlineSNVListHandler(repo repository.GermlineSNVOccurrencesDAO
 			return
 		}
 		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
-		query, err := types.NewListQueryFromSqon(types.OccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort)
+		query, err := types.NewListQueryFromSqon(types.GermlineSNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort)
 		if err != nil {
 			HandleValidationError(c, err)
 			return

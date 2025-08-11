@@ -35,6 +35,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoSeqExp := repository.NewSequencingRepository(dbStarrocks)
 	repoVariants := repository.NewVariantsRepository(dbStarrocks)
 	repoExomiser := repository.NewExomiserRepository(dbStarrocks)
+	repoGermlineCNVOccurrences := repository.NewGermlineCNVOccurrencesRepository(dbStarrocks)
 	repoGermlineSNVOccurrences := repository.NewGermlineSNVOccurrencesRepository(dbStarrocks)
 	repoTerms := repository.NewTermsRepository(dbStarrocks)
 	repoCases := repository.NewCasesRepository(dbStarrocks)
@@ -109,6 +110,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	occurrencesGroup := privateRoutes.Group("/occurrences")
 	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
+
+	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
+	occurrencesGermlineCNVGroup.POST("/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.POST("/:seq_id/list", server.OccurrencesGermlineCNVListHandler(repoGermlineCNVOccurrences))
 
 	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")
 	occurrencesGermlineSNVGroup.POST("/:seq_id/count", server.OccurrencesGermlineSNVCountHandler(repoGermlineSNVOccurrences))

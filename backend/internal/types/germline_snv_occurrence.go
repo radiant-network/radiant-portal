@@ -100,33 +100,33 @@ var GermlineSNVOccurrenceTable = Table{
 	Alias: "o",
 }
 
-var FilterField = Field{
+var GermlineSNVFilterField = Field{
 	Name:            "filter",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var SeqIdField = Field{
+var GermlineSNVSeqIdField = Field{
 	Name:          "seq_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var TaskIdField = Field{
+var GermlineSNVTaskIdField = Field{
 	Name:          "task_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var LocusIdField = Field{
+var GermlineSNVLocusIdField = Field{
 	Name:          "locus_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var ZygosityField = Field{
+var GermlineSNVZygosityField = Field{
 	Name:            "zygosity",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
@@ -134,31 +134,31 @@ var ZygosityField = Field{
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var TransmissionModeField = Field{
+var GermlineSNVTransmissionModeField = Field{
 	Name:            "transmission_mode",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var ParentalOriginField = Field{
+var GermlineSNVParentalOriginField = Field{
 	Name:            "parental_origin",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var MotherZygosityField = Field{
+var GermlineSNVMotherZygosityField = Field{
 	Name:            "mother_zygosity",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var FatherZygosityField = Field{
+var GermlineSNVFatherZygosityField = Field{
 	Name:            "father_zygosity",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var GenotypeQualityField = Field{
+var GermlineSNVGenotypeQualityField = Field{
 	Name:          "gq",
 	Alias:         "genotype_quality",
 	CanBeSelected: true,
@@ -167,7 +167,7 @@ var GenotypeQualityField = Field{
 	Type:          NumericType,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var AdRatioField = Field{
+var GermlineSNVAdRatioField = Field{
 	Name:          "ad_ratio",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -175,7 +175,7 @@ var AdRatioField = Field{
 	Type:          NumericType,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var AdAltField = Field{
+var GermlineSNVAdAltField = Field{
 	Name:          "ad_alt",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -183,7 +183,7 @@ var AdAltField = Field{
 	Type:          NumericType,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var AdTotalField = Field{
+var GermlineSNVAdTotalField = Field{
 	Name:          "ad_total",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -191,7 +191,7 @@ var AdTotalField = Field{
 	Type:          NumericType,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var InfoQdField = Field{
+var GermlineSNVInfoQdField = Field{
 	Name:          "info_qd",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -199,7 +199,7 @@ var InfoQdField = Field{
 	Type:          NumericType,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var ExomiserMoiField = Field{
+var GermlineSNVExomiserMoiField = Field{
 	Name:            "exomiser_moi",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
@@ -207,7 +207,7 @@ var ExomiserMoiField = Field{
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var ExomiserAcmgClassificationField = Field{
+var GermlineSNVExomiserAcmgClassificationField = Field{
 	Name:            "exomiser_acmg_classification",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
@@ -215,7 +215,7 @@ var ExomiserAcmgClassificationField = Field{
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var ExomiserAcmgEvidenceField = Field{
+var GermlineSNVExomiserAcmgEvidenceField = Field{
 	Name:            "exomiser_acmg_evidence",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
@@ -224,7 +224,7 @@ var ExomiserAcmgEvidenceField = Field{
 	Type:            ArrayType,
 	Table:           GermlineSNVOccurrenceTable,
 }
-var ExomiserVariantScoreField = Field{
+var GermlineSNVExomiserVariantScoreField = Field{
 	Name:          "exomiser_variant_score",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -232,7 +232,7 @@ var ExomiserVariantScoreField = Field{
 	Type:          NumericType,
 	Table:         GermlineSNVOccurrenceTable,
 }
-var ExomiserGeneCombinedScoreField = Field{
+var GermlineSNVExomiserGeneCombinedScoreField = Field{
 	Name:          "exomiser_gene_combined_score",
 	CanBeSelected: true,
 	CanBeFiltered: true,
@@ -242,14 +242,14 @@ var ExomiserGeneCombinedScoreField = Field{
 }
 
 var GermlineSNVOccurrencesFields = []Field{
-	SeqIdField,
-	TaskIdField,
-	LocusIdField,
-	FilterField,
-	GenotypeQualityField,
-	AdRatioField,
-	AdAltField,
-	AdTotalField,
+	GermlineSNVSeqIdField,
+	GermlineSNVTaskIdField,
+	GermlineSNVLocusIdField,
+	GermlineSNVFilterField,
+	GermlineSNVGenotypeQualityField,
+	GermlineSNVAdRatioField,
+	GermlineSNVAdAltField,
+	GermlineSNVAdTotalField,
 	HgvsgField,
 	ClinvarField,
 	ConsequenceField,
@@ -265,11 +265,11 @@ var GermlineSNVOccurrencesFields = []Field{
 	PickedIsCanonicalField,
 	PickedOmimInheritanceCodeField,
 	PickedTranscriptIdField,
-	TransmissionModeField,
-	ParentalOriginField,
-	MotherZygosityField,
-	FatherZygosityField,
-	InfoQdField,
+	GermlineSNVTransmissionModeField,
+	GermlineSNVParentalOriginField,
+	GermlineSNVMotherZygosityField,
+	GermlineSNVFatherZygosityField,
+	GermlineSNVInfoQdField,
 
 	// Frequencies
 	PfWgsField,
@@ -285,7 +285,7 @@ var GermlineSNVOccurrencesFields = []Field{
 	VariantClassField,
 	ChromosomeField,
 	StartField,
-	ZygosityField,
+	GermlineSNVZygosityField,
 
 	// Genes
 	PickedVepImpactField,
@@ -312,24 +312,24 @@ var GermlineSNVOccurrencesFields = []Field{
 	SiftPredField,
 
 	// Exomiser
-	ExomiserMoiField,
-	ExomiserAcmgClassificationField,
-	ExomiserAcmgEvidenceField,
-	ExomiserGeneCombinedScoreField,
-	ExomiserVariantScoreField,
+	GermlineSNVExomiserMoiField,
+	GermlineSNVExomiserAcmgClassificationField,
+	GermlineSNVExomiserAcmgEvidenceField,
+	GermlineSNVExomiserGeneCombinedScoreField,
+	GermlineSNVExomiserVariantScoreField,
 }
 
 var GermlineSNVOccurrencesDefaultFields = []Field{
-	SeqIdField,
-	TaskIdField,
-	LocusIdField,
+	GermlineSNVSeqIdField,
+	GermlineSNVTaskIdField,
+	GermlineSNVLocusIdField,
 	HgvsgField,
 	VariantClassField,
 	GnomadV3AfField,
 	PfWgsField,
-	GenotypeQualityField,
-	ZygosityField,
-	AdRatioField,
+	GermlineSNVGenotypeQualityField,
+	GermlineSNVZygosityField,
+	GermlineSNVAdRatioField,
 	PickedConsequencesField,
 	PickedAaChangeField,
 	ClinvarField,
@@ -340,18 +340,18 @@ var GermlineSNVOccurrencesDefaultFields = []Field{
 	PickedSymbolField,
 	ChromosomeField,
 	StartField,
-	ExomiserMoiField,
-	ExomiserAcmgClassificationField,
-	ExomiserAcmgEvidenceField,
-	ExomiserGeneCombinedScoreField,
-	ExomiserVariantScoreField,
+	GermlineSNVExomiserMoiField,
+	GermlineSNVExomiserAcmgClassificationField,
+	GermlineSNVExomiserAcmgEvidenceField,
+	GermlineSNVExomiserGeneCombinedScoreField,
+	GermlineSNVExomiserVariantScoreField,
 }
 
 var GermlineSNVOccurrencesDefaultSort = []SortField{{Field: PickedImpactScoreField, Order: "desc"}}
 
-var OccurrencesQueryConfig = QueryConfig{
+var GermlineSNVOccurrencesQueryConfig = QueryConfig{
 	AllFields:     GermlineSNVOccurrencesFields,
 	DefaultFields: GermlineSNVOccurrencesDefaultFields,
 	DefaultSort:   GermlineSNVOccurrencesDefaultSort,
-	IdField:       LocusIdField,
+	IdField:       GermlineSNVLocusIdField,
 }

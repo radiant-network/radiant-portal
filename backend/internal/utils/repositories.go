@@ -26,7 +26,7 @@ func AddWhere(userQuery types.Query, tx *gorm.DB) {
 	}
 }
 
-func AddLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
+func AddLimit(tx *gorm.DB, userQuery types.ListQuery) {
 	if userQuery.Pagination() != nil {
 		var l int
 		if userQuery.Pagination().Limit < MaxLimit {
@@ -42,6 +42,10 @@ func AddLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
 	} else {
 		tx = tx.Limit(MinLimit)
 	}
+}
+
+func AddLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
+	AddLimit(tx, userQuery)
 	AddSort(tx, userQuery)
 }
 
