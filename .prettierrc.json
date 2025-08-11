@@ -1,0 +1,20 @@
+{
+  "overrides": [
+    {
+      "files": ["cypress/**/*.{ts,js,json}"],
+      "options": {
+        "semi": true,
+        "singleQuote": true,
+        "bracketSpacing": true,
+        "trailingComma": "es5",
+        "arrowParens": "avoid",
+        "endOfLine": "lf",
+        "tabWidth": 2,
+        "printWidth": 500,
+        "useTabs": false,
+        "quoteProps": "as-needed",
+        "bracketSameLine": false
+      }
+    }
+  ]
+}

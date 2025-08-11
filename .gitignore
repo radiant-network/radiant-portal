@@ -45,6 +45,13 @@ bin/
 .env
 .env*
 
+# testing
+/cypress/downloads
+/cypress/screenshots
+/cypress/videos
+/cypress/results
+.testquality
+
 test.http
 /http-client.private.env.json
 openapitools.json
@@ -52,7 +59,5 @@ openapitools.json
 **/api/git_push.sh
 
 .nvmrc
-
 cypress
-
 node_modules

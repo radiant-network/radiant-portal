@@ -1,0 +1,32 @@
+{
+  "name": "radiant-portal",
+  "version": "1.0.0",
+  "description": "[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0) [![Build Status](https://github.com/radiant-network/radiant-portal/actions/workflows/build_and_push.yml/badge.svg)](https://github.com/radiant-network/radiant-portal/actions/workflows/build_and_push.yml) [![Build Storybook](https://github.com/radiant-network/radiant-portal/actions/workflows/storybook.yml/badge.svg)](https://github.com/radiant-network/radiant-portal/actions/workflows/storybook.yml)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format:cypress": "prettier --write \"cypress/**/*.{ts,js,json}\"",
+    "format:cypress:check": "prettier --check \"cypress/**/*.{ts,js,json}\"",
+    "type-check:cypress": "tsc --noEmit --project cypress/tsconfig.json",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "prettier": "^3.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "lint-staged": {
+    "cypress/**/*.{ts,js,json}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "cypress": "^15.0.0"
+  }
+}
