@@ -56,7 +56,7 @@ function CasesTab() {
     <div className={tabContentClassName}>
       <CasesFiltersProvider filters={filtersQuery.data} isLoading={filtersQuery.isLoading}>
         <Card>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-3">
             <TabsNav value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsListItem value={Tabs.InterpretedCases}>

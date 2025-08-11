@@ -69,7 +69,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
     return (
       <div className="p-2">
         <div className="flex justify-between gap-8">
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 space-y-3">
             <Skeleton className="h-4 w-64" />
             <Skeleton className="h-6 w-3/4" />
           </div>
@@ -86,7 +86,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
   return (
     <div className="p-2">
       <div className="flex flex-col sm:flex-row sm:justify-between gap-4 w-full">
-        <div className="space-y-6 min-w-0">
+        <div className="space-y-3 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 text-muted-foreground">
             <div className="flex gap-1 items-center">
               <User size={16} />{' '}

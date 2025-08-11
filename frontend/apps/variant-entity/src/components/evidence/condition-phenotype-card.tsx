@@ -77,7 +77,7 @@ function ConditionPhenotypeCard() {
       <CardHeader className="flex">
         <CardTitle className="text-xl font-semibold">{t('variantEntity.evidence.gene.title')}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-3">
         <div className="flex items-center gap-2">
           <Tabs
             value={panelType}

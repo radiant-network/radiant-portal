@@ -1,4 +1,3 @@
-
 import { ComponentProps, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import { CaseEntity, SortBodyOrderEnum } from '@/api/api';
@@ -7,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/c
 import { useI18n } from '@/components/hooks/i18n';
 import { defaultSettings, getColumns } from '@/feature/assays-table/table-settings';
 
-const DEFAULT_SORTING = [{
-  field: 'created_at',
-  order: SortBodyOrderEnum.Asc,
-}];
+const DEFAULT_SORTING = [
+  {
+    field: 'created_at',
+    order: SortBodyOrderEnum.Asc,
+  },
+];
 
 type AssayInformationsCardProps = ComponentProps<'div'> & {
   data: CaseEntity;
@@ -28,7 +29,7 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
       <CardHeader className="border-b [.border-b]:pb-4">
         <CardTitle size="xl">{t('caseEntity.details.assayInformationsOverview')}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-6">
+      <CardContent className="flex flex-col gap-3">
         <DataTable
           id="sequencing-and-assays"
           columns={getColumns(t)}

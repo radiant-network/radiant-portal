@@ -45,9 +45,9 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
           )}
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-6 md:flex-row">
+      <CardContent className="flex flex-col gap-3 md:flex-row">
         {/* Proband */}
-        <div className={cn('flex flex-col gap-6 flex-1')}>
+        <div className={cn('flex flex-col gap-3 flex-1')}>
           {/* Primary Condition */}
           <div>
             <CardTitle>{t('caseEntity.details.primary_condition')}</CardTitle>
@@ -65,7 +65,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
 
             <ExpandableList
               items={proband.observed_phenotypes ?? []}
-              renderItem={(item) => (
+              renderItem={item => (
                 <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
               )}
               visibleCount={PHENOTYPES_VISIBLE_COUNT}
@@ -82,7 +82,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
 
             <ExpandableList
               items={proband.non_observed_phenotypes ?? []}
-              renderItem={(item) => (
+              renderItem={item => (
                 <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
               )}
               visibleCount={PHENOTYPES_VISIBLE_COUNT}
@@ -99,7 +99,6 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             <p className="text-sm">{data.note}</p>
           </Card>
         </div>
-
 
         {/* Family member */}
         {hasFamily && (
@@ -130,7 +129,6 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             </div>
           </>
         )}
-
       </CardContent>
     </Card>
   );

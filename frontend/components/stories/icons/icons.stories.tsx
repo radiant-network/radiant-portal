@@ -50,7 +50,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {},
   render: args => (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div>
         <h1 className="font-bold text-xl">Icons:</h1>
         <div>

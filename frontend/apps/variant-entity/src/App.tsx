@@ -100,22 +100,22 @@ export default function App() {
           <TabsListItem value={VariantEntityTabs.Transcripts}>{t('variantEntity.transcripts.title')}</TabsListItem>
           <TabsListItem value={VariantEntityTabs.Cases}>{t('variantEntity.cases.tab')}</TabsListItem>
         </TabsList>
-        <div className="px-0 sm:px-6">
+        <div className="px-0 sm:px-3">
           <Container>
             <div className="max-w-8xl mx-auto w-full">
-              <TabsContent value={VariantEntityTabs.Overview} className="p-0 sm:py-6">
+              <TabsContent value={VariantEntityTabs.Overview} className="p-0 sm:py-3">
                 <OverviewTab />
               </TabsContent>
-              <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="p-0 sm:py-6">
+              <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="p-0 sm:py-3">
                 <EvidenceTab />
               </TabsContent>
-              {/* SJRA-389 <TabsContent value={VariantEntityTabs.Frequency} className="py-6">
+              {/* SJRA-389 <TabsContent value={VariantEntityTabs.Frequency} className="py-3">
                 <FrequencyTab />
               </TabsContent> */}
-              <TabsContent value={VariantEntityTabs.Transcripts} className="p-3 sm:py-6">
+              <TabsContent value={VariantEntityTabs.Transcripts} className="p-3 sm:py-3">
                 <TranscriptsTab />
               </TabsContent>
-              <TabsContent value={VariantEntityTabs.Cases} className="p-0 sm:py-6">
+              <TabsContent value={VariantEntityTabs.Cases} className="p-0 sm:py-3">
                 <CasesTab />
               </TabsContent>
             </div>

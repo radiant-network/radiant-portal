@@ -96,7 +96,7 @@ function InterpretedCasesTable() {
   );
 
   return (
-    <div className="space-y-6 mt-2">
+    <div className="space-y-3 mt-2">
       <InterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="interpreted-cases"

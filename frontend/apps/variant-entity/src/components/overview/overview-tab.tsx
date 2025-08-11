@@ -55,11 +55,11 @@ function OverviewTab() {
 
 const VariantOverviewSkeleton = () => {
   return (
-    <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
+    <div className="gap-3 grid grid-cols-1 md:grid-cols-3">
       <Card>
         <CardContent>
           <Skeleton className="h-6" />
-          <Separator className="my-6" />
+          <Separator className="my-3" />
           <div className="space-y-4">
             <Skeleton className="h-6" />
             <Skeleton className="h-4" />
@@ -71,11 +71,11 @@ const VariantOverviewSkeleton = () => {
       <Card className="shadow-none col-span-1 md:col-span-2">
         <CardContent>
           <Skeleton className="h-12" />
-          <Separator className="my-6" />
+          <Separator className="my-3" />
           <Skeleton className="h-12" />
         </CardContent>
         <Separator />
-        <CardFooter className="px-6 py-4">
+        <CardFooter className="px-3 py-4">
           <Skeleton className="h-6 w-full" />
         </CardFooter>
       </Card>
@@ -106,7 +106,7 @@ const VariantOverviewSkeleton = () => {
       <Card>
         <CardContent>
           <Skeleton className="h-6" />
-          <Separator className="my-6" />
+          <Separator className="my-3" />
           <div className="space-y-4">
             <Skeleton className="h-4" />
             <Skeleton className="h-4" />

@@ -259,7 +259,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
           {hasAnyPredictionScores ? (
             predictionScoreList.slice(0, 4)
           ) : (
-            <Empty bordered showIcon={false} description={t('variant.noDataForVariant')} className="py-6 h-full" />
+            <Empty bordered showIcon={false} description={t('variant.noDataForVariant')} className="py-3 h-full" />
           )}
         </CardContent>
       </Card>

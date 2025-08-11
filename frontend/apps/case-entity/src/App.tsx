@@ -107,7 +107,7 @@ export default function App() {
             )}
           </TabsList>
           <Container>
-            <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-6">
+            <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-3">
               <DetailsTab caseEntity={data} isLoading={isLoading} />
             </TabsContent>
           </Container>

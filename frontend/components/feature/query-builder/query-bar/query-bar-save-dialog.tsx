@@ -53,7 +53,7 @@ function QueryBarSaveDialog({
           <DialogTitle>{dict.queryBar.saveDialog.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="title"

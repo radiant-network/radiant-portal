@@ -238,7 +238,7 @@ export const Default: Story = {
   },
   render: args => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <QueryBuilder {...args} />
         <TestingTools queryBuilderId={qbId} />
       </div>
@@ -326,7 +326,7 @@ export const QueryPillFilter: Story = {
   },
   render: args => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <QueryBuilder {...args} />
         <TestingTools queryBuilderId={qbQueryPillFilterId} />
       </div>

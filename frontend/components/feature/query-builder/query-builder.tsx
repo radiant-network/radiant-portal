@@ -81,13 +81,13 @@ function QueryBuilder({
           <Accordion type="multiple" defaultValue={['query-builder']}>
             <AccordionItem value="query-builder" className="border-none">
               <AccordionTrigger
-                className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
+                className="border-b py-0 px-3 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
                 asChild
               >
                 <SavedFiltersLeftActions className="py-4 pr-4" />
                 <SavedFiltersRightActions className="ml-auto py-4" />
               </AccordionTrigger>
-              <AccordionContent className="py-4 px-6 space-y-4">
+              <AccordionContent className="py-4 px-3 space-y-4">
                 <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
                   {queryBuilder.getQueries().map(query => (
                     <QueryBar key={query.id} query={query} />
