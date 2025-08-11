@@ -464,6 +464,18 @@ export interface CaseEntity {
     'priority_code'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'project_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'project_name'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof CaseEntity
      */

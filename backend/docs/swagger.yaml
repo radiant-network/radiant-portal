@@ -179,6 +179,10 @@ components:
           type: string
         priority_code:
           type: string
+        project_code:
+          type: string
+        project_name:
+          type: string
         request_id:
           type: integer
         requested_by_code:

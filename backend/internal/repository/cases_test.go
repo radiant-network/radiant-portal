@@ -164,6 +164,8 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 		assert.Equal(t, "MONDO:0700092", (*caseEntity).PrimaryConditionID)
 		assert.Equal(t, "neurodevelopmental disorder", (*caseEntity).PrimaryConditionName)
 		assert.Equal(t, "Administrative comment", (*caseEntity).Note)
+		assert.Equal(t, "N1", (*caseEntity).ProjectCode)
+		assert.Equal(t, "NeuroDev Phase I", (*caseEntity).ProjectName)
 	})
 }
 
