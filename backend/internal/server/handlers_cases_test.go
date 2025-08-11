@@ -2,13 +2,14 @@ package server
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
@@ -111,7 +112,7 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 			{SeqID: 3, RequestID: 24, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: false},
 		},
 		Tasks: types.JsonArray[types.CaseTask]{
-			{ID: 1, TypeCode: "ngba", TypeName: "Normal Genome Bioinformatic Analysis", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
+			{ID: 1, TypeCode: "ngba", TypeName: "Normal Germline Bioinformatics Analysis", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
 		},
 		Members: types.JsonArray[types.CasePatientClinicalInformation]{
 			{PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", Mrn: "MRN-283775", SexCode: "male", ManagingOrganizationCode: "CHUSJ", ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
@@ -282,7 +283,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"requested_by_name":"Centre hospitalier universitaire Sainte-Justine", 
 		"status_code":"", 
 		"tasks":[
-			{"id": 1, "type_code": "ngba", "type_name": "Normal Genome Bioinformatic Analysis", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
+			{"id": 1, "type_code": "ngba", "type_name": "Normal Germline Bioinformatics Analysis", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
 		],
 		"updated_on":"2000-02-02T00:00:00Z"
 	}`, w.Body.String())
