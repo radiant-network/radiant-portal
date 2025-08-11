@@ -459,7 +459,7 @@
       "exomiser_acmg_classification": "ACMG Exo.",
       "exomiser_acmg_classification_tooltips": "Exomiser ACMG",
       "exomiser_gene_combined_score": "Exo.",
-      "exomiser_gene_combined_score_tooltips": "Exomiser score based on variant properties and patient phenotypes.",
+      "exomiser_gene_combined_score_tooltips": "Exomiser score based on variant properties and patient phenotypes",
       "dbSNP": "dbSNP",
       "hgvsg": "Variant",
       "clinical_interpretation": "Clinical Interpretation",
