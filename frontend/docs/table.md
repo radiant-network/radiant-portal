@@ -14,9 +14,9 @@ e.g. `InterpretationCell` needs `InterpretationDialog` to works, a component uni
 
 
 
-If the cell is only a basic component, you should still create an cell component equivalent to manage the `EmptyCell` state.
+## Always add an attraction layer when using a basic component
 
-e.g.
+If the cell is only a basic component, you should still create an cell component equivalent to manage the `EmptyCell` state or state specific related to the table. 
 
 ```typescript
 // affected-status-badge-cell.tsx
@@ -45,8 +45,8 @@ export default AffectedStatusCell;
 
 
 
-
-
 ### Storybook
 
-Every new cell should be place inside data-table storybook. The goal is always to prioritize reusability.
+Every new cell should be place inside data-table storybook. The goal is always to prioritize re-usability. 
+
+See [Storybook Documentation](./storybook.md)
