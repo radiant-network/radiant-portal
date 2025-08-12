@@ -22,10 +22,10 @@ const emptyVariants = tv({
       mini: {
         base: 'py-3 gap-3',
         iconsContainer: '[&_svg]:size-4',
-        textContainer: 'space-y-1',
+        textContainer: 'space-y-2',
         title: 'text-base',
         description: 'text-xs',
-        customIcon: 'size-8 [&_svg]:size-4',
+        customIcon: 'size-9 [&_svg]:size-6',
       },
       default: {
         base: 'py-8 gap-3',

@@ -88,17 +88,17 @@ export type TableProps<TData> = {
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 } & (
-    | {
+  | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-    | {
+  | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-  );
+);
 
 export interface BaseColumnSettings {
   id: string;
@@ -265,7 +265,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -309,8 +309,8 @@ function getRowFlexRender<T>({
 
 /**
  * Data-Table
- * Should be used for complex and interactive table. 
- * If you needs to only display data in a table without interaction, local storage or pagination, 
+ * Should be used for complex and interactive table.
+ * If you needs to only display data in a table without interaction, local storage or pagination,
  * use DisplayTable instead
  *
  * @issue For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
@@ -430,7 +430,7 @@ function TranstackTable<T>({
   );
 
   // Key Input Map
-  const handleEscEventListener = function() {
+  const handleEscEventListener = function () {
     setIsFullscreen(false);
   };
 
@@ -509,19 +509,18 @@ function TranstackTable<T>({
     previousTableCache: tableLocaleStorage,
   });
 
-
   /**
    * Add 'Esc' keyboard shortcut for fullscreen mode
    */
   useEffect(() => {
     if (isFullscreen) {
-      document.addEventListener("keydown", handleEscEventListener);
+      document.addEventListener('keydown', handleEscEventListener);
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscEventListener);
-    }
-  }, [isFullscreen])
+      document.removeEventListener('keydown', handleEscEventListener);
+    };
+  }, [isFullscreen]);
 
   /**
    * Fix scrolling when a subcomponent is open by setting a containerWidth
@@ -689,6 +688,7 @@ function TranstackTable<T>({
             description={t('common.table.no_result_description')}
             iconType="custom"
             icon={SearchIcon}
+            size="mini"
           />
         </Card>
       )}
@@ -792,7 +792,7 @@ function TranstackTable<T>({
               {/* PageSize select */}
               <PaginationPageSize
                 pageSize={table.getState().pagination?.pageSize ?? 20}
-                onPageSizeChange={(pageSize) => {
+                onPageSizeChange={pageSize => {
                   table.setPageSize(pageSize);
                 }}
               />
