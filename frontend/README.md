@@ -2,18 +2,26 @@
 
 ## Getting Started
 
+See [Onboarding documentation for newcomers](./docs/onboarding.md)
+
 ### Prerequisites
 
-- Node.js
+- Node.js (> 20.18.0)
 - Mac or Linux OS
 - Make
 
 ### Installing
 
 1. Clone the repository
+
 2. Install the dependencies.
-    Frontend is a workspace. It contains multiple projects that works together. To make them see each other and import each other
-    you need to install the dependencies of the workspace at the root of the frontend folder first.
+    Frontend is a workspace. It contains multiple projects that works together. To make them see each other and import each other you need to install the dependencies of the workspace at the root of the frontend folder first.
+
+    ```shell
+    cd radiant-portal/frontend/
+    npm install
+    ```
+
 3. Run the the server
 
 ```bash
@@ -21,7 +29,7 @@ git clone git@github.com:radiant-network/radiant-portal.git
 cd radiant-portal/frontend
 npm install
 cd portals/radiant
-npm run dev
+npm run dev:radiant
 ```
 
 ### Running server with docker
@@ -42,23 +50,27 @@ openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axio
 
 ```
 
-## Contribution
-[Contribution](./docs/contribution.md)
+# Documentations
 
-## Project Directory Structure
+[Onboarding documentation for newcomers](./docs/onboarding.md)
+
 [Project Structure Documentation](./docs/project-structure.md)
 
-## Code Conventions
 [Code Convention Documentation](./docs/code-conventions.md)
 
-## Theme and Figma
 [Theme and Figma documentation](./docs/theme.md)
 
-## Shadcn
 [shadcn convention documentation](./docs/shadcn.md)
 
-## Adding a new Page Application
 [Create An Application](./docs/create-an-application.md)
+
+[Managing form](./docs/form.md)
+
+[Query-Builder](./docs/query-builder.md)
+
+[Table and Tanstack headless UI](./docs/table.md)
+
+
 
 ## Development Workflow
 
