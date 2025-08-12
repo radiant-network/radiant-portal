@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardProps } from '@/components/base/ui/card';
-import { BrainCircuit } from 'lucide-react';
+import { HospitalIcon } from 'lucide-react';
 import { useI18n } from '@/components/hooks/i18n';
 import { VariantOverview } from '@/api/api';
 import ClassificationSection from './classification-section';
@@ -18,7 +18,7 @@ function InterpretationCard({ data, ...props }: InterpretationCardProps) {
     <Card {...props}>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <BrainCircuit />
+          <HospitalIcon />
           <span className="font-semibold">{t('variantEntity.overview.interpretation')}</span>
         </div>
       </CardHeader>
