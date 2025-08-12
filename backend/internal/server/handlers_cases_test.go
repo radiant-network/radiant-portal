@@ -20,7 +20,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 			PatientID:            3,
 			MRN:                  "MRN-283775",
 			PriorityCode:         "routine",
-			StatusCode:           "active",
+			StatusCode:           "in_progress",
 			CaseAnalysisTypeCode: "germline",
 			CaseType:             "germline_family",
 			CaseAnalysisCode:     "WGA",
@@ -60,7 +60,7 @@ func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilte
 	var result = types.CaseFilters{
 		Status: []types.Aggregation{
 			{Bucket: "draft", Label: "Draft"},
-			{Bucket: "active", Label: "Active"},
+			{Bucket: "in_progress", Label: "In Progress"},
 			{Bucket: "revoke", Label: "Revoke"},
 		},
 		Priority: []types.Aggregation{
@@ -157,7 +157,7 @@ func Test_SearchCasesHandler(t *testing.T) {
 			"request_id":1,
 			"requested_by_code":"CHUSJ",
 			"requested_by_name":"Centre hospitalier universitaire Sainte-Justine",
-			"status_code":"active",
+			"status_code":"in_progress",
 			"updated_on":"2000-02-02T00:00:00Z",
 			"has_variants": true
 		}],
@@ -218,7 +218,7 @@ func Test_CasesFiltersHandler(t *testing.T) {
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], "status":[
 			{"count":0, "key":"draft", "label":"Draft"},
-			{"count":0, "key":"active", "label":"Active"},
+			{"count":0, "key":"in_progress", "label":"In Progress"},
 			{"count":0, "key":"revoke", "label":"Revoke"}
 		]
 	}`, w.Body.String())
