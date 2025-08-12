@@ -705,6 +705,8 @@ components:
           type: boolean
         is_mane_select:
           type: boolean
+        locus:
+          type: string
         locus_id:
           type: string
         max_impact_score:
@@ -755,6 +757,7 @@ components:
       - gnomad_v3_af
       - has_interpretation
       - hgvsg
+      - locus
       - locus_id
       - max_impact_score
       - pf_wgs
