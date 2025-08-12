@@ -39,7 +39,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
           {/* 
             ref: https://d3b.atlassian.net/browse/SJRA-146
           TODO when vep_impact is added to the api if data.is_picked == true
-            <ImpactIcon value="HIGH" size={16} />
+            <ImpactIndicator value="HIGH" size={16} />
           */}
         </div>
         <div className="flex flex-1">
