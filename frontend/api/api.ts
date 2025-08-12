@@ -1557,6 +1557,12 @@ export interface GermlineSNVOccurrence {
      * @type {string}
      * @memberof GermlineSNVOccurrence
      */
+    'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'locus_id': string;
     /**
      * 

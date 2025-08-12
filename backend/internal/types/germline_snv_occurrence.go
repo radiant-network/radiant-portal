@@ -8,6 +8,7 @@ type GermlineSNVOccurrence struct {
 	Chromosome                 string            `json:"chromosome" validate:"required"`
 	Start                      int64             `json:"start" validate:"required"`
 	LocusId                    string            `json:"locus_id" validate:"required"`
+	Locus                      string            `json:"locus" validate:"required"`
 	GenotypeQuality            int32             `json:"genotype_quality" validate:"required"`
 	Filter                     string            `json:"filter,omitempty"`
 	Zygosity                   string            `json:"zygosity" validate:"required"`

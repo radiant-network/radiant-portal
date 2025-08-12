@@ -59,6 +59,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(seqId int, userQuery t
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 	columns = append(columns, "i.locus_id IS NOT NULL AS has_interpretation")
+	columns = append(columns, "v.locus")
 
 	utils.AddLimitAndSort(tx, userQuery)
 	// we build a TOP-N query like :
