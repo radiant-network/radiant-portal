@@ -1,0 +1,26 @@
+CREATE TABLE `germline__cnv__occurrence` (
+     `part`         INT NOT NULL,
+     `seq_id`       INT NOT NULL,
+     `id`           VARCHAR(256),
+     `aliquot`      VARCHAR(255) NOT NULL,
+     `chromosome`   VARCHAR(2) NOT NULL,
+     `start`        BIGINT NOT NULL,
+     `end`          BIGINT NOT NULL,
+     `type`         VARCHAR(32) NOT NULL,
+     `length`       BIGINT NOT NULL,
+     `name`         VARCHAR(128) NOT NULL,
+     `quality`      FLOAT,
+     `calls`        ARRAY<INT>,
+     `filter`       VARCHAR(32),
+     `bc`           INT,
+     `cn`           INT,
+     `pe`           ARRAY<INT>,
+     `sm`           FLOAT,
+     `svtype`       VARCHAR(32),
+     `svlen`        INT,
+     `reflen`       INT,
+     `ciend`        ARRAY<INT>,
+     `cipos`        ARRAY<INT>
+)
+ENGINE=OLAP
+DUPLICATE KEY(`part`, `seq_id`, `id`);

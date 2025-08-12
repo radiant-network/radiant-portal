@@ -28,7 +28,7 @@ func Test_FindSortedFields_Return_Only_Valid_Field_And_Field_That_Can_Be_Sorted(
 		{Name: "field1", CanBeSorted: true},
 		{Name: "field2", CanBeSorted: false},
 		{Name: "field3", CanBeSorted: true},
-		LocusIdField,
+		GermlineSNVLocusIdField,
 	}
 	sorted := []SortBody{
 		{Field: "field1", Order: "asc"},
@@ -44,7 +44,7 @@ func Test_FindSortedFields_Return_Only_Valid_Field_And_Field_That_Can_Be_Sorted(
 	defaultSorted := []SortField{
 		{Field: fields[0], Order: "asc"},
 	}
-	result := findSortedFields(fields, sorted, defaultSorted, LocusIdField)
+	result := findSortedFields(fields, sorted, defaultSorted, GermlineSNVLocusIdField)
 	assert.Equal(t, result, expected)
 }
 
@@ -54,7 +54,7 @@ func Test_FindSortedFields_Filter_out_Field_With_Bad_Order(t *testing.T) {
 		{Name: "field1", CanBeSorted: true},
 		{Name: "field2", CanBeSorted: false},
 		{Name: "field3", CanBeSorted: true},
-		LocusIdField,
+		GermlineSNVLocusIdField,
 	}
 	sorted := []SortBody{
 		{Field: "field1", Order: "bad"},
@@ -69,6 +69,6 @@ func Test_FindSortedFields_Filter_out_Field_With_Bad_Order(t *testing.T) {
 	defaultSorted := []SortField{
 		{Field: fields[0], Order: "asc"},
 	}
-	result := findSortedFields(fields, sorted, defaultSorted, LocusIdField)
+	result := findSortedFields(fields, sorted, defaultSorted, GermlineSNVLocusIdField)
 	assert.Equal(t, result, expected)
 }

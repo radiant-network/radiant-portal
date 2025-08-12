@@ -600,6 +600,64 @@ components:
       - conditions
       - count
       type: object
+    GermlineCNVOccurrence:
+      description: GermlineCNVOccurrence represents a germline CNV occurrence
+      properties:
+        aliquot:
+          type: string
+        bc:
+          type: integer
+        calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        chromosome:
+          type: string
+        ciend:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        cipos:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        cn:
+          type: integer
+        end:
+          type: integer
+        filter:
+          type: string
+        id:
+          type: string
+        length:
+          type: integer
+        name:
+          type: string
+        pe:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        quality:
+          type: number
+        reflen:
+          type: integer
+        seq_id:
+          type: integer
+        sm:
+          type: number
+        start:
+          type: integer
+        svlen:
+          type: integer
+        svtype:
+          type: string
+        type:
+          type: string
+      type: object
     GermlineSNVOccurrence:
       description: GermlineSNVOccurrence represents a germline SNV occurrence
       properties:
@@ -1990,6 +2048,104 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
+  /occurrences/germline/cnv/{seq_id}/count:
+    post:
+      description: Counts germline CNV occurrences for a given sequence ID
+      operationId: countGermlineCNVOccurrences
+      parameters:
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountBodyWithSqon'
+        description: Count Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Count'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Count germline CNV occurrences
+      tags:
+      - occurrences
+  /occurrences/germline/cnv/{seq_id}/list:
+    post:
+      description: List germline CNV occurrences for a given sequence ID
+      operationId: listGermlineCNVOccurrences
+      parameters:
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithSqon'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GermlineCNVOccurrence'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: List germline CNV occurrences
+      tags:
+      - occurrences
   /occurrences/germline/snv/{seq_id}/{locus_id}/expanded:
     get:
       description: Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID

@@ -77,11 +77,11 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 	})
 }
 
-func Test_OccurrencesList(t *testing.T) {
+func Test_SNVOccurrences_List(t *testing.T) {
 	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "hgvsg":"hgvsg1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":1, "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
 }
 
-func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
+func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
 	body := `{
 			"additional_fields":[
 				"seq_id","locus_id","filter","zygosity","pf_wgs","pc_wgs","hgvsg","ad_ratio","variant_class"
@@ -96,14 +96,13 @@ func Test_OccurrencesList_Return_Filtered_Occurrences_When_Sqon_Specified(t *tes
 		}`
 	expected := `[{"ad_ratio":1, "chromosome": "1", "filter":"PASS", "exomiser_acmg_classification":"", "exomiser_acmg_evidence":null, "exomiser_gene_combined_score":0, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "hgvsg":"hgvsg1", "locus_id":"1000", "max_impact_score":4, "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "pc_wgs":3, "pf_wgs":0.99, "picked_consequences": null, "seq_id":1, "task_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
-
 }
 
-func Test_OccurrencesCount(t *testing.T) {
+func Test_SNVOccurrences_Count(t *testing.T) {
 	testCount(t, "simple", "{}", 1)
-
 }
-func Test_OccurrencesCount_Return_Expected_Count_When_Sqon_Specified(t *testing.T) {
+
+func Test_SNVOccurrences_Count_Return_Expected_Count_When_Sqon_Specified(t *testing.T) {
 	body := `{
 			"sqon":{
 				"op":"in",
@@ -116,7 +115,7 @@ func Test_OccurrencesCount_Return_Expected_Count_When_Sqon_Specified(t *testing.
 	testCount(t, "multiple", body, 1)
 }
 
-func Test_Aggregation(t *testing.T) {
+func Test_SNVOccurrence_Aggregation(t *testing.T) {
 	body := `{
 			"field": "zygosity",
 			"sqon": {
@@ -145,7 +144,7 @@ func Test_Aggregation(t *testing.T) {
 	testAggregation(t, "aggregation", body, expected)
 }
 
-func Test_Statistics(t *testing.T) {
+func Test_SNVOccurrence_Statistics(t *testing.T) {
 	body := `{
 			"field": "pf_wgs",
 			"sqon": {
@@ -165,7 +164,7 @@ func Test_Statistics(t *testing.T) {
 	testStatistics(t, "pagination", body, expected)
 }
 
-func Test_Filter_On_Consequence_Column(t *testing.T) {
+func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
 	body := `{
 			"additional_fields":[
 				"seq_id","task_id","locus_id","filter","zygosity","pf_wgs","pc_wgs","hgvsg","ad_ratio","variant_class"
@@ -187,6 +186,105 @@ func Test_Filter_On_Consequence_Column(t *testing.T) {
 		}`
 	expected := `[{"ad_ratio":1, "chromosome": "1", "filter":"PASS", "exomiser_acmg_classification":"", "exomiser_acmg_evidence":null, "exomiser_gene_combined_score":0, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "hgvsg":"hgvsg1", "locus_id":"1000", "max_impact_score":4, "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "pc_wgs":3, "pf_wgs":0.99, "picked_consequences": null, "seq_id":1, "task_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
 	testList(t, "multiple", body, expected)
+}
+
+func Test_CNVOccurrence_List(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		router := gin.Default()
+		router.POST("/occurrences/germline/cnv/:seq_id/list", server.OccurrencesGermlineCNVListHandler(repo))
+
+		body := `{}`
+		req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/list", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expected := `[{"id":"CNV1_1","seq_id":1,"aliquot":"AQ001","chromosome":"1","start":10000,"end":10500,"type":"DEL","length":500,"name":"CNV1","quality":0.995,"calls":[1,0,1],"filter":"PASS","bc":10,"cn":2,"pe":[5,3],"sm":0.95,"svtype":"DEL","svlen":500,"ciend":[100,200],"cipos":[50,60]},{"id":"CNV2_1","seq_id":1,"aliquot":"AQ002","chromosome":"2","start":20000,"end":20500,"type":"DUP","length":500,"name":"CNV2","quality":0.887,"calls":[0,1,1],"filter":"PASS","bc":12,"cn":3,"pe":[2,4],"sm":0.85,"svtype":"DUP","svlen":500,"ciend":[150,250],"cipos":[70,80]}]`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		router := gin.Default()
+		router.POST("/occurrences/germline/cnv/:seq_id/list", server.OccurrencesGermlineCNVListHandler(repo))
+
+		body := `
+		{
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op": "in",
+						"content": {
+							"field": "chromosome",
+							"value": ["2"]
+						}
+					}
+				]
+			}
+		}`
+		req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/list", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expected := `[{"id":"CNV2_1","seq_id":1,"aliquot":"AQ002","chromosome":"2","start":20000,"end":20500,"type":"DUP","length":500,"name":"CNV2","quality":0.887,"calls":[0,1,1],"filter":"PASS","bc":12,"cn":3,"pe":[2,4],"sm":0.85,"svtype":"DUP","svlen":500,"ciend":[150,250],"cipos":[70,80]}]`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_Count(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		router := gin.Default()
+		router.POST("/occurrences/germline/cnv/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
+
+		body := `{}`
+		req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/count", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expected := `{"count":2}`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		router := gin.Default()
+		router.POST("/occurrences/germline/cnv/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
+
+		body := `{
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op": ">",
+						"content": {
+							"field": "quality",
+							"value": [0.9]
+						}
+					}
+				]
+			}
+		}`
+		req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/count", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expected := `{"count":1}`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
 }
 
 type MockExternalClient struct{}
@@ -1159,6 +1257,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"occurrences/germline/snv/1/list",
 			"occurrences/germline/snv/1/aggregate",
 			"occurrences/germline/snv/1/statistics",
+			"occurrences/germline/cnv/1/list",
 			"variants/germline/1/cases/interpreted",
 			"variants/germline/1/cases/uninterpreted",
 		} {

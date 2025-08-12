@@ -26,7 +26,7 @@ func AddWhere(userQuery types.Query, tx *gorm.DB) {
 	}
 }
 
-func AddLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
+func AddLimit(tx *gorm.DB, userQuery types.ListQuery) {
 	if userQuery.Pagination() != nil {
 		var l int
 		if userQuery.Pagination().Limit < MaxLimit {
@@ -42,6 +42,10 @@ func AddLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
 	} else {
 		tx = tx.Limit(MinLimit)
 	}
+}
+
+func AddLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
+	AddLimit(tx, userQuery)
 	AddSort(tx, userQuery)
 }
 
@@ -60,4 +64,13 @@ func GetAggregatedPhenotypes(db *gorm.DB) *gorm.DB {
 	tx = tx.Select("obs.case_id as case_id, obs.patient_id as patient_id, GROUP_CONCAT(CONCAT(hpo.id,'__',hpo.name) SEPARATOR '|') as phenotypes_term")
 
 	return tx
+}
+
+func GetSequencingPart(seqId int, db *gorm.DB) (int, error) {
+	tx := db.Table("staging_sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
+	var part int
+	if err := tx.Scan(&part).Error; err != nil {
+		return part, fmt.Errorf("error fetching part: %w", err)
+	}
+	return part, nil
 }
