@@ -31,7 +31,7 @@ func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRep
 
 func (r *GermlineCNVOccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
 	var occurrences []GermlineCNVOccurrence
-	tx, err := r.prepareListOrCountQuery(seqId, userQuery)
+	tx, err := r.prepareListOrCountQuery(seqId)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -53,7 +53,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(seqId int, userQuery t
 }
 
 func (r *GermlineCNVOccurrencesRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
-	tx, err := r.prepareListOrCountQuery(seqId, userQuery)
+	tx, err := r.prepareListOrCountQuery(seqId)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -67,8 +67,8 @@ func (r *GermlineCNVOccurrencesRepository) CountOccurrences(seqId int, userQuery
 	return count, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) prepareListOrCountQuery(seqId int, userQuery types.Query) (*gorm.DB, error) {
-	part, err := r.getPart(seqId)
+func (r *GermlineCNVOccurrencesRepository) prepareListOrCountQuery(seqId int) (*gorm.DB, error) {
+	part, err := utils.GetSequencingPart(seqId, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during partition fetch %w", err)
 	}
@@ -78,14 +78,4 @@ func (r *GermlineCNVOccurrencesRepository) prepareListOrCountQuery(seqId int, us
 	).Where("seq_id = ? and part=?", seqId, part)
 
 	return tx, nil
-}
-
-func (r *GermlineCNVOccurrencesRepository) getPart(seqId int) (int, error) {
-	tx := r.db.Table("staging_sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
-	var part int
-	err := tx.Scan(&part).Error
-	if err != nil {
-		return part, fmt.Errorf("error fetching part: %w", err)
-	}
-	return part, err
 }

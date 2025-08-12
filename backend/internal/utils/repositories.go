@@ -65,3 +65,12 @@ func GetAggregatedPhenotypes(db *gorm.DB) *gorm.DB {
 
 	return tx
 }
+
+func GetSequencingPart(seqId int, db *gorm.DB) (int, error) {
+	tx := db.Table("staging_sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
+	var part int
+	if err := tx.Scan(&part).Error; err != nil {
+		return part, fmt.Errorf("error fetching part: %w", err)
+	}
+	return part, nil
+}

@@ -47,15 +47,6 @@ func addImplicitOccurrencesFilters(seqId int, r *GermlineSNVOccurrencesRepositor
 func joinWithVariants(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("JOIN germline__snv__variant v ON v.locus_id=o.locus_id")
 }
-func (r *GermlineSNVOccurrencesRepository) GetPart(seqId int) (int, error) { //TODO cache
-	tx := r.db.Table("staging_sequencing_experiment").Where("seq_id = ?", seqId).Select("part")
-	var part int
-	err := tx.Scan(&part).Error
-	if err != nil {
-		return part, fmt.Errorf("error fetching part: %w", err)
-	}
-	return part, err
-}
 
 func (r *GermlineSNVOccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
 	var occurrences []GermlineSNVOccurrence
@@ -92,7 +83,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(seqId int, userQuery t
 }
 
 func prepareListOrCountQuery(seqId int, userQuery types.Query, r *GermlineSNVOccurrencesRepository) (*gorm.DB, int, error) {
-	part, err := r.GetPart(seqId)
+	part, err := utils.GetSequencingPart(seqId, r.db)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
 	}
@@ -184,7 +175,7 @@ func (r *GermlineSNVOccurrencesRepository) CountOccurrences(seqId int, userQuery
 }
 
 func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *GermlineSNVOccurrencesRepository) (*gorm.DB, int, error) {
-	part, err := r.GetPart(seqId)
+	part, err := utils.GetSequencingPart(seqId, r.db)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
 	}
