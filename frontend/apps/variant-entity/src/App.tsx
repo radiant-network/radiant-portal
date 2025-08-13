@@ -1,20 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
-import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import { BadgeProps } from '@/components/base/ui/badge';
 import { Link, useLocation, useParams } from 'react-router';
-import OverviewTab from './components/overview/overview-tab';
-import EvidenceTab from './components/evidence/evidence-tab';
-import TranscriptsTab from './components/transcripts/transcripts-tab';
-import CasesTab from './components/cases/cases-tab';
-import { VariantEntityTabs } from './types';
-import { variantsApi } from '@/utils/api';
-import { VariantHeader, ApiError } from '@/api/api';
 import useSWR from 'swr';
-import { useI18n } from '@/components/hooks/i18n';
-import PageError from '@/components/base/page/page-error';
-import { Button } from '@/components/base/ui/button';
+
+import { ApiError, VariantHeader } from '@/api/api';
 import Container from '@/components/base/container';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
+import PageError from '@/components/base/page/page-error';
 import PageHeader from '@/components/base/page/page-header';
+import { BadgeProps } from '@/components/base/ui/badge';
+import { Button } from '@/components/base/ui/button';
+import { useI18n } from '@/components/hooks/i18n';
+import { variantsApi } from '@/utils/api';
+
+import CasesTab from './components/cases/cases-tab';
+import EvidenceTab from './components/evidence/evidence-tab';
+import OverviewTab from './components/overview/overview-tab';
+import TranscriptsTab from './components/transcripts/transcripts-tab';
+import { VariantEntityTabs } from './types';
 
 type VariantHeaderInput = {
   key: string;

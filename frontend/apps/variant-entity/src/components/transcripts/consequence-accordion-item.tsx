@@ -1,13 +1,18 @@
+import { Fragment } from 'react';
+import { Link } from 'react-router';
+import { ArrowUpRight } from 'lucide-react';
+
+import { VariantConsequence } from '@/api/api';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { Badge } from '@/components/base/ui/badge';
+import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
-import { Fragment } from 'react';
-import TranscriptDetails from './transcript-details';
-import { useI18n } from '@/components/hooks/i18n';
-import { VariantConsequence } from '@/api/api';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore } from '@/components/lib/string-format';
+
+import TranscriptDetails from './transcript-details';
 
 interface ConsequenceAccordionItemProps {
   value: string;
@@ -20,27 +25,20 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
   return (
     <AccordionItem value={value} className="border rounded-lg bg-background">
       <AccordionTrigger asChild className="py-4 px-5 hover:cursor-pointer">
-        <div className="flex flex-1 ml-4 items-center gap-3">
-          <span className="font-semibold text-base">
-            {data.symbol ? (
-              <a
-                href={getOmimOrgUrl({ symbol: data.symbol })}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:underline"
-                onClick={e => e.stopPropagation()}
-              >
-                {data.symbol}
-              </a>
-            ) : (
-              '-'
-            )}
-          </span>
+        <div className="flex flex-1 ml-4 items-center gap-2">
+          <span className="font-semibold text-base">{data.symbol || '-'}</span>
           {/* 
             ref: https://d3b.atlassian.net/browse/SJRA-146
           TODO when vep_impact is added to the api if data.is_picked == true
             <ImpactIndicator value="HIGH" size={16} />
           */}
+          {data.symbol && (
+            <Link to={getOmimOrgUrl({ symbol: data.symbol })} target="_blank" rel="noreferrer">
+              <Button iconOnly size="xs" variant="ghost">
+                {<ArrowUpRight className="size-4!" />}
+              </Button>
+            </Link>
+          )}
         </div>
         <div className="flex flex-1">
           <Badge variant="neutral" className="capitalize">
