@@ -1,12 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
-import { Accordion } from '@/components/base/ui/accordion';
-import { useI18n } from '@/components/hooks/i18n';
-import ConsequenceAccordionItem from './consequence-accordion-item';
-import { variantsApi } from '@/utils/api';
 import { useParams } from 'react-router';
 import useSWR from 'swr';
+
 import { VariantConsequence } from '@/api/api';
+import { Accordion } from '@/components/base/ui/accordion';
+import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
 import { Skeleton } from '@/components/base/ui/skeleton';
+import { variantsApi } from '@/utils/api';
+
+import ConsequenceAccordionItem from './consequence-accordion-item';
 
 type VariantTranscriptsInput = {
   key: string;
@@ -19,7 +20,6 @@ async function fetchVariantConsequences(input: VariantTranscriptsInput) {
 }
 
 function TranscriptsTab() {
-  const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
 
   const { data, isLoading } = useSWR<VariantConsequence[], any, VariantTranscriptsInput>(
@@ -46,21 +46,19 @@ function TranscriptsTab() {
   );
 }
 
-const VariantTranscriptsSkeleton = () => {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-6" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <Skeleton className="h-16" />
-          <Skeleton className="h-16" />
-          <Skeleton className="h-16" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+const VariantTranscriptsSkeleton = () => (
+  <Card>
+    <CardHeader>
+      <Skeleton className="h-6" />
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-2">
+        <Skeleton className="h-16" />
+        <Skeleton className="h-16" />
+        <Skeleton className="h-16" />
+      </div>
+    </CardContent>
+  </Card>
+);
 
 export default TranscriptsTab;
