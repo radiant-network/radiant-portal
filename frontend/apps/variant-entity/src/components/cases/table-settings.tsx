@@ -17,6 +17,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 
 const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>();
 const otherCasesColumnHelper = createColumnHelper<VariantUninterpretedCase>();
@@ -93,9 +94,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.performer_lab_code, {
       id: 'performer_lab_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>
-          {info.getValue()}
-        </TextTooltipsCell>
+        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipsCell>
       ),
       header: t('variantEntity.cases.interpreted-table.headers.institution'),
       minSize: 100,
@@ -106,9 +105,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>
-          {info.getValue()}
-        </TextTooltipsCell>
+        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipsCell>
       ),
       header: t('variantEntity.cases.interpreted-table.headers.test'),
       minSize: 80,
@@ -147,7 +144,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband} >
+        <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband}>
           <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs">
             {info.getValue()}
           </AnchorLink>
@@ -168,19 +165,28 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.affected_status, {
-      id: 'affected_status',
-      cell: info => <AffectedStatusCell status={info.getValue()} />,
-      header: t('variantEntity.cases.other-table.headers.affected_status'),
+    otherCasesColumnHelper.accessor(row => row.patient_id, {
+      id: 'patient_id',
+      cell: info => <span>{info.getValue()}</span>,
+      header: t('variantEntity.cases.other-table.headers.patient_id'),
       minSize: 80,
       maxSize: 150,
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.submitter_sample_id, {
-      id: 'submitter_sample_id',
-      cell: info => <span>{info.getValue()}</span>,
-      header: t('variantEntity.cases.other-table.headers.submitter_sample_id'),
+    otherCasesColumnHelper.accessor(row => row.updated_on, {
+      id: 'updated_on',
+      cell: info => <DateCell date={info.getValue()} />,
+      header: t('variantEntity.cases.other-table.headers.sample'),
+      minSize: 80,
+      maxSize: 150,
+      size: 120,
+      enableSorting: false,
+    }),
+    otherCasesColumnHelper.accessor(row => row.affected_status, {
+      id: 'affected_status',
+      cell: info => <AffectedStatusCell status={info.getValue()} />,
+      header: t('variantEntity.cases.other-table.headers.affected_status'),
       minSize: 80,
       maxSize: 150,
       size: 120,
@@ -211,16 +217,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
           <DialogListCell
             header={t('variantEntity.cases.other-table.headers.phenotypesHpo')}
             items={items}
-            renderItem={(item) => (
-              <AnchorLink
-                href={`https://purl.obolibrary.org/obo/${item.id?.replace(':', '_')}`}
-                size="xs"
-                variant="secondary"
-                target="_blank"
-              >
-                {item.name} <span className="font-mono text-xs text-muted-foreground">({item.id})</span>
-              </AnchorLink>
-            )}
+            renderItem={item => <PhenotypeConditionLink name={item.name} code={item.id} />}
             visibleCount={1}
           />
         );
@@ -239,21 +236,10 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       maxSize: 150,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row, {
-      id: 'inheritance',
-      cell: info => <EmptyCell />,
-      header: t('variantEntity.cases.other-table.headers.inheritance'),
-      size: 130,
-      minSize: 130,
-      maxSize: 250,
-      enableSorting: false,
-    }),
     otherCasesColumnHelper.accessor(row => row.performer_lab_code, {
       id: 'performer_lab_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>
-          {info.getValue()}
-        </TextTooltipsCell>
+        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipsCell>
       ),
       header: t('variantEntity.cases.other-table.headers.institution'),
       minSize: 100,
@@ -264,9 +250,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>
-          {info.getValue()}
-        </TextTooltipsCell>
+        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipsCell>
       ),
       header: t('variantEntity.cases.other-table.headers.test'),
       minSize: 80,
@@ -369,24 +353,14 @@ const otherCasesDefaultSettings = createColumnSettings([
     label: 'variant.headers.patient_id',
   },
   {
-    id: 'relationship_to_proband',
+    id: 'updated_on',
     visible: true,
-    label: 'variant.headers.relationship_to_proband',
+    label: 'variant.headers.sample',
   },
   {
     id: 'affected_status',
     visible: true,
     label: 'variant.headers.affected_status',
-  },
-  {
-    id: 'submitter_sample_id',
-    visible: true,
-    label: 'variant.headers.submitter_sample_id',
-  },
-  {
-    id: 'created_on',
-    visible: true,
-    label: 'variant.headers.date',
   },
   {
     id: 'observed_phenotypes',
@@ -399,11 +373,6 @@ const otherCasesDefaultSettings = createColumnSettings([
     label: 'variant.headers.zygosity',
   },
   {
-    id: 'inheritance',
-    visible: true,
-    label: 'variant.headers.inheritance',
-  },
-  {
     id: 'performer_lab_code',
     visible: true,
     label: 'variant.headers.institution',
@@ -412,6 +381,11 @@ const otherCasesDefaultSettings = createColumnSettings([
     id: 'case_analysis_code',
     visible: true,
     label: 'variant.headers.test',
+  },
+  {
+    id: 'created_on',
+    visible: true,
+    label: 'variant.headers.date',
   },
   {
     id: 'status_code',
