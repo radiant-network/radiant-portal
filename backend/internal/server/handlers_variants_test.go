@@ -63,20 +63,20 @@ func (m *MockRepository) GetVariantInterpretedCases(int, types.ListQuery) (*[]ty
 			ConditionId:             "MONDO:0000002", ConditionName: "blood vessel neoplasm", Classification: "benign",
 			ClassificationCode: "LA6675-8", Zygosity: "HET",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
-			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active",
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "in_progress",
 			Phenotypes: types.JsonArray[types.Term]{{ID: "HP:0100622", Name: "Maternal seizure"}}},
 		{CaseId: 1, SeqId: 2, TranscriptId: "T001", PatientId: 2,
 			InterpretationUpdatedOn: time.Date(2025, 6, 27, 19, 51, 0, 0, time.UTC),
 			ConditionId:             "MONDO:0000001", ConditionName: "blood group incompatibility", Classification: "likelyPathogenic",
 			ClassificationCode: "LA26332-9", Zygosity: "HET",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
-			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active", Phenotypes: make(types.JsonArray[types.Term], 0)},
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "in_progress", Phenotypes: make(types.JsonArray[types.Term], 0)},
 		{CaseId: 1, SeqId: 1, TranscriptId: "T001", PatientId: 1,
 			InterpretationUpdatedOn: time.Date(2025, 5, 23, 14, 57, 36, 0, time.UTC),
 			ConditionId:             "MONDO:0000001", ConditionName: "blood group incompatibility", Classification: "pathogenic",
 			ClassificationCode: "LA6668-3", Zygosity: "HET",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
-			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active", Phenotypes: make(types.JsonArray[types.Term], 0)},
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "in_progress", Phenotypes: make(types.JsonArray[types.Term], 0)},
 	}, &count, nil
 }
 
@@ -115,7 +115,7 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 			UpdatedOn:        time.Date(2021, 9, 12, 12, 8, 0, 0, time.UTC),
 			Zygosity:         "HOM",
 			PerformerLabCode: "CQGC", PerformerLabName: "Quebec Clinical Genomic Center",
-			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "active",
+			CaseAnalysisCode: "WGA", CaseAnalysisName: "Whole Genome Analysis", StatusCode: "in_progress",
 			Phenotypes:                 types.JsonArray[types.Term]{{ID: "HP:0100622", Name: "Maternal seizure"}, {ID: "HP:0001562", Name: "Oligohydramnios"}},
 			ExomiserACMGClassification: "Benign",
 			ExomiserACMGEvidence:       types.JsonArray[string]{"PVS2", "PS2"},
@@ -364,7 +364,7 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"seq_id":1, 
-				"status_code":"active", 
+				"status_code":"in_progress", 
 				"transcript_id":"T002", 
 				"zygosity":"HET"
 			}, {
@@ -380,7 +380,7 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"seq_id":2, 
-				"status_code":"active", 
+				"status_code":"in_progress", 
 				"transcript_id":"T001", 
 				"zygosity":"HET"
 			}, {
@@ -396,7 +396,7 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"seq_id":1, 
-				"status_code":"active", 
+				"status_code":"in_progress", 
 				"transcript_id":"T001", 
 				"zygosity":"HET"
 			}
@@ -485,7 +485,7 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"primary_condition_id":"MONDO:0700092", 
 				"primary_condition_name":"neurodevelopmental disorder", 
-				"status_code":"active", 
+				"status_code":"in_progress", 
 				"updated_on":"2021-09-12T12:08:00Z",
 				"zygosity":"HOM",
 				"exomiser_acmg_classification": "Benign",

@@ -328,7 +328,7 @@ PARTITION BY (`part`)
 DISTRIBUTED BY HASH(`locus_id`)
 BUCKETS 10;
 
-CREATE TABLE `germline__cnv__occurrence` (
+CREATE TABLE IF NOT EXISTS `germline__cnv__occurrence` (
     `part`         INT NOT NULL,
     `seq_id`       INT NOT NULL,
     `id`           VARCHAR(256),

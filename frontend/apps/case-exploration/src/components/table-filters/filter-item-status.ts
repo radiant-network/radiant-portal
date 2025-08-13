@@ -1,16 +1,17 @@
 import { Aggregation } from '@/api/api';
-import { FileQuestion, CircleDashed, Pen, Hourglass, RefreshCcw, Check, OctagonX, ListFilter, X } from 'lucide-react';
+import { FileQuestion, CircleDashed, Pen, Hourglass, RefreshCcw, Check, OctagonX } from 'lucide-react';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 // Status icon mapping function
 function getStatusIcon(statusKey: string) {
   const iconMap: { [key: string]: any } = {
     'draft': Pen,
-    'on-hold': Hourglass, // on-hold key == . submitted
-    'active': RefreshCcw, // active key == . in_progress
+    'submitted': Hourglass,
+    'in_progress': RefreshCcw,
     'completed': Check,
     'incomplete': CircleDashed,
     'revoke': OctagonX,
+    'unknown': FileQuestion,
   };
   return iconMap[statusKey.toLowerCase()] || FileQuestion;
 }

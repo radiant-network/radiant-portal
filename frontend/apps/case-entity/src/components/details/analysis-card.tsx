@@ -7,7 +7,7 @@ import { formatDate } from 'date-fns';
 import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
 import filterItemPriority from '@/case-exploration/components/table-filters/filter-item-priority';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
-import { CaseEntity, CaseTask, Aggregation } from '@/api/api';
+import { CaseEntity, Aggregation } from '@/api/api';
 import InformationField from '@/components/base/information/information-field';
 import BioinformaticsSection from './bioinformatics-section';
 
@@ -31,9 +31,9 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
     { key: 'incomplete', label: 'Incomplete' },
     { key: 'draft', label: 'Draft' },
     { key: 'revoke', label: 'Revoke' },
-    { key: 'active', label: 'Active' },
+    { key: 'in_progress', label: 'In Progress' },
     { key: 'completed', label: 'Completed' },
-    { key: 'on-hold', label: 'On-hold' },
+    { key: 'submitted', label: 'Submitted' },
     { key: 'unknown', label: 'Unknown' },
   ];
   interface IStatusOption extends IFilterButtonItem {

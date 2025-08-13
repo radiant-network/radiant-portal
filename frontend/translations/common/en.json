@@ -459,12 +459,13 @@
       "germline_family": "Family germline"
     },
     "status": {
-      "active": "In-progress",
-      "completed": "Completed",
+      "unknown": "Unknown",
       "draft": "Draft",
+      "in_progress": "In Progress",
+      "revoke": "Revoke",
+      "completed": "Completed",
       "incomplete": "Incomplete",
-      "on-hold": "Submitted",
-      "revoke": "Revoked"
+      "submitted": "Submitted"
     },
     "case": {
       "title": "Cases",
@@ -918,10 +919,9 @@
       "statusOptions": {
         "unknown": "Unknown",
         "draft": "Draft",
-        "active": "Active",
+        "in_progress": "In Progress",
         "revoke": "Revoke",
         "completed": "Completed",
-        "on-hold": "On-hold",
         "incomplete": "Incomplete",
         "submitted": "Submitted"
       }

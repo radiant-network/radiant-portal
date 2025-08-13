@@ -237,8 +237,20 @@ export const firstSetCellColumns = [
 ];
 
 export const firstSetCellData = [
+    {
+    link: "AnchorLinkCell 1",
+    assay_status_code: 'unknown',
+    badge: 'loremp',
+    badge_list: ['loremp', 'ipsum'],
+    date: '2022-02-12T13:08:00Z',
+    phenotype_condition: 'code',
+    phenotype_condition_name: 'Condition Name',
+    text: 'no tooltips',
+    tooltips: undefined,
+    number_value: 101,
+  },
   {
-    link: 'AnchorLinkCell 1',
+    link: "AnchorLinkCell 2",
     assay_status_code: 'draft',
     badge: 'loremp',
     badge_list: ['loremp', 'ipsum'],
@@ -250,8 +262,8 @@ export const firstSetCellData = [
     number_value: 100,
   },
   {
-    link: 'AnchorLinkCell 2',
-    assay_status_code: 'on-hold',
+    link: "AnchorLinkCell 3",
+    assay_status_code: 'submitted',
     badge: 'ipsum',
     badge_list: ['loremp'],
     date: '2021-01-10T13:08:00Z',
@@ -262,8 +274,8 @@ export const firstSetCellData = [
     number_value: 1,
   },
   {
-    link: 'AnchorLinkCell 3',
-    assay_status_code: 'active',
+    link: "AnchorLinkCell 4",
+    assay_status_code: 'in_progress',
     badge: 'amet',
     badge_list: ['sit', 'amet', 'consectetur'],
     date: '2001-05-12T13:08:00Z',
@@ -274,7 +286,7 @@ export const firstSetCellData = [
     number_value: 0.1,
   },
   {
-    link: 'AnchorLinkCell 4',
+    link: "AnchorLinkCell 5",
     assay_status_code: 'revoke',
     badge: 'consectetur',
     badge_list: ['ipsum', 'sit', 'ipsum', 'volutpat'],
@@ -286,7 +298,7 @@ export const firstSetCellData = [
     number_value: 0.5,
   },
   {
-    link: 'AnchorLinkCell 5',
+    link: "AnchorLinkCell 6",
     assay_status_code: 'completed',
     badge: 'loremp ipsum',
     badge_list: ['ipsum', 'sit', 'volutpat'],
@@ -298,7 +310,7 @@ export const firstSetCellData = [
     number_value: 0.95,
   },
   {
-    link: 'AnchorLinkCell 6',
+    link: "AnchorLinkCell 7",
     assay_status_code: 'incomplete',
     badge: 'consectetur',
     badge_list: ['loremp'],
