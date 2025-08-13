@@ -2296,6 +2296,12 @@ export interface Statistics {
      * @memberof Statistics
      */
     'min'?: number;
+    /**
+     * To tell UI if it\'s an integer or a decimal
+     * @type {string}
+     * @memberof Statistics
+     */
+    'type'?: string;
 }
 /**
  * 

@@ -11,6 +11,6 @@ var ThousandGenomesAfField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         ThousandGenomesTable,
 }

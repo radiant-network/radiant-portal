@@ -198,7 +198,7 @@ var StartField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            IntegerType,
 	Table:           VariantTable,
 }
 
@@ -207,7 +207,7 @@ var PfWgsField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         VariantTable,
 }
 var PcWgsField = Field{
@@ -215,7 +215,7 @@ var PcWgsField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         VariantTable,
 }
 var PnWgsField = Field{
@@ -223,7 +223,7 @@ var PnWgsField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         VariantTable,
 }
 var PfWgsAffectedField = Field{
@@ -231,7 +231,7 @@ var PfWgsAffectedField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         VariantTable,
 }
 var PfWgsNotAffectedField = Field{
@@ -239,7 +239,7 @@ var PfWgsNotAffectedField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         VariantTable,
 }
 var VariantClassField = Field{
@@ -343,7 +343,7 @@ var GnomadV3AfField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            DecimalType,
 	Table:           VariantTable,
 }
 var PickedTranscriptIdField = Field{

@@ -165,7 +165,7 @@ var GermlineSNVGenotypeQualityField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineSNVOccurrenceTable,
 }
 var GermlineSNVAdRatioField = Field{
@@ -173,7 +173,7 @@ var GermlineSNVAdRatioField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineSNVOccurrenceTable,
 }
 var GermlineSNVAdAltField = Field{
@@ -181,7 +181,7 @@ var GermlineSNVAdAltField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineSNVOccurrenceTable,
 }
 var GermlineSNVAdTotalField = Field{
@@ -189,7 +189,7 @@ var GermlineSNVAdTotalField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineSNVOccurrenceTable,
 }
 var GermlineSNVInfoQdField = Field{
@@ -197,7 +197,7 @@ var GermlineSNVInfoQdField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         GermlineSNVOccurrenceTable,
 }
 var GermlineSNVExomiserMoiField = Field{
@@ -230,7 +230,7 @@ var GermlineSNVExomiserVariantScoreField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         GermlineSNVOccurrenceTable,
 }
 var GermlineSNVExomiserGeneCombinedScoreField = Field{
@@ -238,7 +238,7 @@ var GermlineSNVExomiserGeneCombinedScoreField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         GermlineSNVOccurrenceTable,
 }
 

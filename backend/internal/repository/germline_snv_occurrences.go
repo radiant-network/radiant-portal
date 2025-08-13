@@ -247,6 +247,7 @@ func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(seqId int, u
 	if err = tx.Find(&statistics).Error; err != nil {
 		return nil, fmt.Errorf("error query statistics: %w", err)
 	}
+	statistics.Type = targetCol.Type
 	return &statistics, nil
 }
 

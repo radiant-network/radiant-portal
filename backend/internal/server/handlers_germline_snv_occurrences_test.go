@@ -52,8 +52,9 @@ func (m *MockRepository) AggregateOccurrences(int, types.AggQuery) ([]types.Aggr
 
 func (m *MockRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*types.Statistics, error) {
 	return &types.Statistics{
-			Min: 0,
-			Max: 100,
+			Min:  0,
+			Max:  100,
+			Type: types.IntegerType,
 		},
 		nil
 }
@@ -185,7 +186,7 @@ func Test_OccurrencesStatisticsHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	expected := `{"min": 0, "max": 100}`
+	expected := `{"min": 0, "max": 100, "type": "integer"}`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }

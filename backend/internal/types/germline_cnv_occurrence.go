@@ -43,7 +43,7 @@ var GermlineCNVSeqIdField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -66,7 +66,7 @@ var GermlineCNVStartField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -75,7 +75,7 @@ var GermlineCNVEndField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -91,7 +91,7 @@ var GermlineCNVLengthField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -107,7 +107,7 @@ var GermlineCNVQualityField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -131,7 +131,7 @@ var GermlineCNVBCField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -140,7 +140,7 @@ var GermlineCNVCNField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -157,7 +157,7 @@ var GermlineCNVSMField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          DecimalType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -173,7 +173,7 @@ var GermlineCNVSVLenField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -181,7 +181,7 @@ var GermlineCNVRefLenField = Field{
 	Name:          "reflen",
 	CanBeSelected: true,
 	CanBeFiltered: true,
-	Type:          NumericType,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 

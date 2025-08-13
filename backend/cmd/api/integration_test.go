@@ -160,7 +160,7 @@ func Test_SNVOccurrence_Statistics(t *testing.T) {
 				]
 			}
 		}`
-	expected := `{"min": 0.01, "max": 0.29}`
+	expected := `{"min": 0.01, "max": 0.29, "type": "decimal"}`
 	testStatistics(t, "pagination", body, expected)
 }
 
