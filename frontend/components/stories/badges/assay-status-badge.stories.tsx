@@ -46,7 +46,7 @@ export const Default: Story = {
   args: {},
   render: args => (
     <div className="flex gap-2">
-      {['draft', 'on-hold', 'revoke', 'active', 'completed', 'incomplete'].map(status => (
+      {['draft', 'submitted', 'revoke', 'in_progress', 'completed', 'incomplete', 'unknown'].map(status => (
         <AssayStatusBadge status={status as AssayStatus} />
       ))}
     </div>

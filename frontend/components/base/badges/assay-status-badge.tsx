@@ -1,30 +1,31 @@
 import { Badge, BadgeProps } from '@/components/base/ui/badge';
 import { useI18n } from '@/components/hooks/i18n';
-import { Check, CircleDashed, CircleX, Hourglass, Pen, RefreshCcwIcon } from 'lucide-react';
+import { Check, CircleDashed, CircleX, FileQuestion, Hourglass, Pen, RefreshCcwIcon } from 'lucide-react';
 
-export type AssayStatus = 'draft' | 'on-hold' | 'revoke' | 'active' | 'completed' | 'incomplete';
+export type AssayStatus = 'unknown' | 'draft' | 'in_progress' | 'revoke' | 'submitted' | 'completed' | 'incomplete';
 
 type AssayStatusBadgeProps = {
   status: AssayStatus;
 };
 
 const colors: Record<string, BadgeProps['variant']> = {
+  unknown: 'outline',
   draft: 'neutral',
-  'on-hold': 'yellow',
-  active: 'blue',
+  submitted: 'yellow',
+  in_progress: 'blue',
   revoke: 'red',
   completed: 'green',
   incomplete: 'orange',
 };
 
 const icons = {
+  unknown: FileQuestion,
   draft: Pen,
-  'on-hold': Hourglass,
-  active: RefreshCcwIcon,
+  submitted: Hourglass,
+  in_progress: RefreshCcwIcon,
   revoke: CircleX,
   completed: Check,
   incomplete: CircleDashed,
-  cancelled: CircleX,
 };
 
 function AssayStatusBadge({ status }: AssayStatusBadgeProps) {

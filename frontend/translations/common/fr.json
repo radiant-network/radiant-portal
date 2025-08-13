@@ -455,12 +455,13 @@
       "germline_family": "Lignée Germinale Familiale"
     },
     "status": {
-      "active": "En cours",
+      "in_progress": "En cours",
       "completed": "Completé",
       "draft": "Brouillon",
       "incomplete": "Incomplet",
-      "on-hold": "Soumis",
-      "revoke": "Refusé"
+      "submitted": "Soumis",
+      "revoke": "Refusé",
+      "unknown": "Inconnu"
     },
     "case": {
       "title": "Cas",
@@ -928,14 +929,13 @@
       "patient": "Patient",
       "noTaskFound": "Aucune tâche trouvée",
       "statusOptions": {
-        "unknown": "Inconnu",
+        "in_progress": "En cours",
+        "completed": "Completé",
         "draft": "Brouillon",
-        "active": "Actif",
-        "revoke": "Révoquer",
-        "completed": "Complété",
-        "on-hold": "En attente",
         "incomplete": "Incomplet",
-        "submitted": "Soumis"
+        "submitted": "Soumis",
+        "revoke": "Refusé",
+        "unknown": "Inconnu"
       }
     },
     "variants": {
