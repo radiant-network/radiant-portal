@@ -1134,8 +1134,8 @@
           "label": "Conditions",
           "searchInputPlaceholder": "Filtrer les conditions MONDO"
         },
-        "expend": {
-          "patientId": "ID du patient",
+        "expand": {
+          "patientId": "ID du probant du cas",
           "copy": "Copier",
           "copySuccess": "Copié dans le presse-papiers"
         }
@@ -1146,12 +1146,16 @@
           "case": "Cas",
           "date": "Date",
           "date.tooltip": "Date de réception",
-          "phenotypesHpo": "Phénotypes (HPO)",
+          "phenotypesHpo": "Phénotype (HPO)",
           "zygosity": "Zygosité",
           "inheritance": "Hérédité",
           "institution": "laboratoires de diagnostic",
           "test": "Analyse",
-          "status": "Statut"
+          "status": "Statut",
+          "patient_id": "Patient",
+          "seq_id": "Essai",
+          "affected_status": "Statut Aff.",
+          "sample": "Échantillon"
         },
         "filters": {
           "label": "Phénotypes",

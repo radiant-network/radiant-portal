@@ -94,7 +94,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
                 {expandedData?.patient_id ? (
                   <Tooltip>
                     <TooltipTrigger>{expandedData?.patient_id}</TooltipTrigger>
-                    <TooltipContent>{t('variantEntity.cases.interpreted-table.expend.patientId')}</TooltipContent>
+                    <TooltipContent>{t('variantEntity.cases.interpreted-table.expand.patientId')}</TooltipContent>
                   </Tooltip>
                 ) : (
                   '-'

@@ -1114,7 +1114,7 @@
           "allInstitutions": "All Diagnostic Labs"
         },
         "tests": {
-          "allTests": "All analyses"
+          "allTests": "All Analyses"
         },
         "createdAt": {
           "mostRecent": "Most recent",
@@ -1141,10 +1141,10 @@
         },
         "filters": {
           "label": "Condition",
-          "searchInputPlaceholder": "Filter MONDO condition"
+          "searchInputPlaceholder": "Filter MONDO conditions"
         },
-        "expend": {
-          "patientId": "Patient ID",
+        "expand": {
+          "patientId": "Case's proband ID",
           "copy": "Copy",
           "copySuccess": "Copied to clipboard"
         }
@@ -1156,7 +1156,7 @@
           "date": "Date",
           "date.tooltip": "Date received",
           "mondo": "Condition (Mondo)",
-          "phenotypesHpo": "Phenotypes (HPO)",
+          "phenotypesHpo": "Phenotype (HPO)",
           "zygosity": "Zygosity",
           "inheritance": "Inheritance",
           "institution": "Diagnostic Lab",
@@ -1164,8 +1164,9 @@
           "status": "Status",
           "zygosity_tooltips": "Zygosity",
           "seq_id": "Assay",
+          "patient_id": "Patient",
           "affected_status": "Aff. Status",
-          "submitter_sample_id": "Sample"
+          "sample": "Sample"
         },
 
         "filters": {
