@@ -927,7 +927,7 @@
       "type": "Type",
       "tissue_site": "Site tissulaire",
       "submitter_id": "ID soumissionnaire",
-      "requestId": "ID de demande",
+      "request_id": "ID de demande",
       "priority": "Priorité",
       "status": "Statut",
       "assigned_to": "Assigné à",

@@ -102,7 +102,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
                 {caseData.performer_lab_code}
               </InformationField>
 
-              <InformationField label={t('case_entity.details.requestId')}>{caseData.request_id}</InformationField>
+              <InformationField label={t('case_entity.details.request_id')}>{caseData.request_id}</InformationField>
             </div>
           </div>
 

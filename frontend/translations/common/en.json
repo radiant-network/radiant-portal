@@ -927,7 +927,7 @@
       "type": "Type",
       "tissue_site": "Tissue Site",
       "submitter_id": "Submitter ID",
-      "requestId": "Request ID",
+      "request_id": "Request ID",
       "priority": "Priority",
       "status": "Status",
       "assigned_to": "Assigned to",
