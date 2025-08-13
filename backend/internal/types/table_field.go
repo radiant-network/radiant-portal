@@ -12,7 +12,8 @@ type Table struct {
 
 const (
 	ArrayType   = "array"
-	NumericType = "numeric"
+	IntegerType = "integer"
+	DecimalType = "decimal"
 )
 
 type Field struct {
@@ -46,7 +47,7 @@ func (f *Field) IsArray() bool {
 	return f.Type == ArrayType
 }
 func (f *Field) IsNumeric() bool {
-	return f.Type == NumericType
+	return f.Type == IntegerType || f.Type == DecimalType
 }
 
 // findSortableByAlias returns the sortable field with the given name from the list of fields

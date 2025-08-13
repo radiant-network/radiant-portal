@@ -1042,6 +1042,9 @@ components:
         min:
           description: Min for numeric facet
           type: number
+        type:
+          description: To tell UI if it's an integer or a decimal
+          type: string
       type: object
     StatisticsBodyWithSqon:
       properties:

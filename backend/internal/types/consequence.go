@@ -122,7 +122,7 @@ var CaddScoreField = Field{
 	Name:            "cadd_score",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            DecimalType,
 	Table:           ConsequenceFilterTable,
 }
 
@@ -130,7 +130,7 @@ var CaddPhredField = Field{
 	Name:            "cadd_phred",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            DecimalType,
 	Table:           ConsequenceFilterTable,
 }
 
@@ -138,7 +138,7 @@ var DannScoreField = Field{
 	Name:            "dann_score",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            DecimalType,
 	Table:           ConsequenceFilterTable,
 }
 
@@ -166,7 +166,7 @@ var SpliceaiDsField = Field{
 	Name:            "spliceai_ds",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            DecimalType,
 	Table:           ConsequenceFilterTable,
 }
 
@@ -174,7 +174,7 @@ var RevelScoreField = Field{
 	Name:            "revel_score",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            DecimalType,
 	Table:           ConsequenceFilterTable,
 }
 
@@ -189,7 +189,7 @@ var GnomadPliField = Field{
 	Name:            "gnomad_pli",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            DecimalType,
 	Table:           ConsequenceFilterTable,
 }
 
@@ -197,7 +197,7 @@ var GnomadLoeufField = Field{
 	Name:            "gnomad_loeuf",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            NumericType,
+	Type:            DecimalType,
 	Table:           ConsequenceFilterTable,
 }
 

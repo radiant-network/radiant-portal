@@ -626,7 +626,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(
 	})
 }
 
-func Test_GetStatisticsOccurrences(t *testing.T) {
+func Test_GetStatisticsOccurrences_Decimal(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewStatisticsQueryFromSqon("pf_wgs", nil, types.GermlineSNVOccurrencesFields)
@@ -635,6 +635,20 @@ func Test_GetStatisticsOccurrences(t *testing.T) {
 		assert.NoError(t, err)
 		assert.EqualValues(t, 0.01, statistics.Min)
 		assert.EqualValues(t, 0.29, statistics.Max)
+		assert.EqualValues(t, types.DecimalType, statistics.Type)
+	})
+}
+
+func Test_GetStatisticsOccurrences_Integer(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineSNVOccurrencesRepository(db)
+		query, err := types.NewStatisticsQueryFromSqon("pc_wgs", nil, types.GermlineSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(1, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, statistics.Min)
+		assert.EqualValues(t, 4, statistics.Max)
+		assert.EqualValues(t, types.IntegerType, statistics.Type)
 	})
 }
 
