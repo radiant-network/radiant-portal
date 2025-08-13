@@ -1,9 +1,11 @@
-import { useI18n } from '@/components/hooks/i18n';
-import DetailSection, { DetailItem } from './detail-section';
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
-import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
+import ClassificationBadge from '@/components/base/badges/classification-badge';
 import { Badge } from '@/components/base/ui/badge';
+import { useI18n } from '@/components/hooks/i18n';
+
 import { getClassificationCriteriaColor } from '../interpretation/data';
+
+import DetailSection, { DetailItem } from './detail-section';
 
 type PredictionSectionProps = {
   data: ExpandedGermlineSNVOccurrence;
@@ -12,22 +14,24 @@ type PredictionSectionProps = {
 export default function PredictionSection({ data }: PredictionSectionProps) {
   const { t } = useI18n();
 
-  const exomiser = data.exomiser_acmg_classification || data.exomiser_acmg_evidence ? (
-    <div className="flex items-center gap-1">
-      {data.exomiser_acmg_classification && (
-        <ClinVarBadge abbreviated value={data.exomiser_acmg_classification.replace(' ', '_')}>
-          {data.exomiser_acmg_classification}
-        </ClinVarBadge>
-      )}
-      {data.exomiser_acmg_evidence && data.exomiser_acmg_evidence.map(e => (
-        <Badge key={e} variant={getClassificationCriteriaColor(e)}>
-          {e}
-        </Badge>
-      ))}
-    </div>
-  ) : (
-    '-'
-  );
+  const exomiser =
+    data.exomiser_acmg_classification || data.exomiser_acmg_evidence ? (
+      <div className="flex items-center gap-1">
+        {data.exomiser_acmg_classification && (
+          <ClassificationBadge abbreviated value={data.exomiser_acmg_classification.replace(' ', '_')}>
+            {data.exomiser_acmg_classification}
+          </ClassificationBadge>
+        )}
+        {data.exomiser_acmg_evidence &&
+          data.exomiser_acmg_evidence.map(e => (
+            <Badge key={e} variant={getClassificationCriteriaColor(e)}>
+              {e}
+            </Badge>
+          ))}
+      </div>
+    ) : (
+      '-'
+    );
 
   return (
     <DetailSection title={t('occurrenceExpand.predictions.title')}>

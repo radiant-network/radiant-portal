@@ -1,7 +1,8 @@
-import { useI18n } from '@/components/hooks/i18n';
-import DetailSection, { DetailItem } from './detail-section';
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
-import ClinVarBadge from '@/components/feature/variant/clinvar-badge';
+import ClassificationBadge from '@/components/base/badges/classification-badge';
+import { useI18n } from '@/components/hooks/i18n';
+
+import DetailSection, { DetailItem } from './detail-section';
 
 type ClassificationSectionProps = {
   data: ExpandedGermlineSNVOccurrence;
@@ -11,9 +12,9 @@ export default function ClassificationSection({ data }: ClassificationSectionPro
   const { t } = useI18n();
 
   const clinvar = data.clinvar?.map(clinvar => (
-    <ClinVarBadge abbreviated value={clinvar}>
+    <ClassificationBadge key={clinvar} abbreviated value={clinvar}>
       {clinvar}
-    </ClinVarBadge>
+    </ClassificationBadge>
   ));
 
   return (

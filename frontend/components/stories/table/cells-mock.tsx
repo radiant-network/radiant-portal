@@ -1,11 +1,21 @@
+import { createColumnHelper } from '@tanstack/react-table';
 
 import { Term, VepImpact } from '@/api/api';
+import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence-table/cells/interpretation-cell';
+import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
+import { AssayStatus } from '@/components/base/badges/assay-status-badge';
+import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
+import AnalysisTypeCodeCell, {
+  AnalysisTypeCodeCellTooltips,
+} from '@/components/base/data-table/cells/analysis-type-code-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
-import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
+import ConditionCell from '@/components/base/data-table/cells/condition-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
+import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
@@ -15,95 +25,85 @@ import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
+import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
+import RatingCell from '@/components/base/data-table/cells/rating-cell';
+import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createColumnSettings } from '@/components/base/data-table/data-table';
-import { createColumnHelper } from '@tanstack/react-table';
-import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence-table/cells/interpretation-cell';
-import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
-import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
-import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
-import RatingCell from '@/components/base/data-table/cells/rating-cell';
-import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
-import ConditionCell from '@/components/base/data-table/cells/condition-cell';
-import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 
 const observed_phenotypes = [
   {
-    "id": "HP:0001680",
-    "name": "Coarctation of aorta"
+    id: 'HP:0001680',
+    name: 'Coarctation of aorta',
   },
   {
-    "id": "HP:0000028",
-    "name": "Cryptorchidism"
+    id: 'HP:0000028',
+    name: 'Cryptorchidism',
   },
   {
-    "id": "HP:0001998",
-    "name": "Neonatal hypoglycemia"
+    id: 'HP:0001998',
+    name: 'Neonatal hypoglycemia',
   },
   {
-    "id": "HP:0002197",
-    "name": "Generalized-onset seizure"
+    id: 'HP:0002197',
+    name: 'Generalized-onset seizure',
   },
   {
-    "id": "HP:0010519",
-    "name": "Increased fetal movement"
+    id: 'HP:0010519',
+    name: 'Increased fetal movement',
   },
   {
-    "id": "HP:0001631",
-    "name": "Atrial septal defect"
+    id: 'HP:0001631',
+    name: 'Atrial septal defect',
   },
   {
-    "id": "HP:0002575",
-    "name": "Tracheoesophageal fistula"
+    id: 'HP:0002575',
+    name: 'Tracheoesophageal fistula',
   },
   {
-    "id": "HP:0001787",
-    "name": "Abnormal delivery"
+    id: 'HP:0001787',
+    name: 'Abnormal delivery',
   },
   {
-    "id": "HP:0000062",
-    "name": "Ambiguous genitalia"
+    id: 'HP:0000062',
+    name: 'Ambiguous genitalia',
   },
   {
-    "id": "HP:0001518",
-    "name": "Small for gestational age"
+    id: 'HP:0001518',
+    name: 'Small for gestational age',
   },
   {
-    "id": "HP:0001562",
-    "name": "Oligohydramnios"
+    id: 'HP:0001562',
+    name: 'Oligohydramnios',
   },
   {
-    "id": "HP:0030244",
-    "name": "Maternal fever in pregnancy"
+    id: 'HP:0030244',
+    name: 'Maternal fever in pregnancy',
   },
   {
-    "id": "HP:0001558",
-    "name": "Decreased fetal movement"
+    id: 'HP:0001558',
+    name: 'Decreased fetal movement',
   },
   {
-    "id": "HP:0000953",
-    "name": "Hyperpigmentation of the skin"
+    id: 'HP:0000953',
+    name: 'Hyperpigmentation of the skin',
   },
   {
-    "id": "HP:0003517",
-    "name": "Birth length greater than 97th percentile"
+    id: 'HP:0003517',
+    name: 'Birth length greater than 97th percentile',
   },
-]
-
+];
 
 // Settings
 export const defaultColumnSettings = createColumnSettings([]);
 
-
 /**
- * Base cell 
+ * Base cell
  */
 export type BaseCellMockData = {
   link?: string;
@@ -142,8 +142,8 @@ export type BaseCellMockData = {
   observed_phenotypes?: {
     id: string;
     name: string;
-  }[]
-}
+  }[];
+};
 
 const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
 
@@ -163,7 +163,7 @@ const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
  */
 export const firstSetCellColumns = [
   {
-    id: "pinRow",
+    id: 'pinRow',
     cell: PinRowCell,
     header: 'PinRowCell',
     size: 52,
@@ -171,7 +171,7 @@ export const firstSetCellColumns = [
     enablePinning: false,
   },
   {
-    id: "expand",
+    id: 'expand',
     cell: RowExpandCell,
     header: 'RowExpandCell',
     size: 52,
@@ -179,7 +179,7 @@ export const firstSetCellColumns = [
     enablePinning: false,
   },
   {
-    id: "selection",
+    id: 'selection',
     cell: RowSelectionCell,
     header: 'RowSelectionCell',
     size: 52,
@@ -198,7 +198,11 @@ export const firstSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row.badge, {
     id: 'badge',
-    cell: info => <BadgeCell variant="secondary" tooltip='A tooltips for badge cell'>{info.getValue()}</BadgeCell>,
+    cell: info => (
+      <BadgeCell variant="secondary" tooltip="A tooltips for badge cell">
+        {info.getValue()}
+      </BadgeCell>
+    ),
     header: 'BadgeCell',
   }),
   baseCellColumnHelper.accessor(row => row.badge_list, {
@@ -208,7 +212,9 @@ export const firstSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row.phenotype_condition, {
     id: 'phenotype_condition',
-    cell: info => <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.phenotype_condition_name} />,
+    cell: info => (
+      <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.phenotype_condition_name} />
+    ),
     header: 'PhenotypeConditionLinkCell',
     size: 200,
   }),
@@ -232,7 +238,7 @@ export const firstSetCellColumns = [
 
 export const firstSetCellData = [
   {
-    link: "AnchorLinkCell 1",
+    link: 'AnchorLinkCell 1',
     assay_status_code: 'draft',
     badge: 'loremp',
     badge_list: ['loremp', 'ipsum'],
@@ -244,7 +250,7 @@ export const firstSetCellData = [
     number_value: 100,
   },
   {
-    link: "AnchorLinkCell 2",
+    link: 'AnchorLinkCell 2',
     assay_status_code: 'on-hold',
     badge: 'ipsum',
     badge_list: ['loremp'],
@@ -256,7 +262,7 @@ export const firstSetCellData = [
     number_value: 1,
   },
   {
-    link: "AnchorLinkCell 3",
+    link: 'AnchorLinkCell 3',
     assay_status_code: 'active',
     badge: 'amet',
     badge_list: ['sit', 'amet', 'consectetur'],
@@ -268,7 +274,7 @@ export const firstSetCellData = [
     number_value: 0.1,
   },
   {
-    link: "AnchorLinkCell 4",
+    link: 'AnchorLinkCell 4',
     assay_status_code: 'revoke',
     badge: 'consectetur',
     badge_list: ['ipsum', 'sit', 'ipsum', 'volutpat'],
@@ -280,7 +286,7 @@ export const firstSetCellData = [
     number_value: 0.5,
   },
   {
-    link: "AnchorLinkCell 5",
+    link: 'AnchorLinkCell 5',
     assay_status_code: 'completed',
     badge: 'loremp ipsum',
     badge_list: ['ipsum', 'sit', 'volutpat'],
@@ -292,7 +298,7 @@ export const firstSetCellData = [
     number_value: 0.95,
   },
   {
-    link: "AnchorLinkCell 6",
+    link: 'AnchorLinkCell 6',
     assay_status_code: 'incomplete',
     badge: 'consectetur',
     badge_list: ['loremp'],
@@ -319,7 +325,7 @@ export const firstSetCellData = [
 
 /*
  * Second set of cell components
- *   - ClinvarCell
+ *   - ClassificationBadge
  *   - AnchorLinkCell (rsnumber example)
  *   - GeneCell
  *   - GnomadCell
@@ -332,8 +338,8 @@ export const firstSetCellData = [
 export const secondSetCellColumns = [
   baseCellColumnHelper.accessor(row => row.clinvar, {
     id: 'clinvar',
-    cell: info => <ClinvarCell codes={info.getValue()} />,
-    header: 'ClinvarCell',
+    cell: info => <ClassificationCell codes={info.getValue()} />,
+    header: 'ClassificationCell',
   }),
   baseCellColumnHelper.accessor(row => row.rsnumber, {
     id: 'rsnumber',
@@ -389,12 +395,7 @@ export const secondSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row.pf_wgs, {
     id: 'pf_wgs',
-    cell: info => (
-      <ParticipantFrequencyCell
-        locusId={info.row.original.locus_id}
-        value={info.getValue()}
-      />
-    ),
+    cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
     header: 'ParticipantFrequencyCell',
     minSize: 120,
   }),
@@ -415,9 +416,9 @@ export const secondSetCellData = [
     gnomad_v3_af: 100,
     is_mane_plus: true,
     aa_change: 'p.Val234GlyfsTer4',
-    picked_consequences: ["frameshift_variant"],
-    vep_impact: "HIGH",
-    omim_inheritance_code: ["AD", "AR", "DD", "DR"],
+    picked_consequences: ['frameshift_variant'],
+    vep_impact: 'HIGH',
+    omim_inheritance_code: ['AD', 'AR', 'DD', 'DR'],
     pf_wgs: 0.5,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
@@ -429,9 +430,9 @@ export const secondSetCellData = [
     gnomad_v3_af: 1,
     is_canonical: true,
     aa_change: 'p.Val234GlyfsTer4',
-    picked_consequences: ["frameshift_variant"],
-    vep_impact: "MODERATE",
-    omim_inheritance_code: ["IC", "Mi", "Mu", "NA"],
+    picked_consequences: ['frameshift_variant'],
+    vep_impact: 'MODERATE',
+    omim_inheritance_code: ['IC', 'Mi', 'Mu', 'NA'],
     pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HET',
@@ -443,15 +444,20 @@ export const secondSetCellData = [
     gnomad_v3_af: 0.2,
     is_mane_select: true,
     aa_change: 'p.Val234GlyfsTer4',
-    picked_consequences: ["frameshift_variant"],
-    vep_impact: "LOW",
-    omim_inheritance_code: ["NRT", "SMo", "Smu", "XL"],
+    picked_consequences: ['frameshift_variant'],
+    vep_impact: 'LOW',
+    omim_inheritance_code: ['NRT', 'SMo', 'Smu', 'XL'],
     pf_wgs: 100,
     locus_id: '-7485572602358923261',
     zygosity: 'HET',
   },
   {
-    clinvar: ['pathogenic', 'protective', 'conflicting_classifications_of_pathogenicity', 'conflicting_interpretations_of_pathogenicity'],
+    clinvar: [
+      'pathogenic',
+      'protective',
+      'conflicting_classifications_of_pathogenicity',
+      'conflicting_interpretations_of_pathogenicity',
+    ],
     rsnumber: '123123129',
     symbol: 'USF1',
     gnomad_v3_af: 0.1,
@@ -459,24 +465,29 @@ export const secondSetCellData = [
     is_canonical: true,
     is_mane_select: true,
     aa_change: undefined,
-    picked_consequences: ["intron_variant"],
-    vep_impact: "MODIFIER",
-    omim_inheritance_code: ["XLD", "XLR", "YL"],
+    picked_consequences: ['intron_variant'],
+    vep_impact: 'MODIFIER',
+    omim_inheritance_code: ['XLD', 'XLR', 'YL'],
     pf_wgs: 0.0001,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
   },
   {
-    clinvar: ['conflicting_interpretations_of_pathogenicity', 'not_provided', 'established_risk_allele', 'likely_risk_allele'],
+    clinvar: [
+      'conflicting_interpretations_of_pathogenicity',
+      'not_provided',
+      'established_risk_allele',
+      'likely_risk_allele',
+    ],
     rsnumber: '2',
     symbol: 'NEGR1',
     gnomad_v3_af: 0.01,
     is_mane_plus: true,
     is_mane_select: true,
     aa_change: 'p.Val234GlyfsTer4',
-    picked_consequences: ["frameshift_variant"],
-    vep_impact: "MODIFIER",
-    omim_inheritance_code: ["NRT", "SMo"],
+    picked_consequences: ['frameshift_variant'],
+    vep_impact: 'MODIFIER',
+    omim_inheritance_code: ['NRT', 'SMo'],
     pf_wgs: 0.01,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
@@ -489,9 +500,9 @@ export const secondSetCellData = [
     is_mane_plus: true,
     is_canonical: true,
     aa_change: 'p.Leu119ProfsTer19',
-    picked_consequences: ["uncertain_significance"],
-    vep_impact: "HIGH",
-    omim_inheritance_code: ["null"],
+    picked_consequences: ['uncertain_significance'],
+    vep_impact: 'HIGH',
+    omim_inheritance_code: ['null'],
     pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
@@ -514,7 +525,6 @@ export const secondSetCellData = [
   },
 ];
 
-
 /**
  * Third set of cell components
  *   - PriorityIndicatorCell
@@ -533,11 +543,7 @@ export const thirdSetCellColumns = [
   baseCellColumnHelper.accessor(row => row.case_type, {
     id: 'case_type',
     cell: info => <AnalysisTypeCodeCell code={info.getValue()} />,
-    header: () => (
-      <TooltipsHeader tooltips={<AnalysisTypeCodeCellTooltips />}>
-        AnalysisTypeCodeCell
-      </TooltipsHeader>
-    ),
+    header: () => <TooltipsHeader tooltips={<AnalysisTypeCodeCellTooltips />}>AnalysisTypeCodeCell</TooltipsHeader>,
     size: 120,
     minSize: 120,
     enableSorting: false,
@@ -553,7 +559,7 @@ export const thirdSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row.review_status_stars, {
     id: 'review_status_stars',
-    cell: (info) => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
+    cell: info => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
     header: 'RatingCell',
     minSize: 60,
     maxSize: 150,
@@ -561,7 +567,7 @@ export const thirdSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row.affected_status, {
     id: 'affected_status',
-    cell: (info) => <AffectedStatusCell status={info.getValue()} />,
+    cell: info => <AffectedStatusCell status={info.getValue()} />,
     header: 'AffectedStatusCell',
     minSize: 60,
     maxSize: 150,
@@ -578,7 +584,7 @@ export const thirdSetCellColumns = [
   baseCellColumnHelper.accessor(row => row.observed_phenotypes, {
     id: 'observed_phenotypes',
     cell: info => {
-      const items = (info.getValue() as Term[] ?? []).sort((a, b) => {
+      const items = ((info.getValue() as Term[]) ?? []).sort((a, b) => {
         const nameA = a.name || '';
         const nameB = b.name || '';
         return nameA.localeCompare(nameB);
@@ -586,9 +592,9 @@ export const thirdSetCellColumns = [
 
       return (
         <DialogListCell
-          header={"test"}
+          header={'test'}
           items={items}
-          renderItem={(item) => (
+          renderItem={item => (
             <AnchorLink
               href={`https://purl.obolibrary.org/obo/${item.id?.replace(':', '_')}`}
               size="xs"
@@ -609,17 +615,16 @@ export const thirdSetCellColumns = [
   }),
 ];
 
-
 export const thirdSetCellData = [
   {
     sample_id: 1,
     priority_code: 'asap',
     case_type: 'somatic',
     review_status_stars: 1,
-    review_status: "review status 1 stars",
+    review_status: 'review status 1 stars',
     affected_status: 'affected',
-    condition_id: "HP:12345",
-    condition_name: "Abnormal Delivery",
+    condition_id: 'HP:12345',
+    condition_name: 'Abnormal Delivery',
     observed_phenotypes,
   },
   {
@@ -628,10 +633,10 @@ export const thirdSetCellData = [
     sample_id: 2,
     relationship_to_proband: 'mother',
     review_status_stars: 2,
-    review_status: "review status 2 stars",
+    review_status: 'review status 2 stars',
     affected_status: 'affected',
-    condition_id: "HP:32345",
-    condition_name: "Abnormal Delivery",
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 5),
   },
   {
@@ -640,10 +645,10 @@ export const thirdSetCellData = [
     sample_id: 3,
     relationship_to_proband: 'father',
     review_status_stars: 3,
-    review_status: "review status 3 stars",
+    review_status: 'review status 3 stars',
     affected_status: 'non_affected',
-    condition_id: "HP:32345",
-    condition_name: "Abnormal Delivery",
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 2),
   },
   {
@@ -652,10 +657,10 @@ export const thirdSetCellData = [
     sample_id: 4,
     relationship_to_proband: 'sibling',
     review_status_stars: 4,
-    review_status: "review status 4 stars",
+    review_status: 'review status 4 stars',
     affected_status: 'unknown',
-    condition_id: "HP:32345",
-    condition_name: "Abnormal Delivery",
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 1),
   },
   {
@@ -668,9 +673,8 @@ export const thirdSetCellData = [
     condition_id: undefined,
     condition_name: undefined,
     observed_phenotypes: undefined,
-  }
+  },
 ];
-
 
 /**
  * First set of application cell components
@@ -690,11 +694,10 @@ export const applicationFirstSetCellColumns = [
   {
     id: 'actions_menu',
     cell: CaseActionsMenuCell,
-    header: "CaseActionsMenuCell (Case-Exploration)",
+    header: 'CaseActionsMenuCell (Case-Exploration)',
     size: 64,
     maxSize: 64,
     enableResizing: false,
     enablePinning: false,
   },
 ];
-
