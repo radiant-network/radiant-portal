@@ -1,3 +1,8 @@
+import { useCallback } from 'react';
+import { Copy, Mars, Stethoscope, User, Venus } from 'lucide-react';
+import { toast } from 'sonner';
+import useSWR from 'swr';
+
 import { VariantExpandedInterpretedCase, VariantInterpretedCase } from '@/api/api';
 import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
@@ -7,11 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { variantsApi } from '@/utils/api';
-import { sanitizeHtml, decodeHtmlEntities } from '@/utils/helper';
-import { Copy, Mars, Stethoscope, User, Venus } from 'lucide-react';
-import { useCallback } from 'react';
-import { toast } from 'sonner';
-import useSWR from 'swr';
+import { decodeHtmlEntities, sanitizeHtml } from '@/utils/helper';
 
 interface InterpretedCasesExpendProps {
   locusId: string;
@@ -61,7 +62,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
       const textContent = tempDiv.textContent || tempDiv.innerText || '';
 
       navigator.clipboard.writeText(textContent);
-      toast.success(t('variantEntity.cases.interpreted-table.expend.copySuccess'));
+      toast.success(t('variant_entity.cases.interpreted_table.expend.copySuccess'));
     }
   }, [expandedData?.interpretation, t]);
 
@@ -94,7 +95,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
                 {expandedData?.patient_id ? (
                   <Tooltip>
                     <TooltipTrigger>{expandedData?.patient_id}</TooltipTrigger>
-                    <TooltipContent>{t('variantEntity.cases.interpreted-table.expand.patientId')}</TooltipContent>
+                    <TooltipContent>{t('variant_entity.cases.interpreted_table.expand.patient_id')}</TooltipContent>
                   </Tooltip>
                 ) : (
                   '-'
@@ -118,7 +119,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
         {expandedData?.interpretation && (
           <div className="flex-shrink-0">
             <Button variant="outline" size="xs" onClick={handleCopy}>
-              <Copy /> {t('variantEntity.cases.interpreted-table.expend.copy')}
+              <Copy /> {t('variant_entity.cases.interpreted_table.expend.copy')}
             </Button>
           </div>
         )}

@@ -1,15 +1,17 @@
-import { useFieldArray, useFormContext } from 'react-hook-form';
-import { GenericInterpretationSchemaType } from './types';
 import { useState } from 'react';
-import { interpretationApi } from '@/utils/api';
+import { useFieldArray, useFormContext } from 'react-hook-form';
+import { PlusIcon, XIcon } from 'lucide-react';
+import useSWR from 'swr';
+
+import InputSearch from '@/components/base/data-entry/input-search';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+import { Button } from '@/components/base/ui/button';
 import { FormLabel, FormMessage } from '@/components/base/ui/form';
 import { Input } from '@/components/base/ui/input';
-import { PlusIcon, XIcon } from 'lucide-react';
-import InputSearch from '@/components/base/data-entry/input-search';
-import { Button } from '@/components/base/ui/button';
-import useSWR from 'swr';
 import { useI18n } from '@/components/hooks/i18n';
-import AnchorLink from '@/components/base/navigation/anchor-link';
+import { interpretationApi } from '@/utils/api';
+
+import { GenericInterpretationSchemaType } from './types';
 
 function PubmedFormField() {
   const { t } = useI18n();
@@ -37,7 +39,7 @@ function PubmedFormField() {
       onError: () => {
         if (pubmedFetchKey?.index) {
           setError(`pubmed.${pubmedFetchKey.index}.citation`, {
-            message: t('variant.interpretationForm.generic.pubMedIdNotFound'),
+            message: t('variant.interpretation_form.generic.pub_med_id_not_found'),
           });
         }
       },
@@ -52,14 +54,20 @@ function PubmedFormField() {
       <FormLabel
         infoCardContent={
           <div className="leading-6">
-            {t('variant.interpretationForm.generic.pubMedPublication_popover.enter')}{' '}
-            <AnchorLink className='inline-flex' href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" size="sm" external>
-              {t('variant.interpretationForm.generic.pubMedPublication_popover.pmid')}
+            {t('variant.interpretation_form.generic.pub_med_publication_popover.enter')}{' '}
+            <AnchorLink
+              className="inline-flex"
+              href="https://pubmed.ncbi.nlm.nih.gov/"
+              target="_blank"
+              size="sm"
+              external
+            >
+              {t('variant.interpretation_form.generic.pub_med_publication_popover.pmid')}
             </AnchorLink>
           </div>
         }
       >
-        {t('variant.interpretationForm.generic.pubMedPublication')}
+        {t('variant.interpretation_form.generic.pub_med_publication')}
       </FormLabel>
       <div className="space-y-2">
         {fields.map((field, index) => {
@@ -95,7 +103,7 @@ function PubmedFormField() {
                       disabled: !!error,
                     }}
                     autoFocus
-                    placeholder={t('variant.interpretationForm.generic.citation-placeholder')}
+                    placeholder={t('variant.interpretation_form.generic.citation_placeholder')}
                     onSearch={searchValue =>
                       setPubmedFetchKey({
                         value: searchValue,
@@ -128,7 +136,7 @@ function PubmedFormField() {
             })
           }
         >
-          <PlusIcon /> {t('variant.interpretationForm.generic.addCitation')}
+          <PlusIcon /> {t('variant.interpretation_form.generic.add_citation')}
         </Button>
       </div>
     </div>

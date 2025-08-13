@@ -1,7 +1,8 @@
 import { useState } from 'react';
+
 import { Button } from '@/components/base/ui/button';
-import { Input } from '@/components/base/ui/input';
 import { Checkbox } from '@/components/base/ui/checkbox';
+import { Input } from '@/components/base/ui/input';
 import { useI18n } from '@/components/hooks/i18n';
 
 interface User {
@@ -66,7 +67,7 @@ const CaseAssignation = ({ initialAssignations = [], onAssignationsChange }: Cas
       <div className="relative">
         <Input
           type="text"
-          placeholder={t('case.assignation.searchPlaceholder') || 'Search users...'}
+          placeholder={t('case.assignation.search_placeholder') || 'Search users...'}
           value={searchTerm}
           onChange={handleSearchChange}
           className="w-full"
@@ -84,7 +85,7 @@ const CaseAssignation = ({ initialAssignations = [], onAssignationsChange }: Cas
               .filter(
                 user =>
                   user.reference.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                  !selectedUsers.some(selected => selected.reference === user.reference)
+                  !selectedUsers.some(selected => selected.reference === user.reference),
               )
               .map(user => (
                 <div
@@ -92,7 +93,9 @@ const CaseAssignation = ({ initialAssignations = [], onAssignationsChange }: Cas
                   className="p-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
                   onClick={() => handleUserSelect(user)}
                 >
-                  <div className={`w-8 h-8 rounded-full ${getRandomColor(user.reference)} flex items-center justify-center text-white font-semibold`}>
+                  <div
+                    className={`w-8 h-8 rounded-full ${getRandomColor(user.reference)} flex items-center justify-center text-white font-semibold`}
+                  >
                     {getInitials(user.reference)}
                   </div>
                   <span className="font-semibold">{user.reference}</span>
@@ -107,7 +110,9 @@ const CaseAssignation = ({ initialAssignations = [], onAssignationsChange }: Cas
         {selectedUsers.map(user => (
           <div key={user.reference} className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
             <Checkbox />
-            <div className={`w-8 h-8 rounded-full ${getRandomColor(user.reference)} flex items-center justify-center text-white font-semibold`}>
+            <div
+              className={`w-8 h-8 rounded-full ${getRandomColor(user.reference)} flex items-center justify-center text-white font-semibold`}
+            >
               {getInitials(user.reference)}
             </div>
             <span className="font-semibold">{user.reference}</span>
@@ -120,9 +125,7 @@ const CaseAssignation = ({ initialAssignations = [], onAssignationsChange }: Cas
         <Button variant="outline" onClick={handleReset}>
           {t('case.assignation.reset') || 'Reset'}
         </Button>
-        <Button variant="default">
-          {t('case.assignation.filter') || 'Filter'}
-        </Button>
+        <Button variant="default">{t('case.assignation.filter') || 'Filter'}</Button>
       </div>
     </div>
   );

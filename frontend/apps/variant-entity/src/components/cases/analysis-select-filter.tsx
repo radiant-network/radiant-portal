@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { useI18n } from '@/components/hooks/i18n';
+
 import { useCasesFilters } from './cases-filters-context';
 
 interface AnalysisSelectFilterProps {
@@ -17,7 +18,7 @@ function AnalysisSelectFilter({ value = 'all', onChange }: AnalysisSelectFilterP
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{t('variantEntity.cases.commonFilters.tests.allTests')}</SelectItem>
+        <SelectItem value="all">{t('variant_entity.cases.common_filters.tests.all_tests')}</SelectItem>
         {filters?.case_analysis.map(analysis => (
           <SelectItem key={analysis.key} value={analysis.key!}>
             {analysis.label}

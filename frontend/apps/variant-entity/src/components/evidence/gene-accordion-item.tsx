@@ -42,7 +42,7 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
             bordered
             showIcon={false}
             size="mini"
-            description={t('variantEntity.evidence.gene.table.empty.description')}
+            description={t('variant_entity.evidence.gene.table.empty.description')}
           />
         ) : (
           <DataTable

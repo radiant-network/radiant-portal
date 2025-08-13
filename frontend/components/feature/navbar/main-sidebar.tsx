@@ -1,3 +1,7 @@
+import { ChevronRight, CircleAlert, LogOutIcon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+
+import { Button } from '@/components/base/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/ui/collapsible';
 import {
   Sidebar,
   SidebarContent,
@@ -13,13 +17,11 @@ import {
   SidebarSeparator,
   useSidebar,
 } from '@/components/base/ui/sidebar';
-import { BaseMainNavbarProps } from './main-navbar-types';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/ui/collapsible';
-import { ChevronRight, CircleAlert, LogOutIcon, PanelLeftClose, PanelLeftOpen, UserIcon } from 'lucide-react';
-import { AvatarUserDetails } from './main-navbar-user-avatar';
-import { Button } from '@/components/base/ui/button';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
+
+import { BaseMainNavbarProps } from './main-navbar-types';
+import { AvatarUserDetails } from './main-navbar-user-avatar';
 
 type MainSidebarProps = BaseMainNavbarProps & {
   placement?: 'left' | 'right';
@@ -146,7 +148,7 @@ function MainSidebar({
               <div>
                 <UserIcon />
                 <span>
-                  {t('mainNavbar.userDetails.profile', {
+                  {t('main_navbar.user_details.profile', {
                     defaultValue: 'Profile',
                   })}
                 </span>
@@ -158,7 +160,7 @@ function MainSidebar({
               <div>
                 <LogOutIcon />
                 <span>
-                  {t('mainNavbar.userDetails.signOut', {
+                  {t('main_navbar.user_details.sign_out', {
                     defaultValue: 'Sign out',
                   })}
                 </span>

@@ -58,17 +58,17 @@ If the page need to be added to the main navigation bar, `protected-layout.tsx` 
 ```typescript
 links={[
 	{
-		title: t('mainNavbar.links.dashboard'),
+		title: t('main_navbar.links.dashboard'),
 		icon: <LayoutDashboardIcon />,
 	},
 	{
-		title: t('mainNavbar.links.cases'),
+		title: t('main_navbar.links.cases'),
 		icon: <FolderIcon />,
 		onClick: () => navigate('/case-exploration'),
 		active: pathname === '/case-exploration'
 	},
 	{
-		title: t('mainNavbar.links.cases'),
+		title: t('main_navbar.links.cases'),
 		icon: <FolderIcon />,
 		onClick: () => navigate('/my-new-application'),
 		active: pathname === '/my-new-application'

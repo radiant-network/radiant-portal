@@ -9,7 +9,7 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
   return (
     <PageHeader
       isLoading={isLoading}
-      title={`${t('caseEntity.header.case')} ${data?.case_id}`}
+      title={`${t('case_entity.header.case')} ${data?.case_id}`}
       badges={[
         {
           variant: 'secondary',

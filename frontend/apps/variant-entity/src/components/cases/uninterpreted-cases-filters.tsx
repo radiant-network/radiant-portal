@@ -23,7 +23,7 @@ function OtherCasesFilters({ filters, onFiltersChange }: CasesFilterBarProps) {
 
   return (
     <div className="space-y-2">
-      <div className="text-sm">{t('variantEntity.cases.other-table.filters.label')}</div>
+      <div className="text-sm">{t('variant_entity.cases.other_table.filters.label')}</div>
       <div className="flex items-center gap-2">
         <PhenotypeCasesFilter onChange={value => handleFilterChange('phenotype', value)} />
         <InstitutionSelectFilter

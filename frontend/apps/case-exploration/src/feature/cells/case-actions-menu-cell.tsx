@@ -29,7 +29,7 @@ function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
             }}
           >
             <ExternalLink />
-            {t('caseExploration.case.actions.view_case')}
+            {t('case_exploration.case.actions.view_case')}
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={!row.original.has_variants}
@@ -38,7 +38,7 @@ function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
             }}
           >
             <ExternalLink />
-            {t('caseExploration.case.actions.view_variant')}
+            {t('case_exploration.case.actions.view_variant')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

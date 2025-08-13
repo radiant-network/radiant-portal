@@ -2,8 +2,8 @@
   "common": {
     "date": "yyyy-MM-dd",
     "unspecified": "Unspecified",
-    "noDataAvailable": "No data available",
-    "notAvailableYet": "Not available yet",
+    "no_data_available": "No data available",
+    "not_available_yet": "Not available yet",
     "save": "Save",
     "close": "Close",
     "view_all": "View all",
@@ -83,28 +83,28 @@
       "confers_sensitivity.abbrev": "CS",
       "confers_sensitivity.tooltip": "Confers Sensitivity"
     },
-    "customPillFilter": {
+    "custom_pill_filter": {
       "info": "You can create custom queries by adding criteria to the query bar and clicking the save button.",
-      "deleteDialog": {
+      "delete_dialog": {
         "title": "Delete this query?",
         "description": "You are about to delete this custom query \"{{title}}\". which may affect your results.",
         "cancel": "Cancel",
         "ok": "Delete"
       },
-      "learnMore": "Lean more"
+      "learn_more": "Learn more"
     },
-    "queryBar": {
+    "query_bar": {
       "empty": "Use the search tools & facets on the left to build a query",
-      "deletePopover": {
+      "delete_popover": {
         "title": "Delete this query?",
         "cancel": "Cancel",
         "ok": "Delete"
       },
-      "customPill": {
-        "createTooltip": "Create a custom query",
-        "cannotSaveAsCustomPill": "Custom queries cannot include other custom queries"
+      "custom_pill": {
+        "create_tooltip": "Create a custom query",
+        "cannot_save_as_custom_pill": "Custom queries cannot include other custom queries"
       },
-      "saveDialog": {
+      "save_dialog": {
         "title": "Save this query",
         "fields": {
           "title": {
@@ -117,32 +117,32 @@
         "ok": "Save"
       }
     },
-    "queryPill": {
+    "query_pill": {
       "operator": {
-        "changeOperatorTo": "Change operator to",
+        "change_operator_to": "Change operator to",
         "and": "and",
         "or": "or"
       },
-      "customPill": {
-        "editDialog": {
+      "custom_pill": {
+        "edit_dialog": {
           "title": "Edit custom query",
           "cancel": "Cancel",
           "ok": "Save"
         },
-        "cantBeEmptyDialog": {
+        "cant_be_empty_dialog": {
           "title": "Query cannot be empty",
           "description": "Your custom query must contain at least one criteria.",
           "ok": "Close"
         },
-        "titleExistsDialog": {
+        "title_exists_dialog": {
           "title": "Name already in use",
           "description": "A custom query with this name already exists. Please assign a unique name.",
           "ok": "Close"
         },
-        "saveDialog": {
+        "save_dialog": {
           "title": "Edit this query?",
-          "confirmationMessage": "You are about to edit the custom query \"{title}\", which may affect your results.",
-          "affectedFilters": "Affected saved filters:",
+          "confirmation_message": "You are about to edit the custom query \"{title}\", which may affect your results.",
+          "affected_filters": "Affected saved filters:",
           "cancel": "Cancel",
           "ok": "Save"
         }
@@ -151,8 +151,8 @@
     "toolbar": {
       "combine": "Combine",
       "newQuery": "New query",
-      "clearAll": "Clear all",
-      "clearAllDialog": {
+      "clear_all": "Clear all",
+      "clear_all_dialog": {
         "title": "Delete all queries?",
         "description": "You are about to delete all your queries. They will be lost forever.",
         "cancel": "Cancel",
@@ -160,22 +160,22 @@
       },
       "labels": "Labels"
     },
-    "savedFilter": {
-      "deleteTooltip": "Delete filter",
-      "deleteDialog": {
+    "saved_filter": {
+      "delete_tooltip": "Delete filter",
+      "delete_dialog": {
         "title": "Permanently delete this filter?",
         "description": "You are about to permanently delete this filter and all of its queries.",
         "cancel": "Cancel",
         "ok": "Delete filter"
       },
-      "duplicateTooltip": "Duplicate filter",
-      "overwriteDialog": {
+      "duplicate_tooltip": "Duplicate filter",
+      "overwrite_dialog": {
         "title": "Unsaved changes",
         "description": "You are about to create a new filter; all modifications will be lost.",
         "cancel": "Cancel",
         "ok": "Create"
       },
-      "editDialog": {
+      "edit_dialog": {
         "title": "Edit filter",
         "cancel": "Cancel",
         "ok": "Save",
@@ -186,34 +186,34 @@
           }
         }
       },
-      "myFilters": "My Filters",
-      "manageFilters": "Manage filters",
-      "manageDialog": {
+      "my_filters": "My Filters",
+      "manage_filters": "Manage filters",
+      "manage_dialog": {
         "title": "Manage filters",
         "close": "Close",
-        "lastSaveAt": "Last saved at: {lastSaveAt} ago"
+        "last_save_st": "Last saved at: {lastSaveAt} ago"
       },
-      "newFilter": "New filter",
-      "saveTooltip": {
-        "whenEmpty": "Add a query to save",
-        "whenDirty": "Save changes",
+      "new_filter": "New filter",
+      "save_tooltip": {
+        "when_empty": "Add a query to save",
+        "when_dirty": "Save changes",
         "default": "Save filter"
       },
-      "shareTooltip": {
-        "whenNotSaved": "Save filter to share",
+      "share_tooltip": {
+        "when_not_saved": "Save filter to share",
         "default": "Share (Copy url)"
       },
-      "favoriteTooltip": {
+      "favorite_tooltip": {
         "set": "Set as default filter",
         "unset": "Unset default filter"
       },
-      "discardTooltip": "Discard unsaved changes",
-      "noSavedFilters": "You have no saved filters",
-      "untitledFilter": "Untitled filter"
+      "discard_tooltip": "Discard unsaved changes",
+      "no_saved_filters": "You have no saved filters",
+      "untitled_filter": "Untitled filter"
     },
     "components": {
-      "queryPillRemote": "Composant Query Pill Remote",
-      "emptyCell": "-"
+      "query_pill_remote": "Composant Query Pill Remote",
+      "empty_cell": "-"
     },
     "table": {
       "fullscreen": {
@@ -258,10 +258,10 @@
       "logout": "Logout"
     },
     "actions": {
-      "selectLanguage": "Select language",
-      "collapseAll": "Collapse all",
-      "expandAll": "Expand All",
-      "seeMore": "See more",
+      "select_language": "Select language",
+      "collapse_all": "Collapse all",
+      "expand_all": "Expand All",
+      "see_more": "See more",
       "clear": "Clear",
       "copy": "Copy to clipboard",
       "copied": "Copied!",
@@ -380,29 +380,29 @@
         "requested_by": "Prescribing Institution"
       },
       "operators": {
-        "greaterThan": "Greater than",
-        "lessThan": "Less than",
+        "greater_than": "Greater than",
+        "less_than": "Less than",
         "between": "Between",
-        "greaterThanOrEqual": "Greater than or equal to",
-        "lessThanOrEqual": "Less than or equal to",
+        "greater_than_or_equal": "Greater than or equal to",
+        "less_than_or_equal": "Less than or equal to",
         "in": "In",
-        "selectOperator": "Select operator"
+        "select_operator": "Select operator"
       },
       "buttons": {
         "clear": "Clear",
         "apply": "Apply",
         "all": "All of",
         "none": "None of",
-        "showMore": "{{count}} More",
-        "showLess": "Less",
-        "someNotIn": "Any of",
-        "notIn": "None of"
+        "show_more": "{{count}} More",
+        "show_less": "Less",
+        "some_not_in": "Any of",
+        "not_in": "None of"
       },
       "search": {
         "placeholder": "Search..."
       },
-      "noValuesFound": "No values found",
-      "unsupportedType": "Unsupported type",
+      "no_values_found": "No values found",
+      "unsupported_type": "Unsupported type",
       "gene_divider": "Gene Panels",
       "pathogenicity_exomiser_divider": "Exomiser",
       "pathogenicity_predictions_divider": "Predictions",
@@ -432,9 +432,9 @@
       }
     }
   },
-  "caseExploration": {
-    "filtersGroup": {
-      "searchById": "Search by ID",
+  "case_exploration": {
+    "filters_group": {
+      "search_by_id": "Search by ID",
       "priority_code": "Priority",
       "status_code": "Status",
       "case_analysis_code": "Analysis",
@@ -518,8 +518,26 @@
       "title": "Assays"
     }
   },
+  "interpretation": {
+    "title": "Clinical Interpretation"
+  },
+  "query_filters": {
+    "sidebar_panel": {
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "organization": "RQDM Panel",
+      "filters": {
+        "variant": "Variant",
+        "gene": "Gene",
+        "frequency": "Frequency",
+        "pathogenicity": "Pathogenicity",
+        "occurrence": "Occurrence",
+        "organization": "My Organization"
+      }
+    }
+  },
   "variant": {
-    "noDataForVariant": "No data for this variant.",
+    "no_data_for_variant": "No data for this variant.",
     "headers": {
       "ad_ratio": "AD Ratio",
       "clinvar": "ClinVar",
@@ -546,7 +564,7 @@
       "zygosity": "Zyg.",
       "zygosity_tooltips": "Zygosity"
     },
-    "spliceAi": {
+    "splice_ai": {
       "AG": "Acceptor Gain",
       "AL": "Acceptor Loss",
       "DG": "Donor Gain",
@@ -555,14 +573,14 @@
     "interpretation": {
       "tooltips": "Open clinical interpretation",
       "classifications": {
-        "allClassifications": "All Classifications",
+        "all_classifications": "All Classifications",
         "pathogenic": "Pathogenic",
-        "likelyPathogenic": "Likely Pathogenic",
-        "likelyPathogenic-tooltip": "Probably pathogenic",
+        "likely_pathogenic": "Likely Pathogenic",
+        "likely_pathogenic_tooltip": "Probably pathogenic",
         "vus": "VUS",
-        "vus-tooltip": "Variant of Uncertain Significance",
-        "likelyBenign": "Likely Benign",
-        "likelyBenign-tooltip": "Probably benign",
+        "vus_tooltip": "Variant of Uncertain Significance",
+        "likely_benign": "Likely Benign",
+        "likely_benign_tooltip": "Probably benign",
         "benign": "Benign"
       }
     },
@@ -663,10 +681,10 @@
       "sift": "SIFT",
       "revel": "REVEL",
       "loeuf": "LOEUF",
-      "spliceAI": "SpliceAI",
+      "splice_ai": "SpliceAI",
       "fathmm": "FATHMM",
-      "caddRaw": "CADD (Raw)",
-      "caddPhred": "CADD (Phred)",
+      "cadd_raw": "CADD (Raw)",
+      "cadd_phred": "CADD (Phred)",
       "dann": "DANN",
       "lrt": "LRT",
       "polyphen2hvar": "PolyPhen-2 HVAR",
@@ -680,11 +698,12 @@
       "deletion": "Deletion",
       "sequence_alteration": "Sequence Alteration"
     },
-    "interpretationForm": {
+    "canonical_transcript": "Canonical transcript",
+    "interpretation_form": {
       "title": "Clinical Interpretation",
-      "cancelText": "Cancel",
-      "okText": "Save",
-      "lastUpdate": "Last update: <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
+      "cancel_text": "Cancel",
+      "ok_text": "Save",
+      "last_update": "Last update: <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
       "header": {
         "germline": "Germline",
         "somatic": "Somatic"
@@ -701,50 +720,50 @@
       },
       "generic": {
         "interpretation": "Interpretation",
-        "pubMedPublication": "PubMed Publication",
-        "pubMedPublication_popover": {
+        "pub_med_publication": "PubMed Publication",
+        "pub_med_publication_popover": {
           "enter": "Enter a",
           "pmid": "PMID"
         },
-        "pubMedIdNotFound": "Invalid or unknown PMID",
-        "citation-placeholder": "Ex : 25741868",
-        "addCitation": "Add a publication"
+        "pub_med_id_not_found": "Invalid or unknown PMID",
+        "citation_placeholder": "Ex : 25741868",
+        "add_citation": "Add a publication"
       },
       "germline": {
         "condition": "MONDO condition",
-        "condition-placeholder": "e.g. muscular dystrophy",
-        "condition-popover": "Search for a medical condition in",
-        "condition-popover-link": "MONDO ontology",
+        "condition_placeholder": "e.g. muscular dystrophy",
+        "condition_popover": "Search for a medical condition in",
+        "condition_popover_link": "MONDO ontology",
         "classification": "ACMG/AMP classification",
         "classification_popover": {
           "consult": "Consult",
           "standards_and_guidelines": "standards and guidelines",
           "variant_interpretation": "for variant interpretation"
         },
-        "classificationCriteria": "Classification criteria",
-        "classificationCriteria-placeholder": "e.g. PM1, PS2",
-        "modeOfTransmission": "Mode of inheritance",
-        "modeOfTransmission-placeholder": "e.g. Autosomal dominant de novo"
+        "classification_criteria": "Classification criteria",
+        "classification_criteria_placeholder": "e.g. PM1, PS2",
+        "mode_of_transmission": "Mode of inheritance",
+        "mode_of_transmission_placeholder": "e.g. Autosomal dominant de novo"
       },
       "somatic": {
-        "tumoralType": "Tumor type",
-        "tumoralType-placeholder": "e.g. colon sarcoma",
+        "tumoral_type": "Tumor type",
+        "tumoral_type_placeholder": "e.g. colon sarcoma",
         "oncogenicity": "Oncogenicity",
-        "oncogenicity-options": {
+        "oncogenicity_options": {
           "oncogenic": "Oncogenic",
-          "likelyOncogenic": "Likely Oncogenic",
-          "likelyOncogenic-tooltip": "Probably oncogenic",
+          "likely_oncogenic": "Likely Oncogenic",
+          "likely_oncogenic_tooltip": "Probably oncogenic",
           "vus": "VUS",
-          "vus-tooltip": "Variant of Uncertain Significance",
-          "likelyBenign": "Likely Benign",
-          "likelyBenign-tooltip": "Probably benign",
+          "vus_tooltip": "Variant of Uncertain Significance",
+          "likely_benign": "Likely Benign",
+          "likely_benign_tooltip": "Probably benign",
           "benign": "Benign"
         },
-        "classificationCriteria": "Classification criteria",
-        "classificationCriteria-placeholder": "e.g. OS1, OM2",
-        "clinicalUtility": "Clinical utility",
-        "clinicalUtility-placeholder": "Select",
-        "clinicalUtility-options": {
+        "classification_criteria": "Classification criteria",
+        "classification_criteria_placeholder": "e.g. OS1, OM2",
+        "clinical_utility": "Clinical utility",
+        "clinical_utility_placeholder": "Select",
+        "clinical_utility_options": {
           "category_ia": "Tier IA",
           "category_ib": "Tier IB",
           "category_iic": "Tier IIC",
@@ -756,20 +775,20 @@
             "title": "Cancer Hotspot",
             "hotspot": "Hotspot"
           },
-          "annotationsVariant": {
+          "annotations_variant": {
             "title": "Variant annotations"
           },
-          "annotationsGene": {
+          "annotations_gene": {
             "title": "Gene annotations"
           }
         }
       }
     }
   },
-  "occurrenceExpand": {
+  "occurrence_expand": {
     "actions": {
-      "downloadReport": "Download report",
-      "openIGV": "Open IGV",
+      "download_report": "Download report",
+      "open_igv": "Open IGV",
       "interpret": "Interpret"
     },
     "classifications": {
@@ -786,61 +805,61 @@
       "pli": "pLI",
       "loeuf": "LOEUF",
       "revel": "REVEL",
-      "spliceAi": "SpliceAI"
+      "splice_ai": "SpliceAI"
     },
     "frequencies": {
       "title": "Frequencies",
       "affected": "Affected",
-      "nonAffected": "Non-affected",
-      "affectedTooltip": "Affected patients",
-      "nonAffectedTooltip": "Unaffected patients",
+      "non_affected": "Non-affected",
+      "affected_tooltip": "Affected patients",
+      "non_affected_tooltip": "Unaffected patients",
       "gnomad": "gnomAD"
     },
-    "functionalScores": {
+    "functional_scores": {
       "title": "Functional Scores",
       "sift": "SIFT",
       "revel": "REVEL",
       "fathmm": "FATHMM",
-      "caddRaw": "CADD (Raw)",
-      "caddPhred": "CADD (Phred)"
+      "cadd_raw": "CADD (Raw)",
+      "cadd_phred": "CADD (Phred)"
     },
     "zygosity": {
       "title": "Zygosity",
       "zygosity": "Zygosity",
-      "compoundHet": "Compound Het.",
-      "potentialCompoundHet": "Potential Compound Het.",
+      "compound_het": "Compound Het.",
+      "potential_compound_het": "Potential Compound Het.",
       "inheritance": "Inheritance",
-      "parentalOrigin": "Parental Origin"
+      "parental_origin": "Parental Origin"
     },
-    "clinicalAssociation": {
+    "clinical_association": {
       "title": "Clinical Associations (OMIM)"
     },
     "family": {
       "title": "Family",
-      "motherGenotype": "Mother's Genotype",
-      "fatherGenotype": "Father's Genotype",
-      "affectedTooltip": "Affected",
-      "notAffectedTooltip": "Not affected"
+      "mother_genotype": "Mother's Genotype",
+      "father_genotype": "Father's Genotype",
+      "affected_tooltip": "Affected",
+      "not_affected_tooltip": "Not affected"
     },
     "metrics": {
       "title": "Metrics",
-      "qualityDepth": "Quality Depth",
-      "alleleDepthAlt": "Allele Depth ALT",
-      "totalDepthAltRef": "Total Depth ALT + REF",
-      "genotypeQuality": "Genotype Quality",
+      "quality_depth": "Quality Depth",
+      "allele_depth_alt": "Allele Depth ALT",
+      "total_depth_altRef": "Total Depth ALT + REF",
+      "genotype_quality": "Genotype Quality",
       "filter": "Filter"
     }
   },
-  "caseEntity": {
-    "notFound": "Case not found",
-    "notFound.button": "Back to case list",
+  "case_entity": {
+    "not_found": "Case not found",
+    "not_found.button": "Back to case list",
     "header": {
       "cases": "Cases",
       "germline": "Germline Solo",
       "germline_family": "Germline Family",
       "case": "Case"
     },
-    "patientInformation": {
+    "patient_information": {
       "title": "Patient Information",
       "proband": "Proband",
       "mother": "Mother",
@@ -856,16 +875,16 @@
       "sex": "Sex",
       "jhn": "JHN",
       "mrn": "MRN",
-      "managingOrg": "Managing Org.",
-      "managingOrg_tooltips": "Organization managing the patient’s file"
+      "managing_org": "Managing Org.",
+      "managing_org_tooltips": "Organization managing the patient’s file"
     },
     "details": {
       "date_format_tooltips": "yyyy-mm-dd",
       "title": "Case Details",
-      "analysisOverview": "Analysis Overview",
-      "clinicalOverview": "Clinical",
-      "assayInformationsOverview": "Assays",
-      "assayDetailsDialog": "Assays Details",
+      "analysis_overview": "Analysis Overview",
+      "clinical_overview": "Clinical",
+      "assay_informations_overview": "Assays",
+      "assay_details_dialog": "Assays Details",
       "assay_id": "Assay ID",
       "sample_id": "Sample ID",
       "sample_type_code": "Sample Type",
@@ -883,13 +902,13 @@
       "phenotypes_observed": "Observed",
       "phenotypes_non_observed": "Non-Observed",
       "clinical_note": "Clinical Note",
-      "createdOn": "Created on",
-      "lastUpdate": "Last Update",
+      "created_on": "Created on",
+      "last_update": "Last Update",
       "prescriber": "Prescriber",
-      "prescribingInst": "Prescribing Inst.",
-      "prescribingInst_tooltips": "Prescribing institution",
-      "diagLab": "Diag. Lab",
-      "diagLab_tooltips": "Molecular diagnostic laboratory",
+      "prescribing_inst": "Prescribing Inst.",
+      "prescribing_inst_tooltips": "Prescribing institution",
+      "diag_lab": "Diag. Lab",
+      "diag_lab_tooltips": "Molecular diagnostic laboratory",
       "aliquot": "Aliquot",
       "run_name": "Run Name",
       "run_alias": "Run Alias",
@@ -911,12 +930,12 @@
       "requestId": "Request ID",
       "priority": "Priority",
       "status": "Status",
-      "assignedTo": "Assigned to",
+      "assigned_to": "Assigned to",
       "bioinformatics": "Bioinformatics",
-      "taskId": "Task ID",
+      "task_id": "Task ID",
       "patient": "Patients",
-      "noTaskFound": "No Task Found",
-      "statusOptions": {
+      "no_task_found": "No Task Found",
+      "status_options": {
         "unknown": "Unknown",
         "draft": "Draft",
         "in_progress": "In Progress",
@@ -941,9 +960,9 @@
       }
     }
   },
-  "variantEntity": {
-    "notFound": "Variant not found",
-    "notFound.button": "Back to variant list",
+  "variant_entity": {
+    "not_found": "Variant not found",
+    "not_found.button": "Back to variant list",
     "header": {
       "variants": "Variants",
       "germline": "Germline"
@@ -951,47 +970,47 @@
     "overview": {
       "title": "Overview",
       "interpretation": "Interpretation",
-      "myNetwork": "My Network",
+      "my_network": "My Network",
       "classification": "Classifications",
       "exomiser": "Exomiser",
       "details": "Details",
       "radiant": "Radiant",
       "consequence": "Consequence",
-      "clinVar": "ClinVar",
+      "clin_var": "ClinVar",
       "patients": "Patients",
       "patients_tooltips": "Number of germline genomes containing this variant and their frequency across this organization. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
-      "gnomAD": "gnomAD",
-      "gnomADInfoTooltip": "gnomAD Genome 3.1.2 (allele frequency)",
+      "gnom_ad": "gnomAD",
+      "gnom_ad_info_tooltip": "gnomAD Genome 3.1.2 (allele frequency)",
       "exon": "Exon",
-      "mostDeleteriousConsequenceNotice": "This transcript was selected because it represents the most deleterious consequence.",
-      "viewAllTranscripts": "View all transcripts",
-      "predictionScores": "Prediction Scores",
+      "most_deleterious_consequence_notice": "This transcript was selected because it represents the most deleterious consequence.",
+      "view_all_transcripts": "View all transcripts",
+      "prediction_scores": "Prediction Scores",
       "sift": "SIFT",
       "revel": "REVEL",
       "loeuf": "LOEUF",
-      "spliceAI": "SpliceAI",
+      "splice_ai": "SpliceAI",
       "fathmm": "FATHMM",
-      "caddRaw": "CADD (raw)",
-      "caddPhred": "CADD (phred)",
+      "cadd_raw": "CADD (raw)",
+      "cadd_phred": "CADD (phred)",
       "dann": "DANN",
       "lrt": "LRT",
       "polyphen2hvar": "PolyPhen-2 HVAR",
       "phylop17way": "PhyloP17Way",
       "pli": "pLI",
-      "associatedConditionsOmim": "Associated Conditions (OMIM)",
-      "externalReferences": "External References",
+      "associated_conditions_omim": "Associated Conditions (OMIM)",
+      "external_references": "External References",
       "dbSNP": "dbSNP",
-      "noExomiserScore": "This variant does not have an Exomiser score.",
-      "noInterpretationNetwork": "This variant has not been interpreted within your network.",
-      "noClinVarInterpretation": "This variant has not been submitted to ClinVar."
+      "no_exomiser_score": "This variant does not have an Exomiser score.",
+      "no_interpretation_network": "This variant has not been interpreted within your network.",
+      "no_clin_var_interpretation": "This variant has not been submitted to ClinVar."
     },
     "evidence": {
       "title": "Evidence and conditions",
-      "clinVar": {
+      "clin_var": {
         "title": "ClinVar",
         "description": "Pathogenic evidence provided by ClinVar",
         "filters": {
-          "searchPlaceholder": "Filter Conditions"
+          "search_placeholder": "Filter Conditions"
         },
         "table": {
           "headers": {
@@ -1024,7 +1043,7 @@
       "gene": {
         "title": "Associated Conditions and Phenotypes by Gene",
         "filters": {
-          "searchPlaceholder": "Filter condition or phenotype",
+          "search_placeholder": "Filter condition or phenotype",
           "omim": "OMIM",
           "orphanet": "Orphanet",
           "hpo": "HPO"
@@ -1049,7 +1068,7 @@
     },
     "transcripts": {
       "title": "Transcripts",
-      "aminoAcidSubstitution": "Amino acid substitution"
+      "amino_acid_substitution": "Amino acid substitution"
     },
     "cases": {
       "title": "{{count}} Cases",
@@ -1060,27 +1079,27 @@
         "non_affected": "Unaffected",
         "unknown": "Unknown"
       },
-      "commonHeaders": {
+      "common_headers": {
         "patient_id": "Patient",
         "relationship_to_proband": "Relation"
       },
-      "commonFilters": {
+      "common_filters": {
         "institutions": {
-          "allInstitutions": "All Diagnostic Labs"
+          "all_institutions": "All Diagnostic Labs"
         },
         "tests": {
-          "allTests": "All Analyses"
+          "all_tests": "All Analyses"
         },
-        "createdAt": {
-          "mostRecent": "Most recent",
-          "leastRecent": "Least recent"
+        "created_at": {
+          "most_recent": "Most recent",
+          "least_recent": "Least recent"
         }
       },
       "status": {
         "active": "Active",
         "completed": "Completed"
       },
-      "interpreted-table": {
+      "interpreted_table": {
         "title": "Interpreted ({{count}})",
         "headers": {
           "case": "Case",
@@ -1096,22 +1115,22 @@
         },
         "filters": {
           "label": "Condition",
-          "searchInputPlaceholder": "Filter MONDO conditions"
+          "search_input_placeholder": "Filter MONDO conditions"
         },
         "expand": {
-          "patientId": "Case's proband ID",
+          "patient_id": "Case's proband ID",
           "copy": "Copy",
-          "copySuccess": "Copied to clipboard"
+          "copy_success": "Copied to clipboard"
         }
       },
-      "other-table": {
+      "other_table": {
         "title": "Non-interpreted ({{count}})",
         "headers": {
           "case": "Case",
           "date": "Date",
           "date.tooltip": "Date received",
           "mondo": "Condition (Mondo)",
-          "phenotypesHpo": "Phenotype (HPO)",
+          "phenotypes_hpo": "Phenotype (HPO)",
           "zygosity": "Zygosity",
           "inheritance": "Inheritance",
           "institution": "Diagnostic Lab",
@@ -1123,24 +1142,23 @@
           "affected_status": "Aff. Status",
           "sample": "Sample"
         },
-
         "filters": {
           "label": "Phenotype",
-          "searchInputPlaceholder": "Filter HPO phenotype"
+          "search_input_placeholder": "Filter HPO phenotype"
         }
       }
     }
   },
-  "mainNavbar": {
-    "userDetails": {
+  "main_navbar": {
+    "user_details": {
       "profile": "Profile",
-      "signOut": "Sign out"
+      "sign_out": "Sign out"
     },
     "links": {
       "analysis": "Analysis",
       "cases": "Cases",
       "dashboard": "Dashboard",
-      "dataExploration": "Data Exploration",
+      "data_exploration": "Data Exploration",
       "studies": "Studies",
       "variants": "Variants"
     },
@@ -1150,24 +1168,6 @@
       "website": "Website",
       "documentation": "Documentation",
       "contact": "Contact"
-    }
-  },
-  "interpretation": {
-    "title": "Clinical Interpretation"
-  },
-  "queryFilters": {
-    "sidebarPanel": {
-      "collapse": "Collapse",
-      "expand": "Expand",
-      "organization": "RQDM Panel",
-      "filters": {
-        "variant": "Variant",
-        "gene": "Gene",
-        "frequency": "Frequency",
-        "pathogenicity": "Pathogenicity",
-        "occurrence": "Occurrence",
-        "organization": "My Organization"
-      }
     }
   },
   "occurence": {

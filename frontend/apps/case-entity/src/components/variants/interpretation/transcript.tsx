@@ -55,7 +55,7 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
       <Separator className="h-5" orientation="vertical" />
       <div className="text-sm">
         <span className="text-muted-foreground">
-          {t('variant.interpretationForm.transcript.exon')}:{' '}
+          {t('variant.interpretation_form.transcript.exon')}:{' '}
           {occurrence?.exon_rank && occurrence?.exon_total
             ? `${occurrence?.exon_rank} / ${occurrence?.exon_total}`
             : '-'}
@@ -70,12 +70,7 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
       {occurrence?.rsnumber && (
         <>
           <Separator className="h-5" orientation="vertical" />
-          <AnchorLink
-            href={getDbSnpUrl(occurrence.rsnumber)}
-            target="_blank"
-            rel="noreferrer"
-            size="sm"
-          >
+          <AnchorLink href={getDbSnpUrl(occurrence.rsnumber)} target="_blank" rel="noreferrer" size="sm">
             {occurrence.rsnumber}
           </AnchorLink>
         </>

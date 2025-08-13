@@ -34,9 +34,9 @@ export default function PredictionSection({ data }: PredictionSectionProps) {
     );
 
   return (
-    <DetailSection title={t('occurrenceExpand.predictions.title')}>
+    <DetailSection title={t('occurrence_expand.predictions.title')}>
       <DetailItem
-        title={t('occurrenceExpand.predictions.exomiser')}
+        title={t('occurrence_expand.predictions.exomiser')}
         value={data.exomiser_acmg_classification ? <div>{exomiser}</div> : '-'}
       />
     </DetailSection>

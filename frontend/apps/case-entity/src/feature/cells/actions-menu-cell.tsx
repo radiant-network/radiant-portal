@@ -1,3 +1,14 @@
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { CellContext } from '@tanstack/react-table';
+import { formatDate } from 'date-fns';
+import { EllipsisVertical, ExternalLink } from 'lucide-react';
+import useSWR from 'swr';
+
+import { Assay } from '@/api/api';
+import AssayStatusCell, { AssayStatus } from '@/components/base/data-table/cells/assay-status-cell';
+import InformationField from '@/components/base/information/information-field';
+import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/base/ui/dialog';
 import {
@@ -6,29 +17,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
-import { useSearchParams } from 'react-router-dom';
-import InformationField from '@/components/base/information/information-field';
-import { useI18n } from '@/components/hooks/i18n';
-import { CellContext } from '@tanstack/react-table';
-import { EllipsisVertical, ExternalLink } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { Separator } from '@/components/base/ui/separator';
-import AssayStatusCell, { AssayStatus } from '@/components/base/data-table/cells/assay-status-cell';
-import { assayApi } from '@/utils/api';
-import useSWR from 'swr';
-import { Assay } from '@/api/api';
-import { formatDate } from 'date-fns';
-import { Badge } from '@/components/base/ui/badge';
+import { useI18n } from '@/components/hooks/i18n';
 import { CaseEntityTabs } from '@/types';
+import { assayApi } from '@/utils/api';
 
 type AssayInput = {
   seqId: string;
 };
 
 export function useAssayHelper(input: AssayInput) {
-  const fetchAssayHelper = useCallback(async () => {
-    return assayApi.getAssayBySeqId(input.seqId).then(response => response.data);
-  }, [input]);
+  const fetchAssayHelper = useCallback(
+    async () => assayApi.getAssayBySeqId(input.seqId).then(response => response.data),
+    [input],
+  );
 
   return fetchAssayHelper;
 }
@@ -59,54 +61,54 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
     <Dialog open={open} onOpenChange={(value: boolean) => onClose(value)}>
       <DialogContent className="md:min-w-[800px] lg:min-w-[1050px]">
         <DialogHeader>
-          <DialogTitle>{t('caseEntity.details.assayDetailsDialog')}</DialogTitle>
+          <DialogTitle>{t('case_entity.details.assay_details_dialog')}</DialogTitle>
         </DialogHeader>
 
         {/* Status */}
         <div className="flex flex-col w-full md:justify-between md:flex-row">
           <div className="flex flex-col gap-2 flex-1">
             <h2 className="text-sm font-semibold">
-              {t('caseEntity.details.assay')} {data?.seq_id}
+              {t('case_entity.details.assay')} {data?.seq_id}
             </h2>
 
-            <InformationField label={t('caseEntity.details.status')}>
+            <InformationField label={t('case_entity.details.status')}>
               <AssayStatusCell status={data?.status_code as AssayStatus} />
             </InformationField>
 
             {/* Created On */}
             <InformationField
-              label={t('caseEntity.details.createdOn')}
-              tooltipsText={t('caseEntity.details.date_format_tooltips')}
+              label={t('case_entity.details.created_on')}
+              tooltipsText={t('case_entity.details.date_format_tooltips')}
             >
               {data?.created_on && <>{formatDate(data.created_on, t('common.date'))}</>}
             </InformationField>
 
             {/* Last Update */}
             <InformationField
-              label={t('caseEntity.details.lastUpdate')}
-              tooltipsText={t('caseEntity.details.date_format_tooltips')}
+              label={t('case_entity.details.last_update')}
+              tooltipsText={t('case_entity.details.date_format_tooltips')}
             >
               {data?.updated_on && <>{formatDate(data.updated_on, t('common.date'))}</>}
             </InformationField>
 
             {/* Diag. Lab. */}
-            <InformationField label={t('caseEntity.details.diagLab')} tooltipsText={data?.performer_lab_name}>
+            <InformationField label={t('case_entity.details.diag_lab')} tooltipsText={data?.performer_lab_name}>
               {data?.performer_lab_code}
             </InformationField>
 
             {/* Aliquot */}
-            <InformationField label={t('caseEntity.details.aliquot')}>{data?.aliquot}</InformationField>
+            <InformationField label={t('case_entity.details.aliquot')}>{data?.aliquot}</InformationField>
 
             {/* Run Name */}
-            <InformationField label={t('caseEntity.details.run_name')}>{data?.run_name}</InformationField>
+            <InformationField label={t('case_entity.details.run_name')}>{data?.run_name}</InformationField>
 
             {/* Run Alias */}
-            <InformationField label={t('caseEntity.details.run_alias')}>{data?.run_alias}</InformationField>
+            <InformationField label={t('case_entity.details.run_alias')}>{data?.run_alias}</InformationField>
 
             {/* Run Date */}
             <InformationField
-              label={t('caseEntity.details.run_date')}
-              tooltipsText={t('caseEntity.details.date_format_tooltips')}
+              label={t('case_entity.details.run_date')}
+              tooltipsText={t('case_entity.details.date_format_tooltips')}
             >
               {data?.run_date && <>{formatDate(data.run_date, t('common.date'))}</>}
             </InformationField>
@@ -114,11 +116,11 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
           <Separator orientation="vertical" className="hidden mx-8 md:block" />
           <Separator className="block my-8 md:hidden" />
           <div className="flex flex-col gap-2 flex-1">
-            <h2 className="text-sm font-semibold">{t('caseEntity.details.experiment')}</h2>
+            <h2 className="text-sm font-semibold">{t('case_entity.details.experiment')}</h2>
 
             {/* Exp. Strategy */}
             <InformationField
-              label={t('caseEntity.details.experimental_strategy_code')}
+              label={t('case_entity.details.experimental_strategy_code')}
               tooltipsText={data?.experimental_strategy_name}
             >
               {data?.experimental_strategy_code && (
@@ -127,23 +129,23 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             </InformationField>
 
             {/* Paired End */}
-            <InformationField label={t('caseEntity.details.paired_end')}>
+            <InformationField label={t('case_entity.details.paired_end')}>
               <Badge variant="outline">{t(`caseEntity.details.paired_end_${data?.is_paired_end ?? 'false'}`)}</Badge>
             </InformationField>
 
             {/* Platform */}
-            <InformationField label={t('caseEntity.details.platform')}>{data?.platform_code}</InformationField>
+            <InformationField label={t('case_entity.details.platform')}>{data?.platform_code}</InformationField>
 
             {/* Capture Kit */}
-            <InformationField label={t('caseEntity.details.capture_kit')}>{data?.capture_kit}</InformationField>
+            <InformationField label={t('case_entity.details.capture_kit')}>{data?.capture_kit}</InformationField>
 
             {/* Read Lenght */}
-            <InformationField label={t('caseEntity.details.read_length')}>
+            <InformationField label={t('case_entity.details.read_length')}>
               {data?.read_length?.toString()}
             </InformationField>
 
             {/* Description */}
-            <InformationField label={t('caseEntity.details.description')}>
+            <InformationField label={t('case_entity.details.description')}>
               {data?.experiment_description}
             </InformationField>
           </div>
@@ -151,23 +153,23 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
           <Separator className="block my-8 md:hidden" />
           <div className="flex flex-col gap-2 flex-1">
             <h2 className="text-sm font-semibold">
-              {t('caseEntity.details.sample')} {data?.sample_id ?? '-'}
+              {t('case_entity.details.sample')} {data?.sample_id ?? '-'}
             </h2>
 
             {/* Category */}
-            <InformationField label={t('caseEntity.details.category')}>{data?.category_code}</InformationField>
+            <InformationField label={t('case_entity.details.category')}>{data?.category_code}</InformationField>
 
             {/* Type */}
-            <InformationField label={t('caseEntity.details.type')}>{data?.sample_type_code}</InformationField>
+            <InformationField label={t('case_entity.details.type')}>{data?.sample_type_code}</InformationField>
 
             {/* Tissue site */}
-            <InformationField label={t('caseEntity.details.tissue_site')}>{data?.tissue_site}</InformationField>
+            <InformationField label={t('case_entity.details.tissue_site')}>{data?.tissue_site}</InformationField>
 
             {/* Histology */}
-            <InformationField label={t('caseEntity.details.histology_code')}>{data?.histology_code}</InformationField>
+            <InformationField label={t('case_entity.details.histology_code')}>{data?.histology_code}</InformationField>
 
             {/* Submitter ID */}
-            <InformationField label={t('caseEntity.details.submitter_id')}>
+            <InformationField label={t('case_entity.details.submitter_id')}>
               {data?.submitter_sample_id}
             </InformationField>
           </div>
@@ -203,12 +205,13 @@ function ActionsMenuCell({ row }: CellContext<any, any>) {
             <DropdownMenuItem
               disabled={!row.original.has_variants}
               onClick={() => {
-                searchParams.set("tab", CaseEntityTabs.Variants);
-                searchParams.set("seq_id", row.original.seq_id);
+                searchParams.set('tab', CaseEntityTabs.Variants);
+                searchParams.set('seq_id', row.original.seq_id);
                 setSearchParams(searchParams, { replace: true });
-              }}>
+              }}
+            >
               <ExternalLink />
-              {t('caseExploration.case.actions.view_variant')}
+              {t('case_exploration.case.actions.view_variant')}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
@@ -216,7 +219,7 @@ function ActionsMenuCell({ row }: CellContext<any, any>) {
               }}
             >
               <ExternalLink />
-              {t('caseExploration.case.actions.view_assay')}
+              {t('case_exploration.case.actions.view_assay')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -60,12 +60,12 @@ function CasesTab() {
             <TabsNav value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsListItem value={Tabs.InterpretedCases}>
-                  {t('variantEntity.cases.interpreted-table.title', {
+                  {t('variant_entity.cases.interpreted_table.title', {
                     count: data?.count_interpreted,
                   })}
                 </TabsListItem>
                 <TabsListItem value={Tabs.OtherCases}>
-                  {t('variantEntity.cases.other-table.title', {
+                  {t('variant_entity.cases.other_table.title', {
                     count: data?.count_uninterpreted,
                   })}
                 </TabsListItem>

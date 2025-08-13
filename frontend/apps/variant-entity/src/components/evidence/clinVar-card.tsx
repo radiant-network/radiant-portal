@@ -1,15 +1,17 @@
-import { Button } from '@/components/base/ui/button';
-import { Card, CardContent, CardDescription, CardAction, CardHeader, CardTitle } from '@/components/base/ui/card';
-import { useI18n } from '@/components/hooks/i18n';
-import { ExternalLink, Search } from 'lucide-react';
-import { Input } from '@/components/base/ui/input';
-import DataTable from '@/components/base/data-table/data-table';
-import { getPathogenicEvidenceColumns, pathogenicEvidenceDefaultSettings } from './table-settings';
 import { useState } from 'react';
-import useSWR from 'swr';
-import { variantsApi } from '@/utils/api';
 import { useParams } from 'react-router';
+import { ExternalLink, Search } from 'lucide-react';
+import useSWR from 'swr';
+
 import { ApiError, ClinvarRCV } from '@/api/api';
+import DataTable from '@/components/base/data-table/data-table';
+import { Button } from '@/components/base/ui/button';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/ui/card';
+import { Input } from '@/components/base/ui/input';
+import { useI18n } from '@/components/hooks/i18n';
+import { variantsApi } from '@/utils/api';
+
+import { getPathogenicEvidenceColumns, pathogenicEvidenceDefaultSettings } from './table-settings';
 
 type ClinVarConditionsSearchInput = {
   key: string;
@@ -49,8 +51,8 @@ function ClinVarCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">{t('variantEntity.evidence.clinVar.title')}</CardTitle>
-        <CardDescription>{t('variantEntity.evidence.clinVar.description')}</CardDescription>
+        <CardTitle className="text-xl font-semibold">{t('variant_entity.evidence.clin_var.title')}</CardTitle>
+        <CardDescription>{t('variant_entity.evidence.clin_var.description')}</CardDescription>
         <CardAction>
           <Button variant="outline">
             ClinVar <ExternalLink />
@@ -60,7 +62,7 @@ function ClinVarCard() {
       <CardContent className="space-y-4">
         <Input
           startIcon={Search}
-          placeholder={t('variantEntity.evidence.clinVar.filters.searchPlaceholder')}
+          placeholder={t('variant_entity.evidence.clin_var.filters.search_placeholder')}
           wrapperClassName="max-w-[320px]"
           value={search}
           onChange={e => setSearch(e.target.value)}

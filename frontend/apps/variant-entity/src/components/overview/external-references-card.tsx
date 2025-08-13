@@ -13,11 +13,11 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
   return (
     <Card {...props}>
       <CardHeader className="flex flex-row justify-between pb-0">
-        <div className="font-semibold">{t('variantEntity.overview.externalReferences')}</div>
+        <div className="font-semibold">{t('variant_entity.overview.external_references')}</div>
       </CardHeader>
       <CardContent className="text-sm space-y-3 h-full">
         {isEmpty && (
-          <Empty bordered showIcon={false} description={t('variant.noDataForVariant')} className="py-3 h-full" />
+          <Empty bordered showIcon={false} description={t('variant.no_data_for_variant')} className="py-3 h-full" />
         )}
         {data?.clinvar_name && (
           <AnchorLink
@@ -29,7 +29,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
             className="flex items-center gap-1"
             external
           >
-            {t('variantEntity.overview.clinVar')}
+            {t('variant_entity.overview.clin_var')}
           </AnchorLink>
         )}
         {data?.locus && (
@@ -41,7 +41,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
             rel="noreferrer"
             external
           >
-            {t('variantEntity.overview.gnomAD')}
+            {t('variant_entity.overview.gnom_ad')}
           </AnchorLink>
         )}
         {data?.rsnumber && (
@@ -54,7 +54,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
             className="flex items-center gap-1"
             external
           >
-            {t('variantEntity.overview.dbSNP')}
+            {t('variant_entity.overview.dbSNP')}
           </AnchorLink>
         )}
       </CardContent>

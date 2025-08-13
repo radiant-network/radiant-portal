@@ -17,7 +17,7 @@ function InterpretationFormGeneric() {
         schema={genericInterpretationFormSchema}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t('variant.interpretationForm.generic.interpretation')}</FormLabel>
+            <FormLabel>{t('variant.interpretation_form.generic.interpretation')}</FormLabel>
             <FormControl>
               <RichTextEditor {...field} />
             </FormControl>

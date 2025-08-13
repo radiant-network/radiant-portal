@@ -25,7 +25,7 @@ function InterpretedCasesFilters({ filters, onFiltersChange }: CasesFilterBarPro
 
   return (
     <div className="space-y-2">
-      <div className="text-sm">{t('variantEntity.cases.interpreted-table.filters.label')}</div>
+      <div className="text-sm">{t('variant_entity.cases.interpreted_table.filters.label')}</div>
       <div className="flex items-center gap-2">
         <ConditionCasesFilter onChange={value => handleFilterChange('mondo', value)} />
         <ClassificationSelectFilter

@@ -1,19 +1,21 @@
 import { useCallback, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import capitalize from 'lodash/capitalize';
+import useSWR from 'swr';
+
+import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
+import MondoOptionItemLabel from '@/components/feature/variant/mondo-option-item-label';
+import { useI18n } from '@/components/hooks/i18n';
+import { debounce } from '@/components/hooks/useDebounce';
+import { mondoApi } from '@/utils/api';
+
 import {
   germlineInterpretationFormSchema,
   GermlineInterpretationSchemaType,
   SomaticInterpretationSchemaType,
 } from './types';
-import { useFormContext } from 'react-hook-form';
-import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
-import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
-import { debounce } from '@/components/hooks/useDebounce';
-import { mondoApi } from '@/utils/api';
-import capitalize from 'lodash/capitalize';
-import MondoOptionItemLabel from '@/components/feature/variant/mondo-option-item-label';
-import useSWR from 'swr';
-import { useI18n } from '@/components/hooks/i18n';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 
 type MondoAutoCompleteFormFieldProps = {
   name: keyof GermlineInterpretationSchemaType | keyof SomaticInterpretationSchemaType;
@@ -60,9 +62,9 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
           <FormLabel
             infoCardContent={
               <div className="leading-6">
-                {t('variant.interpretationForm.germline.condition-popover')}{' '}
+                {t('variant.interpretation_form.germline.condition_popover')}{' '}
                 <AnchorLink href="https://www.ebi.ac.uk/ols4/ontologies/mondo" target="_blank" size="sm" external>
-                  {t('variant.interpretationForm.germline.condition-popover-link')}
+                  {t('variant.interpretation_form.germline.condition_popover_link')}
                 </AnchorLink>
               </div>
             }

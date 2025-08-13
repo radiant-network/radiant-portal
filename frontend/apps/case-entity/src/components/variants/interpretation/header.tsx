@@ -26,16 +26,16 @@ function InterpretationVariantHeader({ occurrence }: InterpretationVariantHeader
       <AnchorLink href={`/variants/entity/${occurrence.locus_id}`} size="lg" external>
         <span className="max-w-72 overflow-hidden text-ellipsis">{occurrence.hgvsg}</span>
       </AnchorLink>
-      <Badge>{t('variant.interpretationForm.header.germline')}</Badge>
+      <Badge>{t('variant.interpretation_form.header.germline')}</Badge>
       <Separator className="h-6" orientation="vertical" />
-      <span className='capitalize'>{member?.relationship_to_proband ?? t('caseEntity.patientInformation.proband')} ({member?.seq_id})</span>
+      <span className="capitalize">
+        {member?.relationship_to_proband ?? t('case_entity.patient_information.proband')} ({member?.seq_id})
+      </span>
       <Tooltip>
         <TooltipTrigger asChild>
           <Badge variant="blue">{caseEntity?.case_analysis_code}</Badge>
         </TooltipTrigger>
-        <TooltipContent>
-          {caseEntity?.case_analysis_name}
-        </TooltipContent>
+        <TooltipContent>{caseEntity?.case_analysis_name}</TooltipContent>
       </Tooltip>
     </div>
   );

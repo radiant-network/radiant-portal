@@ -1,6 +1,7 @@
+import { LogOutIcon } from 'lucide-react';
+import { tv, VariantProps } from 'tailwind-variants';
+
 import { Avatar, AvatarFallback } from '@/components/base/ui/avatar';
-import MainNavbarItem from './main-navbar-item';
-import { LogOutIcon, UserIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,9 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
-import { tv, VariantProps } from 'tailwind-variants';
-import { cn } from '@/components/lib/utils';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
+
+import MainNavbarItem from './main-navbar-item';
 
 interface NavbarUserAvatarProps {
   userDetails: {
@@ -45,13 +47,13 @@ function NavbarUserAvatar({ userDetails: { name, email }, onLogoutClick, avatarC
             <DropdownMenuGroup>
               {/* SJRA-389 <DropdownMenuItem>
                 <UserIcon />{' '}
-                {t('mainNavbar.userDetails.profile', {
+                {t('main_navbar.user_details.profile', {
                   defaultValue: 'Profile',
                 })}
               </DropdownMenuItem> */}
               <DropdownMenuItem onClick={onLogoutClick}>
                 <LogOutIcon />{' '}
-                {t('mainNavbar.userDetails.signOut', {
+                {t('main_navbar.user_details.sign_out', {
                   defaultValue: 'Sign out',
                 })}
               </DropdownMenuItem>

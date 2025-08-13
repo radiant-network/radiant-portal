@@ -8,7 +8,7 @@ export default function App() {
 
   return (
     <>
-      <PageHeader isLoading={false} title={t('caseExploration.case.title')} variant="info" />
+      <PageHeader isLoading={false} title={t('case_exploration.case.title')} variant="info" />
       <main className={`bg-muted h-screen overflow-auto p-3`}>
         <Card className="h-auto size-max w-full p-3 m-0">
           <CardContent className="p-0">

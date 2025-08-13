@@ -1,22 +1,24 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
-import { useI18n } from '@/components/hooks/i18n';
-import { Tabs, TabsList, TabsTrigger } from '@/components/base/ui/tabs';
-import { Input } from '@/components/base/ui/input';
+import { useMemo, useState } from 'react';
+import { useParams } from 'react-router';
 import { Search, SearchIcon } from 'lucide-react';
-import { Accordion } from '@/components/base/ui/accordion';
-import GeneAccordionItem from './gene-accordion-item';
-import { variantsApi } from '@/utils/api';
+import useSWR from 'swr';
+
 import {
   ApiError,
   GenePanelCondition,
   GenePanelConditions,
   GetGermlineVariantConditionsPanelTypeEnum,
 } from '@/api/api';
-import useSWR from 'swr';
-import { useParams } from 'react-router';
-import { useState, useMemo } from 'react';
-import { Skeleton } from '@/components/base/ui/skeleton';
 import Empty from '@/components/base/empty';
+import { Accordion } from '@/components/base/ui/accordion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
+import { Input } from '@/components/base/ui/input';
+import { Skeleton } from '@/components/base/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/base/ui/tabs';
+import { useI18n } from '@/components/hooks/i18n';
+import { variantsApi } from '@/utils/api';
+
+import GeneAccordionItem from './gene-accordion-item';
 
 type ConditionByPanelTypeInput = {
   key: string;
@@ -75,7 +77,7 @@ function ConditionPhenotypeCard() {
   return (
     <Card>
       <CardHeader className="flex">
-        <CardTitle className="text-xl font-semibold">{t('variantEntity.evidence.gene.title')}</CardTitle>
+        <CardTitle className="text-xl font-semibold">{t('variant_entity.evidence.gene.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center gap-2">
@@ -85,18 +87,18 @@ function ConditionPhenotypeCard() {
           >
             <TabsList>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Omim}>
-                {t('variantEntity.evidence.gene.filters.omim', {
+                {t('variant_entity.evidence.gene.filters.omim', {
                   count: 20,
                 })}
               </TabsTrigger>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Orphanet}>
-                {t('variantEntity.evidence.gene.filters.orphanet', {
+                {t('variant_entity.evidence.gene.filters.orphanet', {
                   count: 10,
                 })}
               </TabsTrigger>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Hpo}>
                 {' '}
-                {t('variantEntity.evidence.gene.filters.hpo', {
+                {t('variant_entity.evidence.gene.filters.hpo', {
                   count: 54,
                 })}
               </TabsTrigger>
@@ -104,7 +106,7 @@ function ConditionPhenotypeCard() {
           </Tabs>
           <Input
             startIcon={Search}
-            placeholder={t('variantEntity.evidence.gene.filters.searchPlaceholder')}
+            placeholder={t('variant_entity.evidence.gene.filters.search_placeholder')}
             wrapperClassName="max-w-[320px] w-full"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}

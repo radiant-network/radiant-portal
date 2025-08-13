@@ -1,7 +1,4 @@
-import { Button } from '@/components/base/ui/button';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/ui/hover-card';
-import { useI18n } from '@/components/hooks/i18n';
-import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
+import { useState } from 'react';
 import {
   ChartColumn,
   ChartLine,
@@ -13,14 +10,18 @@ import {
   PencilLineIcon,
   TrashIcon,
 } from 'lucide-react';
-import { useState } from 'react';
-import QueryPillCustomEditDialog from '@/components/feature/query-builder/query-pill/query-pill-custom-edit-dialog';
+
+import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
+import { Button } from '@/components/base/ui/button';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/ui/hover-card';
 import { useQueryBuilderDictionary } from '@/components/feature/query-builder/data';
 import { QueryBuilderContext, QueryBuilderDictContext } from '@/components/feature/query-builder/query-builder-context';
-import { createSavedFilter, useQueryBuilder } from '@/components/model/query-builder-core';
-import { ISqonGroupFilter } from '@/components/model/sqon';
-import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
+import QueryPillCustomEditDialog from '@/components/feature/query-builder/query-pill/query-pill-custom-edit-dialog';
 import { QueryPillCustomConfig } from '@/components/feature/query-builder/types';
+import { useI18n } from '@/components/hooks/i18n';
+import { createSavedFilter, useQueryBuilder } from '@/components/model/query-builder-core';
+import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
+import { ISqonGroupFilter } from '@/components/model/sqon';
 
 export interface CustomPillFilterProps {
   customPills: IUserSavedFilter[];
@@ -69,28 +70,28 @@ function CustomPillFilter({
   const openConfirmDeleteDialog = (pill: IUserSavedFilter) =>
     alertDialog.open({
       type: 'warning',
-      title: t('common.customPillFilter.deleteDialog.title', {
+      title: t('common.custom_pill_filter.delete_dialog.title', {
         defaultValue: 'Delete this query?',
       }),
-      description: t('common.customPillFilter.deleteDialog.description', {
+      description: t('common.custom_pill_filter.delete_dialog.description', {
         title: pill.title,
-        defaultValue: `You are about to delete this custom query \"${pill.title}\", which may affect your results."`,
+        defaultValue: `You are about to delete this custom query "${pill.title}", which may affect your results."`,
       }),
       cancelProps: {
-        children: t('common.customPillFilter.deleteDialog.cancel', {
+        children: t('common.custom_pill_filter.delete_dialog.cancel', {
           defaultValue: 'Cancel',
         }),
       },
       actionProps: {
         color: 'destructive',
         onClick: () => onDeletePill(pill.id),
-        children: t('common.customPillFilter.deleteDialog.ok', {
+        children: t('common.custom_pill_filter.delete_dialog.ok', {
           defaultValue: 'Delete',
         }),
       },
     });
 
-  const tipText = t('common.customPillFilter.info', {
+  const tipText = t('common.custom_pill_filter.info', {
     defaultValue: 'You can create custom queries by adding criteria to the query bar and clicking the save button.',
   });
 
@@ -106,7 +107,7 @@ function CustomPillFilter({
         <div className="text-sm text-center">{tipText}</div>
         <a className="flex justify-center" href={learnMoreLink} target="_blank" rel="noreferrer">
           <Button variant="link" className="py-0 h-5">
-            {t('common.customPillFilter.learnMore', {
+            {t('common.custom_pill_filter.learn_more', {
               defaultValue: 'Learn more',
             })}
             <ExternalLink />

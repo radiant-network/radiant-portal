@@ -1,15 +1,16 @@
-import { CaseEntity, Term } from '@/api/api';
+import { ComponentProps } from 'react';
 import { useNavigate } from 'react-router';
+import { ArrowUpRightIcon, AudioWaveformIcon } from 'lucide-react';
+
+import { CaseEntity, Term } from '@/api/api';
+import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import ExpandableList from '@/components/base/list/expandable-list';
+import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import { Button } from '@/components/base/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardSeparator, CardTitle } from '@/components/base/ui/card';
-import { useI18n } from '@/components/hooks/i18n';
-import { ArrowUpRightIcon, AudioWaveformIcon } from 'lucide-react';
-import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
-import { ComponentProps } from 'react';
-import { cn } from '@/components/lib/utils';
-import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;
 
@@ -27,20 +28,20 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   return (
     <Card {...props}>
       <CardHeader className="border-b [.border-b]:pb-4">
-        <CardTitle size="xl">{t('caseEntity.details.clinicalOverview')}</CardTitle>
+        <CardTitle size="xl">{t('case_entity.details.clinical_overview')}</CardTitle>
         <CardAction>
           {hasVariants ? (
             <Button onClick={() => navigate('?tab=variants')}>
-              <AudioWaveformIcon /> {t('caseEntity.details.view_variants')} <ArrowUpRightIcon />
+              <AudioWaveformIcon /> {t('case_entity.details.view_variants')} <ArrowUpRightIcon />
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger>
                 <Button disabled>
-                  <AudioWaveformIcon /> {t('caseEntity.details.view_variants')} <ArrowUpRightIcon />
+                  <AudioWaveformIcon /> {t('case_entity.details.view_variants')} <ArrowUpRightIcon />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{t('caseEntity.details.no_variants')}</TooltipContent>
+              <TooltipContent>{t('case_entity.details.no_variants')}</TooltipContent>
             </Tooltip>
           )}
         </CardAction>
@@ -50,17 +51,17 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
         <div className={cn('flex flex-col gap-3 flex-1')}>
           {/* Primary Condition */}
           <div>
-            <CardTitle>{t('caseEntity.details.primary_condition')}</CardTitle>
+            <CardTitle>{t('case_entity.details.primary_condition')}</CardTitle>
             <PhenotypeConditionLink code={data.primary_condition_id} name={data.primary_condition_name} />
           </div>
 
           {/* Phenotypes */}
           <div className="flex flex-col gap-2">
-            <CardTitle>{t('caseEntity.details.phenotypes')}</CardTitle>
+            <CardTitle>{t('case_entity.details.phenotypes')}</CardTitle>
 
             {/* Phenotypes Observed */}
             <CardTitle size="xs" className="font-bold">
-              {t('caseEntity.details.phenotypes_observed')}
+              {t('case_entity.details.phenotypes_observed')}
             </CardTitle>
 
             <ExpandableList
@@ -72,12 +73,12 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             />
 
             {!proband.observed_phenotypes && (
-              <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
+              <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
             )}
 
             {/* Phenotypes Non-Observed */}
             <CardTitle size="xs" className="font-bold">
-              {t('caseEntity.details.phenotypes_non_observed')}
+              {t('case_entity.details.phenotypes_non_observed')}
             </CardTitle>
 
             <ExpandableList
@@ -89,13 +90,13 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             />
 
             {!proband.non_observed_phenotypes && (
-              <span className="text-xs text-muted-foreground">{t('caseEntity.details.no_phenotype')}</span>
+              <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
             )}
           </div>
 
           {/* Clinical Note */}
           <Card className="p-4 gap-4">
-            <CardTitle className="text-base">{t('caseEntity.details.clinical_note')}</CardTitle>
+            <CardTitle className="text-base">{t('case_entity.details.clinical_note')}</CardTitle>
             <p className="text-sm">{data.note}</p>
           </Card>
         </div>

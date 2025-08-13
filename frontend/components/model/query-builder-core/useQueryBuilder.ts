@@ -1,25 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+
+import { PartialKeys } from '@/components/lib/utils';
+
+import { useI18n } from '../../hooks/i18n';
+import { ISyntheticSqon } from '../sqon';
+
+import { removeIgnoredFieldsFromQueryList } from './utils/sqon';
 import {
   CoreQueryBuilderProps,
   createQueryBuilder,
   getDefaultQueryBuilderState,
   QueryBuilderInstance,
   QueryBuilderState,
-} from "./query-builder";
+} from './query-builder';
 import {
   QUERY_BUILDER_UPDATE_EVENT_KEY,
   queryBuilderRemote,
   QueryBuilderRemoteEvent,
   QueryBuilderUpdateEventType,
-} from "./query-builder-remote";
-import { PartialKeys } from "@/components/lib/utils";
-import { ISyntheticSqon } from "../sqon";
-import { removeIgnoredFieldsFromQueryList } from "./utils/sqon";
-import { useI18n } from '../../hooks/i18n';
+} from './query-builder-remote';
 
-export function useQueryBuilder(
-  props: PartialKeys<CoreQueryBuilderProps, "state">
-): QueryBuilderInstance {
+export function useQueryBuilder(props: PartialKeys<CoreQueryBuilderProps, 'state'>): QueryBuilderInstance {
   const { t } = useI18n('common');
   const defaultProps: CoreQueryBuilderProps = {
     state: {
@@ -35,9 +36,7 @@ export function useQueryBuilder(
     current: createQueryBuilder(defaultProps),
   }));
 
-  const [state, setState] = useState(
-    () => defaultProps.initialState || defaultProps.state
-  );
+  const [state, setState] = useState(() => defaultProps.initialState || defaultProps.state);
 
   useEffect(() => {
     if (state) {
@@ -56,9 +55,7 @@ export function useQueryBuilder(
           if (sqon.id === event.value.activeQueryId) {
             props.onActiveQueryChange?.(sqon);
           }
-        } else if (
-          event.eventType === QueryBuilderUpdateEventType.UPDATE_QUERY
-        ) {
+        } else if (event.eventType === QueryBuilderUpdateEventType.UPDATE_QUERY) {
           const sqon = event.eventData as ISyntheticSqon;
 
           props.onQueryUpdate?.(sqon);
@@ -68,7 +65,7 @@ export function useQueryBuilder(
           }
         }
 
-        setState((prev) => {
+        setState(prev => {
           const newState: QueryBuilderState = {
             ...prev,
             ...props.state,
@@ -80,16 +77,10 @@ export function useQueryBuilder(
       }
     };
 
-    window.addEventListener(
-      QUERY_BUILDER_UPDATE_EVENT_KEY,
-      listener as EventListener
-    );
+    window.addEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener as EventListener);
 
     return () => {
-      window.removeEventListener(
-        QUERY_BUILDER_UPDATE_EVENT_KEY,
-        listener as EventListener
-      );
+      window.removeEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener as EventListener);
     };
   }, [props.state]);
 
@@ -100,21 +91,18 @@ export function useQueryBuilder(
     ...props.state,
   };
 
-  queryBuilderRef.current.setCoreProps((prevProps) => ({
-    savedFilterDefaultTitle: t('common.savedFilter.untitledFilter'),
+  queryBuilderRef.current.setCoreProps(prevProps => ({
+    savedFilterDefaultTitle: t('common.saved_filter.untitled_filter'),
     ...prevProps,
     ...props,
     state: {
       ...mergedState,
       queries:
         props.fieldsToIgnore && mergedState.queries
-          ? removeIgnoredFieldsFromQueryList(
-              mergedState.queries,
-              props.fieldsToIgnore
-            )
+          ? removeIgnoredFieldsFromQueryList(mergedState.queries, props.fieldsToIgnore)
           : mergedState.queries,
     },
-    onStateChange: (newState) => {
+    onStateChange: newState => {
       setState(newState);
       queryBuilderRemote.setLocalQueryBuilderState(props.id, {
         value: newState,

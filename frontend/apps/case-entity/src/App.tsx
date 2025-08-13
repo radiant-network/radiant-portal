@@ -1,19 +1,21 @@
 import { createContext, useCallback, useEffect, useState } from 'react';
-import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Link, useParams, useSearchParams } from 'react-router';
-import DetailsTab from './components/details/details-tab';
-import VariantsTab from './components/variants/variants-tab';
-import { CaseEntityTabs } from './types';
-import { caseApi } from '@/utils/api';
-import { CaseEntity, ApiError } from '@/api/api';
+import { AudioWaveform, ClipboardList } from 'lucide-react';
 import useSWR from 'swr';
-import { useI18n } from '@/components/hooks/i18n';
+
+import { ApiError, CaseEntity } from '@/api/api';
+import Container from '@/components/base/container';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import PageError from '@/components/base/page/page-error';
 import { Button } from '@/components/base/ui/button';
-import Container from '@/components/base/container';
-import Header from './components/layout/header';
-import { AudioWaveform, ClipboardList } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+import { caseApi } from '@/utils/api';
+
+import DetailsTab from './components/details/details-tab';
+import Header from './components/layout/header';
+import VariantsTab from './components/variants/variants-tab';
+import { CaseEntityTabs } from './types';
 
 export const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
 
@@ -62,11 +64,11 @@ export default function App() {
     return (
       <PageError
         status="404"
-        message={t('caseEntity.notFound')}
+        message={t('case_entity.not_found')}
         className="h-screen"
         extra={
           <Link to="/">
-            <Button>{t('caseEntity.notFound.button')}</Button>
+            <Button>{t('case_entity.not_found.button')}</Button>
           </Link>
         }
       />
@@ -87,22 +89,22 @@ export default function App() {
           <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
             <TabsListItem value={CaseEntityTabs.Details}>
               <ClipboardList />
-              {t('caseEntity.details.title')}
+              {t('case_entity.details.title')}
             </TabsListItem>
             {hasVariants ? (
               <TabsListItem value={CaseEntityTabs.Variants}>
                 <AudioWaveform />
-                {t('caseEntity.variants.title')}
+                {t('case_entity.variants.title')}
               </TabsListItem>
             ) : (
               <Tooltip>
                 <TooltipTrigger>
                   <TabsListItem disabled value={CaseEntityTabs.Variants}>
                     <AudioWaveform />
-                    {t('caseEntity.variants.title')}
+                    {t('case_entity.variants.title')}
                   </TabsListItem>
                 </TooltipTrigger>
-                <TooltipContent>{t('caseEntity.details.no_variants')}</TooltipContent>
+                <TooltipContent>{t('case_entity.details.no_variants')}</TooltipContent>
               </Tooltip>
             )}
           </TabsList>
