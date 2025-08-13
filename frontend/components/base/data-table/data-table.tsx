@@ -1,27 +1,37 @@
-import { CSSProperties, useEffect, useMemo, useState, Fragment, useRef } from 'react';
+import { CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ColumnDef,
-  flexRender,
-  useReactTable,
-  getCoreRowModel,
-  PaginationState,
-  getPaginationRowModel,
-  ColumnOrderState,
-  getExpandedRowModel,
-  OnChangeFn,
-  SortingState,
   Column,
+  ColumnDef,
+  ColumnOrderState,
   ColumnPinningPosition,
   ColumnPinningState,
-  RowPinningState,
-  Row,
   ExpandedState,
+  flexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
+  OnChangeFn,
+  PaginationState,
+  Row,
+  RowPinningState,
+  SortingState,
+  useReactTable,
 } from '@tanstack/react-table';
+import { AlertCircle, SearchIcon } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
+import DataTableFullscreenButton from '@/components/base/data-table/data-table-fullscreen-button';
+import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
+import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
+import {
+  cleanTableLocaleStorage,
+  getTableLocaleStorage,
+  TableCacheProps,
+  useTableStateObserver,
+} from '@/components/base/data-table/hooks/use-table-localstorage';
 import {
   Pagination,
   PaginationContent,
@@ -30,23 +40,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/base/ui/pagination';
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
 import { PaginationPageSize } from '@/components/base/ui/pagination';
-import { SortBody, SortBodyOrderEnum } from '@/api/api';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
+import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/lib/utils';
 
-import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
-import {
-  cleanTableLocaleStorage,
-  getTableLocaleStorage,
-  TableCacheProps,
-  useTableStateObserver,
-} from '@/components/base/data-table/hooks/use-table-localstorage';
-import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
-import DataTableFullscreenButton from '@/components/base/data-table/data-table-fullscreen-button';
 import Empty from '../empty';
 import { Card } from '../ui/card';
-import { useI18n } from '@/components/hooks/i18n';
-import { AlertCircle, SearchIcon } from 'lucide-react';
 
 export const IS_SERVER = typeof window === 'undefined';
 
@@ -369,6 +369,7 @@ function getRowFlexRender<T>({
  *  enablePinning: false,
  * }]
  */
+// eslint-disable-next-line complexity
 function TranstackTable<T>({
   id,
   columns,
@@ -455,7 +456,7 @@ function TranstackTable<T>({
     getExpandedRowModel: getExpandedRowModel(),
     getPaginationRowModel: paginationHidden ? undefined : getPaginationRowModel(),
     getRowCanExpand: () => true,
-    isMultiSortEvent: _e => true,
+    isMultiSortEvent: () => true,
     keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
     manualPagination: !paginationHidden,
     onColumnPinningChange: setColumnPinning,
@@ -478,9 +479,10 @@ function TranstackTable<T>({
   });
 
   // Cache our row flexRender method
-  const rowFlexRender = useMemo(() => {
-    return getRowFlexRender<T>({ subComponent, containerWidth });
-  }, [subComponent, containerWidth]);
+  const rowFlexRender = useMemo(
+    () => getRowFlexRender<T>({ subComponent, containerWidth }),
+    [subComponent, containerWidth],
+  );
 
   /*
    * Prevent calling of `column.getSize()` on every render
@@ -530,7 +532,7 @@ function TranstackTable<T>({
     if (!element) return;
 
     const observer = new ResizeObserver(entries => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         const newWidth = entry.contentRect.width;
         setContainerWidth(newWidth);
       }
@@ -589,9 +591,7 @@ function TranstackTable<T>({
   const footerGroups = table.getFooterGroups();
 
   // Check if any columns have footer definitions
-  const hasFooterDefinitions = useMemo(() => {
-    return columns.some(column => column.footer !== undefined);
-  }, [columns]);
+  const hasFooterDefinitions = useMemo(() => columns.some(column => column.footer !== undefined), [columns]);
 
   // Determine if pagination should be hidden based on data size vs total
   const shouldHidePagination = useMemo(() => {
