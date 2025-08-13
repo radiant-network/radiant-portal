@@ -18,7 +18,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
   const { t } = useI18n();
 
   return (
-    <AccordionItem value={value} className="border rounded bg-background">
+    <AccordionItem value={value} className="border rounded-lg bg-background">
       <AccordionTrigger asChild className="py-4 px-5 hover:cursor-pointer">
         <div className="flex flex-1 ml-4 items-center gap-3">
           <span className="font-semibold text-base">
