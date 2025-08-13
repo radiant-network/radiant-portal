@@ -1,21 +1,23 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
-import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import NumberCell from '@/components/base/data-table/cells/number-cell';
-import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
-import GeneCell from '@/components/base/data-table/cells/gene-cell';
-import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
-import ManeCell from '@/components/base/data-table/cells/mane-cell';
-import OmimCell from '@/components/base/data-table/cells/omim-cell';
-import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
-import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
-import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
-import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
-import { GermlineSNVOccurrence } from '@/api/api';
 import { TFunction } from 'i18next';
 import { ZapIcon } from 'lucide-react';
+
+import { GermlineSNVOccurrence } from '@/api/api';
+import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
+import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
+import GeneCell from '@/components/base/data-table/cells/gene-cell';
+import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
+import ManeCell from '@/components/base/data-table/cells/mane-cell';
+import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
+import OmimCell from '@/components/base/data-table/cells/omim-cell';
+import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
+import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
+import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+
 import InterpretationCell from './cells/interpretation-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
@@ -74,7 +76,11 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // Type
     columnHelper.accessor(row => row.variant_class, {
       id: 'variant_class',
-      cell: info => <TextTooltipsCell tooltipsText={info.getValue()}>{t(`variant.classes.${info.getValue().toLowerCase()}`)}</TextTooltipsCell>,
+      cell: info => (
+        <TextTooltipsCell tooltipsText={info.getValue()}>
+          {t(`variant.classes.${info.getValue().toLowerCase()}`)}
+        </TextTooltipsCell>
+      ),
       header: t('variant.headers.variant_class'),
       minSize: 120,
     }),
@@ -91,7 +97,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       header: t('variant.headers.dbSNP'),
       size: 100,
       minSize: 100,
-      enableSorting: false
+      enableSorting: false,
     }),
     // Gene
     columnHelper.accessor(row => row.symbol, {
@@ -149,7 +155,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // ClinVar
     columnHelper.accessor(row => row.clinvar, {
       id: 'clinvar',
-      cell: info => <ClinvarCell codes={info.getValue()} />,
+      cell: info => <ClassificationCell codes={info.getValue()} />,
       header: t('variant.headers.clinvar'),
       minSize: 120,
       enableSorting: false,
@@ -168,7 +174,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     //ACMG. Exo.
     columnHelper.accessor(row => row.exomiser_acmg_classification, {
       id: 'exomiser_acmg_classification',
-      cell: info => <ClinvarCell codes={[info.getValue()]} />,
+      cell: info => <ClassificationCell codes={[info.getValue()]} />,
       header: () => (
         <TooltipsHeader tooltips={t('variant.headers.exomiser_acmg_classification_tooltips')}>
           {t('variant.headers.exomiser_acmg_classification')}
@@ -190,16 +196,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // Freq.
     columnHelper.accessor(row => row.pf_wgs, {
       id: 'pf_wgs',
-      cell: info => (
-        <ParticipantFrequencyCell
-          locusId={info.row.original.locus_id}
-          value={info.getValue()}
-        />
-      ),
+      cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltips')}>
-          {t('variant.headers.pf_wgs')}
-        </TooltipsHeader>
+        <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltips')}>{t('variant.headers.pf_wgs')}</TooltipsHeader>
       ),
       minSize: 120,
     }),

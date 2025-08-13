@@ -1,23 +1,24 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
-import DateCell from '@/components/base/data-table/cells/date-cell';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import { TFunction } from 'i18next';
 import { EllipsisVertical } from 'lucide-react';
-import { Button } from '@/components/base/ui/button';
+
 import { Term, VariantInterpretedCase, VariantUninterpretedCase } from '@/api/api';
-import ConditionCell from '@/components/base/data-table/cells/condition-cell';
-import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
-import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
-import BadgeCell from '@/components/base/data-table/cells/badge-cell';
-import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
+import BadgeCell from '@/components/base/data-table/cells/badge-cell';
+import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
+import ConditionCell from '@/components/base/data-table/cells/condition-cell';
+import DateCell from '@/components/base/data-table/cells/date-cell';
 import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
+import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
+import { Button } from '@/components/base/ui/button';
 
 const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>();
 const otherCasesColumnHelper = createColumnHelper<VariantUninterpretedCase>();
@@ -68,7 +69,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.classification, {
       id: 'classification',
-      cell: info => <ClinvarCell codes={[info.getValue()]} />,
+      cell: info => <ClassificationCell codes={[info.getValue()]} />,
       header: t('variantEntity.cases.interpreted-table.headers.classification'),
       minSize: 150,
       maxSize: 250,
@@ -123,13 +124,11 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row, {
       id: 'action',
-      cell: info => {
-        return (
-          <Button iconOnly variant="outline" className="size-6">
-            <EllipsisVertical />
-          </Button>
-        );
-      },
+      cell: info => (
+        <Button iconOnly variant="outline" className="size-6">
+          <EllipsisVertical />
+        </Button>
+      ),
       header: '',
       size: 50,
       enableSorting: false,

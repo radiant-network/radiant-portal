@@ -1,15 +1,16 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TableColumnDef, createColumnSettings } from '@/components/base/data-table/data-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import { TFunction } from 'i18next';
-import RatingCell from 'components/base/data-table/cells/rating-cell';
-import ClinvarCell from 'components/base/data-table/cells/clinvar-cell';
-import AnchorLinkCell from 'components/base/data-table/cells/anchor-link-cell';
+
+import { ClinvarRCV, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+import BadgeCell from '@/components/base/data-table/cells/badge-cell';
+import DateCell from '@/components/base/data-table/cells/date-cell';
+import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
 import { Badge } from '@/components/base/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import DateCell from '@/components/base/data-table/cells/date-cell';
-import BadgeCell from '@/components/base/data-table/cells/badge-cell';
-import { ClinvarRCV, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+import AnchorLinkCell from 'components/base/data-table/cells/anchor-link-cell';
+import ClassificationCell from 'components/base/data-table/cells/classification-cell';
+import RatingCell from 'components/base/data-table/cells/rating-cell';
 
 const pathogenicEvidenceColumnHelper = createColumnHelper<ClinvarRCV>();
 const conditionPhenotypeColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
@@ -39,7 +40,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.clinical_significance, {
       id: 'clinical_significance',
-      cell: info => <ClinvarCell codes={[info.getValue()?.[0]?.replace(/\s+/g, '_')]} />,
+      cell: info => <ClassificationCell codes={[info.getValue()?.[0]?.replace(/\s+/g, '_')]} />,
       header: t('variantEntity.evidence.clinVar.table.headers.classification'),
       minSize: 75,
       maxSize: 150,
@@ -57,7 +58,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.review_status_stars, {
       id: 'review_status_stars',
-      cell: (info) => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
+      cell: info => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
       header: () => t('variantEntity.evidence.clinVar.table.headers.status'),
       minSize: 60,
       maxSize: 150,
@@ -66,9 +67,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     pathogenicEvidenceColumnHelper.accessor(row => row.origins, {
       id: 'origins',
       cell: info => (
-        <BadgeCell variant="outline">
-          {t(`variantEntity.evidence.clinVar.origin.${info.getValue()?.[0]}`)}
-        </BadgeCell>
+        <BadgeCell variant="outline">{t(`variantEntity.evidence.clinVar.origin.${info.getValue()?.[0]}`)}</BadgeCell>
       ),
       header: t('variantEntity.evidence.clinVar.table.headers.origin'),
       minSize: 60,
