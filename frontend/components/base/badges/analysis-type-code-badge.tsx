@@ -28,7 +28,7 @@ function AnalysisTypeCodeBadge({ code, size = 12 }: AnalysisTypeCodeProps) {
           <Icon size={size} />
         </Badge>
       </TooltipTrigger>
-      <TooltipContent>{t(`caseExploration.analysis_type_code.${code}`)}</TooltipContent>
+      <TooltipContent>{t(`case_exploration.analysis_type_code.${code}`)}</TooltipContent>
     </Tooltip>
   );
 }

@@ -21,7 +21,7 @@ function PriorityIndicator({ code, ...props }: PriorityIndicatorProps) {
 
   return (
     <Indicator variant={color} {...props}>
-      <span>{t(`caseExploration.priority.${code}`)}</span>
+      <span>{t(`case_exploration.priority.${code}`)}</span>
     </Indicator>
   );
 }

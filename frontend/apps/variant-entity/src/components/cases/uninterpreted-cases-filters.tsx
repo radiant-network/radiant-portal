@@ -1,6 +1,7 @@
 import { useI18n } from '@/components/hooks/i18n';
-import InstitutionSelectFilter from './institution-select-filter';
+
 import AnalysisSelectFilter from './analysis-select-filter';
+import InstitutionSelectFilter from './institution-select-filter';
 import PhenotypeCasesFilter from './phenotype-cases-filter';
 
 export interface UninterpretedCasesFiltersState {

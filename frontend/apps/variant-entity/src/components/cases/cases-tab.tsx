@@ -1,16 +1,17 @@
+import { useState } from 'react';
+import { useParams } from 'react-router';
+import useSWR from 'swr';
+
+import { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Card, CardContent } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
-import { useState } from 'react';
-import InterpretedCasesTable from './interpreted-cases-table';
-import UninterpretedCasesTable from './uninterpreted-cases-table';
-import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
+import { tabContentClassName } from '@/style';
 import { variantsApi } from '@/utils/api';
-import useSWR from 'swr';
-import { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
-import { useParams } from 'react-router';
 
 import { CasesFiltersProvider } from './cases-filters-context';
-import { tabContentClassName } from '@/style';
+import InterpretedCasesTable from './interpreted-cases-table';
+import UninterpretedCasesTable from './uninterpreted-cases-table';
 
 enum Tabs {
   InterpretedCases = 'InterpretedCases',

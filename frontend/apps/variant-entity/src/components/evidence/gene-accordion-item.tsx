@@ -1,10 +1,11 @@
+import { GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+import DataTable from '@/components/base/data-table/data-table';
+import Empty from '@/components/base/empty';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { getOmimOrgUrl } from '@/components/feature/variant/utils';
-import { conditionPhenotypeDefaultSettings, getConditionPhenotypeColumns } from './table-settings';
-import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import Empty from '@/components/base/empty';
-import { GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+
+import { conditionPhenotypeDefaultSettings, getConditionPhenotypeColumns } from './table-settings';
 
 export interface GeneAccordionItemProps {
   symbol: string;

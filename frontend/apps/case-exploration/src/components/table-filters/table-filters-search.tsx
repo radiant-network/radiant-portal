@@ -138,7 +138,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
                     key={category}
                     heading={
                       <span className="h-[28px] &:not(:first-child)]:bg-border">
-                        {t(`caseExploration.case.search.${category}`, category.toUpperCase())}
+                        {t(`case_exploration.case.search.${category}`, category.toUpperCase())}
                       </span>
                     }
                   >

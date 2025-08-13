@@ -3,7 +3,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { ArrayTenOrMore, QueryBuilderDictionary } from './types';
 
 export const useQueryBuilderDictionary = (): QueryBuilderDictionary => {
-  const { t } = useI18n();
+  const { t } = useI18n('common');
 
   return {
     queryBar: {

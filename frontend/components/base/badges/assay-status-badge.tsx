@@ -37,7 +37,7 @@ function AssayStatusBadge({ status }: AssayStatusBadgeProps) {
   return (
     <Badge variant={color ?? 'neutral'}>
       <Icon />
-      {t(`caseExploration.status.${status}`)}
+      {t(`case_exploration.status.${status}`)}
     </Badge>
   );
 }

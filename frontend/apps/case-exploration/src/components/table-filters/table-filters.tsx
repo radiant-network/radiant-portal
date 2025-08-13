@@ -109,7 +109,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       .map(key => {
         const baseOption: IFilterButton = {
           key,
-          label: t(`caseExploration.case.filters.${key}`),
+          label: t(`case_exploration.case.filters.${key}`),
           isVisible: ['priority', 'status', 'case_analysis'].includes(key), // Show first three by default
           isOpen: openFilters[key] || false,
           selectedItems: filters[key] || [],
@@ -216,7 +216,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
         return {
           type,
           value: values[0], // Only take the first value since we only allow one
-          label: t(`caseExploration.case.headers.${type}`, type.toUpperCase()) + ': ' + values[0],
+          label: t(`case_exploration.case.headers.${type}`, type.toUpperCase()) + ': ' + values[0],
         };
       }
     }

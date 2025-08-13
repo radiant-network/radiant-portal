@@ -1,12 +1,13 @@
-import { useI18n } from '@/components/hooks/i18n';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
-import { Badge } from '@/components/base/ui/badge';
-import { Separator } from '@/components/base/ui/separator';
 import { DotIcon, FlaskConical } from 'lucide-react';
+
 import { CaseAssay } from '@/api/api';
-import { cn } from '@/components/lib/utils';
-import { Skeleton } from '@/components/base/ui/skeleton';
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
+import { Badge } from '@/components/base/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
+import { Separator } from '@/components/base/ui/separator';
+import { Skeleton } from '@/components/base/ui/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 function AssayVariantFiltersSelectValue({ relationship_to_proband, request_id }: CaseAssay) {
   const { t } = useI18n();

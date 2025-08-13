@@ -1,10 +1,10 @@
-import { Separator } from '@/components/base/ui/separator';
-import ConsequenceLabel from '@/components/feature/variant/consequence-label';
-import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
-import { useI18n } from '@/components/hooks/i18n';
-import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { Separator } from '@/components/base/ui/separator';
+import ConsequenceLabel from '@/components/feature/variant/consequence-label';
+import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { useI18n } from '@/components/hooks/i18n';
 
 type InterpretationTranscriptProps = {
   occurrence?: ExpandedGermlineSNVOccurrence;

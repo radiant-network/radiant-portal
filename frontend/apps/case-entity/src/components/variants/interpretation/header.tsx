@@ -1,11 +1,13 @@
+import { useContext } from 'react';
+
 import { GermlineSNVOccurrence } from '@/api/api';
+import { CaseEntityContext } from '@/App';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/ui/badge';
 import { Separator } from '@/components/base/ui/separator';
-import { useI18n } from '@/components/hooks/i18n';
-import { CaseEntityContext } from '@/App';
-import { useContext } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+
 import { SeqIDContext } from '../variants-tab';
 
 type InterpretationVariantHeaderProps = {
