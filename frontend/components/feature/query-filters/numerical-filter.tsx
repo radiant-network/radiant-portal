@@ -1,37 +1,41 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { Button } from '@/components/base/ui/button';
-import { SqonOpEnum, type Statistics, type StatisticsBodyWithSqon, type SqonContent } from '@/api/api';
-import { DEFAULT_EMPTY_QUERY, queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
-import { IFilterRangeConfig, useConfig } from '@/components/model/applications-config';
-import { ISqonGroupFilter, IValueFilter, MERGE_VALUES_STRATEGIES, RangeOperators, TSqonContentValue } from '@/components/model/sqon';
-import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
-import { Input } from '@/components/base/ui/input';
-import { Checkbox } from '@/components/base/ui/checkbox';
-import { TextMuted } from '@/components/base/typography/text-muted';
-import { Label } from '@/components/base/ui/label';
+import useSWR from 'swr';
+
+import { type SqonContent, SqonOpEnum, type Statistics, type StatisticsBodyWithSqon } from '@/api/api';
 import ElementOperatorIcon from '@/components/base/icons/element-operator-icon';
 import EqualOperatorIcon from '@/components/base/icons/equal-operator-icon';
 import GreaterThanOperatorIcon from '@/components/base/icons/greater-than-operator-icon';
 import GreaterThanOrEqualOperatorIcon from '@/components/base/icons/greater-than-or-equal-operator-icon';
 import LessThanOperatorIcon from '@/components/base/icons/less-than-operator-icon';
 import LessThanOrEqualOperatorIcon from '@/components/base/icons/less-than-or-equal-operator-icon';
-import { useI18n } from '@/components/hooks/i18n';
-import useSWR from 'swr';
-import { occurrencesApi } from '@/utils/api';
+import { TextMuted } from '@/components/base/typography/text-muted';
+import { Button } from '@/components/base/ui/button';
+import { Checkbox } from '@/components/base/ui/checkbox';
+import { Input } from '@/components/base/ui/input';
+import { Label } from '@/components/base/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
+import { useI18n } from '@/components/hooks/i18n';
+import { IFilterRangeConfig, useConfig } from '@/components/model/applications-config';
+import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
+import { DEFAULT_EMPTY_QUERY, queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import {
+  ISqonGroupFilter,
+  IValueFilter,
+  MERGE_VALUES_STRATEGIES,
+  RangeOperators,
+  TSqonContentValue,
+} from '@/components/model/sqon';
+import { occurrencesApi } from '@/utils/api';
 
 type OccurrenceStatisticsInput = {
   seqId: string;
   statisticsBody: StatisticsBodyWithSqon;
 };
 
-const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics> => {
-  return occurrencesApi
-    .statisticsGermlineSNVOccurrences(input.seqId, input.statisticsBody)
-    .then(response => response.data);
-};
+const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics> =>
+  occurrencesApi.statisticsGermlineSNVOccurrences(input.seqId, input.statisticsBody).then(response => response.data);
 
 function useStatisticsBuilder(field: string, appId: string, seqId: string, useEmptyQuery = false) {
   const data: OccurrenceStatisticsInput = {
@@ -55,10 +59,15 @@ function useStatisticsBuilder(field: string, appId: string, seqId: string, useEm
 }
 
 /**
-  * noData
-  * unappliedItems
-  */
-function getNumericalValue(fieldKey: string, activeQuery: ISqonGroupFilter, aggConfig: IFilterRangeConfig, statistics?: Statistics) {
+ * noData
+ * unappliedItems
+ */
+function getNumericalValue(
+  fieldKey: string,
+  activeQuery: ISqonGroupFilter,
+  aggConfig: IFilterRangeConfig,
+  statistics?: Statistics,
+) {
   let hasUnappliedItems: boolean = false;
   let selectedRange: RangeOperators = RangeOperators.LessThan;
   let minValue: string = '0';
@@ -67,9 +76,9 @@ function getNumericalValue(fieldKey: string, activeQuery: ISqonGroupFilter, aggC
   let hasNoData: boolean = false;
 
   // Find the main numeric field filter
-  const numericFilter = activeQuery.content.find((x: TSqonContentValue) => {
-    return 'content' in x && 'field' in x.content ? x.content.field === fieldKey : false;
-  }) as IValueFilter | undefined;
+  const numericFilter = activeQuery.content.find((x: TSqonContentValue) =>
+    'content' in x && 'field' in x.content ? x.content.field === fieldKey : false,
+  ) as IValueFilter | undefined;
 
   // Find the unit field filter if it exists
   const unitFilter = activeQuery.content.find((x: TSqonContentValue) => {
@@ -118,7 +127,7 @@ function getNumericalValue(fieldKey: string, activeQuery: ISqonGroupFilter, aggC
     // Use defaults from config if available
     if (aggConfig?.defaultMin !== undefined) {
       minValue = aggConfig.defaultMin.toString();
-      numericalValue = aggConfig.defaultMin.toString()
+      numericalValue = aggConfig.defaultMin.toString();
     } else if (statistics?.min !== undefined) {
       minValue = Number(statistics.min.toFixed(3)).toString();
       numericalValue = Number(statistics.min.toFixed(3)).toString();
@@ -148,14 +157,14 @@ function getNumericalValue(fieldKey: string, activeQuery: ISqonGroupFilter, aggC
       : aggConfig?.rangeTypes?.length
         ? aggConfig.rangeTypes[0].key
         : undefined,
-  }
+  };
 }
-
 
 interface IProps {
   field: AggregationConfig;
 }
 
+// eslint-disable-next-line complexity
 export function NumericalFilter({ field }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
@@ -167,13 +176,13 @@ export function NumericalFilter({ field }: IProps) {
     { display: string; dropdown: string; icon: React.ComponentType<{ size?: number; className?: string }> }
   > = {
     [RangeOperators.GreaterThan]: {
-      display: t('common.filters.operators.greaterThan'),
-      dropdown: t('common.filters.operators.greaterThan'),
+      display: t('common.filters.operators.greater_than'),
+      dropdown: t('common.filters.operators.greater_than'),
       icon: GreaterThanOperatorIcon,
     },
     [RangeOperators.LessThan]: {
-      display: t('common.filters.operators.lessThan'),
-      dropdown: t('common.filters.operators.lessThan'),
+      display: t('common.filters.operators.less_than'),
+      dropdown: t('common.filters.operators.less_than'),
       icon: LessThanOperatorIcon,
     },
     [RangeOperators.Between]: {
@@ -182,13 +191,13 @@ export function NumericalFilter({ field }: IProps) {
       icon: ElementOperatorIcon,
     },
     [RangeOperators.GreaterThanOrEqualTo]: {
-      display: t('common.filters.operators.greaterThanOrEqual'),
-      dropdown: t('common.filters.operators.greaterThanOrEqual'),
+      display: t('common.filters.operators.greater_than_or_equal'),
+      dropdown: t('common.filters.operators.greater_than_or_equal'),
       icon: GreaterThanOrEqualOperatorIcon,
     },
     [RangeOperators.LessThanOrEqualTo]: {
-      display: t('common.filters.operators.lessThanOrEqual'),
-      dropdown: t('common.filters.operators.lessThanOrEqual'),
+      display: t('common.filters.operators.less_than_or_equal'),
+      dropdown: t('common.filters.operators.less_than_or_equal'),
       icon: LessThanOrEqualOperatorIcon,
     },
     [RangeOperators.In]: {
@@ -227,7 +236,7 @@ export function NumericalFilter({ field }: IProps) {
     const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
     if (!activeQuery?.content) return;
 
-    var result = getNumericalValue(fieldKey, activeQuery, aggConfig, statistics);
+    const result = getNumericalValue(fieldKey, activeQuery, aggConfig, statistics);
     setHasNoData(result.hasNoData);
     setMinValue(result.minValue);
     setMaxValue(result.maxValue);
@@ -258,7 +267,7 @@ export function NumericalFilter({ field }: IProps) {
 
   const reset = () => {
     setHasUnappliedItems(false);
-    var result = getNumericalValue(fieldKey, DEFAULT_EMPTY_QUERY, aggConfig, statistics);
+    const result = getNumericalValue(fieldKey, DEFAULT_EMPTY_QUERY, aggConfig, statistics);
     setHasNoData(result.hasNoData);
     setMinValue(result.minValue);
     setMaxValue(result.maxValue);
@@ -329,7 +338,7 @@ export function NumericalFilter({ field }: IProps) {
           <div id={`${fieldKey}_operator`}>
             <Select value={selectedRange} onValueChange={onRangeValueChanged}>
               <SelectTrigger>
-                <SelectValue placeholder={t('common.filters.operators.selectOperator')}>
+                <SelectValue placeholder={t('common.filters.operators.select_operator')}>
                   {RANGE_OPERATOR_LABELS[selectedRange].display}
                 </SelectValue>
               </SelectTrigger>

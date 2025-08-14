@@ -1,3 +1,10 @@
+import { ReactNode, useCallback, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
+
+import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
+import { Spinner } from '@/components/base/spinner';
 import { Button } from '@/components/base/ui/button';
 import {
   Dialog,
@@ -7,22 +14,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
-import { toast } from 'sonner';
 import { Separator } from '@/components/base/ui/separator';
-import InterpretationFormGermline from './interpretation-form-germline';
-import { ReactNode, useCallback, useContext, useRef, useState } from 'react';
-import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
-import InterpretationFormSomatic from './interpretation-form-somatic';
-import InterpretationLastUpdatedBanner from './last-updated-banner';
+import { useI18n } from '@/components/hooks/i18n';
+
 import InterpretationVariantHeader from './header';
 import { useInterpretationHelper, useOccurenceExpandHelper } from './hook';
-import useSWR from 'swr';
-import useSWRMutation from 'swr/mutation';
-import { Interpretation, InterpretationFormRef } from './types';
-import { Spinner } from '@/components/base/spinner';
-import InterpretationTranscript from './transcript';
+import InterpretationFormGermline from './interpretation-form-germline';
+import InterpretationFormSomatic from './interpretation-form-somatic';
+import InterpretationLastUpdatedBanner from './last-updated-banner';
 import OccurrenceDetails from './occurence-details';
-import { useI18n } from '@/components/hooks/i18n';
+import InterpretationTranscript from './transcript';
+import { Interpretation, InterpretationFormRef } from './types';
 
 type InterpretationDialogButtonProps = {
   occurrence: GermlineSNVOccurrence;
@@ -75,12 +77,12 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
     onSuccess: () => {
       setOpen(false);
       handleSaveCallback && handleSaveCallback();
-      toast(t('variant.interpretationForm.notification.success'));
+      toast(t('variant.interpretation_form.notification.success'));
     },
     onError: () => {
       setOpen(false);
-      toast(t('variant.interpretationForm.notification.error.title'), {
-        description: t('variant.interpretationForm.notification.error.text'),
+      toast(t('variant.interpretation_form.notification.error.title'), {
+        description: t('variant.interpretation_form.notification.error.text'),
       });
     },
   });
@@ -113,7 +115,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
         ) : (
           <div>
             <DialogHeader>
-              <DialogTitle>{t('variant.interpretationForm.title')}</DialogTitle>
+              <DialogTitle>{t('variant.interpretation_form.title')}</DialogTitle>
             </DialogHeader>
             <Separator className="mt-3" />
             <div className="py-3 overflow-scroll space-y-3 h-[calc(95vh-150px)]">
@@ -154,7 +156,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
             <Separator className="mb-3" />
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline">{t('variant.interpretationForm.cancelText')}</Button>
+                <Button variant="outline">{t('variant.interpretation_form.cancel_text')}</Button>
               </DialogClose>
               <Button
                 type="submit"
@@ -163,7 +165,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
                 onClick={handleSave}
                 disabled={!isDirty}
               >
-                {t('variant.interpretationForm.okText')}
+                {t('variant.interpretation_form.ok_text')}
               </Button>
             </DialogFooter>
           </div>

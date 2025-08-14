@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { useI18n } from '@/components/hooks/i18n';
+
 import { useCasesFilters } from './cases-filters-context';
 
 interface ClassificationSelectFilterProps {
@@ -17,7 +18,7 @@ function ClassificationSelectFilter({ value = 'all', onChange }: ClassificationS
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{t('variant.interpretation.classifications.allClassifications')}</SelectItem>
+        <SelectItem value="all">{t('variant.interpretation.classifications.all_classifications')}</SelectItem>
         {filters?.classification.map(classification => (
           <SelectItem key={classification.key} value={classification.key!}>
             {t(`variant.interpretation.classifications.${classification.label}`)}

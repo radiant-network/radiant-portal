@@ -1,5 +1,6 @@
 import { ComponentProps, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
+
 import { CaseEntity, SortBodyOrderEnum } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
@@ -27,7 +28,7 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
   return (
     <Card {...props}>
       <CardHeader className="border-b [.border-b]:pb-4">
-        <CardTitle size="xl">{t('caseEntity.details.assayInformationsOverview')}</CardTitle>
+        <CardTitle size="xl">{t('case_entity.details.assay_informations_overview')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <DataTable

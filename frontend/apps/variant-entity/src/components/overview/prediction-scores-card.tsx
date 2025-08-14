@@ -1,15 +1,16 @@
-import { Card, CardContent, CardHeader, CardProps } from '@/components/base/ui/card';
-import { Button } from '@/components/base/ui/button';
-import { VariantOverview } from '@/api/api';
-import { Badge } from '@/components/base/ui/badge';
-import { useI18n } from '@/components/hooks/i18n';
-import { TFunction } from 'i18next';
 import { useMemo } from 'react';
+import { TFunction } from 'i18next';
+
+import { VariantOverview } from '@/api/api';
+import Empty from '@/components/base/empty';
+import { Badge } from '@/components/base/ui/badge';
+import { Button } from '@/components/base/ui/button';
+import { Card, CardContent, CardHeader, CardProps } from '@/components/base/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/base/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import Empty from '@/components/base/empty';
-import { BarChart3 } from 'lucide-react';
+import { useI18n } from '@/components/hooks/i18n';
 
+// eslint-disable-next-line complexity
 const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined>) => {
   const predictions: { key: string; label: string; value: string | React.ReactElement }[] = [];
   const empties: { key: string; label: string }[] = [];
@@ -61,7 +62,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
   if (data.spliceai_ds && data.spliceai_type?.length) {
     predictions.push({
       key: 'spliceai',
-      label: t('variant.predictions.spliceAI'),
+      label: t('variant.predictions.splice_ai'),
       value: (
         <div className="space-x-1">
           {data.spliceai_type?.map(type => (
@@ -69,7 +70,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
               <TooltipTrigger>
                 <Badge variant="outline">{type}</Badge>
               </TooltipTrigger>
-              <TooltipContent>{t(`variant.spliceAi.${type}`)}</TooltipContent>
+              <TooltipContent>{t(`variant.splice_ai.${type}`)}</TooltipContent>
             </Tooltip>
           ))}
         </div>
@@ -78,7 +79,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
   } else {
     empties.push({
       key: 'spliceai',
-      label: t('variant.predictions.spliceAI'),
+      label: t('variant.predictions.splice_ai'),
     });
   }
 
@@ -101,13 +102,13 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
   if (data.cadd_score) {
     predictions.push({
       key: 'caddraw',
-      label: t('variant.predictions.caddRaw'),
+      label: t('variant.predictions.cadd_raw'),
       value: `${data.cadd_score}`,
     });
   } else {
     empties.push({
       key: 'caddraw',
-      label: t('variant.predictions.caddRaw'),
+      label: t('variant.predictions.cadd_raw'),
     });
   }
 
@@ -115,13 +116,13 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
   if (data.cadd_phred) {
     predictions.push({
       key: 'caddphred',
-      label: t('variant.predictions.caddPhred'),
+      label: t('variant.predictions.cadd_phred'),
       value: `${data.cadd_phred}`,
     });
   } else {
     empties.push({
       key: 'caddphred',
-      label: t('variant.predictions.caddPhred'),
+      label: t('variant.predictions.cadd_phred'),
     });
   }
 
@@ -217,28 +218,31 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
   const predictionScoreList = useMemo(() => getPredictionList(data, t), [data, t]);
 
   // Check if all prediction scores are empty
-  const hasAnyPredictionScores = useMemo(() => {
-    return !!(
-      data.revel_score ||
-      (data.sift_pred && data.sift_score !== undefined) ||
-      data.gnomad_loeuf ||
-      (data.spliceai_ds && data.spliceai_type?.length) ||
-      (data.fathmm_pred && data.fathmm_score !== undefined) ||
-      data.cadd_score ||
-      data.cadd_phred ||
-      data.dann_score ||
-      (data?.lrt_pred && data.lrt_score !== undefined) ||
-      (data.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined) ||
-      data.phyloP17way_primate ||
-      data.gnomad_pli
-    );
-  }, [data]);
+  const hasAnyPredictionScores = useMemo(
+    // eslint-disable-next-line complexity
+    () =>
+      !!(
+        data.revel_score ||
+        (data.sift_pred && data.sift_score !== undefined) ||
+        data.gnomad_loeuf ||
+        (data.spliceai_ds && data.spliceai_type?.length) ||
+        (data.fathmm_pred && data.fathmm_score !== undefined) ||
+        data.cadd_score ||
+        data.cadd_phred ||
+        data.dann_score ||
+        (data?.lrt_pred && data.lrt_score !== undefined) ||
+        (data.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined) ||
+        data.phyloP17way_primate ||
+        data.gnomad_pli
+      ),
+    [data],
+  );
 
   return (
     <>
       <Card {...props}>
         <CardHeader className="flex flex-row justify-between pb-0">
-          <div className="font-semibold">{t('variantEntity.overview.predictionScores')}</div>
+          <div className="font-semibold">{t('variant_entity.overview.prediction_scores')}</div>
           {hasAnyPredictionScores && (
             <Dialog>
               <DialogTrigger asChild>
@@ -248,7 +252,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>{t('variantEntity.overview.predictionScores')}</DialogTitle>
+                  <DialogTitle>{t('variant_entity.overview.prediction_scores')}</DialogTitle>
                 </DialogHeader>
                 <div className="text-sm space-y-3">{predictionScoreList}</div>
               </DialogContent>
@@ -259,7 +263,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
           {hasAnyPredictionScores ? (
             predictionScoreList.slice(0, 4)
           ) : (
-            <Empty bordered showIcon={false} description={t('variant.noDataForVariant')} className="py-3 h-full" />
+            <Empty bordered showIcon={false} description={t('variant.no_data_for_variant')} className="py-3 h-full" />
           )}
         </CardContent>
       </Card>

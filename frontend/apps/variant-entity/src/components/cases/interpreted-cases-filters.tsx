@@ -1,8 +1,9 @@
 import { useI18n } from '@/components/hooks/i18n';
-import ClassificationSelectFilter from './classification-select-filter';
-import InstitutionSelectFilter from './institution-select-filter';
+
 import AnalysisSelectFilter from './analysis-select-filter';
+import ClassificationSelectFilter from './classification-select-filter';
 import ConditionCasesFilter from './condition-cases-filter';
+import InstitutionSelectFilter from './institution-select-filter';
 
 export interface InterpretedCasesFiltersState {
   mondo: string;
@@ -25,7 +26,7 @@ function InterpretedCasesFilters({ filters, onFiltersChange }: CasesFilterBarPro
 
   return (
     <div className="space-y-2">
-      <div className="text-sm">{t('variantEntity.cases.interpreted-table.filters.label')}</div>
+      <div className="text-sm">{t('variant_entity.cases.interpreted_table.filters.label')}</div>
       <div className="flex items-center gap-2">
         <ConditionCasesFilter onChange={value => handleFilterChange('mondo', value)} />
         <ClassificationSelectFilter

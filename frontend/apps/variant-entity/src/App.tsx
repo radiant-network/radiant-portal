@@ -67,11 +67,11 @@ export default function App() {
     return (
       <PageError
         status="404"
-        message={t('variantEntity.notFound')}
+        message={t('variant_entity.not_found')}
         className="h-screen"
         extra={
           <Link to="/">
-            <Button>{t('variantEntity.notFound.button')}</Button>
+            <Button>{t('variant_entity.not_found.button')}</Button>
           </Link>
         }
       />
@@ -82,7 +82,7 @@ export default function App() {
   if (data?.assembly_version) {
     pageHeaderBadges.push({ variant: 'outline', children: data?.assembly_version });
   }
-  pageHeaderBadges.push({ children: t('variantEntity.header.germline') });
+  pageHeaderBadges.push({ children: t('variant_entity.header.germline') });
 
   // To avoid hydration mismatch with hash in ssr
   if (!activeTab) {
@@ -94,13 +94,13 @@ export default function App() {
       <PageHeader isLoading={isLoading} title={data?.hgvsg} badges={pageHeaderBadges} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
-          <TabsListItem value={VariantEntityTabs.Overview}>{t('variantEntity.overview.title')}</TabsListItem>
-          {/* SJRA-389 <TabsListItem value={VariantEntityTabs.Frequency}>{t('variantEntity.frequency.title')}</TabsListItem> */}
+          <TabsListItem value={VariantEntityTabs.Overview}>{t('variant_entity.overview.title')}</TabsListItem>
+          {/* SJRA-389 <TabsListItem value={VariantEntityTabs.Frequency}>{t('variant_entity.frequency.title')}</TabsListItem> */}
           <TabsListItem value={VariantEntityTabs.EvidenceAndConditions}>
-            {t('variantEntity.evidence.title')}
+            {t('variant_entity.evidence.title')}
           </TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Transcripts}>{t('variantEntity.transcripts.title')}</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Cases}>{t('variantEntity.cases.tab')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Transcripts}>{t('variant_entity.transcripts.title')}</TabsListItem>
+          <TabsListItem value={VariantEntityTabs.Cases}>{t('variant_entity.cases.tab')}</TabsListItem>
         </TabsList>
         <div className="px-0 sm:px-3">
           <Container>

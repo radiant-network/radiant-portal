@@ -59,7 +59,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
           </div>
           <Separator orientation="vertical" className="h-4" />
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">{t('variant.predictions.spliceAI')}:</span>
+            <span className="text-muted-foreground">{t('variant.predictions.splice_ai')}:</span>
             <div className="flex items-center gap-2">
               <span>{data?.spliceai_ds ? data.spliceai_ds : '-'}</span>
               {data?.spliceai_type?.length && (
@@ -69,7 +69,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
                       <TooltipTrigger>
                         <Badge variant="outline">{type}</Badge>
                       </TooltipTrigger>
-                      <TooltipContent>{t(`variant.spliceAi.${type}`)}</TooltipContent>
+                      <TooltipContent>{t(`variant.splice_ai.${type}`)}</TooltipContent>
                     </Tooltip>
                   ))}
                 </div>

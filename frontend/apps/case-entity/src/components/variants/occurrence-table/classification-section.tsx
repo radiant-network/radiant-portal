@@ -18,9 +18,9 @@ export default function ClassificationSection({ data }: ClassificationSectionPro
   ));
 
   return (
-    <DetailSection title={t('occurrenceExpand.classifications.title')}>
+    <DetailSection title={t('occurrence_expand.classifications.title')}>
       <DetailItem
-        title={t('occurrenceExpand.classifications.clinvar')}
+        title={t('occurrence_expand.classifications.clinvar')}
         value={clinvar?.length ? <div className="flex items-center gap-1">{clinvar}</div> : '-'}
       />
     </DetailSection>

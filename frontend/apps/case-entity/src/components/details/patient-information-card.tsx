@@ -1,11 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
-import { useI18n } from '@/components/hooks/i18n';
-import { ComponentProps, useState, useEffect, useCallback } from 'react';
-import { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/ui/tabs';
+import { ComponentProps, useCallback, useEffect, useState } from 'react';
 import { formatDate } from 'date-fns';
+
+import { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
 import { CopyButton } from '@/components/base/buttons/copy-button';
 import InformationField from '@/components/base/information/information-field';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/ui/tabs';
+import { useI18n } from '@/components/hooks/i18n';
 import { titleCase } from '@/components/lib/string-format';
 
 enum CaseType {
@@ -27,24 +28,26 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
   return (
     <div className="flex w-full justify-between gap-4">
       <div className="flex flex-col gap-2 flex-1">
-        <InformationField label={t('caseEntity.patientInformation.id')}>{member.patient_id}</InformationField>
+        <InformationField label={t('case_entity.patient_information.id')}>{member.patient_id}</InformationField>
 
         <InformationField
-          label={t('caseEntity.patientInformation.dob')}
-          labelTooltipsText={t('caseEntity.details.date_format_tooltips')}
+          label={t('case_entity.patient_information.dob')}
+          labelTooltipsText={t('case_entity.details.date_format_tooltips')}
         >
           {member.date_of_birth && formatDate(member.date_of_birth, t('common.date'))}
         </InformationField>
 
-        <InformationField label={t('caseEntity.patientInformation.sex')}>{titleCase(member.sex_code)}</InformationField>
+        <InformationField label={t('case_entity.patient_information.sex')}>
+          {titleCase(member.sex_code)}
+        </InformationField>
 
-        <InformationField label={t('caseEntity.patientInformation.mrn')}>
+        <InformationField label={t('case_entity.patient_information.mrn')}>
           {member.mrn && <CopyButton value={member.mrn} label={member.mrn} className="-m-2" />}
         </InformationField>
 
         <InformationField
-          label={t('caseEntity.patientInformation.managingOrg')}
-          labelTooltipsText={t('caseEntity.patientInformation.managingOrg_tooltips')}
+          label={t('case_entity.patient_information.managing_org')}
+          labelTooltipsText={t('case_entity.patient_information.managing_org_tooltips')}
           tooltipsText={member.managing_organization_name}
         >
           {member.managing_organization_code}
@@ -68,12 +71,11 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
   }, [members, activeTab]);
 
   const getRelationshipLabel = useCallback(
-    (relationship: string) => {
-      return t(
-        `caseEntity.patientInformation.relationships.${relationship}`,
+    (relationship: string) =>
+      t(
+        `case_entity.patientInformation.relationships.${relationship}`,
         relationship.charAt(0).toUpperCase() + relationship.slice(1),
-      );
-    },
+      ),
     [t],
   );
 
@@ -81,7 +83,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
     return (
       <Card {...props}>
         <CardHeader className="border-b [.border-b]:pb-2">
-          <CardTitle size="xl">{t('caseEntity.patientInformation.title')}</CardTitle>
+          <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -108,7 +110,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
   return (
     <Card {...props}>
       <CardHeader className="border-b [.border-b]:pb-2">
-        <CardTitle size="xl">{t('caseEntity.patientInformation.title')}</CardTitle>
+        <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <PatientInfoDisplay member={firstMember} />

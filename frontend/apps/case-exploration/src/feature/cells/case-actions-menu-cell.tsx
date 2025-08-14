@@ -1,5 +1,9 @@
-import { Button } from '@/components/base/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { CellContext } from '@tanstack/react-table';
+import { EllipsisVertical, ExternalLink } from 'lucide-react';
+
+import { CaseResult } from '@/api/api';
+import { Button } from '@/components/base/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,9 +11,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
 import { useI18n } from '@/components/hooks/i18n';
-import { CellContext } from '@tanstack/react-table';
-import { EllipsisVertical, ExternalLink } from 'lucide-react';
-import { CaseResult } from '@/api/api';
 
 function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
   const { t } = useI18n();
@@ -29,7 +30,7 @@ function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
             }}
           >
             <ExternalLink />
-            {t('caseExploration.case.actions.view_case')}
+            {t('case_exploration.case.actions.view_case')}
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={!row.original.has_variants}
@@ -38,7 +39,7 @@ function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
             }}
           >
             <ExternalLink />
-            {t('caseExploration.case.actions.view_variant')}
+            {t('case_exploration.case.actions.view_variant')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

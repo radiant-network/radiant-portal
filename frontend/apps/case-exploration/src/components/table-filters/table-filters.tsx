@@ -1,16 +1,18 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { useI18n } from '@/components/hooks/i18n';
-import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListFilter, X } from 'lucide-react';
-import FilterButton, { IFilterButton, IFilterButtonItem } from '@/components/base/buttons/filter-button';
-import { CaseFilters, SearchCriterion } from '@/api/api';
 import useSWR from 'swr';
-import { caseApi } from '@/utils/api';
-import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+
+import { CaseFilters, SearchCriterion } from '@/api/api';
+import FilterButton, { IFilterButton, IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
 import { Button } from '@/components/base/ui/button';
-import TableFiltersSearch from './table-filters-search';
-import filterItemStatus from './filter-item-status';
+import { useI18n } from '@/components/hooks/i18n';
+import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import { caseApi } from '@/utils/api';
+
 import filterItemPriority from './filter-item-priority';
+import filterItemStatus from './filter-item-status';
+import TableFiltersSearch from './table-filters-search';
 
 type CaseFiltersInput = {
   search_criteria: Array<SearchCriterion>;
@@ -40,10 +42,10 @@ export const FILTERS_SEARCH_DEFAULTS = {
   patient_id: [],
   mrn: [],
   request_id: [],
-}
+};
 
 function updateSearchCriteria(filters: StringArrayRecord) {
-  let search_criteria: SearchCriterion[] = [];
+  const search_criteria: SearchCriterion[] = [];
   if (filters.priority?.length > 0) {
     search_criteria.push({ field: 'priority_code', value: filters.priority });
   }
@@ -80,21 +82,16 @@ function updateSearchCriteria(filters: StringArrayRecord) {
 }
 
 function sortOptions(options: IFilterButtonItem[]) {
-  return options.sort((a, b) => {
-    return (a.label as string).localeCompare(b.label as string);
-  });
+  return options.sort((a, b) => (a.label as string).localeCompare(b.label as string));
 }
 
-function FiltersGroupForm({
-  loading = true,
-  setSearchCriteria,
-}: FiltersGroupFormProps) {
+function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFormProps) {
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
-  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>(
-    'case-exploration-filters',
-    { ...FILTER_DEFAULTS, ...FILTERS_SEARCH_DEFAULTS },
-  );
+  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
+    ...FILTER_DEFAULTS,
+    ...FILTERS_SEARCH_DEFAULTS,
+  });
   const { t } = useI18n();
 
   const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters({ search_criteria: [] }), {
@@ -108,48 +105,50 @@ function FiltersGroupForm({
   const filterButtons = useMemo(() => {
     if (!apiFilters) return [];
 
-    return Object.keys(apiFilters).map((key) => {
-      const baseOption: IFilterButton = {
-        key,
-        label: t(`caseExploration.case.filters.${key}`),
-        isVisible: ['priority', 'status', 'case_analysis'].includes(key), // Show first three by default
-        isOpen: openFilters[key] || false,
-        selectedItems: filters[key] || [],
-        options: [],
-      };
+    return Object.keys(apiFilters)
+      .map(key => {
+        const baseOption: IFilterButton = {
+          key,
+          label: t(`case_exploration.case.filters.${key}`),
+          isVisible: ['priority', 'status', 'case_analysis'].includes(key), // Show first three by default
+          isOpen: openFilters[key] || false,
+          selectedItems: filters[key] || [],
+          options: [],
+        };
 
-      switch (key) {
-        case 'status':
-          return {
-            ...baseOption,
-            options: sortOptions(filterItemStatus(apiFilters[key] || [], t))
-          };
-        case 'project':
-        case 'performer_lab':
-        case 'requested_by':
-          return {
-            ...baseOption,
-            popoverSize: 'lg',
-            isVisible: ((filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key)) || false,
-            options: sortOptions(apiFilters[key] || []),
-            withTooltip: true
-          };
-        case 'priority':
-          return {
-            ...baseOption,
-            options: filterItemPriority(apiFilters[key] || [], t)
-          };
-        case 'case_analysis':
-          return {
-            ...baseOption,
-            options: sortOptions(apiFilters[key] || []),
-            popoverSize: 'lg',
-            withTooltip: true
-          };
-        default:
-          return baseOption;
-      }
-    }).filter(option => option.options.length > 0);
+        switch (key) {
+          case 'status':
+            return {
+              ...baseOption,
+              options: sortOptions(filterItemStatus(apiFilters[key] || [], t)),
+            };
+          case 'project':
+          case 'performer_lab':
+          case 'requested_by':
+            return {
+              ...baseOption,
+              popoverSize: 'lg',
+              isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
+              options: sortOptions(apiFilters[key] || []),
+              withTooltip: true,
+            };
+          case 'priority':
+            return {
+              ...baseOption,
+              options: filterItemPriority(apiFilters[key] || [], t),
+            };
+          case 'case_analysis':
+            return {
+              ...baseOption,
+              options: sortOptions(apiFilters[key] || []),
+              popoverSize: 'lg',
+              withTooltip: true,
+            };
+          default:
+            return baseOption;
+        }
+      })
+      .filter(option => option.options.length > 0);
   }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
 
   useEffect(() => {
@@ -157,24 +156,30 @@ function FiltersGroupForm({
   }, [filters, setSearchCriteria]);
 
   // Handle filter selection
-  const handleFilterSelect = useCallback((filterKey: string, selectedValues: string[]) => {
-    setFilters({ ...filters, [filterKey]: selectedValues });
-  }, [filters, setFilters]);
+  const handleFilterSelect = useCallback(
+    (filterKey: string, selectedValues: string[]) => {
+      setFilters({ ...filters, [filterKey]: selectedValues });
+    },
+    [filters, setFilters],
+  );
 
   // Handle autocomplete item selection - only one search term allowed at a time
-  const handleAutocompleteSelect = useCallback((type: string, value: string) => {
-    // Clear all existing search terms first
-    const clearedFilters = {
-      ...filters,
-      ...FILTERS_SEARCH_DEFAULTS,
-    };
+  const handleAutocompleteSelect = useCallback(
+    (type: string, value: string) => {
+      // Clear all existing search terms first
+      const clearedFilters = {
+        ...filters,
+        ...FILTERS_SEARCH_DEFAULTS,
+      };
 
-    // Set the new search term
-    setFilters({
-      ...clearedFilters,
-      [type]: [value],
-    });
-  }, [filters, setFilters]);
+      // Set the new search term
+      setFilters({
+        ...clearedFilters,
+        [type]: [value],
+      });
+    },
+    [filters, setFilters],
+  );
 
   // Handle clearing the search input
   const handleSearchClear = useCallback(() => {
@@ -190,10 +195,13 @@ function FiltersGroupForm({
     setChangedFilterButtons(prev => [...prev, ...selectedKeys.filter(key => !prev.includes(key))]);
 
     // Set selected filters as open
-    const newOpenFilters = selectedKeys.reduce((acc, key) => {
-      acc[key] = true;
-      return acc;
-    }, {} as Record<string, boolean>);
+    const newOpenFilters = selectedKeys.reduce(
+      (acc, key) => {
+        acc[key] = true;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    );
 
     setOpenFilters(prev => ({ ...prev, ...newOpenFilters }));
   }, []);
@@ -208,7 +216,7 @@ function FiltersGroupForm({
         return {
           type,
           value: values[0], // Only take the first value since we only allow one
-          label: t(`caseExploration.case.headers.${type}`, type.toUpperCase()) + ': ' + values[0]
+          label: t(`case_exploration.case.headers.${type}`, type.toUpperCase()) + ': ' + values[0],
         };
       }
     }
@@ -216,10 +224,7 @@ function FiltersGroupForm({
     return null;
   };
 
-  const hiddenFilterOptions = useMemo(() =>
-    filterButtons.filter(option => !option.isVisible),
-    [filterButtons]
-  );
+  const hiddenFilterOptions = useMemo(() => filterButtons.filter(option => !option.isVisible), [filterButtons]);
   const searchTerm = getSearchTerm();
 
   // Check if any filters are active
@@ -250,21 +255,20 @@ function FiltersGroupForm({
 
       <div className="flex flex-wrap gap-2 items-end">
         {/* Show visible filters */}
-        {filterButtons.map((filter) => {
-          return filter.isVisible === true ?
-            (
-              <FilterButton
-                key={filter.key}
-                popoverSize={filter.popoverSize}
-                label={filter.label}
-                options={filter.options}
-                selected={filter.selectedItems}
-                onSelect={(values) => handleFilterSelect(filter.key, values)}
-                isOpen={filter.isOpen}
-                withTooltip={filter.withTooltip}
-              />
-            ) : null;
-        })}
+        {filterButtons.map(filter =>
+          filter.isVisible === true ? (
+            <FilterButton
+              key={filter.key}
+              popoverSize={filter.popoverSize}
+              label={filter.label}
+              options={filter.options}
+              selected={filter.selectedItems}
+              onSelect={values => handleFilterSelect(filter.key, values)}
+              isOpen={filter.isOpen}
+              withTooltip={filter.withTooltip}
+            />
+          ) : null,
+        )}
 
         {/* Additional filters control button - only show if there are hidden options */}
         {hiddenFilterOptions.length > 0 && (
@@ -275,18 +279,14 @@ function FiltersGroupForm({
             onSelect={makeFiltersVisible}
             actionMode={true}
             icon={<ListFilter size={16} />}
-            placeholder={t('caseExploration.filtersGroup.case.filters.more_placeholder', 'Filters')}
+            placeholder={t('case_exploration.filters_group.case.filters.more_placeholder', 'Filters')}
             closeOnSelect={true}
           />
         )}
 
         {/* Clear button - only show if filters are active */}
         {hasActiveFilters && (
-          <Button
-            variant="link"
-            onClick={clearAllFilters}
-            className="text-sm py-2 px-3 h-8"
-          >
+          <Button variant="link" onClick={clearAllFilters} className="text-sm py-2 px-3 h-8">
             <X size={14} />
             {t('common.actions.clear', 'Clear')}
           </Button>

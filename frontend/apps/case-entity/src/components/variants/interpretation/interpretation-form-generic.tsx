@@ -1,9 +1,11 @@
-import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
-import RichTextEditor from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
 import { useFormContext } from 'react-hook-form';
-import { genericInterpretationFormSchema, GenericInterpretationSchemaType } from './types';
-import PubmedFormField from './pubmed-form-field';
+
+import RichTextEditor from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
 import { useI18n } from '@/components/hooks/i18n';
+
+import PubmedFormField from './pubmed-form-field';
+import { genericInterpretationFormSchema, GenericInterpretationSchemaType } from './types';
 
 function InterpretationFormGeneric() {
   const { t } = useI18n();
@@ -17,7 +19,7 @@ function InterpretationFormGeneric() {
         schema={genericInterpretationFormSchema}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t('variant.interpretationForm.generic.interpretation')}</FormLabel>
+            <FormLabel>{t('variant.interpretation_form.generic.interpretation')}</FormLabel>
             <FormControl>
               <RichTextEditor {...field} />
             </FormControl>

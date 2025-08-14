@@ -1,10 +1,11 @@
-import { Transcript } from '@/api/api';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { useI18n } from '@/components/hooks/i18n';
-import ExpandableList from '@/components/base/list/expandable-list';
 import { TFunction } from 'i18next';
-import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+
+import { Transcript } from '@/api/api';
+import ExpandableList from '@/components/base/list/expandable-list';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import ConsequenceLabel from '@/components/feature/variant/consequence-label';
+import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+import { useI18n } from '@/components/hooks/i18n';
 
 interface TranscriptDetailsProps {
   data: Transcript;
@@ -30,7 +31,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
           <div>
             <Tooltip>
               <TooltipTrigger>{data.aa_change && <span>{data.aa_change}</span>}</TooltipTrigger>
-              <TooltipContent>{t('variantEntity.transcripts.aminoAcidSubstitution')}</TooltipContent>
+              <TooltipContent>{t('variant_entity.transcripts.amino_acid_substitution')}</TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -97,13 +98,13 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
   if (data.cadd_score) {
     predictions.push({
       key: 'caddraw',
-      label: t('variant.predictions.caddRaw'),
+      label: t('variant.predictions.cadd_raw'),
       value: `${data.cadd_score}`,
     });
   } else {
     empties.push({
       key: 'caddraw',
-      label: t('variant.predictions.caddRaw'),
+      label: t('variant.predictions.cadd_raw'),
     });
   }
 
@@ -111,13 +112,13 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
   if (data.cadd_phred) {
     predictions.push({
       key: 'caddphred',
-      label: t('variant.predictions.caddPhred'),
+      label: t('variant.predictions.cadd_phred'),
       value: `${data.cadd_phred}`,
     });
   } else {
     empties.push({
       key: 'caddphred',
-      label: t('variant.predictions.caddPhred'),
+      label: t('variant.predictions.cadd_phred'),
     });
   }
 

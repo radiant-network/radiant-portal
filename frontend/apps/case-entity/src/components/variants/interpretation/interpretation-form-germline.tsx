@@ -1,23 +1,25 @@
-import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
-import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
-import { classificationCriterias, getClassificationCriteriaColor, getTransmissionModes } from './data';
+import { forwardRef, useEffect, useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
+import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+import { Badge } from '@/components/base/ui/badge';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/ui/form';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+
+import { classificationCriterias, getClassificationCriteriaColor, getTransmissionModes } from './data';
+import InterpretationFormGeneric from './interpretation-form-generic';
+import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
 import {
   germlineInterpretationFormSchema,
   GermlineInterpretationSchemaType,
   InterpretationFormProps,
   InterpretationFormRef,
 } from './types';
-import { zodResolver } from '@hookform/resolvers/zod';
-import InterpretationFormGeneric from './interpretation-form-generic';
-import { Badge } from '@/components/base/ui/badge';
-import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
-import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
-import { useEffect, useImperativeHandle, forwardRef } from 'react';
-import { useI18n } from '@/components/hooks/i18n';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 
 const InterpretationFormGermline = forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationGermline>>(
   ({ interpretation, saveInterpretation, onDirtyChange }, ref) => {
@@ -58,8 +60,8 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
         <div className="space-y-3">
           <MondoAutoCompleteFormField
             name="condition"
-            label={t('variant.interpretationForm.germline.condition')}
-            placeholder={t('variant.interpretationForm.germline.condition-placeholder')}
+            label={t('variant.interpretation_form.germline.condition')}
+            placeholder={t('variant.interpretation_form.germline.condition_placeholder')}
           />
           <FormField
             schema={germlineInterpretationFormSchema}
@@ -70,7 +72,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                 <FormLabel
                   infoCardContent={
                     <div className="leading-6">
-                      {t('variant.interpretationForm.germline.classification_popover.consult')}{' '}
+                      {t('variant.interpretation_form.germline.classification_popover.consult')}{' '}
                       <AnchorLink
                         className="inline-flex"
                         href="https://pubmed.ncbi.nlm.nih.gov/25741868/"
@@ -78,13 +80,13 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                         size="sm"
                         external
                       >
-                        {t('variant.interpretationForm.germline.classification_popover.standards_and_guidelines')}
+                        {t('variant.interpretation_form.germline.classification_popover.standards_and_guidelines')}
                       </AnchorLink>{' '}
-                      {t('variant.interpretationForm.germline.classification_popover.variant_interpretation')}
+                      {t('variant.interpretation_form.germline.classification_popover.variant_interpretation')}
                     </div>
                   }
                 >
-                  {t('variant.interpretationForm.germline.classification')}
+                  {t('variant.interpretation_form.germline.classification')}
                 </FormLabel>
                 <FormControl>
                   <ToggleGroup
@@ -113,7 +115,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {t('variant.interpretation.classifications.likelyPathogenic-tooltip')}
+                        {t('variant.interpretation.classifications.likelyPathogenic_tooltip')}
                       </TooltipContent>
                     </Tooltip>
                     <Tooltip>
@@ -127,7 +129,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                           </ToggleGroupItem>
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent>{t('variant.interpretation.classifications.vus-tooltip')}</TooltipContent>
+                      <TooltipContent>{t('variant.interpretation.classifications.vus_tooltip')}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -141,7 +143,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {t('variant.interpretation.classifications.likelyBenign-tooltip')}
+                        {t('variant.interpretation.classifications.likelyBenign_tooltip')}
                       </TooltipContent>
                     </Tooltip>
                     <ToggleGroupItem
@@ -161,11 +163,11 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
             name="classification_criterias"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('variant.interpretationForm.germline.classificationCriteria')}</FormLabel>
+                <FormLabel>{t('variant.interpretation_form.germline.classification_criteria')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
                     defaultOptions={classificationCriterias}
-                    placeholder={t('variant.interpretationForm.germline.classificationCriteria-placeholder')}
+                    placeholder={t('variant.interpretation_form.germline.classification_criteria_placeholder')}
                     emptyIndicator={<>no results found.</>}
                     renderBadge={({ option, onRemove }) => (
                       <Badge
@@ -189,11 +191,11 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
             name="transmission_modes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('variant.interpretationForm.germline.modeOfTransmission')}</FormLabel>
+                <FormLabel>{t('variant.interpretation_form.germline.mode_of_transmission')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
                     defaultOptions={getTransmissionModes(t)}
-                    placeholder={t('variant.interpretationForm.germline.modeOfTransmission-placeholder')}
+                    placeholder={t('variant.interpretation_form.germline.mode_of_transmission_placeholder')}
                     emptyIndicator={<p>no results found.</p>}
                     {...field}
                   />

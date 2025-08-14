@@ -1,20 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
+
+import { Aggregation } from '@/api/api';
+import { ActionButton } from '@/components/base/buttons';
 import { Button } from '@/components/base/ui/button';
 import { Checkbox } from '@/components/base/ui/checkbox';
 import { Input } from '@/components/base/ui/input';
-import { ActionButton } from '@/components/base/buttons';
-import { Aggregation } from '@/api/api';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
-import { useConfig } from '@/components/model/applications-config';
-import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/model/sqon';
-import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
-import { numberFormat } from '@/components/lib/number-format';
-import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
-import { useAggregationBuilder } from './use-aggregation-builder';
 import { Skeleton } from '@/components/base/ui/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
+import { numberFormat } from '@/components/lib/number-format';
 import { replaceUnderscore } from '@/components/lib/string-format';
+import { useConfig } from '@/components/model/applications-config';
+import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
+import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/model/sqon';
 
+import { useAggregationBuilder } from './use-aggregation-builder';
 
 interface IProps {
   field: AggregationConfig;
@@ -63,12 +64,10 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
-    let prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
       .getResolvedActiveQuery(appId)
       // @ts-ignore
-      .content.find((x: IValueFilter) => {
-        return x.content.field === field.key;
-      });
+      .content.find((x: IValueFilter) => x.content.field === field.key);
     if (prevSelectedItems) {
       setSelectedItems(prevSelectedItems.content.value as string[]);
       setHasUnappliedItems(true);
@@ -89,24 +88,21 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
     });
 
     /**
-      * Lowercase the result
-      * Capitalize the First word
-      * Ignore word in parenthese
-      */
+     * Lowercase the result
+     * Capitalize the First word
+     * Ignore word in parenthese
+     */
     aggregationData?.forEach(item => {
-      item.label = item.key ?
-        replaceUnderscore(item.key)
-          .replace(
-            /\([^)]+\)|[^()]+/g,
-            (part) => {
+      item.label = item.key
+        ? replaceUnderscore(item.key)
+            .replace(/\([^)]+\)|[^()]+/g, part => {
               if (part.startsWith('(') && part.endsWith(')')) {
                 return part;
               }
               return part.toLowerCase();
-            }
-          )
-          .replace(/^\w/, c => c.toUpperCase())
-        : item.key
+            })
+            .replace(/^\w/, c => c.toUpperCase())
+        : item.key;
     });
 
     setItems(aggregationData || []);
@@ -228,7 +224,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
         </Button>
       </div>
 
-      <div className='max-h-[250px] overflow-auto'>
+      <div className="max-h-[250px] overflow-auto">
         {isLoading ? (
           // Loading skeleton state
           Array.from({ length: 3 }, (_, i) => (
@@ -238,7 +234,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
             </div>
           ))
         ) : items.length === 0 ? (
-          <div className="text-muted-foreground py-4">{t('common.filters.noValuesFound')}</div>
+          <div className="text-muted-foreground py-4">{t('common.filters.no_values_found')}</div>
         ) : (
           // Actual content
           Array.from({ length: visibleItemsCount }, (_, i) => (
@@ -251,13 +247,13 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
                     onCheckedChange={() => itemSelected(items[i])}
                   />
                   <div className="overflow-hidden whitespace-normal break-words text-xs">
-                    {t(`common.filters.labels.${field.key}_value.${items[i].key}`,
-                      { defaultValue: items[i].label }
-                    )}
+                    {t(`common.filters.labels.${field.key}_value.${items[i].key}`, { defaultValue: items[i].label })}
                   </div>
                   <span className="checkmark"></span>
                 </label>
-                <span className="bg-accent px-2 h-5 rounded-md text-xs flex items-center">{numberFormat(items[i].count || 0)}</span>
+                <span className="bg-accent px-2 h-5 rounded-md text-xs flex items-center">
+                  {numberFormat(items[i].count || 0)}
+                </span>
               </div>
             </div>
           ))
@@ -266,12 +262,12 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
 
       {!isLoading && items.length > visibleItemsCount && (
         <Button className="mt-2 px-0" onClick={showMore} size="sm" variant="link">
-          {t('common.filters.buttons.showMore', { count: items.length - maxVisibleItems })}
+          {t('common.filters.buttons.show_more', { count: items.length - maxVisibleItems })}
         </Button>
       )}
       {!isLoading && visibleItemsCount > maxVisibleItems && (
         <Button className="mt-2 px-0" onClick={showLess} size="sm" variant="link">
-          {t('common.filters.buttons.showLess')}
+          {t('common.filters.buttons.show_less')}
         </Button>
       )}
 
@@ -288,7 +284,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
             color="primary"
             actions={[
               {
-                label: t('common.filters.buttons.someNotIn'),
+                label: t('common.filters.buttons.some_not_in'),
                 onClick: applySomeNotIn,
               },
               {
@@ -296,7 +292,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
                 onClick: applyAll,
               },
               {
-                label: t('common.filters.buttons.notIn'),
+                label: t('common.filters.buttons.not_in'),
                 onClick: applyNotIn,
               },
             ]}

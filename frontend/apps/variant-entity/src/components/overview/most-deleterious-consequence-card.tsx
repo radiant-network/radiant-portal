@@ -41,7 +41,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="text-xs font-mono">{'-'}</div>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="text-sm text-muted-foreground">{t('variantEntity.overview.consequence')}</div>
+            <div className="text-sm text-muted-foreground">{t('variant_entity.overview.consequence')}</div>
             <div className="flex items-center gap-2">
               {data?.picked_consequences?.[0] && data.vep_impact ? (
                 <ConsequenceLabel vepImpact={data.vep_impact} consequence={data?.picked_consequences?.[0]} />
@@ -51,28 +51,28 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="text-sm text-muted-foreground">{t('variantEntity.overview.clinVar')}</div>
+            <div className="text-sm text-muted-foreground">{t('variant_entity.overview.clin_var')}</div>
             <div className="flex flex-wrap items-start gap-1">
               {data?.clinvar?.length
                 ? data?.clinvar.map(clinvar => (
-                  <Link
-                    key={clinvar}
-                    to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
-                  >
-                    <ClassificationBadge key={clinvar} value={clinvar} />
-                  </Link>
-                ))
+                    <Link
+                      key={clinvar}
+                      to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
+                    >
+                      <ClassificationBadge key={clinvar} value={clinvar} />
+                    </Link>
+                  ))
                 : '-'}
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              {t('variantEntity.overview.patients')}{' '}
+              {t('variant_entity.overview.patients')}{' '}
               <Tooltip>
                 <TooltipTrigger>
                   <InfoIcon size={16} />
                 </TooltipTrigger>
-                <TooltipContent>{t('variantEntity.overview.patients_tooltips')}</TooltipContent>
+                <TooltipContent>{t('variant_entity.overview.patients_tooltips')}</TooltipContent>
               </Tooltip>
             </div>
             <div className="font-semibold font-mono">
@@ -87,12 +87,12 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              {t('variantEntity.overview.gnomAD')}
+              {t('variant_entity.overview.gnom_ad')}
               <Tooltip>
                 <TooltipTrigger>
                   <InfoIcon size={16} />
                 </TooltipTrigger>
-                <TooltipContent>{t('variantEntity.overview.gnomADInfoTooltip')}</TooltipContent>
+                <TooltipContent>{t('variant_entity.overview.gnom_ad_info_tooltip')}</TooltipContent>
               </Tooltip>
             </div>
             <div className="font-semibold font-mono">
@@ -124,7 +124,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           )}
           {data?.exon_rank && data?.exon_total && (
             <div className="font-mono">
-              {t('variantEntity.overview.exon')}: {data?.exon_rank} / {data?.exon_total}
+              {t('variant_entity.overview.exon')}: {data?.exon_rank} / {data?.exon_total}
             </div>
           )}
           {data?.dna_change && <div className="font-mono">{data?.dna_change}</div>}

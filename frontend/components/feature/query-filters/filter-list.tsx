@@ -1,10 +1,10 @@
-import { useConfig } from '@/components/model/applications-config';
-import { FilterContainer } from '@/components/feature/query-filters/filter-container';
-
-import { Button } from '@/components/base/ui/button';
 import { useEffect, useState } from 'react';
-import { useI18n } from '@/components/hooks/i18n';
+
 import { Accordion } from '@/components/base/ui/accordion';
+import { Button } from '@/components/base/ui/button';
+import { FilterContainer } from '@/components/feature/query-filters/filter-container';
+import { useI18n } from '@/components/hooks/i18n';
+import { useConfig } from '@/components/model/applications-config';
 
 interface FilterListProps {
   groupKey?: string | null;
@@ -42,7 +42,7 @@ export function FilterList({ groupKey }: FilterListProps) {
             }
           }}
         >
-          {toggleExpandAll ? t('common.actions.collapseAll') : t('common.actions.expandAll')}
+          {toggleExpandAll ? t('common.actions.collapse_all') : t('common.actions.expand_all')}
         </Button>
       </div>
       <Accordion type="multiple" value={expandedFilters} onValueChange={value => setExpandedFilters(value)}>

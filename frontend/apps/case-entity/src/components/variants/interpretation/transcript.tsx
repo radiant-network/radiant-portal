@@ -1,10 +1,10 @@
-import { Separator } from '@/components/base/ui/separator';
-import ConsequenceLabel from '@/components/feature/variant/consequence-label';
-import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
-import { useI18n } from '@/components/hooks/i18n';
-import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { Separator } from '@/components/base/ui/separator';
+import ConsequenceLabel from '@/components/feature/variant/consequence-label';
+import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
+import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { useI18n } from '@/components/hooks/i18n';
 
 type InterpretationTranscriptProps = {
   occurrence?: ExpandedGermlineSNVOccurrence;
@@ -55,7 +55,7 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
       <Separator className="h-5" orientation="vertical" />
       <div className="text-sm">
         <span className="text-muted-foreground">
-          {t('variant.interpretationForm.transcript.exon')}:{' '}
+          {t('variant.interpretation_form.transcript.exon')}:{' '}
           {occurrence?.exon_rank && occurrence?.exon_total
             ? `${occurrence?.exon_rank} / ${occurrence?.exon_total}`
             : '-'}
@@ -70,12 +70,7 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
       {occurrence?.rsnumber && (
         <>
           <Separator className="h-5" orientation="vertical" />
-          <AnchorLink
-            href={getDbSnpUrl(occurrence.rsnumber)}
-            target="_blank"
-            rel="noreferrer"
-            size="sm"
-          >
+          <AnchorLink href={getDbSnpUrl(occurrence.rsnumber)} target="_blank" rel="noreferrer" size="sm">
             {occurrence.rsnumber}
           </AnchorLink>
         </>

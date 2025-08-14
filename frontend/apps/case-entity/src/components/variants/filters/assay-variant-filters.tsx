@@ -1,12 +1,13 @@
-import { useI18n } from '@/components/hooks/i18n';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
-import { Badge } from '@/components/base/ui/badge';
-import { Separator } from '@/components/base/ui/separator';
 import { DotIcon, FlaskConical } from 'lucide-react';
+
 import { CaseAssay } from '@/api/api';
-import { cn } from '@/components/lib/utils';
-import { Skeleton } from '@/components/base/ui/skeleton';
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
+import { Badge } from '@/components/base/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
+import { Separator } from '@/components/base/ui/separator';
+import { Skeleton } from '@/components/base/ui/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 function AssayVariantFiltersSelectValue({ relationship_to_proband, request_id }: CaseAssay) {
   const { t } = useI18n();
@@ -14,7 +15,7 @@ function AssayVariantFiltersSelectValue({ relationship_to_proband, request_id }:
   return (
     <div className="inline-flex gap-1">
       <span className="font-bold capitalize">
-        {relationship_to_proband ?? t('caseEntity.variants.filters.proband')}
+        {relationship_to_proband ?? t('case_entity.variants.filters.proband')}
       </span>
       <span>{request_id}</span>
     </div>
@@ -27,12 +28,12 @@ function AssayVariantFiltersSelectItem(assay: CaseAssay) {
     <div>
       <AssayVariantFiltersSelectValue {...assay} />
       <div className="flex items-center color-muted text-xs">
-        {t('caseEntity.variants.filters.sample_id')} {assay.sample_id}
+        {t('case_entity.variants.filters.sample_id')} {assay.sample_id}
         {assay.affected_status_code && (
           <>
             <DotIcon />
             <span className={cn({ 'text-red': assay.affected_status_code === 'affected' })}>
-              {t(`caseEntity.variants.filters.affected_status_code.${assay.affected_status_code}`)}
+              {t(`case_entity.variants.filters.affected_status_code.${assay.affected_status_code}`)}
             </span>
           </>
         )}
@@ -75,7 +76,7 @@ function AssayVariantFilters({ assays = [], value, handleChange, isLoading }: As
 
   return (
     <div className="inline-flex gap-4 items-center border-b px-3 py-4">
-      <span>{t('caseEntity.variants.filters.assay')}</span>
+      <span>{t('case_entity.variants.filters.assay')}</span>
       <Select
         value={value}
         onValueChange={value => {
@@ -101,7 +102,7 @@ function AssayVariantFilters({ assays = [], value, handleChange, isLoading }: As
         {selectedAssay?.sample_id}
       </Badge>
       <Separator className="h-6" orientation="vertical" />
-      <Badge>{t('caseEntity.variants.filters.snv')}</Badge>
+      <Badge>{t('case_entity.variants.filters.snv')}</Badge>
     </div>
   );
 }

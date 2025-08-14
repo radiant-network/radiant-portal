@@ -1,11 +1,13 @@
-import { Button } from '@/components/base/ui/button';
-import { Edit2Icon } from 'lucide-react';
-import InterpretationDialog from '../interpretation/interpretation-dialog';
-import { GermlineSNVOccurrence } from '@/api/api';
-import { useI18n } from '@/components/hooks/i18n';
-import { Separator } from '@/components/base/ui/separator';
 import { Link } from 'react-router';
+import { Edit2Icon } from 'lucide-react';
+
+import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { Button } from '@/components/base/ui/button';
+import { Separator } from '@/components/base/ui/separator';
+import { useI18n } from '@/components/hooks/i18n';
+
+import InterpretationDialog from '../interpretation/interpretation-dialog';
 
 type OccurrenceExpandHeaderProps = {
   occurrence: GermlineSNVOccurrence;
@@ -16,7 +18,7 @@ export default function OccurrenceExpandHeader({ occurrence }: OccurrenceExpandH
 
   return (
     <div className="flex items-center gap-8">
-      <AnchorLink component={Link} to={`/variants/entity/${occurrence.locus_id}`} size="lg" target='_blank' external>
+      <AnchorLink component={Link} to={`/variants/entity/${occurrence.locus_id}`} size="lg" target="_blank" external>
         <span className="max-w-72 overflow-hidden text-ellipsis">{occurrence.hgvsg}</span>
       </AnchorLink>
       <div className="flex items-center gap-5">
@@ -25,17 +27,17 @@ export default function OccurrenceExpandHeader({ occurrence }: OccurrenceExpandH
             occurrence={occurrence}
             renderTrigger={handleOpen => (
               <Button size="xs" onClick={handleOpen}>
-                <Edit2Icon /> {t('occurrenceExpand.actions.interpret')}
+                <Edit2Icon /> {t('occurrence_expand.actions.interpret')}
               </Button>
             )}
           />
           {/* SJRA-389 <Button color="primary" size="xs">
             <Download />
-            {t('occurrenceExpand.actions.downloadReport')}
+            {t('occurrence_expand.actions.download_report')}
           </Button>
           <Button color="primary" size="xs">
             <VariantIcon />
-            {t('occurrenceExpand.actions.openIGV')}
+            {t('occurrence_expand.actions.open_igv')}
           </Button> */}
         </div>
         <Separator orientation="vertical" className="h-5" />

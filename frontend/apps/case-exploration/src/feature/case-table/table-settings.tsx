@@ -1,15 +1,19 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { CaseResult } from '@/api/api';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import DateCell from '@/components/base/data-table/cells/date-cell';
-import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
-import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
-import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
-import AnalysisTypeCodeCell, { AnalysisTypeCodeCellTooltips } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import { TFunction } from 'i18next';
+
+import { CaseResult } from '@/api/api';
+import AnalysisTypeCodeCell, {
+  AnalysisTypeCodeCellTooltips,
+} from '@/components/base/data-table/cells/analysis-type-code-cell';
+import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
+import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
+import DateCell from '@/components/base/data-table/cells/date-cell';
+import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
+import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
+import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+
 import CaseActionsMenuCell from '../cells/case-actions-menu-cell';
 
 const columnHelper = createColumnHelper<CaseResult>();
@@ -22,7 +26,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       cell: info => (
         <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>
       ),
-      header: t('caseExploration.case.headers.case_id'),
+      header: t('case_exploration.case.headers.case_id'),
       size: 124,
       minSize: 124,
     }),
@@ -30,7 +34,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.patient_id, {
       id: 'patient_id',
       cell: info => <>{info.getValue()}</>,
-      header: t('caseExploration.case.headers.patient_id'),
+      header: t('case_exploration.case.headers.patient_id'),
       size: 124,
       minSize: 124,
     }),
@@ -39,8 +43,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'mrn',
       cell: info => <>{info.getValue()}</>,
       header: () => (
-        <TooltipsHeader tooltips={t('caseExploration.case.headers.mrn_tooltips')}>
-          {t('caseExploration.case.headers.mrn')}
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.mrn_tooltips')}>
+          {t('case_exploration.case.headers.mrn')}
         </TooltipsHeader>
       ),
       size: 124,
@@ -50,7 +54,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.priority_code, {
       id: 'priority_code',
       cell: info => <PriorityIndicatorCell code={info.getValue()} />,
-      header: t('caseExploration.case.headers.priority_code'),
+      header: t('case_exploration.case.headers.priority_code'),
       size: 124,
       minSize: 124,
     }),
@@ -58,7 +62,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.status_code, {
       id: 'status_code',
       cell: info => <AssayStatusCell status={info.getValue()} />,
-      header: t('caseExploration.case.headers.status_code'),
+      header: t('case_exploration.case.headers.status_code'),
       size: 124,
       minSize: 124,
     }),
@@ -68,7 +72,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       cell: info => <AnalysisTypeCodeCell code={info.getValue()} />,
       header: () => (
         <TooltipsHeader tooltips={<AnalysisTypeCodeCellTooltips />}>
-          {t('caseExploration.case.headers.case_type')}
+          {t('case_exploration.case.headers.case_type')}
         </TooltipsHeader>
       ),
       size: 120,
@@ -81,7 +85,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       cell: info => (
         <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipsCell>
       ),
-      header: t('caseExploration.case.headers.case_analysis_code'),
+      header: t('case_exploration.case.headers.case_analysis_code'),
       size: 124,
       minSize: 124,
     }),
@@ -91,7 +95,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       cell: info => (
         <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.primary_condition_name} />
       ),
-      header: t('caseExploration.case.headers.primary_condition'),
+      header: t('case_exploration.case.headers.primary_condition'),
       size: 124,
       minSize: 124,
     }),
@@ -102,8 +106,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         <TextTooltipsCell tooltipsText={info.row.original.requested_by_name}>{info.getValue()}</TextTooltipsCell>
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('caseExploration.case.headers.requested_by_code_tooltips')}>
-          {t('caseExploration.case.headers.requested_by_code')}
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.requested_by_code_tooltips')}>
+          {t('case_exploration.case.headers.requested_by_code')}
         </TooltipsHeader>
       ),
       size: 124,
@@ -112,7 +116,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Project
     columnHelper.accessor(row => row.project_code, {
       id: 'project_code',
-      header: t('caseExploration.case.headers.project_code'),
+      header: t('case_exploration.case.headers.project_code'),
       size: 124,
       minSize: 124,
     }),
@@ -121,8 +125,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'created_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('caseExploration.case.headers.created_on_tooltips')}>
-          {t('caseExploration.case.headers.created_on')}
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.created_on_tooltips')}>
+          {t('case_exploration.case.headers.created_on')}
         </TooltipsHeader>
       ),
       size: 124,
@@ -133,8 +137,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('caseExploration.case.headers.updated_on_tooltips')}>
-          {t('caseExploration.case.headers.updated_on')}
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.updated_on_tooltips')}>
+          {t('case_exploration.case.headers.updated_on')}
         </TooltipsHeader>
       ),
       size: 124,
@@ -145,8 +149,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'prescriber',
       cell: info => info.getValue(),
       header: () => (
-        <TooltipsHeader tooltips={t('caseExploration.case.headers.prescriber_tooltips')}>
-          {t('caseExploration.case.headers.prescriber')}
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.prescriber_tooltips')}>
+          {t('case_exploration.case.headers.prescriber')}
         </TooltipsHeader>
       ),
       size: 124,
@@ -159,8 +163,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipsCell>
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('caseExploration.case.headers.diagnostic_lab_tooltips')}>
-          {t('caseExploration.case.headers.diagnostic_lab')}
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.diagnostic_lab_tooltips')}>
+          {t('case_exploration.case.headers.diagnostic_lab')}
         </TooltipsHeader>
       ),
       size: 124,
@@ -170,7 +174,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.request_id, {
       id: 'request_id',
       cell: info => info.getValue(),
-      header: t('caseExploration.case.headers.request_id'),
+      header: t('case_exploration.case.headers.request_id'),
       size: 124,
       minSize: 124,
     }),
@@ -182,7 +186,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
           {info.getValue()}
         </TextTooltipsCell>
       ),
-      header: t('caseExploration.case.headers.managing_organization'),
+      header: t('case_exploration.case.headers.managing_organization'),
       size: 124,
       minSize: 124,
     }),
@@ -202,82 +206,82 @@ const defaultSettings = createColumnSettings([
   {
     id: 'case_id',
     visible: true,
-    label: 'caseExploration.case.headers.case_id',
+    label: 'case_exploration.case.headers.case_id',
   },
   {
     id: 'patient_id',
     visible: false,
-    label: 'caseExploration.case.headers.patient_id',
+    label: 'case_exploration.case.headers.patient_id',
   },
   {
     id: 'mrn',
     visible: true,
-    label: 'caseExploration.case.headers.mrn',
+    label: 'case_exploration.case.headers.mrn',
   },
   {
     id: 'priority_code',
     visible: true,
-    label: 'caseExploration.case.headers.priority_code',
+    label: 'case_exploration.case.headers.priority_code',
   },
   {
     id: 'status_code',
     visible: true,
-    label: 'caseExploration.case.headers.status_code',
+    label: 'case_exploration.case.headers.status_code',
   },
   {
     id: 'case_type',
     visible: true,
-    label: 'caseExploration.case.headers.case_type',
+    label: 'case_exploration.case.headers.case_type',
   },
   {
     id: 'case_analysis_code',
     visible: true,
-    label: 'caseExploration.case.headers.case_analysis_code',
+    label: 'case_exploration.case.headers.case_analysis_code',
   },
   {
     id: 'primary_condition',
     visible: false,
-    label: 'caseExploration.case.headers.primary_condition',
+    label: 'case_exploration.case.headers.primary_condition',
   },
   {
     id: 'requested_by_code',
     visible: true,
-    label: 'caseExploration.case.headers.requested_by_code',
+    label: 'case_exploration.case.headers.requested_by_code',
   },
   {
     id: 'project_code',
     visible: false,
-    label: 'caseExploration.case.headers.project_code',
+    label: 'case_exploration.case.headers.project_code',
   },
   {
     id: 'created_on',
     visible: false,
-    label: 'caseExploration.case.headers.created_on',
+    label: 'case_exploration.case.headers.created_on',
   },
   {
     id: 'updated_on',
     visible: true,
-    label: 'caseExploration.case.headers.updated_on',
+    label: 'case_exploration.case.headers.updated_on',
   },
   {
     id: 'prescriber',
     visible: false,
-    label: 'caseExploration.case.headers.prescriber',
+    label: 'case_exploration.case.headers.prescriber',
   },
   {
     id: 'diagnostic_lab',
     visible: false,
-    label: 'caseExploration.case.headers.diagnostic_lab',
+    label: 'case_exploration.case.headers.diagnostic_lab',
   },
   {
     id: 'request_id',
     visible: false,
-    label: 'caseExploration.case.headers.request_id',
+    label: 'case_exploration.case.headers.request_id',
   },
   {
     id: 'managing_organization',
     visible: false,
-    label: 'caseExploration.case.headers.managing_organization',
+    label: 'case_exploration.case.headers.managing_organization',
   },
   {
     id: 'actions_menu',

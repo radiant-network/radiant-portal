@@ -1,5 +1,13 @@
+import { useState } from 'react';
 import { Droplet, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { tv } from 'tailwind-variants';
 
+import FrequencyIcon from '@/components/base/icons/frequency-icon';
+import GeneIcon from '@/components/base/icons/gene-icon';
+import OccurrenceIcon from '@/components/base/icons/occurrence-icon';
+import PathogenicityIcon from '@/components/base/icons/pathogenicity-icon';
+import VariantIcon from '@/components/base/icons/variant-icon';
+import { Button } from '@/components/base/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -9,17 +17,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/base/ui/sidebar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useConfig } from '@/components/model/applications-config';
-import { useState } from 'react';
-import VariantIcon from '@/components/base/icons/variant-icon';
-import GeneIcon from '@/components/base/icons/gene-icon';
-import FrequencyIcon from '@/components/base/icons/frequency-icon';
-import PathogenicityIcon from '@/components/base/icons/pathogenicity-icon';
-import OccurrenceIcon from '@/components/base/icons/occurrence-icon';
-import { tv } from 'tailwind-variants';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { Button } from '@/components/base/ui/button';
 
 // Icon mapping for different aggregation groups
 const iconMap = {
@@ -88,13 +88,13 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" align="center">
-              {open ? t('queryFilters.sidebarPanel.collapse') : t('queryFilters.sidebarPanel.expand')}
+              {open ? t('query_filters.sidebar_panel.collapse') : t('query_filters.sidebar_panel.expand')}
             </TooltipContent>
           </Tooltip>
           <SidebarMenu>
             {Object.entries(aggregationGroups).map(([id]) => {
               const Icon = iconMap[id as keyof typeof iconMap];
-              const label = t(`queryFilters.sidebarPanel.filters.${id}`);
+              const label = t(`query_filters.sidebar_panel.filters.${id}`);
               return (
                 <SidebarMenuItem key={id}>
                   <SidebarMenuButton

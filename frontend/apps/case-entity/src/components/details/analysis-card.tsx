@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
-import { useI18n } from '@/components/hooks/i18n';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
-import { User } from 'lucide-react';
 import { ComponentProps, useState } from 'react';
 import { formatDate } from 'date-fns';
-import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
+import { User } from 'lucide-react';
+
+import { Aggregation, CaseEntity } from '@/api/api';
 import filterItemPriority from '@/case-exploration/components/table-filters/filter-item-priority';
+import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
-import { CaseEntity, Aggregation } from '@/api/api';
 import InformationField from '@/components/base/information/information-field';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
+import { useI18n } from '@/components/hooks/i18n';
+
 import BioinformaticsSection from './bioinformatics-section';
 
 function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
@@ -55,7 +57,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
   return (
     <Card {...props}>
       <CardHeader className="border-b [.border-b]:pb-2">
-        <CardTitle size="xl">{t('caseEntity.details.analysisOverview')}</CardTitle>
+        <CardTitle size="xl">{t('case_entity.details.analysis_overview')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {/* Title with codes */}
@@ -69,38 +71,38 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
           <div className="flex w-full justify-between gap-4">
             <div className="flex flex-col gap-2 flex-1">
               <InformationField
-                label={t('caseEntity.details.createdOn')}
-                tooltipsText={t('caseEntity.details.date_format_tooltips')}
+                label={t('case_entity.details.created_on')}
+                tooltipsText={t('case_entity.details.date_format_tooltips')}
               >
                 {caseData.created_on && formatDate(caseData.created_on, t('common.date'))}
               </InformationField>
 
               <InformationField
-                label={t('caseEntity.details.lastUpdate')}
-                tooltipsText={t('caseEntity.details.date_format_tooltips')}
+                label={t('case_entity.details.last_update')}
+                tooltipsText={t('case_entity.details.date_format_tooltips')}
               >
                 {caseData.updated_on && formatDate(caseData.updated_on, t('common.date'))}
               </InformationField>
 
-              <InformationField label={t('caseEntity.details.prescriber')}>{caseData.prescriber}</InformationField>
+              <InformationField label={t('case_entity.details.prescriber')}>{caseData.prescriber}</InformationField>
 
               <InformationField
-                label={t('caseEntity.details.prescribingInst')}
-                labelTooltipsText={t('caseEntity.details.prescribingInst_tooltips')}
+                label={t('case_entity.details.prescribing_inst')}
+                labelTooltipsText={t('case_entity.details.prescribing_inst_tooltips')}
                 tooltipsText={caseData.requested_by_name}
               >
                 {caseData.requested_by_code}
               </InformationField>
 
               <InformationField
-                label={t('caseEntity.details.diagLab')}
+                label={t('case_entity.details.diag_lab')}
                 tooltipsText={caseData.performer_lab_name}
-                labelTooltipsText={t('caseEntity.details.diagLab_tooltips')}
+                labelTooltipsText={t('case_entity.details.diag_lab_tooltips')}
               >
                 {caseData.performer_lab_code}
               </InformationField>
 
-              <InformationField label={t('caseEntity.details.requestId')}>{caseData.request_id}</InformationField>
+              <InformationField label={t('case_entity.details.request_id')}>{caseData.request_id}</InformationField>
             </div>
           </div>
 
@@ -108,7 +110,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
           <div>
             <div className="grid md:grid-cols-[1fr_minmax(160px,180px)] grid-cols-2 gap-y-3 gap-x-2 text-sm items-center">
               <div className="flex text-muted-foreground md:justify-end justify-start">
-                {t('caseEntity.details.priority')}
+                {t('case_entity.details.priority')}
               </div>
               <div>
                 <Select value={priority} onValueChange={setPriority}>
@@ -128,7 +130,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
               </div>
 
               <div className="flex text-muted-foreground md:justify-end justify-start">
-                {t('caseEntity.details.status')}
+                {t('case_entity.details.status')}
               </div>
               <div>
                 <Select value={status} onValueChange={setStatus}>
@@ -156,7 +158,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
               </div>
 
               <div className="flex text-muted-foreground md:justify-end justify-start">
-                {t('caseEntity.details.assignedTo')}
+                {t('case_entity.details.assigned_to')}
               </div>
               <div>
                 <Select value={assignedTo} onValueChange={setAssignedTo}>

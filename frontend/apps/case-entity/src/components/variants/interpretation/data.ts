@@ -1,6 +1,7 @@
+import { TFunction } from 'i18next';
+
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 import { BadgeProps } from '@/components/base/ui/badge';
-import { TFunction } from 'i18next';
 
 export const getTransmissionModes = (
   t: TFunction,
@@ -360,27 +361,27 @@ export const getClinicalUtilitys = (
   color?: string;
 })[] => [
   {
-    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_ia'),
+    label: t('variant.interpretation_form.somatic.clinical_utility_options.tier_ia'),
     value: 'category_ia',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_ib'),
+    label: t('variant.interpretation_form.somatic.clinical_utility_options.tier_ib'),
     value: 'category_ib',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_iic'),
+    label: t('variant.interpretation_form.somatic.clinical_utility_options.tier_iic'),
     value: 'category_iic',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_iid'),
+    label: t('variant.interpretation_form.somatic.clinical_utility_options.tier_iid'),
     value: 'category_iid',
     title: '',
   },
   {
-    label: t('variant.interpretationForm.somatic.clinicalUtility-options.tier_iii'),
+    label: t('variant.interpretation_form.somatic.clinical_utility_options.tier_iii'),
     value: 'category_iii',
     title: '',
   },

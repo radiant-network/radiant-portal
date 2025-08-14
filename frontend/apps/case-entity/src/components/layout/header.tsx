@@ -1,7 +1,8 @@
-import { CaseEntity } from '@/api/api';
 import { Users } from 'lucide-react';
-import { useI18n } from '@/components/hooks/i18n';
+
+import { CaseEntity } from '@/api/api';
 import PageHeader from '@/components/base/page/page-header';
+import { useI18n } from '@/components/hooks/i18n';
 
 export default function Header({ data, isLoading }: { data?: CaseEntity | null; isLoading: boolean }) {
   const { t } = useI18n();
@@ -9,7 +10,7 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
   return (
     <PageHeader
       isLoading={isLoading}
-      title={`${t('caseEntity.header.case')} ${data?.case_id}`}
+      title={`${t('case_entity.header.case')} ${data?.case_id}`}
       badges={[
         {
           variant: 'secondary',
@@ -17,7 +18,7 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
           children: (
             <>
               <Users />
-              {t(`caseEntity.header.${data?.case_type ?? 'unknown'}`)}
+              {t(`case_entity.header.${data?.case_type ?? 'unknown'}`)}
             </>
           ),
         },

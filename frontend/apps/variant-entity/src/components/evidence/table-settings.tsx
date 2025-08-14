@@ -21,8 +21,8 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
       id: 'date_last_evaluated',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variantEntity.evidence.clinVar.table.headers.evaluated.tooltip')}>
-          {t('variantEntity.evidence.clinVar.table.headers.evaluated')}
+        <TooltipsHeader tooltips={t('variant_entity.evidence.clin_var.table.headers.evaluated.tooltip')}>
+          {t('variant_entity.evidence.clin_var.table.headers.evaluated')}
         </TooltipsHeader>
       ),
       minSize: 60,
@@ -33,7 +33,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     pathogenicEvidenceColumnHelper.accessor(row => row.traits, {
       id: 'traits',
       cell: info => <div className="font-medium capitalize">{info.getValue()?.[0]}</div>,
-      header: t('variantEntity.evidence.clinVar.table.headers.condition'),
+      header: t('variant_entity.evidence.clin_var.table.headers.condition'),
       minSize: 85,
       maxSize: 150,
       size: 120,
@@ -41,7 +41,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     pathogenicEvidenceColumnHelper.accessor(row => row.clinical_significance, {
       id: 'clinical_significance',
       cell: info => <ClassificationCell codes={[info.getValue()?.[0]?.replace(/\s+/g, '_')]} />,
-      header: t('variantEntity.evidence.clinVar.table.headers.classification'),
+      header: t('variant_entity.evidence.clin_var.table.headers.classification'),
       minSize: 75,
       maxSize: 150,
       size: 120,
@@ -50,8 +50,8 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
       id: 'submission_count',
       cell: info => <div>{info.getValue()}</div>,
       header: () => (
-        <TooltipsHeader tooltips={t('variantEntity.evidence.clinVar.table.headers.submission_count.tooltip')}>
-          {t('variantEntity.evidence.clinVar.table.headers.submission_count')}
+        <TooltipsHeader tooltips={t('variant_entity.evidence.clin_var.table.headers.submission_count.tooltip')}>
+          {t('variant_entity.evidence.clin_var.table.headers.submission_count')}
         </TooltipsHeader>
       ),
       size: 80,
@@ -59,7 +59,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     pathogenicEvidenceColumnHelper.accessor(row => row.review_status_stars, {
       id: 'review_status_stars',
       cell: info => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
-      header: () => t('variantEntity.evidence.clinVar.table.headers.status'),
+      header: () => t('variant_entity.evidence.clin_var.table.headers.status'),
       minSize: 60,
       maxSize: 150,
       size: 120,
@@ -67,9 +67,9 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     pathogenicEvidenceColumnHelper.accessor(row => row.origins, {
       id: 'origins',
       cell: info => (
-        <BadgeCell variant="outline">{t(`variantEntity.evidence.clinVar.origin.${info.getValue()?.[0]}`)}</BadgeCell>
+        <BadgeCell variant="outline">{t(`variant_entity.evidence.clin_var.origin.${info.getValue()?.[0]}`)}</BadgeCell>
       ),
-      header: t('variantEntity.evidence.clinVar.table.headers.origin'),
+      header: t('variant_entity.evidence.clin_var.table.headers.origin'),
       minSize: 60,
       maxSize: 150,
       size: 120,
@@ -110,7 +110,7 @@ function getConditionPhenotypeColumns(
     conditionPhenotypeColumnHelper.accessor(row => row.panel_name, {
       id: 'panel_name',
       cell: info => <div className="text-sm font-medium">{info.getValue()}</div>,
-      header: t('variantEntity.evidence.gene.table.headers.condition'),
+      header: t('variant_entity.evidence.gene.table.headers.condition'),
       enableSorting: true,
     }),
     conditionPhenotypeColumnHelper.accessor(row => row.inheritance_code, {
@@ -133,7 +133,7 @@ function getConditionPhenotypeColumns(
           </Tooltip>
         ));
       },
-      header: t('variantEntity.evidence.gene.table.headers.inheritance'),
+      header: t('variant_entity.evidence.gene.table.headers.inheritance'),
       enableSorting: false,
     }),
     conditionPhenotypeColumnHelper.accessor(row => row.panel_id, {
