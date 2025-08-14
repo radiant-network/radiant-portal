@@ -114,7 +114,7 @@ export default function App() {
               {/* SJRA-389 <TabsContent value={VariantEntityTabs.Frequency} className="py-3">
                 <FrequencyTab />
               </TabsContent> */}
-              <TabsContent value={VariantEntityTabs.Transcripts} className="p-3 sm:py-3">
+              <TabsContent value={VariantEntityTabs.Transcripts} className="p-0 sm:py-3">
                 <TranscriptsTab />
               </TabsContent>
               <TabsContent value={VariantEntityTabs.Cases} className="p-0 sm:py-3">

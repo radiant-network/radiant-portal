@@ -1,10 +1,10 @@
 import * as React from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
-
-import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/base/buttons/button.variants';
-import { VariantProps } from 'tailwind-variants';
 import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, InfoIcon } from 'lucide-react';
+import { VariantProps } from 'tailwind-variants';
+
+import { buttonVariants } from '@/base/buttons/button.variants';
+import { cn } from '@/lib/utils';
 
 const AlertDialog = AlertDialogPrimitive.Root;
 

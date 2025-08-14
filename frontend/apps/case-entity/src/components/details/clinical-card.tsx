@@ -46,9 +46,9 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
           )}
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3 md:flex-row">
+      <CardContent className="flex flex-col gap-6 md:flex-row">
         {/* Proband */}
-        <div className={cn('flex flex-col gap-3 flex-1')}>
+        <div className={cn('flex flex-col gap-6 flex-1')}>
           {/* Primary Condition */}
           <div>
             <CardTitle>{t('case_entity.details.primary_condition')}</CardTitle>

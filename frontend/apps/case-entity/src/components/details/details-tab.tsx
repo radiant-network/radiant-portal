@@ -1,11 +1,12 @@
+import { CaseEntity } from '@/api/api';
 import { Card, CardContent, CardFooter } from '@/components/base/ui/card';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
+
 import AnalysisCard from './analysis-card';
-import PatientInformationCard from './patient-information-card';
-import { CaseEntity } from '@/api/api';
-import ClinicalCard from './clinical-card';
 import AssayInformationsCard from './assay-informations-card';
+import ClinicalCard from './clinical-card';
+import PatientInformationCard from './patient-information-card';
 
 type DetailsTabProps = {
   caseEntity?: CaseEntity;
@@ -42,9 +43,9 @@ function DetailsTab({ caseEntity, isLoading }: DetailsTabProps) {
   );
 }
 
-const CaseEntityDetailsSkeleton = () => {
+function CaseEntityDetailsSkeleton() {
   return (
-    <div className="gap-3 grid grid-cols-1 lg:grid-cols-3">
+    <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
       <Card className="lg:col-span-2">
         <CardContent>
           <Skeleton className="h-6" />
@@ -101,6 +102,6 @@ const CaseEntityDetailsSkeleton = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default DetailsTab;

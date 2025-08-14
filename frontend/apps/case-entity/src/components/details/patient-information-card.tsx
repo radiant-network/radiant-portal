@@ -85,7 +85,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
         <CardHeader className="border-b [.border-b]:pb-2">
           <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full">
               {members.map(member => (
@@ -112,7 +112,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
       <CardHeader className="border-b [.border-b]:pb-2">
         <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-6">
         <PatientInfoDisplay member={firstMember} />
       </CardContent>
     </Card>

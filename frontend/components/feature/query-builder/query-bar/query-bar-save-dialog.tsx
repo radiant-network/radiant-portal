@@ -1,3 +1,9 @@
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+import { Button } from '@/components/base/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -6,15 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
-import { Button } from '@/components/base/ui/button';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { Form, FormField, FormControl, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
 import { Input } from '@/components/base/ui/input';
 import { QueryInstance } from '@/components/model/query-builder-core';
+
 import { useQueryBuilderDictContext } from '../query-builder-context';
-import { useState } from 'react';
 
 const formSchema = z.object({
   title: z.string(),
@@ -53,7 +55,7 @@ function QueryBarSaveDialog({
           <DialogTitle>{dict.queryBar.saveDialog.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { tv } from 'tailwind-variants';
 
 import { cn } from '@/lib/utils';
+
 import { Separator } from './separator';
 
 export type CardProps = React.ComponentProps<'div'>;
@@ -10,7 +11,7 @@ function Card({ className, ...props }: CardProps) {
   return (
     <div
       data-slot="card"
-      className={cn('bg-card text-card-foreground flex flex-col gap-3 rounded-xl border py-3 shadow-xs', className)}
+      className={cn('bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-xs', className)}
       {...props}
     />
   );
@@ -21,7 +22,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-header"
       className={cn(
-        '@container/card-header grid auto-rows-min items-start gap-3 sm:gap-1.5 px-3 sm:grid-rows-[auto_auto] sm:has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-4',
+        '@container/card-header grid auto-rows-min items-start gap-6 sm:gap-1.5 px-6 sm:grid-rows-[auto_auto] sm:has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-4',
         className,
       )}
       {...props}
@@ -63,7 +64,7 @@ function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="card-content" className={cn('px-4 md:px-3', className)} {...props} />;
+  return <div data-slot="card-content" className={cn('px-4 md:px-6', className)} {...props} />;
 }
 
 function CardSeparator({ className, ...props }: React.ComponentProps<'div'>) {
@@ -77,7 +78,7 @@ function CardSeparator({ className, ...props }: React.ComponentProps<'div'>) {
 
 function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div data-slot="card-footer" className={cn('flex items-center px-3 [.border-t]:pt-3', className)} {...props} />
+    <div data-slot="card-footer" className={cn('flex items-center px-6 [.border-t]:pt-6', className)} {...props} />
   );
 }
 

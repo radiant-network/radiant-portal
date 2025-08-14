@@ -30,7 +30,7 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
       <CardHeader className="border-b [.border-b]:pb-4">
         <CardTitle size="xl">{t('case_entity.details.assay_informations_overview')}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent>
         <DataTable
           id="sequencing-and-assays"
           columns={getColumns(t)}

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useConfig } from '@/components/model/applications-config';
+
 import { Button } from '@/components/base/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { Switch } from '@/components/base/ui/switch';
 import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
+import { useConfig } from '@/components/model/applications-config';
 
 function BetaFeatures() {
   const { admin_code } = useConfig().admin;
@@ -72,7 +73,7 @@ function BetaFeatures() {
   }
 
   return (
-    <section className="mt-3">
+    <section className="mt-6">
       {Object.entries(featureDefinitions).map(([key, definition]) => renderFeature(key, definition))}
     </section>
   );

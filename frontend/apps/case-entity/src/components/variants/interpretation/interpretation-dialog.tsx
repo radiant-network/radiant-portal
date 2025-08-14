@@ -117,13 +117,13 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
             <DialogHeader>
               <DialogTitle>{t('variant.interpretation_form.title')}</DialogTitle>
             </DialogHeader>
-            <Separator className="mt-3" />
-            <div className="py-3 overflow-scroll space-y-3 h-[calc(95vh-150px)]">
+            <Separator className="mt-6" />
+            <div className="py-6 overflow-scroll space-y-6 h-[calc(95vh-150px)]">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
               <InterpretationTranscript occurrence={fetchOccurrenceExpand.data} />
-              <div className="grid gap-3 grid-cols-12">
-                <div className="rounded-sm col-span-7 border p-3 bg-muted">
+              <div className="grid gap-6 grid-cols-12">
+                <div className="rounded-sm col-span-7 border p-6 bg-muted">
                   {isSomatic ? (
                     <InterpretationFormSomatic
                       ref={somaticFormRef}
@@ -148,12 +148,12 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
                     />
                   )}
                 </div>
-                <div className="rounded-sm col-span-5 border py-4 px-3">
+                <div className="rounded-sm col-span-5 border py-4 px-6">
                   <OccurrenceDetails occurrence={fetchOccurrenceExpand.data} />
                 </div>
               </div>
             </div>
-            <Separator className="mb-3" />
+            <Separator className="mb-6" />
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">{t('variant.interpretation_form.cancel_text')}</Button>

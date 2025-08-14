@@ -13,7 +13,7 @@ type ClassificationSectionProps = {
 
 function ClassificationSection({ title, counts, emptyText, href }: ClassificationSectionProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       <div className="flex items-center gap-1">
         <span className="font-semibold text-sm">{title}</span>
         {href && (

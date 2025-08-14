@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { createContext, useContext } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import { tv, VariantProps } from 'tailwind-variants';
 
 import { cn } from '@/lib/utils';
-import { tv, VariantProps } from 'tailwind-variants';
-import { createContext, useContext } from 'react';
 
 const dialogVariants = tv({
   slots: {

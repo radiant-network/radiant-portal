@@ -59,14 +59,14 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
       <CardHeader className="border-b [.border-b]:pb-2">
         <CardTitle size="xl">{t('case_entity.details.analysis_overview')}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex flex-col gap-6">
         {/* Title with codes */}
         <div className="text-base font-semibold">
           {`${caseData.case_analysis_code} - ${caseData.case_analysis_name}`}
         </div>
 
         {/* Main content grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left side - Static information */}
           <div className="flex w-full justify-between gap-4">
             <div className="flex flex-col gap-2 flex-1">

@@ -1,7 +1,7 @@
 import * as React from 'react';
+import { tv, VariantProps } from 'tailwind-variants';
 
 import { cn } from '@/lib/utils';
-import { tv, VariantProps } from 'tailwind-variants';
 
 const tableVariants = tv({
   slots: {
@@ -16,7 +16,7 @@ const tableVariants = tv({
         base: 'text-base [&>tbody>tr>td]:py-4',
       },
       lg: {
-        base: 'text-lg [&>tbody>tr>td]:py-3',
+        base: 'text-lg [&>tbody>tr>td]:py-6',
       },
     },
   },

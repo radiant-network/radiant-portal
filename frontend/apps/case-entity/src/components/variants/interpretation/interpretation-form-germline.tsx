@@ -57,7 +57,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
 
     return (
       <FormProvider {...form}>
-        <div className="space-y-3">
+        <div className="space-y-6">
           <MondoAutoCompleteFormField
             name="condition"
             label={t('variant.interpretation_form.germline.condition')}

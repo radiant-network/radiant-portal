@@ -1,6 +1,7 @@
-import { ChartColumn, ChartLine, ChartPie, ChartScatter, LucideIcon } from 'lucide-react';
 import React from 'react';
+import { ChartColumn, ChartLine, ChartPie, ChartScatter, LucideIcon } from 'lucide-react';
 import { tv, VariantProps } from 'tailwind-variants';
+
 import { cn } from '../lib/utils';
 
 const emptyVariants = tv({
@@ -20,7 +21,7 @@ const emptyVariants = tv({
     },
     size: {
       mini: {
-        base: 'py-3 gap-3',
+        base: 'py-6 gap-3',
         iconsContainer: '[&_svg]:size-4',
         textContainer: 'space-y-2',
         title: 'text-base',
@@ -28,7 +29,7 @@ const emptyVariants = tv({
         customIcon: 'size-9 [&_svg]:size-6',
       },
       default: {
-        base: 'py-8 gap-3',
+        base: 'py-8 gap-6',
         iconsContainer: '[&_svg]:size-6',
         textContainer: 'space-y-2',
         title: 'text-lg',
