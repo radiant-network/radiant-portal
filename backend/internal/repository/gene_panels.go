@@ -68,6 +68,21 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(panelType string, l
 
 	tx = tx.Order("panel_name asc")
 
+	countOmim, err := r.CountGenePanel(types.OmimGenePanelTable, "panel", conditionFilter, txGene)
+	if err != nil {
+		return nil, fmt.Errorf("error while counting gene panel: %w", err)
+	}
+
+	countOrphanet, err := r.CountGenePanel(types.OrphanetGenePanelTable, "panel", conditionFilter, txGene)
+	if err != nil {
+		return nil, fmt.Errorf("error while counting gene panel: %w", err)
+	}
+
+	countHpo, err := r.CountGenePanel(types.HpoGenePanelTable, "hpo_term_name", conditionFilter, txGene)
+	if err != nil {
+		return nil, fmt.Errorf("error while counting gene panel: %w", err)
+	}
+
 	if err := tx.Find(&genePanelConditions).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching variant gene panel conditions: %w", err)
@@ -84,8 +99,10 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(panelType string, l
 		}
 	}
 	return &GenePanelConditions{
-		Count:      len(genePanelConditions),
-		Conditions: genePanelConditionsPerSymbol,
+		CountOmim:     *countOmim,
+		CountOrphanet: *countOrphanet,
+		CountHpo:      *countHpo,
+		Conditions:    genePanelConditionsPerSymbol,
 	}, nil
 }
 
@@ -104,4 +121,21 @@ func retrieveTableByPanelType(panelType string) (*types.Table, error) {
 	default:
 		return nil, fmt.Errorf("error while retrieving gene panel table: invalid panel type")
 	}
+}
+
+func (r *GenePanelsRepository) CountGenePanel(table types.Table, panelColumnName string, conditionFilter string, geneFilter *gorm.DB) (*int64, error) {
+	var count int64
+	like := fmt.Sprintf("%%%s%%", conditionFilter)
+	txCount := r.db.Table(table.Name).Where("symbol in (?)", geneFilter)
+	if len(conditionFilter) > 0 {
+		txCount = txCount.Where(fmt.Sprintf("LOWER(%s) like ?", panelColumnName), strings.ToLower(like))
+	}
+	if err := txCount.Count(&count).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while counting %s gene panel conditions: %w", table.Name, err)
+		} else {
+			return nil, nil
+		}
+	}
+	return &count, nil
 }

@@ -57,6 +57,8 @@ type GenePanelCondition = struct {
 }
 
 type GenePanelConditions = struct {
-	Count      int                             `json:"count" validate:"required"`
-	Conditions map[string][]GenePanelCondition `json:"conditions" validate:"required"`
+	CountOmim     int64                           `json:"count_omim" validate:"required"`
+	CountOrphanet int64                           `json:"count_orphanet" validate:"required"`
+	CountHpo      int64                           `json:"count_hpo" validate:"required"`
+	Conditions    map[string][]GenePanelCondition `json:"conditions" validate:"required"`
 }

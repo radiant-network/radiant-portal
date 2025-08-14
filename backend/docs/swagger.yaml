@@ -598,11 +598,17 @@ components:
               $ref: '#/components/schemas/GenePanelCondition'
             type: array
           type: object
-        count:
+        count_hpo:
+          type: integer
+        count_omim:
+          type: integer
+        count_orphanet:
           type: integer
       required:
       - conditions
-      - count
+      - count_hpo
+      - count_omim
+      - count_orphanet
       type: object
     GermlineCNVOccurrence:
       description: GermlineCNVOccurrence represents a germline CNV occurrence

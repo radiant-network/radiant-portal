@@ -167,8 +167,10 @@ func (m *MockRepository) GetVariantGenePanelConditions(panelType string, locusId
 	conditions["BRCA2"] = []types.GenePanelCondition{{Symbol: "BRCA2", PanelName: "Name 3", PanelID: "3", InheritanceCode: []string{"AD", "AR"}}}
 
 	return &types.GenePanelConditions{
-		Count:      3,
-		Conditions: conditions,
+		CountOmim:     int64(3),
+		CountHpo:      int64(2),
+		CountOrphanet: int64(3),
+		Conditions:    conditions,
 	}, nil
 }
 
@@ -549,7 +551,9 @@ func Test_GetGermlineVariantConditions(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"count":3, 
+		"count_hpo": 2,
+		"count_omim":3,
+		"count_orphanet": 3,
 		"conditions": { 
 			"BRAF": [{"panel_id":"1", "panel_name":"Name 1"}, {"panel_id":"2", "panel_name":"Name 2"}], 
 			"BRCA2": [{"panel_id":"3", "panel_name":"Name 3", "inheritance_code": ["AD", "AR"]}]
