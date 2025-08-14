@@ -29,6 +29,7 @@ func (m *MockS3PreSigner) GenerateS3PreSignedURL(url string) (*utils.PreSignedUR
 func (r *MockRepository) GetIGV(seqId int) ([]types.IGVTrack, error) {
 	return []types.IGVTrack{{
 		SequencingExperimentId: 1,
+		SampleId:               "sample_123",
 		PatientId:              1,
 		FamilyRole:             "proband",
 		SexCode:                "male",
@@ -37,6 +38,7 @@ func (r *MockRepository) GetIGV(seqId int) ([]types.IGVTrack, error) {
 		URL:                    "s3://example.com/file.cram",
 	}, {
 		SequencingExperimentId: 1,
+		SampleId:               "sample_123",
 		PatientId:              1,
 		FamilyRole:             "proband",
 		SexCode:                "male",
@@ -56,7 +58,7 @@ func Test_IGVGetHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"alignment":[{"patient_id":1,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"file.cram"}]}`, w.Body.String())
+	assert.JSONEq(t, `{"alignment":[{"patient_id":1,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 proband"}]}`, w.Body.String())
 }
 
 func Test_IGV_prepareTracks_handlesEmptyInputTracks(t *testing.T) {
