@@ -1,17 +1,19 @@
-import { Card, CardContent, CardFooter } from '@/components/base/ui/card';
-import { variantsApi } from '@/utils/api';
 import { useParams } from 'react-router';
 import useSWR from 'swr';
+
 import { VariantOverview } from '@/api/api';
+import { Card, CardContent, CardFooter } from '@/components/base/ui/card';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
-import PredictionScoresCard from './prediction-scores-card';
+import { tabContentClassName } from '@/style';
+import { variantsApi } from '@/utils/api';
+
 import AssociatedConditionsCard from './associated-conditions-card';
-import MostDeleteriousConsequenceCard from './most-deleterious-consequence-card';
+import ClassificationCard from './classification-card';
 import ExternalReferencesCard from './external-references-card';
 import InterpretationCard from './interpretation-card';
-import ClassificationCard from './classification-card';
-import { tabContentClassName } from '@/style';
+import MostDeleteriousConsequenceCard from './most-deleterious-consequence-card';
+import PredictionScoresCard from './prediction-scores-card';
 
 type VariantOverviewInput = {
   key: string;
@@ -53,7 +55,7 @@ function OverviewTab() {
   );
 }
 
-const VariantOverviewSkeleton = () => {
+function VariantOverviewSkeleton() {
   return (
     <div className="gap-3 grid grid-cols-1 md:grid-cols-3">
       <Card>
@@ -117,6 +119,6 @@ const VariantOverviewSkeleton = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default OverviewTab;
