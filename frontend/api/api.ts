@@ -1309,7 +1309,19 @@ export interface GenePanelConditions {
      * @type {number}
      * @memberof GenePanelConditions
      */
-    'count': number;
+    'count_hpo': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelConditions
+     */
+    'count_omim': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelConditions
+     */
+    'count_orphanet': number;
 }
 /**
  * GermlineCNVOccurrence represents a germline CNV occurrence

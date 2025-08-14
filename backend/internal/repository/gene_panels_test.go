@@ -15,6 +15,9 @@ func Test_GetVariantGenePanelConditions_Omim(t *testing.T) {
 		value, ok := ((*result).Conditions)["BRAF"]
 		assert.True(t, ok)
 		assert.Len(t, value, 2)
+		assert.Equal(t, int64(2), result.CountOmim)
+		assert.Equal(t, int64(2), result.CountOrphanet)
+		assert.Equal(t, int64(3), result.CountHpo)
 	})
 }
 
@@ -26,6 +29,9 @@ func Test_GetVariantGenePanelConditions_Omim_WithFilter(t *testing.T) {
 		value, ok := ((*result).Conditions)["BRAF"]
 		assert.True(t, ok)
 		assert.Len(t, value, 1)
+		assert.Equal(t, int64(1), result.CountOmim)
+		assert.Equal(t, int64(1), result.CountOrphanet)
+		assert.Equal(t, int64(0), result.CountHpo)
 	})
 }
 
@@ -37,6 +43,9 @@ func Test_GetVariantGenePanelConditions_Hpo(t *testing.T) {
 		value, ok := ((*result).Conditions)["BRAF"]
 		assert.True(t, ok)
 		assert.Len(t, value, 3)
+		assert.Equal(t, int64(2), result.CountOmim)
+		assert.Equal(t, int64(2), result.CountOrphanet)
+		assert.Equal(t, int64(3), result.CountHpo)
 	})
 }
 
@@ -48,6 +57,9 @@ func Test_GetVariantGenePanelConditions_Hpo_WithFilter(t *testing.T) {
 		value, ok := ((*result).Conditions)["BRAF"]
 		assert.True(t, ok)
 		assert.Len(t, value, 1)
+		assert.Equal(t, int64(0), result.CountOmim)
+		assert.Equal(t, int64(0), result.CountOrphanet)
+		assert.Equal(t, int64(1), result.CountHpo)
 	})
 }
 
@@ -59,6 +71,9 @@ func Test_GetVariantGenePanelConditions_Orphanet(t *testing.T) {
 		value, ok := ((*result).Conditions)["BRAF"]
 		assert.True(t, ok)
 		assert.Len(t, value, 2)
+		assert.Equal(t, int64(2), result.CountOmim)
+		assert.Equal(t, int64(2), result.CountOrphanet)
+		assert.Equal(t, int64(3), result.CountHpo)
 	})
 }
 
@@ -70,6 +85,9 @@ func Test_GetVariantGenePanelConditions_Orphanet_WithFilter(t *testing.T) {
 		value, ok := ((*result).Conditions)["BRAF"]
 		assert.True(t, ok)
 		assert.Len(t, value, 1)
+		assert.Equal(t, int64(1), result.CountOmim)
+		assert.Equal(t, int64(1), result.CountOrphanet)
+		assert.Equal(t, int64(0), result.CountHpo)
 	})
 }
 

@@ -1002,7 +1002,9 @@ func assertGetGermlineVariantConditions(t *testing.T, data string, locusId int, 
 
 func Test_GetGermlineVariantConditions_Omim(t *testing.T) {
 	expected := `{
-		"count":2, 
+		"count_hpo": 3,
+		"count_omim":2,
+		"count_orphanet": 2,
 		"conditions": {
 			"BRAF": [
 				{"inheritance_code":["AD"], "panel_id":"1111", "panel_name":"panel1"},
@@ -1015,7 +1017,9 @@ func Test_GetGermlineVariantConditions_Omim(t *testing.T) {
 
 func Test_GetGermlineVariantConditions_Hpo(t *testing.T) {
 	expected := `{
-		"count":3, 
+		"count_hpo": 3,
+		"count_omim":2,
+		"count_orphanet": 2,
 		"conditions": {
 			"BRAF": [
 				{"panel_id":"HP:0001061", "panel_name":"Acne"}, 
@@ -1029,7 +1033,9 @@ func Test_GetGermlineVariantConditions_Hpo(t *testing.T) {
 
 func Test_GetGermlineVariantConditions_Hpo_WithFilter(t *testing.T) {
 	expected := `{
-		"count":1, 
+		"count_hpo": 1,
+		"count_omim":0,
+		"count_orphanet": 0, 
 		"conditions": {
 			"BRAF": [
 				{"panel_id":"HP:0000286", "panel_name":"Epicanthus"}
@@ -1041,7 +1047,9 @@ func Test_GetGermlineVariantConditions_Hpo_WithFilter(t *testing.T) {
 
 func Test_GetGermlineVariantConditions_Orphanet(t *testing.T) {
 	expected := `{
-		"count":2, 
+		"count_hpo": 3,
+		"count_omim":2,
+		"count_orphanet": 2,
 		"conditions": {
 			"BRAF": [
 				{"inheritance_code":["AD"], "panel_id":"1111", "panel_name":"panel1"},
