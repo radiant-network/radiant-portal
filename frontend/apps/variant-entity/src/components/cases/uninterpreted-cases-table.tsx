@@ -1,13 +1,15 @@
+import { useMemo, useState } from 'react';
+import { useParams } from 'react-router';
+import { PaginationState } from '@tanstack/table-core';
+import useSWR from 'swr';
+
+import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import { useMemo, useState } from 'react';
-import { getOtherCasesColumns, otherCasesDefaultSettings } from './table-settings';
-import { PaginationState } from '@tanstack/table-core';
-import OtherCasesFilters, { UninterpretedCasesFiltersState } from './uninterpreted-cases-filters';
-import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
 import { variantsApi } from '@/utils/api';
-import useSWR from 'swr';
-import { useParams } from 'react-router';
+
+import { getOtherCasesColumns, otherCasesDefaultSettings } from './table-settings';
+import OtherCasesFilters, { UninterpretedCasesFiltersState } from './uninterpreted-cases-filters';
 
 type UninterpretedCasesSearchInput = {
   key: string;
@@ -89,7 +91,7 @@ function UninterpretedCasesTable() {
   );
 
   return (
-    <div className="space-y-3 mt-2">
+    <div className="space-y-6 mt-2">
       <OtherCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="uninterpreted-cases"

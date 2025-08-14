@@ -61,7 +61,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
 
     return (
       <FormProvider {...form}>
-        <div className="space-y-3">
+        <div className="space-y-6">
           <MondoAutoCompleteFormField
             name="tumoral_type"
             label={t('variant.interpretation_form.somatic.tumoral_type')}

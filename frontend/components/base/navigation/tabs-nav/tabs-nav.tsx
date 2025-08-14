@@ -1,7 +1,9 @@
-import { cn } from '@/components/lib/utils';
 import React from 'react';
-import { TabsNavContext, useTabsNavContext } from './tabs-nav-context';
+
 import Lazy from '@/components/base/lazy';
+import { cn } from '@/components/lib/utils';
+
+import { TabsNavContext, useTabsNavContext } from './tabs-nav-context';
 
 export type TabsNavProps<T> = React.HTMLAttributes<HTMLDivElement> & {
   ref?: React.Ref<HTMLDivElement>;
@@ -92,11 +94,10 @@ export function TabsListItem<T extends string | number | symbol = string>({
 
 export type TabsContentProps<T> = React.HTMLAttributes<HTMLDivElement> & {
   value: T;
-  noMargin?: boolean;
   ref?: React.Ref<HTMLDivElement>;
 };
 
-export function TabsContent<T>({ ref, value, children, className, noMargin = false, ...props }: TabsContentProps<T>) {
+export function TabsContent<T>({ ref, value, children, className, ...props }: TabsContentProps<T>) {
   const tabsContext = useTabsNavContext();
   const active = tabsContext.value === value;
 
@@ -106,7 +107,6 @@ export function TabsContent<T>({ ref, value, children, className, noMargin = fal
         ref={ref}
         className={cn(
           {
-            'py-3': !noMargin,
             hidden: !active,
           },
           className,

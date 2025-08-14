@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 import { tv, VariantProps } from 'tailwind-variants';
+
+import { cn } from '@/lib/utils';
 
 const alertVariants = tv({
   base: 'relative w-full rounded-lg border p-2.5 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground',

@@ -86,7 +86,7 @@ export default function App() {
       <main className="bg-muted h-screen overflow-auto">
         <Header data={data} isLoading={isLoading} />
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
-          <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
+          <TabsList className="pt-4 px-6 bg-background" contentClassName="min-[1440px]:px-6 mx-auto">
             <TabsListItem value={CaseEntityTabs.Details}>
               <ClipboardList />
               {t('case_entity.details.title')}
@@ -113,7 +113,7 @@ export default function App() {
               <DetailsTab caseEntity={data} isLoading={isLoading} />
             </TabsContent>
           </Container>
-          <TabsContent value={CaseEntityTabs.Variants} noMargin>
+          <TabsContent value={CaseEntityTabs.Variants} className="py-0">
             <VariantsTab isLoading={isLoading} caseEntity={data} />
           </TabsContent>
         </TabsNav>

@@ -254,16 +254,16 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
                 <DialogHeader>
                   <DialogTitle>{t('variant_entity.overview.prediction_scores')}</DialogTitle>
                 </DialogHeader>
-                <div className="text-sm space-y-3">{predictionScoreList}</div>
+                <div className="text-sm space-y-6">{predictionScoreList}</div>
               </DialogContent>
             </Dialog>
           )}
         </CardHeader>
-        <CardContent className="text-sm space-y-3 h-full">
+        <CardContent className="text-sm space-y-6 h-full">
           {hasAnyPredictionScores ? (
             predictionScoreList.slice(0, 4)
           ) : (
-            <Empty bordered showIcon={false} description={t('variant.no_data_for_variant')} className="py-3 h-full" />
+            <Empty bordered showIcon={false} description={t('variant.no_data_for_variant')} className="py-6 h-full" />
           )}
         </CardContent>
       </Card>

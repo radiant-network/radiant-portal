@@ -64,7 +64,7 @@ function AssayVariantFilters({ assays = [], value, handleChange, isLoading }: As
 
   if (isLoading || assays.length === 0) {
     return (
-      <div className="inline-flex gap-4 items-center border-b px-3 py-4">
+      <div className="inline-flex gap-4 items-center border-b px-6 py-4">
         <Skeleton className="w-[100px] h-[32px]" />
         <Skeleton className="w-[200px] h-[32px]" />
         <Skeleton className="w-[60px] h-[32px]" />

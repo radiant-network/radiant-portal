@@ -44,7 +44,7 @@ function PageHeader({ title, badges, buttons, description, isLoading = true, var
     return (
       <div className={style.container()}>
         <Container>
-          <div className="flex flex-col gap-4 pt-4 px-3">
+          <div className="flex flex-col gap-4 pt-4 px-6">
             <Skeleton className="w-96 h-8" />
           </div>
         </Container>
@@ -55,7 +55,7 @@ function PageHeader({ title, badges, buttons, description, isLoading = true, var
   return (
     <div className={style.container()}>
       <Container>
-        <div className="flex flex-col gap-4 pt-4 px-3">
+        <div className="flex flex-col gap-4 pt-4 px-6">
           <div className="flex justify-between">
             <div className={cn('flex flex-col', { 'gap-3': !!description })}>
               <div className="flex items-center gap-2 flex-wrap">

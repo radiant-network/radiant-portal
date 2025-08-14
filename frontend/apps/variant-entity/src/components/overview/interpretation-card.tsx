@@ -19,12 +19,12 @@ function InterpretationCard({ data, ...props }: InterpretationCardProps) {
   return (
     <Card {...props}>
       <CardHeader>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6">
           <HospitalIcon />
           <span className="font-semibold">{t('variant_entity.overview.interpretation')}</span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-6">
         <ClassificationSection
           href={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`}
           title={t('variant_entity.overview.my_network')}

@@ -1,5 +1,5 @@
 export const tabContentClassName = `
- gap-2 sm:gap-6 
+ gap-2 sm:gap-3 
 **:data-[slot=card]:border-0 sm:**:data-[slot=card]:border 
 **:data-[slot=card]:rounded-none sm:**:data-[slot=card]:rounded-xl 
 **:data-[slot=card]:shadow-none sm:**:data-[slot=card]:shadow-xs 

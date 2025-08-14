@@ -1,14 +1,16 @@
+import { useMemo, useState } from 'react';
+import { useParams } from 'react-router';
+import { PaginationState } from '@tanstack/table-core';
+import useSWR from 'swr';
+
+import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantInterpretedCasesSearchResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import { useMemo, useState } from 'react';
-import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table-settings';
-import { PaginationState } from '@tanstack/table-core';
+import { variantsApi } from '@/utils/api';
+
 import InterpretedCasesExpand from './interpreted-cases-expand';
 import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './interpreted-cases-filters';
-import { useParams } from 'react-router';
-import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantInterpretedCasesSearchResponse } from '@/api/api';
-import { variantsApi } from '@/utils/api';
-import useSWR from 'swr';
+import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table-settings';
 
 type InterpretedCasesSearchInput = {
   key: string;
@@ -96,7 +98,7 @@ function InterpretedCasesTable() {
   );
 
   return (
-    <div className="space-y-3 mt-2">
+    <div className="space-y-6 mt-2">
       <InterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="interpreted-cases"

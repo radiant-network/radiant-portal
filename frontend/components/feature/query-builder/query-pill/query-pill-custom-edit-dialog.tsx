@@ -1,3 +1,7 @@
+import { useCallback, useState } from 'react';
+
+import EditableText from '@/components/base/data-entry/editable-text';
+import { Button } from '@/components/base/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -6,17 +10,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
-import { QueryBuilderContext, useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
-import { ISavedFilter, IUserSavedFilter, SavedFilterTypeEnum } from '@/components/model/saved-filter';
-import EditableText from '@/components/base/data-entry/editable-text';
 import { Separator } from '@/components/base/ui/separator';
-import { Button } from '@/components/base/ui/button';
-import { useCallback, useState } from 'react';
-import QueryPillBoolean from './query-pill-boolean';
 import { updateQueriesWithCustomPill, useQueryBuilder } from '@/components/model/query-builder-core';
-import { QueryBarContext } from '../query-bar/query-bar-context';
-import { openCustomPillCantBeEmptyDialog, openCustomPillSaveDialog, openCustomPillTitleExistsDialog } from '../alerts';
+import { ISavedFilter, IUserSavedFilter, SavedFilterTypeEnum } from '@/components/model/saved-filter';
 import { ISqonGroupFilter } from '@/components/model/sqon';
+
+import { openCustomPillCantBeEmptyDialog, openCustomPillSaveDialog, openCustomPillTitleExistsDialog } from '../alerts';
+import { QueryBarContext } from '../query-bar/query-bar-context';
+import { QueryBuilderContext, useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+
+import QueryPillBoolean from './query-pill-boolean';
 
 function QueryPillCustomEditDialog({
   open,
@@ -121,7 +124,7 @@ function QueryPillCustomEditDialog({
             <span className="italic">TODO Insert filters</span>
           </aside>
           <div className="w-full">
-            <div className="flex flex-col gap-3 p-3">
+            <div className="flex flex-col gap-6 p-6">
               <DialogHeader>
                 <DialogTitle>{dict.queryPill.customPill.editDialog.title}</DialogTitle>
               </DialogHeader>

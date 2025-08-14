@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
-import { tv } from 'tailwind-variants';
 import { CircleAlert, MenuIcon, XIcon } from 'lucide-react';
-import MainNavbarLangSwitcher from './main-navbar-lang-switcher';
+import { tv } from 'tailwind-variants';
+
 import { Separator } from '@/components/base/ui/separator';
-import MainNavbarItem from './main-navbar-item';
-import MainNavbarUserAvatar from './main-navbar-user-avatar';
-import BetaFeaturesSheet from '../admin/beta-features-sheet';
-import { cn } from '@/components/lib/utils';
-import MainSidebar from './main-sidebar';
-import { BaseMainNavbarProps } from './main-navbar-types';
-import { ThemeToggle } from '../theme-toggle/theme-toggle';
 import { useSidebar } from '@/components/base/ui/sidebar';
+import { cn } from '@/components/lib/utils';
+
+import BetaFeaturesSheet from '../admin/beta-features-sheet';
+import { ThemeToggle } from '../theme-toggle/theme-toggle';
+
+import MainNavbarItem from './main-navbar-item';
+import MainNavbarLangSwitcher from './main-navbar-lang-switcher';
+import { BaseMainNavbarProps } from './main-navbar-types';
+import MainNavbarUserAvatar from './main-navbar-user-avatar';
+import MainSidebar from './main-sidebar';
 
 const navbarVariant = tv({
   slots: {
-    base: 'flex items-center h-[44px] px-3 hidden md:flex py-2 border-b bg-background shadow-xs w-full',
+    base: 'flex items-center h-[44px] px-6 hidden md:flex py-2 border-b bg-background shadow-xs w-full',
   },
 });
 
@@ -88,7 +91,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
           {/* Desktop NavBar */}
           <div className={navbarStyles.base()}>
             <div
-              className="flex mr-3 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
+              className="flex mr-6 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
               onClick={e => {
                 if (e.metaKey && e.altKey) {
                   setBetaSuperMode(!betaSuperMode);

@@ -1,30 +1,32 @@
+import { createContext, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
+import { PaginationState } from '@tanstack/react-table';
+import { X } from 'lucide-react';
+import useSWR from 'swr';
+
 import { CaseEntity, Count, GermlineSNVOccurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
-import { PaginationState } from '@tanstack/react-table';
-import useSWR from 'swr';
-import QueryBuilder from '@/components/feature/query-builder/query-builder';
-import { createContext, useEffect, useState } from 'react';
+import VariantIcon from '@/components/base/icons/variant-icon';
+import { Card, CardContent } from '@/components/base/ui/card';
 import { SidebarProvider } from '@/components/base/ui/sidebar';
-import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import QueryBuilder from '@/components/feature/query-builder/query-builder';
+import { FilterComponent } from '@/components/feature/query-filters/filter-container';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { SidebarGroups } from '@/components/feature/query-filters/sidebar-groups';
-import { useConfig } from '@/components/model/applications-config';
-import VariantIcon from '@/components/base/icons/variant-icon';
-import { FilterComponent } from '@/components/feature/query-filters/filter-container';
+import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
 import { useI18n } from '@/components/hooks/i18n';
-import { X } from 'lucide-react';
 import { cn } from '@/components/lib/utils';
+import { useConfig } from '@/components/model/applications-config';
+import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
+import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { occurrencesApi } from '@/utils/api';
+
+import AssayVariantFilters from './filters/assay-variant-filters';
 import OccurrenceExpand from './occurrence-table/occurrence-expand';
 import { defaultSettings, getVariantColumns } from './occurrence-table/table-settings';
-import AssayVariantFilters from './filters/assay-variant-filters';
-import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
 import { OccurrenceCountInput, useOccurencesCountHelper, useOccurencesListHelper } from './hook';
-import { occurrencesApi } from '@/utils/api';
-import { Card, CardContent } from '@/components/base/ui/card';
-import { useSearchParams } from "react-router";
 
-export const SeqIDContext = createContext<string>("");
+export const SeqIDContext = createContext<string>('');
 
 const DEFAULT_SORTING = [
   {
@@ -32,19 +34,19 @@ const DEFAULT_SORTING = [
     order: SortBodyOrderEnum.Desc,
   },
   {
-    field: "max_impact_score",
-    order: SortBodyOrderEnum.Desc
+    field: 'max_impact_score',
+    order: SortBodyOrderEnum.Desc,
   },
   {
-    field: "hgvsg",
-    order: SortBodyOrderEnum.Asc
+    field: 'hgvsg',
+    order: SortBodyOrderEnum.Asc,
   },
 ];
 
 type VariantTabProps = {
   caseEntity?: CaseEntity;
   isLoading: boolean;
-}
+};
 
 async function fetchQueryCount(input: OccurrenceCountInput) {
   const response = await occurrencesApi.countGermlineSNVOccurrences(input.seqId, input.countBody);
@@ -56,10 +58,10 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useI18n();
 
-  // only use assay with variants 
+  // only use assay with variants
   const assaysWithVariants = caseEntity?.assays.filter(assay => assay.has_variants) ?? [];
 
-  let defaultSeqId = searchParams.get("seq_id") ?? '';
+  let defaultSeqId = searchParams.get('seq_id') ?? '';
   if (!defaultSeqId && assaysWithVariants[0]?.seq_id.toString()) {
     defaultSeqId = assaysWithVariants[0]?.seq_id.toString();
   }
@@ -109,7 +111,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
 
   const { fetch: fetchOccurrencesCountHelper } = useOccurencesCountHelper({
     seqId,
-    countBody: { sqon: activeSqon }
+    countBody: { sqon: activeSqon },
   });
 
   const fetchOccurrencesList = useSWR<GermlineSNVOccurrence[]>('fetch-occurences-list', fetchOccurrencesListHelper, {
@@ -125,8 +127,8 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   });
 
   useEffect(() => {
-    if (searchParams.get("seq_id") != null) {
-      setSeqId(searchParams.get("seq_id") ?? '');
+    if (searchParams.get('seq_id') != null) {
+      setSeqId(searchParams.get('seq_id') ?? '');
       return;
     }
 
@@ -151,26 +153,24 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   }, []);
 
   /**
-    * Re-fetch count
-    */
+   * Re-fetch count
+   */
   useEffect(() => {
-    if (seqId === "") return;
+    if (seqId === '') return;
     fetchOccurrencesCount.mutate();
   }, [seqId, activeSqon]);
 
-
   /**
-    * Re-fetch list
-    */
+   * Re-fetch list
+   */
   useEffect(() => {
-    if (seqId === "") return;
+    if (seqId === '') return;
     fetchOccurrencesList.mutate();
   }, [seqId, sorting, pagination]);
 
-
   /**
-    * Reset pagination on sqon change
-    */
+   * Reset pagination on sqon change
+   */
   useEffect(() => {
     setPagination({
       pageIndex: 0,
@@ -178,21 +178,20 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     });
   }, [activeSqon]);
 
-
   return (
     <SeqIDContext value={seqId}>
-      <div className='bg-background flex flex-col'>
+      <div className="bg-background flex flex-col">
         <AssayVariantFilters
           isLoading={isLoading}
           assays={assaysWithVariants}
           value={seqId}
           handleChange={(value: string) => {
-            searchParams.set("seq_id", value);
+            searchParams.set('seq_id', value);
             setSearchParams(searchParams, { replace: true });
             setSeqId(value);
           }}
         />
-        <div className='bg-muted w-full'>
+        <div className="bg-muted w-full">
           <div className={`flex flex-1 h-screen overflow-hidden`}>
             <aside className="w-auto min-w-fit h-full shrink-0">
               <AggregateContext value={{ seqId }}>
@@ -221,8 +220,8 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                 </SidebarProvider>
               </AggregateContext>
             </aside>
-            <main className="flex-1 flex-shrink-1 px-4 pb-4 overflow-auto">
-              <div className="py-4 space-y-2">
+            <main className="flex-1 flex-shrink-1 px-3 pb-3 overflow-auto">
+              <div className="py-3 space-y-2">
                 <QueryBuilder
                   id={appId}
                   state={qbState}
@@ -239,7 +238,9 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                     }).then(res => res.count || 0)
                   }
                   resolveSyntheticSqon={resolveSyntheticSqon}
-                  onActiveQueryChange={sqon => setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)}
+                  onActiveQueryChange={sqon =>
+                    setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)
+                  }
                   onStateChange={state => {
                     setQbState(state);
                   }}
