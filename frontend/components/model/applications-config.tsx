@@ -1,4 +1,5 @@
 import { createContext, type ReactNode, useContext } from 'react';
+
 import { RangeOperators } from '@/components/model/sqon';
 
 export interface IFilterRangeTypes {
@@ -93,9 +94,9 @@ interface ConfigProviderProps {
   config: PortalConfig | undefined;
 }
 
-export const ConfigProvider = ({ children, config }: ConfigProviderProps) => {
-  return <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>;
-};
+export const ConfigProvider = ({ children, config }: ConfigProviderProps) => (
+  <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
+);
 
 export const useConfig = (): PortalConfig => {
   const context = useContext(ConfigContext);
