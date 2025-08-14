@@ -911,6 +911,7 @@
       "prescribing_inst_tooltip": "Établissement prescripteur",
       "diag_lab": "Lab. de diagnostic",
       "diag_lab_tooltip": "Laboratoire de diagnostic moléculaire",
+      "project_code": "Projet",
       "aliquot": "Aliquot",
       "run_name": "Nom du lot",
       "run_alias": "Alias du lot",

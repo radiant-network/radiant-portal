@@ -911,6 +911,7 @@
       "prescribing_inst_tooltip": "Prescribing institution",
       "diag_lab": "Diag. Lab",
       "diag_lab_tooltip": "Molecular diagnostic laboratory",
+      "project_code": "Project",
       "aliquot": "Aliquot",
       "run_name": "Run Name",
       "run_alias": "Run Alias",
