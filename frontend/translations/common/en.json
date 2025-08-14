@@ -858,7 +858,8 @@
       "cases": "Cases",
       "germline": "Germline Solo",
       "germline_family": "Germline Family",
-      "case": "Case"
+      "case": "Case",
+      "unknown": "Unknown"
     },
     "patient_information": {
       "title": "Patient Information",

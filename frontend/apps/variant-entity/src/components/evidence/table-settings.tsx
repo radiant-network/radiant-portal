@@ -5,7 +5,7 @@ import { ClinvarRCV, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import AnchorLinkCell from 'components/base/data-table/cells/anchor-link-cell';
@@ -21,9 +21,9 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
       id: 'date_last_evaluated',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant_entity.evidence.clin_var.table.headers.evaluated.tooltip')}>
+        <TooltipHeader tooltip={t('variant_entity.evidence.clin_var.table.headers.evaluated.tooltip')}>
           {t('variant_entity.evidence.clin_var.table.headers.evaluated')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       minSize: 60,
       maxSize: 150,
@@ -50,15 +50,15 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
       id: 'submission_count',
       cell: info => <div>{info.getValue()}</div>,
       header: () => (
-        <TooltipsHeader tooltips={t('variant_entity.evidence.clin_var.table.headers.submission_count.tooltip')}>
+        <TooltipHeader tooltip={t('variant_entity.evidence.clin_var.table.headers.submission_count.tooltip')}>
           {t('variant_entity.evidence.clin_var.table.headers.submission_count')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 80,
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.review_status_stars, {
       id: 'review_status_stars',
-      cell: info => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
+      cell: info => <RatingCell rating={info.getValue()} tooltip={info.row.original.review_status} />,
       header: () => t('variant_entity.evidence.clin_var.table.headers.status'),
       minSize: 60,
       maxSize: 150,

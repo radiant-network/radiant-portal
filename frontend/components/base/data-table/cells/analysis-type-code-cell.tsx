@@ -17,7 +17,7 @@ function AnalysisTypeCodeCell({ code }: AnalysisTypeCodeCellProps) {
   return <AnalysisTypeCodeBadge code={code} />;
 }
 
-export function AnalysisTypeCodeCellTooltips() {
+export function AnalysisTypeCodeCellTooltip() {
   const { t } = useI18n();
   return (
     <div className="flex flex-col gap-2">

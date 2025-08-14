@@ -1,19 +1,19 @@
-import Rating, { RatingProps } from "../../rating";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
+import Rating, { RatingProps } from '../../rating';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 
 type RatingCellProps = RatingProps & {
-  tooltips?: string;
+  tooltip?: string;
 };
-function RatingCell({ tooltips, ...props }: RatingCellProps) {
-  if (!tooltips) return <Rating {...props} />;
+function RatingCell({ tooltip, ...props }: RatingCellProps) {
+  if (!tooltip) return <Rating {...props} />;
 
   return (
     <Tooltip>
       <TooltipTrigger>
         <Rating {...props} />
       </TooltipTrigger>
-      <TooltipContent>{tooltips}</TooltipContent>
+      <TooltipContent>{tooltip}</TooltipContent>
     </Tooltip>
   );
-};
+}
 export default RatingCell;

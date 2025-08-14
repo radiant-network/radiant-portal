@@ -3,16 +3,16 @@ import { TFunction } from 'i18next';
 
 import { CaseResult } from '@/api/api';
 import AnalysisTypeCodeCell, {
-  AnalysisTypeCodeCellTooltips,
+  AnalysisTypeCodeCellTooltip,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
-import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 import CaseActionsMenuCell from '../cells/case-actions-menu-cell';
 
@@ -43,9 +43,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'mrn',
       cell: info => <>{info.getValue()}</>,
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.mrn_tooltip')}>
+        <TooltipHeader tooltip={t('case_exploration.case.headers.mrn_tooltip')}>
           {t('case_exploration.case.headers.mrn')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 124,
@@ -71,9 +71,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'case_type',
       cell: info => <AnalysisTypeCodeCell code={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={<AnalysisTypeCodeCellTooltips />}>
+        <TooltipHeader tooltip={<AnalysisTypeCodeCellTooltip />}>
           {t('case_exploration.case.headers.case_type')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 120,
       minSize: 120,
@@ -83,7 +83,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipsCell>
+        <TextTooltipCell tooltipText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('case_exploration.case.headers.case_analysis_code'),
       size: 124,
@@ -103,12 +103,12 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.requested_by_code, {
       id: 'requested_by_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.requested_by_name}>{info.getValue()}</TextTooltipsCell>
+        <TextTooltipCell tooltipText={info.row.original.requested_by_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.requested_by_code_tooltip')}>
+        <TooltipHeader tooltip={t('case_exploration.case.headers.requested_by_code_tooltip')}>
           {t('case_exploration.case.headers.requested_by_code')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 124,
@@ -125,9 +125,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'created_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.created_on_tooltip')}>
+        <TooltipHeader tooltip={t('case_exploration.case.headers.created_on_tooltip')}>
           {t('case_exploration.case.headers.created_on')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 124,
@@ -137,9 +137,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.updated_on_tooltip')}>
+        <TooltipHeader tooltip={t('case_exploration.case.headers.updated_on_tooltip')}>
           {t('case_exploration.case.headers.updated_on')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 124,
@@ -149,9 +149,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'prescriber',
       cell: info => info.getValue(),
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.prescriber_tooltip')}>
+        <TooltipHeader tooltip={t('case_exploration.case.headers.prescriber_tooltip')}>
           {t('case_exploration.case.headers.prescriber')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 124,
@@ -160,12 +160,12 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.performer_lab_code, {
       id: 'diagnostic_lab',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipsCell>
+        <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.diagnostic_lab_tooltip')}>
+        <TooltipHeader tooltip={t('case_exploration.case.headers.diagnostic_lab_tooltip')}>
           {t('case_exploration.case.headers.diagnostic_lab')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 124,
@@ -182,9 +182,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.managing_organization_code, {
       id: 'managing_organization',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.managing_organization_name}>
-          {info.getValue()}
-        </TextTooltipsCell>
+        <TextTooltipCell tooltipText={info.row.original.managing_organization_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('case_exploration.case.headers.managing_organization'),
       size: 124,

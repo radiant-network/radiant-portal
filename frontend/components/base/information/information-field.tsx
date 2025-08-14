@@ -1,42 +1,42 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { PropsWithChildren } from 'react';
+
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+
 import EmptyField from './empty-field';
 
 type InformationFieldProps = {
   label: string;
-  labelTooltipsText?: string;
-  tooltipsText?: string;
+  labelTooltipText?: string;
+  tooltipText?: string;
 };
 
 function InformationField({
   label,
-  labelTooltipsText,
+  labelTooltipText,
   children,
-  tooltipsText,
+  tooltipText,
 }: PropsWithChildren<InformationFieldProps>) {
   const labelOrPlaceholder = label !== undefined ? label : <EmptyField />;
-  const labelContent = !labelTooltipsText ? (
+  const labelContent = !labelTooltipText ? (
     labelOrPlaceholder
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="underline decoration-dotted underline-offset-4 cursor-pointer">
-          {labelOrPlaceholder}
-        </span>
+        <span className="underline decoration-dotted underline-offset-4 cursor-pointer">{labelOrPlaceholder}</span>
       </TooltipTrigger>
-      <TooltipContent>{labelTooltipsText}</TooltipContent>
+      <TooltipContent>{labelTooltipText}</TooltipContent>
     </Tooltip>
   );
 
   const contentOrPlaceholder = children !== undefined ? children : <EmptyField />;
-  const content = !tooltipsText ? (
+  const content = !tooltipText ? (
     contentOrPlaceholder
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="cursor-pointer">{contentOrPlaceholder}</span>
       </TooltipTrigger>
-      <TooltipContent>{tooltipsText}</TooltipContent>
+      <TooltipContent>{tooltipText}</TooltipContent>
     </Tooltip>
   );
 

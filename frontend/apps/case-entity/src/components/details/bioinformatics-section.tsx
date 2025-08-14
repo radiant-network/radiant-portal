@@ -7,7 +7,7 @@ import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import { TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -48,9 +48,9 @@ function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewA
     columnHelper.accessor('created_on', {
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_entity.details.date_format_tooltip')}>
+        <TooltipHeader tooltip={t('case_entity.details.date_format_tooltip')}>
           {t('case_entity.details.created_on')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 80,
     }),

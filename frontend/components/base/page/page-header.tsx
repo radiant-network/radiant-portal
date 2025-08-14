@@ -1,9 +1,11 @@
-import { VariantProps, tv } from 'tailwind-variants';
-import Container from '../container';
-import { Skeleton } from '../ui/skeleton';
-import { Button, ButtonProps } from '../ui/button';
-import { Badge, BadgeProps } from '../ui/badge';
+import { tv, VariantProps } from 'tailwind-variants';
+
 import { cn } from '@/components/lib/utils';
+
+import Container from '../container';
+import { Badge, BadgeProps } from '../ui/badge';
+import { Button, ButtonProps } from '../ui/button';
+import { Skeleton } from '../ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 const pageHeaderVariants = tv({
@@ -25,7 +27,7 @@ const pageHeaderVariants = tv({
   },
 });
 
-type PageHeaderBadge = BadgeProps & { tooltipsText?: string };
+type PageHeaderBadge = BadgeProps & { tooltipText?: string };
 
 interface EntityHeaderProps extends VariantProps<typeof pageHeaderVariants> {
   isLoading?: boolean;
@@ -59,26 +61,26 @@ function PageHeader({ title, badges, buttons, description, isLoading = true, var
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold">{title}</h1>
                 <div className="flex items-center gap-2">
-                  {(badges ?? []).map(badgeProps => {
-                    if (badgeProps.tooltipsText) {
+                  {(badges ?? []).map((badgeProps, index) => {
+                    if (badgeProps.tooltipText) {
                       return (
-                        <Tooltip>
+                        <Tooltip key={index}>
                           <TooltipTrigger>
                             <Badge {...badgeProps} />
                           </TooltipTrigger>
-                          <TooltipContent>{badgeProps.tooltipsText}</TooltipContent>
+                          <TooltipContent>{badgeProps.tooltipText}</TooltipContent>
                         </Tooltip>
                       );
                     }
-                    return <Badge {...badgeProps} />;
+                    return <Badge key={index} {...badgeProps} />;
                   })}
                 </div>
               </div>
               <h2 className="text-sm text-muted-foreground">{description}</h2>
             </div>
             <div className="flex items-center gap-2">
-              {(buttons ?? []).map(buttonProps => (
-                <Button {...buttonProps} />
+              {(buttons ?? []).map((buttonProps, index) => (
+                <Button key={buttonProps.key ?? index} {...buttonProps} />
               ))}
             </div>
           </div>

@@ -858,7 +858,8 @@
       "cases": "Cas",
       "germline": "Germinal",
       "germline_family": "Germinal familial",
-      "case": "Cas"
+      "case": "Cas",
+      "unknown": "Inconnu"
     },
     "patient_information": {
       "title": "Information du Patient",

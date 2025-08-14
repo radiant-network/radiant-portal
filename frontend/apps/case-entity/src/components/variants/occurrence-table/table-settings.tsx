@@ -13,10 +13,10 @@ import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
-import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 import InterpretationCell from './cells/interpretation-cell';
 
@@ -46,9 +46,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       cell: info => <InterpretationCell occurrence={info.getValue()} />,
       header: () => (
         <div className="flex justify-center">
-          <TooltipsHeader tooltips={t('variant.headers.clinical_interpretation')} iconOnly>
+          <TooltipHeader tooltip={t('variant.headers.clinical_interpretation')} iconOnly>
             <ZapIcon size={16} />
-          </TooltipsHeader>
+          </TooltipHeader>
         </div>
       ),
       size: 40,
@@ -77,9 +77,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.variant_class, {
       id: 'variant_class',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.getValue()}>
+        <TextTooltipCell tooltipText={info.getValue()}>
           {t(`variant.classes.${info.getValue().toLowerCase()}`)}
-        </TextTooltipsCell>
+        </TextTooltipCell>
       ),
       header: t('variant.headers.variant_class'),
       minSize: 120,
@@ -118,9 +118,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         />
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.picked_consequences_tooltip')}>
+        <TooltipHeader tooltip={t('variant.headers.picked_consequences_tooltip')}>
           {t('variant.headers.picked_consequences')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 225,
       enableSorting: false,
@@ -145,9 +145,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'omim_inheritance_code',
       cell: info => <OmimCell codes={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.omim_inheritance_code_tooltip')}>
+        <TooltipHeader tooltip={t('variant.headers.omim_inheritance_code_tooltip')}>
           {t('variant.headers.omim_inheritance_code')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       minSize: 120,
       enableSorting: false,
@@ -165,9 +165,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'exomiser_gene_combined_score',
       cell: info => <NumberCell value={info.getValue()} fractionDigits={3} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.exomiser_gene_combined_score_tooltip')}>
+        <TooltipHeader tooltip={t('variant.headers.exomiser_gene_combined_score_tooltip')}>
           {t('variant.headers.exomiser_gene_combined_score')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       minSize: 100,
     }),
@@ -176,9 +176,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'exomiser_acmg_classification',
       cell: info => <ClassificationCell codes={[info.getValue()]} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.exomiser_acmg_classification_tooltip')}>
+        <TooltipHeader tooltip={t('variant.headers.exomiser_acmg_classification_tooltip')}>
           {t('variant.headers.exomiser_acmg_classification')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       minSize: 100,
     }),
@@ -187,9 +187,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'gnomad_v3_af',
       cell: info => <GnomadCell value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.gnomad_v3_af_tooltip')}>
+        <TooltipHeader tooltip={t('variant.headers.gnomad_v3_af_tooltip')}>
           {t('variant.headers.gnomad_v3_af')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       minSize: 120,
     }),
@@ -198,7 +198,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'pf_wgs',
       cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltip')}>{t('variant.headers.pf_wgs')}</TooltipsHeader>
+        <TooltipHeader tooltip={t('variant.headers.pf_wgs_tooltip')}>{t('variant.headers.pf_wgs')}</TooltipHeader>
       ),
       minSize: 120,
     }),
@@ -207,9 +207,9 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'genotype_quality',
       cell: info => <NumberCell value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.genotype_quality_tooltip')}>
+        <TooltipHeader tooltip={t('variant.headers.genotype_quality_tooltip')}>
           {t('variant.headers.genotype_quality')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       minSize: 120,
     }),
@@ -218,9 +218,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'zygosity',
       cell: info => <ZygosityCell value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.zygosity_tooltip')}>
-          {t('variant.headers.zygosity')}
-        </TooltipsHeader>
+        <TooltipHeader tooltip={t('variant.headers.zygosity_tooltip')}>{t('variant.headers.zygosity')}</TooltipHeader>
       ),
       minSize: 120,
       enableSorting: false,
