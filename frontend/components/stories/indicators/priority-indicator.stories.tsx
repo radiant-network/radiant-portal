@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
+import type { Meta, StoryObj } from '@storybook/react';
+
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
@@ -41,11 +42,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {},
-  render: args => (
+  args: {
+    code: 'asap',
+  },
+  render: () => (
     <div className="flex flex-col gap-2">
       {['asap', 'routine', 'stat', 'urgent'].map(code => (
-        <PriorityIndicator code={code as PriorityIndicatorCode} />
+        <div key={code}>
+          <PriorityIndicator code={code as PriorityIndicatorCode} />
+          <PriorityIndicator code={code as PriorityIndicatorCode} size="sm" />
+        </div>
       ))}
     </div>
   ),

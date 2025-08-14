@@ -32,10 +32,43 @@ export const ClassificationValueMap: Record<string, BadgeProps['variant']> = {
   no_data: 'neutral',
 };
 
+/**
+ * API can return non-snake-case key. We needs to map
+ * the non-snake-case value to the correct classification value
+ */
+function getClassificationValue(value: string): { color: BadgeProps['variant']; key: string } {
+  const color = ClassificationValueMap[value];
+
+  // value is in snake_case
+  if (color) {
+    return { color, key: value };
+  }
+
+  for (const key in ClassificationValueMap) {
+    // value has no underscore
+    if (key.replaceAll('_', '') === value) {
+      return {
+        color: ClassificationValueMap[key],
+        key,
+      };
+      // value start with an underscore
+    } else if (`_${key}` === value) {
+      return {
+        color: ClassificationValueMap[key],
+        key,
+      };
+    }
+  }
+
+  return {
+    color: ClassificationValueMap.no_data,
+    key: 'no_data',
+  };
+}
+
 function ClassificationBadge({ value, abbreviated, ...props }: ClassificationBadgeProps) {
   const { t } = useI18n();
-  const normalizedValue = value ? value.toLowerCase() : 'no_data';
-  const color = ClassificationValueMap[normalizedValue];
+  const result = getClassificationValue(value.toLowerCase());
 
   return (
     <ConditionalWrapper
@@ -43,12 +76,12 @@ function ClassificationBadge({ value, abbreviated, ...props }: ClassificationBad
       wrapper={children => (
         <Tooltip>
           <TooltipTrigger className="flex">{children}</TooltipTrigger>
-          <TooltipContent>{t(`common.classification.${normalizedValue}.tooltip`)}</TooltipContent>
+          <TooltipContent>{t(`common.classification.${result.key}.tooltip`)}</TooltipContent>
         </Tooltip>
       )}
     >
-      <Badge variant={color || 'neutral'} {...props}>
-        {t(`common.classification.${normalizedValue}${abbreviated ? '.abbrev' : ''}`)}
+      <Badge variant={result.color || 'neutral'} {...props}>
+        {t(`common.classification.${result.key}${abbreviated ? '.abbrev' : ''}`)}
       </Badge>
     </ConditionalWrapper>
   );

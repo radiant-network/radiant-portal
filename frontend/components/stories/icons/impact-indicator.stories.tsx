@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import ImpactIndicator from '@/components/base/indicators/impact-indicator';
+
 import { VepImpact } from '@/api/api';
+import ImpactIndicator from '@/components/base/indicators/impact-indicator';
 
 const meta = {
   title: 'Indicators/Impact Indicator',
@@ -15,15 +16,18 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => {
-    return (
-      <div className="flex flex-col gap-2">
-        {Object.keys(VepImpact).map(impact => (
+  render: () => (
+    <div className="flex flex-col gap-2">
+      {Object.keys(VepImpact).map(impact => (
+        <>
           <ImpactIndicator key={impact} value={impact as VepImpact}>
             {impact.toLowerCase()}
           </ImpactIndicator>
-        ))}
-      </div>
-    );
-  },
+          <ImpactIndicator key={impact} value={impact as VepImpact} size="sm">
+            {impact.toLowerCase()}
+          </ImpactIndicator>
+        </>
+      ))}
+    </div>
+  ),
 };

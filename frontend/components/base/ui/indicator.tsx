@@ -1,17 +1,18 @@
-import { cn } from '@/components/lib/utils';
 import * as React from 'react';
 import { tv } from 'tailwind-variants';
-import ShapeTriangleUpIcon from '../icons/shape-triangle-up-icon';
-import ShapeTriangleDownIcon from '../icons/shape-triangle-down-icon';
-import ShapeDiamondIcon from '../icons/shape-diamond-icon';
-import ShapeCircleIcon from '../icons/shape-circle-icon';
 
+import { cn } from '@/components/lib/utils';
+
+import ShapeCircleIcon from '../icons/shape-circle-icon';
+import ShapeDiamondIcon from '../icons/shape-diamond-icon';
+import ShapeTriangleDownIcon from '../icons/shape-triangle-down-icon';
+import ShapeTriangleUpIcon from '../icons/shape-triangle-up-icon';
 
 export type IndicatorVariant = 'red' | 'amber' | 'emerald' | 'blue' | 'fuchsia' | 'grey';
 
 const IndicatorVariants = tv({
   slots: {
-    base: 'rounded-sm px-0 py-0 w-2 h-2',
+    base: 'shrink-0',
   },
   variants: {
     variant: {
@@ -34,33 +35,37 @@ const IndicatorVariants = tv({
         base: 'text-indicator-grey',
       },
     },
+    size: {
+      sm: {
+        base: 'w-2.5 h-2.5',
+      },
+      lg: {
+        base: 'w-3.5 h-3.5',
+      },
+    },
   },
 });
-
-
 
 export interface IndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
   variant: 'red' | 'amber' | 'emerald' | 'blue' | 'fuchsia' | 'grey';
   symbol?: 'triangle-up' | 'triangle-down' | 'diamond' | 'circle';
-  size?: number;
+  size?: 'lg' | 'sm';
 }
 
-function Indicator({ className, variant, size = 10, symbol = 'circle', children, ...props }: IndicatorProps) {
+function Indicator({ className, variant, size = 'lg', symbol = 'circle', children, ...props }: IndicatorProps) {
   const styles = IndicatorVariants({ variant });
-  const iconProps = { size: size, className: "shrink-0" }
+  const iconProps = { className: cn(styles.base({ size })) };
 
   return (
-    <div className={cn('flex', { "items-center gap-2": !!children })}>
-      <div className={cn(styles.base({ className }))} {...props}>
+    <div className={cn('flex items-center gap-2', className)} {...props}>
+      {
         {
-          {
-            "triangle-up": <ShapeTriangleUpIcon {...iconProps} />,
-            "triangle-down": <ShapeTriangleDownIcon {...iconProps} />,
-            "diamond": <ShapeDiamondIcon {...iconProps} />,
-            "circle": <ShapeCircleIcon {...iconProps} />,
-          }[symbol]
-        }
-      </div>
+          'triangle-up': <ShapeTriangleUpIcon {...iconProps} />,
+          'triangle-down': <ShapeTriangleDownIcon {...iconProps} />,
+          diamond: <ShapeDiamondIcon {...iconProps} />,
+          circle: <ShapeCircleIcon {...iconProps} />,
+        }[symbol]
+      }
       {children}
     </div>
   );
