@@ -62,7 +62,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
       const textContent = tempDiv.textContent || tempDiv.innerText || '';
 
       navigator.clipboard.writeText(textContent);
-      toast.success(t('variant_entity.cases.interpreted_table.expend.copySuccess'));
+      toast.success(t('variant_entity.cases.interpreted_table.expand.copy_success'));
     }
   }, [expandedData?.interpretation, t]);
 
@@ -119,7 +119,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
         {expandedData?.interpretation && (
           <div className="flex-shrink-0">
             <Button variant="outline" size="xs" onClick={handleCopy}>
-              <Copy /> {t('variant_entity.cases.interpreted_table.expend.copy')}
+              <Copy /> {t('variant_entity.cases.interpreted_table.expand.copy')}
             </Button>
           </div>
         )}

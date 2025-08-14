@@ -1,6 +1,7 @@
+import { Check, CircleDashed, CircleX, FileQuestion, Hourglass, Pen, RefreshCcwIcon } from 'lucide-react';
+
 import { Badge, BadgeProps } from '@/components/base/ui/badge';
 import { useI18n } from '@/components/hooks/i18n';
-import { Check, CircleDashed, CircleX, FileQuestion, Hourglass, Pen, RefreshCcwIcon } from 'lucide-react';
 
 export type AssayStatus = 'unknown' | 'draft' | 'in_progress' | 'revoke' | 'submitted' | 'completed' | 'incomplete';
 
@@ -12,6 +13,8 @@ const colors: Record<string, BadgeProps['variant']> = {
   unknown: 'outline',
   draft: 'neutral',
   submitted: 'yellow',
+  'on-hold': 'yellow',
+  active: 'blue',
   in_progress: 'blue',
   revoke: 'red',
   completed: 'green',
@@ -22,6 +25,8 @@ const icons = {
   unknown: FileQuestion,
   draft: Pen,
   submitted: Hourglass,
+  'on-hold': Hourglass,
+  active: RefreshCcwIcon,
   in_progress: RefreshCcwIcon,
   revoke: CircleX,
   completed: Check,

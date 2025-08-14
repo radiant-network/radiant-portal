@@ -1,5 +1,6 @@
-import EmptyCell from './empty-cell';
 import AssayStatusBadge, { AssayStatus } from '../../badges/assay-status-badge';
+
+import EmptyCell from './empty-cell';
 
 type StatusCellProps = {
   status: AssayStatus | undefined;

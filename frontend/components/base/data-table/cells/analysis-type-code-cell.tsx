@@ -25,7 +25,7 @@ export function AnalysisTypeCodeCellTooltips() {
         <Badge variant="secondary" iconOnly>
           <Biohazard />
         </Badge>
-        <span>{t(`case_explorationanalysis_type_code.somatic`)}</span>
+        <span>{t(`case_exploration.analysis_type_code.somatic`)}</span>
       </div>
       <div className="flex gap-2">
         <Badge variant="secondary" iconOnly>

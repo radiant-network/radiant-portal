@@ -191,7 +191,7 @@
       "manage_dialog": {
         "title": "Manage filters",
         "close": "Close",
-        "last_save_st": "Last saved at: {lastSaveAt} ago"
+        "last_save_at": "Last saved at: {lastSaveAt} ago"
       },
       "new_filter": "New filter",
       "save_tooltip": {
@@ -465,7 +465,8 @@
       "revoke": "Revoke",
       "completed": "Completed",
       "incomplete": "Incomplete",
-      "submitted": "Submitted"
+      "submitted": "Submitted",
+      "on-hold": "Submitted"
     },
     "case": {
       "title": "Cases",
@@ -575,12 +576,12 @@
       "classifications": {
         "all_classifications": "All Classifications",
         "pathogenic": "Pathogenic",
-        "likely_pathogenic": "Likely Pathogenic",
-        "likely_pathogenic_tooltip": "Probably pathogenic",
+        "likelyPathogenic": "Likely Pathogenic",
+        "likelyPathogenic_tooltip": "Probably pathogenic",
         "vus": "VUS",
         "vus_tooltip": "Variant of Uncertain Significance",
-        "likely_benign": "Likely Benign",
-        "likely_benign_tooltip": "Probably benign",
+        "likelyBenign": "Likely Benign",
+        "likelyBenign_tooltip": "Probably benign",
         "benign": "Benign"
       }
     },

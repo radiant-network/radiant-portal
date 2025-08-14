@@ -33,7 +33,7 @@ function AssayVariantFiltersSelectItem(assay: CaseAssay) {
           <>
             <DotIcon />
             <span className={cn({ 'text-red': assay.affected_status_code === 'affected' })}>
-              {t(`caseEntity.variants.filters.affected_status_code.${assay.affected_status_code}`)}
+              {t(`case_entity.variants.filters.affected_status_code.${assay.affected_status_code}`)}
             </span>
           </>
         )}

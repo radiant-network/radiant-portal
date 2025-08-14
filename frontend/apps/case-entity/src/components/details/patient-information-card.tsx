@@ -73,7 +73,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
   const getRelationshipLabel = useCallback(
     (relationship: string) =>
       t(
-        `caseEntity.patientInformation.relationships.${relationship}`,
+        `case_entity.patientInformation.relationships.${relationship}`,
         relationship.charAt(0).toUpperCase() + relationship.slice(1),
       ),
     [t],

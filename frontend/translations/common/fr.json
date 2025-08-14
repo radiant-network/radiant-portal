@@ -465,7 +465,8 @@
       "incomplete": "Incomplet",
       "submitted": "Soumis",
       "revoke": "Refusé",
-      "unknown": "Inconnu"
+      "unknown": "Inconnu",
+      "on-hold": "Soumis"
     },
     "case": {
       "title": "Cas",
@@ -575,12 +576,12 @@
       "classifications": {
         "all_classifications": "Toutes les classifications",
         "pathogenic": "Pathogénique",
-        "likely_pathogenic": "Prob. pathogénique",
-        "likely_pathogenic_tooltip": "Probablement pathogénique",
+        "likelyPathogenic": "Prob. pathogénique",
+        "likelyPathogenic_tooltip": "Probablement pathogénique",
         "vus": "VSI",
         "vus_tooltip": "Variant de signification incertaine",
-        "likely_benign": "Prob. bénigne",
-        "likely_benign_tooltip": "Probablement bénigne",
+        "likelyBenign": "Prob. bénigne",
+        "likelyBenign_tooltip": "Probablement bénigne",
         "benign": "Bénigne"
       }
     },

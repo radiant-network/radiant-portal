@@ -1,7 +1,8 @@
-import { CaseEntity } from '@/api/api';
 import { Users } from 'lucide-react';
-import { useI18n } from '@/components/hooks/i18n';
+
+import { CaseEntity } from '@/api/api';
 import PageHeader from '@/components/base/page/page-header';
+import { useI18n } from '@/components/hooks/i18n';
 
 export default function Header({ data, isLoading }: { data?: CaseEntity | null; isLoading: boolean }) {
   const { t } = useI18n();
@@ -17,7 +18,7 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
           children: (
             <>
               <Users />
-              {t(`caseEntity.header.${data?.case_type ?? 'unknown'}`)}
+              {t(`case_entity.header.${data?.case_type ?? 'unknown'}`)}
             </>
           ),
         },

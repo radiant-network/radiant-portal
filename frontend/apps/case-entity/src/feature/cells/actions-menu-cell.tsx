@@ -6,7 +6,8 @@ import { EllipsisVertical, ExternalLink } from 'lucide-react';
 import useSWR from 'swr';
 
 import { Assay } from '@/api/api';
-import AssayStatusCell, { AssayStatus } from '@/components/base/data-table/cells/assay-status-cell';
+import { AssayStatus } from '@/components/base/badges/assay-status-badge';
+import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import InformationField from '@/components/base/information/information-field';
 import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
@@ -130,7 +131,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
 
             {/* Paired End */}
             <InformationField label={t('case_entity.details.paired_end')}>
-              <Badge variant="outline">{t(`caseEntity.details.paired_end_${data?.is_paired_end ?? 'false'}`)}</Badge>
+              <Badge variant="outline">{t(`case_entity.details.paired_end_${data?.is_paired_end ?? 'false'}`)}</Badge>
             </InformationField>
 
             {/* Platform */}

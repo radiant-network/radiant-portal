@@ -110,12 +110,12 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                             value="LA26332-9"
                             className="data-[state=on]:bg-orange/20 data-[state=on]:text-orange-foreground border data-[state=on]:border-orange-foreground data-[state=on]:hover:text-orange-foreground"
                           >
-                            {t('variant.interpretation.classifications.likely_pathogenic')}
+                            {t('variant.interpretation.classifications.likelyPathogenic')}
                           </ToggleGroupItem>
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {t('variant.interpretation.classifications.likely_pathogenic_tooltip')}
+                        {t('variant.interpretation.classifications.likelyPathogenic_tooltip')}
                       </TooltipContent>
                     </Tooltip>
                     <Tooltip>
@@ -138,12 +138,12 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                             value="LA26334-5"
                             className="data-[state=on]:bg-lime/20 data-[state=on]:text-lime-foreground border data-[state=on]:border-lime-foreground data-[state=on]:hover:text-lime-foreground"
                           >
-                            {t('variant.interpretation.classifications.likely_benign')}
+                            {t('variant.interpretation.classifications.likelyBenign')}
                           </ToggleGroupItem>
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {t('variant.interpretation.classifications.likely_benign_tooltip')}
+                        {t('variant.interpretation.classifications.likelyBenign_tooltip')}
                       </TooltipContent>
                     </Tooltip>
                     <ToggleGroupItem

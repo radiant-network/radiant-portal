@@ -1,17 +1,19 @@
 import { createColumnHelper } from '@tanstack/react-table';
+import { TFunction } from 'i18next';
+
 import { CaseResult } from '@/api/api';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
-import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import DateCell from '@/components/base/data-table/cells/date-cell';
-import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
-import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
-import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltips,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
-import { TFunction } from 'i18next';
+import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
+import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
+import DateCell from '@/components/base/data-table/cells/date-cell';
+import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
+import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
+import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+
 import CaseActionsMenuCell from '../cells/case-actions-menu-cell';
 
 const columnHelper = createColumnHelper<CaseResult>();

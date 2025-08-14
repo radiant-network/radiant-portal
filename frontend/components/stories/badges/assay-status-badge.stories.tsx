@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
+import type { Meta, StoryObj } from '@storybook/react';
+
 import AssayStatusBadge, { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
