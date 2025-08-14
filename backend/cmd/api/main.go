@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"gorm.io/gorm"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
@@ -44,6 +45,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
 	repoClinvarRCV := repository.NewClinvarRCVRepository(dbStarrocks)
+	repoIGV := repository.NewIGVRepository(dbStarrocks)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -92,6 +94,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	hpoGroup := privateRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
+
+	igvGroup := privateRoutes.Group("/igv")
+	igvGroup.GET("/:seq_id", server.IGVGetHandler(repoIGV, nil))
 
 	interpretationsGroup := privateRoutes.Group("/interpretations")
 	interpretationsGroup.GET("/pubmed/:citation_id", server.GetPubmedCitation(pubmedClient))
