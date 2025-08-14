@@ -8,7 +8,7 @@ import DateCell from '@/components/base/data-table/cells/date-cell';
 import ExperimentalStrategyCell from '@/components/base/data-table/cells/experimental-strategy-code-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 import ActionsMenuCell from '../cells/actions-menu-cell';
 
@@ -65,9 +65,9 @@ function getColumns(t: TFunction<string, undefined>) {
       id: 'experimental_strategy_code',
       cell: info => <ExperimentalStrategyCell code={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_entity.details.experimental_strategy_code_tooltips')}>
+        <TooltipHeader tooltip={t('case_entity.details.experimental_strategy_code_tooltip')}>
           {t('case_entity.details.experimental_strategy_code')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 124,
@@ -85,9 +85,9 @@ function getColumns(t: TFunction<string, undefined>) {
       id: 'updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_entity.details.date_format_tooltips')}>
+        <TooltipHeader tooltip={t('case_entity.details.date_format_tooltip')}>
           {t('case_entity.details.last_update')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 124,

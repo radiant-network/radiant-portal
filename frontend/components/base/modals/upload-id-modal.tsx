@@ -1,4 +1,14 @@
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { createColumnHelper } from '@tanstack/react-table';
+import { uniqBy } from 'lodash';
+import { Paperclip, UploadIcon } from 'lucide-react';
+
 import { useI18n } from '@/components/hooks/i18n';
+
+import CollapsibleCard from '../cards/collapsible-card';
+import { TableColumnDef } from '../data-table/data-table';
+import DisplayTable from '../data-table/display-table';
 import { Button } from '../ui/button';
 import {
   Dialog,
@@ -10,18 +20,10 @@ import {
   DialogTrigger,
 } from '../ui/dialog';
 import { Form, FormItem, FormLabel } from '../ui/form';
-import { Textarea } from '../ui/textarea';
-import { useForm } from 'react-hook-form';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { useState } from 'react';
-import { Paperclip, UploadIcon } from 'lucide-react';
-import CollapsibleCard from '../cards/collapsible-card';
-import { createColumnHelper } from '@tanstack/react-table';
-import DisplayTable from '../data-table/display-table';
-import { uniqBy } from 'lodash';
-import { TableColumnDef } from '../data-table/data-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Textarea } from '../ui/textarea';
 
 type UploadIdTableEntry = {
   entry: string;

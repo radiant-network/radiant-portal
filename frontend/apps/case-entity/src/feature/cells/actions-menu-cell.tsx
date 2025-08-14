@@ -79,7 +79,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             {/* Created On */}
             <InformationField
               label={t('case_entity.details.created_on')}
-              tooltipsText={t('case_entity.details.date_format_tooltips')}
+              tooltipText={t('case_entity.details.date_format_tooltip')}
             >
               {data?.created_on && <>{formatDate(data.created_on, t('common.date'))}</>}
             </InformationField>
@@ -87,13 +87,13 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             {/* Last Update */}
             <InformationField
               label={t('case_entity.details.last_update')}
-              tooltipsText={t('case_entity.details.date_format_tooltips')}
+              tooltipText={t('case_entity.details.date_format_tooltip')}
             >
               {data?.updated_on && <>{formatDate(data.updated_on, t('common.date'))}</>}
             </InformationField>
 
             {/* Diag. Lab. */}
-            <InformationField label={t('case_entity.details.diag_lab')} tooltipsText={data?.performer_lab_name}>
+            <InformationField label={t('case_entity.details.diag_lab')} tooltipText={data?.performer_lab_name}>
               {data?.performer_lab_code}
             </InformationField>
 
@@ -109,7 +109,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             {/* Run Date */}
             <InformationField
               label={t('case_entity.details.run_date')}
-              tooltipsText={t('case_entity.details.date_format_tooltips')}
+              tooltipText={t('case_entity.details.date_format_tooltip')}
             >
               {data?.run_date && <>{formatDate(data.run_date, t('common.date'))}</>}
             </InformationField>
@@ -122,7 +122,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             {/* Exp. Strategy */}
             <InformationField
               label={t('case_entity.details.experimental_strategy_code')}
-              tooltipsText={data?.experimental_strategy_name}
+              tooltipText={data?.experimental_strategy_name}
             >
               {data?.experimental_strategy_code && (
                 <Badge variant="secondary">{data?.experimental_strategy_code}</Badge>

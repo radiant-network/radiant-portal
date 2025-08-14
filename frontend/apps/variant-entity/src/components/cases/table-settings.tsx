@@ -13,9 +13,9 @@ import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell'
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
-import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import { Button } from '@/components/base/ui/button';
@@ -51,9 +51,9 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       id: 'interpretation_updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant_entity.cases.interpreted_table.headers.date.tooltip')}>
+        <TooltipHeader tooltip={t('variant_entity.cases.interpreted_table.headers.date.tooltip')}>
           {t('variant_entity.cases.interpreted_table.headers.date')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 120,
       minSize: 80,
@@ -95,7 +95,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.performer_lab_code, {
       id: 'performer_lab_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipsCell>
+        <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('variant_entity.cases.interpreted_table.headers.institution'),
       minSize: 100,
@@ -106,7 +106,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipsCell>
+        <TextTooltipCell tooltipText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('variant_entity.cases.interpreted_table.headers.test'),
       minSize: 80,
@@ -195,9 +195,9 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       id: 'created_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant_entity.cases.other_table.headers.date.tooltip')}>
+        <TooltipHeader tooltip={t('variant_entity.cases.other_table.headers.date.tooltip')}>
           {t('variant_entity.cases.other_table.headers.date')}
-        </TooltipsHeader>
+        </TooltipHeader>
       ),
       size: 120,
       minSize: 80,
@@ -238,7 +238,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.performer_lab_code, {
       id: 'performer_lab_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipsCell>
+        <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('variant_entity.cases.other_table.headers.institution'),
       minSize: 100,
@@ -249,7 +249,7 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.case_analysis_code, {
       id: 'case_analysis_code',
       cell: info => (
-        <TextTooltipsCell tooltipsText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipsCell>
+        <TextTooltipCell tooltipText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('variant_entity.cases.other_table.headers.test'),
       minSize: 80,

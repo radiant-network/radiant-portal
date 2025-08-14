@@ -6,7 +6,7 @@ import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import AnalysisTypeCodeCell, {
-  AnalysisTypeCodeCellTooltips,
+  AnalysisTypeCodeCellTooltip,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
@@ -30,10 +30,10 @@ import RatingCell from '@/components/base/data-table/cells/rating-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import TextTooltipsCell from '@/components/base/data-table/cells/text-tooltips-cell';
+import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createColumnSettings } from '@/components/base/data-table/data-table';
-import TooltipsHeader from '@/components/base/data-table/headers/table-tooltips-header';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
 const observed_phenotypes = [
@@ -157,7 +157,7 @@ const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
  *   - BadgeCell
  *   - BadgeListCell
  *   - PhenotypeConditionLinkCell
- *   - TextTooltipsCell
+ *   - TextTooltipCell
  *   - NumberCell
  *   - DateCell
  */
@@ -220,8 +220,8 @@ export const firstSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row.text, {
     id: 'text',
-    cell: info => <TextTooltipsCell tooltipsText={info.row.original.tooltips}>{info.getValue()}</TextTooltipsCell>,
-    header: 'TextTooltipsCell',
+    cell: info => <TextTooltipCell tooltipText={info.row.original.tooltips}>{info.getValue()}</TextTooltipCell>,
+    header: 'TextTooltipCell',
   }),
   baseCellColumnHelper.accessor(row => row.number_value, {
     id: 'number_value',
@@ -237,8 +237,8 @@ export const firstSetCellColumns = [
 ];
 
 export const firstSetCellData = [
-    {
-    link: "AnchorLinkCell 1",
+  {
+    link: 'AnchorLinkCell 1',
     assay_status_code: 'unknown',
     badge: 'loremp',
     badge_list: ['loremp', 'ipsum'],
@@ -250,7 +250,7 @@ export const firstSetCellData = [
     number_value: 101,
   },
   {
-    link: "AnchorLinkCell 2",
+    link: 'AnchorLinkCell 2',
     assay_status_code: 'draft',
     badge: 'loremp',
     badge_list: ['loremp', 'ipsum'],
@@ -262,7 +262,7 @@ export const firstSetCellData = [
     number_value: 100,
   },
   {
-    link: "AnchorLinkCell 3",
+    link: 'AnchorLinkCell 3',
     assay_status_code: 'submitted',
     badge: 'ipsum',
     badge_list: ['loremp'],
@@ -274,7 +274,7 @@ export const firstSetCellData = [
     number_value: 1,
   },
   {
-    link: "AnchorLinkCell 4",
+    link: 'AnchorLinkCell 4',
     assay_status_code: 'in_progress',
     badge: 'amet',
     badge_list: ['sit', 'amet', 'consectetur'],
@@ -286,7 +286,7 @@ export const firstSetCellData = [
     number_value: 0.1,
   },
   {
-    link: "AnchorLinkCell 5",
+    link: 'AnchorLinkCell 5',
     assay_status_code: 'revoke',
     badge: 'consectetur',
     badge_list: ['ipsum', 'sit', 'ipsum', 'volutpat'],
@@ -298,7 +298,7 @@ export const firstSetCellData = [
     number_value: 0.5,
   },
   {
-    link: "AnchorLinkCell 6",
+    link: 'AnchorLinkCell 6',
     assay_status_code: 'completed',
     badge: 'loremp ipsum',
     badge_list: ['ipsum', 'sit', 'volutpat'],
@@ -310,7 +310,7 @@ export const firstSetCellData = [
     number_value: 0.95,
   },
   {
-    link: "AnchorLinkCell 7",
+    link: 'AnchorLinkCell 7',
     assay_status_code: 'incomplete',
     badge: 'consectetur',
     badge_list: ['loremp'],
@@ -540,7 +540,7 @@ export const secondSetCellData = [
 /**
  * Third set of cell components
  *   - PriorityIndicatorCell
- *   - AnalysisTypeCodeCell (AnalysisTypeCodeCellTooltips)
+ *   - AnalysisTypeCodeCell (AnalysisTypeCodeCellTooltip)
  *   - RelationshipToProbandCell
  *   - RatingCell
  */
@@ -555,7 +555,7 @@ export const thirdSetCellColumns = [
   baseCellColumnHelper.accessor(row => row.case_type, {
     id: 'case_type',
     cell: info => <AnalysisTypeCodeCell code={info.getValue()} />,
-    header: () => <TooltipsHeader tooltips={<AnalysisTypeCodeCellTooltips />}>AnalysisTypeCodeCell</TooltipsHeader>,
+    header: () => <TooltipHeader tooltip={<AnalysisTypeCodeCellTooltip />}>AnalysisTypeCodeCell</TooltipHeader>,
     size: 120,
     minSize: 120,
     enableSorting: false,
@@ -571,7 +571,7 @@ export const thirdSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row.review_status_stars, {
     id: 'review_status_stars',
-    cell: info => <RatingCell rating={info.getValue()} tooltips={info.row.original.review_status} />,
+    cell: info => <RatingCell rating={info.getValue()} tooltip={info.row.original.review_status} />,
     header: 'RatingCell',
     minSize: 60,
     maxSize: 150,

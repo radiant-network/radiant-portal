@@ -18,7 +18,7 @@ function PriorityIndicatorCell({ code }: PriorityIndicatorCellProps) {
       <TooltipTrigger>
         <PriorityIndicator code={code} />
       </TooltipTrigger>
-      <TooltipContent>{t(`case_exploration.priority.${code}_tooltips`)}</TooltipContent>
+      <TooltipContent>{t(`case_exploration.priority.${code}_tooltip`)}</TooltipContent>
     </Tooltip>
   );
 }

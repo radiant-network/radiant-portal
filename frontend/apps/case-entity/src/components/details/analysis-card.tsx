@@ -27,7 +27,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
     { key: 'asap', label: 'ASAP' },
   ];
 
-  const priorityOptions = filterItemPriority(priorityOptionsValues, t);
+  const priorityOptions = filterItemPriority(priorityOptionsValues);
 
   const statusOptionsValues = [
     { key: 'incomplete', label: 'Incomplete' },
@@ -72,14 +72,14 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
             <div className="flex flex-col gap-2 flex-1">
               <InformationField
                 label={t('case_entity.details.created_on')}
-                tooltipsText={t('case_entity.details.date_format_tooltips')}
+                tooltipText={t('case_entity.details.date_format_tooltip')}
               >
                 {caseData.created_on && formatDate(caseData.created_on, t('common.date'))}
               </InformationField>
 
               <InformationField
                 label={t('case_entity.details.last_update')}
-                tooltipsText={t('case_entity.details.date_format_tooltips')}
+                tooltipText={t('case_entity.details.date_format_tooltip')}
               >
                 {caseData.updated_on && formatDate(caseData.updated_on, t('common.date'))}
               </InformationField>
@@ -88,16 +88,16 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
 
               <InformationField
                 label={t('case_entity.details.prescribing_inst')}
-                labelTooltipsText={t('case_entity.details.prescribing_inst_tooltips')}
-                tooltipsText={caseData.requested_by_name}
+                labelTooltipText={t('case_entity.details.prescribing_inst_tooltip')}
+                tooltipText={caseData.requested_by_name}
               >
                 {caseData.requested_by_code}
               </InformationField>
 
               <InformationField
                 label={t('case_entity.details.diag_lab')}
-                tooltipsText={caseData.performer_lab_name}
-                labelTooltipsText={t('case_entity.details.diag_lab_tooltips')}
+                tooltipText={caseData.performer_lab_name}
+                labelTooltipText={t('case_entity.details.diag_lab_tooltip')}
               >
                 {caseData.performer_lab_code}
               </InformationField>

@@ -132,7 +132,7 @@ const Header = () => {
 {
 	"field": {
 		"name": "Your Name",
-		"name_tooltips": "Write your name right here"
+		"name_tooltip": "Write your name right here"
 	}
 }
 ```

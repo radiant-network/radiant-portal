@@ -5,7 +5,6 @@ import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indi
 // Define the desired order
 const ORDER = ['routine', 'urgent', 'asap', 'stat'];
 
-
 export default function filterItemPriority(options: Aggregation[]): IFilterButtonItem[] {
   // Sort options according to the desired order
   const sortedOptions = options.sort((a, b) => {
@@ -27,8 +26,6 @@ export default function filterItemPriority(options: Aggregation[]): IFilterButto
 
   return sortedOptions.map(option => ({
     ...option,
-    label: (
-      <PriorityIndicator code={option.key as PriorityIndicatorCode} />
-    ),
+    label: <PriorityIndicator code={option.key as PriorityIndicatorCode} />,
   }));
-};
+}

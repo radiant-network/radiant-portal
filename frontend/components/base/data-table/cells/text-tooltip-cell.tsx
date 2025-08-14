@@ -1,24 +1,24 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+
 import EmptyCell from './empty-cell';
 
-type TextTooltipsCell = {
+type TextTooltipCell = {
   children: any;
-  tooltipsText?: string;
+  tooltipText?: string;
   asChild?: boolean;
 };
 
-function TextTooltipsCell({ children, tooltipsText, asChild = false }: TextTooltipsCell) {
-
+function TextTooltipCell({ children, tooltipText, asChild = false }: TextTooltipCell) {
   if (!children) return <EmptyCell />;
 
-  if (!tooltipsText) return <span>{children}</span>;
+  if (!tooltipText) return <span>{children}</span>;
 
   return (
     <Tooltip>
       <TooltipTrigger asChild={asChild}>{children}</TooltipTrigger>
-      <TooltipContent>{tooltipsText}</TooltipContent>
+      <TooltipContent>{tooltipText}</TooltipContent>
     </Tooltip>
   );
 }
 
-export default TextTooltipsCell;
+export default TextTooltipCell;
