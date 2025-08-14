@@ -2,9 +2,10 @@ package repository
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
-	"log"
 )
 
 type IGVTrack = types.IGVTrack
@@ -34,6 +35,7 @@ func (r *IGVRepository) GetIGV(seqId int) ([]IGVTrack, error) {
 
 	tx := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s dhp ON dhp.patient_id=se.patient_id", types.DocumentHasPatientTable.Name))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id=se.sample_id", types.SampleTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s d ON dhp.document_id=d.id", types.DocumentTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON dhp.patient_id=f.family_member_id", types.FamilyTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s p ON dhp.patient_id=p.id", types.PatientTable.Name))
@@ -42,6 +44,7 @@ func (r *IGVRepository) GetIGV(seqId int) ([]IGVTrack, error) {
 	columns := []string{
 		"se.id AS sequencing_experiment_id",
 		"se.patient_id",
+		"sa.submitter_sample_id AS sample_id",
 		"COALESCE(f.relationship_to_proband_code, 'proband') AS family_role",
 		"p.sex_code",
 		"d.data_type_code",

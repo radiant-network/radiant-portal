@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -175,8 +176,13 @@ func main() {
 		log.Fatal("Failed to initialize postgres database: ", err)
 	}
 
+	p := os.Getenv("API_PORT")
+	if p == "" {
+		p = "8090"
+	}
+
 	r := setupRouter(dbStarrocks, dbPostgres)
-	err = r.Run(":8090")
+	err = r.Run(fmt.Sprintf(":%s", p))
 	if err != nil {
 		log.Fatal(err)
 	}

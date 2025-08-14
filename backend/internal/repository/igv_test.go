@@ -17,6 +17,7 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 		assert.Len(t, igvInternal, 6)
 		assert.Equal(t, IGVTrack{
 			SequencingExperimentId: 1,
+			SampleId:               "S13224",
 			PatientId:              3,
 			FamilyRole:             "proband",
 			SexCode:                "male",
@@ -26,6 +27,7 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 		}, igvInternal[0])
 		assert.Equal(t, IGVTrack{
 			SequencingExperimentId: 3,
+			SampleId:               "S13226",
 			PatientId:              2,
 			FamilyRole:             "father",
 			SexCode:                "male",

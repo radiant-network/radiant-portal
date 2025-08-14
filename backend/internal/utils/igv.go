@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"strings"
@@ -63,8 +62,6 @@ func (ps *DefaultS3PreSigner) GenerateS3PreSignedURL(url string) (*PreSignedURL,
 		DisableSSL:       aws.Bool(!useSSL),
 	}
 
-	log.Println("AWS Config: %s", awsConfig)
-
 	sess, err := session.NewSession(awsConfig)
 	if err != nil {
 		return nil, err
@@ -82,7 +79,6 @@ func (ps *DefaultS3PreSigner) GenerateS3PreSignedURL(url string) (*PreSignedURL,
 		return nil, err
 	}
 
-	log.Println("Pre-Signed URL:", urlStr)
 	return &PreSignedURL{
 		URL:         urlStr,
 		URLExpireAt: expireAt,

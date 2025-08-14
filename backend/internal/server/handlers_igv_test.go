@@ -71,10 +71,10 @@ func Test_IGV_prepareTracks_handlesEmptyInputTracks(t *testing.T) {
 
 func Test_IGV_prepareTracks_groupsTracksByDataTypeAndPatientId(t *testing.T) {
 	internalTracks := []repository.IGVTrack{
-		{PatientId: 1, FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file1.cram"},
-		{PatientId: 1, FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file1.crai"},
-		{PatientId: 2, FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file2.cram"},
-		{PatientId: 2, FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file2.crai"},
+		{PatientId: 1, SampleId: "S0001", FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file1.cram"},
+		{PatientId: 1, SampleId: "S0001", FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file1.crai"},
+		{PatientId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file2.cram"},
+		{PatientId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file2.crai"},
 	}
 	result, err := prepareIgvTracks(internalTracks, &MockS3PreSigner{})
 
@@ -92,7 +92,7 @@ func Test_IGV_prepareTracks_groupsTracksByDataTypeAndPatientId(t *testing.T) {
 			URLExpireAt:      1234567890,
 			IndexURL:         "presigned.s3://example.com/file1.crai",
 			IndexURLExpireAt: 1234567890,
-			Name:             "file1.cram",
+			Name:             "Reads: S0001 proband",
 		},
 		{
 			PatientId:        2,
@@ -104,7 +104,7 @@ func Test_IGV_prepareTracks_groupsTracksByDataTypeAndPatientId(t *testing.T) {
 			URLExpireAt:      1234567890,
 			IndexURL:         "presigned.s3://example.com/file2.crai",
 			IndexURLExpireAt: 1234567890,
-			Name:             "file2.cram",
+			Name:             "Reads: S0002 mother",
 		},
 	})
 }

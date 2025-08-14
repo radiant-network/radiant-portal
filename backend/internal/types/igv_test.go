@@ -3,15 +3,17 @@ package types
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_IGVInternal_ToJSON(t *testing.T) {
+func Test_IGVTrack_ToJSON(t *testing.T) {
 	t.Parallel()
 
 	var igvInternal = IGVTrack{
 		SequencingExperimentId: 0,
+		SampleId:               "sample_123",
 		PatientId:              123,
 		FamilyRole:             "proband",
 		SexCode:                "male",
@@ -20,7 +22,7 @@ func Test_IGVInternal_ToJSON(t *testing.T) {
 		URL:                    "s3://foo/bar/file.cram",
 	}
 
-	var expected = []byte(`{"sequencing_experiment_id":0,"patient_id":123,"family_role":"proband","sexcode":"male","datatype_code":"alignment","format_code":"cram","url":"s3://foo/bar/file.cram"}`)
+	var expected = []byte(`{"sequencing_experiment_id":0,"sample_id":"sample_123","patient_id":123,"family_role":"proband","sexcode":"male","datatype_code":"alignment","format_code":"cram","url":"s3://foo/bar/file.cram"}`)
 	jsonData, err := json.Marshal(igvInternal)
 	assert.Nil(t, err, "Failed to marshal IGVTrack to JSON")
 
@@ -28,12 +30,13 @@ func Test_IGVInternal_ToJSON(t *testing.T) {
 	assert.True(t, is_equal, "IGVTrack not matching expected JSON output")
 }
 
-func Test_IGVInternal_FromJSON(t *testing.T) {
+func Test_IGVTrack_FromJSON(t *testing.T) {
 	t.Parallel()
 
-	var jsonData = []byte(`{"sequencing_experiment_id":0,"patient_id":123,"family_role":"proband","sexcode":"male","datatype_code":"alignment","format_code":"cram","url":"s3://foo/bar/file.cram"}`)
+	var jsonData = []byte(`{"sequencing_experiment_id":0,"sample_id":"sample_123","patient_id":123,"family_role":"proband","sexcode":"male","datatype_code":"alignment","format_code":"cram","url":"s3://foo/bar/file.cram"}`)
 	var expected = IGVTrack{
 		SequencingExperimentId: 0,
+		SampleId:               "sample_123",
 		PatientId:              123,
 		FamilyRole:             "proband",
 		SexCode:                "male",
@@ -48,7 +51,7 @@ func Test_IGVInternal_FromJSON(t *testing.T) {
 	assert.Equal(t, expected, igv, "Objects should be equal after unmarshalling from JSON")
 }
 
-func Test_IGVTrack_ToJSON(t *testing.T) {
+func Test_IGVTrackEnriched_ToJSON(t *testing.T) {
 	t.Parallel()
 
 	var igvTrack = IGVTrackEnriched{
@@ -72,7 +75,7 @@ func Test_IGVTrack_ToJSON(t *testing.T) {
 	assert.True(t, is_equal, "IGVTrackEnriched not matching expected JSON output")
 }
 
-func Test_IGVTrack_FromJSON(t *testing.T) {
+func Test_IGVTrackEnriched_FromJSON(t *testing.T) {
 	t.Parallel()
 
 	var jsonData = []byte(`{"patient_id":123,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}`)

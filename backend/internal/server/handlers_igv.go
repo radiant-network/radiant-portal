@@ -1,8 +1,8 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -51,6 +51,15 @@ func IGVGetHandler(repo repository.IGVRepositoryDAO, presigner utils.S3PreSigner
 	}
 }
 
+func getTrackName(track repository.IGVTrack) string {
+	switch track.DataTypeCode {
+	case "alignment":
+		return fmt.Sprintf("Reads: %s %s", track.SampleId, track.FamilyRole)
+	default:
+		return "Unknown"
+	}
+}
+
 func prepareIgvTracks(internalTracks []repository.IGVTrack, presigner utils.S3PreSigner) (*types.IGVTracks, error) {
 	result := types.IGVTracks{}
 
@@ -67,7 +76,7 @@ func prepareIgvTracks(internalTracks []repository.IGVTrack, presigner utils.S3Pr
 			enriched = types.IGVTrackEnriched{
 				PatientId:  r.PatientId,
 				Type:       r.DataTypeCode,
-				Name:       filepath.Base(r.URL),
+				Name:       getTrackName(r),
 				Sex:        r.SexCode,
 				FamilyRole: r.FamilyRole,
 			}
@@ -82,7 +91,6 @@ func prepareIgvTracks(internalTracks []repository.IGVTrack, presigner utils.S3Pr
 			enriched.Format = r.FormatCode
 			enriched.URL = presigned.URL
 			enriched.URLExpireAt = presigned.URLExpireAt
-			enriched.Name = filepath.Base(r.URL)
 		} else if r.FormatCode == "crai" {
 			enriched.IndexURL = presigned.URL
 			enriched.IndexURLExpireAt = presigned.URLExpireAt
