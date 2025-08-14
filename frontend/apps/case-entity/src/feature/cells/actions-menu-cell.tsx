@@ -79,7 +79,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             {/* Created On */}
             <InformationField
               label={t('case_entity.details.created_on')}
-              tooltipsText={t('case_entity.details.date_format_tooltips')}
+              tooltipsText={t('case_entity.details.date_format_tooltip')}
             >
               {data?.created_on && <>{formatDate(data.created_on, t('common.date'))}</>}
             </InformationField>
@@ -87,7 +87,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             {/* Last Update */}
             <InformationField
               label={t('case_entity.details.last_update')}
-              tooltipsText={t('case_entity.details.date_format_tooltips')}
+              tooltipsText={t('case_entity.details.date_format_tooltip')}
             >
               {data?.updated_on && <>{formatDate(data.updated_on, t('common.date'))}</>}
             </InformationField>
@@ -109,7 +109,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             {/* Run Date */}
             <InformationField
               label={t('case_entity.details.run_date')}
-              tooltipsText={t('case_entity.details.date_format_tooltips')}
+              tooltipsText={t('case_entity.details.date_format_tooltip')}
             >
               {data?.run_date && <>{formatDate(data.run_date, t('common.date'))}</>}
             </InformationField>

@@ -65,7 +65,7 @@ function getColumns(t: TFunction<string, undefined>) {
       id: 'experimental_strategy_code',
       cell: info => <ExperimentalStrategyCell code={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_entity.details.experimental_strategy_code_tooltips')}>
+        <TooltipsHeader tooltips={t('case_entity.details.experimental_strategy_code_tooltip')}>
           {t('case_entity.details.experimental_strategy_code')}
         </TooltipsHeader>
       ),
@@ -85,7 +85,7 @@ function getColumns(t: TFunction<string, undefined>) {
       id: 'updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_entity.details.date_format_tooltips')}>
+        <TooltipsHeader tooltips={t('case_entity.details.date_format_tooltip')}>
           {t('case_entity.details.last_update')}
         </TooltipsHeader>
       ),

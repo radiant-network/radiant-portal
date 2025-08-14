@@ -43,7 +43,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'mrn',
       cell: info => <>{info.getValue()}</>,
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.mrn_tooltips')}>
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.mrn_tooltip')}>
           {t('case_exploration.case.headers.mrn')}
         </TooltipsHeader>
       ),
@@ -106,7 +106,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         <TextTooltipsCell tooltipsText={info.row.original.requested_by_name}>{info.getValue()}</TextTooltipsCell>
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.requested_by_code_tooltips')}>
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.requested_by_code_tooltip')}>
           {t('case_exploration.case.headers.requested_by_code')}
         </TooltipsHeader>
       ),
@@ -125,7 +125,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'created_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.created_on_tooltips')}>
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.created_on_tooltip')}>
           {t('case_exploration.case.headers.created_on')}
         </TooltipsHeader>
       ),
@@ -137,7 +137,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.updated_on_tooltips')}>
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.updated_on_tooltip')}>
           {t('case_exploration.case.headers.updated_on')}
         </TooltipsHeader>
       ),
@@ -149,7 +149,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'prescriber',
       cell: info => info.getValue(),
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.prescriber_tooltips')}>
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.prescriber_tooltip')}>
           {t('case_exploration.case.headers.prescriber')}
         </TooltipsHeader>
       ),
@@ -163,7 +163,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         <TextTooltipsCell tooltipsText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipsCell>
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('case_exploration.case.headers.diagnostic_lab_tooltips')}>
+        <TooltipsHeader tooltips={t('case_exploration.case.headers.diagnostic_lab_tooltip')}>
           {t('case_exploration.case.headers.diagnostic_lab')}
         </TooltipsHeader>
       ),

@@ -48,7 +48,7 @@ function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewA
     columnHelper.accessor('created_on', {
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('case_entity.details.date_format_tooltips')}>
+        <TooltipsHeader tooltips={t('case_entity.details.date_format_tooltip')}>
           {t('case_entity.details.created_on')}
         </TooltipsHeader>
       ),

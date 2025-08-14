@@ -118,7 +118,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         />
       ),
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.picked_consequences_tooltips')}>
+        <TooltipsHeader tooltips={t('variant.headers.picked_consequences_tooltip')}>
           {t('variant.headers.picked_consequences')}
         </TooltipsHeader>
       ),
@@ -145,7 +145,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'omim_inheritance_code',
       cell: info => <OmimCell codes={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.omim_inheritance_code_tooltips')}>
+        <TooltipsHeader tooltips={t('variant.headers.omim_inheritance_code_tooltip')}>
           {t('variant.headers.omim_inheritance_code')}
         </TooltipsHeader>
       ),
@@ -165,7 +165,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'exomiser_gene_combined_score',
       cell: info => <NumberCell value={info.getValue()} fractionDigits={3} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.exomiser_gene_combined_score_tooltips')}>
+        <TooltipsHeader tooltips={t('variant.headers.exomiser_gene_combined_score_tooltip')}>
           {t('variant.headers.exomiser_gene_combined_score')}
         </TooltipsHeader>
       ),
@@ -176,7 +176,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'exomiser_acmg_classification',
       cell: info => <ClassificationCell codes={[info.getValue()]} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.exomiser_acmg_classification_tooltips')}>
+        <TooltipsHeader tooltips={t('variant.headers.exomiser_acmg_classification_tooltip')}>
           {t('variant.headers.exomiser_acmg_classification')}
         </TooltipsHeader>
       ),
@@ -187,7 +187,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'gnomad_v3_af',
       cell: info => <GnomadCell value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.gnomad_v3_af_tooltips')}>
+        <TooltipsHeader tooltips={t('variant.headers.gnomad_v3_af_tooltip')}>
           {t('variant.headers.gnomad_v3_af')}
         </TooltipsHeader>
       ),
@@ -198,7 +198,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'pf_wgs',
       cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltips')}>{t('variant.headers.pf_wgs')}</TooltipsHeader>
+        <TooltipsHeader tooltips={t('variant.headers.pf_wgs_tooltip')}>{t('variant.headers.pf_wgs')}</TooltipsHeader>
       ),
       minSize: 120,
     }),
@@ -207,7 +207,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'genotype_quality',
       cell: info => <NumberCell value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.genotype_quality_tooltips')}>
+        <TooltipsHeader tooltips={t('variant.headers.genotype_quality_tooltip')}>
           {t('variant.headers.genotype_quality')}
         </TooltipsHeader>
       ),
@@ -218,7 +218,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'zygosity',
       cell: info => <ZygosityCell value={info.getValue()} />,
       header: () => (
-        <TooltipsHeader tooltips={t('variant.headers.zygosity_tooltips')}>
+        <TooltipsHeader tooltips={t('variant.headers.zygosity_tooltip')}>
           {t('variant.headers.zygosity')}
         </TooltipsHeader>
       ),

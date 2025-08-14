@@ -72,7 +72,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 <TooltipTrigger>
                   <InfoIcon size={16} />
                 </TooltipTrigger>
-                <TooltipContent>{t('variant_entity.overview.patients_tooltips')}</TooltipContent>
+                <TooltipContent>{t('variant_entity.overview.patients_tooltip')}</TooltipContent>
               </Tooltip>
             </div>
             <div className="font-semibold font-mono">
