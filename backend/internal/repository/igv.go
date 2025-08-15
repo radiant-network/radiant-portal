@@ -3,8 +3,11 @@ package repository
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -59,4 +62,58 @@ func (r *IGVRepository) GetIGV(seqId int) ([]IGVTrack, error) {
 	}
 
 	return igvInternal, nil
+}
+
+func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.S3PreSigner) (*types.IGVTracks, error) {
+	result := types.IGVTracks{}
+
+	grouped := map[string]types.IGVTrackEnriched{}
+
+	for _, r := range internalTracks {
+		key := strings.Join([]string{
+			r.DataTypeCode,
+			strconv.Itoa(r.PatientId),
+		}, "|")
+
+		enriched, exists := grouped[key]
+		if !exists {
+			enriched = types.IGVTrackEnriched{
+				PatientId:  r.PatientId,
+				Type:       r.DataTypeCode,
+				Sex:        r.SexCode,
+				FamilyRole: r.FamilyRole,
+			}
+		}
+
+		presigned, err := presigner.GenerateS3PreSignedURL(r.URL)
+		if err != nil {
+			return nil, err
+		}
+
+		if r.FormatCode == "cram" {
+			enriched.Name = fmt.Sprintf("Reads: %s %s", r.SampleId, r.FamilyRole)
+			enriched.Format = r.FormatCode
+			enriched.URL = presigned.URL
+			enriched.URLExpireAt = presigned.URLExpireAt
+		} else if r.FormatCode == "crai" {
+			enriched.IndexURL = presigned.URL
+			enriched.IndexURLExpireAt = presigned.URLExpireAt
+		}
+
+		grouped[key] = enriched
+	}
+
+	for _, track := range grouped {
+		switch track.Type {
+		case "alignment":
+			// Ensure the proband is always first in the alignment list
+			if track.FamilyRole == "proband" {
+				result.Alignment = append([]types.IGVTrackEnriched{track}, result.Alignment...)
+			} else {
+				result.Alignment = append(result.Alignment, track)
+			}
+		}
+	}
+
+	return &result, nil
 }

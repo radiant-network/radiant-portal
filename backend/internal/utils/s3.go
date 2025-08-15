@@ -25,6 +25,10 @@ type S3PreSigner interface {
 
 type DefaultS3PreSigner struct{}
 
+func NewS3PreSigner() *DefaultS3PreSigner {
+	return &DefaultS3PreSigner{}
+}
+
 func (ps *DefaultS3PreSigner) extractS3BucketAndKey(s3URL string) (string, string, error) {
 	parsed, err := url.Parse(s3URL)
 	if err != nil {

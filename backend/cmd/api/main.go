@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 
 	"github.com/gin-contrib/cors"
@@ -31,6 +32,9 @@ func init() {
 }
 
 func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
+
+	// S3 URL Presigner for IGV returned URLs
+	s3Presigner := utils.NewS3PreSigner()
 
 	// Create repository
 	repoStarrocks := repository.NewStarrocksRepository(dbStarrocks)
@@ -97,7 +101,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
 
 	igvGroup := privateRoutes.Group("/igv")
-	igvGroup.GET("/:seq_id", server.GetIGVHandler(repoIGV, nil))
+	igvGroup.GET("/:seq_id", server.GetIGVHandler(repoIGV, s3Presigner))
 
 	interpretationsGroup := privateRoutes.Group("/interpretations")
 	interpretationsGroup.GET("/pubmed/:citation_id", server.GetPubmedCitation(pubmedClient))
