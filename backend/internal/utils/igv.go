@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -50,13 +49,10 @@ func (ps *DefaultS3PreSigner) GenerateS3PreSignedURL(url string) (*PreSignedURL,
 
 	endpoint := os.Getenv("AWS_ENDPOINT_URL")
 	region := os.Getenv("AWS_REGION")
-	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
-	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	useSSL := os.Getenv("AWS_USE_SSL") == "true"
 
 	awsConfig := &aws.Config{
 		Region:           aws.String(region),
-		Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
 		Endpoint:         aws.String(endpoint),
 		S3ForcePathStyle: aws.Bool(true),
 		DisableSSL:       aws.Bool(!useSSL),

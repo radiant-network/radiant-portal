@@ -3,31 +3,35 @@ package testutils
 import (
 	"context"
 	"fmt"
-	"github.com/testcontainers/testcontainers-go/network"
 	"log"
 	"os/exec"
 	"sync"
 	"time"
+
+	"github.com/testcontainers/testcontainers-go/network"
 
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 const (
-	testResources          = "../../test/data"
-	StarrocksContainerName = "starrocks_radiant"
-	PostgresContainerName  = "postgres_radiant"
+	testResources            = "../../test/data"
+	StarrocksContainerName   = "starrocks_radiant"
+	PostgresContainerName    = "postgres_radiant"
+	ObjectStoreContainerName = "minio_radiant"
 )
 
 var (
-	PostgresContainerSetup  *ContainerConf
-	StarrocksContainerSetup *ContainerConf
-	Network                 *testcontainers.DockerNetwork
+	PostgresContainerSetup    *ContainerConf
+	StarrocksContainerSetup   *ContainerConf
+	ObjectStoreContainerSetup *ContainerConf
+	Network                   *testcontainers.DockerNetwork
 )
 
 func StartAllContainers() {
 	StartPostgresContainer()
 	StartStarrocksContainer()
+	StartObjectStoreContainer()
 }
 
 func StartPostgresContainer() {
@@ -50,12 +54,25 @@ func StartStarrocksContainer() {
 	}
 }
 
+func StartObjectStoreContainer() {
+	if Network == nil {
+		Network = createNetwork()
+	}
+	if ObjectStoreContainerSetup == nil {
+		ObjectStoreContainerSetup = newContainerSetup(ObjectStoreContainerName, startMinioContainer)
+		ObjectStoreContainerSetup.setupContainer()
+	}
+}
+
 func StopAllContainers() {
 	if PostgresContainerSetup != nil {
 		PostgresContainerSetup.stopContainer()
 	}
 	if StarrocksContainerSetup != nil {
 		StarrocksContainerSetup.stopContainer()
+	}
+	if ObjectStoreContainerSetup != nil {
+		ObjectStoreContainerSetup.stopContainer()
 	}
 	if Network != nil {
 		deleteNetwork()
@@ -150,6 +167,37 @@ func startPostgresContainer() (testcontainers.Container, error) {
 			wait.ForListeningPort("5432/tcp"),
 			wait.ForLog("PostgreSQL init process complete").WithPollInterval(1*time.Second),
 		),
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return container, nil
+}
+
+func startMinioContainer() (testcontainers.Container, error) {
+	ctx := context.Background()
+	networkName := Network.Name
+	aliases := []string{ObjectStoreContainerName}
+
+	req := testcontainers.ContainerRequest{
+		Image:        "minio/minio:latest",
+		ExposedPorts: []string{"9000/tcp"},
+		Env: map[string]string{
+			"MINIO_ROOT_USER":     "admin",
+			"MINIO_ROOT_PASSWORD": "password",
+		},
+		Cmd:      []string{"server", "/data"},
+		Networks: []string{networkName},
+		NetworkAliases: map[string][]string{
+			networkName: aliases,
+		},
+		WaitingFor: wait.ForListeningPort("9000/tcp"),
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{

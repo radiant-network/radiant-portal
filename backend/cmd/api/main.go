@@ -97,7 +97,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
 
 	igvGroup := privateRoutes.Group("/igv")
-	igvGroup.GET("/:seq_id", server.IGVGetHandler(repoIGV, nil))
+	igvGroup.GET("/:seq_id", server.GetIGVHandler(repoIGV, nil))
 
 	interpretationsGroup := privateRoutes.Group("/interpretations")
 	interpretationsGroup.GET("/pubmed/:citation_id", server.GetPubmedCitation(pubmedClient))

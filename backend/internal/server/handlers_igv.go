@@ -12,7 +12,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
-// IGVGetHandler
+// GetIGVHandler
 // @Summary Get IGV
 // @Id getIGV
 // @Description Get IGV tracks for a sequencing experiment
@@ -24,7 +24,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /igv/{seq_id} [get]
-func IGVGetHandler(repo repository.IGVRepositoryDAO, presigner utils.S3PreSigner) gin.HandlerFunc {
+func GetIGVHandler(repo repository.IGVRepositoryDAO, presigner utils.S3PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = &utils.DefaultS3PreSigner{}
 	}
@@ -41,6 +41,11 @@ func IGVGetHandler(repo repository.IGVRepositoryDAO, presigner utils.S3PreSigner
 			return
 		}
 
+		if len(internalIgvTracks) == 0 {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+
 		igvEnrichedTracks, err := prepareIgvTracks(internalIgvTracks, presigner)
 		if err != nil {
 			HandleError(c, err)
@@ -48,15 +53,6 @@ func IGVGetHandler(repo repository.IGVRepositoryDAO, presigner utils.S3PreSigner
 		}
 
 		c.JSON(http.StatusOK, igvEnrichedTracks)
-	}
-}
-
-func getTrackName(track repository.IGVTrack) string {
-	switch track.DataTypeCode {
-	case "alignment":
-		return fmt.Sprintf("Reads: %s %s", track.SampleId, track.FamilyRole)
-	default:
-		return "Unknown"
 	}
 }
 
@@ -76,7 +72,6 @@ func prepareIgvTracks(internalTracks []repository.IGVTrack, presigner utils.S3Pr
 			enriched = types.IGVTrackEnriched{
 				PatientId:  r.PatientId,
 				Type:       r.DataTypeCode,
-				Name:       getTrackName(r),
 				Sex:        r.SexCode,
 				FamilyRole: r.FamilyRole,
 			}
@@ -88,6 +83,7 @@ func prepareIgvTracks(internalTracks []repository.IGVTrack, presigner utils.S3Pr
 		}
 
 		if r.FormatCode == "cram" {
+			enriched.Name = fmt.Sprintf("Reads: %s %s", r.SampleId, r.FamilyRole)
 			enriched.Format = r.FormatCode
 			enriched.URL = presigned.URL
 			enriched.URLExpireAt = presigned.URLExpireAt
