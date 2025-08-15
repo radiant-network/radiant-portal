@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"gorm.io/driver/postgres"
@@ -16,16 +15,6 @@ import (
 )
 
 var setupPostgresMutex sync.RWMutex
-
-func SequentialPostgresTestWithDb(t *testing.T, testFunc func(t *testing.T, db *gorm.DB)) {
-	gormDb, err := initPostgresDb()
-	if err != nil {
-		log.Fatal("Failed to init db connection: ", err)
-	}
-	testFunc(t, gormDb)
-	// Clean up
-	cleanUp(gormDb)
-}
 
 func cleanUp(gormDb *gorm.DB) {
 	var db *sql.DB

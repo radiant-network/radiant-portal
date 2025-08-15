@@ -774,6 +774,37 @@ components:
       - variant_class
       - zygosity
       type: object
+    IGVTrackEnriched:
+      properties:
+        family_role:
+          type: string
+        format:
+          type: string
+        indexURL:
+          type: string
+        indexURLExpireAt:
+          type: integer
+        name:
+          type: string
+        patient_id:
+          type: integer
+        sex:
+          type: string
+        type:
+          type: string
+        url:
+          type: string
+        urlExpireAt:
+          type: integer
+      type: object
+    IGVTracks:
+      properties:
+        alignment:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+      type: object
     InterpretationGermline:
       properties:
         classification:
@@ -1726,6 +1757,41 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - hpo
+  /igv/{seq_id}:
+    get:
+      description: Get IGV tracks for a sequencing experiment
+      operationId: getIGV
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IGVTracks'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get IGV
+      tags:
+      - igv
   /interpretations/germline:
     get:
       description: Search interpretation germline

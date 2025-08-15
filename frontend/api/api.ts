@@ -1672,6 +1672,86 @@ export interface GermlineSNVOccurrence {
 /**
  * 
  * @export
+ * @interface IGVTrackEnriched
+ */
+export interface IGVTrackEnriched {
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'family_role'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'format'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'indexURL'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
+    'indexURLExpireAt'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
+    'patient_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'sex'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'url'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
+    'urlExpireAt'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface IGVTracks
+ */
+export interface IGVTracks {
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'alignment'?: Array<IGVTrackEnriched>;
+}
+/**
+ * 
+ * @export
  * @interface InterpretationGermline
  */
 export interface InterpretationGermline {
@@ -3850,6 +3930,118 @@ export class HpoApi extends BaseAPI {
      */
     public hpoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return HpoApiFp(this.configuration).hpoTermAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * IgvApi - axios parameter creator
+ * @export
+ */
+export const IgvApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get IGV tracks for a sequencing experiment
+         * @summary Get IGV
+         * @param {string} seqId Sequencing ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getIGV: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getIGV', 'seqId', seqId)
+            const localVarPath = `/igv/{seq_id}`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * IgvApi - functional programming interface
+ * @export
+ */
+export const IgvApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = IgvApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get IGV tracks for a sequencing experiment
+         * @summary Get IGV
+         * @param {string} seqId Sequencing ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getIGV(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IGVTracks>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getIGV(seqId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['IgvApi.getIGV']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * IgvApi - factory interface
+ * @export
+ */
+export const IgvApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = IgvApiFp(configuration)
+    return {
+        /**
+         * Get IGV tracks for a sequencing experiment
+         * @summary Get IGV
+         * @param {string} seqId Sequencing ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getIGV(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<IGVTracks> {
+            return localVarFp.getIGV(seqId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * IgvApi - object-oriented interface
+ * @export
+ * @class IgvApi
+ * @extends {BaseAPI}
+ */
+export class IgvApi extends BaseAPI {
+    /**
+     * Get IGV tracks for a sequencing experiment
+     * @summary Get IGV
+     * @param {string} seqId Sequencing ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof IgvApi
+     */
+    public getIGV(seqId: string, options?: RawAxiosRequestConfig) {
+        return IgvApiFp(this.configuration).getIGV(seqId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
