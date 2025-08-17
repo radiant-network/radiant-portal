@@ -17,6 +17,8 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
 
+  const pickedConsequence = data?.picked_consequences?.[0];
+
   return (
     <Card {...props}>
       <CardContent className="px-4 md:px-6 py-0 2xl:py-12 grow">
@@ -34,6 +36,8 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 >
                   {data.symbol}
                 </a>
+              ) : ['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? (
+                t('common.no_gene')
               ) : (
                 '-'
               )}
@@ -43,8 +47,8 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.consequence')}</div>
             <div className="flex items-center gap-2">
-              {data?.picked_consequences?.[0] && data.vep_impact ? (
-                <ConsequenceLabel vepImpact={data.vep_impact} consequence={data?.picked_consequences?.[0]} />
+              {pickedConsequence && data.vep_impact ? (
+                <ConsequenceLabel vepImpact={data.vep_impact} consequence={pickedConsequence} />
               ) : (
                 '-'
               )}
