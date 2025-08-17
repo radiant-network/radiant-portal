@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { Button } from '@/components/base/ui/button';
 import {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogFooter,
@@ -55,21 +56,23 @@ function QueryBarSaveDialog({
           <DialogTitle>{dict.queryBar.saveDialog.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{dict.queryBar.saveDialog.fields.title.label}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={dict.queryBar.saveDialog.fields.title.placeholder} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="text-sm">{dict.queryBar.saveDialog.notice}</div>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DialogBody className="space-y-6">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{dict.queryBar.saveDialog.fields.title.label}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={dict.queryBar.saveDialog.fields.title.placeholder} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="text-sm">{dict.queryBar.saveDialog.notice}</div>
+            </DialogBody>
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">{dict.queryBar.saveDialog.cancel}</Button>

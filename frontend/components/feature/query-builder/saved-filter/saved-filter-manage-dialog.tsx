@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogFooter,
@@ -37,11 +38,13 @@ function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpe
           <DialogHeader>
             <DialogTitle>{dict.savedFilter.manageDialog.title}</DialogTitle>
           </DialogHeader>
-          <List bordered className="max-h-[250px]">
-            {savedFilters.map(savedFilter => (
-              <SavedFilterListItem key={savedFilter.id} savedFilter={savedFilter} />
-            ))}
-          </List>
+          <DialogBody>
+            <List bordered className="max-h-[250px]">
+              {savedFilters.map(savedFilter => (
+                <SavedFilterListItem key={savedFilter.id} savedFilter={savedFilter} />
+              ))}
+            </List>
+          </DialogBody>
           <DialogFooter>
             <DialogClose asChild>
               <Button>{dict.savedFilter.manageDialog.close}</Button>

@@ -8,6 +8,7 @@ import { Spinner } from '@/components/base/spinner';
 import { Button } from '@/components/base/ui/button';
 import {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogFooter,
@@ -105,20 +106,20 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger(handleOpen)}
       <DialogContent
-        className="max-w-[calc(100vw-48px)] min-h-[calc(100vh-48px)] w-[1200px]"
+        className="max-w-[calc(100vw-60px)] min-h-[calc(100vh-60px)] w-[1200px]"
         onEscapeKeyDown={e => e.preventDefault()}
+        variant="stickyBoth"
       >
         {fetchInterpretation.isLoading || fetchOccurrenceExpand.isLoading ? (
-          <div className="flex items-center justify-center">
+          <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
-          </div>
+          </DialogBody>
         ) : (
           <div>
             <DialogHeader>
               <DialogTitle>{t('variant.interpretation_form.title')}</DialogTitle>
             </DialogHeader>
-            <Separator className="mt-6" />
-            <div className="py-6 overflow-scroll space-y-6 h-[calc(95vh-150px)]">
+            <DialogBody className="overflow-scroll space-y-6 h-[calc(95vh-150px)]">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
               <InterpretationTranscript occurrence={fetchOccurrenceExpand.data} />
@@ -152,8 +153,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
                   <OccurrenceDetails occurrence={fetchOccurrenceExpand.data} />
                 </div>
               </div>
-            </div>
-            <Separator className="mb-6" />
+            </DialogBody>
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">{t('variant.interpretation_form.cancel_text')}</Button>

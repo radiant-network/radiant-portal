@@ -1,5 +1,6 @@
 import {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogFooter,
@@ -56,20 +57,22 @@ function SavedFiltersEditDialog({
           <DialogTitle>{dict.savedFilter.editDialog.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{dict.savedFilter.editDialog.fields.title.label}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={dict.savedFilter.editDialog.fields.title.placeholder} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DialogBody>
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{dict.savedFilter.editDialog.fields.title.label}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={dict.savedFilter.editDialog.fields.title.placeholder} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </DialogBody>
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">{dict.savedFilter.editDialog.cancel}</Button>
