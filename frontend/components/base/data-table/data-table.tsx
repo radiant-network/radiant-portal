@@ -706,8 +706,8 @@ function TranstackTable<T>({
         </Card>
       )}
 
-      {loadingStates?.list === false && !hasError && !isTableEmpty && (
-        <div ref={containerRef}>
+      <div ref={containerRef}>
+        {loadingStates?.list === false && !hasError && !isTableEmpty && (
           <Table id={id} style={{ ...columnSizeVars }}>
             <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
               {table.getHeaderGroups().map(headerGroup => (
@@ -773,8 +773,8 @@ function TranstackTable<T>({
               </TableFooter>
             )}
           </Table>
-        </div>
-      )}
+        )}{' '}
+      </div>
       {!shouldHidePagination && (
         <div className={'flex items-center justify-between py-3 '}>
           <div>
