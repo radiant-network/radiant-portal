@@ -229,14 +229,18 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                   enableFavorite
                   enableShowHideLabels
                   queryCountIcon={<VariantIcon size={14} />}
-                  fetchQueryCount={resolvedSqon =>
-                    fetchQueryCount({
+                  fetchQueryCount={async resolvedSqon => {
+                    if (!seqId) {
+                      return Promise.resolve(0);
+                    }
+
+                    return fetchQueryCount({
                       seqId,
                       countBody: {
                         sqon: resolvedSqon,
                       },
-                    }).then(res => res.count || 0)
-                  }
+                    }).then(res => res.count || 0);
+                  }}
                   resolveSyntheticSqon={resolveSyntheticSqon}
                   onActiveQueryChange={sqon =>
                     setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)
