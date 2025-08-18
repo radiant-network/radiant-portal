@@ -6,6 +6,8 @@ module.exports = defineConfig({
   rules: {
     'react-hooks/exhaustive-deps': 'off', // disable missing deps warnings
     'react/display-name': 'off', // disables missing display name warnings
+    'no-nested-ternary': 'error', // disallow nested ternaries
+    'no-unneeded-ternary': 'error',
     'max-len': [
       'warn', // or 'error'
       {
