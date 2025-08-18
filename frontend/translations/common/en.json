@@ -311,7 +311,7 @@
         "pf_wgs_not_affected_tooltip": "Non-affected Patient Frequency (WGS)",
         "topmed_af": "TopMed",
         "thousand_genome_af": "1000 Genomes",
-        "actualInterval": "Actual interval",
+        "actual_interval": "Actual interval",
         "unit": "Unit",
         "selectUnit": "Select unit",
         "noData": "No data",
