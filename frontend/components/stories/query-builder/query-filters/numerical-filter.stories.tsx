@@ -1,10 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import type { Meta, StoryObj } from '@storybook/react';
+import { expect, userEvent, within } from '@storybook/test';
+
 import { NumericalFilter } from '@/components/feature/query-filters/numerical-filter';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { RangeOperators } from '@/components/model/sqon';
-import { expect, userEvent, within } from '@storybook/test';
+
 import { config as configMock } from './config-mock';
 
 const config: PortalConfig = {
@@ -81,13 +83,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: args => {
-    return (
-      <div className="space-y-3">
-        <NumericalFilter {...args} />
-      </div>
-    );
-  },
+  render: args => (
+    <div className="space-y-3">
+      <NumericalFilter {...args} />
+    </div>
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -129,13 +129,11 @@ export const NoDataToggleHidden: Story = {
   args: {
     field: { key: 'impact_score', type: 'multiple' },
   },
-  render: args => {
-    return (
-      <div className="space-y-3">
-        <NumericalFilter {...args} />
-      </div>
-    );
-  },
+  render: args => (
+    <div className="space-y-3">
+      <NumericalFilter {...args} />
+    </div>
+  ),
 };
 
 export const RangeFilterWithInterval: Story = {

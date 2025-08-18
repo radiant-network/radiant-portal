@@ -29,6 +29,8 @@ import {
 } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
 
+const API_DEFAULT_TYPE = 'integer';
+
 type OccurrenceStatisticsInput = {
   seqId: string;
   statisticsBody: StatisticsBodyWithSqon;
@@ -74,6 +76,7 @@ function getNumericalValue(
   let maxValue: string = '0';
   let numericalValue: string = '';
   let hasNoData: boolean = false;
+  const decimal = statistics?.type === API_DEFAULT_TYPE ? 0 : 3;
 
   // Find the main numeric field filter
   const numericFilter = activeQuery.content.find((x: TSqonContentValue) =>
@@ -109,8 +112,8 @@ function getNumericalValue(
     // Handle numeric values
     if (values.length === 2) {
       selectedRange = RangeOperators.Between;
-      minValue = Number(values[0]).toFixed(3);
-      maxValue = Number(values[1]).toFixed(3);
+      minValue = Number(values[0]).toFixed(decimal);
+      maxValue = Number(values[1]).toFixed(decimal);
     } else {
       // Single value case
       numericalValue = values[0] as string;
@@ -129,14 +132,14 @@ function getNumericalValue(
       minValue = aggConfig.defaultMin.toString();
       numericalValue = aggConfig.defaultMin.toString();
     } else if (statistics?.min !== undefined) {
-      minValue = Number(statistics.min.toFixed(3)).toString();
-      numericalValue = Number(statistics.min.toFixed(3)).toString();
+      minValue = Number(statistics.min.toFixed(decimal)).toString();
+      numericalValue = Number(statistics.min.toFixed(decimal)).toString();
     }
 
     if (aggConfig?.defaultMax !== undefined) {
       maxValue = aggConfig.defaultMax.toString();
     } else if (statistics?.max !== undefined) {
-      maxValue = Number(statistics.max.toFixed(3)).toString();
+      maxValue = Number(statistics.max.toFixed(decimal)).toString();
     }
 
     if (aggConfig?.defaultOperator) {
@@ -209,6 +212,7 @@ export function NumericalFilter({ field }: IProps) {
 
   // Fetch statistics for min/max values
   const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, appId, seqId, false);
+  const decimal = statistics?.type === API_DEFAULT_TYPE ? 0 : 3;
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
   const [numericValue, setNumericValue] = useState<string>('0');
   const [maxValue, setMaxValue] = useState<string>('0');
@@ -241,7 +245,7 @@ export function NumericalFilter({ field }: IProps) {
     setMinValue(result.minValue);
     setMaxValue(result.maxValue);
     setHasUnappliedItems(result.hasUnappliedItems);
-    setSelectedRange(result.selectedRange);
+    setSelectedRange(result.selectedRange ?? RangeOperators.GreaterThan);
     setNumericValue(result.numericalValue);
   }, [appId, fieldKey, aggConfig, statistics]);
 
@@ -397,8 +401,8 @@ export function NumericalFilter({ field }: IProps) {
           {hasInterval && (
             <div id={`${fieldKey}_interval`}>
               <TextMuted>
-                {t('common.filters.labels.actualInterval')} : {statistics?.min?.toFixed(3)} -{' '}
-                {statistics?.max?.toFixed(3)}
+                {t('common.filters.labels.actual_interval')} : {statistics?.min?.toFixed(decimal)} -{' '}
+                {statistics?.max?.toFixed(decimal)}
               </TextMuted>
             </div>
           )}
@@ -406,7 +410,7 @@ export function NumericalFilter({ field }: IProps) {
 
         {aggConfig?.rangeTypes && aggConfig.rangeTypes.length > 0 && (
           <div id={`${fieldKey}_range_type_container`}>
-            {isLoadingStats && defaultIsLoadingStats ? (
+            {isLoadingStats ? (
               <>
                 <Skeleton className="h-5 w-16 mb-1" id={`${fieldKey}_unit_label_skeleton`} />
                 <Skeleton className="h-9 w-full" id={`${fieldKey}_select_skeleton`} />
