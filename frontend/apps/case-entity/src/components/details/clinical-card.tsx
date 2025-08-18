@@ -95,7 +95,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
           </div>
 
           {/* Clinical Note */}
-          <Card className="p-4 gap-4">
+          <Card className="p-4 gap-4 shadow-none">
             <CardTitle className="text-base">{t('case_entity.details.clinical_note')}</CardTitle>
             <p className="text-sm">{data.note}</p>
           </Card>
@@ -108,7 +108,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
 
             <div className={cn('flex flex-col gap-4 flex-1')}>
               {family.map(member => (
-                <Card className="p-4 gap-4 flex">
+                <Card className="p-4 gap-4 flex shadow-none">
                   {/* Relationship */}
                   <CardTitle className="capitalize">{member.relationship_to_proband}</CardTitle>
 
