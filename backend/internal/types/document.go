@@ -19,6 +19,11 @@ var DocumentTable = Table{
 	Name: "radiant_jdbc.public.document",
 }
 
+var DocumentHasPatientTable = Table{
+	Name:  "radiant_jdbc.public.document_has_patient",
+	Alias: "dhp",
+}
+
 func (Document) TableName() string {
 	return DocumentTable.Name
 }

@@ -10,48 +10,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"testing"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
-
-func ParallelTestWithDb(t *testing.T, dbName string, testFunc func(t *testing.T, db *gorm.DB)) {
-	t.Parallel()
-	db, dbName, err := initDb(dbName)
-	if err != nil {
-		log.Fatal("Failed to init db connection:", err)
-
-	}
-	_, err = initPostgresDb()
-	if err != nil {
-		log.Fatal("Failed to init PostgreSQL db connection:", err)
-
-	}
-	testFunc(t, db)
-	//Drop database
-	db.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
-
-}
-
-func ParallelTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFunc func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB)) {
-	t.Parallel()
-	starrocks, dbName, err := initDb(dbName)
-	if err != nil {
-		log.Fatal("Failed to init db connection:", err)
-
-	}
-	postgres, err := initPostgresDb()
-	if err != nil {
-		log.Fatal("Failed to init PostgreSQL db connection:", err)
-
-	}
-	testFunc(t, starrocks, postgres)
-	//Drop database
-	starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
-
-}
 
 func initDb(folderName string) (*gorm.DB, string, error) {
 	ctx := context.Background()

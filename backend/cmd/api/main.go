@@ -2,11 +2,14 @@ package main
 
 import (
 	"flag"
-	"gorm.io/gorm"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"gorm.io/gorm"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
@@ -30,6 +33,9 @@ func init() {
 
 func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
+	// S3 URL Presigner for IGV returned URLs
+	s3Presigner := utils.NewS3PreSigner()
+
 	// Create repository
 	repoStarrocks := repository.NewStarrocksRepository(dbStarrocks)
 	repoSeqExp := repository.NewSequencingRepository(dbStarrocks)
@@ -44,6 +50,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
 	repoClinvarRCV := repository.NewClinvarRCVRepository(dbStarrocks)
+	repoIGV := repository.NewIGVRepository(dbStarrocks)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -92,6 +99,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	hpoGroup := privateRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
+
+	igvGroup := privateRoutes.Group("/igv")
+	igvGroup.GET("/:seq_id", server.GetIGVHandler(repoIGV, s3Presigner))
 
 	interpretationsGroup := privateRoutes.Group("/interpretations")
 	interpretationsGroup.GET("/pubmed/:citation_id", server.GetPubmedCitation(pubmedClient))
@@ -170,8 +180,13 @@ func main() {
 		log.Fatal("Failed to initialize postgres database: ", err)
 	}
 
+	p := os.Getenv("API_PORT")
+	if p == "" {
+		p = "8090"
+	}
+
 	r := setupRouter(dbStarrocks, dbPostgres)
-	err = r.Run(":8090")
+	err = r.Run(fmt.Sprintf(":%s", p))
 	if err != nil {
 		log.Fatal(err)
 	}
