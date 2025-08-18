@@ -1,16 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { useQueryBuilderContext } from "../query-builder-context";
-import { useQueryBarContext } from "./query-bar-context";
-import { Spinner } from "@/components/base/spinner";
-import { ISqonGroupFilter } from "@/components/model/sqon";
-import isEqual from "lodash/isEqual";
-import { resolveSyntheticSqon } from "@/components/model/query-builder-core";
-import { Sqon } from "@/api/api";
-import { numberFormat } from "@/components/lib/number-format";
+import { useEffect, useRef, useState } from 'react';
+import { useQueryBuilderContext } from '../query-builder-context';
+import { useQueryBarContext } from './query-bar-context';
+import { Spinner } from '@/components/base/spinner';
+import { ISqonGroupFilter } from '@/components/model/sqon';
+import isEqual from 'lodash/isEqual';
+import { resolveSyntheticSqon } from '@/components/model/query-builder-core';
+import { Sqon } from '@/api/api';
+import { numberFormat } from '@/components/lib/number-format';
 
 function QueryBarCount() {
-  const { queryBuilder, queryCountIcon, fetchQueryCount } =
-    useQueryBuilderContext();
+  const { queryBuilder, queryCountIcon, fetchQueryCount } = useQueryBuilderContext();
   const { query } = useQueryBarContext();
 
   const previousQuery = useRef<ISqonGroupFilter | null>(null);
@@ -18,12 +17,9 @@ function QueryBarCount() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (queryBuilder.getRawQueries().find((q) => q.id === query.id)) {
+    if (queryBuilder.getRawQueries().find(q => q.id === query.id)) {
       const previous = previousQuery.current;
-      const resolvedCurrent = resolveSyntheticSqon(
-        query.raw(),
-        queryBuilder.getRawQueries()
-      );
+      const resolvedCurrent = resolveSyntheticSqon(query.raw(), queryBuilder.getRawQueries());
 
       if (!previousQuery.current || !isEqual(previous, resolvedCurrent)) {
         previousQuery.current = resolvedCurrent;
