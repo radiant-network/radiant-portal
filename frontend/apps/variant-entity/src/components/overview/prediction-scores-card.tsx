@@ -6,7 +6,14 @@ import Empty from '@/components/base/empty';
 import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
 import { Card, CardContent, CardHeader, CardProps } from '@/components/base/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/base/ui/dialog';
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/base/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -254,7 +261,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
                 <DialogHeader>
                   <DialogTitle>{t('variant_entity.overview.prediction_scores')}</DialogTitle>
                 </DialogHeader>
-                <div className="text-sm space-y-6">{predictionScoreList}</div>
+                <DialogBody className="text-sm space-y-6">{predictionScoreList}</DialogBody>
               </DialogContent>
             </Dialog>
           )}

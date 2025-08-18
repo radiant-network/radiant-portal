@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogDescription,
   DialogFooter,
+  DialogBody,
 } from '@/components/base/ui/dialog';
 import { Button } from '@/components/base/ui/button';
 
@@ -32,11 +33,11 @@ export const Default: Story = {
           <DialogTitle>Dialog Title</DialogTitle>
           <DialogDescription>Dialog Description</DialogDescription>
         </DialogHeader>
-        <div className="px-6 py-4">
+        <DialogBody>
           <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-40">
             Slot (swap it with your content)
           </div>
-        </div>
+        </DialogBody>
         <DialogFooter>
           <Button>Close</Button>
         </DialogFooter>
@@ -58,11 +59,11 @@ export const StickyHeader: Story = {
           <DialogDescription>Dialog Description</DialogDescription>
         </DialogHeader>
         <div className="overflow-auto">
-          <div className="px-6 py-4">
+          <DialogBody>
             <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-40">
               Slot (swap it with your content)
             </div>
-          </div>
+          </DialogBody>
           <DialogFooter>
             <Button>Close</Button>
           </DialogFooter>
@@ -85,11 +86,11 @@ export const StickyFooter: Story = {
             <DialogTitle>Dialog Title</DialogTitle>
             <DialogDescription>Dialog Description</DialogDescription>
           </DialogHeader>
-          <div className="px-6 py-4">
+          <DialogBody>
             <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-56">
               Slot (swap it with your content)
             </div>
-          </div>
+          </DialogBody>
         </div>
         <DialogFooter>
           <Button>Close</Button>

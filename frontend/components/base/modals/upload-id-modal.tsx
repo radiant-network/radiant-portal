@@ -12,6 +12,7 @@ import DisplayTable from '../data-table/display-table';
 import { Button } from '../ui/button';
 import {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogFooter,
@@ -141,93 +142,95 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
         <DialogHeader>
           <DialogTitle>{t(`common.upload_id.${variant}.dialog_header`)}</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <FormItem>
-            <FormLabel
-              infoCardContent={
-                <div className="leading-6">
-                  {t('common.upload_id.identifiers.tooltips.identifiers')}
-                  {t('common.upload_id.identifiers.tooltips.separated_by')}
-                  {t('common.upload_id.identifiers.tooltips.upload_file_format')}
-                </div>
-              }
-            >
-              {t('common.upload_id.identifiers.label')}
-            </FormLabel>
-            <Textarea rows={5} />
-          </FormItem>
-        </Form>
-        <div className="flex flex-col gap-2">
-          <div>
-            <Button loading={isLoading} variant="outline">
-              <Label className="cursor-pointer" htmlFor="file">
-                {t('common.upload_id.upload_a_file')}
-              </Label>
-              <Input
-                id="file"
-                type="file"
-                accept=".txt,.csv,.tsv"
-                placeholder={t('common.upload_id.upload_a_file')}
-                className="hidden"
-                multiple
-                onChange={handleFileChange}
-              />
-            </Button>
-            {files.length > 0 && (
-              <Button variant="ghost" onClick={() => setFiles([])}>
-                {t('common.actions.clear')}
+        <DialogBody className="space-y-4">
+          <Form {...form}>
+            <FormItem>
+              <FormLabel
+                infoCardContent={
+                  <div className="leading-6">
+                    {t('common.upload_id.identifiers.tooltips.identifiers')}
+                    {t('common.upload_id.identifiers.tooltips.separated_by')}
+                    {t('common.upload_id.identifiers.tooltips.upload_file_format')}
+                  </div>
+                }
+              >
+                {t('common.upload_id.identifiers.label')}
+              </FormLabel>
+              <Textarea rows={5} />
+            </FormItem>
+          </Form>
+          <div className="flex flex-col gap-2">
+            <div>
+              <Button loading={isLoading} variant="outline">
+                <Label className="cursor-pointer" htmlFor="file">
+                  {t('common.upload_id.upload_a_file')}
+                </Label>
+                <Input
+                  id="file"
+                  type="file"
+                  accept=".txt,.csv,.tsv"
+                  placeholder={t('common.upload_id.upload_a_file')}
+                  className="hidden"
+                  multiple
+                  onChange={handleFileChange}
+                />
               </Button>
+              {files.length > 0 && (
+                <Button variant="ghost" onClick={() => setFiles([])}>
+                  {t('common.actions.clear')}
+                </Button>
+              )}
+            </div>
+            {files.length > 0 && (
+              <>
+                <div className="flex flex-col gap-1">
+                  {files.map((file, index) => (
+                    <div key={index} className="flex items-center gap-1">
+                      <Paperclip size={14} /> {file.name}
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <CollapsibleCard
+                    title={t('common.upload_id.summary_table', {
+                      matched: matched.length,
+                      unmatched: unmatched.length,
+                    })}
+                  >
+                    <div className="flex flex-col gap-3">
+                      <span>
+                        {t('common.upload_id.resume', {
+                          total: items.length,
+                          unique: uniqBy(items, 'entry').length,
+                        })}
+                      </span>
+                      <Tabs defaultValue="matched">
+                        <TabsList>
+                          <TabsTrigger value="matched">
+                            {t('common.upload_id.matched', {
+                              total: matched.length,
+                            })}
+                          </TabsTrigger>
+                          <TabsTrigger value="unmatched">
+                            {t('common.upload_id.unmatched', {
+                              total: matched.length,
+                            })}
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="matched">
+                          <DisplayTable data={matched} columns={columns} />
+                        </TabsContent>
+                        <TabsContent value="unmatched">
+                          <DisplayTable data={unmatched} columns={columns} />
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </CollapsibleCard>
+                </div>
+              </>
             )}
           </div>
-          {files.length > 0 && (
-            <>
-              <div className="flex flex-col gap-1">
-                {files.map((file, index) => (
-                  <div key={index} className="flex items-center gap-1">
-                    <Paperclip size={14} /> {file.name}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <CollapsibleCard
-                  title={t('common.upload_id.summary_table', {
-                    matched: matched.length,
-                    unmatched: unmatched.length,
-                  })}
-                >
-                  <div className="flex flex-col gap-3">
-                    <span>
-                      {t('common.upload_id.resume', {
-                        total: items.length,
-                        unique: uniqBy(items, 'entry').length,
-                      })}
-                    </span>
-                    <Tabs defaultValue="matched">
-                      <TabsList>
-                        <TabsTrigger value="matched">
-                          {t('common.upload_id.matched', {
-                            total: matched.length,
-                          })}
-                        </TabsTrigger>
-                        <TabsTrigger value="unmatched">
-                          {t('common.upload_id.unmatched', {
-                            total: matched.length,
-                          })}
-                        </TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="matched">
-                        <DisplayTable data={matched} columns={columns} />
-                      </TabsContent>
-                      <TabsContent value="unmatched">
-                        <DisplayTable data={unmatched} columns={columns} />
-                      </TabsContent>
-                    </Tabs>
-                  </div>
-                </CollapsibleCard>
-              </div>
-            </>
-          )}
-        </div>
+        </DialogBody>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="secondary">{t('common.actions.cancel')}</Button>

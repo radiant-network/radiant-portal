@@ -11,7 +11,14 @@ import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cel
 import InformationField from '@/components/base/information/information-field';
 import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/base/ui/dialog';
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/base/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,7 +73,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
         </DialogHeader>
 
         {/* Status */}
-        <div className="flex flex-col w-full md:justify-between md:flex-row">
+        <DialogBody className="flex flex-col w-full md:justify-between md:flex-row">
           <div className="flex flex-col gap-2 flex-1">
             <h2 className="text-sm font-semibold">
               {t('case_entity.details.assay')} {data?.seq_id}
@@ -174,7 +181,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
               {data?.submitter_sample_id}
             </InformationField>
           </div>
-        </div>
+        </DialogBody>
         <DialogFooter>
           <Button onClick={() => onClose(true)}>{t('common.close')}</Button>
         </DialogFooter>
