@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { CheckedState } from '@radix-ui/react-checkbox';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 
 import { Checkbox } from '@/components/base/ui/checkbox';
-import { CheckedState } from '@radix-ui/react-checkbox';
 
 const meta = {
   title: 'Inputs/Checkbox',
@@ -32,13 +32,16 @@ export const Sizes: Story = {
     const [checked, setChecked] = useState<CheckedState>(false);
 
     return (
-      <div className="flex gap-2">
-        <Checkbox size="default" checked={checked} onCheckedChange={setChecked} />
-        <Checkbox size="xs" checked={checked} onCheckedChange={setChecked} />
-        <Checkbox size="sm" checked={checked} onCheckedChange={setChecked} />
-        <Checkbox size="md" checked={checked} onCheckedChange={setChecked} />
-        <Checkbox size="lg" checked={checked} onCheckedChange={setChecked} />
-      </div>
+      <>
+        <div className="p-4">
+          <h3 className="mb-4 text-lg font-semibold">Size: default</h3>
+          <Checkbox size="default" checked={checked} onCheckedChange={setChecked} />
+        </div>
+        <div className="p-4">
+          <h3 className="mb-4 text-lg font-semibold">Size: xs</h3>
+          <Checkbox size="xs" checked={checked} onCheckedChange={setChecked} />
+        </div>
+      </>
     );
   },
 };
