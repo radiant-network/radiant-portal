@@ -15,7 +15,7 @@ function AssociatedConditionsCard({ data, ...props }: { data: VariantOverview } 
       <CardHeader className="flex flex-row justify-between pb-0">
         <div className="font-semibold">{t('variant_entity.overview.associated_conditions_omim')}</div>
       </CardHeader>
-      <CardContent className="text-sm space-y-6 h-full">
+      <CardContent className="text-sm space-y-3 h-full">
         {isEmpty && (
           <Empty bordered showIcon={false} description={t('variant.no_data_for_variant')} className="py-6 h-full" />
         )}

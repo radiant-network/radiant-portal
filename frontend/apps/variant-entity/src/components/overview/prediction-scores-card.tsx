@@ -266,7 +266,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
             </Dialog>
           )}
         </CardHeader>
-        <CardContent className="text-sm space-y-6 h-full">
+        <CardContent className="text-sm space-y-2 h-full">
           {hasAnyPredictionScores ? (
             predictionScoreList.slice(0, 4)
           ) : (
