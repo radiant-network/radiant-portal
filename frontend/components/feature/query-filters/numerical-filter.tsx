@@ -422,9 +422,9 @@ export function NumericalFilter({ field }: IProps) {
                 </Label>
                 <Select defaultValue={selectedUnit || aggConfig.rangeTypes[0].key} onValueChange={onRangeTypeChanged}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('common.filters.labels.selectUnit')}>
+                    <SelectValue placeholder={t('common.filters.labels.select_unit')}>
                       {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name ||
-                        t('common.filters.labels.selectUnit')}
+                        t('common.filters.labels.select_unit')}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -443,7 +443,7 @@ export function NumericalFilter({ field }: IProps) {
         {noDataInputOption && !hasInterval && (
           <label className="flex items-center space-x-2 overflow-hidden" id={`${fieldKey}_no_data_label`}>
             <Checkbox checked={hasNoData} onCheckedChange={onNoDataChanged} id={`${fieldKey}_no_data`} />
-            <span>{t('common.filters.labels.noData')}</span>
+            <span>{t('common.filters.labels.no_data')}</span>
           </label>
         )}
       </div>
