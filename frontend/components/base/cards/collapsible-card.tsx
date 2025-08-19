@@ -1,8 +1,9 @@
-import { Collapsible, CollapsibleTrigger } from "@radix-ui/react-collapsible";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { CollapsibleContent } from "../ui/collapsible";
-import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from 'react';
+import { Collapsible, CollapsibleTrigger } from '@radix-ui/react-collapsible';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { CollapsibleContent } from '../ui/collapsible';
 
 type CollapsibleCardProps = {
   defaultOpen?: boolean;
@@ -14,10 +15,7 @@ function CollapsibleCard({ defaultOpen = false, title, children }: CollapsibleCa
 
   return (
     <Card>
-      <Collapsible
-        open={open}
-        onOpenChange={setOpen}
-      >
+      <Collapsible open={open} onOpenChange={setOpen}>
         <CardHeader>
           <CollapsibleTrigger className="flex justify-start">
             <CardTitle className="flex items-center justify-start gap-2 ">
@@ -26,12 +24,10 @@ function CollapsibleCard({ defaultOpen = false, title, children }: CollapsibleCa
           </CollapsibleTrigger>
         </CardHeader>
         <CardContent>
-          <CollapsibleContent>
-            {children}
-          </CollapsibleContent>
+          <CollapsibleContent>{children}</CollapsibleContent>
         </CardContent>
       </Collapsible>
-    </Card >
+    </Card>
   );
-};
-export default CollapsibleCard; 
+}
+export default CollapsibleCard;
