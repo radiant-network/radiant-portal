@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
-import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
 
 import InterpretationVariantHeader from './header';
