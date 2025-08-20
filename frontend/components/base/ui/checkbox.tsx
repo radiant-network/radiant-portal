@@ -1,11 +1,11 @@
 import * as React from 'react';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { Check } from 'lucide-react';
-
-import { cn } from '@/lib/utils';
 import { tv, VariantProps } from 'tailwind-variants';
 
-const checkboxVariants = tv({
+import { cn } from '@/lib/utils';
+
+export const checkboxVariants = tv({
   slots: {
     base: 'peer shrink-0 rounded-xs border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring shadow-sm disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground',
     icon: '',

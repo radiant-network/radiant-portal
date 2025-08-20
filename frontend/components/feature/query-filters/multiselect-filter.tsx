@@ -2,13 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { Aggregation } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
+import CheckboxFilter from '@/components/base/checkboxes/checkbox-filter';
 import { Button } from '@/components/base/ui/button';
-import { Checkbox } from '@/components/base/ui/checkbox';
 import { Input } from '@/components/base/ui/input';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
-import { numberFormat } from '@/components/lib/number-format';
 import { replaceUnderscore } from '@/components/lib/string-format';
 import { useConfig } from '@/components/model/applications-config';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
@@ -225,39 +224,36 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
       </div>
 
       <div className="max-h-[250px] overflow-auto">
-        {isLoading ? (
-          // Loading skeleton state
+        {/* Loading skeleton state */}
+        {isLoading &&
           Array.from({ length: 3 }, (_, i) => (
             <div className="flex justify-between items-center py-2 space-x-2" key={`skeleton-${i}`}>
               <Skeleton className="w-full h-6 rounded" />
               <Skeleton className="h-6 w-12 rounded-md" />
             </div>
-          ))
-        ) : items.length === 0 ? (
+          ))}
+
+        {/* No Result Found */}
+        {!isLoading && items.length === 0 && (
           <div className="text-muted-foreground py-4">{t('common.filters.no_values_found')}</div>
-        ) : (
-          // Actual content
+        )}
+
+        {/* Actual content */}
+        {!isLoading &&
+          items.length > 0 &&
           Array.from({ length: visibleItemsCount }, (_, i) => (
             <div className="gap-3 py-1.5" key={items[i].key}>
-              <div className="flex justify-between">
-                <label className="flex gap-2 overflow-hidden items-start py-0.5">
-                  <Checkbox
-                    className="w-4 h-4 py-0.5"
-                    checked={selectedItems.some(f => f === items[i].key)}
-                    onCheckedChange={() => itemSelected(items[i])}
-                  />
-                  <div className="overflow-hidden whitespace-normal break-words text-xs">
-                    {t(`common.filters.labels.${field.key}_value.${items[i].key}`, { defaultValue: items[i].label })}
-                  </div>
-                  <span className="checkmark"></span>
-                </label>
-                <span className="bg-accent px-2 h-5 rounded-md text-xs flex items-center">
-                  {numberFormat(items[i].count || 0)}
-                </span>
-              </div>
+              <CheckboxFilter
+                size="xs"
+                label={t(`common.filters.labels.${field.key}_value.${items[i].key}`, {
+                  defaultValue: items[i].label,
+                })}
+                checked={selectedItems.some(f => f === items[i].key)}
+                count={items[i].count}
+                onCheckedChange={() => itemSelected(items[i])}
+              />
             </div>
-          ))
-        )}
+          ))}
       </div>
 
       {!isLoading && items.length > visibleItemsCount && (
