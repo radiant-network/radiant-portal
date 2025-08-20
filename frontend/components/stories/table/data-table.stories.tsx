@@ -187,6 +187,18 @@ export const WithOneResult: Story = {
   render: args => <DataTable {...args} />,
 };
 
+export const WithTableFiltersAndOneResult: Story = {
+  args: {
+    data: data.slice(0, 1),
+    total: 1,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    tableIndexResultPosition: 'bottom',
+  },
+  render: args => <DataTable {...args} />,
+};
+
 // @TODO:  not functional at the moment
 // export const WithHeaderGroups: Story = {
 //   args: {
