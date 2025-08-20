@@ -1,12 +1,13 @@
 import { PlusIcon } from 'lucide-react';
+
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import { cn } from '@/components/lib/utils';
-import { Button } from '@/components/base/ui/button';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
-import { useConfig } from '@/components/model/applications-config';
-import { MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
-import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { Button } from '@/components/base/ui/button';
+import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { cn } from '@/components/lib/utils';
+import { useConfig } from '@/components/model/applications-config';
+import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
 
 type GeneCellProps = {
   className?: string;
@@ -27,7 +28,7 @@ function GeneCell({ className, symbol }: GeneCellProps) {
 
   return (
     <div className={cn('flex items-center gap-1', className)}>
-      <AnchorLink size="sm" variant='secondary' href={getOmimOrgUrl({ symbol })} target="_blank">
+      <AnchorLink size="sm" variant="secondary" href={getOmimOrgUrl({ symbol })} target="_blank">
         {symbol}
       </AnchorLink>
       <Button

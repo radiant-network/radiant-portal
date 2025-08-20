@@ -96,17 +96,17 @@ export type TableProps<TData> = {
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 } & (
-    | {
+  | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-    | {
+  | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-  );
+);
 
 export interface BaseColumnSettings {
   id: string;
@@ -309,7 +309,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -380,6 +380,7 @@ function getRowFlexRender<T>({
  * Should be used for complex and interactive table.
  * @SEE: If you needs to only display data in a table without interaction, local storage or pagination,
  * use DisplayTable instead
+ * @SEE: Storybook provide an example of all custom cell
  
  * @ISSUE: For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
  * @LINK: https://github.com/TanStack/table/issues/4825#issuecomment-1749665597

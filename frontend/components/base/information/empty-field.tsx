@@ -1,6 +1,4 @@
 function EmptyField() {
-  return (
-    <span>-</span>
-  );
-};
+  return <span>-</span>;
+}
 export default EmptyField;

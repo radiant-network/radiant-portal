@@ -1,7 +1,8 @@
+import { HeaderGroup, PaginationState } from '@tanstack/react-table';
+
 import { ColumnSettings } from '@/components/base/data-table/data-table';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
-import { HeaderGroup, PaginationState } from '@tanstack/react-table';
 
 type DataTableSkeletonLoadingProps = {
   headerGroups: HeaderGroup<any>[];
@@ -15,18 +16,16 @@ type DataTableSkeletonLoadingProps = {
  *
  * Using a skeleton prevent those issues
  */
-function DataTableSkeletonLoading({
-  headerGroups,
-  pagination,
-  columnSettings,
-}: DataTableSkeletonLoadingProps) {
+function DataTableSkeletonLoading({ headerGroups, pagination, columnSettings }: DataTableSkeletonLoadingProps) {
+  const rows = new Array(pagination.pageSize).fill(0);
+
   return (
     <Table>
       <TableHeader>
         {headerGroups.map(headerGroup => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map(header => (
-              <TableHead key={header.id}>
+              <TableHead key={header.id} className="w-full">
                 <Skeleton className="w-full h-[24px]" />
               </TableHead>
             ))}
@@ -34,7 +33,7 @@ function DataTableSkeletonLoading({
         ))}
       </TableHeader>
       <TableBody>
-        {new Array(pagination.pageSize).fill(0).map((_, index) => (
+        {rows.map((_, index) => (
           <TableRow key={`skeleton-row-${index}`}>
             <TableCell colSpan={columnSettings.length}>
               <Skeleton className="w-full h-[20px]" />
