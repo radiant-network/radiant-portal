@@ -1,15 +1,18 @@
-import { Link, Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
-import { authenticateRequest, getSessionUser, requireAuth } from '~/utils/auth.server';
-import type { Route } from '../+types/root';
-import type { IAuthUser } from '~/utils/auth.types';
-import { tv } from 'tailwind-variants';
-import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
-import MainNavbar from '@/components/feature/navbar/main-navbar';
-import logo from '@assets/logo/header.svg';
-import { SidebarProvider } from '@/components/base/ui/sidebar';
-import { FolderIcon } from 'lucide-react';
-import { useI18n } from '@/components/hooks/i18n';
 import { Suspense } from 'react';
+import { Link, Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
+import logo from '@assets/logo/header.svg';
+import { FolderIcon } from 'lucide-react';
+import { tv } from 'tailwind-variants';
+
+import { SidebarProvider } from '@/components/base/ui/sidebar';
+import MainNavbar from '@/components/feature/navbar/main-navbar';
+import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
+import { useI18n } from '@/components/hooks/i18n';
+
+import type { Route } from '../+types/root';
+
+import { authenticateRequest, getSessionUser, requireAuth } from '~/utils/auth.server';
+import type { IAuthUser } from '~/utils/auth.types';
 
 export async function loader({ request }: Route.LoaderArgs) {
   if (await requireAuth(request)) {

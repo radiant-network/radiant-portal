@@ -1,12 +1,14 @@
-import useSWR from 'swr';
-import DataTable from '@/components/base/data-table/data-table';
-import { PaginationState } from '@tanstack/react-table';
-import { getCaseExplorationColumns, defaultSettings } from '@/feature/case-table/table-settings';
-import { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody, SortBodyOrderEnum } from '@/api/api';
 import { useState } from 'react';
+import { PaginationState } from '@tanstack/react-table';
+import useSWR from 'swr';
+
+import { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody, SortBodyOrderEnum } from '@/api/api';
+import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
+import { defaultSettings, getCaseExplorationColumns } from '@/feature/case-table/table-settings';
 import { caseApi } from '@/utils/api';
-import TableFilters  from '../table-filters/table-filters';
+
+import TableFilters from '../table-filters/table-filters';
 
 type CaseListInput = {
   listBodyWithCriteria: ListBodyWithCriteria;
@@ -23,7 +25,6 @@ async function fetchCasesList(input: CaseListInput) {
   const response = await caseApi.searchCases(input.listBodyWithCriteria);
   return response.data;
 }
-
 
 function CasesTab() {
   const { t } = useI18n();
@@ -54,6 +55,7 @@ function CasesTab() {
           'primary_condition_name',
           'priority_code',
           'project_code',
+          'project_name',
           'request_id',
           'requested_by_code',
           'requested_by_name',
@@ -77,12 +79,7 @@ function CasesTab() {
       <DataTable
         id="case-exploration"
         columns={getCaseExplorationColumns(t)}
-        TableFilters={() => (
-          <TableFilters
-            loading={isLoading && !isValidating}
-            setSearchCriteria={setSearchCriteria}
-          />
-        )}
+        TableFilters={() => <TableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />}
         data={data?.list ?? []}
         defaultColumnSettings={defaultSettings}
         defaultServerSorting={DEFAULT_SORTING}

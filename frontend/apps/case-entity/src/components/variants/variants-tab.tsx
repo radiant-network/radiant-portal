@@ -126,6 +126,23 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     shouldRetryOnError: false,
   });
 
+  /**
+   * Restore activeSqon
+   */
+  useEffect(() => {
+    const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);
+
+    setQbState({
+      ...localQbState,
+      savedFilters: [],
+      selectedQueryIndexes: [0],
+    });
+    setActiveSqon(queryBuilderRemote.getResolvedActiveQuery(appId) as Sqon);
+  }, []);
+
+  /**
+   * Set proband based on searchParams
+   */
   useEffect(() => {
     if (searchParams.get('seq_id') != null) {
       setSeqId(searchParams.get('seq_id') ?? '');
@@ -140,17 +157,6 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
 
     setSeqId(assaysWithVariants[0].seq_id.toString());
   }, [searchParams, caseEntity]);
-
-  useEffect(() => {
-    const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);
-
-    setQbState({
-      ...localQbState,
-      savedFilters: [],
-      selectedQueryIndexes: [0],
-    });
-    setActiveSqon(queryBuilderRemote.getResolvedActiveQuery(appId) as Sqon);
-  }, []);
 
   /**
    * Re-fetch count
