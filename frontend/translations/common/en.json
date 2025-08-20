@@ -961,6 +961,9 @@
         },
         "snv": "SNV"
       }
+    }, 
+    "files": {
+      "title": "Files"
     }
   },
   "variant_entity": {

@@ -1,4 +1,5 @@
 export enum CaseEntityTabs {
   Details = 'details',
-  Variants = 'variants'
+  Variants = 'variants',
+  Files = 'files',
 }

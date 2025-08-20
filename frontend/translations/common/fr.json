@@ -960,6 +960,9 @@
           "unknown": "Inconnu"
         },
         "snv": "SNV"
+      },
+      "files": {
+        "title": "Fichiers"
       }
     }
   },
