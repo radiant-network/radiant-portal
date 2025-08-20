@@ -1,7 +1,5 @@
 import VCaseExploration from './cases/list';
 
-const Home = () => {
-  return <VCaseExploration />;
-};
+const Home = () => <VCaseExploration />;
 
 export default Home;

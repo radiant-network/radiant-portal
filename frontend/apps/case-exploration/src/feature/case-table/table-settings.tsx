@@ -116,6 +116,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Project
     columnHelper.accessor(row => row.project_code, {
       id: 'project_code',
+      cell: info => <TextTooltipCell tooltipText={info.row.original.project_name}>{info.getValue()}</TextTooltipCell>,
       header: t('case_exploration.case.headers.project_code'),
       size: 124,
       minSize: 124,

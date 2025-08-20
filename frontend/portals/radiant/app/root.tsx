@@ -1,14 +1,16 @@
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from 'react-router';
-import stylesheet from './app.css?url';
-import type { Route } from './+types/root';
+
 import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
+import { Toaster } from '@/components/base/ui/sonner';
 import { TooltipProvider } from '@/components/base/ui/tooltip';
 import ThemeProvider from '@/components/feature/theme-toggle/theme-provider';
-import { ConfigProvider, type PortalConfig } from '@/components/model/applications-config';
 import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
-import { I18nProvider } from '@/components/hooks/I18nProvider';
-import { Toaster } from '@/components/base/ui/sonner';
 import { detectLanguageFromRequest } from '@/components/hooks/i18n.server';
+import { I18nProvider } from '@/components/hooks/I18nProvider';
+import { ConfigProvider, type PortalConfig } from '@/components/model/applications-config';
+
+import type { Route } from './+types/root';
+import stylesheet from './app.css?url';
 declare const __PROJECT__: PortalConfig;
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -46,11 +48,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
         <link rel="icon" type="image/x-icon" href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon.ico`} />
-        <link rel="icon" type="image/png" href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-16x16.png`} sizes="16x16" />
-        <link rel="icon" type="image/png" href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-32x32.png`} sizes="32x32" />
-        <link rel="icon" type="image/png" href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-96x96.png`} sizes="96x96" />
-        <link rel="icon" type="image/png" href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-128x128.png`} sizes="128x128" />
-        <link rel="icon" type="image/png" href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-196x196.png`} sizes="196x196" />
+        <link
+          rel="icon"
+          type="image/png"
+          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-16x16.png`}
+          sizes="16x16"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-32x32.png`}
+          sizes="32x32"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-96x96.png`}
+          sizes="96x96"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-128x128.png`}
+          sizes="128x128"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-196x196.png`}
+          sizes="196x196"
+        />
         <link rel="manifest" href={`/${__PROJECT__.portal.name.toLowerCase()}/site.webmanifest`} />
       </head>
       <body>
@@ -62,7 +89,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <BetaFeatureProvider>{children}</BetaFeatureProvider>
                 </AlertDialogProvider>
               </TooltipProvider>
-              <Toaster position='top-right' />
+              <Toaster position="top-right" />
             </ThemeProvider>
           </ConfigProvider>
         </I18nProvider>

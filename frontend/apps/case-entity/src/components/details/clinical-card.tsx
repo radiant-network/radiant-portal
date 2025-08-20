@@ -1,5 +1,5 @@
 import { ComponentProps } from 'react';
-import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router';
 import { ArrowUpRightIcon, AudioWaveformIcon } from 'lucide-react';
 
 import { CaseEntity, Term } from '@/api/api';
@@ -11,6 +11,7 @@ import { Card, CardAction, CardContent, CardHeader, CardSeparator, CardTitle } f
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
+import { CaseEntityTabs } from '@/types';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;
 
@@ -19,7 +20,7 @@ type ClinicalCardProps = ComponentProps<'div'> & {
 };
 function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   const { t } = useI18n();
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const proband = data.members[0];
   const family = data.members.filter(member => member.relationship_to_proband);
   const hasFamily = family.length > 0;
@@ -31,7 +32,12 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
         <CardTitle size="xl">{t('case_entity.details.clinical_overview')}</CardTitle>
         <CardAction>
           {hasVariants ? (
-            <Button onClick={() => navigate('?tab=variants')}>
+            <Button
+              onClick={() => {
+                searchParams.set('tab', CaseEntityTabs.Variants);
+                setSearchParams(searchParams, { replace: true });
+              }}
+            >
               <AudioWaveformIcon /> {t('case_entity.details.view_variants')} <ArrowUpRightIcon />
             </Button>
           ) : (

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { AudioWaveform, ClipboardList } from 'lucide-react';
 import useSWR from 'swr';
@@ -34,11 +34,11 @@ async function fetchCaseEntity(input: CaseEntityInput) {
 export default function App() {
   const { t } = useI18n();
   const params = useParams<{ caseId: string }>();
+  const mainRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<CaseEntityTabs>(
     (searchParams.get(TAB_SEARCH_PARAM) as CaseEntityTabs) ?? CaseEntityTabs.Details,
   );
-
   const { data, error, isLoading } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
     {
       key: 'case-entity',
@@ -51,9 +51,21 @@ export default function App() {
     },
   );
 
+  /**
+   * Set active tab by searchParams (from urls)
+   */
   useEffect(() => {
     setActiveTab((searchParams.get(TAB_SEARCH_PARAM) as CaseEntityTabs) ?? CaseEntityTabs.Details);
   }, [searchParams]);
+
+  /**
+   * Reset scroll position when changing tab
+   */
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [activeTab]);
 
   const handleOnTabChange = useCallback((value: CaseEntityTabs) => {
     setSearchParams({ tab: value });
@@ -83,7 +95,7 @@ export default function App() {
   const hasVariants = (data?.assays ?? []).some(assay => assay.has_variants);
   return (
     <CaseEntityContext value={data}>
-      <main className="bg-muted h-screen overflow-auto">
+      <main ref={mainRef} className="bg-muted h-screen overflow-auto">
         <Header data={data} isLoading={isLoading} />
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
           <TabsList className="pt-4 px-6 bg-background" contentClassName="min-[1440px]:px-6 mx-auto">
