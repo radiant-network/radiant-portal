@@ -504,7 +504,8 @@
         "diagnostic_lab": "Laboratoire de diagnostic",
         "diagnostic_lab_tooltip": "Laboratoire de diagnostic moléculaire",
         "request_id": "Requête",
-        "managing_organization": "Organisation responsable du patient",
+        "managing_organization": "Organisation resp.",
+        "managing_organization_tooltip": "Organisation responsable du dossier du patient",
         "created_on": "Créé le",
         "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
       },

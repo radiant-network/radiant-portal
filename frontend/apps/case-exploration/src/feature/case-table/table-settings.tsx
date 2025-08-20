@@ -184,7 +184,11 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       cell: info => (
         <TextTooltipCell tooltipText={info.row.original.managing_organization_name}>{info.getValue()}</TextTooltipCell>
       ),
-      header: t('case_exploration.case.headers.managing_organization'),
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.managing_organization_tooltip')}>
+          {t('case_exploration.case.headers.managing_organization')}
+        </TooltipHeader>
+      ),
       size: 124,
       minSize: 124,
     }),
