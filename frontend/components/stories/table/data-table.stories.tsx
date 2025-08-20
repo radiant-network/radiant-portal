@@ -1,22 +1,24 @@
-import type { Meta, StoryObj } from '@storybook/react';
+// @ts-nocheck
 import { BrowserRouter } from 'react-router-dom';
-import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import { SortBodyOrderEnum } from '@/api/api';
-import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
-import TableFilters from '@/apps/case-exploration/src/components/table-filters/table-filters';
+import type { Meta, StoryObj } from '@storybook/react';
 import { createColumnHelper } from '@tanstack/react-table';
+
+import { SortBodyOrderEnum } from '@/api/api';
+import TableFilters from '@/apps/case-exploration/src/components/table-filters/table-filters';
+import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+
 import {
+  applicationFirstSetCellColumns,
   defaultColumnSettings,
-  thirdSetCellColumns,
   firstSetCellColumns,
+  firstSetCellData,
   secondSetCellColumns,
   secondSetCellData,
-  firstSetCellData,
+  thirdSetCellColumns,
   thirdSetCellData,
-  applicationFirstSetCellColumns,
 } from './cells-mock';
 import { data, MockData } from './table-mock';
-
 
 const columnHelper = createColumnHelper<MockData>();
 
@@ -114,8 +116,8 @@ const meta = {
       pageIndex: 0,
       pageSize: 10,
     },
-    onPaginationChange: () => { },
-    onServerSortingChange: sorting => { },
+    onPaginationChange: () => {},
+    onServerSortingChange: sorting => {},
     total: 10,
   },
   decorators: [
@@ -175,6 +177,15 @@ export const Default: Story = {
   render: args => <DataTable {...args} />,
 };
 
+export const WithOneResult: Story = {
+  args: {
+    data: data.slice(0, 1),
+    total: 1,
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+  },
+  render: args => <DataTable {...args} />,
+};
 
 // @TODO:  not functional at the moment
 // export const WithHeaderGroups: Story = {
@@ -258,7 +269,7 @@ export const WithTableFilters: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
   },
   render: args => <DataTable {...args} />,
 };

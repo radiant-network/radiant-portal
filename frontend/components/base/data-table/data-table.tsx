@@ -610,16 +610,16 @@ function TranstackTable<T>({
       <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
         {/* Total */}
 
-        {tableIndexResultPosition === 'top' && !shouldHidePagination && (
-          <div className="flex">
+        <div className="flex-1">
+          {tableIndexResultPosition === 'top' && !shouldHidePagination && (
             <TableIndexResult
               loading={loadingStates?.total}
               pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
               pageSize={table.getState().pagination?.pageSize ?? 20}
               total={total}
             />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* FiltersGroup */}
         {FiltersGroupForm && FiltersGroupForm({ loading: loadingStates?.list ?? true })}
@@ -778,7 +778,7 @@ function TranstackTable<T>({
       {!shouldHidePagination && (
         <div className={'flex items-center justify-between py-3 '}>
           <div>
-            {tableIndexResultPosition === 'bottom' && !shouldHidePagination && (
+            {tableIndexResultPosition === 'bottom' && (
               <TableIndexResult
                 loading={loadingStates?.total}
                 pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
