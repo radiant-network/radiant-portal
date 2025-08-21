@@ -52,3 +52,5 @@ openapitools.json
 **/api/git_push.sh
 
 .nvmrc
+
+cypress
