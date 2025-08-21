@@ -11,11 +11,13 @@ import {
   getExpandedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Header,
   OnChangeFn,
   PaginationState,
   Row,
   RowPinningState,
   SortingState,
+  Table as TTable,
   useReactTable,
 } from '@tanstack/react-table';
 import { AlertCircle, SearchIcon } from 'lucide-react';
@@ -255,6 +257,42 @@ function getRowPinningCellExtraCN(row: Row<any>): string {
 }
 
 /**
+ * Reusable flex header function
+ * Used to render header group and header
+ */
+function getHeaderFlexRender(table: TTable<any>, header: Header<any, any>) {
+  if (header.isPlaceholder) return null;
+
+  return (
+    <>
+      <div className="flex items-center justify-between gap-1">
+        {/* Header rendering */}
+        <div className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+          {flexRender(header.column.columnDef.header, header.getContext())}
+        </div>
+
+        {/* Table Header Actions, only display on hover */}
+        <TableHeaderActions header={header} />
+      </div>
+
+      {/* Resize Grip */}
+      {header.column.getCanResize() && (
+        <div
+          onDoubleClick={() => header.column.resetSize()}
+          onMouseDown={header.getResizeHandler()}
+          onTouchStart={header.getResizeHandler()}
+          className={cn(
+            'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
+            table.options.columnResizeDirection,
+            header.column.getIsResizing() ? 'opacity-100' : '',
+          )}
+        />
+      )}
+    </>
+  );
+}
+
+/**
  * Reusable flex row function
  * Used to render top, centered or bottom rows
  */
@@ -310,7 +348,7 @@ function getRowFlexRender<T>({
 /**
  * Data-Table
  * Should be used for complex and interactive table.
- * If you needs to only display data in a table without interaction, local storage or pagination,
+ * @see If you needs to only display data in a table without interaction, local storage or pagination,
  * use DisplayTable instead
  *
  * @issue For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
@@ -431,7 +469,7 @@ function TranstackTable<T>({
   );
 
   // Key Input Map
-  const handleEscEventListener = function () {
+  const handleEscEventListener = () => {
     setIsFullscreen(false);
   };
 
@@ -478,7 +516,9 @@ function TranstackTable<T>({
     },
   });
 
-  // Cache our row flexRender method
+  /**
+   * Cache our row flexRender method
+   */
   const rowFlexRender = useMemo(
     () => getRowFlexRender<T>({ subComponent, containerWidth }),
     [subComponent, containerWidth],
@@ -510,6 +550,21 @@ function TranstackTable<T>({
     rows: table.getRowModel().rows,
     previousTableCache: tableLocaleStorage,
   });
+
+  // Table Index display position
+  const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
+
+  // Footer, check if any columns have footer definitions
+  const footerGroups = table.getFooterGroups();
+  const hasFooterDefinitions = useMemo(() => columns.some(column => column.footer !== undefined), [columns]);
+
+  // Determine if pagination should be hidden based on data size vs total
+  const shouldHidePagination = useMemo(() => {
+    if (paginationHidden) return true;
+
+    // Hide pagination if data rows are fewer than total records
+    return total < (pagination?.pageSize || 20);
+  }, [paginationHidden, pagination, total]);
 
   /**
    * Add 'Esc' keyboard shortcut for fullscreen mode
@@ -545,6 +600,9 @@ function TranstackTable<T>({
     };
   }, []);
 
+  /**
+   * Manage Empty State
+   */
   useEffect(() => {
     setIsTableEmpty(table.getRowCount() === 0 && data.length === 0);
   }, [table.getRowCount(), data.length]);
@@ -585,21 +643,6 @@ function TranstackTable<T>({
       setExpanded({});
     }
   }, [pagination, paginationHidden]);
-
-  const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
-
-  const footerGroups = table.getFooterGroups();
-
-  // Check if any columns have footer definitions
-  const hasFooterDefinitions = useMemo(() => columns.some(column => column.footer !== undefined), [columns]);
-
-  // Determine if pagination should be hidden based on data size vs total
-  const shouldHidePagination = useMemo(() => {
-    if (paginationHidden) return true;
-
-    // Hide pagination if data rows are fewer than total records
-    return total < (pagination?.pageSize || 20);
-  }, [paginationHidden, pagination, total]);
 
   return (
     <div
@@ -721,31 +764,7 @@ function TranstackTable<T>({
                       }}
                       colSpan={header.colSpan}
                     >
-                      <>
-                        <div className="flex items-center justify-between gap-1">
-                          {/* Header rendering */}
-                          <div className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </div>
-
-                          {/* Table Header Actions, only display on hover */}
-                          <TableHeaderActions header={header} />
-                        </div>
-
-                        {/* Resize Grip */}
-                        {header.column.getCanResize() && (
-                          <div
-                            onDoubleClick={() => header.column.resetSize()}
-                            onMouseDown={header.getResizeHandler()}
-                            onTouchStart={header.getResizeHandler()}
-                            className={cn(
-                              'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
-                              table.options.columnResizeDirection,
-                              header.column.getIsResizing() ? 'opacity-100' : '',
-                            )}
-                          />
-                        )}
-                      </>
+                      {getHeaderFlexRender(table, header)}
                     </TableHead>
                   ))}
                 </TableRow>
