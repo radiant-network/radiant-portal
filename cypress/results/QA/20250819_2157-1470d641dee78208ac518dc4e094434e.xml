@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="0.759" tests="3" failures="1">
+  <testsuite name="Tests Cypress" timestamp="2025-08-20T01:57:23" tests="0" file="cypress/e2e/CaseEntity/Variants/Columns.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Case Entity - Variants - Columns" timestamp="2025-08-20T01:57:23" tests="3" time="0.759" failures="1">
+    <testcase name="Case Entity - Variants - Columns &quot;before each&quot; hook for &quot;Default display&quot;" time="0.178" classname="&quot;before each&quot; hook for &quot;Default display&quot;">
+      <failure message="`cy.request()` failed on:
+
+https://auth.qa.juno.cqdg.ferlab.bio/realms/CQDG/protocol/openid-connect/userinfo
+
+The response we received from your web server was:
+
+  &gt; 403: Forbidden
+
+This was considered a failure because the status code was not `2xx` or `3xx`.
+
+If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
+
+-----------------------------------------------------------
+
+The request we sent was:
+
+Method: GET
+URL: https://auth.qa.juno.cqdg.ferlab.bio/realms/CQDG/protocol/openid-connect/userinfo
+Headers: {
+  &quot;Connection&quot;: &quot;keep-alive&quot;,
+  &quot;Authorization&quot;: &quot;Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpUFdvXzZXYWR0NG1vUml5Z0drS2U0azBiekRBbjdPVmw1Y0VRbzhQRVVrIn0.eyJleHAiOjE3NTU2ODM4NDQsImlhdCI6MTc1NTY1NTA0NCwianRpIjoiYzlhZWJlZjktNDc2ZS00MTFlLTg0ZTktNjllZjEyNmJkMmUzIiwiaXNzIjoiaHR0cHM6Ly9hdXRoLnFhLmp1bm8uY3FkZy5mZXJsYWIuYmlvL3JlYWxtcy9DUURHIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjZhMzk2MjE4LTg2OWYtNGY1MS1hYWE4LWMwNmMxYTQwOTA2NSIsInR5cCI6IkJlYXJlciIsImF6cCI6InJhZGlhbnQiLCJzZXNzaW9uX3N0YXRlIjoiNTUwY2U5MWQtZGNhNi00ZjFlLWFkNjAtMTA0MDA3MjlmZWRjIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIqIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIiwiZGVmYXVsdC1yb2xlcy1jcWRnIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsicmFkaWFudCI6eyJyb2xlcyI6WyJyYWRpYW50Il19LCJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJzaWQiOiI1NTBjZTkxZC1kY2E2LTRmMWUtYWQ2MC0xMDQwMDcyOWZlZGMiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInByZWZlcnJlZF91c2VybmFtZSI6ImN5cHJlc3MiLCJnaXZlbl9uYW1lIjoiIiwiZmFtaWx5X25hbWUiOiIifQ.ZW-Rm-czQdzoox_QdaJp5FfqFRbBKgDcd38aVYtgSlayE-C_Yrg3Gi4yR3aZmDtDeu6adv-FnrbBXmqAbVyA1tm5vkKCmB4ylV4OVFTFUjGKRKHhW-uhWeHPZ_y0e1Cc1LpRZFlRMjFyTA4YL3nZW7-Jd0xbGyfDewsc5qDa-OeP1r1vlpZcwGP4-FB-qfZQBTN9gBY5FCHR3gpj8D7XxTURd1a2g5dcGV3ui1gnO42lUubuWz0_cwiQoyqC86ov24-JtYLIFLmYs8jG83JQqrx0Su7_3cfpw-smkOFZtRzNW0efv88Dv58qASr8JSJRNUSVFMiEbyKsuwVqF4wgaA&quot;,
+  &quot;user-agent&quot;: &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/14.5.4 Chrome/130.0.6723.137 Electron/33.2.1 Safari/537.36&quot;,
+  &quot;accept&quot;: &quot;*/*&quot;,
+  &quot;accept-encoding&quot;: &quot;gzip, deflate&quot;
+}
+
+-----------------------------------------------------------
+
+The response we got was:
+
+Status: 403 - Forbidden
+Headers: {
+  &quot;date&quot;: &quot;Wed, 20 Aug 2025 01:57:24 GMT&quot;,
+  &quot;content-type&quot;: &quot;application/json&quot;,
+  &quot;content-length&quot;: &quot;0&quot;,
+  &quot;connection&quot;: &quot;keep-alive&quot;,
+  &quot;referrer-policy&quot;: &quot;no-referrer&quot;,
+  &quot;x-frame-options&quot;: &quot;SAMEORIGIN&quot;,
+  &quot;strict-transport-security&quot;: &quot;max-age=31536000; includeSubDomains&quot;,
+  &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+  &quot;www-authenticate&quot;: &quot;Bearer realm=\&quot;CQDG\&quot;, error=\&quot;insufficient_scope\&quot;, error_description=\&quot;Missing openid scope\&quot;&quot;,
+  &quot;x-xss-protection&quot;: &quot;1; mode=block&quot;
+}
+Body: 
+
+
+This error occurred while creating the session. Because the session setup failed, we failed the test.
+
+https://on.cypress.io/request
+
+Because this error occurred during a `before each` hook we are skipping all of the remaining tests." type="CypressError"><![CDATA[CypressError: `cy.request()` failed on:
+
+https://auth.qa.juno.cqdg.ferlab.bio/realms/CQDG/protocol/openid-connect/userinfo
+
+The response we received from your web server was:
+
+  > 403: Forbidden
+
+This was considered a failure because the status code was not `2xx` or `3xx`.
+
+If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
+
+-----------------------------------------------------------
+
+The request we sent was:
+
+Method: GET
+URL: https://auth.qa.juno.cqdg.ferlab.bio/realms/CQDG/protocol/openid-connect/userinfo
+Headers: {
+  "Connection": "keep-alive",
+  "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpUFdvXzZXYWR0NG1vUml5Z0drS2U0azBiekRBbjdPVmw1Y0VRbzhQRVVrIn0.eyJleHAiOjE3NTU2ODM4NDQsImlhdCI6MTc1NTY1NTA0NCwianRpIjoiYzlhZWJlZjktNDc2ZS00MTFlLTg0ZTktNjllZjEyNmJkMmUzIiwiaXNzIjoiaHR0cHM6Ly9hdXRoLnFhLmp1bm8uY3FkZy5mZXJsYWIuYmlvL3JlYWxtcy9DUURHIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjZhMzk2MjE4LTg2OWYtNGY1MS1hYWE4LWMwNmMxYTQwOTA2NSIsInR5cCI6IkJlYXJlciIsImF6cCI6InJhZGlhbnQiLCJzZXNzaW9uX3N0YXRlIjoiNTUwY2U5MWQtZGNhNi00ZjFlLWFkNjAtMTA0MDA3MjlmZWRjIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIqIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIiwiZGVmYXVsdC1yb2xlcy1jcWRnIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsicmFkaWFudCI6eyJyb2xlcyI6WyJyYWRpYW50Il19LCJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJzaWQiOiI1NTBjZTkxZC1kY2E2LTRmMWUtYWQ2MC0xMDQwMDcyOWZlZGMiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInByZWZlcnJlZF91c2VybmFtZSI6ImN5cHJlc3MiLCJnaXZlbl9uYW1lIjoiIiwiZmFtaWx5X25hbWUiOiIifQ.ZW-Rm-czQdzoox_QdaJp5FfqFRbBKgDcd38aVYtgSlayE-C_Yrg3Gi4yR3aZmDtDeu6adv-FnrbBXmqAbVyA1tm5vkKCmB4ylV4OVFTFUjGKRKHhW-uhWeHPZ_y0e1Cc1LpRZFlRMjFyTA4YL3nZW7-Jd0xbGyfDewsc5qDa-OeP1r1vlpZcwGP4-FB-qfZQBTN9gBY5FCHR3gpj8D7XxTURd1a2g5dcGV3ui1gnO42lUubuWz0_cwiQoyqC86ov24-JtYLIFLmYs8jG83JQqrx0Su7_3cfpw-smkOFZtRzNW0efv88Dv58qASr8JSJRNUSVFMiEbyKsuwVqF4wgaA",
+  "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/14.5.4 Chrome/130.0.6723.137 Electron/33.2.1 Safari/537.36",
+  "accept": "*/*",
+  "accept-encoding": "gzip, deflate"
+}
+
+-----------------------------------------------------------
+
+The response we got was:
+
+Status: 403 - Forbidden
+Headers: {
+  "date": "Wed, 20 Aug 2025 01:57:24 GMT",
+  "content-type": "application/json",
+  "content-length": "0",
+  "connection": "keep-alive",
+  "referrer-policy": "no-referrer",
+  "x-frame-options": "SAMEORIGIN",
+  "strict-transport-security": "max-age=31536000; includeSubDomains",
+  "x-content-type-options": "nosniff",
+  "www-authenticate": "Bearer realm=\"CQDG\", error=\"insufficient_scope\", error_description=\"Missing openid scope\"",
+  "x-xss-protection": "1; mode=block"
+}
+Body: 
+
+
+This error occurred while creating the session. Because the session setup failed, we failed the test.
+
+https://on.cypress.io/request
+
+Because this error occurred during a `before each` hook we are skipping all of the remaining tests.
+    at <unknown> (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:136469:72)
+    at tryCatcher (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:1777:23)
+    at Promise._settlePromiseFromHandler (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:1489:31)
+    at Promise._settlePromise (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:1546:18)
+    at Promise._settlePromise0 (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:1591:10)
+    at Promise._settlePromises (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:1671:18)
+    at _drainQueueStep (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:2377:12)
+    at _drainQueue (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:2370:9)
+    at Async._drainQueues (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:2386:5)
+    at Async.drainQueues (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:2256:14)
+From Your Spec Code:
+    at Context.eval (webpack://radiant-portal/./cypress/support/commands.ts:85:13)
+    at getRet (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:121066:20)
+    at tryCatcher (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:1777:23)
+    at Promise.attempt.Promise.try (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:4285:29)
+    at Context.thenFn (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:121077:66)
+    at Context.then (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:121328:21)
+    at wrapped (https://radiant.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:141671:19)]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

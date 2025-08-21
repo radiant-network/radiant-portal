@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="14.120" tests="3" failures="1">
+  <testsuite name="Tests Cypress" timestamp="2025-08-17T18:23:15" tests="0" file="cypress/e2e/CaseEntity/Variants/Columns.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Case Entity - Variants - Columns" timestamp="2025-08-17T18:23:15" tests="3" time="14.117" failures="1">
+    <testcase name="Case Entity - Variants - Columns &quot;before each&quot; hook for &quot;Default display&quot;" time="4.489" classname="&quot;before each&quot; hook for &quot;Default display&quot;">
+      <failure message="Timed out retrying after 4000ms: Expected to find element: `[id=&quot;case-exploration&quot;]`, but never found it.
+
+Because this error occurred during a `before each` hook we are skipping all of the remaining tests." type="AssertionError"><![CDATA[AssertionError: Timed out retrying after 4000ms: Expected to find element: `[id="case-exploration"]`, but never found it.
+
+Because this error occurred during a `before each` hook we are skipping all of the remaining tests.
+    at Context.eval (webpack://radiant-portal/./cypress/support/commands.ts:87:0)]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

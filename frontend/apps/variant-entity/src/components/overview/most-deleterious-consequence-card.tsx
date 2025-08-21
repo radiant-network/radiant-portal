@@ -25,7 +25,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
         <div className="flex items-start flex-wrap md:flex-nowrap md:[&>div]:w-40 md:justify-between gap-6">
           <div className="flex flex-col gap-2">
             <div className="text-2xl font-semibold uppercase">
-              {data.symbol ? (
+              {data.symbol && (
                 <a
                   href={getOmimOrgUrl({
                     symbol: data.symbol,
@@ -36,11 +36,8 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 >
                   {data.symbol}
                 </a>
-              ) : ['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? (
-                t('common.no_gene')
-              ) : (
-                '-'
               )}
+              {['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? t('common.no_gene') : '-'}
             </div>
             <div className="text-xs font-mono">{'-'}</div>
           </div>

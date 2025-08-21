@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="13.739" tests="3" failures="1">
+  <testsuite name="Tests Cypress" timestamp="2025-08-20T01:28:47" tests="0" file="cypress/e2e/CaseEntity/Variants/Columns.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Case Entity - Variants - Columns" timestamp="2025-08-20T01:28:47" tests="3" time="13.739" failures="1">
+    <testcase name="Case Entity - Variants - Columns &quot;before each&quot; hook for &quot;Default display&quot;" time="4.281" classname="&quot;before each&quot; hook for &quot;Default display&quot;">
+      <failure message="Timed out retrying after 4000ms: Expected to find element: `[id=&quot;case-exploration&quot;]`, but never found it.
+
+Because this error occurred during a `before each` hook we are skipping all of the remaining tests." type="AssertionError"><![CDATA[AssertionError: Timed out retrying after 4000ms: Expected to find element: `[id="case-exploration"]`, but never found it.
+
+Because this error occurred during a `before each` hook we are skipping all of the remaining tests.
+    at Context.eval (webpack://radiant-portal/./cypress/support/commands.ts:105:38)
+    at getRet (https://auth.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:121066:20)
+    at tryCatcher (https://auth.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:1777:23)
+    at Promise.attempt.Promise.try (https://auth.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:4285:29)
+    at Context.thenFn (https://auth.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:121077:66)
+    at Context.then (https://auth.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:121328:21)
+    at wrapped (https://auth.qa.juno.cqdg.ferlab.bio/__cypress/runner/cypress_runner.js:141671:19)]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>
