@@ -773,7 +773,7 @@ function TranstackTable<T>({
               </TableFooter>
             )}
           </Table>
-        )}{' '}
+        )}
       </div>
       {!shouldHidePagination && (
         <div className={'flex items-center justify-between py-3 '}>
