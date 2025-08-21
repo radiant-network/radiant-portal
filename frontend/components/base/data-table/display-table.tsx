@@ -1,10 +1,13 @@
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { HEADER_HEIGHT, ROW_HEIGHT, TableColumnDef } from './data-table';
-import Empty from '../empty';
 import { SearchIcon } from 'lucide-react';
+
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
+
+import Empty from '../empty';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+
+import { HEADER_HEIGHT, ROW_HEIGHT, TableColumnDef } from './data-table';
 
 const TABLE_MAX_HEIGHT = HEADER_HEIGHT + ROW_HEIGHT * 10;
 
@@ -16,8 +19,8 @@ type SimpleTableProps<TData> = {
 
 /**
  * DisplayTable
- * Only display data in a table. For more complexe case (needs pagination, re-order, re-sizing etc..)
- * use DataTable instead
+ * Only display data in a table.
+ * @see For more complexe case (needs pagination, re-order, re-sizing etc..) use DataTable instead
  */
 function DisplayTable({ columns, variant = 'default', data }: SimpleTableProps<any>) {
   const { t } = useI18n();
@@ -33,18 +36,16 @@ function DisplayTable({ columns, variant = 'default', data }: SimpleTableProps<a
         <TableHeader>
           {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id} variant={variant}>
-              {headerGroup.headers.map(header => {
-                return (
-                  <TableHead
-                    key={header.id}
-                    className="h-[43px]"
-                    style={{ width: `${header.getSize()}px` }}
-                    colSpan={header.colSpan}
-                  >
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                );
-              })}
+              {headerGroup.headers.map(header => (
+                <TableHead
+                  key={header.id}
+                  className="h-[43px]"
+                  style={{ width: `${header.getSize()}px` }}
+                  colSpan={header.colSpan}
+                >
+                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>

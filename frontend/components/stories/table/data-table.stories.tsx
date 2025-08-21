@@ -116,8 +116,8 @@ const meta = {
       pageIndex: 0,
       pageSize: 10,
     },
-    onPaginationChange: () => {},
-    onServerSortingChange: sorting => {},
+    onPaginationChange: () => { },
+    onServerSortingChange: sorting => { },
     total: 10,
   },
   decorators: [
@@ -177,101 +177,7 @@ export const Default: Story = {
   render: args => <DataTable {...args} />,
 };
 
-export const WithOneResult: Story = {
-  args: {
-    data: data.slice(0, 1),
-    total: 1,
-    enableFullscreen: true,
-    enableColumnOrdering: true,
-  },
-  render: args => <DataTable {...args} />,
-};
-
-export const WithTableFiltersAndOneResult: Story = {
-  args: {
-    data: data.slice(0, 1),
-    total: 1,
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
-    enableFullscreen: true,
-    enableColumnOrdering: true,
-    tableIndexResultPosition: 'bottom',
-  },
-  render: args => <DataTable {...args} />,
-};
-
-// @TODO:  not functional at the moment
-// export const WithHeaderGroups: Story = {
-//   args: {
-//     data: data.slice(0, 10),
-//     enableFullscreen: true,
-//     enableColumnOrdering: true,
-//     columns: [
-//       columnHelper.group({
-//         id: 'group_1',
-//         header: () => <span>Group 1</span>,
-//         columns: [
-//           columnHelper.accessor('firstName', {
-//             cell: info => info.getValue(),
-//             footer: props => props.column.id,
-//           }),
-//           columnHelper.accessor(row => row.lastName, {
-//             id: 'lastName',
-//             cell: info => info.getValue(),
-//             header: () => <span>Last Name</span>,
-//             footer: props => props.column.id,
-//           }),
-//         ],
-//       }),
-//       columnHelper.group({
-//         header: 'group_2',
-//         columns: [
-//           columnHelper.accessor('age', {
-//             header: () => 'Age',
-//             footer: props => props.column.id,
-//           }),
-//           columnHelper.group({
-//             header: 'More Info',
-//             columns: [
-//               columnHelper.accessor('visits', {
-//                 header: () => <span>Visits</span>,
-//               }),
-//               columnHelper.accessor('status', {
-//                 header: 'Status',
-//               }),
-//               columnHelper.accessor('progress', {
-//                 header: 'Profile Progress',
-//               }),
-//             ],
-//           }),
-//         ],
-//       }),
-//     ] as TableColumnDef<MockData, any>[],
-//   },
-//   render: args => <DataTable {...args} />,
-// };
-
-export const WithFullscreen: Story = {
-  args: {
-    enableFullscreen: true,
-  },
-  render: args => (
-    <div>
-      <span>
-        <i>Use "Open in new canvas" button at the top right of the screen a better preview</i>
-      </span>
-      <DataTable {...args} />
-    </div>
-  ),
-};
-
-export const WithPaginationHidden: Story = {
-  args: {
-    paginationHidden: true,
-  },
-  render: args => <DataTable {...args} />,
-};
-
-export const WithTableFilters: Story = {
+export const DefaultTableFilters: Story = {
   args: {
     loadingStates: {
       list: false,
@@ -281,12 +187,105 @@ export const WithTableFilters: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
   },
   render: args => <DataTable {...args} />,
 };
 
-export const WithFooter: Story = {
+export const Fullscreen: Story = {
+  args: {
+    enableFullscreen: true,
+  },
+  render: args => (
+    <div>
+      <span>
+        <i>Use &quot;Open in new canvas&quot; button at the top right of the screen a better preview</i>
+      </span>
+      <DataTable {...args} />
+    </div>
+  ),
+};
+
+export const LessThan10Results: Story = {
+  args: {
+    data: data.slice(0, 1),
+    total: 1,
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+  },
+  render: args => <DataTable {...args} />,
+};
+
+export const TableFiltersAndLessThan10Results: Story = {
+  args: {
+    data: data.slice(0, 1),
+    total: 1,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    tableIndexResultPosition: 'bottom',
+  },
+  render: args => <DataTable {...args} />,
+};
+
+export const HeaderGroups: Story = {
+  args: {
+    data: data.slice(0, 10),
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    columns: [
+      columnHelper.group({
+        id: 'group_1',
+        header: () => <span>Group 1</span>,
+        columns: [
+          columnHelper.accessor('firstName', {
+            cell: info => info.getValue(),
+            footer: props => props.column.id,
+          }),
+          columnHelper.accessor(row => row.lastName, {
+            id: 'lastName',
+            cell: info => info.getValue(),
+            header: () => <span>Last Name</span>,
+            footer: props => props.column.id,
+          }),
+        ],
+      }),
+      columnHelper.group({
+        header: 'group_2',
+        columns: [
+          columnHelper.accessor('age', {
+            header: () => 'Age',
+            footer: props => props.column.id,
+          }),
+          columnHelper.group({
+            header: 'More Info',
+            columns: [
+              columnHelper.accessor('visits', {
+                header: () => <span>Visits</span>,
+              }),
+              columnHelper.accessor('status', {
+                header: 'Status',
+              }),
+              columnHelper.accessor('progress', {
+                header: 'Profile Progress',
+              }),
+            ],
+          }),
+        ],
+      }),
+    ] as TableColumnDef<MockData, any>[],
+  },
+  render: args => <DataTable {...args} />,
+};
+
+export const PaginationHidden: Story = {
+  args: {
+    paginationHidden: true,
+  },
+  render: args => <DataTable {...args} />,
+};
+
+export const Footer: Story = {
   args: {
     columns: [
       columnHelper.accessor('firstName', {
