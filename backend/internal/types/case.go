@@ -40,6 +40,7 @@ type CaseResult struct {
 	RequestedByCode          string    `json:"requested_by_code,omitempty"`
 	RequestedByName          string    `json:"requested_by_name,omitempty"`
 	ProjectCode              string    `json:"project_code,omitempty"`
+	ProjectName              string    `json:"project_name,omitempty"`
 	CreatedOn                time.Time `json:"created_on" validate:"required"`
 	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
 	Prescriber               string    `json:"prescriber,omitempty"`
@@ -155,6 +156,7 @@ var CasesFields = []Field{
 	RequestOrderingOrganizationCodeField,
 	RequestOrderingOrganizationNameField,
 	ProjectCodeField,
+	ProjectNameField,
 	CaseCreatedOnField,
 	CaseUpdatedOnField,
 	RequestOrderingPhysicianField,
@@ -176,6 +178,7 @@ var CasesDefaultFields = []Field{
 	RequestOrderingOrganizationCodeField,
 	RequestOrderingOrganizationNameField,
 	ProjectCodeField,
+	ProjectNameField,
 	CaseCreatedOnField,
 	CaseUpdatedOnField,
 }
