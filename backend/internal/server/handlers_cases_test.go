@@ -30,6 +30,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 			RequestedByCode:      "CHUSJ",
 			RequestedByName:      "Centre hospitalier universitaire Sainte-Justine",
 			ProjectCode:          "N1",
+			ProjectName:          "NeuroDev Phase I",
 			CreatedOn: time.Date(
 				2000, 1, 1, 0, 0, 0, 0, time.UTC),
 			UpdatedOn: time.Date(
@@ -154,6 +155,7 @@ func Test_SearchCasesHandler(t *testing.T) {
 			"primary_condition_name":"neurodevelopmental disorder",
 			"priority_code":"routine",
 			"project_code":"N1",
+			"project_name":"NeuroDev Phase I",
 			"request_id":1,
 			"requested_by_code":"CHUSJ",
 			"requested_by_name":"Centre hospitalier universitaire Sainte-Justine",

@@ -737,6 +737,12 @@ export interface CaseResult {
     'project_code'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'project_name'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof CaseResult
      */

@@ -25,3 +25,13 @@ var ProjectCodeField = Field{
 	CanBeAggregated: true,
 	Table:           ProjectTable,
 }
+
+var ProjectNameField = Field{
+	Name:            "name",
+	Alias:           "project_name",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           ProjectTable,
+}
