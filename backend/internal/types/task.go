@@ -16,8 +16,27 @@ type Task struct {
 	Documents             []Document             `gorm:"many2many:radiant_jdbc.public.task_has_document;"`
 }
 
+var TaskIdField = Field{
+	Name:          "id",
+	Alias:         "task_id",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         TaskTable,
+}
+
 var TaskTable = Table{
-	Name: "radiant_jdbc.public.task",
+	Name:  "radiant_jdbc.public.task",
+	Alias: "task",
+}
+
+var TaskHasDocumentTable = Table{
+	Name:  "radiant_jdbc.public.task_has_document",
+	Alias: "thd",
+}
+
+var TaskHasSequencingExperimentTable = Table{
+	Name:  "radiant_jdbc.public.task_has_sequencing_experiment",
+	Alias: "thseq",
 }
 
 func (Task) TableName() string {
