@@ -54,3 +54,5 @@ openapitools.json
 .nvmrc
 
 cypress
+
+node_modules
