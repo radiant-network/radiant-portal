@@ -88,18 +88,18 @@ function ConditionPhenotypeCard() {
             <TabsList>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Omim}>
                 {t('variant_entity.evidence.gene.filters.omim', {
-                  count: 20,
+                  count: data?.count_omim,
                 })}
               </TabsTrigger>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Orphanet}>
                 {t('variant_entity.evidence.gene.filters.orphanet', {
-                  count: 10,
+                  count: data?.count_orphanet,
                 })}
               </TabsTrigger>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Hpo}>
                 {' '}
                 {t('variant_entity.evidence.gene.filters.hpo', {
-                  count: 54,
+                  count: data?.count_hpo,
                 })}
               </TabsTrigger>
             </TabsList>

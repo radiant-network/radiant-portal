@@ -1048,9 +1048,9 @@
         "title": "Associated Conditions and Phenotypes by Gene",
         "filters": {
           "search_placeholder": "Filter condition or phenotype",
-          "omim": "OMIM",
-          "orphanet": "Orphanet",
-          "hpo": "HPO"
+          "omim": "OMIM ({{count}})",
+          "orphanet": "Orphanet ({{count}})",
+          "hpo": "HPO ({{count}})"
         },
         "table": {
           "headers": {
