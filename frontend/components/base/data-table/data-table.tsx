@@ -9,8 +9,11 @@ import {
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
+  getGroupedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  GroupingState,
   Header,
   OnChangeFn,
   PaginationState,
@@ -20,7 +23,7 @@ import {
   Table as TTable,
   useReactTable,
 } from '@tanstack/react-table';
-import { AlertCircle, SearchIcon } from 'lucide-react';
+import { AlertCircle, Check, CheckIcon, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
 
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
@@ -48,7 +51,9 @@ import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
 import Empty from '../empty';
+import { Button } from '../ui/button';
 import { Card } from '../ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 export const IS_SERVER = typeof window === 'undefined';
 
@@ -327,10 +332,34 @@ function getRowFlexRender<T>({
                 ...getColumnPinningExtraStyles(cell.column),
               }}
             >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              <>
+                {/* Group By */}
+                {cell.getIsGrouped() && (
+                  <Button
+                    className="self-center"
+                    size="xs"
+                    variant="ghost"
+                    iconOnly
+                    onClick={row.getToggleExpandedHandler()}
+                  >
+                    {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
+                  </Button>
+                )}
+
+                {/* Group By: Aggregated */}
+                {cell.getIsAggregated() &&
+                  flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())}
+
+                {/* Placeholder OR normal rendering */}
+                {!cell.getIsAggregated() &&
+                  !cell.getIsPlaceholder() &&
+                  flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </>
             </TableCell>
           ))}
         </TableRow>
+
+        {/* SubComponent */}
         {subComponent && row.getIsExpanded() && (
           <TableRow key={`subcomponent-${row.id}`} className="bg-muted/30">
             <TableCell colSpan={row.getVisibleCells().length}>
@@ -348,28 +377,29 @@ function getRowFlexRender<T>({
 /**
  * Data-Table
  * Should be used for complex and interactive table.
- * @see If you needs to only display data in a table without interaction, local storage or pagination,
+ * @SEE: If you needs to only display data in a table without interaction, local storage or pagination,
  * use DisplayTable instead
+ 
+ * @ISSUE: For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
+ * @LINK: https://github.com/TanStack/table/issues/4825#issuecomment-1749665597
  *
- * @issue For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
- * @link https://github.com/TanStack/table/issues/4825#issuecomment-1749665597
+ * @DESCRIPTION: `columns` define the mapping between the column and the cell component
+ * @LINK: https://tanstack.com/table/latest/docs/guide/column-defs#creating-accessor-columns
  *
- * @description `columns` define the mapping between the column and the cell component
- * @link https://tanstack.com/table/latest/docs/guide/column-defs#creating-accessor-columns
  *
- * @example
- * [
- *  columnHelper.accessor((row) => row.hgvsg, {
- *   id: "hgvsg",
- *   cell: (info) => info.getValue(),
- *   header: "Variant",
- *   size: 100,
- *   minSize: 50,
- *  })
- * ]
- * @description `columnSettings` (saved by user) and defaultColumnSettings manage order, visibility,
+ * @EXAMPLE:
+ *  [
+ *   columnHelper.accessor((row) => row.hgvsg, {
+ *    id: "hgvsg",
+ *    cell: (info) => info.getValue(),
+ *    header: "Variant",
+ *    size: 100,
+ *    minSize: 50,
+ *   })
+ *  ]
+ * @DESCRIPTION: `columnSettings` (saved by user) and defaultColumnSettings manage order, visibility,
  *              fixed status of each column
- * @example
+ * @EXAMPLE:
  *  [{
  *   "key": "{column.id}",
  *   "index": 16,
@@ -377,35 +407,51 @@ function getRowFlexRender<T>({
  *   "fixed": {boolean},
  *  }]
  *
- * @description add a row selection checkbox for each row
- * @example
- * [{
- *  id: "pinRow",
- *  cell: PinRowCell,
- *  size: 52,
- *  enableResizing: false,
- *  enablePinning: false,
- * }]*
- * @description add a row selection checkbox for each row
- * @example
- * [{
- *  id: "rowSelection",
- *  header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
- *  cell: info => <RowSelectionCell row={info.row} />,
- *  size: 48,
- *  maxSize: 48,
- *  enableResizing: false,
- *  enablePinning: false,
- * }]
- * @description add a `RowExpandCell`, expand a custom subcomponent
- * @example
- * [{
- *  id: "rowExpand",
- *  cell: RowExpandCell
- *  size: 48,
- *  enableResizing: false,
- *  enablePinning: false,
- * }]
+ * @DESCRIPTION: add a row selection checkbox for each row
+ * @EXAMPLE:
+ *  [{
+ *   id: "pinRow",
+ *   cell: PinRowCell,
+ *   size: 52,
+ *   enableResizing: false,
+ *   enablePinning: false,
+ *  }]*
+ *
+ * @DESCRIPTION: add a row selection checkbox for each row
+ * @EXAMPLE:
+ *  [{
+ *   id: "rowSelection",
+ *   header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+ *   cell: info => <RowSelectionCell row={info.row} />,
+ *   size: 48,
+ *   maxSize: 48,
+ *   enableResizing: false,
+ *   enablePinning: false,
+ *  }]
+ *
+ * @DESCRIPTION: add a `RowExpandCell`, expand a custom subcomponent
+ * @EXAMPLE:
+ *  [{
+ *   id: "rowExpand",
+ *   cell: RowExpandCell
+ *   size: 48,
+ *   enableResizing: false,
+ *   enablePinning: false,
+ *  }]
+ *
+ * @DESCRIPTION: enable groupBy for a columns.
+ *               Accessor must have an id.
+ *               DropdownMenuItem label's is created with defaultColumnSettings
+ * @EXAMPLE:
+ *  [{
+ *   columnHelper.accessor('status', {
+ *     id: "status",
+ *     header: 'Status',
+ *     getGroupingValue: row => `Group By ${row.status}`,
+ *     enableGrouping: true,
+ *   }),
+ *  }]*
+ *
  */
 // eslint-disable-next-line complexity
 function TranstackTable<T>({
@@ -445,7 +491,7 @@ function TranstackTable<T>({
 
   /**
    * Load the previous table state
-   * @todo should be replaced by userApi
+   * @TODO: should be replaced by userApi
    */
   const tableLocaleStorage: TableCacheProps = getTableLocaleStorage(id, columns, defaultColumnTableState);
 
@@ -460,6 +506,7 @@ function TranstackTable<T>({
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(tableLocaleStorage.columnVisibility);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(tableLocaleStorage.columnOrder);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(tableLocaleStorage.columnPinning);
+  const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [sorting, setSorting] = useState<SortingState>(
     defaultServerSorting.map(serverSorting => ({
@@ -492,6 +539,8 @@ function TranstackTable<T>({
     getSortedRowModel: onServerSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getGroupedRowModel: getGroupedRowModel(),
     getPaginationRowModel: paginationHidden ? undefined : getPaginationRowModel(),
     getRowCanExpand: () => true,
     isMultiSortEvent: () => true,
@@ -501,6 +550,7 @@ function TranstackTable<T>({
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
     onExpandedChange: setExpanded,
+    onGroupingChange: setGrouping,
     onPaginationChange: paginationHidden ? undefined : onPaginationChange,
     onRowPinningChange: setRowPinning,
     onSortingChange: setSorting,
@@ -509,12 +559,15 @@ function TranstackTable<T>({
       columnOrder,
       columnVisibility,
       columnPinning,
+      grouping,
       pagination: paginationHidden ? undefined : pagination,
       expanded,
       rowPinning,
       sorting,
     },
   });
+
+  const groupByColumns = columns.filter(column => column.enableGrouping);
 
   /**
    * Cache our row flexRender method
@@ -668,9 +721,42 @@ function TranstackTable<T>({
 
         {/* Right Menu Options */}
         <div className="flex justify-end">
+          {/* GroupBy */}
+          {groupByColumns.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  {grouping.length === 0
+                    ? t('common.table.group_by.none')
+                    : t('common.table.group_by.group', { group: grouping.join(',') })}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {groupByColumns.map(column => (
+                  <DropdownMenuItem
+                    key={column.id}
+                    onClick={() => {
+                      table.getFlatHeaders().forEach(header => {
+                        if (header.id === column.id) {
+                          const onClick = header.column.getToggleGroupingHandler();
+                          onClick();
+                        }
+                      });
+                    }}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <div>{defaultColumnSettings.find(setting => setting.id === column.id)?.label}</div>
+                      {grouping.includes(column.id) && <Check size={16} />}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {/* columns order and visibility */}
           {enableColumnOrdering && (
             <>
-              {/* columns order and visibility */}
               <TableColumnSettings
                 loading={loadingStates?.list}
                 columnPinning={tableCache.columnPinning}

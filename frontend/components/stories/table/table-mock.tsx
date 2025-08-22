@@ -1,4 +1,3 @@
-
 export type MockData = {
   firstName: string;
   lastName: string;
@@ -7,7 +6,6 @@ export type MockData = {
   status: string;
   progress: number;
 };
-
 
 export const data: MockData[] = [
   {
@@ -91,5 +89,3 @@ export const data: MockData[] = [
     progress: 12,
   },
 ];
-
-

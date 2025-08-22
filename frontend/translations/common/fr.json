@@ -217,6 +217,10 @@
       "empty_cell": "-"
     },
     "table": {
+      "group_by": {
+        "none": "Groupe",
+        "group": "Regrouper: {{group}}"
+      },
       "fullscreen": {
         "maximize": "Passer en plein écran",
         "minimize": "Quitter le plein écran"

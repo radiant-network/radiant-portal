@@ -217,6 +217,10 @@
       "empty_cell": "-"
     },
     "table": {
+      "group_by": {
+        "none": "Groups",
+        "group": "Group by: {{group}}"
+      },
       "fullscreen": {
         "maximize": "Toggle to full screen",
         "minimize": "Exit full screen"

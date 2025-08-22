@@ -1,18 +1,19 @@
-import { ArrowDown, ArrowDownUp, ArrowUp, Pin, PinIcon, PinOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useI18n } from '@/components/hooks/i18n';
+import { useState } from 'react';
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
+import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
+import { TFunction } from 'i18next';
+import { ArrowDown, ArrowDownUp, ArrowUp, BeanIcon, BeanOffIcon, Pin, PinIcon, PinOff } from 'lucide-react';
+
+import { Button } from '@/components/base/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuPortal,
 } from '@/components/base/ui/dropdown-menu';
-import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { Button } from '@/components/base/ui/button';
-import { TFunction } from 'i18next';
-import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/lib/utils';
 
 const PIN_COLUMN_ACTIONS: {
   key: string;
