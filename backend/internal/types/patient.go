@@ -17,6 +17,11 @@ var PatientTable = Table{
 	Alias: "p",
 }
 
+var ProbandTable = Table{
+	Name:  "radiant_jdbc.public.patient",
+	Alias: "pro",
+}
+
 var ManagingOrganizationTable = Table{
 	Name:  OrganizationTable.Name,
 	Alias: "mgmt_org",
@@ -26,11 +31,25 @@ func (Patient) TableName() string {
 	return PatientTable.Name
 }
 
+var ProbandIdField = Field{
+	Name:          "id",
+	Alias:         "proband_id",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         ProbandTable,
+}
+
+var ProbandMrnField = Field{
+	Name:          "mrn",
+	Alias:         "proband_mrn",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         ProbandTable,
+}
+
 var PatientMrnField = Field{
 	Name:          "mrn",
-	CanBeSelected: true,
 	CanBeFiltered: true,
-	CanBeSorted:   true,
 	Table:         PatientTable,
 }
 

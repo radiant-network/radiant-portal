@@ -77,6 +77,44 @@ func Test_SearchCases(t *testing.T) {
 	})
 }
 
+func Test_SearchCases_OnProbandMRN(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.PatientMrnField.GetAlias(),
+				Value:     []interface{}{"MRN-283775"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		cases, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
+		assert.Len(t, *cases, 1)
+		assert.Equal(t, 3, (*cases)[0].ProbandID)
+		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandMRN)
+	})
+}
+
+func Test_SearchCases_OnPatientMRN(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.PatientMrnField.GetAlias(),
+				Value:     []interface{}{"MRN-283773"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		cases, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
+		assert.Len(t, *cases, 1)
+		assert.Equal(t, 3, (*cases)[0].ProbandID)
+		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandMRN)
+	})
+}
+
 func Test_SearchById(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)

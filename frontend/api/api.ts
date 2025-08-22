@@ -686,18 +686,6 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'mrn'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseResult
-     */
-    'patient_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseResult
-     */
     'performer_lab_code'?: string;
     /**
      * 
@@ -729,6 +717,18 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'priority_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseResult
+     */
+    'proband_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'proband_mrn'?: string;
     /**
      * 
      * @type {string}

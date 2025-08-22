@@ -17,8 +17,8 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 	return &[]types.CaseResult{
 		{
 			CaseID:               1,
-			PatientID:            3,
-			MRN:                  "MRN-283775",
+			ProbandID:            3,
+			ProbandMRN:           "MRN-283775",
 			PriorityCode:         "routine",
 			StatusCode:           "in_progress",
 			CaseAnalysisTypeCode: "germline",
@@ -146,8 +146,8 @@ func Test_SearchCasesHandler(t *testing.T) {
 			"created_on":"2000-01-01T00:00:00Z",
 			"managing_organization_code":"CHUSJ",
 			"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine",
-			"mrn":"MRN-283775",
-			"patient_id":3,
+			"proband_mrn":"MRN-283775",
+			"proband_id":3,
 			"performer_lab_code":"CQGC",
 			"performer_lab_name":"Quebec Clinical Genomic Center",
 			"prescriber":"Felix Laflamme",
