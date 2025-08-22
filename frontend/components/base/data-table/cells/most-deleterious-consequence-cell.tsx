@@ -1,7 +1,7 @@
-import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import { cn } from '@/components/lib/utils';
 import { VepImpact } from '@/api/api';
-import ConsequenceLabel from '@/components/feature/variant/consequence-label';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
+import { cn } from '@/components/lib/utils';
 
 type MostDeleteriousConsequenceCellProps = {
   vepImpact?: VepImpact;
@@ -26,7 +26,7 @@ function MostDeleteriousConsequenceCell({ vepImpact, consequences, aaChange }: M
 
   return (
     <div className={cn('flex items-center gap-2')}>
-      <ConsequenceLabel vepImpact={vepImpact} consequence={consequences[0]} size="sm" />
+      <ConsequenceIndicator vepImpact={vepImpact} consequence={consequences[0]} size="sm" />
       {aaChange && ` - ${aaChange}`}
     </div>
   );

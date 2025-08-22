@@ -1,7 +1,7 @@
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
+import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Separator } from '@/components/base/ui/separator';
-import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
@@ -32,7 +32,7 @@ function InterpretationTranscript({ occurrence }: InterpretationTranscriptProps)
       </span>
       {occurrence?.picked_consequences?.[0] && occurrence.vep_impact ? (
         <div className="flex items-center gap-1.5 text-sm">
-          <ConsequenceLabel
+          <ConsequenceIndicator
             vepImpact={occurrence.vep_impact}
             consequence={occurrence.picked_consequences[0]}
             size="sm"

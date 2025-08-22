@@ -8,37 +8,36 @@ import ImpactIndicator from '../../base/indicators/impact-indicator';
 
 const consequenceVariant = tv({
   slots: {
-    base: 'capitalize gap-[6px] overflow-hidden flex',
-    icon: 'mt-[5.25px]',
+    base: 'capitalize gap-[6px] overflow-hidden flex items-baseline',
   },
   variants: {
     size: {
       sm: {
         base: 'text-sm',
-        icon: 'size-[10px]',
       },
-      default: {
+      lg: {
         base: 'text-base font-semibold',
-        icon: 'size-[14px]',
       },
     },
   },
   defaultVariants: {
-    size: 'default',
+    size: 'lg',
   },
 });
-interface ConsequenceLabelProps extends VariantProps<typeof consequenceVariant>, React.HTMLAttributes<HTMLDivElement> {
+interface ConsequenceIndicatorProps
+  extends VariantProps<typeof consequenceVariant>,
+    React.HTMLAttributes<HTMLDivElement> {
   consequence: string;
   vepImpact: VepImpact;
 }
 
-function ConsequenceLabel({ consequence, vepImpact, size, className, ...props }: ConsequenceLabelProps) {
+function ConsequenceIndicator({ consequence, vepImpact, size, className, ...props }: ConsequenceIndicatorProps) {
   const { t } = useI18n();
   const styles = consequenceVariant({ size });
 
   return (
     <div className={styles.base({ className })} {...props}>
-      <ImpactIndicator value={vepImpact} size="sm" className={styles.icon()} />
+      <ImpactIndicator value={vepImpact} size={size} />
       <span className="text-ellipsis overflow-hidden">
         {t(`variant.consequences.${consequence}`, {
           defaultValue: replaceUnderscore(consequence),
@@ -48,4 +47,4 @@ function ConsequenceLabel({ consequence, vepImpact, size, className, ...props }:
   );
 }
 
-export default ConsequenceLabel;
+export default ConsequenceIndicator;

@@ -3,7 +3,7 @@ import { ListFilter, X } from 'lucide-react';
 import useSWR from 'swr';
 
 import { CaseFilters, SearchCriterion } from '@/api/api';
-import FilterButton, { IFilterButton, IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import FilterButton, { IFilterButton, IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
 import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
 import { Button } from '@/components/base/ui/button';
 import { useI18n } from '@/components/hooks/i18n';
@@ -259,7 +259,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           filter.isVisible === true ? (
             <FilterButton
               key={filter.key}
-              popoverSize={filter.popoverSize}
+              popoverSize={filter.popoverSize as PopoverSize}
               label={filter.label}
               options={filter.options}
               selected={filter.selectedItems}

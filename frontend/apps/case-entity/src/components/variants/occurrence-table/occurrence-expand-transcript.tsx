@@ -1,14 +1,9 @@
 import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
-import { Separator } from '@/components/base/ui/separator';
-import ConsequenceLabel from '@/components/feature/variant/consequence-label';
+import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import {
-  getDbSnpUrl,
-  getEnsemblGeneUrl, getEnsemblTranscriptUrl,
-  getOmimOrgUrl,
-} from '@/components/feature/variant/utils';
+import { Separator } from '@/components/base/ui/separator';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
-import {cn} from "@/lib/utils";
+import { getDbSnpUrl, getEnsemblGeneUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
 
 type OccurrenceExpandTranscriptProps = {
   occurrence: GermlineSNVOccurrence;
@@ -71,24 +66,18 @@ export default function OccurrenceExpandTranscript({
       )}
       {occurrence.picked_consequences && occurrence.vep_impact && (
         <div className="flex items-center gap-2">
-          <ConsequenceLabel
+          <ConsequenceIndicator
             vepImpact={occurrence.vep_impact}
             consequence={occurrence.picked_consequences[0]}
             size="sm"
-          />{' '}
+          />
           {occurrence.aa_change && ` - ${occurrence.aa_change}`}
         </div>
       )}
       {expandedOccurrence.rsnumber && (
         <>
           <Separator orientation="vertical" className="h-5" />
-          <AnchorLink
-              href={getDbSnpUrl(expandedOccurrence.rsnumber)}
-              target="_blank"
-              rel="noreferrer"
-              size="sm"
-          >
-
+          <AnchorLink href={getDbSnpUrl(expandedOccurrence.rsnumber)} target="_blank" rel="noreferrer" size="sm">
             {expandedOccurrence.rsnumber}
           </AnchorLink>
         </>

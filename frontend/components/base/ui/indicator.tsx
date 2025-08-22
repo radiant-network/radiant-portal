@@ -37,10 +37,10 @@ const IndicatorVariants = tv({
     },
     size: {
       sm: {
-        base: 'w-2.5 h-2.5',
+        base: '!w-2.5 !h-2.5',
       },
       lg: {
-        base: 'w-3.5 h-3.5',
+        base: '!w-3.5 !h-3.5',
       },
     },
   },

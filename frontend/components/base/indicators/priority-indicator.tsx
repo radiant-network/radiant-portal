@@ -3,7 +3,7 @@ import { useI18n } from '@/components/hooks/i18n';
 
 export type PriorityIndicatorCode = 'asap' | 'routine' | 'stat' | 'urgent';
 
-type PriorityIndicatorProps = React.HTMLAttributes<HTMLDivElement> & {
+type PriorityIndicatorProps = Omit<IndicatorProps, 'variant'> & {
   code: PriorityIndicatorCode;
 };
 
@@ -20,7 +20,7 @@ function PriorityIndicator({ code, ...props }: PriorityIndicatorProps) {
   const color = colors[code];
 
   return (
-    <Indicator variant={color} {...props}>
+    <Indicator {...props} variant={color}>
       <span>{t(`case_exploration.priority.${code}`)}</span>
     </Indicator>
   );

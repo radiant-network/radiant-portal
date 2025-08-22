@@ -3,11 +3,11 @@ import { InfoIcon } from 'lucide-react';
 
 import { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
+import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardProps } from '@/components/base/ui/card';
 import { Separator } from '@/components/base/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
@@ -45,7 +45,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.consequence')}</div>
             <div className="flex items-center gap-2">
               {pickedConsequence && data.vep_impact ? (
-                <ConsequenceLabel vepImpact={data.vep_impact} consequence={pickedConsequence} />
+                <ConsequenceIndicator vepImpact={data.vep_impact} consequence={pickedConsequence} />
               ) : (
                 '-'
               )}
@@ -56,13 +56,13 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="flex flex-wrap items-start gap-1">
               {data?.clinvar?.length
                 ? data?.clinvar.map(clinvar => (
-                    <Link
-                      key={clinvar}
-                      to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
-                    >
-                      <ClassificationBadge key={clinvar} value={clinvar} />
-                    </Link>
-                  ))
+                  <Link
+                    key={clinvar}
+                    to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
+                  >
+                    <ClassificationBadge key={clinvar} value={clinvar} />
+                  </Link>
+                ))
                 : '-'}
             </div>
           </div>
