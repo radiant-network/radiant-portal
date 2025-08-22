@@ -4,9 +4,9 @@ import * as React from 'react';
 import { type DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive, useCommandState } from 'cmdk';
 
-import { cn } from '@/lib/utils';
-import { Dialog, DialogContent } from '@/components/base/ui/dialog';
 import { Checkbox } from '@/components/base/ui/checkbox';
+import { Dialog, DialogContent } from '@/components/base/ui/dialog';
+import { cn } from '@/lib/utils';
 
 function Command({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive>) {
   return (
@@ -21,17 +21,15 @@ function Command({ className, ...props }: React.ComponentPropsWithoutRef<typeof 
 }
 Command.displayName = CommandPrimitive.displayName;
 
-const CommandDialog = ({ children, ...props }: DialogProps) => {
-  return (
-    <Dialog {...props}>
-      <DialogContent className="overflow-hidden p-0">
-        <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
-          {children}
-        </Command>
-      </DialogContent>
-    </Dialog>
-  );
-};
+const CommandDialog = ({ children, ...props }: DialogProps) => (
+  <Dialog {...props}>
+    <DialogContent className="overflow-hidden p-0">
+      <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+        {children}
+      </Command>
+    </DialogContent>
+  </Dialog>
+);
 
 function CommandInput({
   className,
@@ -136,9 +134,9 @@ function CommandItemCheckbox({ className, ...props }: React.ComponentPropsWithou
 }
 CommandItemCheckbox.displayName = 'CommandItemCheckbox';
 
-const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
-  return <span className={cn('ml-auto text-xs tracking-widest text-muted-foreground', className)} {...props} />;
-};
+const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => (
+  <span className={cn('ml-auto text-xs tracking-widest text-muted-foreground', className)} {...props} />
+);
 CommandShortcut.displayName = 'CommandShortcut';
 
 export {

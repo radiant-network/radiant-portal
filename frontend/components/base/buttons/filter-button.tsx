@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import { LucideIcon, PlusCircle, Search } from 'lucide-react';
+
+import { Badge } from '@/components/base/ui/badge';
 import {
   Command,
   CommandEmpty,
@@ -8,16 +12,14 @@ import {
   CommandSeparator,
 } from '@/components/base/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/ui/popover';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/base/ui/tooltip';
-import { PlusCircle, LucideIcon, Search } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Badge } from '@/components/base/ui/badge';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
-import { Checkbox } from '../ui/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/lib/utils';
 
-type PopoverSize = 'default' | 'lg';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+
+export type PopoverSize = 'default' | 'lg';
 
 // Extended Aggregation type to include optional icon
 export interface IFilterButtonItem {
@@ -88,10 +90,7 @@ const CustomCommandItem = ({
       className="p-0 overflow-hidden hover:bg-accent hover:text-accent-foreground focus:bg-transparent focus:text-foreground"
     >
       {actionMode ? (
-        <Button
-          variant="ghost"
-          className="mx-2 my-1.5 p-0 h-full w-full items-center justify-start font-normal"
-        >
+        <Button variant="ghost" className="mx-2 my-1.5 p-0 h-full w-full items-center justify-start font-normal">
           {option.label}
         </Button>
       ) : (
@@ -208,8 +207,7 @@ export default function FilterButton({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className={cn(
-          'p-0 flex flex-col', {
+        className={cn('p-0 flex flex-col', {
           'w-[229px] max-h-[240px]': popoverSize === 'default',
           'w-[470px] max-h-[280px]': popoverSize === 'lg',
         })}
@@ -226,37 +224,33 @@ export default function FilterButton({
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
-              {optionSnapshot.selectedOptions.map(option => {
-                return (
-                  <CustomCommandItem
-                    key={option.key}
-                    option={option}
-                    handleSelect={handleSelect}
-                    closeOnSelect={closeOnSelect}
-                    setOpen={setOpen}
-                    actionMode={actionMode}
-                    selected={selected}
-                    withTooltip={withTooltip}
-                  />
-                );
-              })}
+              {optionSnapshot.selectedOptions.map(option => (
+                <CustomCommandItem
+                  key={option.key}
+                  option={option}
+                  handleSelect={handleSelect}
+                  closeOnSelect={closeOnSelect}
+                  setOpen={setOpen}
+                  actionMode={actionMode}
+                  selected={selected}
+                  withTooltip={withTooltip}
+                />
+              ))}
             </CommandGroup>
             {optionSnapshot.selectedOptions.length > 0 && <CommandSeparator />}
             <CommandGroup>
-              {optionSnapshot.unselectedOptions.map(option => {
-                return (
-                  <CustomCommandItem
-                    key={option.key}
-                    option={option}
-                    handleSelect={handleSelect}
-                    closeOnSelect={closeOnSelect}
-                    setOpen={setOpen}
-                    actionMode={actionMode}
-                    selected={selected}
-                    withTooltip={withTooltip}
-                  />
-                );
-              })}
+              {optionSnapshot.unselectedOptions.map(option => (
+                <CustomCommandItem
+                  key={option.key}
+                  option={option}
+                  handleSelect={handleSelect}
+                  closeOnSelect={closeOnSelect}
+                  setOpen={setOpen}
+                  actionMode={actionMode}
+                  selected={selected}
+                  withTooltip={withTooltip}
+                />
+              ))}
             </CommandGroup>
           </CommandList>
         </Command>

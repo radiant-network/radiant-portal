@@ -26,6 +26,6 @@ export default function filterItemPriority(options: Aggregation[]): IFilterButto
 
   return sortedOptions.map(option => ({
     ...option,
-    label: <PriorityIndicator code={option.key as PriorityIndicatorCode} />,
+    label: <PriorityIndicator size="sm" code={option.key as PriorityIndicatorCode} />,
   }));
 }

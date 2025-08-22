@@ -1,9 +1,9 @@
 import { TFunction } from 'i18next';
 
 import { Transcript } from '@/api/api';
+import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import ExpandableList from '@/components/base/list/expandable-list';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import ConsequenceLabel from '@/components/feature/variant/consequence-label';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -39,7 +39,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
       <div>
         <div className="flex items-center gap-2">
           <div className="">
-            <ConsequenceLabel vepImpact={data.vep_impact!} consequence={data.consequences?.[0] || ''} size="sm" />
+            <ConsequenceIndicator vepImpact={data.vep_impact!} consequence={data.consequences?.[0] || ''} size="sm" />
           </div>
         </div>
       </div>
