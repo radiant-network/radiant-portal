@@ -17,13 +17,15 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
 
+  const pickedConsequence = data?.picked_consequences?.[0];
+
   return (
     <Card {...props}>
       <CardContent className="px-4 md:px-6 py-0 2xl:py-12 grow">
         <div className="flex items-start flex-wrap md:flex-nowrap md:[&>div]:w-40 md:justify-between gap-6">
           <div className="flex flex-col gap-2">
             <div className="text-2xl font-semibold uppercase">
-              {data.symbol ? (
+              {data.symbol && (
                 <a
                   href={getOmimOrgUrl({
                     symbol: data.symbol,
@@ -34,17 +36,16 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 >
                   {data.symbol}
                 </a>
-              ) : (
-                '-'
               )}
+              {['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? t('common.no_gene') : '-'}
             </div>
             <div className="text-xs font-mono">{'-'}</div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.consequence')}</div>
             <div className="flex items-center gap-2">
-              {data?.picked_consequences?.[0] && data.vep_impact ? (
-                <ConsequenceLabel vepImpact={data.vep_impact} consequence={data?.picked_consequences?.[0]} />
+              {pickedConsequence && data.vep_impact ? (
+                <ConsequenceLabel vepImpact={data.vep_impact} consequence={pickedConsequence} />
               ) : (
                 '-'
               )}
