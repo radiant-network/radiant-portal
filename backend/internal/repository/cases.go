@@ -228,7 +228,7 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
 	tx = joinWithRequest(tx)
-	tx = joinWithPatient(tx, userQuery)
+	tx = joinWithProband(tx, userQuery)
 	tx = joinWithCaseAnalysis(tx)
 	tx = joinWithProject(tx)
 	tx = joinWithFamilyMembers(tx, r.db)
@@ -242,6 +242,10 @@ func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 		if userQuery.HasFieldFromTables(types.MondoTable) {
 			tx = joinWithMondoTerm(tx)
 		}
+
+		if userQuery.HasFieldFromTables(types.PatientTable) {
+			tx = joinWithPatients(tx)
+		}
 	}
 	return tx, nil
 }
@@ -252,13 +256,19 @@ func joinWithRequest(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(joinWithRequestSql).Joins(joinWithOrderingOrganizationSql)
 }
 
-func joinWithPatient(tx *gorm.DB, userQuery types.Query) *gorm.DB {
-	joinWithPatientSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.PatientTable.Name, types.PatientTable.Alias, types.CaseTable.Alias, types.PatientTable.Alias)
-	joinWithPatientManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.managing_organization_id=%s.id", types.ManagingOrganizationTable.Name, types.ManagingOrganizationTable.Alias, types.PatientTable.Alias, types.ManagingOrganizationTable.Alias)
+func joinWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
+	joinWithProbandSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.ProbandTable.Name, types.ProbandTable.Alias, types.CaseTable.Alias, types.ProbandTable.Alias)
+	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.managing_organization_id=%s.id", types.ManagingOrganizationTable.Name, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
 	if userQuery != nil && userQuery.HasFieldFromTables(types.ManagingOrganizationTable) {
-		return tx.Joins(joinWithPatientSql).Joins(joinWithPatientManagingOrganizationSql)
+		return tx.Joins(joinWithProbandSql).Joins(joinWithProbandManagingOrganizationSql)
 	}
-	return tx.Joins(joinWithPatientSql)
+	return tx.Joins(joinWithProbandSql)
+}
+
+func joinWithPatients(tx *gorm.DB) *gorm.DB {
+	joinWithSeqExp := fmt.Sprintf("LEFT JOIN %s %s ON %s.case_id=%s.id", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias, types.CaseTable.Alias)
+	joinWithPatientSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.patient_id=%s.id", types.PatientTable.Name, types.PatientTable.Alias, types.SequencingExperimentTable.Alias, types.PatientTable.Alias)
+	return tx.Joins(joinWithSeqExp).Joins(joinWithPatientSql)
 }
 
 func joinWithCaseAnalysis(tx *gorm.DB) *gorm.DB {

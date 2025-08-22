@@ -305,10 +305,6 @@ components:
           type: string
         managing_organization_name:
           type: string
-        mrn:
-          type: string
-        patient_id:
-          type: integer
         performer_lab_code:
           type: string
         performer_lab_name:
@@ -320,6 +316,10 @@ components:
         primary_condition_name:
           type: string
         priority_code:
+          type: string
+        proband_id:
+          type: integer
+        proband_mrn:
           type: string
         project_code:
           type: string

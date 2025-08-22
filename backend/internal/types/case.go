@@ -27,8 +27,8 @@ type Case struct {
 // @Name CaseResult
 type CaseResult struct {
 	CaseID                   int       `json:"case_id" validate:"required"`
-	PatientID                int       `json:"patient_id,omitempty"`
-	MRN                      string    `json:"mrn,omitempty"`
+	ProbandID                int       `json:"proband_id,omitempty"`
+	ProbandMRN               string    `json:"proband_mrn,omitempty"`
 	PriorityCode             string    `json:"priority_code,omitempty"`
 	StatusCode               string    `json:"status_code" validate:"required"`
 	CaseAnalysisTypeCode     string    `json:"-"`
@@ -145,7 +145,9 @@ func (Case) TableName() string {
 var CasesFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
+	ProbandIdField,
 	PatientMrnField,
+	ProbandMrnField,
 	RequestPriorityCodeField,
 	CaseStatusCodeField,
 	CaseAnalysisTypeCodeField,
@@ -169,7 +171,8 @@ var CasesFields = []Field{
 
 var CasesDefaultFields = []Field{
 	CaseIdField,
-	PatientMrnField,
+	ProbandIdField,
+	ProbandMrnField,
 	RequestPriorityCodeField,
 	CaseStatusCodeField,
 	CaseAnalysisTypeCodeField,
