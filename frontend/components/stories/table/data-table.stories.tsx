@@ -116,8 +116,8 @@ const meta = {
       pageIndex: 0,
       pageSize: 10,
     },
-    onPaginationChange: () => { },
-    onServerSortingChange: sorting => { },
+    onPaginationChange: () => {},
+    onServerSortingChange: sorting => {},
     total: 10,
   },
   decorators: [
@@ -187,7 +187,7 @@ export const DefaultTableFilters: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
   },
   render: args => <DataTable {...args} />,
 };
@@ -220,12 +220,73 @@ export const TableFiltersAndLessThan10Results: Story = {
   args: {
     data: data.slice(0, 1),
     total: 1,
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
     enableFullscreen: true,
     enableColumnOrdering: true,
     tableIndexResultPosition: 'bottom',
   },
   render: args => <DataTable {...args} />,
+};
+
+export const PaginationHidden: Story = {
+  args: {
+    paginationHidden: true,
+  },
+  render: args => <DataTable {...args} />,
+};
+
+export const GroupBy: Story = {
+  args: {
+    data: data.slice(0, 10),
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    columns: [
+      columnHelper.accessor('firstName', {
+        id: 'firstName',
+        cell: info => info.getValue(),
+        header: () => <span>First Name</span>,
+      }),
+      columnHelper.accessor(row => row.lastName, {
+        id: 'lastName',
+        cell: info => <i>{info.getValue()}</i>,
+        header: () => <span>Last Name</span>,
+      }),
+      columnHelper.accessor('age', {
+        id: 'age',
+        header: () => 'Age',
+        cell: info => info.renderValue(),
+        aggregatedCell: ({ getValue }) => <>{`[${getValue()[0]}-${getValue()[1]}]`}</>,
+        aggregationFn: 'extent',
+        enableGrouping: true,
+      }),
+      columnHelper.accessor('visits', {
+        id: 'visits',
+        header: () => <span>Visits</span>,
+        aggregationFn: 'sum',
+      }),
+      columnHelper.accessor('status', {
+        id: 'status',
+        header: 'Status',
+        getGroupingValue: row => `Group By ${row.status}`,
+        enableGrouping: true,
+      }),
+      columnHelper.accessor('progress', {
+        id: 'progress',
+        header: 'Profile Progress',
+        cell: ({ getValue }) => `${Math.round(getValue<number>() * 100) / 100}%`,
+        aggregationFn: 'mean',
+        aggregatedCell: ({ getValue }) => `~${Math.round(getValue<number>() * 100) / 100}%`,
+      }),
+    ] as TableColumnDef<MockData, any>[],
+  },
+  render: args => (
+    <>
+      <span>
+        You can group by <b>status</b>
+      </span>
+      <DataTable {...args} />
+    </>
+  ),
 };
 
 export const HeaderGroups: Story = {
@@ -274,13 +335,6 @@ export const HeaderGroups: Story = {
         ],
       }),
     ] as TableColumnDef<MockData, any>[],
-  },
-  render: args => <DataTable {...args} />,
-};
-
-export const PaginationHidden: Story = {
-  args: {
-    paginationHidden: true,
   },
   render: args => <DataTable {...args} />,
 };
