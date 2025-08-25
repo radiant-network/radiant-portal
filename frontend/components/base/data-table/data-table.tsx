@@ -23,7 +23,7 @@ import {
   Table as TTable,
   useReactTable,
 } from '@tanstack/react-table';
-import { AlertCircle, Check, CheckIcon, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronRight, CombineIcon, SearchIcon } from 'lucide-react';
 
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
@@ -51,9 +51,19 @@ import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
 import Empty from '../empty';
+import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 export const IS_SERVER = typeof window === 'undefined';
 
@@ -725,30 +735,45 @@ function TranstackTable<T>({
           {groupByColumns.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  {grouping.length === 0
-                    ? t('common.table.group_by.none')
-                    : t('common.table.group_by.group', { group: grouping.join(',') })}
+                <Button variant="ghost" size="sm">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div className="flex gap-2">
+                        <CombineIcon />
+                        {grouping.length > 0 && (
+                          <Badge variant="secondary" className="capitalize">
+                            {grouping[0]}
+                          </Badge>
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent sideOffset={12}>{t('common.table.group_by')}</TooltipContent>
+                  </Tooltip>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                <DropdownMenuLabel>{t('common.table.group_by')}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 {groupByColumns.map(column => (
-                  <DropdownMenuItem
+                  <DropdownMenuCheckboxItem
                     key={column.id}
+                    checked={grouping.includes(column.id)}
                     onClick={() => {
                       table.getFlatHeaders().forEach(header => {
                         if (header.id === column.id) {
-                          const onClick = header.column.getToggleGroupingHandler();
-                          onClick();
+                          table.resetGrouping();
+
+                          if (!grouping.includes(header.id)) {
+                            setGrouping([header.id]);
+                          }
                         }
                       });
                     }}
                   >
                     <div className="flex w-full items-center justify-between">
                       <div>{defaultColumnSettings.find(setting => setting.id === column.id)?.label}</div>
-                      {grouping.includes(column.id) && <Check size={16} />}
                     </div>
-                  </DropdownMenuItem>
+                  </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
