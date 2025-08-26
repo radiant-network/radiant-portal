@@ -6,7 +6,7 @@ type ClinvarCellProps = {
 };
 
 function ClassificationCell({ codes = [] }: ClinvarCellProps) {
-  if (codes.length === 0) return <EmptyCell />;
+  if (codes.filter(code => code != '' && code != null).length === 0) return <EmptyCell />;
 
   return (
     <div className="flex gap-1">

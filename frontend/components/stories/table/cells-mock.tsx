@@ -337,7 +337,7 @@ export const firstSetCellData = [
 
 /*
  * Second set of cell components
- *   - ClassificationBadge
+ *   - ClassificationCell
  *   - AnchorLinkCell (rsnumber example)
  *   - GeneCell
  *   - GnomadCell
@@ -505,7 +505,22 @@ export const secondSetCellData = [
     zygosity: 'HEM',
   },
   {
-    clinvar: ['likely_risk_allele', 'drug_response', 'benign', 'confers_sensitivity'],
+    clinvar: ['likely_risk_allele', 'drug_response', 'benign', 'confers_sensitivity', ''],
+    rsnumber: '1',
+    symbol: 'DCAF15',
+    gnomad_v3_af: 0.001,
+    is_mane_plus: true,
+    is_canonical: true,
+    aa_change: 'p.Leu119ProfsTer19',
+    picked_consequences: ['uncertain_significance'],
+    vep_impact: 'HIGH',
+    omim_inheritance_code: ['null'],
+    pf_wgs: 0.1,
+    locus_id: '-7485572602358923261',
+    zygosity: 'HEM',
+  },
+  {
+    clinvar: ['', null],
     rsnumber: '1',
     symbol: 'DCAF15',
     gnomad_v3_af: 0.001,

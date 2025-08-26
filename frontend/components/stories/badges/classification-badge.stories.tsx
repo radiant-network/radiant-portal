@@ -65,11 +65,19 @@ export const ClassificationValueStartingWithAnUnderscore: Story = {
 export const NoData: Story = {
   render: () => (
     <div className="flex flex-col gap-2 items-start">
+      With an empty string
       <div className="flex items-center gap-2">
         <ClassificationBadge value="" />
         <ClassificationBadge value="" abbreviated />
         <ClassificationBadge value="" count={1} />
         <ClassificationBadge value="" abbreviated count={1} />
+      </div>
+      With an null value
+      <div className="flex items-center gap-2">
+        <ClassificationBadge value={null} />
+        <ClassificationBadge value={null} abbreviated />
+        <ClassificationBadge value={null} count={1} />
+        <ClassificationBadge value={null} abbreviated count={1} />
       </div>
     </div>
   ),
