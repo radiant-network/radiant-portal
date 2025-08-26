@@ -1,0 +1,7 @@
+import{j as o}from"./jsx-runtime-D_zvdyIk.js";import{P as i}from"./page-error-D8r08eI5.js";import{B as s}from"./button-BCCKP-ZJ.js";import"./utils-D-KgF5mV.js";import"./index-COcwYKbe.js";import"./index-CGj_12n1.js";import"./index-D8dqFcAi.js";import"./index-BBPXtLXU.js";import"./ActionButton-CClS75b0.js";import"./dropdown-menu-DRugeY2X.js";import"./index-CcLUv2_A.js";import"./index-CphM_NEg.js";import"./Combination-Bb6GvI2f.js";import"./index-CbbSLEvm.js";import"./index-A6VgBoaw.js";import"./index-CKNrATXZ.js";import"./index-CIckazZy.js";import"./check-DRc1RmCY.js";import"./createLucideIcon-8Lr1oLzj.js";import"./button.variants-BQkt_1YJ.js";import"./index-C66Dxnp2.js";import"./ellipsis-BM4jpslE.js";import"./spinner-BMSZ66Eg.js";import"./tooltip-Bh6uXa7k.js";import"./i18n-pd1UZOT2.js";import"./iframe-DFkYV6oI.js";import"./context-DkqwYzW-.js";const z={title:"Error/Page-Error",component:i,args:{status:"404",message:"Page not found",extra:o.jsx(s,{children:"Go to dashboard"})}},r={render:p=>o.jsx("div",{className:"flex justify-center p-24",children:o.jsx(i,{...p})})};var t,e,m;r.parameters={...r.parameters,docs:{...(t=r.parameters)==null?void 0:t.docs,source:{originalSource:`{
+  render: args => {
+    return <div className="flex justify-center p-24">
+        <PageError {...args} />
+      </div>;
+  }
+}`,...(m=(e=r.parameters)==null?void 0:e.docs)==null?void 0:m.source}}};const A=["NotFound404"];export{r as NotFound404,A as __namedExportsOrder,z as default};
