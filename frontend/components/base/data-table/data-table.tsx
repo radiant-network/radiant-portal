@@ -20,7 +20,7 @@ import {
   Row,
   RowPinningState,
   SortingState,
-  Table as TTable,
+  Table as TableType,
   useReactTable,
 } from '@tanstack/react-table';
 import { AlertCircle, ChevronDown, ChevronRight, CombineIcon, SearchIcon } from 'lucide-react';
@@ -64,6 +64,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+
+import DataTableGroupBy from './data-table-group-by';
 
 export const IS_SERVER = typeof window === 'undefined';
 
@@ -275,7 +277,7 @@ function getRowPinningCellExtraCN(row: Row<any>): string {
  * Reusable flex header function
  * Used to render header group and header
  */
-function getHeaderFlexRender(table: TTable<any>, header: Header<any, any>) {
+function getHeaderFlexRender(table: TableType<any>, header: Header<any, any>) {
   if (header.isPlaceholder) return null;
 
   return (
@@ -733,50 +735,12 @@ function TranstackTable<T>({
         <div className="flex justify-end">
           {/* GroupBy */}
           {groupByColumns.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <div className="flex gap-2">
-                        <CombineIcon />
-                        {grouping.length > 0 && (
-                          <Badge variant="secondary" className="capitalize">
-                            {grouping[0]}
-                          </Badge>
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent sideOffset={12}>{t('common.table.group_by')}</TooltipContent>
-                  </Tooltip>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>{t('common.table.group_by')}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {groupByColumns.map(column => (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    checked={grouping.includes(column.id)}
-                    onClick={() => {
-                      table.getFlatHeaders().forEach(header => {
-                        if (header.id === column.id) {
-                          table.resetGrouping();
-
-                          if (!grouping.includes(header.id)) {
-                            setGrouping([header.id]);
-                          }
-                        }
-                      });
-                    }}
-                  >
-                    <div className="flex w-full items-center justify-between">
-                      <div>{defaultColumnSettings.find(setting => setting.id === column.id)?.label}</div>
-                    </div>
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <DataTableGroupBy
+              grouping={grouping}
+              table={table}
+              groupByColumns={groupByColumns}
+              defaultColumnSettings={defaultColumnSettings}
+            />
           )}
 
           {/* columns order and visibility */}
