@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  DragEndEvent,
   KeyboardSensor,
   PointerSensor,
+  UniqueIdentifier,
   useSensor,
   useSensors,
-  DragEndEvent,
-  UniqueIdentifier,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -15,10 +15,11 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { ColumnSettings } from '@/components/base/data-table/data-table';
 import { ColumnOrderState, ColumnPinningState } from '@tanstack/react-table';
-import { Button } from '@/base/ui/button';
 import { SettingsIcon } from 'lucide-react';
+
+import { Button } from '@/base/ui/button';
+import { ColumnSettings } from '@/components/base/data-table/data-table';
 import TableSortableColumnSetting from '@/components/base/data-table/data-table-sortable-column-setting';
 import {
   DropdownMenu,
@@ -26,8 +27,10 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
-import { Skeleton } from '../ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
+
+import { Skeleton } from '../ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 /**
  * Read user config to return column order (in asc)
@@ -44,7 +47,7 @@ function deserializeColumnsFixed(settings: ColumnSettings[]): string[] {
 }
 
 function filterColumnById(defaultSettings: ColumnSettings[]) {
-  return function(id: string) {
+  return function (id: string) {
     return defaultSettings.find(column => column.id === id);
   };
 }
@@ -52,6 +55,9 @@ function filterColumnById(defaultSettings: ColumnSettings[]) {
 /**
  * TableColumnSettings
  * Dropdown that manage column's visiblity and order
+ *
+ * @WARNING: There is a small workaround to make tooltip works with DropdownMenu.
+ *           it must be set has a child of Button and edit his sideOffset manualy
  */
 type TableColumnSettingsProps = {
   loading?: boolean;
@@ -94,9 +100,7 @@ function TableColumnSettings({
     const { active, over } = event;
     if (!over) return;
     if (active.id !== over.id) {
-      setColumnsMiddle(items => {
-        return arrayMove(items, items.indexOf(active.id), items.indexOf(over.id));
-      });
+      setColumnsMiddle(items => arrayMove(items, items.indexOf(active.id), items.indexOf(over.id)));
     }
   }
 
@@ -104,14 +108,21 @@ function TableColumnSettings({
     handleOrderChange(columnsMiddle as ColumnOrderState);
   }, [columnsMiddle]);
 
-  if (loading) return <Skeleton className='w-[24px] h-[24px] mr-2' />;
+  if (loading) return <Skeleton className="w-[24px] h-[24px] mr-2" />;
 
   return (
     <span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button iconOnly variant="ghost" className="w-8 h-8">
-            <SettingsIcon />
+          <Button size="sm" iconOnly variant="ghost">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <SettingsIcon />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={12}>{t('common.table.columns')}</TooltipContent>
+            </Tooltip>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuPortal>

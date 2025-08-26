@@ -218,9 +218,10 @@
     },
     "table": {
       "group_by": "Regrouper par",
+      "columns": "Colonnes",
       "fullscreen": {
-        "maximize": "Passer en plein écran",
-        "minimize": "Quitter le plein écran"
+        "maximize": "Plein écran",
+        "minimize": "Quitter plein écran"
       },
       "pin": {
         "left": "Épingler à gauche",

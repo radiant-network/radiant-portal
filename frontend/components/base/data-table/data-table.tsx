@@ -23,7 +23,7 @@ import {
   Table as TableType,
   useReactTable,
 } from '@tanstack/react-table';
-import { AlertCircle, ChevronDown, ChevronRight, CombineIcon, SearchIcon } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
 
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
@@ -51,19 +51,8 @@ import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
 import Empty from '../empty';
-import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 import DataTableGroupBy from './data-table-group-by';
 
@@ -107,17 +96,17 @@ export type TableProps<TData> = {
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 } & (
-  | {
+    | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-  | {
+    | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-);
+  );
 
 export interface BaseColumnSettings {
   id: string;
@@ -320,7 +309,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow

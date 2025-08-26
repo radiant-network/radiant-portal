@@ -53,7 +53,7 @@ function DataTableGroupBy({ table, grouping, groupByColumns, defaultColumnSettin
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" iconOnly={!hasGroupedValue}>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <div className="flex items-center gap-2">
                 <CombineIcon />
                 {hasGroupedValue && (
