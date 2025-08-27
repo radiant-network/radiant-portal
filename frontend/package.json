@@ -7,11 +7,21 @@
     "components/*",
     "portals/*"
   ],
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "eslint --fix"
+    ]
+  },
   "scripts": {
     "test": "vitest",
-    "prepare": "husky"
+    "prepare": "cd .. && husky frontend/.husky",
+    "commit:lint": "commitlint --edit $1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@ferlab/eslint-config": "^2.0.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
@@ -19,6 +29,7 @@
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-prettier": "^5.2.3",
     "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
     "typescript": "^5.8.2",
     "vitest": "^3.1.4"
   },
@@ -30,6 +41,7 @@
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/vite": "^4.1.8",
     "axios": "^1.11.0",
+    "commitlint": "^19.8.1",
     "date-fns": "^4.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
