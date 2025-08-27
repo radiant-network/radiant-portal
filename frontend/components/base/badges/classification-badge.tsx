@@ -4,11 +4,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 import { useI18n } from '@/components/hooks/i18n';
 
 interface ClassificationBadgeProps extends BadgeProps {
-  value: string; // TODO: Should be replace with enum with API exposes one
+  value: string | null; // TODO: Should be replace with enum with API exposes one
   abbreviated?: boolean;
 }
 
-// TODO: Should be replace with enum with API exposes one
 export const ClassificationValueMap: Record<string, BadgeProps['variant']> = {
   other: 'neutral',
   association_not_found: 'neutral',
@@ -68,7 +67,7 @@ function getClassificationValue(value: string): { color: BadgeProps['variant']; 
 
 function ClassificationBadge({ value, abbreviated, ...props }: ClassificationBadgeProps) {
   const { t } = useI18n();
-  const result = getClassificationValue(value.toLowerCase());
+  const result = getClassificationValue((value ?? '').toLowerCase());
 
   return (
     <ConditionalWrapper
