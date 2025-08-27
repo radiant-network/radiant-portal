@@ -1,7 +1,10 @@
+import { MoreVerticalIcon } from 'lucide-react';
 import { VariantProps } from 'tailwind-variants';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+
 import { cn } from '@/lib/utils';
-import { MoreHorizontalIcon } from 'lucide-react';
+
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+
 import { actionButtonVariants } from './button.variants';
 
 interface Action {
@@ -40,7 +43,7 @@ function ActionButton({
       <DropdownMenu>
         <DropdownMenuTrigger asChild disabled={btnProps.disabled}>
           <button className={cn(style.base(), style.actionsButton())} {...btnProps}>
-            <MoreHorizontalIcon />
+            <MoreVerticalIcon />
           </button>
         </DropdownMenuTrigger>
 

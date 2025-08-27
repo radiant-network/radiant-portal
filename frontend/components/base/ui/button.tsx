@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
-import { buttonVariants } from '@/base/buttons';
 import { VariantProps } from 'tailwind-variants';
+
+import { buttonVariants } from '@/base/buttons';
+
 import { Spinner } from '../spinner';
 
 export interface ButtonProps extends React.ComponentProps<'button'>, VariantProps<typeof buttonVariants> {

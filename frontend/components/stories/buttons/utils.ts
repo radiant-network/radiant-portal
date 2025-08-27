@@ -1,5 +1,6 @@
-import { baseButtonVariants, buttonVariants as buttonVar } from '@/components/base/buttons';
 import { VariantProps } from 'tailwind-variants';
+
+import { baseButtonVariants, buttonVariants as buttonVar } from '@/components/base/buttons';
 
 export const buttonVariants: VariantProps<typeof baseButtonVariants>['variant'][] = [
   'default',
@@ -10,4 +11,4 @@ export const buttonVariants: VariantProps<typeof baseButtonVariants>['variant'][
   'link',
 ];
 
-export const buttonSizes: VariantProps<typeof buttonVar>['size'][] = ['default', 'xs', 'sm', 'lg'];
+export const buttonSizes: VariantProps<typeof buttonVar>['size'][] = ['default', 'xxs', 'xs', 'sm', 'lg'];
