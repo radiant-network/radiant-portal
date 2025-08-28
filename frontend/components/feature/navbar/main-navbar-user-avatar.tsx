@@ -122,15 +122,19 @@ export function AvatarUserDetails({
   );
 }
 
-function UserAvatar({ name, className }: { className?: string; name: string }) {
+function UserAvatar({ name, className }: { className?: string; name?: string }) {
   return (
     <Avatar className={cn('size-9', className)}>
-      <AvatarFallback className="bg-cyan/20 text-cyan-foreground text-sm">{getInitials(name)}</AvatarFallback>
+      <AvatarFallback className="bg-cyan/20 text-cyan-foreground text-sm">{getInitials(name || '')}</AvatarFallback>
     </Avatar>
   );
 }
 
 function getInitials(name: string): string {
+  if (!name || typeof name !== 'string') {
+    return '';
+  }
+
   const words = name.trim().split(/\s+/);
 
   if (words.length >= 2) {
