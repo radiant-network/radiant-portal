@@ -30,7 +30,7 @@ function ActionButton({
   const style = actionButtonVariants({ size, variant, disabled: btnProps.disabled });
 
   return (
-    <div className={cn('flex items-center', className)}>
+    <div className={style.container({ className })}>
       {/* Default Action Button */}
       <button onClick={onDefaultAction} className={cn(style.base(), 'rounded-r-none')} {...btnProps}>
         {children}

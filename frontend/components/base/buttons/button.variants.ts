@@ -99,25 +99,21 @@ export const buttonVariants = tv({
 export const actionButtonVariants = tv({
   extend: baseButtonVariants,
   slots: {
-    base: '',
+    container: 'flex items-center',
     actionsButton: 'rounded-l-none',
   },
   variants: {
     size: {
       xs: {
-        base: '',
         actionsButton: 'h-7 px-1.5 [&_svg]:size-3',
       },
       sm: {
-        base: '',
         actionsButton: 'h-8 px-2 [&_svg]:size-4',
       },
       default: {
-        base: '',
         actionsButton: 'h-9 px-2 [&_svg]:size-5',
       },
       lg: {
-        base: '',
         actionsButton: 'h-10 px-2 [&_svg]:size-6',
       },
     },
@@ -125,6 +121,15 @@ export const actionButtonVariants = tv({
       outline: {
         base: 'hover:z-2',
         actionsButton: '-ml-px hover:z-2',
+      },
+      default: {
+        container: 'divide-x divide-primary-foreground/30',
+      },
+      destructive: {
+        container: 'divide-x divide-destructive-foreground/30',
+      },
+      secondary: {
+        container: 'divide-x divide-secondary-foreground/30',
       },
     },
   },
