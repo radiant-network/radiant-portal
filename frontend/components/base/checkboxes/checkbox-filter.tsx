@@ -9,7 +9,7 @@ import { Label } from '../ui/label';
 
 export const checkboxFilterVariants = tv({
   slots: {
-    base: 'flex gap-2 justify-baseline w-full max-w-[228px] cursor-pointer',
+    base: 'flex gap-2 justify-between w-full max-w-[228px] cursor-pointer',
     label: 'first-letter:capitalize line-clamp-2 cursor-pointer max-w-[154px] whitespace-normal break-words',
     description: 'w-full',
     icon: '',

@@ -59,9 +59,7 @@ const tableHeaderVariants = tv({
   },
 });
 
-type TableHeaderType = React.HTMLAttributes<HTMLTableSectionElement> & {
-  variant?: 'default';
-};
+type TableHeaderType = React.HTMLAttributes<HTMLTableSectionElement> & VariantProps<typeof tableHeaderVariants>;
 function TableHeader({ className, variant, ...props }: TableHeaderType) {
   const styles = tableHeaderVariants({ variant });
   return <thead className={styles.base({ className })} {...props} />;
@@ -112,9 +110,9 @@ const tableRowVariants = tv({
     variant: 'default',
   },
 });
-type TableRowType = React.HTMLAttributes<HTMLTableRowElement> & {
-  variant?: 'default' | 'borderless' | 'border';
-};
+
+type TableRowType = React.HTMLAttributes<HTMLTableRowElement> & VariantProps<typeof tableRowVariants>;
+
 function TableRow({ className, variant = 'default', ...props }: TableRowType) {
   const styles = tableRowVariants({ variant });
   return <tr className={styles.base({ className })} {...props} />;

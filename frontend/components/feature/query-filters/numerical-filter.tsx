@@ -10,6 +10,7 @@ import LessThanOperatorIcon from '@/components/base/icons/less-than-operator-ico
 import LessThanOrEqualOperatorIcon from '@/components/base/icons/less-than-or-equal-operator-icon';
 import { TextMuted } from '@/components/base/typography/text-muted';
 import { Button } from '@/components/base/ui/button';
+import { CardContent, CardFooter } from '@/components/base/ui/card';
 import { Checkbox } from '@/components/base/ui/checkbox';
 import { Input } from '@/components/base/ui/input';
 import { Label } from '@/components/base/ui/label';
@@ -93,6 +94,7 @@ function getNumericalValue(
 
   if (numericFilter) {
     const values = numericFilter.content.value;
+    // eslint-disable-next-line no-console
     console.log('[NumericalFilter] values', values);
     // Check for __missing__ value
     if (values.includes('__missing__')) {
@@ -123,6 +125,7 @@ function getNumericalValue(
       selectedRange = numericFilter.op as RangeOperators;
     }
   } else {
+    // eslint-disable-next-line no-console
     console.log('[NumericalFilter else] no filter exists', aggConfig);
 
     hasNoData = false;
@@ -147,6 +150,11 @@ function getNumericalValue(
     }
   }
 
+  let selectedUnit = undefined;
+  if (unitFilter && (unitFilter.content.value[0] as string) && aggConfig?.rangeTypes?.length) {
+    selectedUnit = aggConfig.rangeTypes[0].key;
+  }
+
   return {
     hasUnappliedItems,
     selectedRange,
@@ -154,12 +162,7 @@ function getNumericalValue(
     maxValue,
     numericalValue,
     hasNoData,
-    // Handle unit if it exists
-    selectedUnit: unitFilter
-      ? (unitFilter.content.value[0] as string)
-      : aggConfig?.rangeTypes?.length
-        ? aggConfig.rangeTypes[0].key
-        : undefined,
+    selectedUnit,
   };
 }
 
@@ -336,130 +339,134 @@ export function NumericalFilter({ field }: IProps) {
     .filter(Boolean);
 
   return (
-    <div className="p-2 w-full max-w-md" id={`${fieldKey}_container`}>
-      <div className="space-y-3 pt-2">
-        <div className="flex flex-col gap-3">
-          <div id={`${fieldKey}_operator`}>
-            <Select value={selectedRange} onValueChange={onRangeValueChanged}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('common.filters.operators.select_operator')}>
-                  {RANGE_OPERATOR_LABELS[selectedRange].display}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>{RangeChoices}</SelectContent>
-            </Select>
-          </div>
-
-          {selectedRange === RangeOperators.Between ? (
-            <div className="flex gap-2 flex-row">
-              <Input
-                className="w-half"
-                value={minValue}
-                onChange={e => {
-                  const value = e.target.value;
-                  if (isNaN(Number(value))) return;
-                  setMinValue(value);
-                  setHasUnappliedItems(true);
-                }}
-                min={inputMin}
-                max={inputMax}
-                id={`${fieldKey}_min`}
-                data-testid={`${fieldKey}_min`}
-              />
-              <Input
-                className="w-half"
-                value={maxValue}
-                onChange={e => {
-                  const value = e.target.value;
-                  if (isNaN(Number(value))) return;
-                  setMaxValue(value);
-                  setHasUnappliedItems(true);
-                }}
-                min={inputMin}
-                max={inputMax}
-                id={`${fieldKey}_max`}
-                data-testid={`${fieldKey}_max`}
-              />
+    <>
+      <CardContent id={`${fieldKey}_container`} size="sm" variant="outline">
+        <div className="pt-2">
+          <div className="flex flex-col gap-3">
+            <div id={`${fieldKey}_operator`}>
+              <Select value={selectedRange} onValueChange={onRangeValueChanged}>
+                <SelectTrigger size="sm">
+                  <SelectValue placeholder={t('common.filters.operators.select_operator')}>
+                    {RANGE_OPERATOR_LABELS[selectedRange].display}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>{RangeChoices}</SelectContent>
+              </Select>
             </div>
-          ) : (
-            <Input
-              className="w-full"
-              value={numericValue}
-              onChange={e => {
-                const value = e.target.value;
-                if (isNaN(Number(value))) return;
-                setNumericValue(value);
-                setHasUnappliedItems(true);
-              }}
-              min={inputMin}
-              max={inputMax}
-              id={`${fieldKey}_value`}
-              data-testid={`${fieldKey}_value`}
-            />
-          )}
 
-          {hasInterval && (
-            <div id={`${fieldKey}_interval`}>
-              <TextMuted>
-                {t('common.filters.labels.actual_interval')} : {statistics?.min?.toFixed(decimal)} -{' '}
-                {statistics?.max?.toFixed(decimal)}
-              </TextMuted>
-            </div>
-          )}
-        </div>
-
-        {aggConfig?.rangeTypes && aggConfig.rangeTypes.length > 0 && (
-          <div id={`${fieldKey}_range_type_container`}>
-            {isLoadingStats ? (
-              <>
-                <Skeleton className="h-5 w-16 mb-1" id={`${fieldKey}_unit_label_skeleton`} />
-                <Skeleton className="h-9 w-full" id={`${fieldKey}_select_skeleton`} />
-              </>
+            {selectedRange === RangeOperators.Between ? (
+              <div className="flex gap-2 flex-row">
+                <Input
+                  variant="facet"
+                  className="w-half"
+                  value={minValue}
+                  onChange={e => {
+                    const value = e.target.value;
+                    if (isNaN(Number(value))) return;
+                    setMinValue(value);
+                    setHasUnappliedItems(true);
+                  }}
+                  min={inputMin}
+                  max={inputMax}
+                  id={`${fieldKey}_min`}
+                  data-testid={`${fieldKey}_min`}
+                />
+                <Input
+                  variant="facet"
+                  className="w-half"
+                  value={maxValue}
+                  onChange={e => {
+                    const value = e.target.value;
+                    if (isNaN(Number(value))) return;
+                    setMaxValue(value);
+                    setHasUnappliedItems(true);
+                  }}
+                  min={inputMin}
+                  max={inputMax}
+                  id={`${fieldKey}_max`}
+                  data-testid={`${fieldKey}_max`}
+                />
+              </div>
             ) : (
-              <>
-                <Label className="text-sm" id={`${fieldKey}_unit_label`}>
-                  {t('common.filters.labels.unit')}
-                </Label>
-                <Select defaultValue={selectedUnit || aggConfig.rangeTypes[0].key} onValueChange={onRangeTypeChanged}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('common.filters.labels.select_unit')}>
-                      {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name ||
-                        t('common.filters.labels.select_unit')}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {aggConfig.rangeTypes.map(type => (
-                      <SelectItem key={type.key} value={type.key}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </>
+              <Input
+                variant="facet"
+                className="w-full"
+                value={numericValue}
+                onChange={e => {
+                  const value = e.target.value;
+                  if (isNaN(Number(value))) return;
+                  setNumericValue(value);
+                  setHasUnappliedItems(true);
+                }}
+                min={inputMin}
+                max={inputMax}
+                id={`${fieldKey}_value`}
+                data-testid={`${fieldKey}_value`}
+              />
+            )}
+
+            {hasInterval && (
+              <div id={`${fieldKey}_interval`}>
+                <TextMuted size="xs">
+                  {t('common.filters.labels.actual_interval')} : {statistics?.min?.toFixed(decimal)} -{' '}
+                  {statistics?.max?.toFixed(decimal)}
+                </TextMuted>
+              </div>
             )}
           </div>
-        )}
 
-        {noDataInputOption && !hasInterval && (
-          <label className="flex items-center space-x-2 overflow-hidden" id={`${fieldKey}_no_data_label`}>
-            <Checkbox checked={hasNoData} onCheckedChange={onNoDataChanged} id={`${fieldKey}_no_data`} />
-            <span>{t('common.filters.labels.no_data')}</span>
-          </label>
-        )}
-      </div>
+          {aggConfig?.rangeTypes && aggConfig.rangeTypes.length > 0 && (
+            <div id={`${fieldKey}_range_type_container`}>
+              {isLoadingStats ? (
+                <>
+                  <Skeleton className="h-5 w-16 mb-1" id={`${fieldKey}_unit_label_skeleton`} />
+                  <Skeleton className="h-9 w-full" id={`${fieldKey}_select_skeleton`} />
+                </>
+              ) : (
+                <>
+                  <Label className="text-sm" id={`${fieldKey}_unit_label`}>
+                    {t('common.filters.labels.unit')}
+                  </Label>
+                  <Select defaultValue={selectedUnit || aggConfig.rangeTypes[0].key} onValueChange={onRangeTypeChanged}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('common.filters.labels.select_unit')}>
+                        {aggConfig.rangeTypes.find(type => type.key === selectedUnit)?.name ||
+                          t('common.filters.labels.select_unit')}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {aggConfig.rangeTypes.map(type => (
+                        <SelectItem key={type.key} value={type.key}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </>
+              )}
+            </div>
+          )}
 
-      <hr className="my-4 border-border" id={`${fieldKey}_divider`} />
-
-      <div className="flex align-right justify-end items-center space-x-2">
-        <Button size="xs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems} id={`${fieldKey}_clear`}>
-          {t('common.filters.buttons.clear')}
-        </Button>
-        <div className="flex space-x-2">
-          <Button size="xs" className="h-7" color="primary" onClick={apply} id={`${fieldKey}_apply`}>
-            {t('common.filters.buttons.apply')}
-          </Button>
+          {noDataInputOption && !hasInterval && (
+            <label className="flex items-center space-x-2 overflow-hidden" id={`${fieldKey}_no_data_label`}>
+              <Checkbox checked={hasNoData} onCheckedChange={onNoDataChanged} id={`${fieldKey}_no_data`} />
+              <span>{t('common.filters.labels.no_data')}</span>
+            </label>
+          )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+      <CardFooter size="sm">
+        <div className="flex align-right justify-end items-center space-x-2">
+          <Button size="xxs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems} id={`${fieldKey}_clear`}>
+            {t('common.filters.buttons.clear')}
+          </Button>
+          <div className="flex space-x-2">
+            <Button size="xxs" variant="outline" onClick={apply} id={`${fieldKey}_apply`}>
+              {t('common.filters.buttons.apply')}
+            </Button>
+          </div>
+        </div>
+      </CardFooter>
+    </>
   );
 }
