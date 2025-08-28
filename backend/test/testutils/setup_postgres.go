@@ -14,7 +14,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var setupPostgresMutex sync.RWMutex
+var (
+	gormPostgresDb     *gorm.DB
+	setupPostgresMutex sync.RWMutex
+)
 
 func cleanUp(gormDb *gorm.DB) {
 	var db *sql.DB
@@ -37,15 +40,19 @@ func initPostgresDb() (*gorm.DB, error) {
 		log.Fatal("failed to get container port: ", err)
 	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, "radiant", "radiant", "radiant", port.Port(), "disable")
-	gormDb, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to open connection to db", err)
-		return nil, err
+	if gormPostgresDb == nil {
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, "radiant", "radiant", "radiant", port.Port(), "disable")
+		local, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err != nil {
+			log.Fatal("failed to open connection to db", err)
+			return nil, err
+		}
+
+		gormPostgresDb = local
 	}
 
 	var db *sql.DB
-	db, err = gormDb.DB()
+	db, err = gormPostgresDb.DB()
 	if err != nil {
 		log.Fatal("failed to connect to Postgres: ", err)
 		return nil, err
@@ -70,7 +77,7 @@ func initPostgresDb() (*gorm.DB, error) {
 		log.Print("radiant postgres database already setup")
 	}
 
-	return gormDb, nil
+	return gormPostgresDb, nil
 }
 
 func populateData(db *sql.DB) error {
