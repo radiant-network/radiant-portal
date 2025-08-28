@@ -31,6 +31,9 @@ export const baseButtonVariants = tv({
       },
     },
     size: {
+      xxs: {
+        base: 'h-6 p-2 gap-[4px] text-xs [&_svg]:size-3',
+      },
       xs: {
         base: 'h-7 px-2.5 py-2 gap-[6px] text-xs [&_svg]:size-3',
       },
@@ -60,6 +63,13 @@ export const buttonVariants = tv({
     },
   },
   compoundVariants: [
+    {
+      iconOnly: true,
+      size: 'xxs',
+      className: {
+        base: 'w-7 px-0',
+      },
+    },
     {
       iconOnly: true,
       size: 'xs',
@@ -104,6 +114,9 @@ export const actionButtonVariants = tv({
   },
   variants: {
     size: {
+      xxs: {
+        actionsButton: 'h-6 px-1.5 [&_svg]:size-3',
+      },
       xs: {
         actionsButton: 'h-7 px-1.5 [&_svg]:size-3',
       },
@@ -123,13 +136,13 @@ export const actionButtonVariants = tv({
         actionsButton: '-ml-px hover:z-2',
       },
       default: {
-        container: 'divide-x divide-primary-foreground/30',
+        container: 'divide-x divide-primary-foreground/20',
       },
       destructive: {
         container: 'divide-x divide-destructive-foreground/30',
       },
       secondary: {
-        container: 'divide-x divide-secondary-foreground/30',
+        container: 'divide-x divide-secondary-foreground/20',
       },
     },
   },
