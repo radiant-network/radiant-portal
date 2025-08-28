@@ -67,7 +67,7 @@ export const buttonVariants = tv({
       iconOnly: true,
       size: 'xxs',
       className: {
-        base: 'w-7 px-0',
+        base: 'w-6 h-6 px-0',
       },
     },
     {
