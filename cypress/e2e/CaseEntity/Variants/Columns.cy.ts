@@ -5,6 +5,7 @@ import { VariantsTable } from '../../../pom/pages/VariantsTable';
 beforeEach(() => {
   cy.login();
   cy.visitCaseVariantsPage('1');
+  VariantsTable.actions.showAllColumns();
 });
 
 describe('Case Entity - Variants - Columns', () => {
@@ -19,7 +20,7 @@ describe('Case Entity - Variants - Columns', () => {
   it('Sort', () => {
     VariantsTable.validations.shouldShowSortableColumns();
   });
-/*
+
   it('Tooltip', () => {
     VariantsTable.validations.shouldShowColumnTooltips();
   });
@@ -34,5 +35,5 @@ describe('Case Entity - Variants - Columns', () => {
     VariantsTable.validations.shouldNotDisplayColumn('cadd');
     VariantsTable.actions.showColumn('cadd');
     VariantsTable.validations.shouldDisplayColumn('cadd');
-  });*/
+  });
 });

@@ -12,8 +12,10 @@
   "devDependencies": {
     "@testquality/cli": "^1.2.4",
     "@types/node": "^24.2.1",
-    "cypress": "^13.17.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "cypress": "^15.0.0"
   }
 }
