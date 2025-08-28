@@ -408,7 +408,7 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	println(len(tasks))
 
 	for i, task := range tasks {
-		patients := split(task.PatientsUnparsed)
+		patients := utils.ParseString(task.PatientsUnparsed)
 		if int64(len(patients)) < task.PatientCount {
 			patients = append(patients, "proband")
 		}

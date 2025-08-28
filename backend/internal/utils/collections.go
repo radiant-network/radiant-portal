@@ -1,8 +1,13 @@
 package utils
 
 import (
-	"github.com/radiant-network/radiant-api/internal/types"
+	"fmt"
+	"slices"
 	"sort"
+	"strconv"
+	"strings"
+
+	"github.com/radiant-network/radiant-api/internal/types"
 )
 
 func GroupByProperty[T any, K comparable](items []T, getProperty func(T) K) map[K][]T {
@@ -23,4 +28,31 @@ func SortConsequences(variantConsequences []types.VariantConsequence) []types.Va
 			(!variantConsequences[i].IsPicked && !variantConsequences[j].IsPicked && variantConsequences[i].Symbol < variantConsequences[j].Symbol)
 	})
 	return variantConsequences
+}
+
+func ParseString(s string) []string {
+	// split and remove empty elements
+	return slices.DeleteFunc(strings.Split(s, ","), func(e string) bool {
+		return e == ""
+	})
+}
+
+func ParseAndSortString(s string) []string {
+	list := ParseString(s)
+	sort.Strings(list)
+	return list
+}
+
+func ParseConvertIntSortString(s string) ([]int, error) {
+	stringSlice := ParseString(s)
+	intSlice := make([]int, 0, len(stringSlice))
+	for _, s := range stringSlice {
+		num, err := strconv.Atoi(s)
+		if err != nil {
+			return nil, fmt.Errorf("error converting string '%s' to int: %v", s, err)
+		}
+		intSlice = append(intSlice, num)
+	}
+	sort.Ints(intSlice)
+	return intSlice, nil
 }

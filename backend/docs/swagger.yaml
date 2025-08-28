@@ -428,6 +428,89 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
+    DocumentResult:
+      properties:
+        cases_id:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        data_type_code:
+          type: string
+        document_id:
+          type: integer
+        format_code:
+          type: string
+        hash:
+          type: string
+        name:
+          type: string
+        patients_id:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        performer_labs_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        performer_labs_name:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        relationships_to_proband:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        runs_alias:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        sample_submitters_id:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        seqs_id:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        size:
+          type: integer
+        tasks_id:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+      required:
+      - cases_id
+      - data_type_code
+      - document_id
+      - format_code
+      - name
+      - patients_id
+      - relationships_to_proband
+      - size
+      - tasks_id
+      type: object
+    DocumentsSearchResponse:
+      properties:
+        count:
+          type: integer
+        list:
+          items:
+            $ref: '#/components/schemas/DocumentResult'
+          type: array
+          uniqueItems: false
+      required:
+      - count
+      - list
+      type: object
     ExpandedGermlineSNVOccurrence:
       properties:
         aa_change:
@@ -1622,6 +1705,48 @@ paths:
       summary: Get CaseEntity case entity
       tags:
       - cases
+  /cases/{case_id}/documents/search:
+    post:
+      description: Search for DocumentResult list for a case entity
+      operationId: caseEntityDocumentsSearch
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsSearchResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Search DocumentResult list for a case entity
+      tags:
+      - cases
   /cases/autocomplete:
     get:
       description: Retrieve AutocompleteResult list of ids matching prefix
@@ -1722,6 +1847,41 @@ paths:
       summary: Search cases
       tags:
       - cases
+  /documents/search:
+    post:
+      description: Search documents
+      operationId: searchDocuments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsSearchResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Search documents
+      tags:
+      - documents
   /hpo/autocomplete:
     get:
       description: Retrieve AutoCompleteTerm list of HPO terms matching input string
