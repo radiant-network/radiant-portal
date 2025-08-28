@@ -1,5 +1,0 @@
-import{j as e}from"./jsx-runtime-D_zvdyIk.js";import{T as p}from"./transcript-id-link-vjpEGCX3.js";import"./utils-D-KgF5mV.js";import"./anchor-link-B1BnJ2Xu.js";import"./index-C66Dxnp2.js";import"./createLucideIcon-8Lr1oLzj.js";import"./index-CGj_12n1.js";import"./transcript-mane-select-icon-BZZAldBO.js";import"./tooltip-Bh6uXa7k.js";import"./index-CcLUv2_A.js";import"./index-COcwYKbe.js";import"./index-D8dqFcAi.js";import"./index-BBPXtLXU.js";import"./index-CphM_NEg.js";import"./index-CIckazZy.js";import"./index-CbbSLEvm.js";import"./index-A6VgBoaw.js";import"./index-CKNrATXZ.js";import"./i18n-MOeN36sH.js";import"./iframe-CWJ_FFfP.js";import"./context-DkqwYzW-.js";const O={title:"Links/Transcript ID Link",component:p,args:{transcriptId:"ENST00000367770",isCanonical:!0}},r={render:m=>e.jsx(p,{...m})};var t,o,i;r.parameters={...r.parameters,docs:{...(t=r.parameters)==null?void 0:t.docs,source:{originalSource:`{
-  render: args => {
-    return <TranscriptIdLink {...args} />;
-  }
-}`,...(i=(o=r.parameters)==null?void 0:o.docs)==null?void 0:i.source}}};const R=["Default"];export{r as Default,R as __namedExportsOrder,O as default};
