@@ -19,6 +19,13 @@ func AddSort(tx *gorm.DB, userQuery types.ListQuery) {
 		tx = tx.Order(s)
 	}
 }
+func AddGroupBy(tx *gorm.DB, fields []types.Field) {
+	for _, field := range fields {
+		s := fmt.Sprintf("%s.%s", field.Table.Alias, field.GetName())
+		tx = tx.Group(s)
+	}
+}
+
 func AddWhere(userQuery types.Query, tx *gorm.DB) {
 	if userQuery.Filters() != nil {
 		filters, params := userQuery.Filters().ToSQL(nil)

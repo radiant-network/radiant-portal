@@ -16,12 +16,11 @@ type Task struct {
 	Documents             []Document             `gorm:"many2many:radiant_jdbc.public.task_has_document;"`
 }
 
-var TaskIdField = Field{
-	Name:          "id",
-	Alias:         "task_id",
+var TaskHasDocumentTaskIdField = Field{
+	Name:          "task_id",
 	CanBeSelected: true,
-	CanBeSorted:   true,
-	Table:         TaskTable,
+	CanBeFiltered: true,
+	Table:         TaskHasDocumentTable,
 }
 
 var TaskTable = Table{

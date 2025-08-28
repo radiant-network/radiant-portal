@@ -281,6 +281,12 @@ var CasePrimaryConditionNameField = Field{
 	Table:         MondoTable,
 }
 
+var CaseProjectIdField = Field{
+	Name:          "project_id",
+	CanBeFiltered: true,
+	Table:         CaseTable,
+}
+
 type CaseFilters struct {
 	Status       []Aggregation `json:"status" validate:"required"`
 	Priority     []Aggregation `json:"priority" validate:"required"`

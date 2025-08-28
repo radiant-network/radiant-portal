@@ -151,3 +151,4 @@ type SearchResponse[T any] struct {
 type VariantInterpretedCasesSearchResponse = SearchResponse[VariantInterpretedCase]
 type VariantUninterpretedCasesSearchResponse = SearchResponse[VariantUninterpretedCase]
 type CasesSearchResponse = SearchResponse[CaseResult]
+type DocumentsSearchResponse = SearchResponse[DocumentResult]
