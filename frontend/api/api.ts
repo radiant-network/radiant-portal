@@ -930,6 +930,122 @@ export interface CountBodyWithSqon {
 /**
  * 
  * @export
+ * @interface DocumentResult
+ */
+export interface DocumentResult {
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof DocumentResult
+     */
+    'cases_id': Array<number>;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
+    'data_type_code': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
+    'document_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
+    'format_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
+    'hash'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
+    'name': string;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof DocumentResult
+     */
+    'patients_id': Array<number>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DocumentResult
+     */
+    'performer_labs_code'?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DocumentResult
+     */
+    'performer_labs_name'?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DocumentResult
+     */
+    'relationships_to_proband': Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DocumentResult
+     */
+    'runs_alias'?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DocumentResult
+     */
+    'sample_submitters_id'?: Array<string>;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof DocumentResult
+     */
+    'seqs_id'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
+    'size': number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof DocumentResult
+     */
+    'tasks_id': Array<number>;
+}
+/**
+ * 
+ * @export
+ * @interface DocumentsSearchResponse
+ */
+export interface DocumentsSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentsSearchResponse
+     */
+    'count': number;
+    /**
+     * 
+     * @type {Array<DocumentResult>}
+     * @memberof DocumentsSearchResponse
+     */
+    'list': Array<DocumentResult>;
+}
+/**
+ * 
+ * @export
  * @interface ExpandedGermlineSNVOccurrence
  */
 export interface ExpandedGermlineSNVOccurrence {
@@ -3563,6 +3679,50 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Search for DocumentResult list for a case entity
+         * @summary Search DocumentResult list for a case entity
+         * @param {string} caseId Case ID
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        caseEntityDocumentsSearch: async (caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('caseEntityDocumentsSearch', 'caseId', caseId)
+            // verify required parameter 'listBodyWithCriteria' is not null or undefined
+            assertParamExists('caseEntityDocumentsSearch', 'listBodyWithCriteria', listBodyWithCriteria)
+            const localVarPath = `/cases/{case_id}/documents/search`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(listBodyWithCriteria, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
@@ -3680,6 +3840,20 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Search for DocumentResult list for a case entity
+         * @summary Search DocumentResult list for a case entity
+         * @param {string} caseId Case ID
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async caseEntityDocumentsSearch(caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentsSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntityDocumentsSearch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
@@ -3737,6 +3911,17 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.caseEntity(caseId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Search for DocumentResult list for a case entity
+         * @summary Search DocumentResult list for a case entity
+         * @param {string} caseId Case ID
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        caseEntityDocumentsSearch(caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
+            return localVarFp.caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
@@ -3792,6 +3977,19 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
+     * Search for DocumentResult list for a case entity
+     * @summary Search DocumentResult list for a case entity
+     * @param {string} caseId Case ID
+     * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public caseEntityDocumentsSearch(caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrieve CaseFilters cases filters
      * @summary Get CaseFilters cases filters
      * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
@@ -3813,6 +4011,120 @@ export class CasesApi extends BaseAPI {
      */
     public searchCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).searchCases(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * DocumentsApi - axios parameter creator
+ * @export
+ */
+export const DocumentsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Search documents
+         * @summary Search documents
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchDocuments: async (listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'listBodyWithCriteria' is not null or undefined
+            assertParamExists('searchDocuments', 'listBodyWithCriteria', listBodyWithCriteria)
+            const localVarPath = `/documents/search`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(listBodyWithCriteria, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * DocumentsApi - functional programming interface
+ * @export
+ */
+export const DocumentsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = DocumentsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Search documents
+         * @summary Search documents
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchDocuments(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentsSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchDocuments(listBodyWithCriteria, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DocumentsApi.searchDocuments']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * DocumentsApi - factory interface
+ * @export
+ */
+export const DocumentsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = DocumentsApiFp(configuration)
+    return {
+        /**
+         * Search documents
+         * @summary Search documents
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchDocuments(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
+            return localVarFp.searchDocuments(listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * DocumentsApi - object-oriented interface
+ * @export
+ * @class DocumentsApi
+ * @extends {BaseAPI}
+ */
+export class DocumentsApi extends BaseAPI {
+    /**
+     * Search documents
+     * @summary Search documents
+     * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public searchDocuments(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return DocumentsApiFp(this.configuration).searchDocuments(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

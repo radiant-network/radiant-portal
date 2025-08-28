@@ -16,52 +16,71 @@ type Document struct {
 }
 
 type DocumentResult struct {
-	ID                    int    `json:"document_id" validate:"required"`
-	Name                  string `json:"name" validate:"required"`
-	FormatCode            string `json:"format_code" validate:"required"`
-	DataTypeCode          string `json:"data_type_code" validate:"required"`
-	Size                  int    `json:"size" validate:"required"`
-	CaseID                int    `json:"case_id" validate:"required"`
-	PerformerLabCode      string `json:"performer_lab_code,omitempty"`
-	PerformerLabName      string `json:"performer_lab_name,omitempty"`
-	ProbandID             int    `json:"proband_id" validate:"required"`
-	RelationshipToProband string `json:"relationship_to_proband" validate:"required"`
-	PatientID             int    `json:"patient_id" validate:"required"`
-	SampleSubmitterID     string `json:"sample_submitter_id,omitempty"`
-	TaskID                int    `json:"task_id" validate:"required"`
-	SeqID                 int    `json:"seq_id" validate:"required"`
-	Hash                  string `json:"hash" validate:"required"`
-	RunAlias              string `json:"run_alias,omitempty"`
+	DocumentID                    int               `json:"document_id" validate:"required"`
+	Name                          string            `json:"name" validate:"required"`
+	FormatCode                    string            `json:"format_code" validate:"required"`
+	DataTypeCode                  string            `json:"data_type_code" validate:"required"`
+	Size                          int               `json:"size" validate:"required"`
+	CasesID                       JsonArray[int]    `json:"cases_id" validate:"required"`
+	CaseIDList                    string            `json:"-"`
+	PerformerLabsCode             JsonArray[string] `json:"performer_labs_code,omitempty"`
+	PerformerLabCodeList          string            `json:"-"`
+	PerformerLabsName             JsonArray[string] `json:"performer_labs_name,omitempty"`
+	PerformerLabNameList          string            `json:"-"`
+	RelationshipsToProbandCode    JsonArray[string] `json:"relationships_to_proband" validate:"required"`
+	RelationshipToProbandCodeList string            `json:"-"`
+	PatientsID                    JsonArray[int]    `json:"patients_id" validate:"required"`
+	PatientIDList                 string            `json:"-"`
+	SampleSubmittersID            JsonArray[string] `json:"sample_submitters_id,omitempty"`
+	SubmitterSampleIDList         string            `json:"-"`
+	TasksID                       JsonArray[int]    `json:"tasks_id" validate:"required"`
+	TaskIDList                    string            `json:"-"`
+	SeqsID                        JsonArray[int]    `json:"seqs_id,omitempty"`
+	SeqIDList                     string            `json:"-"`
+	Hash                          string            `json:"hash,omitempty"`
+	RunsAlias                     JsonArray[string] `json:"runs_alias,omitempty"`
+	RunAliasList                  string            `json:"-"`
 }
 
 var DocumentFields = []Field{
-	DocumentIdField,
-	DocumentNameField,
-	DocumentFormatCodeField,
-	DocumentSizeField,
 	CaseIdField,
+	CaseProjectIdField,
 	CasePerformerLabCodeField,
 	CasePerformerLabNameField,
-	SampleSubmitterSampleIdField,
-	TaskIdField,
-	SequencingExperimentIdField,
+	DocumentIdField,
+	DocumentNameField,
+	DocumentDataTypeCodeField,
+	DocumentFormatCodeField,
+	DocumentSizeField,
+	DocumentCreatedOnField,
 	DocumentHashField,
+	FamilyRelationshipToProbandCodeField,
+	SampleSubmitterSampleIdField,
+	SampleIdField,
+	SequencingExperimentIdField,
+	SequencingExperimentPatientIdField,
 	SequencingExperimentRunAliasField,
+	SequencingExperimentRunNameField,
+	TaskHasDocumentTaskIdField,
 }
 
 var DocumentDefaultFields = []Field{
 	DocumentIdField,
 	DocumentNameField,
+	DocumentDataTypeCodeField,
 	DocumentFormatCodeField,
 	DocumentSizeField,
+	DocumentCreatedOnField,
+	FamilyRelationshipToProbandCodeField,
 	CaseIdField,
 	CasePerformerLabCodeField,
 	CasePerformerLabNameField,
 	SampleSubmitterSampleIdField,
-	TaskIdField,
+	SequencingExperimentPatientIdField,
+	TaskHasDocumentTaskIdField,
 }
 
-var DocumentsDefaultSort = []SortField{{Field: DocumentNameField, Order: "asc"}}
+var DocumentsDefaultSort = []SortField{{Field: DocumentIdField, Order: "desc"}}
 
 var DocumentsQueryConfig = QueryConfig{
 	AllFields:     DocumentFields,
@@ -74,6 +93,7 @@ var DocumentIdField = Field{
 	Name:          "id",
 	Alias:         "document_id",
 	CanBeSelected: true,
+	CanBeFiltered: true,
 	Table:         DocumentTable,
 }
 
@@ -84,10 +104,19 @@ var DocumentNameField = Field{
 	Table:         DocumentTable,
 }
 
+var DocumentDataTypeCodeField = Field{
+	Name:          "data_type_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         DocumentTable,
+}
+
 var DocumentFormatCodeField = Field{
 	Name:          "format_code",
 	CanBeSelected: true,
 	CanBeSorted:   true,
+	CanBeFiltered: true,
 	Table:         DocumentTable,
 }
 
@@ -100,6 +129,13 @@ var DocumentSizeField = Field{
 
 var DocumentHashField = Field{
 	Name:          "hash",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         DocumentTable,
+}
+
+var DocumentCreatedOnField = Field{
+	Name:          "created_on",
 	CanBeSelected: true,
 	CanBeSorted:   true,
 	Table:         DocumentTable,

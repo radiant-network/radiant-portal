@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"html"
 	"log"
-	"slices"
 	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -41,16 +41,9 @@ func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientS
 	return &InterpretationsRepository{db: db, pubmedClient: pubmedClient}
 }
 
-func split(s string) []string {
-	// split and remove empty elements
-	return slices.DeleteFunc(strings.Split(s, ","), func(e string) bool {
-		return e == ""
-	})
-}
-
 // mappers, could be moved to a separate file
 func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
-	pubmeds := split(dao.Pubmed)
+	pubmeds := utils.ParseString(dao.Pubmed)
 	interpretation := &types.InterpretationCommon{
 		ID:             dao.ID,
 		SequencingId:   dao.SequencingId,
@@ -122,8 +115,8 @@ func (r *InterpretationsRepository) mapToInterpretationGermline(dao *types.Inter
 		InterpretationCommon:    *common,
 		Condition:               dao.Condition,
 		Classification:          dao.Classification,
-		ClassificationCriterias: split(dao.ClassificationCriterias),
-		TransmissionModes:       split(dao.TransmissionModes),
+		ClassificationCriterias: utils.ParseString(dao.ClassificationCriterias),
+		TransmissionModes:       utils.ParseString(dao.TransmissionModes),
 	}
 	return interpretation, nil
 }
@@ -152,7 +145,7 @@ func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.Interp
 		InterpretationCommon:                *common,
 		TumoralType:                         dao.TumoralType,
 		Oncogenicity:                        dao.Oncogenicity,
-		OncogenicityClassificationCriterias: split(dao.OncogenicityClassificationCriterias),
+		OncogenicityClassificationCriterias: utils.ParseString(dao.OncogenicityClassificationCriterias),
 		ClinicalUtility:                     dao.ClinicalUtility,
 	}
 	return interpretation, nil

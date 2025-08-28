@@ -33,14 +33,28 @@ var SequencingExperimentIdField = Field{
 	Name:          "id",
 	Alias:         "seq_id",
 	CanBeSelected: true,
-	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         SequencingExperimentTable,
+}
+
+var SequencingExperimentPatientIdField = Field{
+	Name:          "patient_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
 	Table:         SequencingExperimentTable,
 }
 
 var SequencingExperimentRunAliasField = Field{
 	Name:          "run_alias",
 	CanBeSelected: true,
+	Table:         SequencingExperimentTable,
+}
+
+var SequencingExperimentRunNameField = Field{
+	Name:          "run_name",
+	CanBeSelected: true,
 	CanBeSorted:   true,
+	CanBeFiltered: true,
 	Table:         SequencingExperimentTable,
 }
 

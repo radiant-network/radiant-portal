@@ -294,3 +294,37 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"updated_on":"2000-02-02T00:00:00Z"
 	}`, w.Body.String())
 }
+
+func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/cases/:case_id/documents/search", CaseEntityDocumentsSearchHandler(repo))
+	body := `{
+			"additional_fields":[]
+	}`
+	req, _ := http.NewRequest("POST", "/cases/1/documents/search", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"list": [{
+			"cases_id":[21], 
+			"data_type_code":"snv", 
+			"document_id":204, 
+			"format_code":"tbi", 
+			"hash":"5d41402abc4b2a76b9719d911017c795", 
+			"name":"FI0037905.S14786.vcf.gz.tbi", 
+			"patients_id":[59, 60, 61], 
+			"performer_labs_code":["CQGC"], 
+			"performer_labs_name":["Quebec Clinical Genomic Center"], 
+			"relationships_to_proband":["father", "mother", "proband"], 
+			"runs_alias":["A00516_0227", "A00516_0228", "A00516_0229"], 
+			"sample_submitters_id":["S14857", "S14858", "S14859"], 
+			"seqs_id":[59, 60, 61], 
+			"size":2432696, 
+			"tasks_id":[21]
+		}],
+		"count": 1
+	}`, w.Body.String())
+}
