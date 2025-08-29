@@ -20,6 +20,7 @@ var TaskHasDocumentTaskIdField = Field{
 	Name:          "task_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Table:         TaskHasDocumentTable,
 }
 
