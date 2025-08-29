@@ -298,7 +298,7 @@ export interface CaseAssay {
      * @type {string}
      * @memberof CaseAssay
      */
-    'affected_status_code'?: string;
+    'affected_status_code': string;
     /**
      * 
      * @type {string}
@@ -328,7 +328,7 @@ export interface CaseAssay {
      * @type {string}
      * @memberof CaseAssay
      */
-    'relationship_to_proband'?: string;
+    'relationship_to_proband': string;
     /**
      * 
      * @type {number}
@@ -565,7 +565,7 @@ export interface CasePatientClinicalInformation {
      * @type {string}
      * @memberof CasePatientClinicalInformation
      */
-    'affected_status_code'?: string;
+    'affected_status_code': string;
     /**
      * 
      * @type {string}
@@ -619,7 +619,7 @@ export interface CasePatientClinicalInformation {
      * @type {string}
      * @memberof CasePatientClinicalInformation
      */
-    'relationship_to_proband'?: string;
+    'relationship_to_proband': string;
     /**
      * 
      * @type {string}

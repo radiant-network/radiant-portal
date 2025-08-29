@@ -287,25 +287,25 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandFather(t *testing.T) {
 	})
 }
 
-//func Test_SearchDocumentsFilterOnRelationshipToProbandProband(t *testing.T) {
-//	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-//		repo := NewDocumentsRepository(db)
-//		searchCriteria := []types.SearchCriterion{
-//			{
-//				FieldName: types.FamilyRelationshipToProbandCodeField.GetName(),
-//				Value:     []interface{}{"proband"},
-//			},
-//		}
-//		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
-//		documents, count, err := repo.SearchDocuments(query)
-//		assert.NoError(t, err)
-//		assert.Len(t, *documents, 10)
-//		assert.Equal(t, int64(80), *count)
-//
-//		document204 := (*documents)[0]
-//		assert.Equal(t, 204, document204.DocumentID)
-//	})
-//}
+func Test_SearchDocumentsFilterOnRelationshipToProbandProband(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.FamilyRelationshipToProbandCodeField.GetName(),
+				Value:     []interface{}{"proband"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(84), *count)
+
+		document204 := (*documents)[0]
+		assert.Equal(t, 204, document204.DocumentID)
+	})
+}
 
 func Test_SearchDocumentsFilterOnFormatCode(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {

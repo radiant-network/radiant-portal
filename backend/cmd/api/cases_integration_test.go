@@ -166,7 +166,7 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 func Test_CaseEntityHandler(t *testing.T) {
 	expected := `{
 		"assays":[
-			{"experimental_strategy_code":"wxs", "patient_id":3, "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":3, "relationship_to_proband":"proband", "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true}, 
 			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":1, "relationship_to_proband":"mother", "request_id":23, "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true},
 			{"affected_status_code":"non_affected", "experimental_strategy_code":"wxs", "patient_id":2, "relationship_to_proband":"father", "request_id":24, "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": false}
 		],
@@ -177,11 +177,13 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"created_on":"2021-09-12T13:08:00Z", 
 		"members":[
 			{
+				"affected_status_code":"affected", 
 				"date_of_birth":"1973-03-23T00:00:00Z",
 				"managing_organization_code":"CHUSJ", 
 				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
 				"mrn":"MRN-283775", 
 				"patient_id":3, 
+				"relationship_to_proband":"proband",
 				"sex_code":"male", 
 				"non_observed_phenotypes": [{"id": "HP:0000717", "name": "Autism", "onset_code": "childhood"}, {"id": "HP:0001263", "name": "Global developmental delay", "onset_code": "childhood"}]
 			},
@@ -252,19 +254,6 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"document_id":204, 
 				"format_code":"tbi", 
 				"name":"FI0037905.S14786.vcf.gz.tbi", 
-				"patient_id":59, 
-				"performer_lab_code":"CQGC", 
-				"performer_lab_name":"Quebec Clinical Genomic Center", 
-				"relationship_to_proband_code":"father", 
-				"size":2.432696e+06, 
-				"submitter_sample_id":"S14859", 
-				"task_id":21
-			}, {
-				"case_id":21, 
-				"data_type_code":"snv", 
-				"document_id":204, 
-				"format_code":"tbi", 
-				"name":"FI0037905.S14786.vcf.gz.tbi", 
 				"patient_id":60, 
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
@@ -272,12 +261,25 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"size":2.432696e+06, 
 				"submitter_sample_id":"S14857", 
 				"task_id":21
+			}, {
+				"case_id":21, 
+				"data_type_code":"snv", 
+				"document_id":204, 
+				"format_code":"tbi", 
+				"name":"FI0037905.S14786.vcf.gz.tbi", 
+				"patient_id":61, 
+				"performer_lab_code":"CQGC", 
+				"performer_lab_name":"Quebec Clinical Genomic Center", 
+				"relationship_to_proband_code":"mother", 
+				"size":2.432696e+06, 
+				"submitter_sample_id":"S14858", 
+				"task_id":21
 			}
 		], 
 		"count": 12}`
 	body := `{
 			"additional_fields":[],
-			"sort":[{"field": "name", "order": "desc"}],
+			"sort":[{"field": "name", "order": "desc"}, {"field": "relationship_to_proband_code", "order": "desc"}],
 			"limit": 2
 		}`
 	assertCaseEntityDocumentsSearchHandler(t, "simple", 21, body, expected)

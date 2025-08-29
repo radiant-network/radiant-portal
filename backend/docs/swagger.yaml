@@ -134,9 +134,11 @@ components:
         updated_on:
           type: string
       required:
+      - affected_status_code
       - experimental_strategy_code
       - has_variants
       - patient_id
+      - relationship_to_proband
       - sample_id
       - seq_id
       - status_code
@@ -283,7 +285,9 @@ components:
         sex_code:
           type: string
       required:
+      - affected_status_code
       - patient_id
+      - relationship_to_proband
       - sex_code
       type: object
     CaseResult:

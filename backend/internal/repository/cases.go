@@ -52,7 +52,7 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 
-	columns = append(columns, "CASE WHEN ca.type_code = 'somatic' OR family_members.family_members_id IS NULL THEN ca.type_code ELSE CONCAT(ca.type_code, '_family') END AS case_type")
+	columns = append(columns, "CASE WHEN ca.type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN ca.type_code ELSE CONCAT(ca.type_code, '_family') END AS case_type")
 	columns = append(columns, "se.case_id IS NOT NULL AS has_variants")
 	if err = tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
@@ -62,7 +62,10 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 	txSeqExp = txSeqExp.Select("DISTINCT(case_id)")
 	txSeqExp = txSeqExp.Where("ingested_at IS NOT NULL")
 
+	txMembersCount := r.db.Table(types.FamilyTable.Name).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
+
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) se ON se.case_id=%s.id", types.CaseTable.Alias), txSeqExp)
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
 	tx = tx.Select(columns)
 	utils.AddLimitAndSort(tx, userQuery)
 
@@ -196,18 +199,13 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 		return nil, fmt.Errorf("error fetching case level data: %w", err)
 	}
 
-	familyMembersIds, err := r.retrieveCasesFamilyMembersIds(caseId)
-	if err != nil {
-		return nil, fmt.Errorf("error fetchingfamily members ids: %w", err)
-	}
-
 	assays, err := r.retrieveCaseAssays(caseId)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching assays data: %w", err)
 	}
 	caseEntity.Assays = *assays
 
-	members, err := r.retrieveCasePatients(caseId, append(familyMembersIds, caseEntity.ProbandID))
+	members, err := r.retrieveCasePatients(caseId)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching members data: %w", err)
 	}
@@ -219,7 +217,7 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	}
 	caseEntity.Tasks = *tasks
 
-	caseType := calculateCaseType(*caseEntity, familyMembersIds)
+	caseType := calculateCaseType(*caseEntity)
 	caseEntity.CaseType = caseType
 
 	return caseEntity, nil
@@ -231,7 +229,6 @@ func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	tx = joinWithProband(tx, userQuery)
 	tx = joinWithCaseAnalysis(tx)
 	tx = joinWithProject(tx)
-	tx = joinWithFamilyMembers(tx, r.db)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
@@ -287,17 +284,8 @@ func joinWithMondoTerm(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.primary_condition=%s.id", types.MondoTable.Name, types.MondoTable.Alias, types.CaseTable.Alias, types.MondoTable.Alias))
 }
 
-func joinWithFamilyMembers(tx *gorm.DB, db *gorm.DB) *gorm.DB {
-	txFamilyMembers := getFamilyMembersIds(db)
-	return tx.Joins(fmt.Sprintf("LEFT JOIN (?) family_members ON family_members.case_id=%s.id", types.CaseTable.Alias), txFamilyMembers)
-}
-
-func getFamilyMembersIds(db *gorm.DB) *gorm.DB {
-	tx := db.Table("radiant_jdbc.public.family")
-	tx = tx.Group("case_id")
-	tx = tx.Select("case_id, GROUP_CONCAT(family_member_id) as family_members_id")
-
-	return tx
+func joinWithFamily(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.case_id=%s.id", types.FamilyTable.Name, types.FamilyTable.Alias, types.FamilyTable.Alias, types.CaseTable.Alias))
 }
 
 func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error) {
@@ -336,15 +324,15 @@ func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 	return &assays, nil
 }
 
-func (r *CasesRepository) retrieveCasePatients(caseId int, memberIds []int) (*[]CasePatientClinicalInformation, error) {
+func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinicalInformation, error) {
 	var members []CasePatientClinicalInformation
 	var phenotypeObservationCodings []types.PhenotypeObservationCoding
 
-	txMembers := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
-	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f on p.id = f.family_member_id")
+	txMembers := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
+	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = f.family_member_id")
 	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` mgmt_org on p.managing_organization_id = mgmt_org.id")
-	txMembers = txMembers.Where("p.id in ?", memberIds)
-	txMembers = txMembers.Order("affected_status_code asc")
+	txMembers = txMembers.Where("f.case_id = ?", caseId)
+	txMembers = txMembers.Order("affected_status_code asc, relationship_to_proband_code desc")
 	txMembers = txMembers.Select("p.id as patient_id, f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, p.date_of_birth, p.sex_code, p.mrn, mgmt_org.code as managing_organization_code, mgmt_org.name as managing_organization_name")
 	if err := txMembers.Find(&members).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case members: %w", err)
@@ -409,9 +397,6 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 
 	for i, task := range tasks {
 		patients := utils.ParseString(task.PatientsUnparsed)
-		if int64(len(patients)) < task.PatientCount {
-			patients = append(patients, "proband")
-		}
 		sort.Strings(patients)
 		tasks[i].Patients = patients
 	}
@@ -429,8 +414,8 @@ func (r *CasesRepository) retrieveCasesFamilyMembersIds(caseId int) ([]int, erro
 	return familyMembersIds, nil
 }
 
-func calculateCaseType(caseEntity CaseEntity, familyMembersIds []int) string {
-	if caseEntity.CaseAnalysisType == "somatic" || len(familyMembersIds) == 0 {
+func calculateCaseType(caseEntity CaseEntity) string {
+	if caseEntity.CaseAnalysisType == "somatic" || len(caseEntity.Members) == 1 {
 		return caseEntity.CaseAnalysisType
 	} else {
 		return fmt.Sprintf("%s_family", caseEntity.CaseAnalysisType)

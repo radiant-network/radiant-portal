@@ -103,6 +103,7 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 	expected := `{
 		"list":[
 			{
+				"affected_status":"affected",
 				"case_analysis_code":"WGA", 
 				"case_analysis_name":"Whole Genome Analysis", 
 				"case_id":1, 
@@ -114,6 +115,7 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 				"patient_id":3,
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
+				"relationship_to_proband":"proband",
 				"seq_id":1, 
 				"status_code":"in_progress", 
 				"submitter_sample_id":"S13224",
@@ -146,6 +148,7 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 	expected := `{
 		"list": [
 			{
+				"affected_status":"affected", 
 				"case_analysis_code":"WGA", 
 				"case_analysis_name":"Whole Genome Analysis", 
 				"case_id":5, 
@@ -156,6 +159,7 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"primary_condition_id":"MONDO:0700092", 
 				"primary_condition_name":"neurodevelopmental disorder", 
+				"relationship_to_proband":"proband",
 				"seq_id":13,
 				"status_code":"in_progress", 
 				"submitter_sample_id":"S13236",

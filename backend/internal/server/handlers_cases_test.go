@@ -110,7 +110,7 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 		ProjectCode:          "N1",
 		ProjectName:          "NeuroDev Phase I",
 		Assays: types.JsonArray[types.CaseAssay]{
-			{SeqID: 1, RequestID: 22, PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 1, RequestID: 22, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
 			{SeqID: 2, RequestID: 23, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
 			{SeqID: 3, RequestID: 24, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: false},
 		},
@@ -118,7 +118,7 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 			{ID: 1, TypeCode: "ngba", TypeName: "Normal Germline Bioinformatics Analysis", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
 		},
 		Members: types.JsonArray[types.CasePatientClinicalInformation]{
-			{PatientID: 3, RelationshipToProband: "", AffectedStatusCode: "", Mrn: "MRN-283775", SexCode: "male", ManagingOrganizationCode: "CHUSJ", ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
+			{PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", Mrn: "MRN-283775", SexCode: "male", ManagingOrganizationCode: "CHUSJ", ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
 			{PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", Mrn: "MRN-283773", SexCode: "female", ManagingOrganizationCode: "CHUSJ", ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC)},
 			{PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", Mrn: "MRN-283774", SexCode: "male", ManagingOrganizationCode: "CHUSJ", ManagingOrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC)},
 		},
@@ -238,7 +238,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"assays":[
-			{"experimental_strategy_code":"", "patient_id":3, "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true}, 
 			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "request_id":23, "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
 			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "request_id":24, "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false}
 		],
@@ -249,11 +249,13 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"created_on":"2000-01-01T00:00:00Z", 
 		"members":[
 			{
+				"affected_status_code":"affected", 
 				"date_of_birth":"1973-03-23T00:00:00Z",
 				"managing_organization_code":"CHUSJ", 
 				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
 				"mrn":"MRN-283775", 
 				"patient_id":3, 
+				"relationship_to_proband":"proband",
 				"sex_code":"male", 
 				"non_observed_phenotypes": [{"id": "HP:0000717", "name": "Autism", "onset_code": "childhood"}, {"id": "HP:0001263", "name": "Global developmental delay", "onset_code": "childhood"}]
 			},

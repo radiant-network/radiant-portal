@@ -36,11 +36,7 @@ func (r *DocumentsRepository) SearchDocuments(userQuery types.ListQuery) (*[]Doc
 
 	tx := prepareDocumentsQuery(userQuery, r)
 	var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
-		if field == types.FamilyRelationshipToProbandCodeField {
-			return fmt.Sprintf("COALESCE(%s.%s, 'proband') as %s", field.Table.Alias, field.Name, field.GetAlias())
-		} else {
-			return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
-		}
+		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 
 	if err := tx.Count(&count).Error; err != nil {
