@@ -51,6 +51,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
 	repoClinvarRCV := repository.NewClinvarRCVRepository(dbStarrocks)
 	repoIGV := repository.NewIGVRepository(dbStarrocks)
+	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -96,6 +97,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 	casesGroup.POST("/filters", server.CasesFiltersHandler(repoCases))
 	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
+	casesGroup.POST("/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repoDocuments))
 
 	hpoGroup := privateRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
@@ -150,6 +152,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	variantsGermlineGroup.GET("/cases/filters", server.GetGermlineVariantCasesFilters(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repoGenePanels))
 	variantsGermlineGroup.GET("/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repoClinvarRCV))
+
+	documentsGroup := privateRoutes.Group("/documents")
+	documentsGroup.POST("/search", server.SearchDocumentsHandler(repoDocuments))
 
 	r.Use(gin.Recovery())
 	return r

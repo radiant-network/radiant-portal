@@ -1,11 +1,12 @@
 package server
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"net/http"
-	"strconv"
 )
 
 // SearchCasesHandler handles search of cases
@@ -145,5 +146,54 @@ func CaseEntityHandler(repo repository.CasesDAO) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, caseEntity)
+	}
+}
+
+// CaseEntityDocumentsSearchHandler handles searching for documents for specific case
+// @Summary Search types.DocumentResult list for a case entity
+// @Id caseEntityDocumentsSearch
+// @Description Search for types.DocumentResult list for a case entity
+// @Tags cases
+// @Security bearerauth
+// @Param case_id path string true "Case ID"
+// @Param			message	body		types.ListBodyWithCriteria	true	"List Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.DocumentsSearchResponse
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /cases/{case_id}/documents/search [post]
+func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body types.ListBodyWithCriteria
+		)
+		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
+		if errCaseId != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		var caseIdFilter = types.SearchCriterion{FieldName: types.CaseIdField.Alias, Value: []interface{}{caseId}}
+		var criteria = append(body.SearchCriteria, caseIdFilter)
+		query, err := types.NewListQueryFromCriteria(types.DocumentsQueryConfig, body.AdditionalFields, criteria, p, body.Sort)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		documents, count, err := repo.SearchDocuments(query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		searchResponse := types.DocumentsSearchResponse{List: *documents, Count: *count}
+		c.JSON(http.StatusOK, searchResponse)
 	}
 }

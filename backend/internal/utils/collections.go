@@ -1,8 +1,11 @@
 package utils
 
 import (
-	"github.com/radiant-network/radiant-api/internal/types"
+	"slices"
 	"sort"
+	"strings"
+
+	"github.com/radiant-network/radiant-api/internal/types"
 )
 
 func GroupByProperty[T any, K comparable](items []T, getProperty func(T) K) map[K][]T {
@@ -23,4 +26,11 @@ func SortConsequences(variantConsequences []types.VariantConsequence) []types.Va
 			(!variantConsequences[i].IsPicked && !variantConsequences[j].IsPicked && variantConsequences[i].Symbol < variantConsequences[j].Symbol)
 	})
 	return variantConsequences
+}
+
+func ParseString(s string) []string {
+	// split and remove empty elements
+	return slices.DeleteFunc(strings.Split(s, ","), func(e string) bool {
+		return e == ""
+	})
 }

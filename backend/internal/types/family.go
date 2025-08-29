@@ -17,6 +17,14 @@ var FamilyTable = Table{
 	Alias: "f",
 }
 
+var FamilyRelationshipToProbandCodeField = Field{
+	Name:          "relationship_to_proband_code",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         FamilyTable,
+}
+
 func (Family) TableName() string {
 	return FamilyTable.Name
 }

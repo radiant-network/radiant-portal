@@ -90,7 +90,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
             <TabsList className="w-full">
               {members.map(member => (
                 <TabsTrigger key={member.patient_id} value={member.patient_id.toString()}>
-                  {getRelationshipLabel(member.relationship_to_proband || 'proband')}
+                  {getRelationshipLabel(member.relationship_to_proband)}
                 </TabsTrigger>
               ))}
             </TabsList>

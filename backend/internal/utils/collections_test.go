@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"testing"
+
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type Person struct {
@@ -45,4 +46,20 @@ func Test_SortConsequences(t *testing.T) {
 	assert.Equal(t, "AAA", result[1].Symbol)
 	assert.Equal(t, "BBB", result[2].Symbol)
 	assert.Equal(t, "CCC", result[3].Symbol)
+}
+
+func Test_ParseString(t *testing.T) {
+	input := "A,B,C,D,E,F"
+	expectedOutput := []string{
+		"A", "B", "C", "D", "E", "F",
+	}
+	result := ParseString(input)
+	assert.Equal(t, expectedOutput, result)
+}
+
+func Test_ParseString_EmptyInput(t *testing.T) {
+	input := ""
+	expectedOutput := []string{}
+	result := ParseString(input)
+	assert.Equal(t, expectedOutput, result)
 }

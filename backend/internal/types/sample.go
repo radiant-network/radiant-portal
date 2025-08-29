@@ -14,8 +14,24 @@ type Sample struct {
 	SubmitterSampleId string
 }
 
+var SampleSubmitterSampleIdField = Field{
+	Name:          "submitter_sample_id",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         SampleTable,
+}
+
+var SampleIdField = Field{
+	Name:          "id",
+	Alias:         "sample_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	Table:         SampleTable,
+}
+
 var SampleTable = Table{
-	Name: "radiant_jdbc.public.sample",
+	Name:  "radiant_jdbc.public.sample",
+	Alias: "spl",
 }
 
 func (Sample) TableName() string {

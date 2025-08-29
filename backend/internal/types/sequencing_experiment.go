@@ -29,6 +29,38 @@ type SequencingExperiment struct {
 	UpdatedOn      time.Time
 }
 
+var SequencingExperimentIdField = Field{
+	Name:          "id",
+	Alias:         "seq_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         SequencingExperimentTable,
+}
+
+var SequencingExperimentPatientIdField = Field{
+	Name:          "patient_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         SequencingExperimentTable,
+}
+
+var SequencingExperimentRunAliasField = Field{
+	Name:          "run_alias",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         SequencingExperimentTable,
+}
+
+var SequencingExperimentRunNameField = Field{
+	Name:          "run_name",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         SequencingExperimentTable,
+}
+
 var SequencingExperimentTable = Table{
 	Name:  "radiant_jdbc.public.sequencing_experiment",
 	Alias: "s",
