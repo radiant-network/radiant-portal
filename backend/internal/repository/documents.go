@@ -34,83 +34,46 @@ func (r *DocumentsRepository) SearchDocuments(userQuery types.ListQuery) (*[]Doc
 	var documents []DocumentResult
 	var count int64
 
-	tx, err := prepareDocumentsQuery(userQuery, r)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error during query preparation %w", err)
-	}
+	tx := prepareDocumentsQuery(userQuery, r)
 	var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
-		if field.Table == types.DocumentTable {
-			return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
-		} else if field == types.FamilyRelationshipToProbandCodeField {
-			return fmt.Sprintf("group_concat(distinct coalesce(%s.%s, 'proband')) as %s_list", field.Table.Alias, field.Name, field.GetAlias())
+		if field == types.FamilyRelationshipToProbandCodeField {
+			return fmt.Sprintf("COALESCE(%s.%s, 'proband') as %s", field.Table.Alias, field.Name, field.GetAlias())
 		} else {
-			return fmt.Sprintf("group_concat(distinct %s.%s) as %s_list", field.Table.Alias, field.Name, field.GetAlias())
+			return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 		}
 	})
 
-	if err = tx.Count(&count).Error; err != nil {
+	if err := tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting documents: %w", err)
 	}
 
 	tx = tx.Select(columns)
 	utils.AddLimitAndSort(tx, userQuery)
 
-	if err = tx.Find(&documents).Error; err != nil {
+	if err := tx.Find(&documents).Error; err != nil {
 		return nil, nil, fmt.Errorf("error fetching documents: %w", err)
-	}
-
-	for i, doc := range documents {
-		casesID, err := utils.ParseConvertIntSortString(doc.CaseIDList)
-		if err != nil {
-			return nil, nil, fmt.Errorf("error fetching documents: %w", err)
-		}
-		documents[i].CasesID = casesID
-
-		documents[i].PerformerLabsCode = utils.ParseAndSortString(doc.PerformerLabCodeList)
-		documents[i].PerformerLabsName = utils.ParseAndSortString(doc.PerformerLabNameList)
-		documents[i].RelationshipsToProbandCode = utils.ParseAndSortString(doc.RelationshipToProbandCodeList)
-
-		patientsID, err := utils.ParseConvertIntSortString(doc.PatientIDList)
-		if err != nil {
-			return nil, nil, fmt.Errorf("error fetching documents: %w", err)
-		}
-		documents[i].PatientsID = patientsID
-
-		documents[i].SampleSubmittersID = utils.ParseAndSortString(doc.SubmitterSampleIDList)
-
-		tasksID, err := utils.ParseConvertIntSortString(doc.TaskIDList)
-		if err != nil {
-			return nil, nil, fmt.Errorf("error fetching documents: %w", err)
-		}
-		documents[i].TasksID = tasksID
-
-		seqsID, err := utils.ParseConvertIntSortString(doc.SeqIDList)
-		if err != nil {
-			return nil, nil, fmt.Errorf("error fetching documents: %w", err)
-		}
-		documents[i].SeqsID = seqsID
-		documents[i].RunsAlias = utils.ParseAndSortString(doc.RunAliasList)
 	}
 
 	return &documents, &count, nil
 }
 
-func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) (*gorm.DB, error) {
-	documentFields := userQuery.GetFieldsFromTables(types.DocumentTable)
-
+func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.DB {
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
 	tx = joinWithTaskHasDocument(tx)
 	tx = joinWithTaskHasSequencingExperiment(tx)
 	tx = joinWithSequencingExperiment(tx)
 	tx = joinWithCase(tx)
 	tx = joinWithPerformerLab(tx)
-	tx = joinWithSample(tx)
+
+	if userQuery.HasFieldFromTables(types.SampleTable) {
+		tx = joinWithSample(tx)
+	}
+
 	tx = joinWithFamilyRelationship(tx)
 	if userQuery.Filters() != nil {
 		utils.AddWhere(userQuery, tx)
 	}
-	utils.AddGroupBy(tx, documentFields)
-	return tx, nil
+	return tx
 }
 
 func joinWithTaskHasDocument(tx *gorm.DB) *gorm.DB {

@@ -21,6 +21,7 @@ var FamilyRelationshipToProbandCodeField = Field{
 	Name:          "relationship_to_proband_code",
 	CanBeSelected: true,
 	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Table:         FamilyTable,
 }
 

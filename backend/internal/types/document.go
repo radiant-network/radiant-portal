@@ -16,30 +16,21 @@ type Document struct {
 }
 
 type DocumentResult struct {
-	DocumentID                    int               `json:"document_id" validate:"required"`
-	Name                          string            `json:"name" validate:"required"`
-	FormatCode                    string            `json:"format_code" validate:"required"`
-	DataTypeCode                  string            `json:"data_type_code" validate:"required"`
-	Size                          int               `json:"size" validate:"required"`
-	CasesID                       JsonArray[int]    `json:"cases_id" validate:"required"`
-	CaseIDList                    string            `json:"-"`
-	PerformerLabsCode             JsonArray[string] `json:"performer_labs_code,omitempty"`
-	PerformerLabCodeList          string            `json:"-"`
-	PerformerLabsName             JsonArray[string] `json:"performer_labs_name,omitempty"`
-	PerformerLabNameList          string            `json:"-"`
-	RelationshipsToProbandCode    JsonArray[string] `json:"relationships_to_proband" validate:"required"`
-	RelationshipToProbandCodeList string            `json:"-"`
-	PatientsID                    JsonArray[int]    `json:"patients_id" validate:"required"`
-	PatientIDList                 string            `json:"-"`
-	SampleSubmittersID            JsonArray[string] `json:"sample_submitters_id,omitempty"`
-	SubmitterSampleIDList         string            `json:"-"`
-	TasksID                       JsonArray[int]    `json:"tasks_id" validate:"required"`
-	TaskIDList                    string            `json:"-"`
-	SeqsID                        JsonArray[int]    `json:"seqs_id,omitempty"`
-	SeqIDList                     string            `json:"-"`
-	Hash                          string            `json:"hash,omitempty"`
-	RunsAlias                     JsonArray[string] `json:"runs_alias,omitempty"`
-	RunAliasList                  string            `json:"-"`
+	DocumentID                int    `json:"document_id" validate:"required"`
+	Name                      string `json:"name" validate:"required"`
+	FormatCode                string `json:"format_code" validate:"required"`
+	DataTypeCode              string `json:"data_type_code" validate:"required"`
+	Size                      int    `json:"size" validate:"required"`
+	CaseID                    int    `json:"case_id" validate:"required"`
+	PerformerLabCode          string `json:"performer_lab_code,omitempty"`
+	PerformerLabName          string `json:"performer_lab_name,omitempty"`
+	RelationshipToProbandCode string `json:"relationship_to_proband_code" validate:"required"`
+	PatientID                 int    `json:"patient_id" validate:"required"`
+	SubmitterSampleID         string `json:"submitter_sample_id,omitempty"`
+	TaskID                    int    `json:"task_id" validate:"required"`
+	SeqID                     int    `json:"seq_id,omitempty"`
+	Hash                      string `json:"hash,omitempty"`
+	RunAlias                  string `json:"run_alias,omitempty"`
 }
 
 var DocumentFields = []Field{
@@ -80,7 +71,7 @@ var DocumentDefaultFields = []Field{
 	TaskHasDocumentTaskIdField,
 }
 
-var DocumentsDefaultSort = []SortField{{Field: DocumentIdField, Order: "desc"}}
+var DocumentsDefaultSort = []SortField{{Field: DocumentIdField, Order: "desc"}, {Field: FamilyRelationshipToProbandCodeField, Order: "asc"}} // TODO change me to desc to have proband first
 
 var DocumentsQueryConfig = QueryConfig{
 	AllFields:     DocumentFields,

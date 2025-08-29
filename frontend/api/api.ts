@@ -935,10 +935,10 @@ export interface CountBodyWithSqon {
 export interface DocumentResult {
     /**
      * 
-     * @type {Array<number>}
+     * @type {number}
      * @memberof DocumentResult
      */
-    'cases_id': Array<number>;
+    'case_id': number;
     /**
      * 
      * @type {string}
@@ -971,46 +971,40 @@ export interface DocumentResult {
     'name': string;
     /**
      * 
-     * @type {Array<number>}
+     * @type {number}
      * @memberof DocumentResult
      */
-    'patients_id': Array<number>;
+    'patient_id': number;
     /**
      * 
-     * @type {Array<string>}
+     * @type {string}
      * @memberof DocumentResult
      */
-    'performer_labs_code'?: Array<string>;
+    'performer_lab_code'?: string;
     /**
      * 
-     * @type {Array<string>}
+     * @type {string}
      * @memberof DocumentResult
      */
-    'performer_labs_name'?: Array<string>;
+    'performer_lab_name'?: string;
     /**
      * 
-     * @type {Array<string>}
+     * @type {string}
      * @memberof DocumentResult
      */
-    'relationships_to_proband': Array<string>;
+    'relationship_to_proband_code': string;
     /**
      * 
-     * @type {Array<string>}
+     * @type {string}
      * @memberof DocumentResult
      */
-    'runs_alias'?: Array<string>;
+    'run_alias'?: string;
     /**
      * 
-     * @type {Array<string>}
+     * @type {number}
      * @memberof DocumentResult
      */
-    'sample_submitters_id'?: Array<string>;
-    /**
-     * 
-     * @type {Array<number>}
-     * @memberof DocumentResult
-     */
-    'seqs_id'?: Array<number>;
+    'seq_id'?: number;
     /**
      * 
      * @type {number}
@@ -1019,10 +1013,16 @@ export interface DocumentResult {
     'size': number;
     /**
      * 
-     * @type {Array<number>}
+     * @type {string}
      * @memberof DocumentResult
      */
-    'tasks_id': Array<number>;
+    'submitter_sample_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
+    'task_id': number;
 }
 /**
  * 
