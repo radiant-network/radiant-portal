@@ -309,21 +309,21 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"list": [{
-			"cases_id":[21], 
+			"case_id":21, 
 			"data_type_code":"snv", 
 			"document_id":204, 
 			"format_code":"tbi", 
 			"hash":"5d41402abc4b2a76b9719d911017c795", 
 			"name":"FI0037905.S14786.vcf.gz.tbi", 
-			"patients_id":[59, 60, 61], 
-			"performer_labs_code":["CQGC"], 
-			"performer_labs_name":["Quebec Clinical Genomic Center"], 
-			"relationships_to_proband":["father", "mother", "proband"], 
-			"runs_alias":["A00516_0227", "A00516_0228", "A00516_0229"], 
-			"sample_submitters_id":["S14857", "S14858", "S14859"], 
-			"seqs_id":[59, 60, 61], 
+			"patient_id":60, 
+			"performer_lab_code":"CQGC", 
+			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"relationship_to_proband_code":"proband", 
+			"run_alias":"A00516_0227", 
+			"submitter_sample_id":"S14857", 
+			"seq_id":59, 
 			"size":2432696, 
-			"tasks_id":[21]
+			"task_id":21
 		}],
 		"count": 1
 	}`, w.Body.String())
