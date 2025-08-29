@@ -2,6 +2,7 @@ import '@styles/theme.css';
 import '@styles/tailwind.css';
 
 import React from 'react';
+import { initialize, mswLoader } from 'msw-storybook-addon';
 import type { Preview } from '@storybook/react';
 import { withThemeByClassName } from '@storybook/addon-themes';
 import { TooltipProvider } from '../base/ui/tooltip';
@@ -10,7 +11,10 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n'; // Use the Storybook-specific i18n instance
 import ThemeProvider from '../feature/theme-toggle/theme-provider';
 
+initialize();
+
 const preview: Preview = {
+  loaders: [mswLoader],
   parameters: {
     controls: {
       matchers: {

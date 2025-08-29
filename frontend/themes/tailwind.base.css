@@ -9,7 +9,6 @@
 
 :root {
   /* Define colors/variable that are global for all portals */
-
   /* Extracted Tailwind color variables for light mode */
   --radiant-amber-500: var(--color-amber-500);
   --radiant-amber-800: var(--color-amber-800);

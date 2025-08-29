@@ -394,8 +394,8 @@
       "buttons": {
         "clear": "Clear",
         "apply": "Apply",
-        "all": "All of",
-        "none": "None of",
+        "all": "All",
+        "none": "None",
         "show_more": "{{count}} More",
         "show_less": "Less",
         "some_not_in": "Any of",

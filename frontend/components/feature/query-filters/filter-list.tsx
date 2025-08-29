@@ -45,7 +45,12 @@ export function FilterList({ groupKey }: FilterListProps) {
           {toggleExpandAll ? t('common.actions.collapse_all') : t('common.actions.expand_all')}
         </Button>
       </div>
-      <Accordion type="multiple" value={expandedFilters} onValueChange={value => setExpandedFilters(value)}>
+      <Accordion
+        className="flex flex-col gap-1"
+        type="multiple"
+        value={expandedFilters}
+        onValueChange={value => setExpandedFilters(value)}
+      >
         {fields.map((field, index) => (
           <FilterContainer key={`${field.key}-${index}`} isOpen={expandedFilters.includes(field.key)} field={field} />
         ))}

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { SearchIcon } from 'lucide-react';
 
 import { Aggregation } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import CheckboxFilter from '@/components/base/checkboxes/checkbox-filter';
 import { Button } from '@/components/base/ui/button';
+import { CardContent, CardFooter } from '@/components/base/ui/card';
 import { Input } from '@/components/base/ui/input';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
@@ -19,7 +21,6 @@ import { useAggregationBuilder } from './use-aggregation-builder';
 interface IProps {
   field: AggregationConfig;
   maxVisibleItems?: number;
-  searchVisible?: boolean;
 }
 
 function searchOptions(search: string, data: any[]) {
@@ -45,7 +46,7 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
-export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = false }: IProps) {
+export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const { t } = useI18n();
   const config = useConfig();
   const appId = config.variant_exploration.app_id;
@@ -203,102 +204,104 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5, searchVisible = 
   }, [applyWithOperator]);
 
   return (
-    <div className="p-2 w-full max-w-md">
-      {searchVisible && (
+    <>
+      <CardContent size="sm" variant="outline">
         <Input
+          startIcon={SearchIcon}
           type="text"
           placeholder={t('common.filters.search.placeholder')}
-          className="w-full p-2 mb-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full text-xs py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => updateSearch(e.target.value)}
           autoFocus
         />
-      )}
 
-      <div className="flex justify-between">
-        <Button size="sm" onClick={() => selectAll()} variant="link" className="px-0">
-          {t('common.filters.buttons.all')}
-        </Button>
-        <Button size="sm" onClick={() => unSelectAll()} variant="link" className="px-0">
-          {t('common.filters.buttons.none')}
-        </Button>
-      </div>
-
-      <div className="max-h-[250px] overflow-auto">
-        {/* Loading skeleton state */}
-        {isLoading &&
-          Array.from({ length: 3 }, (_, i) => (
-            <div className="flex justify-between items-center py-2 space-x-2" key={`skeleton-${i}`}>
-              <Skeleton className="w-full h-6 rounded" />
-              <Skeleton className="h-6 w-12 rounded-md" />
-            </div>
-          ))}
-
-        {/* No Result Found */}
-        {!isLoading && items.length === 0 && (
-          <div className="text-muted-foreground py-4">{t('common.filters.no_values_found')}</div>
-        )}
-
-        {/* Actual content */}
-        {!isLoading &&
-          items.length > 0 &&
-          Array.from({ length: visibleItemsCount }, (_, i) => (
-            <div className="gap-3 py-1.5" key={items[i].key}>
-              <CheckboxFilter
-                size="xs"
-                label={t(`common.filters.labels.${field.key}_value.${items[i].key}`, {
-                  defaultValue: items[i].label,
-                })}
-                checked={selectedItems.some(f => f === items[i].key)}
-                count={items[i].count}
-                onCheckedChange={() => itemSelected(items[i])}
-              />
-            </div>
-          ))}
-      </div>
-
-      {!isLoading && items.length > visibleItemsCount && (
-        <Button className="mt-2 px-0" onClick={showMore} size="sm" variant="link">
-          {t('common.filters.buttons.show_more', { count: items.length - maxVisibleItems })}
-        </Button>
-      )}
-      {!isLoading && visibleItemsCount > maxVisibleItems && (
-        <Button className="mt-2 px-0" onClick={showLess} size="sm" variant="link">
-          {t('common.filters.buttons.show_less')}
-        </Button>
-      )}
-
-      <Separator className="my-4 border-border" id={`${field.key}_divider`} />
-
-      <div className="flex align-right justify-end items-center space-x-2">
-        <Button size="xs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems || isLoading}>
-          {t('common.filters.buttons.clear')}
-        </Button>
-        <div className="flex space-x-2">
-          <ActionButton
-            size="xs"
-            className="h-7"
-            color="primary"
-            actions={[
-              {
-                label: t('common.filters.buttons.some_not_in'),
-                onClick: applySomeNotIn,
-              },
-              {
-                label: t('common.filters.buttons.all'),
-                onClick: applyAll,
-              },
-              {
-                label: t('common.filters.buttons.not_in'),
-                onClick: applyNotIn,
-              },
-            ]}
-            onDefaultAction={apply}
-            disabled={isLoading}
-          >
-            {t('common.filters.buttons.apply')}
-          </ActionButton>
+        <div className="flex gap-2 items-center">
+          <Button size="xs" onClick={() => selectAll()} variant="link" className="px-0">
+            {t('common.filters.buttons.all')}
+          </Button>
+          <Separator orientation="vertical" className="h-4" />
+          <Button size="xs" onClick={() => unSelectAll()} variant="link" className="px-0">
+            {t('common.filters.buttons.none')}
+          </Button>
         </div>
-      </div>
-    </div>
+
+        <div className="max-h-[250px] overflow-auto">
+          {/* Loading skeleton state */}
+          {isLoading &&
+            Array.from({ length: 3 }, (_, i) => (
+              <div className="flex justify-between items-center py-2 space-x-2" key={`skeleton-${i}`}>
+                <Skeleton className="w-full h-6 rounded" />
+                <Skeleton className="h-6 w-12 rounded-md" />
+              </div>
+            ))}
+
+          {/* No Result Found */}
+          {!isLoading && items.length === 0 && (
+            <div className="text-muted-foreground py-4">{t('common.filters.no_values_found')}</div>
+          )}
+
+          {/* Actual content */}
+          {!isLoading &&
+            items.length > 0 &&
+            Array.from({ length: visibleItemsCount }, (_, i) => (
+              <div className="gap-3 py-1.5" key={items[i].key}>
+                <CheckboxFilter
+                  size="xs"
+                  label={t(`common.filters.labels.${field.key}_value.${items[i].key}`, {
+                    defaultValue: items[i].label,
+                  })}
+                  checked={selectedItems.some(f => f === items[i].key)}
+                  count={items[i].count}
+                  onCheckedChange={() => itemSelected(items[i])}
+                />
+              </div>
+            ))}
+        </div>
+
+        {!isLoading && items.length > visibleItemsCount && (
+          <Button className="mt-2 px-0" onClick={showMore} size="xs" variant="link">
+            {t('common.filters.buttons.show_more', { count: items.length - maxVisibleItems })}
+          </Button>
+        )}
+        {!isLoading && visibleItemsCount > maxVisibleItems && (
+          <Button className="mt-2 px-0" onClick={showLess} size="xs" variant="link">
+            {t('common.filters.buttons.show_less')}
+          </Button>
+        )}
+      </CardContent>
+      <CardFooter size="sm">
+        <div className="flex align-right justify-end items-center space-x-2">
+          <Button size="xxs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems || isLoading}>
+            {t('common.filters.buttons.clear')}
+          </Button>
+          <div className="flex space-x-2">
+            <ActionButton
+              size="xxs"
+              variant="outline"
+              className="h-7"
+              color="primary"
+              actions={[
+                {
+                  label: t('common.filters.buttons.some_not_in'),
+                  onClick: applySomeNotIn,
+                },
+                {
+                  label: t('common.filters.buttons.all'),
+                  onClick: applyAll,
+                },
+                {
+                  label: t('common.filters.buttons.not_in'),
+                  onClick: applyNotIn,
+                },
+              ]}
+              onDefaultAction={apply}
+              disabled={isLoading}
+            >
+              {t('common.filters.buttons.apply')}
+            </ActionButton>
+          </div>
+        </div>
+      </CardFooter>
+    </>
   );
 }

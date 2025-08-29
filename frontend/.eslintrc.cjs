@@ -8,6 +8,15 @@ module.exports = defineConfig({
     'react/display-name': 'off', // disables missing display name warnings
     'no-nested-ternary': 'error', // disallow nested ternaries
     'no-unneeded-ternary': 'error',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      },
+    ],
     'max-len': [
       'warn', // or 'error'
       {
