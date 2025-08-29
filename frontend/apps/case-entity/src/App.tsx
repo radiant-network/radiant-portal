@@ -101,7 +101,7 @@ export default function App() {
           <TabsList className="pt-4 px-6 bg-background" contentClassName="mx-auto">
             <TabsListItem value={CaseEntityTabs.Details}>
               <ClipboardList />
-              {t('case_entity.details.title')} coucou
+              {t('case_entity.details.title')}
             </TabsListItem>
             {hasVariants ? (
               <TabsListItem value={CaseEntityTabs.Variants}>

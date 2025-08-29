@@ -8,7 +8,7 @@
 4. Read [Components Structure](./components/README.md) to understand the components structure.
 5. Ask for the `.env`
 
-## How To ?
+## Q/A
 
 **I have an error with `@rollup/rollup-darwin-arm64` after installing the project?**
 
@@ -72,6 +72,23 @@ e.g.
 feat(indicator): SJRA-000 update indicator color
 fix(variant): SJRA-000 fix a typo
 chore(frontend): SJRA-000 update axios
+```
+
+
+
+**How to fix husky issue on commit**
+
+When committing, if you receive an error such as:
+```shell
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/Users/xxx/Documents/GitRepositories/radiant-portal/package.json'
+npm error enoent This is related to npm not being able to find a file.
+```
+First check if you are up to date with the main branch.
+If yes and the error persists, you need to fix husky installation.
+```shell
+cd frontend
+npm install --save-dev husky
+npx husky init
 ```
 
 
