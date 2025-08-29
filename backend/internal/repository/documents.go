@@ -18,8 +18,6 @@ type DocumentsRepository struct {
 
 type DocumentsDAO interface {
 	SearchDocuments(userQuery types.ListQuery) (*[]DocumentResult, *int64, error)
-	//SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
-	//GetCasesFilters(userQuery types.AggQuery) (*CaseFilters, error)
 }
 
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {

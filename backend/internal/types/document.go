@@ -85,6 +85,7 @@ var DocumentIdField = Field{
 	Alias:         "document_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Table:         DocumentTable,
 }
 

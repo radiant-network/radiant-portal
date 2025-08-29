@@ -17,6 +17,7 @@ type Sample struct {
 var SampleSubmitterSampleIdField = Field{
 	Name:          "submitter_sample_id",
 	CanBeSelected: true,
+	CanBeSorted:   true,
 	Table:         SampleTable,
 }
 
