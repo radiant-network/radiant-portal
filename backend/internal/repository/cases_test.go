@@ -215,11 +215,11 @@ func Test_RetrieveCaseAssays(t *testing.T) {
 		assert.Equal(t, 3, len(*assays))
 
 		// Proband first
-		assert.Equal(t, "", (*assays)[0].RelationshipToProband)
+		assert.Equal(t, "proband", (*assays)[0].RelationshipToProband)
 		assert.Equal(t, 1, (*assays)[0].SeqID)
 		assert.Equal(t, 22, (*assays)[0].RequestID)
 		assert.Equal(t, 3, (*assays)[0].PatientID)
-		assert.Equal(t, "", (*assays)[0].AffectedStatusCode)
+		assert.Equal(t, "affected", (*assays)[0].AffectedStatusCode)
 		assert.Equal(t, 1, (*assays)[0].SampleID)
 		assert.Equal(t, "S13224", (*assays)[0].SampleSubmitterID)
 		assert.Equal(t, "dna", (*assays)[0].SampleTypeCode)
@@ -254,14 +254,14 @@ func Test_RetrieveCaseAssays(t *testing.T) {
 func Test_RetrieveCasePatients(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		members, err := repo.retrieveCasePatients(1, []int{1, 2, 3})
+		members, err := repo.retrieveCasePatients(1)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(*members))
 
 		// Proband first
-		assert.Equal(t, "", (*members)[0].RelationshipToProband)
+		assert.Equal(t, "proband", (*members)[0].RelationshipToProband)
 		assert.Equal(t, 3, (*members)[0].PatientID)
-		assert.Equal(t, "", (*members)[0].AffectedStatusCode)
+		assert.Equal(t, "affected", (*members)[0].AffectedStatusCode)
 		assert.Equal(t, "1973-03-23 00:00:00 +0000 UTC", (*members)[0].DateOfBirth.String())
 		assert.Equal(t, "MRN-283775", (*members)[0].Mrn)
 		assert.Equal(t, "male", (*members)[0].SexCode)
