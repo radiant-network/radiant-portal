@@ -13,6 +13,9 @@
 
 Source of thruth is the [ferlab code conventions](https://github.com/Ferlab-Ste-Justine/ferlab-ui/tree/master/packages/eslint-config) in eslint. Make sure it is up to date and active in your editor.
 
+### Project Technologies
+- react, tailwindcss, typescript, shadcn
+
 ### Components
 
 - Use PascalCase for component names: `UserProfile`, `NavigationBar`

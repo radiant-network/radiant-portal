@@ -1,0 +1,234 @@
+import type { Meta, StoryObj } from '@storybook/react';
+
+import { Avatar, AvatarUser } from '@/components/base/assignation/avatar';
+
+const meta = {
+  title: 'Assignation/Avatar',
+  component: Avatar,
+  parameters: {
+    layout: 'centered',
+  },
+  argTypes: {
+    size: {
+      control: { type: 'select' },
+      options: ['sm', 'md', 'lg'],
+    },
+  },
+} satisfies Meta<typeof Avatar>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+// Sample users for stories
+const sampleUsers: AvatarUser[] = [
+  {
+    id: 'user-1',
+    name: 'John Doe',
+  },
+  {
+    id: 'user-2',
+    name: 'Jane Smith',
+  },
+  {
+    id: 'user-3',
+    name: 'Mike Johnson',
+  },
+  {
+    id: 'user-4',
+    name: 'Sarah Wilson',
+  },
+  {
+    id: 'user-5',
+    name: 'David Brown',
+  },
+  {
+    id: 'user-6',
+    name: 'Lisa Garcia',
+  },
+];
+
+export const AllStates: Story = {
+  render: () => (
+    <div className="flex flex-col gap-8 p-4">
+      <div className="flex flex-col gap-4">
+        <h3 className="text-lg font-semibold">Avatar States</h3>
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col items-center gap-2">
+            <Avatar users={[]} />
+            <span className="text-sm text-muted-foreground">Unassigned</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <Avatar users={[sampleUsers[0]]} />
+            <span className="text-sm text-muted-foreground">Single User</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <Avatar users={[sampleUsers[0], sampleUsers[1]]} />
+            <span className="text-sm text-muted-foreground">Two Users</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <Avatar users={sampleUsers.slice(0, 3)} />
+            <span className="text-sm text-muted-foreground">Three Users</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <Avatar users={sampleUsers} />
+            <span className="text-sm text-muted-foreground">Six Users</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const Sizes: Story = {
+  render: () => (
+    <div className="flex flex-col gap-8 p-4">
+      <div className="flex flex-col gap-4">
+        <h3 className="text-lg font-semibold">Small Size</h3>
+        <div className="flex items-center gap-4">
+          <Avatar users={[]} size="sm" />
+          <Avatar users={[sampleUsers[0]]} size="sm" />
+          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="sm" />
+          <Avatar users={sampleUsers.slice(0, 4)} size="sm" />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <h3 className="text-lg font-semibold">Medium Size (Default)</h3>
+        <div className="flex items-center gap-4">
+          <Avatar users={[]} size="md" />
+          <Avatar users={[sampleUsers[0]]} size="md" />
+          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="md" />
+          <Avatar users={sampleUsers.slice(0, 4)} size="md" />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <h3 className="text-lg font-semibold">Large Size</h3>
+        <div className="flex items-center gap-4">
+          <Avatar users={[]} size="lg" />
+          <Avatar users={[sampleUsers[0]]} size="lg" />
+          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="lg" />
+          <Avatar users={sampleUsers.slice(0, 4)} size="lg" />
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const Unassigned: Story = {
+  args: {
+    users: [],
+  },
+};
+
+export const SingleUser: Story = {
+  args: {
+    users: [sampleUsers[0]],
+  },
+};
+
+export const TwoUsers: Story = {
+  args: {
+    users: [sampleUsers[0], sampleUsers[1]],
+  },
+};
+
+export const MultipleUsers: Story = {
+  args: {
+    users: sampleUsers.slice(0, 5),
+  },
+};
+
+export const CustomInitials: Story = {
+  args: {
+    users: [
+      {
+        id: 'user-custom-1',
+        name: 'Dr. John Smith',
+        initials: 'Dr',
+      },
+      {
+        id: 'user-custom-2',
+        name: 'Professor Jane Doe',
+        initials: 'PJ',
+      },
+    ],
+  },
+};
+
+export const SingleNameUsers: Story = {
+  args: {
+    users: [
+      {
+        id: 'user-single-1',
+        name: 'Madonna',
+      },
+      {
+        id: 'user-single-2',
+        name: 'Cher',
+      },
+    ],
+  },
+};
+
+export const TableUsageExample: Story = {
+  render: () => (
+    <div className="p-4">
+      <h3 className="text-lg font-semibold mb-4">Table Cell Usage Example</h3>
+      <div className="border rounded-lg">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left p-3">Prescription ID</th>
+              <th className="text-left p-3">Assigned Users</th>
+              <th className="text-left p-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b">
+              <td className="p-3 font-mono text-sm">666106</td>
+              <td className="p-3">
+                <Avatar users={[]} size="sm" />
+              </td>
+              <td className="p-3">
+                <span className="text-muted-foreground">Unassigned</span>
+              </td>
+            </tr>
+            <tr className="border-b">
+              <td className="p-3 font-mono text-sm">658344</td>
+              <td className="p-3">
+                <Avatar users={[sampleUsers[0]]} size="sm" />
+              </td>
+              <td className="p-3">
+                <span className="text-green-600">Assigned</span>
+              </td>
+            </tr>
+            <tr className="border-b">
+              <td className="p-3 font-mono text-sm">658142</td>
+              <td className="p-3">
+                <Avatar users={[sampleUsers[1], sampleUsers[2]]} size="sm" />
+              </td>
+              <td className="p-3">
+                <span className="text-blue-600">Collaborative</span>
+              </td>
+            </tr>
+            <tr>
+              <td className="p-3 font-mono text-sm">658286</td>
+              <td className="p-3">
+                <Avatar users={sampleUsers.slice(0, 4)} size="sm" />
+              </td>
+              <td className="p-3">
+                <span className="text-purple-600">Team Assignment</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ),
+};
