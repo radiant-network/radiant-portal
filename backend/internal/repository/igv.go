@@ -48,7 +48,7 @@ func (r *IGVRepository) GetIGV(seqId int) ([]IGVTrack, error) {
 		"se.id AS sequencing_experiment_id",
 		"se.patient_id",
 		"sa.submitter_sample_id AS sample_id",
-		"COALESCE(f.relationship_to_proband_code, 'proband') AS family_role",
+		"f.relationship_to_proband_code AS family_role",
 		"p.sex_code",
 		"d.data_type_code",
 		"d.format_code",

@@ -89,11 +89,11 @@ type CaseAssay struct {
 	SeqID                    int       `json:"seq_id" validate:"required"`
 	RequestID                int       `json:"request_id,omitempty"`
 	PatientID                int       `json:"patient_id" validate:"required"`
-	RelationshipToProband    string    `json:"relationship_to_proband,omitempty"`
+	RelationshipToProband    string    `json:"relationship_to_proband" validate:"required"`
 	SampleID                 int       `json:"sample_id" validate:"required"`
 	SampleSubmitterID        string    `json:"sample_submitter_id,omitempty"`
 	SampleTypeCode           string    `json:"sample_type_code,omitempty"`
-	AffectedStatusCode       string    `json:"affected_status_code,omitempty"`
+	AffectedStatusCode       string    `json:"affected_status_code" validate:"required"`
 	HistologyCode            string    `json:"histology_code,omitempty"`
 	ExperimentalStrategyCode string    `json:"experimental_strategy_code" validate:"required"`
 	StatusCode               string    `json:"status_code" validate:"required"`
@@ -105,8 +105,8 @@ type CaseAssay struct {
 // @Description Patient clinical information to display in Case Entity
 // @Name CasePatientClinicalInformation
 type CasePatientClinicalInformation struct {
-	RelationshipToProband    string            `json:"relationship_to_proband,omitempty"`
-	AffectedStatusCode       string            `json:"affected_status_code,omitempty"`
+	RelationshipToProband    string            `json:"relationship_to_proband" validate:"required"`
+	AffectedStatusCode       string            `json:"affected_status_code" validate:"required"`
 	PatientID                int               `json:"patient_id" validate:"required"`
 	DateOfBirth              time.Time         `json:"date_of_birth"`
 	SexCode                  string            `json:"sex_code" validate:"required"`
