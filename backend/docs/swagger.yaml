@@ -430,11 +430,8 @@ components:
       type: object
     DocumentResult:
       properties:
-        cases_id:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
+        case_id:
+          type: integer
         data_type_code:
           type: string
         document_id:
@@ -445,58 +442,34 @@ components:
           type: string
         name:
           type: string
-        patients_id:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
-        performer_labs_code:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        performer_labs_name:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        relationships_to_proband:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        runs_alias:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        sample_submitters_id:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        seqs_id:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
+        patient_id:
+          type: integer
+        performer_lab_code:
+          type: string
+        performer_lab_name:
+          type: string
+        relationship_to_proband_code:
+          type: string
+        run_alias:
+          type: string
+        seq_id:
+          type: integer
         size:
           type: integer
-        tasks_id:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
+        submitter_sample_id:
+          type: string
+        task_id:
+          type: integer
       required:
-      - cases_id
+      - case_id
       - data_type_code
       - document_id
       - format_code
       - name
-      - patients_id
-      - relationships_to_proband
+      - patient_id
+      - relationship_to_proband_code
       - size
-      - tasks_id
+      - task_id
       type: object
     DocumentsSearchResponse:
       properties:

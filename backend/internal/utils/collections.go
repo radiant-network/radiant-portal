@@ -1,10 +1,8 @@
 package utils
 
 import (
-	"fmt"
 	"slices"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -35,24 +33,4 @@ func ParseString(s string) []string {
 	return slices.DeleteFunc(strings.Split(s, ","), func(e string) bool {
 		return e == ""
 	})
-}
-
-func ParseAndSortString(s string) []string {
-	list := ParseString(s)
-	sort.Strings(list)
-	return list
-}
-
-func ParseConvertIntSortString(s string) ([]int, error) {
-	stringSlice := ParseString(s)
-	intSlice := make([]int, 0, len(stringSlice))
-	for _, s := range stringSlice {
-		num, err := strconv.Atoi(s)
-		if err != nil {
-			return nil, fmt.Errorf("error converting string '%s' to int: %v", s, err)
-		}
-		intSlice = append(intSlice, num)
-	}
-	sort.Ints(intSlice)
-	return intSlice, nil
 }
