@@ -11,7 +11,17 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n'; // Use the Storybook-specific i18n instance
 import ThemeProvider from '../feature/theme-toggle/theme-provider';
 
-initialize();
+// Configure MSW service worker path depending on environment
+let options = {};
+if (location.hostname === 'radiant-network.github.io') {
+  options = {
+    serviceWorker: {
+      url: '/docs/mockServiceWorker.js',
+    },
+  };
+}
+
+initialize(options);
 
 const preview: Preview = {
   loaders: [mswLoader],
@@ -31,7 +41,7 @@ const preview: Preview = {
       },
       defaultTheme: 'light',
     }),
-    Story => (
+    (Story) => (
       <I18nextProvider i18n={i18n}>
         <ThemeProvider>
           <TooltipProvider delayDuration={0}>
