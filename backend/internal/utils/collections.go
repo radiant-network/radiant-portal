@@ -28,9 +28,9 @@ func SortConsequences(variantConsequences []types.VariantConsequence) []types.Va
 	return variantConsequences
 }
 
-func ParseString(s string) []string {
+func SplitRemoveEmptyString(s string, separator string) []string {
 	// split and remove empty elements
-	return slices.DeleteFunc(strings.Split(s, ","), func(e string) bool {
+	return slices.DeleteFunc(strings.Split(s, separator), func(e string) bool {
 		return e == ""
 	})
 }

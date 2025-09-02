@@ -396,7 +396,7 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	println(len(tasks))
 
 	for i, task := range tasks {
-		patients := utils.ParseString(task.PatientsUnparsed)
+		patients := utils.SplitRemoveEmptyString(task.PatientsUnparsed, ",")
 		sort.Strings(patients)
 		tasks[i].Patients = patients
 	}

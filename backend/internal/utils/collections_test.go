@@ -48,18 +48,18 @@ func Test_SortConsequences(t *testing.T) {
 	assert.Equal(t, "CCC", result[3].Symbol)
 }
 
-func Test_ParseString(t *testing.T) {
+func Test_SplitRemoveEmptyString(t *testing.T) {
 	input := "A,B,C,D,E,F"
 	expectedOutput := []string{
 		"A", "B", "C", "D", "E", "F",
 	}
-	result := ParseString(input)
+	result := SplitRemoveEmptyString(input, ",")
 	assert.Equal(t, expectedOutput, result)
 }
 
-func Test_ParseString_EmptyInput(t *testing.T) {
+func Test_SplitRemoveEmptyString_EmptyInput(t *testing.T) {
 	input := ""
 	expectedOutput := []string{}
-	result := ParseString(input)
+	result := SplitRemoveEmptyString(input, ",")
 	assert.Equal(t, expectedOutput, result)
 }
