@@ -17,7 +17,7 @@ let options = {};
 if (location.hostname === "radiant-network.github.io") {
   options = {
     serviceWorker: {
-      url: "/public/mockServiceWorker.js",
+      url: "/docs/mockServiceWorker.js",
     },
   };
 }
