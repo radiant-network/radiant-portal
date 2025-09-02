@@ -43,7 +43,7 @@ func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientS
 
 // mappers, could be moved to a separate file
 func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
-	pubmeds := utils.ParseString(dao.Pubmed)
+	pubmeds := utils.SplitRemoveEmptyString(dao.Pubmed, ",")
 	interpretation := &types.InterpretationCommon{
 		ID:             dao.ID,
 		SequencingId:   dao.SequencingId,
@@ -115,8 +115,8 @@ func (r *InterpretationsRepository) mapToInterpretationGermline(dao *types.Inter
 		InterpretationCommon:    *common,
 		Condition:               dao.Condition,
 		Classification:          dao.Classification,
-		ClassificationCriterias: utils.ParseString(dao.ClassificationCriterias),
-		TransmissionModes:       utils.ParseString(dao.TransmissionModes),
+		ClassificationCriterias: utils.SplitRemoveEmptyString(dao.ClassificationCriterias, ","),
+		TransmissionModes:       utils.SplitRemoveEmptyString(dao.TransmissionModes, ","),
 	}
 	return interpretation, nil
 }
@@ -145,7 +145,7 @@ func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.Interp
 		InterpretationCommon:                *common,
 		TumoralType:                         dao.TumoralType,
 		Oncogenicity:                        dao.Oncogenicity,
-		OncogenicityClassificationCriterias: utils.ParseString(dao.OncogenicityClassificationCriterias),
+		OncogenicityClassificationCriterias: utils.SplitRemoveEmptyString(dao.OncogenicityClassificationCriterias, ","),
 		ClinicalUtility:                     dao.ClinicalUtility,
 	}
 	return interpretation, nil

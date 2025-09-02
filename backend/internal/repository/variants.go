@@ -269,9 +269,9 @@ func (r *VariantsRepository) GetVariantExpandedInterpretedCase(locusId int, seqI
 		}
 	}
 
-	variantExpandedInterpretedCase.ClassificationCriterias = utils.ParseString(variantExpandedInterpretedCase.ClassificationCriteriasString)
-	variantExpandedInterpretedCase.Inheritances = utils.ParseString(variantExpandedInterpretedCase.InheritancesString)
-	variantExpandedInterpretedCase.PubmedIDs = utils.ParseString(variantExpandedInterpretedCase.PubmedIDsString)
+	variantExpandedInterpretedCase.ClassificationCriterias = utils.SplitRemoveEmptyString(variantExpandedInterpretedCase.ClassificationCriteriasString, ",")
+	variantExpandedInterpretedCase.Inheritances = utils.SplitRemoveEmptyString(variantExpandedInterpretedCase.InheritancesString, ",")
+	variantExpandedInterpretedCase.PubmedIDs = utils.SplitRemoveEmptyString(variantExpandedInterpretedCase.PubmedIDsString, ",")
 
 	return &variantExpandedInterpretedCase, nil
 }
