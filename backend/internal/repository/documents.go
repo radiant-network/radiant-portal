@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -18,6 +19,7 @@ type DocumentsRepository struct {
 
 type DocumentsDAO interface {
 	SearchDocuments(userQuery types.ListQuery) (*[]DocumentResult, *int64, error)
+	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 }
 
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
@@ -49,6 +51,63 @@ func (r *DocumentsRepository) SearchDocuments(userQuery types.ListQuery) (*[]Doc
 	}
 
 	return &documents, &count, nil
+}
+
+func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]AutocompleteResult, error) {
+	/**
+	  	(SELECT "document_id" as type, id as value from `radiant_jdbc`.`public`.`document` WHERE CAST(id AS TEXT) LIKE '1%')
+		UNION
+		(SELECT "run_name" as type, run_name as value from `radiant_jdbc`.`public`.`sequencing_experiment` WHERE run_name LIKE '1%')
+		UNION
+		(SELECT "sample_id" as type, id as value from `radiant_jdbc`.`public`.`sample` WHERE CAST(id AS TEXT) LIKE '1%')
+		UNION
+		(SELECT "patient_id" as type, id as value from `radiant_jdbc`.`public`.`patient` WHERE CAST(id AS TEXT) LIKE '1%')
+		UNION
+		(SELECT "case_id" as type, id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(id AS TEXT) LIKE '1%')
+		UNION
+		(SELECT "seq_id" as type, id as value from `radiant_jdbc`.`public`.`sequencing_experiment` WHERE CAST(id AS TEXT) LIKE '1%')
+		UNION
+		(SELECT "task_id" as type, id as value from `radiant_jdbc`.`public`.`task` WHERE CAST(id AS TEXT) LIKE '1%')
+		ORDER BY value asc, type asc;
+	*/
+	var autocompleteResult []AutocompleteResult
+	searchInput := fmt.Sprintf("%s%%", prefix)
+
+	subQueryDocumentId := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
+	subQueryDocumentId = subQueryDocumentId.Select("\"document_id\" as type, id as value")
+	subQueryDocumentId = subQueryDocumentId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	subQueryRunName := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
+	subQueryRunName = subQueryRunName.Select("\"run_name\" as type, run_name as value")
+	subQueryRunName = subQueryRunName.Where("LOWER(run_name) LIKE ?", strings.ToLower(searchInput))
+
+	subQuerySampleId := r.db.Table(fmt.Sprintf("%s %s", types.SampleTable.Name, types.SampleTable.Alias))
+	subQuerySampleId = subQuerySampleId.Select("\"sample_id\" as type, id as value")
+	subQuerySampleId = subQuerySampleId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	subQueryPatientId := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
+	subQueryPatientId = subQueryPatientId.Select("\"patient_id\" as type, id as value")
+	subQueryPatientId = subQueryPatientId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	subQueryCaseId := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	subQueryCaseId = subQueryCaseId.Select("\"case_id\" as type, id as value")
+	subQueryCaseId = subQueryCaseId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	subQuerySeqId := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
+	subQuerySeqId = subQuerySeqId.Select("\"seq_id\" as type, id as value")
+	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	subQueryTaskId := r.db.Table(fmt.Sprintf("%s %s", types.TaskTable.Name, types.TaskTable.Alias))
+	subQueryTaskId = subQueryTaskId.Select("\"task_id\" as type, id as value")
+	subQueryTaskId = subQueryTaskId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	tx := r.db.Table("(? UNION ? UNION ? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryDocumentId, subQueryRunName, subQuerySampleId, subQueryPatientId, subQueryCaseId, subQuerySeqId, subQueryTaskId)
+	tx = tx.Order("value asc, type asc")
+	tx = tx.Limit(limit)
+	if err := tx.Find(&autocompleteResult).Error; err != nil {
+		return nil, fmt.Errorf("error searching for document autocomplete: %w", err)
+	}
+	return &autocompleteResult, nil
 }
 
 func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.DB {
