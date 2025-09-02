@@ -7,12 +7,7 @@ import { SidebarProvider } from '@/components/base/ui/sidebar';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
-import {
-  httpOccurenceApiResponse,
-  httpStatisticsApiResponse,
-  occurenceApi,
-  statisticApi,
-} from '../public/api-occurence';
+import { httpOccurenceApiResponse, httpStatisticsApiResponse, occurenceApi, statisticApi } from '../api/api-occurence';
 
 const config: PortalConfig = {
   variant_entity: {

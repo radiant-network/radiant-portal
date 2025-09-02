@@ -35,8 +35,6 @@ jobs:
           npx msw init
           npm run build:storybook:radiant
           cp stories/public/mockServiceWorker.js storybook-static/
-          cd storybook-static
-          ls -a
 
       - name: Deploy 🚀
         if: steps.filter.outputs.frontend == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
