@@ -26,7 +26,6 @@ const getName = (url = "", parallel = "") => {
 
 export default defineConfig({
   //  projectId: '',
-  //  projectId: '',
   chromeWebSecurity: true,
   video: false,
   screenshotOnRunFailure: true,
