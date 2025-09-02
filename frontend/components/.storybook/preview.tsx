@@ -13,6 +13,15 @@ import ThemeProvider from '../feature/theme-toggle/theme-provider';
 
 initialize();
 
+let options = {};
+if (location.hostname === "radiant-network.github.io") {
+  options = {
+    serviceWorker: {
+      url: "/public/mockServiceWorker.js",
+    },
+  };
+}
+
 const preview: Preview = {
   loaders: [mswLoader],
   parameters: {
