@@ -10,15 +10,15 @@ import { Separator } from './separator';
  */
 const cardVariants = tv({
   slots: {
-    base: 'bg-card text-card-foreground flex flex-col rounded-xl border shadow-xs',
+    base: 'bg-card text-card-foreground flex flex-col border shadow-xs',
   },
   variants: {
     size: {
       default: {
-        base: 'gap-6 py-6',
+        base: 'gap-6 py-6 rounded-xl',
       },
       sm: {
-        base: 'py-0 gap-2',
+        base: 'py-0 gap-2 rounded-md',
       },
     },
   },
@@ -156,15 +156,15 @@ function CardSeparator({ ...props }: React.ComponentProps<'div'>) {
  */
 const cardFooterVariants = tv({
   slots: {
-    base: 'border-t-1 flex items-center',
+    base: 'flex gap-2',
   },
   variants: {
     size: {
       default: {
-        base: 'px-4 md:px-6',
+        base: 'py-0 px-4 justify-between md:px-6 items-center',
       },
       sm: {
-        base: 'px-3',
+        base: 'border-t-1 justify-end py-2 px-3',
       },
     },
   },
@@ -176,7 +176,7 @@ const cardFooterVariants = tv({
 export type CardFooterProps = React.ComponentProps<'div'> & VariantProps<typeof cardFooterVariants>;
 
 function CardFooter({ className, size, ...props }: CardFooterProps) {
-  const style = cardContentVariants({ size });
+  const style = cardFooterVariants({ size });
   return <div data-slot="card-footer" className={style.base({ className })} {...props} />;
 }
 
