@@ -1,7 +1,7 @@
 import React from 'react';
-import { SearchIcon } from 'lucide-react';
 
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
+import { Card, CardHeader } from '@/components/base/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
 import { NumericalFilter } from '@/components/feature/query-filters/numerical-filter';
@@ -12,15 +12,15 @@ import { type Aggregation as AggregationConfig } from '@/components/model/applic
 interface FilterContainerProps {
   field: AggregationConfig;
   isOpen: boolean;
-  searchHandler?: (e: React.MouseEvent<SVGElement, MouseEvent>) => void;
+  searchHandler?: (_e: React.MouseEvent<SVGElement, MouseEvent>) => void;
 }
 
 interface AccordionContainerProps extends FilterContainerProps {
-  searchHandler?: (e: React.MouseEvent<SVGElement, MouseEvent>) => void;
+  searchHandler?: (_e: React.MouseEvent<SVGElement, MouseEvent>) => void;
   children?: React.ReactNode;
 }
 
-export function AccordionContainer({ field, isOpen, children, searchHandler }: AccordionContainerProps) {
+export function AccordionContainer({ field, children }: AccordionContainerProps) {
   const { t } = useI18n();
 
   const label = t(`common.filters.labels.${field.key}`, { defaultValue: field.key });
@@ -29,42 +29,34 @@ export function AccordionContainer({ field, isOpen, children, searchHandler }: A
 
   function renderTrigger() {
     return (
-      <div className="flex items-center justify-between w-full text-sm">
-        <span>{label}</span>
-        {isOpen && searchHandler && <SearchIcon size={18} className="z-40" aria-hidden onClick={searchHandler} />}
+      <div className="flex items-center justify-between w-full text-xs">
+        <span className="capitalize">{label}</span>
       </div>
     );
   }
 
   return (
-    <AccordionItem key={field.key} value={field.key}>
-      <AccordionTrigger className="AccordionTrigger">
-        {tooltipContent ? (
-          <Tooltip>
-            <TooltipTrigger asChild>{renderTrigger()}</TooltipTrigger>
-            <TooltipContent>{tooltipContent}</TooltipContent>
-          </Tooltip>
-        ) : (
-          renderTrigger()
-        )}
-      </AccordionTrigger>
-      <AccordionContent>{children}</AccordionContent>
-    </AccordionItem>
-  );
-}
-
-export function MultiSelectFilterContainer({ field, isOpen }: FilterContainerProps) {
-  const [searchVisible, setSearchVisible] = React.useState(false);
-
-  function handleSearch(e: React.MouseEvent<SVGElement, MouseEvent>): void {
-    e.stopPropagation();
-    setSearchVisible(!searchVisible);
-  }
-
-  return (
-    <AccordionContainer field={field} isOpen={isOpen} searchHandler={handleSearch}>
-      <MultiSelectFilter field={field} searchVisible={searchVisible} />
-    </AccordionContainer>
+    <Card size="sm">
+      <AccordionItem key={field.key} value={field.key}>
+        <CardHeader size="sm">
+          <AccordionTrigger>
+            {tooltipContent ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>{renderTrigger()}</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>{tooltipContent}</span>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              renderTrigger()
+            )}
+          </AccordionTrigger>
+        </CardHeader>
+        <AccordionContent className="pb-0">{children}</AccordionContent>
+      </AccordionItem>
+    </Card>
   );
 }
 
@@ -77,7 +69,7 @@ export function FilterComponent({ field }: FilterContainerProps) {
 
   switch (field.type) {
     case 'multiple':
-      filterElement = <MultiSelectFilter field={field} searchVisible={true} />;
+      filterElement = <MultiSelectFilter field={field} />;
       break;
     case 'numerical':
       filterElement = <NumericalFilter field={field} />;
@@ -107,7 +99,11 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
 
   switch (fieldType) {
     case 'multiple':
-      filterElement = <MultiSelectFilterContainer field={field} isOpen={isOpen} />;
+      filterElement = (
+        <AccordionContainer field={field} isOpen={isOpen}>
+          <MultiSelectFilter field={field} />
+        </AccordionContainer>
+      );
       break;
     case 'numerical':
       filterElement = (
@@ -126,5 +122,6 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
     default:
       filterElement = <div>{t('common.filters.unsupported_type', { type: field.type })}</div>;
   }
+
   return filterElement;
 }
