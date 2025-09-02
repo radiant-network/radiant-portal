@@ -32,7 +32,7 @@ jobs:
           cd frontend
           npm install
           cd components
-          npx msw init stories/public
+          npx msw init
           npm run build:storybook:radiant
           cp stories/public/mockServiceWorker.js storybook-static/
 
