@@ -16,7 +16,7 @@ if (location.hostname === 'radiant-network.github.io') {
   console.log('Configure MSW service worker for radiant-network.github.io');
   options = {
     serviceWorker: {
-      url: '/docs/mockServiceWorker.js',
+      url: './mockServiceWorker.js',
     },
   };
 }
