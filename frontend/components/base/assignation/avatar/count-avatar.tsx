@@ -4,10 +4,12 @@ import { cn } from '@/components/lib/utils';
 import { avatarStyles, getOverlapClasses } from './avatar.styles';
 import { CountAvatarProps } from './avatar.types';
 import { getInitials, getUserColor } from './avatar.utils';
+import { AvatarPopover } from './avatar-popover';
 
 export function CountAvatar({
   firstUser,
   additionalCount,
+  allUsers,
   size = 'md',
   className,
   'data-testid': testId,
@@ -21,7 +23,7 @@ export function CountAvatar({
 
   const countText = additionalCount > 99 ? '99+' : `+${additionalCount}`;
 
-  return (
+  const avatarElement = (
     <div
       className={cn('flex items-center', className)}
       data-testid={testId}
@@ -40,4 +42,17 @@ export function CountAvatar({
       </Avatar>
     </div>
   );
+
+  // Show popover if we have all users and any have additional details
+  const shouldShowPopover = allUsers && allUsers.some(user => user.email || user.organization);
+
+  if (shouldShowPopover) {
+    return (
+      <AvatarPopover users={allUsers} size={size} data-testid={testId}>
+        {avatarElement}
+      </AvatarPopover>
+    );
+  }
+
+  return avatarElement;
 }

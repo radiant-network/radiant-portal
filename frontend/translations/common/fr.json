@@ -478,6 +478,12 @@
           "upload_file_format": "Formats de fichiers acceptés : tsv, csv"
         }
       }
+    },
+    "user_selection": {
+      "search_placeholder": "Rechercher",
+      "remove_assignment": "Retirer l'assignation",
+      "no_users_found": "Aucun utilisateur trouvé",
+      "start_typing_to_search": "Commencer à taper pour rechercher"
     }
   },
   "case_exploration": {

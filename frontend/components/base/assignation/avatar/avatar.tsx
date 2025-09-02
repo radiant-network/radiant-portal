@@ -13,21 +13,54 @@ import { UnassignedAvatar } from './unassigned-avatar';
  * - 2 users: DualAvatar (two overlapping colored circles with initials)
  * - 3+ users: CountAvatar (first user avatar + count circle)
  */
-export function Avatar({ users = [], size = 'md', className, 'data-testid': testId }: AvatarProps) {
+export function Avatar({
+  users = [],
+  size = 'md',
+  className,
+  'data-testid': testId,
+  canAssign,
+  onAssignClick,
+}: AvatarProps) {
   // Filter out any falsy users and ensure we have valid user objects
   const validUsers = users.filter(user => user && user.id && user.name);
   const userCount = validUsers.length;
 
   if (userCount === 0) {
-    return <UnassignedAvatar size={size} className={className} data-testid={testId} />;
+    return (
+      <UnassignedAvatar
+        size={size}
+        className={className}
+        data-testid={testId}
+        canAssign={canAssign}
+        onAssignClick={onAssignClick}
+      />
+    );
   }
 
   if (userCount === 1) {
-    return <SingleAvatar user={validUsers[0]} size={size} className={className} data-testid={testId} />;
+    return (
+      <SingleAvatar
+        user={validUsers[0]}
+        size={size}
+        className={className}
+        data-testid={testId}
+        canAssign={canAssign}
+        onAssignClick={onAssignClick}
+      />
+    );
   }
 
   if (userCount === 2) {
-    return <DualAvatar users={[validUsers[0], validUsers[1]]} size={size} className={className} data-testid={testId} />;
+    return (
+      <DualAvatar
+        users={[validUsers[0], validUsers[1]]}
+        size={size}
+        className={className}
+        data-testid={testId}
+        canAssign={canAssign}
+        onAssignClick={onAssignClick}
+      />
+    );
   }
 
   // 3 or more users
@@ -35,9 +68,12 @@ export function Avatar({ users = [], size = 'md', className, 'data-testid': test
     <CountAvatar
       firstUser={validUsers[0]}
       additionalCount={userCount - 1}
+      allUsers={validUsers}
       size={size}
       className={className}
       data-testid={testId}
+      canAssign={canAssign}
+      onAssignClick={onAssignClick}
     />
   );
 }

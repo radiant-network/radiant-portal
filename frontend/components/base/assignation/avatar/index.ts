@@ -7,6 +7,13 @@ export { SingleAvatar } from './single-avatar';
 export { DualAvatar } from './dual-avatar';
 export { CountAvatar } from './count-avatar';
 
+// Popover components
+export { AvatarPopover } from './avatar-popover';
+export { AvatarUserItem } from './avatar-user-item';
+
+// User Selection
+export { UserSelection, UserSelectionPopover } from '../user-selection';
+
 // Types
 export type {
   AvatarUser,

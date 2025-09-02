@@ -2,6 +2,8 @@ export interface AvatarUser {
   id: string;
   name: string;
   initials?: string;
+  email?: string;
+  organization?: string;
 }
 
 export interface AvatarProps {
@@ -9,12 +11,16 @@ export interface AvatarProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   'data-testid'?: string;
+  canAssign?: boolean;
+  onAssignClick?: () => void;
 }
 
 export interface BaseAvatarProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   'data-testid'?: string;
+  canAssign?: boolean;
+  onAssignClick?: () => void;
 }
 
 export interface SingleAvatarProps extends BaseAvatarProps {
@@ -28,4 +34,5 @@ export interface DualAvatarProps extends BaseAvatarProps {
 export interface CountAvatarProps extends BaseAvatarProps {
   firstUser: AvatarUser;
   additionalCount: number;
+  allUsers?: AvatarUser[]; // All users for popover, if available
 }

@@ -16,15 +16,15 @@ export const avatarStyles = tv({
     size: {
       sm: {
         container: '!h-6 !w-6', // 24px outer = 20px content
-        fallback: 'text-xs', // 12px with font-weight: 400
+        fallback: 'text-xs font-normal leading-5 tracking-wider', // 12px, 400 weight, 20px line-height, 0.4px letter-spacing
       },
       md: {
         container: '!h-7 !w-7', // 28px outer = 24px content (default)
-        fallback: 'text-xs', // 12px with font-weight: 400
+        fallback: 'text-xs font-normal leading-5 tracking-wider', // 12px, 400 weight, 20px line-height, 0.4px letter-spacing
       },
       lg: {
         container: '!h-10 !w-10', // 40px outer = 32px content
-        fallback: 'text-sm', // 14px with font-weight: 400
+        fallback: 'text-sm font-normal leading-5 tracking-wide', // 14px with font-weight: 400
       },
     },
     variant: {
@@ -63,8 +63,8 @@ export const avatarStyles = tv({
  */
 export const getOverlapClasses = (size: 'sm' | 'md' | 'lg') => {
   const overlapMap = {
-    sm: '-ml-2', // 20px avatars
-    md: '-ml-2', // 24px avatars
+    sm: '-ml-3', // 20px avatars
+    md: '-ml-3', // 24px avatars
     lg: '-ml-3', // 32px avatars
   };
 

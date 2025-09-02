@@ -29,17 +29,17 @@ export function getInitials(user: AvatarUser): string {
  * Uses HSL color generation similar to ferlab-ui but with the project's theme colors
  */
 export function getUserColor(userId: string): string {
-  // Available theme-aware colors from the design system that work well with white text
+  // Available theme-aware colors from the design system that work well with white text (darker shades)
   const colors = [
-    'bg-amber', // --color-amber with theme support
-    'bg-red', // --color-red with theme support
-    'bg-orange', // --color-orange with theme support
-    'bg-lime', // --color-lime with theme support
-    'bg-green', // --color-green with theme support
-    'bg-cyan', // --color-cyan with theme support
-    'bg-blue', // --color-blue with theme support
-    'bg-violet', // --color-violet with theme support
-    'bg-fuchsia', // --color-fuchsia with theme support
+    'bg-amber-600', // --color-amber-600 with theme support
+    'bg-red-600', // --color-red-600 with theme support
+    'bg-orange-600', // --color-orange-600 with theme support
+    'bg-lime-600', // --color-lime-600 with theme support
+    'bg-green-600', // --color-green-600 with theme support
+    'bg-cyan-600', // --color-cyan-600 with theme support
+    'bg-blue-600', // --color-blue-600 with theme support
+    'bg-violet-600', // --color-violet-600 with theme support
+    'bg-fuchsia-600', // --color-fuchsia-600 with theme support
   ];
 
   // Hash function similar to ferlab-ui for consistency

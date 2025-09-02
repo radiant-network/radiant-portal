@@ -4,6 +4,7 @@ import { cn } from '@/components/lib/utils';
 import { avatarStyles, getOverlapClasses } from './avatar.styles';
 import { DualAvatarProps } from './avatar.types';
 import { getInitials, getUserColor } from './avatar.utils';
+import { AvatarPopover } from './avatar-popover';
 
 export function DualAvatar({ users, size = 'md', className, 'data-testid': testId }: DualAvatarProps) {
   const [firstUser, secondUser] = users;
@@ -17,7 +18,7 @@ export function DualAvatar({ users, size = 'md', className, 'data-testid': testI
   const secondStyles = avatarStyles({ size, variant: 'dual', position: 'second' });
   const overlapClass = getOverlapClasses(size);
 
-  return (
+  const avatarElement = (
     <div
       className={cn('flex items-center', className)}
       data-testid={testId}
@@ -38,4 +39,17 @@ export function DualAvatar({ users, size = 'md', className, 'data-testid': testI
       </Avatar>
     </div>
   );
+
+  // Show popover if any user has additional details
+  const shouldShowPopover = users.some(user => user.email || user.organization);
+
+  if (shouldShowPopover) {
+    return (
+      <AvatarPopover users={users} size={size} data-testid={testId}>
+        {avatarElement}
+      </AvatarPopover>
+    );
+  }
+
+  return avatarElement;
 }
