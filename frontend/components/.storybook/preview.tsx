@@ -11,7 +11,6 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n'; // Use the Storybook-specific i18n instance
 import ThemeProvider from '../feature/theme-toggle/theme-provider';
 
-// 
 let options = {};
 console.log(`Currently hosted on ${location.hostname}`);
 if (location.hostname === 'radiant-network.github.io') {

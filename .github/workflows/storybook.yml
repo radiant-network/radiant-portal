@@ -21,10 +21,10 @@ jobs:
       - name: Check Changed Files 👀
         uses: dorny/paths-filter@v3
         id: filter
-        with:
-          filters: |
-            frontend:
-              - 'frontend/components/**'
+        # with:
+        #   filters: |
+        #     frontend:
+        #       - 'frontend/components/**'
 
       - name: Install dependencies and build 🔧
         if: steps.filter.outputs.frontend == 'true'
@@ -35,6 +35,8 @@ jobs:
           npx msw init
           npm run build:storybook:radiant
           cp stories/public/mockServiceWorker.js storybook-static/
+          cd storybook-static
+          ls -a
 
       - name: Deploy 🚀
         if: steps.filter.outputs.frontend == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
