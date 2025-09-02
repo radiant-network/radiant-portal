@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -206,4 +207,24 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 			"limit": 2
 		}`
 	assertDocumentsSearchHandler(t, "simple", body, expected)
+}
+
+func assertDocumentIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
+	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewDocumentsRepository(db)
+		router := gin.Default()
+		router.GET("/documents/autocomplete", server.DocumentsAutocompleteHandler(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/documents/autocomplete?prefix=%s&limit=%d", prefix, limit), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_DocumentIdsAutoComplete(t *testing.T) {
+	expected := `[{"type":"case_id", "value":"1"}, {"type":"document_id", "value":"1"}, {"type":"patient_id", "value":"1"}, {"type":"sample_id", "value":"1"}, {"type":"seq_id", "value":"1"}]`
+	assertDocumentIdsAutoComplete(t, "simple", "1", 5, expected)
 }

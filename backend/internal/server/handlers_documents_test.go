@@ -67,3 +67,20 @@ func Test_SearchDocumentsHandler(t *testing.T) {
 		"count": 1
 	}`, w.Body.String())
 }
+
+func Test_DocumentsAutocompleteHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/documents/autocomplete", DocumentsAutocompleteHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/documents/autocomplete?prefix=1&limit=5", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[
+		{"type":"case_id", "value":"1"},
+		{"type":"patient_id", "value":"10"},
+		{"type":"case_id", "value":"10"}
+	]`, w.Body.String())
+}

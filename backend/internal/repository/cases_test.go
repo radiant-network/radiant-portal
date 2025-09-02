@@ -115,7 +115,7 @@ func Test_SearchCases_OnPatientMRN(t *testing.T) {
 	})
 }
 
-func Test_SearchById(t *testing.T) {
+func Test_Cases_SearchById(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		autocompleteResult, err := repo.SearchById("1", 5)

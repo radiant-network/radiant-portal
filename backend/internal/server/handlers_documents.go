@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -47,5 +48,33 @@ func SearchDocumentsHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 
 		searchResponse := types.DocumentsSearchResponse{List: *documents, Count: *count}
 		c.JSON(http.StatusOK, searchResponse)
+	}
+}
+
+// DocumentsAutocompleteHandler handles retrieving ids by autocomplete
+// @Summary Get types.AutocompleteResult list of matching prefix
+// @Id autocompleteDocuments
+// @Description Retrieve types.AutocompleteResult list of ids matching prefix
+// @Tags documents
+// @Security bearerauth
+// @Param prefix query string true "Prefix"
+// @Param limit query string false "Limit"
+// @Produce json
+// @Success 200 {array} types.AutocompleteResult
+// @Failure 500 {object} types.ApiError
+// @Router /documents/autocomplete [get]
+func DocumentsAutocompleteHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			limit = 25
+		}
+		ids, err := repo.SearchById(prefix, limit)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, ids)
 	}
 }

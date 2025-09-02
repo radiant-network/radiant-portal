@@ -346,3 +346,32 @@ func Test_SearchDocumentsFilterOnDataTypeCode(t *testing.T) {
 		assert.Equal(t, 204, document204.DocumentID)
 	})
 }
+
+func Test_Documents_SearchById(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		autocompleteResult, err := repo.SearchById("1", 10)
+		assert.NoError(t, err)
+		assert.Equal(t, len(*autocompleteResult), 10)
+		assert.Equal(t, (*autocompleteResult)[0].Type, "case_id")
+		assert.Equal(t, (*autocompleteResult)[0].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[1].Type, "document_id")
+		assert.Equal(t, (*autocompleteResult)[1].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[2].Type, "patient_id")
+		assert.Equal(t, (*autocompleteResult)[2].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[3].Type, "sample_id")
+		assert.Equal(t, (*autocompleteResult)[3].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[4].Type, "seq_id")
+		assert.Equal(t, (*autocompleteResult)[4].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[5].Type, "task_id")
+		assert.Equal(t, (*autocompleteResult)[5].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[6].Type, "case_id")
+		assert.Equal(t, (*autocompleteResult)[6].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[7].Type, "document_id")
+		assert.Equal(t, (*autocompleteResult)[7].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[8].Type, "patient_id")
+		assert.Equal(t, (*autocompleteResult)[8].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[9].Type, "sample_id")
+		assert.Equal(t, (*autocompleteResult)[9].Value, "10")
+	})
+}

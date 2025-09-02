@@ -4023,6 +4023,52 @@ export class CasesApi extends BaseAPI {
 export const DocumentsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Retrieve AutocompleteResult list of ids matching prefix
+         * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        autocompleteDocuments: async (prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'prefix' is not null or undefined
+            assertParamExists('autocompleteDocuments', 'prefix', prefix)
+            const localVarPath = `/documents/autocomplete`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (prefix !== undefined) {
+                localVarQueryParameter['prefix'] = prefix;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Search documents
          * @summary Search documents
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -4073,6 +4119,20 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DocumentsApiAxiosParamCreator(configuration)
     return {
         /**
+         * Retrieve AutocompleteResult list of ids matching prefix
+         * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async autocompleteDocuments(prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutocompleteResult>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.autocompleteDocuments(prefix, limit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DocumentsApi.autocompleteDocuments']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Search documents
          * @summary Search documents
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -4096,6 +4156,17 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
     const localVarFp = DocumentsApiFp(configuration)
     return {
         /**
+         * Retrieve AutocompleteResult list of ids matching prefix
+         * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        autocompleteDocuments(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutocompleteResult>> {
+            return localVarFp.autocompleteDocuments(prefix, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Search documents
          * @summary Search documents
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -4115,6 +4186,19 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
  * @extends {BaseAPI}
  */
 export class DocumentsApi extends BaseAPI {
+    /**
+     * Retrieve AutocompleteResult list of ids matching prefix
+     * @summary Get AutocompleteResult list of matching prefix
+     * @param {string} prefix Prefix
+     * @param {string} [limit] Limit
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public autocompleteDocuments(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return DocumentsApiFp(this.configuration).autocompleteDocuments(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Search documents
      * @summary Search documents

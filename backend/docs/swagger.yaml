@@ -1824,6 +1824,42 @@ paths:
       summary: Search cases
       tags:
       - cases
+  /documents/autocomplete:
+    get:
+      description: Retrieve AutocompleteResult list of ids matching prefix
+      operationId: autocompleteDocuments
+      parameters:
+      - description: Prefix
+        in: query
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - description: Limit
+        in: query
+        name: limit
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AutocompleteResult'
+                type: array
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get AutocompleteResult list of matching prefix
+      tags:
+      - documents
   /documents/search:
     post:
       description: Search documents
