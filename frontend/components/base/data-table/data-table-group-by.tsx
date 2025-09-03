@@ -56,19 +56,29 @@ function DataTableGroupBy({ table, grouping, groupByColumns, defaultColumnSettin
             <TooltipTrigger asChild>
               <div className="flex items-center gap-2">
                 <CombineIcon />
-                {hasGroupedValue && (
-                  <Badge variant="secondary" className="capitalize">
-                    {grouping[0]}
-                  </Badge>
-                )}
+                {hasGroupedValue && <Badge className="capitalize">{grouping[0]}</Badge>}
               </div>
             </TooltipTrigger>
             <TooltipContent sideOffset={12}>{t('common.table.group_by')}</TooltipContent>
           </Tooltip>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>{t('common.table.group_by')}</DropdownMenuLabel>
+      <DropdownMenuContent className="w-[180px]">
+        <DropdownMenuLabel>
+          <div className="flex gap-2 items-center">
+            <span className="flex-1">{t('common.table.group_by')}</span>
+            {grouping.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="px-0 hover:bg-transparent"
+                onClick={() => table.resetGrouping()}
+              >
+                {t('common.actions.clear')}
+              </Button>
+            )}
+          </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {groupByColumns.map(column => (
           <DropdownMenuCheckboxItem
