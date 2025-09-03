@@ -470,6 +470,8 @@ components:
       properties:
         case_id:
           type: integer
+        created_on:
+          type: string
         data_type_code:
           type: string
         document_id:
@@ -500,6 +502,7 @@ components:
           type: integer
       required:
       - case_id
+      - created_on
       - data_type_code
       - document_id
       - format_code

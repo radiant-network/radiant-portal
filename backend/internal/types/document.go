@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type Document struct {
 	ID               int
 	Name             string
@@ -13,24 +15,26 @@ type Document struct {
 	Url              string
 	Hash             string
 	Patients         []Patient `gorm:"many2many:radiant_jdbc.public.document_has_patient;"`
+	CreatedOn        time.Time
 }
 
 type DocumentResult struct {
-	DocumentID                int    `json:"document_id" validate:"required"`
-	Name                      string `json:"name" validate:"required"`
-	FormatCode                string `json:"format_code" validate:"required"`
-	DataTypeCode              string `json:"data_type_code" validate:"required"`
-	Size                      int    `json:"size" validate:"required"`
-	CaseID                    int    `json:"case_id" validate:"required"`
-	PerformerLabCode          string `json:"performer_lab_code,omitempty"`
-	PerformerLabName          string `json:"performer_lab_name,omitempty"`
-	RelationshipToProbandCode string `json:"relationship_to_proband_code" validate:"required"`
-	PatientID                 int    `json:"patient_id" validate:"required"`
-	SubmitterSampleID         string `json:"submitter_sample_id,omitempty"`
-	TaskID                    int    `json:"task_id" validate:"required"`
-	SeqID                     int    `json:"seq_id,omitempty"`
-	Hash                      string `json:"hash,omitempty"`
-	RunAlias                  string `json:"run_alias,omitempty"`
+	DocumentID                int       `json:"document_id" validate:"required"`
+	Name                      string    `json:"name" validate:"required"`
+	FormatCode                string    `json:"format_code" validate:"required"`
+	DataTypeCode              string    `json:"data_type_code" validate:"required"`
+	Size                      int       `json:"size" validate:"required"`
+	CaseID                    int       `json:"case_id" validate:"required"`
+	PerformerLabCode          string    `json:"performer_lab_code,omitempty"`
+	PerformerLabName          string    `json:"performer_lab_name,omitempty"`
+	RelationshipToProbandCode string    `json:"relationship_to_proband_code" validate:"required"`
+	PatientID                 int       `json:"patient_id" validate:"required"`
+	SubmitterSampleID         string    `json:"submitter_sample_id,omitempty"`
+	TaskID                    int       `json:"task_id" validate:"required"`
+	SeqID                     int       `json:"seq_id,omitempty"`
+	Hash                      string    `json:"hash,omitempty"`
+	RunAlias                  string    `json:"run_alias,omitempty"`
+	CreatedOn                 time.Time `json:"created_on" validate:"required"`
 }
 
 var DocumentFields = []Field{

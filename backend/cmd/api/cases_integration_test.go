@@ -250,6 +250,7 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 		"list": [
 			{
 				"case_id":21, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
 				"document_id":204, 
 				"format_code":"tbi", 
@@ -263,6 +264,7 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"task_id":21
 			}, {
 				"case_id":21, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
 				"document_id":204, 
 				"format_code":"tbi", 

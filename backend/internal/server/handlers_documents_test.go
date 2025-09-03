@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -30,6 +31,8 @@ func (m *MockRepository) SearchDocuments(userQuery types.ListQuery) (*[]types.Do
 			SeqID:                     59,
 			Hash:                      "5d41402abc4b2a76b9719d911017c795",
 			RunAlias:                  "A00516_0227",
+			CreatedOn: time.Date(
+				2000, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 	}, &count, nil
 }
@@ -78,6 +81,7 @@ func Test_SearchDocumentsHandler(t *testing.T) {
 	assert.JSONEq(t, `{
 		"list": [{
 			"case_id":21, 
+			"created_on": "2000-01-01T00:00:00Z",
 			"data_type_code":"snv", 
 			"document_id":204, 
 			"format_code":"tbi", 
