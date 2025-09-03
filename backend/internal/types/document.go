@@ -146,3 +146,11 @@ var DocumentHasPatientTable = Table{
 func (Document) TableName() string {
 	return DocumentTable.Name
 }
+
+type DocumentFilters struct {
+	Project               []Aggregation `json:"project" validate:"required"`
+	PerformerLab          []Aggregation `json:"performer_lab" validate:"required"`
+	RelationshipToProband []Aggregation `json:"relationship_to_proband" validate:"required"`
+	Format                []Aggregation `json:"format" validate:"required"`
+	DataType              []Aggregation `json:"data_type" validate:"required"`
+}

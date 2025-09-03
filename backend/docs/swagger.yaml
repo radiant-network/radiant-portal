@@ -432,6 +432,40 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
+    DocumentFilters:
+      properties:
+        data_type:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        format:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        performer_lab:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        project:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        relationship_to_proband:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+      required:
+      - data_type
+      - format
+      - performer_lab
+      - project
+      - relationship_to_proband
+      type: object
     DocumentResult:
       properties:
         case_id:
@@ -1858,6 +1892,35 @@ paths:
       security:
       - bearerauth: []
       summary: Get AutocompleteResult list of matching prefix
+      tags:
+      - documents
+  /documents/filters:
+    post:
+      description: Retrieve DocumentFilters documents filters
+      operationId: documentsFilters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FiltersBodyWithCriteria'
+        description: Filters Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentFilters'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get DocumentFilters documents filters
       tags:
       - documents
   /documents/search:

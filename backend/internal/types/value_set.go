@@ -92,7 +92,8 @@ func (Platform) TableName() string {
 }
 
 var FamilyRelationshipTable = Table{
-	Name: "radiant_jdbc.public.family_relationship",
+	Name:  "radiant_jdbc.public.family_relationship",
+	Alias: "fam_rel",
 }
 
 type FamilyRelationship struct {
@@ -201,7 +202,8 @@ func (Onset) TableName() string {
 }
 
 var DataTypeTable = Table{
-	Name: "radiant_jdbc.public.data_type",
+	Name:  "radiant_jdbc.public.data_type",
+	Alias: "data_type",
 }
 
 type DataType struct {
@@ -213,7 +215,8 @@ func (DataType) TableName() string {
 }
 
 var FileFormatTable = Table{
-	Name: "radiant_jdbc.public.file_format",
+	Name:  "radiant_jdbc.public.file_format",
+	Alias: "format",
 }
 
 type FileFormat struct {

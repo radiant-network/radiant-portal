@@ -78,3 +78,41 @@ func DocumentsAutocompleteHandler(repo repository.DocumentsDAO) gin.HandlerFunc 
 		c.JSON(http.StatusOK, ids)
 	}
 }
+
+// DocumentsFiltersHandler handles retrieving documents filters
+// @Summary Get types.DocumentFilters documents filters
+// @Id documentsFilters
+// @Description Retrieve types.DocumentFilters documents filters
+// @Tags documents
+// @Security bearerauth
+// @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.DocumentFilters
+// @Failure 500 {object} types.ApiError
+// @Router /documents/filters [post]
+func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body types.FiltersBodyWithCriteria
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		query, err := types.NewAggregationQueryFromCriteria(body.SearchCriteria, types.DocumentFields)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		filters, err := repo.GetDocumentsFilters(query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, filters)
+	}
+}
