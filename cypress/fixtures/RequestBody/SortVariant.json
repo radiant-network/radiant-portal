@@ -1,0 +1,15 @@
+{
+  "additional_fields": ["rsnumber", "symbol", "vep_impact", "is_mane_select", "is_canonical", "omim_inheritance_code", "clinvar", "exomiser_gene_combined_score", "exomiser_acmg_classification", "pf_wgs", "transcript_id", "has_interpretation"],
+  "limit": 2,
+  "page_index": 0,
+  "sort": [
+    {
+      "field": "_FIELD",
+      "order": "_ORDER"
+    }
+  ],
+  "sqon": {
+    "content": [],
+    "op": "and"
+  }
+}

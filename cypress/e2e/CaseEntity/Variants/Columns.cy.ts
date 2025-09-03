@@ -23,6 +23,7 @@ describe('Case Entity - Variants - Columns', () => {
     VariantsTable.validations.shouldShowSortableColumns();
   });
 
+  // TODO: Test no tooltip
   it.skip('Tooltip', () => {
     setupTest();
     VariantsTable.validations.shouldShowColumnTooltips();
@@ -37,4 +38,3 @@ describe('Case Entity - Variants - Columns', () => {
     VariantsTable.validations.shouldDisplayColumn('type');
   });
 });
-

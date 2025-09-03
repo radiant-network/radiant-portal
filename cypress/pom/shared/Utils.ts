@@ -1,10 +1,10 @@
 /// <reference types="cypress"/>
-import { CommonSelectors } from "./Selectors";
+import { CommonSelectors } from './Selectors';
 
 /**
  * Constant represents one minute
  */
-export const oneMinute = 60*1000;
+export const oneMinute = 60 * 1000;
 
 /**
  * Gets the column name from a columns array by column ID.
@@ -26,20 +26,21 @@ export const getColumnName = (columns: any, columnID: string) => {
  */
 export const getColumnPosition = (tableHead: string, columns: any, columnID: string) => {
   const columnName = getColumnName(columns, columnID);
-  return cy.get(`${tableHead} ${CommonSelectors.tableCellHead}`).should('be.visible').then(($cells) => {
-    let position;
-    if (columnName.startsWith('[')) {
-      position = Array.from($cells).findIndex(($cell) => {
-        return Cypress.$($cell).find(columnName).length > 0;
-      });
-    } else {
-      position = Array.from($cells).findIndex(($cell) => 
-        $cell.textContent?.match(stringToRegExp(columnName, true))
-      );
-    };
-    
-    return position;
-  });
+  return cy
+    .get(`${tableHead} ${CommonSelectors.tableCellHead}`)
+    .should('be.visible')
+    .then($cells => {
+      let position;
+      if (columnName.startsWith('[')) {
+        position = Array.from($cells).findIndex($cell => {
+          return Cypress.$($cell).find(columnName).length > 0;
+        });
+      } else {
+        position = Array.from($cells).findIndex($cell => $cell.textContent?.match(stringToRegExp(columnName, true)));
+      }
+
+      return position;
+    });
 };
 
 /**

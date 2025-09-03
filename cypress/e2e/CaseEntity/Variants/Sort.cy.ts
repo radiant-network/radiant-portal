@@ -8,44 +8,31 @@ describe('Case Entity - Variants - Sort', () => {
     cy.visitCaseVariantsPage('1');
   };
 
-  it.skip('Variant', () => {
+  it('Api request [SJRA-661]', () => {
+    setupTest();
+    VariantsTable.validations.shouldRequestOnSort('variant');
+  });
+
+  it('Alphanumeric', () => {
     setupTest();
     VariantsTable.validations.shouldSortColumn('variant');
   });
 
-  it.skip('Type', () => {
-    setupTest();
-    VariantsTable.validations.shouldSortColumn('type');
-  });
-
-  it.skip('Exo.', () => {
+  // Activate after SJRA-661
+  it.skip('Number', () => {
     setupTest();
     VariantsTable.validations.shouldSortColumn('exomiser');
   });
 
-  it.skip('ACMG Exo.', () => {
+  it('Tag', () => {
     setupTest();
     VariantsTable.validations.shouldSortColumn('acmg_exomiser');
   });
 
-  it.skip('gnomAD', () => {
+  // Activate after SJRA-661
+  it.skip('Scientific number', () => {
     setupTest();
     VariantsTable.validations.shouldSortColumn('gnomad');
-  });
-
-  it.skip('Freq.', () => {
-    setupTest();
-    VariantsTable.validations.shouldSortColumn('freq');
-  });
-
-  it.skip('GQ', () => {
-    setupTest();
-    VariantsTable.validations.shouldSortColumn('gq');
-  });
-
-  it.skip('AD Ratio', () => {
-    setupTest();
-    VariantsTable.validations.shouldSortColumn('ad_ratio');
   });
 
   it('Multiple [SJRA-661]', () => {

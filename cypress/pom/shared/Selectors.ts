@@ -1,6 +1,15 @@
 /// <reference types="cypress"/>
 export const CommonSelectors = {
+  anchorIcon: '[class*="lucide-arrow-up-right"]',
+  gnomadRedIcon: '[class*="text-red-500 bg-red-500"]',
+  interpretationIcon: '[class*="lucide-zap"]',
+  langButton: 'button[class*="text-muted-foreground px-3 text-base md:text-sm"]',
   link: '[href], a',
+  loadIndicator: 'animate-pulse',
+  maneCPath: 'path[d*="0ZM16"]',
+  maneMPath: 'path[d*="0ZM8"]',
+  manePPath: 'path[d*="0ZM10"]',
+  pillQueryActive: '[data-query-active="true"] [class="flex items-center py-[2px]"]',
   plusIcon: '[class*="lucide-plus"]',
   resetButton: 'button:contains("Reset")',
   settingsCheckbox: (value: string) => `[class*="items"]:contains("${value}") [role="checkbox"]`,
@@ -10,8 +19,10 @@ export const CommonSelectors = {
   tableCellData: 'td',
   tableCellHead: 'th',
   tableHead: 'table thead',
-  tablePagingCombobox: (tableID: string) => `[data-slot="card-content"]:has(#${tableID}) button[role="combobox"]`,
-  tableResultsCount: (tableID: string) => `[data-slot="card-content"]:has(#${tableID}) [class="text-xs text-muted-foreground"]`,
   tableRow: 'table tbody tr',
+  tag: (color: string) => `[class*="bg-${color}/20 text-${color}-foreground"]`,
+  tagDefault: '[class*="bg-primary text-primary-foreground"]',
   tooltipPopper: '[class*="radix-tooltip-content"]',
+  underlineHeader: '[class*="decoration-dotted"]',
+  vepIndicator: (color: string) => `[class*="text-indicator-${color}"]`,
 };
