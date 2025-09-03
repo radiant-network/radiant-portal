@@ -375,3 +375,23 @@ func Test_Documents_SearchById(t *testing.T) {
 		assert.Equal(t, (*autocompleteResult)[9].Value, "10")
 	})
 }
+
+func Test_GetDocumentsFilters(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.DocumentDataTypeCodeField.GetAlias(),
+				Value:     []interface{}{"snv"},
+			},
+		}
+		query, err := types.NewAggregationQueryFromCriteria(searchCriteria, DocumentsQueryConfigForTest.AllFields)
+		filters, err := repo.GetDocumentsFilters(query)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len((*filters).Project))
+		assert.Equal(t, 6, len((*filters).PerformerLab))
+		assert.Equal(t, 5, len((*filters).RelationshipToProband))
+		assert.Equal(t, 15, len((*filters).Format))
+		assert.Equal(t, 15, len((*filters).DataType))
+	})
+}
