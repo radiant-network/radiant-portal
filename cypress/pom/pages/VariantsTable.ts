@@ -12,7 +12,8 @@ const selectors = {
 const tableColumns = [
   {
     id: 'interpretation',
-    name: '[class*="lucide-zap"]',
+    name: CommonSelectors.interpretationIcon,
+    apiField: 'has_interpretation',
     isVisibleByDefault: true,
     isSortable: false,
     position: 1,
@@ -21,6 +22,7 @@ const tableColumns = [
   {
     id: 'variant',
     name: 'Variant',
+    apiField: 'hgvsg',
     isVisibleByDefault: true,
     isSortable: true,
     position: 2,
@@ -29,6 +31,7 @@ const tableColumns = [
   {
     id: 'type',
     name: 'Type',
+    apiField: 'variant_class',
     isVisibleByDefault: true,
     isSortable: true,
     position: 3,
@@ -37,6 +40,7 @@ const tableColumns = [
   {
     id: 'dbsnp',
     name: 'dbSNP',
+    apiField: 'rsnumber',
     isVisibleByDefault: true,
     isSortable: false,
     position: 4,
@@ -45,6 +49,7 @@ const tableColumns = [
   {
     id: 'gene',
     name: 'Gene',
+    apiField: 'symbol',
     isVisibleByDefault: true,
     isSortable: false,
     position: 5,
@@ -53,6 +58,7 @@ const tableColumns = [
   {
     id: 'consequence',
     name: 'Consequence',
+    apiField: 'picked_consequences',
     isVisibleByDefault: true,
     isSortable: false,
     position: 6,
@@ -61,6 +67,7 @@ const tableColumns = [
   {
     id: 'mane',
     name: 'MANE',
+    apiField: 'is_canonical',
     isVisibleByDefault: true,
     isSortable: false,
     position: 7,
@@ -69,6 +76,7 @@ const tableColumns = [
   {
     id: 'omim',
     name: 'OMIM',
+    apiField: 'omim_inheritance_code',
     isVisibleByDefault: true,
     isSortable: false,
     position: 8,
@@ -77,6 +85,7 @@ const tableColumns = [
   {
     id: 'clinvar',
     name: 'ClinVar',
+    apiField: 'clinvar',
     isVisibleByDefault: true,
     isSortable: false,
     position: 9,
@@ -85,6 +94,7 @@ const tableColumns = [
   {
     id: 'exomiser',
     name: 'Exo.',
+    apiField: 'exomiser_gene_combined_score',
     isVisibleByDefault: true,
     isSortable: true,
     position: 10,
@@ -93,6 +103,7 @@ const tableColumns = [
   {
     id: 'acmg_exomiser',
     name: 'ACMG Exo.',
+    apiField: 'exomiser_acmg_classification',
     isVisibleByDefault: true,
     isSortable: true,
     position: 11,
@@ -101,6 +112,7 @@ const tableColumns = [
   {
     id: 'gnomad',
     name: 'gnomAD',
+    apiField: 'gnomad_v3_af',
     isVisibleByDefault: true,
     isSortable: true,
     position: 12,
@@ -109,6 +121,7 @@ const tableColumns = [
   {
     id: 'freq',
     name: 'Freq.',
+    apiField: 'pf_wgs',
     isVisibleByDefault: true,
     isSortable: true,
     position: 13,
@@ -117,6 +130,7 @@ const tableColumns = [
   {
     id: 'gq',
     name: 'GQ',
+    apiField: 'genotype_quality',
     isVisibleByDefault: true,
     isSortable: true,
     position: 14,
@@ -125,6 +139,7 @@ const tableColumns = [
   {
     id: 'zyg',
     name: 'Zyg.',
+    apiField: 'zygosity',
     isVisibleByDefault: true,
     isSortable: false,
     position: 15,
@@ -133,11 +148,12 @@ const tableColumns = [
   {
     id: 'ad_ratio',
     name: 'AD Ratio',
+    apiField: 'ad_ratio',
     isVisibleByDefault: true,
     isSortable: true,
     position: 16,
     tooltip: null,
-  }
+  },
 ];
 
 export const VariantsTable = {
@@ -149,28 +165,30 @@ export const VariantsTable = {
      * @param onPlusIcon Click on the plus icon (default: false).
      */
     clickTableCellLink(dataVariant: any, columnID: string, onPlusIcon: boolean = false) {
-      cy.then(() => getColumnPosition(selectorHead, tableColumns, columnID).then((position) => {
-        if (position !== -1) {
-          switch (columnID) {
-            case 'variant':
-            case 'freq':
-              cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).invoke('removeAttr', 'target').clickAndWait({ force: true });
-            break;
-            case 'gene':
-              if (onPlusIcon) {
-                cy.get(selectors.tableCell(dataVariant)).eq(position).find('[class*="lucide-plus"]').clickAndWait({ force: true });
-              } else {
+      cy.then(() =>
+        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+          if (position !== -1) {
+            switch (columnID) {
+              case 'variant':
+              case 'freq':
+                cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).invoke('removeAttr', 'target').clickAndWait({ force: true });
+                break;
+              case 'gene':
+                if (onPlusIcon) {
+                  cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.plusIcon).clickAndWait({ force: true });
+                } else {
+                  cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
+                }
+                break;
+              default:
                 cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
-              }
-            break;
-            default:
-              cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
-            break;
-          };
-        } else {
-          cy.log(`Warning: Column ${columnID} not found`);
-        };
-      }));
+                break;
+            }
+          } else {
+            cy.log(`Warning: Column ${columnID} not found`);
+          }
+        })
+      );
     },
     /**
      * Hides a specific column in the table.
@@ -183,10 +201,10 @@ export const VariantsTable = {
      * Shows all columns in the table.
      */
     showAllColumns() {
-      tableColumns.forEach((column) => {
+      tableColumns.forEach(column => {
         if (!column.isVisibleByDefault) {
           cy.showColumn(column.name);
-        };
+        }
       });
     },
     /**
@@ -203,17 +221,17 @@ export const VariantsTable = {
      */
     sortColumn(columnID: string, needIntercept: boolean = true) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then((position) => {
+        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
           if (position !== -1) {
             if (needIntercept) {
               cy.sortTableAndIntercept(position, 1);
             } else {
               cy.sortTableAndWait(position);
-            };
+            }
           } else {
             cy.log(`Warning: Column ${columnID} not found`);
-          };
-        }),
+          }
+        })
       );
     },
     /**
@@ -242,9 +260,9 @@ export const VariantsTable = {
      */
     shouldHaveFirstRowValue(value: string | RegExp, columnID: string) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then((position) => {
+        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
           cy.validateTableFirstRowContent(value, position);
-        }),
+        })
       );
     },
     /**
@@ -256,11 +274,11 @@ export const VariantsTable = {
       switch (columnID) {
         case 'gene':
           cy.validatePillSelectedQuery('Gene Symbol', [dataVariant[columnID]]);
-        break;
+          break;
         default:
           cy.validatePillSelectedQuery(getColumnName(tableColumns, columnID), [dataVariant[columnID]]);
-        break;
-      };
+          break;
+      }
     },
     /**
      * Validates the link in a specific table cell for a given variant and column.
@@ -270,26 +288,26 @@ export const VariantsTable = {
      */
     shouldHaveTableCellLink(dataVariant: any, columnID: string) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then((position) => {
+        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
           if (position !== -1) {
             cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataVariant));
           } else {
             cy.log(`Warning: Column ${columnID} not found`);
-          };
-        }),
+          }
+        })
       );
     },
     /**
      * Validates the default visibility of each column.
      */
     shouldMatchDefaultColumnVisibility() {
-      tableColumns.forEach((column) => {
+      tableColumns.forEach(column => {
         const expectedExist = column.isVisibleByDefault ? 'exist' : 'not.exist';
         if (column.name.startsWith('[')) {
           cy.get(selectorHead).find(column.name).should(expectedExist);
         } else {
           cy.get(selectorHead).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
-        };
+        }
       });
     },
     /**
@@ -304,15 +322,83 @@ export const VariantsTable = {
      */
     shouldShowAllColumns() {
       VariantsTable.actions.showAllColumns();
-      tableColumns.forEach((column) => {
+      tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(selectors.tableHeadCell).eq(column.position).find(column.name).should('exist');
         } else {
-          cy.get(selectors.tableHeadCell)
-            .eq(column.position)
-            .contains(stringToRegExp(column.name, true /*exact*/))
-            .should('exist');
-        };
+          cy.get(selectors.tableHeadCell).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+        }
+      });
+    },
+    /**
+     * Validates the content of a specific column in the table for a given variant.
+     * @param columnID The ID of the column to validate.
+     * @param dataVariant The variant object containing the expected values.
+     */
+    shouldShowColumnContent(columnID: string, dataVariant: any) {
+      VariantsTable.actions.showAllColumns();
+      getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        if (position !== -1) {
+          switch (columnID) {
+            case 'interpretation':
+              cy.validateTableFirstRowClass(CommonSelectors.interpretationIcon, position);
+              break;
+            case 'dbsnp':
+              cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
+              break;
+            case 'gene':
+              cy.validateTableFirstRowContent(dataVariant[columnID], position);
+              cy.validateTableFirstRowClass(CommonSelectors.plusIcon, position);
+              break;
+            case 'consequence':
+              cy.validateTableFirstRowClass(dataVariant.consequenceImpact, position);
+              cy.validateTableFirstRowContent(dataVariant[columnID], position);
+              cy.validateTableFirstRowContent(dataVariant.aa_change, position);
+              break;
+            case 'mane':
+              cy.get(selectors.tableCell(dataVariant))
+                .eq(position)
+                .find(CommonSelectors.maneCPath)
+                .should(dataVariant.maneC ? 'exist' : 'not.exist');
+              cy.get(selectors.tableCell(dataVariant))
+                .eq(position)
+                .find(CommonSelectors.maneMPath)
+                .should(dataVariant.maneM ? 'exist' : 'not.exist');
+              cy.get(selectors.tableCell(dataVariant))
+                .eq(position)
+                .find(CommonSelectors.manePPath)
+                .should(dataVariant.maneP ? 'exist' : 'not.exist');
+              break;
+            case 'omim':
+              dataVariant[columnID].forEach((value: string | RegExp) => {
+                cy.validateTableFirstRowContent(value, position);
+              });
+              cy.validateTableFirstRowClass(CommonSelectors.tagDefault, position);
+              break;
+            case 'clinvar':
+              dataVariant[columnID].forEach((value: string | RegExp) => {
+                cy.validateTableFirstRowContent(value, position);
+              });
+              cy.validateTableFirstRowClass(CommonSelectors.tag('green'), position);
+              cy.validateTableFirstRowClass(CommonSelectors.tag('yellow'), position);
+              break;
+            case 'acmg_exomiser':
+              dataVariant[columnID].forEach((value: string | RegExp) => {
+                cy.validateTableFirstRowContent(value, position);
+              });
+              cy.validateTableFirstRowClass(CommonSelectors.tag('yellow'), position);
+              break;
+            case 'gnomad':
+              cy.validateTableFirstRowContent(dataVariant[columnID], position);
+              cy.validateTableFirstRowClass(CommonSelectors.gnomadRedIcon, position);
+              break;
+            default:
+              cy.validateTableFirstRowContent(dataVariant[columnID], position);
+              break;
+          }
+        } else {
+          cy.log(`Warning: Column ${columnID} not found`);
+        }
       });
     },
     /**
@@ -320,17 +406,17 @@ export const VariantsTable = {
      */
     shouldShowColumnTooltips() {
       VariantsTable.actions.showAllColumns();
-      tableColumns.forEach((column) => {
+      tableColumns.forEach(column => {
         cy.then(() =>
-          getColumnPosition(selectorHead, tableColumns, column.id).then((position) => {
+          getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
             if (position !== -1) {
               if (column.tooltip) {
                 cy.get(selectors.tableHeadCell).eq(position).shouldHaveTooltip(column.tooltip);
-              };
+              }
             } else {
-            cy.log(`Warning: Column ${column.id} not found`);
-          };
-          }),
+              cy.log(`Warning: Column ${column.id} not found`);
+            }
+          })
         );
       });
     },
@@ -340,127 +426,71 @@ export const VariantsTable = {
     shouldShowSortableColumns() {
       VariantsTable.actions.showAllColumns();
       VariantsTable.actions.unsortAllColumns();
-      tableColumns.forEach((column) => {
+      tableColumns.forEach(column => {
         cy.then(() =>
-          getColumnPosition(selectorHead, tableColumns, column.id).then((position) => {
+          getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
             if (position !== -1) {
               cy.get(selectors.tableHeadCell).eq(position).shouldBeSortable(column.isSortable);
             } else {
-            cy.log(`Warning: Column ${column.id} not found`);
-          };
-          }),
+              cy.log(`Warning: Column ${column.id} not found`);
+            }
+          })
         );
       });
     },
-      /**
-       * Validates the content of all columns in the table for a given variant.
-       * @param dataVariant The variant object containing the expected values.
-       */
-      shouldShowTableContent(dataVariant: any) {
-        VariantsTable.actions.showAllColumns();
-        tableColumns.forEach((column) => {
-          cy.then(() =>
-            getColumnPosition(selectorHead, tableColumns, column.id).then((position) => {
-              if (position !== -1) {
-                switch (column.id) {
-                case 'interpretation':
-                  cy.validateTableFirstRowClass('lucide-zap', position);
-                  break;
-                case 'dbsnp':
-                  cy.validateTableFirstRowClass('lucide-arrow-up-right', position);
-                  break;
-                case 'gene':
-                  cy.validateTableFirstRowContent(dataVariant[column.id], position);
-                  cy.validateTableFirstRowClass('lucide-plus', position);
-                  break;
-                case 'consequence':
-                  cy.validateTableFirstRowClass(dataVariant.consequenceImpact, position);
-                  cy.validateTableFirstRowContent(dataVariant[column.id], position);
-                  cy.validateTableFirstRowContent(dataVariant.aa_change, position);
-                  break;
-                case 'mane':
-                  cy.get(selectors.tableCell(dataVariant)).eq(position).find('path[d*="0ZM16"]').should(dataVariant.maneC ? 'exist' : 'not.exist');
-                  cy.get(selectors.tableCell(dataVariant)).eq(position).find('path[d*="0ZM8"]').should(dataVariant.maneM ? 'exist' : 'not.exist');
-                  cy.get(selectors.tableCell(dataVariant)).eq(position).find('path[d*="0ZM10"]').should(dataVariant.maneP ? 'exist' : 'not.exist');
-                  break;
-                case 'omim':
-                  dataVariant[column.id].forEach((value: string | RegExp) => {
-                    cy.validateTableFirstRowContent(value, position);
-                  });
-                  cy.validateTableFirstRowClass('bg-primary text-primary-foreground', position);
-                  break;
-                case 'clinvar':
-                  dataVariant[column.id].forEach((value: string | RegExp) => {
-                    cy.validateTableFirstRowContent(value, position);
-                  });
-                  cy.validateTableFirstRowClass('bg-green/20 text-green-foreground', position);
-                  cy.validateTableFirstRowClass('bg-yellow/20 text-yellow-foregroun', position);
-                  break;
-                case 'acmg_exomiser':
-                  dataVariant[column.id].forEach((value: string | RegExp) => {
-                    cy.validateTableFirstRowContent(value, position);
-                  });
-                  cy.validateTableFirstRowClass('bg-yellow/20 text-yellow-foregroun', position);
-                  break;
-                case 'gnomad':
-                  cy.validateTableFirstRowContent(dataVariant[column.id], position);
-                  cy.validateTableFirstRowClass('text-red-500 bg-red-500', position);
-                  break;
-                default:
-                  cy.validateTableFirstRowContent(dataVariant[column.id], position);
-                  break;
-              };
-            } else {
-              cy.log(`Warning: Column ${column.id} not found`);
-            };
-          }));
-        });
-      },
     /**
-     * Validates the sorting functionality of a column.
+     * Validates the request sent to api on sorting functionality of a column.
      * @param columnID The ID of the column to sort.
-     * @param needIntercept Whether to use an intercept for the sorting action (default: true).
      */
-    shouldSortColumn(columnID: string, needIntercept: boolean = true) {
+    shouldRequestOnSort(columnID: string) {
       VariantsTable.actions.showAllColumns();
       VariantsTable.actions.unsortAllColumns();
-      cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then((position) => {
-          if (position !== -1) {
-            switch (columnID) {
-              default:
-                VariantsTable.actions.sortColumn(columnID, needIntercept);
-                cy.wait(2000);
-                cy.get(CommonSelectors.tableRow)
-                  .eq(0)
-                  .find(CommonSelectors.tableCellData)
-                  .eq(position)
-                  .invoke('text')
-                  .then((biggestValue) => {
-                    const biggest = biggestValue.trim();
+      cy.intercept('POST', '**/list', req => {
+        expect(req.body.sort).to.have.length(1);
+        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
+      }).as('sortRequest');
+      VariantsTable.actions.sortColumn(columnID, false /*needIntercept*/);
+      cy.wait('@sortRequest');
+    },
+    /**
+     * Validates the sorting functionality of a column with mocked data.
+     * @param columnID The ID of the column to sort.
+     */
+    shouldSortColumn(columnID: string) {
+      VariantsTable.actions.showAllColumns();
+      VariantsTable.actions.unsortAllColumns();
+      const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
 
-                    VariantsTable.actions.sortColumn(columnID);
-                    cy.wait(2000);
-                    cy.get(CommonSelectors.tableRow)
-                      .eq(0)
-                      .find(CommonSelectors.tableCellData)
-                      .eq(position)
-                      .invoke('text')
-                      .then((smallestValue) => {
-                        const smallest = smallestValue.trim();
+      cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
+        cy.intercept('POST', '**/list', req => {
+          const mockBody = { ...mockRequestBody };
+          mockBody.sort.field = apiField;
+          mockBody.sort.order = 'asc';
+          req.alias = 'sortRequestAsc';
+          req.body = mockBody;
+        });
+        VariantsTable.actions.sortColumn(columnID, false /*needIntercept*/);
+        cy.wait('@sortRequestAsc').then(interceptionAsc => {
+          const smallest = interceptionAsc.response?.body[0][apiField];
 
-                        if (biggest.localeCompare(smallest) < 0) {
-                          throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
-                        };
-                      });
-                  });
-                break;
-            };
-          } else {
-            cy.log(`Warning: Column ${columnID} not found`);
-          };
-        }),
-      );
+          cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
+            cy.intercept('POST', '**/list', req => {
+              const mockBody = { ...mockRequestBody };
+              mockBody.sort.field = apiField;
+              mockBody.sort.order = 'desc';
+              req.alias = 'sortRequestDesc';
+              req.body = mockBody;
+            });
+            VariantsTable.actions.sortColumn(columnID, false /*needIntercept*/);
+            cy.wait('@sortRequestDesc').then(interceptionDesc => {
+              const biggest = interceptionDesc.response?.body[0][apiField];
+              if (typeof smallest === 'number' ? Number(biggest) - Number(smallest) : String(biggest).localeCompare(String(smallest)) < 0) {
+                throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
+              }
+            });
+          });
+        });
+      });
     },
   },
 };

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format:cypress": "prettier --write \"cypress/**/*.{ts,js,json}\"",
+    "format:cypress": "prettier --write --log-level silent \"cypress/**/*.{ts,js,json}\"",
     "format:cypress:check": "prettier --check \"cypress/**/*.{ts,js,json}\"",
     "type-check:cypress": "tsc --noEmit --project cypress/tsconfig.json",
     "prepare": "husky"
@@ -14,7 +14,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/dotenv": "^6.1.1",
     "@types/node": "^24.2.1",
+    "dotenv": "^17.2.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
     "prettier": "^3.0.0",

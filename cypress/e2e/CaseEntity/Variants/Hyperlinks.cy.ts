@@ -10,29 +10,29 @@ describe('Case Entity - Variants - Hyperlinks', () => {
     VariantsTable.actions.showAllColumns();
   };
 
-  it('Valider les liens disponibles Lien Variant', () => {
+  it('Variant', () => {
     setupTest();
     VariantsTable.actions.clickTableCellLink(data.variantGermline, 'variant');
     cy.get('h1').contains(data.variantGermline.variant).should('exist');
   });
 
-  it('Valider les liens disponibles Lien dbSNP', () => {
+  it('dbSNP', () => {
     setupTest();
     VariantsTable.validations.shouldHaveTableCellLink(data.variantGermline, 'dbsnp');
   });
 
-  it('Valider les liens disponibles Lien Gène', () => {
+  it('Gene', () => {
     setupTest();
     VariantsTable.validations.shouldHaveTableCellLink(data.variantGermline, 'gene');
   });
- 
-  it('Valider les liens disponibles Lien Gène Plus [SJRA-664]', () => {
+
+  it('Gene Plus [SJRA-680]', () => {
     setupTest();
-    VariantsTable.actions.clickTableCellLink(data.variantGermline, 'gene', true/*onPlusIcon*/);
+    VariantsTable.actions.clickTableCellLink(data.variantGermline, 'gene', true /*onPlusIcon*/);
     VariantsTable.validations.shouldHaveSelectedQueryPill(data.variantGermline, 'gene');
   });
- 
-  it('Valider les liens disponibles Lien Freq. [SJRA-648]', () => {
+
+  it('Freq.', () => {
     setupTest();
     VariantsTable.actions.clickTableCellLink(data.variantGermline, 'freq');
     cy.get('[data-active="true"]:contains("Patients")').should('exist');
