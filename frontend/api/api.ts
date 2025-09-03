@@ -981,6 +981,12 @@ export interface DocumentResult {
      * @type {string}
      * @memberof DocumentResult
      */
+    'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'data_type_code': string;
     /**
      * 

@@ -50,6 +50,7 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		assert.Equal(t, 59, document204.SeqID)
 		assert.Equal(t, "5d41402abc4b2a76b9719d911017c795", document204.Hash)
 		assert.Equal(t, "A00516_0227", document204.RunAlias)
+		assert.NotNil(t, document204.CreatedOn)
 	})
 }
 

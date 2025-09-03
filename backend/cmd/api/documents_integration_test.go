@@ -35,6 +35,7 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 		"list": [
 			{
 				"case_id":2, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
 				"document_id":185, 
 				"format_code":"vcf", 
@@ -48,6 +49,7 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"task_id":2
 			}, {
 				"case_id":2, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
 				"document_id":124, 
 				"format_code":"tbi", 
@@ -61,6 +63,7 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"task_id":2
 			}, {
 				"case_id":2, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
 				"document_id":63, 
 				"format_code":"cram", 
@@ -74,6 +77,7 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"task_id":2
 			}, {
 				"case_id":2, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
 				"document_id":2, 
 				"format_code":"crai", 
@@ -100,6 +104,7 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 		"list": [
 			{
 				"case_id":2, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
 				"document_id":185, 
 				"format_code":"vcf", 
@@ -115,6 +120,7 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"task_id":2
 			}, {
 				"case_id":2, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
 				"document_id":124, 
 				"format_code":"tbi", 
@@ -130,6 +136,7 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"task_id":2
 			}, {
 				"case_id":2, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
 				"document_id":63, 
 				"format_code":"cram", 
@@ -145,6 +152,7 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"task_id":2
 			}, {
 				"case_id":2, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
 				"document_id":2, 
 				"format_code":"crai", 
@@ -173,6 +181,7 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 		"list": [
 			{
 				"case_id":1, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
 				"document_id":62, 
 				"format_code":"crai", 
@@ -187,6 +196,7 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 			},
 			{
 				"case_id":1, 
+				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
 				"document_id":62, 
 				"format_code":"crai", 

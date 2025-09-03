@@ -312,6 +312,7 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 	assert.JSONEq(t, `{
 		"list": [{
 			"case_id":21, 
+			"created_on": "2000-01-01T00:00:00Z",
 			"data_type_code":"snv", 
 			"document_id":204, 
 			"format_code":"tbi", 
