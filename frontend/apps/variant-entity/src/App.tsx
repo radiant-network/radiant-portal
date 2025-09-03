@@ -93,7 +93,7 @@ export default function App() {
     <main className="bg-muted h-screen overflow-auto">
       <PageHeader isLoading={isLoading} title={data?.hgvsg} badges={pageHeaderBadges} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
-        <TabsList className="pt-4 px-3 bg-background" contentClassName="min-[1440px]:px-3 mx-auto">
+        <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
           <TabsListItem value={VariantEntityTabs.Overview}>{t('variant_entity.overview.title')}</TabsListItem>
           {/* SJRA-389 <TabsListItem value={VariantEntityTabs.Frequency}>{t('variant_entity.frequency.title')}</TabsListItem> */}
           <TabsListItem value={VariantEntityTabs.EvidenceAndConditions}>
