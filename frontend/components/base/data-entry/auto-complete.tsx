@@ -1,10 +1,11 @@
-import { CommandGroup, CommandItem, CommandList, CommandInput, CommandEmpty } from '@/components/base/ui/command';
+import { type KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
-import { useState, useRef, useCallback, type KeyboardEvent, ReactNode, useEffect } from 'react';
-import { Skeleton } from '@/components/base/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { Check, XIcon } from 'lucide-react';
+
+import { CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/base/ui/command';
+import { Skeleton } from '@/components/base/ui/skeleton';
 import { useDebounce } from '@/hooks/useDebounce';
+import { cn } from '@/lib/utils';
 
 export type Option = {
   label: ReactNode;

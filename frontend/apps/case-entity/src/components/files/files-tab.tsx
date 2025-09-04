@@ -3,7 +3,14 @@ import { useParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SortBody, SortBodyOrderEnum } from '@/api/api';
+import {
+  ApiError,
+  DocumentsSearchResponse,
+  ListBodyWithCriteria,
+  SearchCriterion,
+  SortBody,
+  SortBodyOrderEnum,
+} from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
@@ -36,6 +43,7 @@ async function fetchDocuments(input: DocumentInput) {
 function FilesTab() {
   const { t } = useI18n();
   const params = useParams<{ caseId: string }>();
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -48,6 +56,7 @@ function FilesTab() {
         sort: sorting,
         limit: pagination.pageSize,
         page_index: pagination.pageIndex,
+        search_criteria: searchCriteria,
       },
     },
     fetchDocuments,
@@ -64,7 +73,7 @@ function FilesTab() {
           <DataTable
             id="case-entity-files"
             columns={getCaseEntityDocumentsColumns(t)}
-            TableFilters={() => <FilesTableFilters />}
+            TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} loading={isLoading} />}
             defaultServerSorting={DEFAULT_SORTING}
             data={data?.list ?? []}
             defaultColumnSettings={defaultSettings}

@@ -14,7 +14,7 @@ import {
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
 
-type TableFiltersSearchProps = {
+export type TableFiltersSearchProps = {
   onSelect: (type: string, value: string) => void;
   onClear?: () => void;
   selectedValue?: string;

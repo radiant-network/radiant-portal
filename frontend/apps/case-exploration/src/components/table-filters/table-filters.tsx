@@ -1,18 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ListFilter, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import { CaseFilters, SearchCriterion } from '@/api/api';
-import FilterButton, { IFilterButton, IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
-import FiltersGroupSkeleton from '@/components/base/filters-group/filters-group-skeleton';
-import { Button } from '@/components/base/ui/button';
+import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
+import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
 
 import filterItemPriority from './filter-item-priority';
 import filterItemStatus from './filter-item-status';
-import TableFiltersSearch from './table-filters-search';
 
 type CaseFiltersInput = {
   search_criteria: Array<SearchCriterion>;
@@ -21,6 +18,19 @@ type CaseFiltersInput = {
 type FiltersGroupFormProps = {
   loading?: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
+};
+
+const CRITERIAS = {
+  priority: { key: 'priority_code', weight: 1 },
+  status: { key: 'status_code', weight: 2 },
+  case_analysis: { key: 'case_analysis_code', weight: 3 },
+  project: { key: 'project_code', weight: 3 },
+  performer_lab: { key: 'performer_lab_code', weight: 4 },
+  requested_by: { key: 'requested_by_code', weight: 5 },
+  case_id: { key: 'case_id', weight: 6 },
+  patient_id: { key: 'patient_id', weight: 7 },
+  mrn: { key: 'mrn', weight: 8 },
+  request_id: { key: 'request_id', weight: 9 },
 };
 
 async function fetchFilters(searchCriteria: CaseFiltersInput) {
@@ -43,47 +53,6 @@ export const FILTERS_SEARCH_DEFAULTS = {
   mrn: [],
   request_id: [],
 };
-
-function updateSearchCriteria(filters: StringArrayRecord) {
-  const search_criteria: SearchCriterion[] = [];
-  if (filters.priority?.length > 0) {
-    search_criteria.push({ field: 'priority_code', value: filters.priority });
-  }
-  if (filters.status?.length > 0) {
-    search_criteria.push({ field: 'status_code', value: filters.status });
-  }
-  if (filters.case_analysis?.length > 0) {
-    search_criteria.push({ field: 'case_analysis_code', value: filters.case_analysis });
-  }
-  if (filters.project?.length > 0) {
-    search_criteria.push({ field: 'project_code', value: filters.project });
-  }
-  if (filters.performer_lab?.length > 0) {
-    search_criteria.push({ field: 'performer_lab_code', value: filters.performer_lab });
-  }
-  if (filters.requested_by?.length > 0) {
-    search_criteria.push({ field: 'requested_by_code', value: filters.requested_by });
-  }
-
-  // Add search-based criteria
-  if (filters.case_id && filters.case_id?.length > 0) {
-    search_criteria.push({ field: 'case_id', value: filters.case_id });
-  }
-  if (filters.patient_id && filters.patient_id?.length > 0) {
-    search_criteria.push({ field: 'patient_id', value: filters.patient_id });
-  }
-  if (filters.mrn && filters.mrn?.length > 0) {
-    search_criteria.push({ field: 'mrn', value: filters.mrn });
-  }
-  if (filters.request_id && filters.request_id?.length > 0) {
-    search_criteria.push({ field: 'request_id', value: filters.request_id });
-  }
-  return search_criteria;
-}
-
-function sortOptions(options: IFilterButtonItem[]) {
-  return options.sort((a, b) => (a.label as string).localeCompare(b.label as string));
-}
 
 function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFormProps) {
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
@@ -127,7 +96,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           case 'requested_by':
             return {
               ...baseOption,
-              popoverSize: 'lg',
+              popoverSize: 'lg' as PopoverSize,
               isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
               options: sortOptions(apiFilters[key] || []),
               withTooltip: true,
@@ -135,13 +104,13 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           case 'priority':
             return {
               ...baseOption,
-              options: filterItemPriority(apiFilters[key] || [], t),
+              options: filterItemPriority(apiFilters[key] || []),
             };
           case 'case_analysis':
             return {
               ...baseOption,
               options: sortOptions(apiFilters[key] || []),
-              popoverSize: 'lg',
+              popoverSize: 'lg' as PopoverSize,
               withTooltip: true,
             };
           default:
@@ -150,61 +119,6 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       })
       .filter(option => option.options.length > 0);
   }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
-
-  useEffect(() => {
-    setSearchCriteria(updateSearchCriteria(filters));
-  }, [filters, setSearchCriteria]);
-
-  // Handle filter selection
-  const handleFilterSelect = useCallback(
-    (filterKey: string, selectedValues: string[]) => {
-      setFilters({ ...filters, [filterKey]: selectedValues });
-    },
-    [filters, setFilters],
-  );
-
-  // Handle autocomplete item selection - only one search term allowed at a time
-  const handleAutocompleteSelect = useCallback(
-    (type: string, value: string) => {
-      // Clear all existing search terms first
-      const clearedFilters = {
-        ...filters,
-        ...FILTERS_SEARCH_DEFAULTS,
-      };
-
-      // Set the new search term
-      setFilters({
-        ...clearedFilters,
-        [type]: [value],
-      });
-    },
-    [filters, setFilters],
-  );
-
-  // Handle clearing the search input
-  const handleSearchClear = useCallback(() => {
-    setFilters({
-      ...filters,
-      ...FILTERS_SEARCH_DEFAULTS,
-    });
-  }, [filters, setFilters]);
-
-  // Handle showing/hiding additional filters and managing open state
-  const makeFiltersVisible = useCallback((selectedKeys: string[]) => {
-    // Update changed filter buttons to make them visible
-    setChangedFilterButtons(prev => [...prev, ...selectedKeys.filter(key => !prev.includes(key))]);
-
-    // Set selected filters as open
-    const newOpenFilters = selectedKeys.reduce(
-      (acc, key) => {
-        acc[key] = true;
-        return acc;
-      },
-      {} as Record<string, boolean>,
-    );
-
-    setOpenFilters(prev => ({ ...prev, ...newOpenFilters }));
-  }, []);
 
   // Get the current search term for display (only one allowed)
   const getSearchTerm = () => {
@@ -224,75 +138,24 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
     return null;
   };
 
-  const hiddenFilterOptions = useMemo(() => filterButtons.filter(option => !option.isVisible), [filterButtons]);
   const searchTerm = getSearchTerm();
 
-  // Check if any filters are active
-  const hasActiveFilters =
-    filterButtons.some(option => option.selectedItems.length > 0) ||
-    searchTerm !== null ||
-    changedFilterButtons.length > 0;
-
-  // Clear all filters function
-  const clearAllFilters = () => {
-    setFilters({
-      ...FILTER_DEFAULTS,
-      ...FILTERS_SEARCH_DEFAULTS,
-    });
-    setChangedFilterButtons([]);
-    setOpenFilters({});
-  };
-
-  if (loading) return <FiltersGroupSkeleton />;
-
   return (
-    <div id="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
-      <TableFiltersSearch
-        onSelect={handleAutocompleteSelect}
-        onClear={handleSearchClear}
-        selectedValue={searchTerm?.value}
-      />
-
-      <div className="flex flex-wrap gap-2 items-end">
-        {/* Show visible filters */}
-        {filterButtons.map(filter =>
-          filter.isVisible === true ? (
-            <FilterButton
-              key={filter.key}
-              popoverSize={filter.popoverSize as PopoverSize}
-              label={filter.label}
-              options={filter.options}
-              selected={filter.selectedItems}
-              onSelect={values => handleFilterSelect(filter.key, values)}
-              isOpen={filter.isOpen}
-              withTooltip={filter.withTooltip}
-            />
-          ) : null,
-        )}
-
-        {/* Additional filters control button - only show if there are hidden options */}
-        {hiddenFilterOptions.length > 0 && (
-          <FilterButton
-            label={t('common.filters.more', 'More')}
-            options={hiddenFilterOptions}
-            selected={[]}
-            onSelect={makeFiltersVisible}
-            actionMode={true}
-            icon={<ListFilter size={16} />}
-            placeholder={t('case_exploration.filters_group.case.filters.more_placeholder', 'Filters')}
-            closeOnSelect={true}
-          />
-        )}
-
-        {/* Clear button - only show if filters are active */}
-        {hasActiveFilters && (
-          <Button variant="link" onClick={clearAllFilters} className="text-sm py-2 px-3 h-8">
-            <X size={14} />
-            {t('common.actions.clear', 'Clear')}
-          </Button>
-        )}
-      </div>
-    </div>
+    <DataTableFilters
+      filterSearchs={[{ id: 'search', searchTerm: searchTerm?.value }]}
+      filterButtons={filterButtons}
+      changedFilterButtons={changedFilterButtons}
+      setChangedFilterButtons={setChangedFilterButtons}
+      filters={filters}
+      setFilters={setFilters}
+      openFilters={openFilters}
+      setOpenFilters={setOpenFilters}
+      loading={loading}
+      setSearchCriteria={setSearchCriteria}
+      criterias={CRITERIAS}
+      defaultFilters={FILTER_DEFAULTS}
+      defaultSearchFilters={FILTERS_SEARCH_DEFAULTS}
+    />
   );
 }
 
