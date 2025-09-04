@@ -1,0 +1,6 @@
+import{j as e}from"./jsx-runtime-D_zvdyIk.js";import{D as o}from"./document-size-BOBmBlIZ.js";import{C as s}from"./applications-config-q4OA8PiL.js";import{B as m}from"./chunk-PVWAREVJ-C1taxNkX.js";import"./empty-field-C1VzDKLJ.js";import"./index-CGj_12n1.js";const d={variant_entity:{app_id:"variant_entity"},variant_exploration:{app_id:"variant_exploration_multi_select_filter",aggregations:[]},admin:{admin_code:"admin",app_id:"admin"},portal:{name:"",navigation:{}}},f={title:"Informations/DocumentSizeField",component:o,args:{},decorators:[a=>e.jsx(m,{children:e.jsx(s,{config:d,children:e.jsx(a,{})})})]},r={render:()=>e.jsxs("div",{children:[[1,10,1e6,1e7,1e9,1e10,1e12,1e13].map(a=>e.jsx(o,{value:a},a)),e.jsx(o,{value:void 0})]})};var t,i,n;r.parameters={...r.parameters,docs:{...(t=r.parameters)==null?void 0:t.docs,source:{originalSource:`{
+  render: () => <div>
+      {[1, 10, 1000000, 10000000, 1000000000, 10000000000, 1000000000000, 10000000000000].map(value => <DocumentSize key={value} value={value} />)}
+      <DocumentSize value={undefined} />
+    </div>
+}`,...(n=(i=r.parameters)==null?void 0:i.docs)==null?void 0:n.source}}};const x=["Default"];export{r as Default,x as __namedExportsOrder,f as default};
