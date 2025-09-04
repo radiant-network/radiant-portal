@@ -48,18 +48,16 @@ export function UnassignedAvatar({ size = 'md', className, canAssign, onAssignCl
   );
 
   // Wrap with tooltip only if canAssign prop is defined (not undefined)
-  if (canAssign !== undefined) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>{avatarElement}</TooltipTrigger>
-          <TooltipContent>
-            <p>{tooltipContent}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
-
-  return avatarElement;
+  return canAssign !== undefined ? (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{avatarElement}</TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltipContent}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    avatarElement
+  );
 }

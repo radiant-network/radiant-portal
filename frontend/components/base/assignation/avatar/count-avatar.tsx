@@ -43,13 +43,11 @@ export function CountAvatar({ firstUser, additionalCount, allUsers, size = 'md',
   // Show popover if we have all users and any have additional details
   const shouldShowPopover = allUsers && allUsers.some(user => user.email || user.organization);
 
-  if (shouldShowPopover) {
-    return (
-      <AvatarPopover users={allUsers} size={size}>
-        {avatarElement}
-      </AvatarPopover>
-    );
-  }
-
-  return avatarElement;
+  return shouldShowPopover ? (
+    <AvatarPopover users={allUsers} size={size}>
+      {avatarElement}
+    </AvatarPopover>
+  ) : (
+    avatarElement
+  );
 }

@@ -38,14 +38,11 @@ export function DualAvatar({ users, size = 'md', className }: DualAvatarProps) {
 
   // Show popover if any user has additional details
   const shouldShowPopover = users.some(user => user.email || user.organization);
-
-  if (shouldShowPopover) {
-    return (
-      <AvatarPopover users={users} size={size}>
-        {avatarElement}
-      </AvatarPopover>
-    );
-  }
-
-  return avatarElement;
+  return shouldShowPopover ? (
+    <AvatarPopover users={users} size={size}>
+      {avatarElement}
+    </AvatarPopover>
+  ) : (
+    avatarElement
+  );
 }
