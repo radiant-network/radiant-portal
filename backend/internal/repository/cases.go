@@ -129,58 +129,28 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 	}
 	txCases = txCases.Select("c.id, c.status_code, r.priority_code, c.case_analysis_id, c.project_id, c.performer_lab_id, r.ordering_organization_id")
 
-	txStatus := r.db.Table(fmt.Sprintf("%s %s", types.StatusTable.Name, types.StatusTable.Alias))
-	txStatus = txStatus.Select(fmt.Sprintf("%s.code as bucket, %s.name_en as label, count(distinct cases.id) as count", types.StatusTable.Alias, types.StatusTable.Alias))
-	txStatus = txStatus.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.status_code = %s.code", types.StatusTable.Alias), txCases)
-	txStatus = txStatus.Group(fmt.Sprintf("%s.code, %s.name_en", types.StatusTable.Alias, types.StatusTable.Alias))
-	txStatus = txStatus.Order("count desc, bucket asc")
-	if err := txStatus.Find(&status).Error; err != nil {
-		return nil, fmt.Errorf("error fetching status: %w", err)
+	if err := r.getCasesFilter(txCases, &status, types.StatusTable, "status_code", "code", "name_en"); err != nil {
+		return nil, err
 	}
 
-	txPriority := r.db.Table(fmt.Sprintf("%s %s", types.PriorityTable.Name, types.PriorityTable.Alias))
-	txPriority = txPriority.Select(fmt.Sprintf("%s.code as bucket, %s.name_en as label, count(distinct cases.id) as count", types.PriorityTable.Alias, types.PriorityTable.Alias))
-	txPriority = txPriority.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.priority_code = %s.code", types.PriorityTable.Alias), txCases)
-	txPriority = txPriority.Group(fmt.Sprintf("%s.code, %s.name_en", types.PriorityTable.Alias, types.PriorityTable.Alias))
-	txPriority = txPriority.Order("count desc, bucket asc")
-	if err := txPriority.Find(&priority).Error; err != nil {
-		return nil, fmt.Errorf("error fetching priority: %w", err)
+	if err := r.getCasesFilter(txCases, &priority, types.PriorityTable, "priority_code", "code", "name_en"); err != nil {
+		return nil, err
 	}
 
-	txCaseAnalysis := r.db.Table(fmt.Sprintf("%s %s", types.CaseAnalysisTable.Name, types.CaseAnalysisTable.Alias))
-	txCaseAnalysis = txCaseAnalysis.Select(fmt.Sprintf("%s.code as bucket, %s.name as label, count(distinct cases.id) as count", types.CaseAnalysisTable.Alias, types.CaseAnalysisTable.Alias))
-	txCaseAnalysis = txCaseAnalysis.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.case_analysis_id = %s.id", types.CaseAnalysisTable.Alias), txCases)
-	txCaseAnalysis = txCaseAnalysis.Group(fmt.Sprintf("%s.code, %s.name", types.CaseAnalysisTable.Alias, types.CaseAnalysisTable.Alias))
-	txCaseAnalysis = txCaseAnalysis.Order("count desc, bucket asc")
-	if err := txCaseAnalysis.Find(&caseAnalysis).Error; err != nil {
-		return nil, fmt.Errorf("error fetching case_analysis: %w", err)
+	if err := r.getCasesFilter(txCases, &caseAnalysis, types.CaseAnalysisTable, "case_analysis_id", "id", "name"); err != nil {
+		return nil, err
 	}
 
-	txProject := r.db.Table(fmt.Sprintf("%s %s", types.ProjectTable.Name, types.ProjectTable.Alias))
-	txProject = txProject.Select(fmt.Sprintf("%s.code as bucket, %s.name as label, count(distinct cases.id) as count", types.ProjectTable.Alias, types.ProjectTable.Alias))
-	txProject = txProject.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.project_id = %s.id", types.ProjectTable.Alias), txCases)
-	txProject = txProject.Group(fmt.Sprintf("%s.code, %s.name", types.ProjectTable.Alias, types.ProjectTable.Alias))
-	txProject = txProject.Order("count desc, bucket asc")
-	if err := txProject.Find(&project).Error; err != nil {
-		return nil, fmt.Errorf("error fetching project: %w", err)
+	if err := r.getCasesFilter(txCases, &project, types.ProjectTable, "project_id", "id", "name"); err != nil {
+		return nil, err
 	}
 
-	txPerformerLab := r.db.Table(fmt.Sprintf("%s %s", types.PerformerLabTable.Name, types.PerformerLabTable.Alias))
-	txPerformerLab = txPerformerLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label, count(distinct cases.id) as count", types.PerformerLabTable.Alias, types.PerformerLabTable.Alias))
-	txPerformerLab = txPerformerLab.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.performer_lab_id = %s.id", types.PerformerLabTable.Alias), txCases)
-	txPerformerLab = txPerformerLab.Group(fmt.Sprintf("%s.code, %s.name", types.PerformerLabTable.Alias, types.PerformerLabTable.Alias))
-	txPerformerLab = txPerformerLab.Order("count desc, bucket asc")
-	if err := txPerformerLab.Find(&performerLab).Error; err != nil {
-		return nil, fmt.Errorf("error fetching performer lab: %w", err)
+	if err := r.getCasesFilter(txCases, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name"); err != nil {
+		return nil, err
 	}
 
-	txRequestedBy := r.db.Table(fmt.Sprintf("%s %s", types.OrderingOrganizationTable.Name, types.OrderingOrganizationTable.Alias))
-	txRequestedBy = txRequestedBy.Select(fmt.Sprintf("%s.code as bucket, %s.name as label, count(distinct cases.id) as count", types.OrderingOrganizationTable.Alias, types.OrderingOrganizationTable.Alias))
-	txRequestedBy = txRequestedBy.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.ordering_organization_id = %s.id", types.OrderingOrganizationTable.Alias), txCases)
-	txRequestedBy = txRequestedBy.Group(fmt.Sprintf("%s.code, %s.name", types.OrderingOrganizationTable.Alias, types.OrderingOrganizationTable.Alias))
-	txRequestedBy = txRequestedBy.Order("count desc, bucket asc")
-	if err := txRequestedBy.Find(&requestedBy).Error; err != nil {
-		return nil, fmt.Errorf("error fetching ordering org: %w", err)
+	if err := r.getCasesFilter(txCases, &requestedBy, types.OrderingOrganizationTable, "ordering_organization_id", "id", "name"); err != nil {
+		return nil, err
 	}
 
 	return &CaseFilters{
@@ -221,6 +191,18 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	caseEntity.CaseType = caseType
 
 	return caseEntity, nil
+}
+
+func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggregation, filterTable types.Table, casesJoinColumn string, filterJoinColumn string, filterLabelColumn string) error {
+	txProject := r.db.Table(fmt.Sprintf("%s %s", filterTable.Name, filterTable.Alias))
+	txProject = txProject.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct cases.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	txProject = txProject.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.%s = %s.%s", casesJoinColumn, filterTable.Alias, filterJoinColumn), txCases)
+	txProject = txProject.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	txProject = txProject.Order("count desc, bucket asc")
+	if err := txProject.Find(destination).Error; err != nil {
+		return fmt.Errorf("error fetching filter %s: %w", filterTable.Name, err)
+	}
+	return nil
 }
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
