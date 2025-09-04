@@ -94,6 +94,39 @@
       },
       "learn_more": "En savoir plus"
     },
+    "file_format": {
+      "cram": "Fichier CRAM",
+      "crai": "Fichier d’index CRAI",
+      "vcf": "Fichier VCF",
+      "tbi": "Fichier d’index TBI",
+      "tgz": "Fichier archive TGZ",
+      "json": "Fichier JSON",
+      "html": "Fichier HTML",
+      "tsv": "Fichier TSV",
+      "bw": "Fichier BW",
+      "bed": "Fichier BED",
+      "png": "Fichier PNG",
+      "csv": "Fichier CSV",
+      "pdf": "Fichier PDF",
+      "txt": "Fichier texte"
+    },
+    "data_type_code": {
+      "alignment": "Lectures alignées",
+      "snv": "SNV constitutionnel",
+      "ssnv": "SNV somatique",
+      "gcnv": "CNV constitutionnel",
+      "scnv": "CNV somatique",
+      "gsv": "SV constitutionnel",
+      "ssv": "SV somatique",
+      "somfu": "VCF Dragen de fusions somatiques",
+      "ssup": "Supplément de données de séquençage",
+      "igv": "Piste IGV",
+      "cnvvis": "Visualisation CNV",
+      "exp": "PNG d’expression",
+      "covgene": "Rapport de couverture par gène",
+      "qcrun": "Rapport de QC de séquençage",
+      "exomiser": "Rapport Exomiser"
+    },
     "query_bar": {
       "empty": "Utilisez les outils de recherche et les facettes à gauche pour construire une requête",
       "delete_popover": {
@@ -148,6 +181,14 @@
           "ok": "Enregistrer"
         }
       }
+    },
+    "relationships": {
+      "proband": "Proband",
+      "mother": "Mère",
+      "father": "Père",
+      "sister": "Sœur",
+      "brother": "Frère",
+      "sibling": "Fratrie"
     },
     "toolbar": {
       "combine": "Combiner",
@@ -219,6 +260,10 @@
     "table": {
       "group_by": "Regrouper par",
       "columns": "Colonnes",
+      "headers": {
+        "created_on": "Créé le",
+        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
+      },
       "fullscreen": {
         "maximize": "Plein écran",
         "minimize": "Quitter plein écran"
@@ -964,6 +1009,20 @@
           "unknown": "Inconnu"
         },
         "snv": "SNV"
+      },
+      "files": {
+        "title": "Fichiers",
+        "name": "Nom du fichier",
+        "format_code": "Format",
+        "data_type_code": "Type",
+        "size": "Taille",
+        "patient_id": "Patient",
+        "relationship_to_proband_code": "Parenté",
+        "submitter_sample_id": "Échantillon",
+        "task_id": "Tâche",
+        "sequencing_experiment_id": "Cas",
+        "hash": "Hash",
+        "run_alias": "Lot"
       }
     }
   },

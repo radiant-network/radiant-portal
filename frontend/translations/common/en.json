@@ -94,6 +94,39 @@
       },
       "learn_more": "Learn more"
     },
+    "file_format": {
+      "cram": "CRAM File",
+      "crai": "CRAI Index File",
+      "vcf": "VCF File",
+      "tbi": "TBI Index File",
+      "tgz": "TGZ Archive File",
+      "json": "JSON File",
+      "html": "HTML File",
+      "tsv": "TSV File",
+      "bw": "BW File",
+      "bed": "BED File",
+      "png": "PNG File",
+      "csv": "CSV File",
+      "pdf": "PDF File",
+      "txt": "Text File"
+    },
+    "data_type_code": {
+      "alignment": "Aligned Reads",
+      "snv": "Germline SNV",
+      "ssnv": "Somatic SNV",
+      "gcnv": "Germline CNV",
+      "scnv": "Somatic CNV",
+      "gsv": "Germline SV",
+      "ssv": "Somatic SV",
+      "somfu": "Somatic Fusion Dragen VCF",
+      "ssup": "Sequencing Data Supplement",
+      "igv": "IGV Track",
+      "cnvvis": "CNV Visualization",
+      "exp": "Expression PNG",
+      "covgene": "Coverage by Gene Report",
+      "qcrun": "Sequencing Run QC Report",
+      "exomiser": "Exomiser Report"
+    },
     "query_bar": {
       "empty": "Use the search tools & facets on the left to build a query",
       "delete_popover": {
@@ -148,6 +181,14 @@
           "ok": "Save"
         }
       }
+    },
+    "relationships": {
+      "proband": "Proband",
+      "mother": "Mother",
+      "father": "Father",
+      "sister": "Sister",
+      "brother": "Brother",
+      "sibling": "Sibling"
     },
     "toolbar": {
       "combine": "Combine",
@@ -222,6 +263,10 @@
       "fullscreen": {
         "maximize": "Fullscreen",
         "minimize": "Exit fullscreen"
+      },
+      "headers": {
+        "created_on": "Created On",
+        "created_on_tooltip": "Date of case creation (yyyy-mm-dd)"
       },
       "pin": {
         "left": "Pin Left",
@@ -965,6 +1010,20 @@
         },
         "snv": "SNV"
       }
+    }, 
+    "files": {
+      "title": "Files",
+      "name": "File Name",
+      "format_code": "Format",
+      "data_type_code": "Type",
+      "size": "Size",
+      "patient_id": "Patient",
+      "relationship_to_proband_code": "Relationship",
+      "submitter_sample_id": "Sample",
+      "task_id": "Task",
+      "sequencing_experiment_id": "Case",
+      "hash": "Hash",
+      "run_alias": "Run"
     }
   },
   "variant_entity": {

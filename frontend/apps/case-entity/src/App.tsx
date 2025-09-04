@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
-import { AudioWaveform, ClipboardList } from 'lucide-react';
+import { AudioWaveform, ClipboardList, FileIcon } from 'lucide-react';
 import useSWR from 'swr';
 
 import { ApiError, CaseEntity } from '@/api/api';
@@ -13,6 +13,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
 
 import DetailsTab from './components/details/details-tab';
+import FilesTab from './components/files/files-tab';
 import Header from './components/layout/header';
 import VariantsTab from './components/variants/variants-tab';
 import { CaseEntityTabs } from './types';
@@ -119,6 +120,10 @@ export default function App() {
                 <TooltipContent>{t('case_entity.details.no_variants')}</TooltipContent>
               </Tooltip>
             )}
+            <TabsListItem value={CaseEntityTabs.Files}>
+              <FileIcon />
+              {t('case_entity.files.title')}
+            </TabsListItem>
           </TabsList>
           <Container>
             <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-3">
@@ -127,6 +132,9 @@ export default function App() {
           </Container>
           <TabsContent value={CaseEntityTabs.Variants} className="py-0">
             <VariantsTab isLoading={isLoading} caseEntity={data} />
+          </TabsContent>
+          <TabsContent value={CaseEntityTabs.Files} className="p-0 md:p-3">
+            <FilesTab />
           </TabsContent>
         </TabsNav>
       </main>

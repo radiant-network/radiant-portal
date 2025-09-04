@@ -1,6 +1,7 @@
-import { Badge, BadgeProps } from "../../ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
-import EmptyCell from "./empty-cell";
+import { Badge, BadgeProps } from '../../ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
+
+import EmptyCell from './empty-cell';
 
 type BadgeCellProps = BadgeProps & {
   tooltip?: string;
@@ -18,5 +19,5 @@ function BadgeCell({ children, tooltip, ...props }: BadgeCellProps) {
       <TooltipContent>{tooltip}</TooltipContent>
     </Tooltip>
   );
-};
+}
 export default BadgeCell;

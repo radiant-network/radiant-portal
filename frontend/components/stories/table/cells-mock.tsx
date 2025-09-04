@@ -16,6 +16,7 @@ import ClassificationCell from '@/components/base/data-table/cells/classificatio
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
+import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
@@ -30,6 +31,7 @@ import RatingCell from '@/components/base/data-table/cells/rating-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
+import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createColumnSettings } from '@/components/base/data-table/data-table';
@@ -106,6 +108,7 @@ export const defaultColumnSettings = createColumnSettings([]);
  * Base cell
  */
 export type BaseCellMockData = {
+  baseText?: string;
   link?: string;
   assay_status_code?: AssayStatus;
   badge?: string;
@@ -143,6 +146,7 @@ export type BaseCellMockData = {
     id: string;
     name: string;
   }[];
+  size?: number;
 };
 
 const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
@@ -152,6 +156,7 @@ const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
  *   - PinRowCell
  *   - RowExpandCell
  *   - RowSelectionCell
+ *   - TextCell
  *   - AnchorLinkCell
  *   - AssayStatusCell
  *   - BadgeCell
@@ -186,6 +191,11 @@ export const firstSetCellColumns = [
     enableResizing: false,
     enablePinning: false,
   },
+  baseCellColumnHelper.accessor(row => row.baseText, {
+    id: 'baseText',
+    cell: info => <TextCell>{info.getValue()}</TextCell>,
+    header: 'TextCell',
+  }),
   baseCellColumnHelper.accessor(row => row.link, {
     id: 'link',
     cell: info => <AnchorLinkCell>{info.getValue()}</AnchorLinkCell>,
@@ -245,6 +255,7 @@ export const firstSetCellData = [
     date: '2022-02-12T13:08:00Z',
     phenotype_condition: 'code',
     phenotype_condition_name: 'Condition Name',
+    baseText: 'text 1',
     text: 'no tooltips',
     tooltips: undefined,
     number_value: 101,
@@ -257,6 +268,7 @@ export const firstSetCellData = [
     date: '2022-02-12T13:08:00Z',
     phenotype_condition: 'code',
     phenotype_condition_name: 'Condition Name',
+    baseText: 'text 2',
     text: 'no tooltips',
     tooltips: undefined,
     number_value: 100,
@@ -277,6 +289,7 @@ export const firstSetCellData = [
     link: 'AnchorLinkCell 4',
     assay_status_code: 'in_progress',
     badge: 'amet',
+    baseText: 'text 3',
     badge_list: ['sit', 'amet', 'consectetur'],
     date: '2001-05-12T13:08:00Z',
     phenotype_condition: 'code',
@@ -287,6 +300,7 @@ export const firstSetCellData = [
   },
   {
     link: 'AnchorLinkCell 5',
+    baseText: 'text 4',
     assay_status_code: 'revoke',
     badge: 'consectetur',
     badge_list: ['ipsum', 'sit', 'ipsum', 'volutpat'],
@@ -324,6 +338,7 @@ export const firstSetCellData = [
   {
     link: undefined,
     assay_status_code: undefined,
+    baseText: undefined,
     badge: undefined,
     badge_list: undefined,
     date: undefined,
@@ -558,6 +573,7 @@ export const secondSetCellData = [
  *   - AnalysisTypeCodeCell (AnalysisTypeCodeCellTooltip)
  *   - RelationshipToProbandCell
  *   - RatingCell
+ *   - DocumentSizeCell
  */
 export const thirdSetCellColumns = [
   baseCellColumnHelper.accessor(row => row.priority_code, {
@@ -582,7 +598,11 @@ export const thirdSetCellColumns = [
         <>{info.getValue()}</>
       </RelationshipToProbandCell>
     ),
-    header: 'RelationshipProbandCell',
+    header: () => (
+      <TooltipHeader tooltip={"In this case, sample_id is used as children. It's optional"}>
+        RelationshipProbandCell
+      </TooltipHeader>
+    ),
   }),
   baseCellColumnHelper.accessor(row => row.review_status_stars, {
     id: 'review_status_stars',
@@ -640,11 +660,18 @@ export const thirdSetCellColumns = [
     maxSize: 150,
     size: 120,
   }),
+  baseCellColumnHelper.accessor(row => row.size, {
+    id: 'size',
+    cell: info => <DocumentSizeCell value={info.getValue()} />,
+    header: 'DocumentSizeCell',
+    size: 124,
+    minSize: 124,
+  }),
 ];
 
 export const thirdSetCellData = [
   {
-    sample_id: 1,
+    relationship_to_proband: 'proband',
     priority_code: 'asap',
     case_type: 'somatic',
     review_status_stars: 1,
@@ -653,6 +680,7 @@ export const thirdSetCellData = [
     condition_id: 'HP:12345',
     condition_name: 'Abnormal Delivery',
     observed_phenotypes,
+    size: 8,
   },
   {
     priority_code: 'routine',
@@ -665,6 +693,7 @@ export const thirdSetCellData = [
     condition_id: 'HP:32345',
     condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 5),
+    size: 12345,
   },
   {
     priority_code: 'stat',
@@ -677,11 +706,38 @@ export const thirdSetCellData = [
     condition_id: 'HP:32345',
     condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 2),
+    size: 25000000,
   },
   {
     priority_code: 'urgent',
     case_type: 'germline_family',
     sample_id: 4,
+    relationship_to_proband: 'sister',
+    review_status_stars: 4,
+    review_status: 'review status 4 stars',
+    affected_status: 'unknown',
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
+    observed_phenotypes: observed_phenotypes.slice(0, 1),
+    size: 5678000000,
+  },
+  {
+    priority_code: 'urgent',
+    case_type: 'germline_family',
+    sample_id: undefined,
+    relationship_to_proband: 'brother',
+    review_status_stars: 4,
+    review_status: 'review status 4 stars',
+    affected_status: 'unknown',
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
+    observed_phenotypes: observed_phenotypes.slice(0, 1),
+    size: 9000000000000,
+  },
+  {
+    priority_code: 'stat',
+    case_type: 'germline_family',
+    sample_id: undefined,
     relationship_to_proband: 'sibling',
     review_status_stars: 4,
     review_status: 'review status 4 stars',
@@ -689,17 +745,19 @@ export const thirdSetCellData = [
     condition_id: 'HP:32345',
     condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 1),
+    size: 90000000000000,
   },
   {
     priority_code: undefined,
     case_type: undefined,
-    sample_id: 4,
+    sample_id: undefined,
     relationship_to_proband: undefined,
     review_status_stars: undefined,
     review_status: undefined,
     condition_id: undefined,
     condition_name: undefined,
     observed_phenotypes: undefined,
+    size: undefined,
   },
 ];
 
