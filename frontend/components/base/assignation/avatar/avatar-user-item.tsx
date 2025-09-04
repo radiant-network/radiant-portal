@@ -10,16 +10,15 @@ interface AvatarUserItemProps {
   user: AvatarUser;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-  'data-testid'?: string;
 }
 
-export function AvatarUserItem({ user, size = 'sm', className, 'data-testid': testId }: AvatarUserItemProps) {
+export function AvatarUserItem({ user, size = 'sm', className }: AvatarUserItemProps) {
   const initials = getInitials(user);
   const colorClass = getUserColor(user.id);
   const styles = avatarStyles({ size, variant: 'single' });
 
   return (
-    <div className={cn('flex space-x-3 items-start', className)} data-testid={testId}>
+    <div className={cn('flex space-x-3 items-start', className)}>
       {/* Avatar on the left - aligned with username */}
       <Avatar className={cn(styles.container(), 'flex-shrink-0')}>
         <AvatarFallback className={cn(styles.fallback(), styles.text(), colorClass)}>{initials}</AvatarFallback>

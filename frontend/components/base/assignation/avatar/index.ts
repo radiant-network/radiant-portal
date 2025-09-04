@@ -1,5 +1,5 @@
 // Main Avatar component
-export { Avatar } from './avatar';
+export { Avatar } from '@/components/base/assignation/avatar/avatar';
 
 // Individual avatar state components
 export { UnassignedAvatar } from './unassigned-avatar';
@@ -29,3 +29,8 @@ export { getInitials, getUserColor, getSizeClasses } from './avatar.utils';
 
 // Centralized Styles
 export { avatarStyles, getOverlapClasses, getIconSize } from './avatar.styles';
+
+// Shared utilities
+export * from '../constants';
+export * from '../user-filtering';
+export * from '../avatar';

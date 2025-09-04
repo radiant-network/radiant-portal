@@ -1,25 +1,26 @@
-import { MousePointer, User } from 'lucide-react';
+import { User } from 'lucide-react';
 
 import { Avatar, AvatarFallback } from '@/components/base/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
 import { avatarStyles, getIconSize } from './avatar.styles';
 import { BaseAvatarProps } from './avatar.types';
 
-export function UnassignedAvatar({
-  size = 'md',
-  className,
-  'data-testid': testId,
-  canAssign,
-  onAssignClick,
-}: BaseAvatarProps) {
-  const styles = avatarStyles({ size, variant: 'unassigned' });
+export function UnassignedAvatar({ size = 'md', className, canAssign, onAssignClick }: BaseAvatarProps) {
+  const { t } = useI18n();
+  // Get styles without size to avoid conflicting size classes, only get variant and base styles
+  const styles = avatarStyles({ variant: 'unassigned' });
   const iconSize = getIconSize(size);
 
   // Determine tooltip content and cursor style based on assignment capability
-  const tooltipContent = canAssign ? 'Assign' : 'No assignation';
-  const cursorClass = canAssign ? 'cursor-pointer' : 'cursor-not-allowed';
+  const tooltipContent = canAssign
+    ? t('common.unassigned_avatar.can_assign')
+    : t('common.unassigned_avatar.cannot_assign');
+
+  // Determine cursor class based on canAssign state
+  const cursorClass = canAssign === true ? 'cursor-pointer' : 'cursor-default';
 
   // Determine if this should be clickable
   const isClickable = canAssign && onAssignClick;
@@ -27,16 +28,21 @@ export function UnassignedAvatar({
 
   const avatarElement = (
     <Avatar
-      className={cn(styles.container(), className, cursorClass)}
-      style={{
-        borderDashArray: '1 2',
-        borderWidth: '2px',
-      }}
-      data-testid={testId}
+      className={cn(
+        // Base container styles without size variants
+        'relative flex shrink-0 overflow-hidden rounded-full',
+        // Unassigned variant styles
+        'border-2 border-dashed border-muted-foreground/40 bg-muted/20',
+        // Fixed size - always 24px x 24px
+        'h-6 w-6',
+        // Cursor styling
+        cursorClass,
+        className,
+      )}
       onClick={handleClick}
     >
       <AvatarFallback className={cn(styles.fallback(), styles.text())}>
-        {canAssign ? <MousePointer className={iconSize} /> : <User className={iconSize} />}
+        <User className={iconSize} />
       </AvatarFallback>
     </Avatar>
   );

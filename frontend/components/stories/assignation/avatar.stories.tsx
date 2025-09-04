@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { Avatar, AvatarUser } from '@/components/base/assignation/avatar';
+import type { AvatarUser } from '@/components/base/assignation/avatar';
+import { Avatar } from '@/components/base/assignation/avatar/avatar';
 
 const meta = {
   title: 'Assignation/Avatar',
@@ -156,23 +157,6 @@ export const MultipleUsers: Story = {
   },
 };
 
-export const CustomInitials: Story = {
-  args: {
-    users: [
-      {
-        id: 'user-custom-1',
-        name: 'Dr. John Smith',
-        initials: 'Dr',
-      },
-      {
-        id: 'user-custom-2',
-        name: 'Professor Jane Doe',
-        initials: 'PJ',
-      },
-    ],
-  },
-};
-
 export const SingleNameUsers: Story = {
   args: {
     users: [
@@ -258,12 +242,7 @@ export const TableUsageExample: Story = {
             <tr className="border-b">
               <td className="p-3 font-mono text-sm">666106</td>
               <td className="p-3">
-                <Avatar
-                  users={[]}
-                  size="sm"
-                  canAssign={true}
-                  onAssignClick={() => alert('Assign to prescription 666106')}
-                />
+                <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign to prescription 666106')} />
               </td>
               <td className="p-3">
                 <span className="text-muted-foreground">Can Assign</span>
@@ -272,7 +251,7 @@ export const TableUsageExample: Story = {
             <tr className="border-b">
               <td className="p-3 font-mono text-sm">658344</td>
               <td className="p-3">
-                <Avatar users={[]} size="sm" canAssign={false} />
+                <Avatar users={[]} canAssign={false} />
               </td>
               <td className="p-3">
                 <span className="text-muted-foreground">No Assignment</span>
@@ -281,7 +260,7 @@ export const TableUsageExample: Story = {
             <tr className="border-b">
               <td className="p-3 font-mono text-sm">658142</td>
               <td className="p-3">
-                <Avatar users={[sampleUsers[0]]} size="sm" />
+                <Avatar users={[sampleUsers[0]]} />
               </td>
               <td className="p-3">
                 <span className="text-green-600">Assigned</span>
@@ -290,7 +269,7 @@ export const TableUsageExample: Story = {
             <tr className="border-b">
               <td className="p-3 font-mono text-sm">658286</td>
               <td className="p-3">
-                <Avatar users={[sampleUsers[1], sampleUsers[2]]} size="sm" />
+                <Avatar users={[sampleUsers[1], sampleUsers[2]]} />
               </td>
               <td className="p-3">
                 <span className="text-blue-600">Collaborative</span>
@@ -299,7 +278,7 @@ export const TableUsageExample: Story = {
             <tr>
               <td className="p-3 font-mono text-sm">658290</td>
               <td className="p-3">
-                <Avatar users={sampleUsers.slice(0, 4)} size="sm" />
+                <Avatar users={sampleUsers.slice(0, 4)} />
               </td>
               <td className="p-3">
                 <span className="text-purple-600">Team Assignment</span>

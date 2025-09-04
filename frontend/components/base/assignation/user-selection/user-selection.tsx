@@ -8,6 +8,8 @@ import { cn } from '@/components/lib/utils';
 import { avatarStyles, getIconSize } from '../avatar/avatar.styles';
 import { AvatarUser } from '../avatar/avatar.types';
 import { getInitials, getUserColor } from '../avatar/avatar.utils';
+import { isNotAssignedUser } from '../constants';
+import { createFilteredUserList, handleUserSelection } from '../user-filtering';
 
 // Shared component for displaying selected users
 function SelectedUsersDisplay({
@@ -42,8 +44,8 @@ function SelectedUsersDisplay({
             ></div>
 
             {/* Avatar */}
-            <div className="relative flex items-center z-10">
-              <Avatar className={cn(avatarStyle.container(), 'z-20')}>
+            <div className="flex items-center z-10">
+              <Avatar className={cn(avatarStyle.container(), 'z-20', isNotAssign && 'bg-background')}>
                 <AvatarFallback className={cn(avatarStyle.fallback(), avatarStyle.text(), !isNotAssign && colorClass)}>
                   {isNotAssign ? <User className={iconSize} /> : initials}
                 </AvatarFallback>
@@ -51,7 +53,7 @@ function SelectedUsersDisplay({
             </div>
 
             {/* Text and Remove Button */}
-            <div className="relative inline-flex items-center gap-2 px-2 py-1 h-6 z-10 ml-2">
+            <div className="inline-flex items-center gap-2 px-2 py-1 h-7 z-10 ml-2">
               {/* User Name and Organization */}
               <div className="flex items-center gap-1">
                 <span className="font-medium text-gray-900">{user.name}</span>
@@ -81,19 +83,15 @@ interface ReadOnlyUserSelectionProps {
   className?: string;
 }
 
-export function ReadOnlyUserSelection({ selectedUsers, className }: ReadOnlyUserSelectionProps) {
+export function ReadOnlyUserSelection({ selectedUsers }: ReadOnlyUserSelectionProps) {
   if (selectedUsers.length === 0) {
     return null;
   }
 
   return (
-    <div className={cn('bg-background border border-border rounded-md shadow-sm', className)}>
-      <div className="px-3 pt-3 pb-1.5">
-        <div className="relative">
-          <div className="flex flex-wrap items-center gap-2 min-h-9 w-full rounded-md border border-input bg-background pl-3 pr-3 py-2 text-sm shadow-xs">
-            <SelectedUsersDisplay selectedUsers={selectedUsers} readOnly={true} />
-          </div>
-        </div>
+    <div className="pt-3 pb-1.5">
+      <div className="flex flex-wrap items-center gap-2 min-h-9 w-full rounded-md border border-input bg-background pl-3 pr-3 py-2 text-sm shadow-xs">
+        <SelectedUsersDisplay selectedUsers={selectedUsers} readOnly={true} />
       </div>
     </div>
   );
@@ -116,7 +114,6 @@ export function EditableUserSelection({
   onUsersChange,
   defaultUser,
   placeholder,
-  className,
   isOpen = true,
 }: EditableUserSelectionProps) {
   const { t } = useI18n();
@@ -124,47 +121,23 @@ export function EditableUserSelection({
 
   const defaultPlaceholder = placeholder || t('common.user_selection.search_placeholder');
 
-  // Create the 'not-assign' user option
-  const notAssignUser: AvatarUser = {
-    id: 'not-assign',
-    name: 'Not assigned',
-    organization: '',
-  };
-
-  // Filter available users based on search term and exclude already selected users
-  const filteredUsers = availableUsers.filter(user => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.organization && user.organization.toLowerCase().includes(searchTerm.toLowerCase()));
-    const notSelected = !selectedUsers.some(selected => selected.id === user.id);
-    const notDefaultUser = !defaultUser || user.id !== defaultUser.id;
-    return matchesSearch && notSelected && notDefaultUser;
+  // Create filtered user list using shared utility
+  const allFilteredUsers = createFilteredUserList({
+    availableUsers,
+    searchTerm,
+    selectedUsers,
+    defaultUser,
+    includeNotAssigned: true,
+    notAssignedName: t('common.user_selection.not_assigned'),
   });
 
-  // Add 'not-assign' option at the beginning if it matches search and isn't already selected
-  const notAssignMatches = notAssignUser.name.toLowerCase().includes(searchTerm.toLowerCase());
-  const notAssignNotSelected = !selectedUsers.some(selected => selected.id === notAssignUser.id);
-
-  // Add default user if it matches search and isn't already selected
-  const defaultUserMatches =
-    defaultUser &&
-    (defaultUser.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (defaultUser.organization && defaultUser.organization.toLowerCase().includes(searchTerm.toLowerCase())));
-  const defaultUserNotSelected = !defaultUser || !selectedUsers.some(selected => selected.id === defaultUser.id);
-
-  const allFilteredUsers = [
-    ...(notAssignMatches && notAssignNotSelected ? [notAssignUser] : []),
-    ...(defaultUserMatches && defaultUserNotSelected ? [defaultUser] : []),
-    ...filteredUsers,
-  ];
-
   const handleUserSelect = (user: AvatarUser) => {
-    if (user.id === 'not-assign') {
-      onUsersChange([user]);
-    } else {
-      const filteredUsers = selectedUsers.filter(u => u.id !== 'not-assign');
-      onUsersChange([...filteredUsers, user]);
-    }
+    const newSelectedUsers = handleUserSelection({
+      selectedUser: user,
+      currentSelectedUsers: selectedUsers,
+      isNotAssignedUser: isNotAssignedUser(user),
+    });
+    onUsersChange(newSelectedUsers);
   };
 
   const handleRemoveAll = () => {
@@ -185,27 +158,25 @@ export function EditableUserSelection({
   }
 
   return (
-    <div className={cn('bg-background border border-border rounded-md shadow-sm', className)}>
+    <>
       {/* Search Bar with Selected Users */}
-      <div className="px-3 pt-3 pb-1.5">
-        <div className="relative">
-          <div className="flex flex-wrap items-center gap-2 min-h-9 w-full rounded-md border border-input bg-background pl-3 pr-3 py-2 text-sm shadow-xs ring-offset-background focus-within:outline-none focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0">
-            <SelectedUsersDisplay selectedUsers={selectedUsers} onRemoveUser={handleRemoveUser} />
+      <div className="pt-3 pb-1.5">
+        <div className="flex flex-wrap items-center gap-2 min-h-9 w-full rounded-md border border-input bg-background pl-3 pr-3 py-2 text-sm shadow-xs ring-offset-background focus-within:outline-none focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0">
+          <SelectedUsersDisplay selectedUsers={selectedUsers} onRemoveUser={handleRemoveUser} />
 
-            {/* Search Input */}
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              placeholder={selectedUsers.length === 0 ? defaultPlaceholder : ''}
-              className="flex-1 min-w-32 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
-            />
-          </div>
+          {/* Search Input */}
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder={selectedUsers.length === 0 ? defaultPlaceholder : ''}
+            className="flex-1 min-w-32 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
+          />
         </div>
       </div>
 
       {/* Remove All Assignment Link */}
-      <div className="px-3 pt-1.5 pb-1.5">
+      <div className="pt-1.5 pb-1.5">
         <button
           onClick={selectedUsers.length > 0 ? handleRemoveAll : undefined}
           disabled={selectedUsers.length === 0}
@@ -221,7 +192,7 @@ export function EditableUserSelection({
       </div>
 
       {/* Users List */}
-      <div className="max-h-60 overflow-y-auto px-3">
+      <div className="max-h-60 overflow-y-auto">
         {allFilteredUsers.length === 0 ? (
           <div className="py-1.5 text-sm text-muted-foreground text-center">
             {searchTerm ? t('common.user_selection.no_users_found') : t('common.user_selection.start_typing_to_search')}
@@ -239,7 +210,7 @@ export function EditableUserSelection({
                 onClick={() => handleUserSelect(user)}
                 className="w-full flex items-center gap-1.5 py-1.5 hover:bg-accent transition-colors text-left"
               >
-                <div className="flex items-center justify-center" style={{ width: '28px', height: '28px' }}>
+                <div className="flex items-center justify-center w-7 h-7">
                   <Avatar className={avatarStyle.container()}>
                     <AvatarFallback
                       className={cn(avatarStyle.fallback(), avatarStyle.text(), !isNotAssign && colorClass)}
@@ -262,7 +233,7 @@ export function EditableUserSelection({
           })
         )}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -288,19 +259,21 @@ export function UserSelection({
   isOpen = true,
   readOnly = false,
 }: UserSelectionProps) {
-  if (readOnly) {
-    return <ReadOnlyUserSelection selectedUsers={selectedUsers} className={className} />;
-  }
-
   return (
-    <EditableUserSelection
-      availableUsers={availableUsers}
-      selectedUsers={selectedUsers}
-      onUsersChange={onUsersChange}
-      defaultUser={defaultUser}
-      placeholder={placeholder}
-      className={className}
-      isOpen={isOpen}
-    />
+    <div className={cn('bg-background border border-border rounded-md shadow-sm px-3', className)}>
+      {readOnly ? (
+        <ReadOnlyUserSelection selectedUsers={selectedUsers} className={className} />
+      ) : (
+        <EditableUserSelection
+          availableUsers={availableUsers}
+          selectedUsers={selectedUsers}
+          onUsersChange={onUsersChange}
+          defaultUser={defaultUser}
+          placeholder={placeholder}
+          className={className}
+          isOpen={isOpen}
+        />
+      )}
+    </div>
   );
 }

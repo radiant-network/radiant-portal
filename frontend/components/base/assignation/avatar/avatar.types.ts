@@ -10,7 +10,6 @@ export interface AvatarProps {
   users?: AvatarUser[];
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-  'data-testid'?: string;
   canAssign?: boolean;
   onAssignClick?: () => void;
 }
@@ -18,7 +17,6 @@ export interface AvatarProps {
 export interface BaseAvatarProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-  'data-testid'?: string;
   canAssign?: boolean;
   onAssignClick?: () => void;
 }

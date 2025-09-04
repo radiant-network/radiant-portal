@@ -483,7 +483,16 @@
       "search_placeholder": "Rechercher",
       "remove_assignment": "Retirer l'assignation",
       "no_users_found": "Aucun utilisateur trouvé",
-      "start_typing_to_search": "Commencer à taper pour rechercher"
+      "start_typing_to_search": "Commencez à taper pour rechercher",
+      "not_assigned": "Non assigné",
+      "filter": "Filtrer",
+      "reset": "Réinitialiser",
+      "assignment": "Assignation",
+      "search": "Rechercher"
+    },
+    "unassigned_avatar": {
+      "can_assign": "Assigner cette prescription",
+      "cannot_assign": "Aucune assignation"
     }
   },
   "case_exploration": {

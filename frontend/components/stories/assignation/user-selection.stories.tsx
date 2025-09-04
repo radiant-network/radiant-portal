@@ -2,7 +2,11 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { AvatarUser } from '@/components/base/assignation/avatar';
-import { UserSelection, UserSelectionPopover } from '@/components/base/assignation/user-selection';
+import {
+  ReadOnlyUserSelection,
+  UserSelection,
+  UserSelectionPopover,
+} from '@/components/base/assignation/user-selection';
 
 const meta = {
   title: 'Assignation/UserSelection',
@@ -165,4 +169,129 @@ const InteractiveComponent = () => {
 
 export const Interactive: Story = {
   render: () => <InteractiveComponent />,
+};
+
+// ReadOnlyUserSelection Stories
+export const ReadOnlyEmpty: Story = {
+  render: () => (
+    <div className="max-w-lg space-y-4">
+      <h3 className="text-lg font-semibold">Read-Only User Selection (Empty)</h3>
+      <ReadOnlyUserSelection selectedUsers={[]} />
+      <p className="text-sm text-gray-600">Note: Component returns null when no users are selected</p>
+    </div>
+  ),
+};
+
+export const ReadOnlySingleUser: Story = {
+  render: () => (
+    <div className="max-w-lg space-y-4">
+      <h3 className="text-lg font-semibold">Read-Only User Selection (Single User)</h3>
+      <ReadOnlyUserSelection selectedUsers={[sampleUsers[0]]} />
+      <div className="text-sm text-gray-600">
+        <p>
+          <strong>Selected:</strong> {sampleUsers[0].name}
+        </p>
+        <p>
+          <strong>Organization:</strong> {sampleUsers[0].organization}
+        </p>
+      </div>
+    </div>
+  ),
+};
+
+export const ReadOnlyMultipleUsers: Story = {
+  render: () => (
+    <div className="max-w-lg space-y-4">
+      <h3 className="text-lg font-semibold">Read-Only User Selection (Multiple Users)</h3>
+      <ReadOnlyUserSelection selectedUsers={[sampleUsers[0], sampleUsers[1], sampleUsers[2]]} />
+      <div className="text-sm text-gray-600">
+        <p>
+          <strong>Selected Users:</strong>
+        </p>
+        <ul className="list-disc list-inside ml-2">
+          {[sampleUsers[0], sampleUsers[1], sampleUsers[2]].map(user => (
+            <li key={user.id}>
+              {user.name} ({user.organization})
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  ),
+};
+
+export const ReadOnlyWithNotAssigned: Story = {
+  render: () => {
+    const notAssignUser: AvatarUser = {
+      id: 'not-assign',
+      name: 'Not assigned',
+      organization: '',
+    };
+
+    return (
+      <div className="max-w-lg space-y-4">
+        <h3 className="text-lg font-semibold">Read-Only User Selection (Not Assigned)</h3>
+        <ReadOnlyUserSelection selectedUsers={[notAssignUser]} />
+        <div className="text-sm text-gray-600">
+          <p>
+            <strong>Status:</strong> No assignment
+          </p>
+          <p>Shows the unassigned state with the user icon</p>
+        </div>
+      </div>
+    );
+  },
+};
+
+export const ReadOnlyMixedUsers: Story = {
+  render: () => {
+    const notAssignUser: AvatarUser = {
+      id: 'not-assign',
+      name: 'Not assigned',
+      organization: '',
+    };
+
+    return (
+      <div className="max-w-lg space-y-4">
+        <h3 className="text-lg font-semibold">Read-Only User Selection (Mixed)</h3>
+        <ReadOnlyUserSelection selectedUsers={[sampleUsers[0], notAssignUser, sampleUsers[2]]} />
+        <div className="text-sm text-gray-600">
+          <p>
+            <strong>Note:</strong> Shows mix of assigned users and unassigned state
+          </p>
+          <p>Demonstrates the different avatar styles in read-only mode</p>
+        </div>
+      </div>
+    );
+  },
+};
+
+export const ReadOnlyComparison: Story = {
+  render: () => {
+    const selectedUsers = [sampleUsers[0], sampleUsers[1]];
+
+    return (
+      <div className="max-w-2xl space-y-6">
+        <h3 className="text-lg font-semibold">Editable vs Read-Only Comparison</h3>
+
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-medium mb-2">Read-Only Version:</h4>
+            <ReadOnlyUserSelection selectedUsers={selectedUsers} />
+            <p className="text-sm text-gray-500 mt-1">No interaction possible - display only</p>
+          </div>
+
+          <div>
+            <h4 className="font-medium mb-2">Editable Version:</h4>
+            <UserSelection
+              availableUsers={sampleUsers}
+              selectedUsers={selectedUsers}
+              onUsersChange={() => {}} // No-op for demo
+            />
+            <p className="text-sm text-gray-500 mt-1">Interactive - allows searching and removing users</p>
+          </div>
+        </div>
+      </div>
+    );
+  },
 };

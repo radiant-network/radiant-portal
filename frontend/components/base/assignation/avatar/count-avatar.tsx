@@ -1,19 +1,14 @@
 import { Avatar, AvatarFallback } from '@/components/base/ui/avatar';
 import { cn } from '@/components/lib/utils';
 
+import { ASSIGNATION_CONSTANTS } from '../constants';
+
 import { avatarStyles, getOverlapClasses } from './avatar.styles';
 import { CountAvatarProps } from './avatar.types';
 import { getInitials, getUserColor } from './avatar.utils';
 import { AvatarPopover } from './avatar-popover';
 
-export function CountAvatar({
-  firstUser,
-  additionalCount,
-  allUsers,
-  size = 'md',
-  className,
-  'data-testid': testId,
-}: CountAvatarProps) {
+export function CountAvatar({ firstUser, additionalCount, allUsers, size = 'md', className }: CountAvatarProps) {
   const initials = getInitials(firstUser);
   const colorClass = getUserColor(firstUser.id);
 
@@ -21,12 +16,14 @@ export function CountAvatar({
   const countStyles = avatarStyles({ size, variant: 'count', position: 'second' });
   const overlapClass = getOverlapClasses(size);
 
-  const countText = additionalCount > 99 ? '99+' : `+${additionalCount}`;
+  const countText =
+    additionalCount > ASSIGNATION_CONSTANTS.MAX_COUNT_DISPLAY
+      ? `${ASSIGNATION_CONSTANTS.MAX_COUNT_DISPLAY}+`
+      : `+${additionalCount}`;
 
   const avatarElement = (
     <div
       className={cn('flex items-center', className)}
-      data-testid={testId}
       title={`${firstUser.name} and ${additionalCount} other${additionalCount > 1 ? 's' : ''}`}
     >
       {/* First user avatar - behind (lower z-index) */}
@@ -36,7 +33,7 @@ export function CountAvatar({
 
       {/* Count avatar - overlapped on top (higher z-index) */}
       <Avatar className={cn(countStyles.container(), overlapClass, 'bg-background')}>
-        <AvatarFallback className={cn(countStyles.fallback(), 'bg-cyan/20 text-cyan-foreground')}>
+        <AvatarFallback className={cn(countStyles.fallback(), 'bg-cyan-800/20 text-cyan-foreground')}>
           {countText}
         </AvatarFallback>
       </Avatar>
@@ -48,7 +45,7 @@ export function CountAvatar({
 
   if (shouldShowPopover) {
     return (
-      <AvatarPopover users={allUsers} size={size} data-testid={testId}>
+      <AvatarPopover users={allUsers} size={size}>
         {avatarElement}
       </AvatarPopover>
     );
