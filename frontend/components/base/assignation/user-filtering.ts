@@ -89,11 +89,10 @@ export function handleUserSelection({
   if (isNotAssigned) {
     // If selecting 'not-assign', replace all others with just this one
     return [selectedUser];
-  } else {
-    // For regular users, remove 'not-assign' if it exists and add the new user
-    const filteredUsers = currentSelectedUsers.filter(u => !isNotAssignedUser(u));
-    return [...filteredUsers, selectedUser];
   }
+  // For regular users, remove 'not-assign' if it exists and add the new user
+  const filteredUsers = currentSelectedUsers.filter(u => !isNotAssignedUser(u));
+  return [...filteredUsers, selectedUser];
 }
 
 /**
@@ -113,14 +112,13 @@ export function handleUserToggle({
   if (isNotAssigned) {
     // If selecting 'not-assign', clear all others and add only this one
     return isChecked ? [user] : [];
-  } else {
-    if (isChecked) {
-      // Remove 'not-assign' if it exists and add the new user
-      const filteredUsers = currentSelectedUsers.filter(u => !isNotAssignedUser(u));
-      return [...filteredUsers, user];
-    } else {
-      // Remove the user
-      return currentSelectedUsers.filter(u => u.id !== user.id);
-    }
   }
+
+  if (isChecked) {
+    // Remove 'not-assign' if it exists and add the new user
+    const filteredUsers = currentSelectedUsers.filter(u => !isNotAssignedUser(u));
+    return [...filteredUsers, user];
+  }
+  // Remove the user
+  return currentSelectedUsers.filter(u => u.id !== user.id);
 }
