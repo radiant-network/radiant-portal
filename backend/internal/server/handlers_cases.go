@@ -197,3 +197,49 @@ func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerF
 		c.JSON(http.StatusOK, searchResponse)
 	}
 }
+
+// CaseEntityDocumentsFiltersHandler handles retrieving documents filters for a specific case
+// @Summary Get types.DocumentFilters documents filters for a specific case
+// @Id caseEntityDocumentsFilters
+// @Description Retrieve types.DocumentFilters documents filters for a specific case
+// @Tags cases
+// @Security bearerauth
+// @Param case_id path string true "Case ID"
+// @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.DocumentFilters
+// @Failure 500 {object} types.ApiError
+// @Router /cases/{case_id}/documents/filters [post]
+func CaseEntityDocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body types.FiltersBodyWithCriteria
+		)
+		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
+		if errCaseId != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		var caseIdFilter = types.SearchCriterion{FieldName: types.CaseIdField.Alias, Value: []interface{}{caseId}}
+		var criteria = append(body.SearchCriteria, caseIdFilter)
+		query, err := types.NewAggregationQueryFromCriteria(criteria, types.DocumentFields)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		filters, err := repo.GetDocumentsFilters(query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, filters)
+	}
+}

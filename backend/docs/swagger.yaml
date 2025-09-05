@@ -1719,6 +1719,43 @@ paths:
       summary: Get CaseEntity case entity
       tags:
       - cases
+  /cases/{case_id}/documents/filters:
+    post:
+      description: Retrieve DocumentFilters documents filters for a specific
+        case
+      operationId: caseEntityDocumentsFilters
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FiltersBodyWithCriteria'
+        description: Filters Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentFilters'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get DocumentFilters documents filters for a specific case
+      tags:
+      - cases
   /cases/{case_id}/documents/search:
     post:
       description: Search for DocumentResult list for a case entity
