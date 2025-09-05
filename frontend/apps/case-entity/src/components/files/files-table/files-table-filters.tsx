@@ -3,7 +3,7 @@ import useSWR from 'swr';
 
 import { DocumentFilters, SearchCriterion } from '@/api/api';
 import { IFilterButton, IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
-import DataTableFilters from '@/components/base/data-table/filters/data-table-filters';
+import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { documentApi } from '@/utils/api';
@@ -32,38 +32,22 @@ export const FILTERS_SEARCH_DEFAULTS = {
   relationship_to_proband: [],
 };
 
+const FILTER_TO_CRITERIA_MAP = {
+  data_type: 'data_type_code',
+  format: 'format_code',
+  performer_lab: 'performer_lab_code',
+  project: 'project_code',
+  relationship_to_proband: 'relationship_to_proband_code',
+};
+
 async function fetchFilters(searchCriteria: DocumentFiltersInput) {
   const response = await documentApi.documentsFilters(searchCriteria);
   return response.data;
 }
 
-function updateSearchCriteria(filters: StringArrayRecord) {
-  const search_criteria: SearchCriterion[] = [];
-  if (filters.data_type?.length > 0) {
-    search_criteria.push({ field: 'data_type_code', value: filters.data_type });
-  }
-  if (filters.format?.length > 0) {
-    search_criteria.push({ field: 'data_type_code', value: filters.format });
-  }
-  if (filters.performer_lab?.length > 0) {
-    search_criteria.push({ field: 'performer_lab_code', value: filters.performer_lab });
-  }
-  if (filters.project?.length > 0) {
-    search_criteria.push({ field: 'project_code', value: filters.project });
-  }
-  if (filters.relationship_to_proband?.length > 0) {
-    search_criteria.push({ field: 'relationship_to_proband_code', value: filters.relationship_to_proband });
-  }
-
-  return search_criteria;
-}
-
-function sortOptions(options: IFilterButtonItem[]) {
-  return options.sort((a, b) => (a.label as string).localeCompare(b.label as string));
-}
-
 function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
   const { t } = useI18n();
+  const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('files-filters', {
     ...FILTER_DEFAULTS,
@@ -97,7 +81,6 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
         switch (key) {
           case 'data_type':
           case 'format':
-          case 'project':
           case 'relationship_to_proband':
             return {
               ...baseOption,
@@ -108,7 +91,16 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
           case 'performer_lab':
             return {
               ...baseOption,
+              isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
               popoverSize: 'lg' as PopoverSize,
+              withTooltip: true,
+              options: sortOptions(apiFilters[key] || []),
+            };
+          case 'project':
+            return {
+              ...baseOption,
+              isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
+              popoverSize: 'sm' as PopoverSize,
               withTooltip: true,
               options: sortOptions(apiFilters[key] || []),
             };
@@ -121,13 +113,16 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
 
   return (
     <DataTableFilters
+      filterButtons={filterButtons}
+      changedFilterButtons={changedFilterButtons}
+      setChangedFilterButtons={setChangedFilterButtons}
       filters={filters}
       setFilters={setFilters}
+      openFilters={openFilters}
       setOpenFilters={setOpenFilters}
       loading={loading}
-      updateSearchCriteria={updateSearchCriteria}
       setSearchCriteria={setSearchCriteria}
-      filterButtons={filterButtons}
+      filterToCriteriaMap={FILTER_TO_CRITERIA_MAP}
     />
   );
 }
