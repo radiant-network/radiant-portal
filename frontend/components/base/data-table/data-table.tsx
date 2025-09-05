@@ -74,7 +74,6 @@ export const ROW_HEIGHT = 41;
  * Interface and types
  */
 type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
-type TableFiltersProps = ({ loading }: { loading: boolean }) => React.JSX.Element;
 
 export type TableProps<TData> = {
   id: string;
@@ -90,23 +89,23 @@ export type TableProps<TData> = {
   paginationHidden?: boolean;
   onServerSortingChange?: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProps<TData>;
-  TableFilters?: TableFiltersProps;
+  TableFilters?: React.JSX.Element;
   total?: number;
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 } & (
-  | {
+    | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-  | {
+    | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-);
+  );
 
 export interface BaseColumnSettings {
   id: string;
@@ -309,7 +308,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -462,7 +461,7 @@ function TranstackTable<T>({
   data,
   defaultColumnSettings,
   defaultServerSorting,
-  TableFilters: FiltersGroupForm,
+  TableFilters,
   loadingStates = {
     total: true,
     list: true,
@@ -719,7 +718,7 @@ function TranstackTable<T>({
         )}
 
         {/* FiltersGroup */}
-        {FiltersGroupForm && FiltersGroupForm({ loading: loadingStates?.list ?? true })}
+        {TableFilters}
 
         {/* Right Menu Options */}
         <div className="flex justify-end">

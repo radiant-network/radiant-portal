@@ -135,7 +135,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           case 'priority':
             return {
               ...baseOption,
-              options: filterItemPriority(apiFilters[key] || [], t),
+              options: filterItemPriority(apiFilters[key] || []),
             };
           case 'case_analysis':
             return {

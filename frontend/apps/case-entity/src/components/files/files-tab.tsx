@@ -73,7 +73,7 @@ function FilesTab() {
           <DataTable
             id="case-entity-files"
             columns={getCaseEntityDocumentsColumns(t)}
-            TableFilters={() => <FilesTableFilters setSearchCriteria={setSearchCriteria} />}
+            TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} loading={isLoading} />}
             defaultServerSorting={DEFAULT_SORTING}
             data={data?.list ?? []}
             defaultColumnSettings={defaultSettings}

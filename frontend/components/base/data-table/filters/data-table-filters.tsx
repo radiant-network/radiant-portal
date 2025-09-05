@@ -1,21 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListFilter, X } from 'lucide-react';
-import useSWR from 'swr';
 
-import { DocumentFilters, SearchCriterion } from '@/api/api';
+import { SearchCriterion } from '@/api/api';
 import FilterButton, { IFilterButton, IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
 import { Button } from '@/components/base/ui/button';
 import { useI18n } from '@/components/hooks/i18n';
-import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { documentApi } from '@/utils/api';
+import { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
-type FilesTableFilters = {
+import { Skeleton } from '../../ui/skeleton';
+
+type DataTableFilters = {
+  loading?: boolean;
+  setOpenFilters: (value: Record<string, boolean>) => void;
+  filters: StringArrayRecord;
+  setFilters: (value: StringArrayRecord) => void;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
+  updateSearchCriteria: (filters: StringArrayRecord) => SearchCriterion[];
+  filterButtons: IFilterButton[];
 };
 
-type DocumentFiltersInput = {
-  search_criteria: Array<SearchCriterion>;
-};
 export const FILTER_DEFAULTS = {
   data_type: [],
   format: [],
@@ -32,55 +35,21 @@ export const FILTERS_SEARCH_DEFAULTS = {
   relationship_to_proband: [],
 };
 
-async function fetchFilters(searchCriteria: DocumentFiltersInput) {
-  const response = await documentApi.documentsFilters(searchCriteria);
-  return response.data;
-}
-
-function updateSearchCriteria(filters: StringArrayRecord) {
-  const search_criteria: SearchCriterion[] = [];
-  if (filters.data_type?.length > 0) {
-    search_criteria.push({ field: 'data_type', value: filters.data_type });
-  }
-  if (filters.format?.length > 0) {
-    search_criteria.push({ field: 'format', value: filters.format });
-  }
-  if (filters.performer_lab?.length > 0) {
-    search_criteria.push({ field: 'performer_lab', value: filters.performer_lab });
-  }
-  if (filters.project?.length > 0) {
-    search_criteria.push({ field: 'project_code', value: filters.project });
-  }
-  if (filters.relationship_to_proband?.length > 0) {
-    search_criteria.push({ field: 'relationship_to_proband', value: filters.relationship_to_proband });
-  }
-
-  return search_criteria;
-}
-
-function sortOptions(options: IFilterButtonItem[]) {
+export function sortOptions(options: IFilterButtonItem[]) {
   return options.sort((a, b) => (a.label as string).localeCompare(b.label as string));
 }
 
-function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
+function DataTableFilters({
+  loading = false,
+  setOpenFilters,
+  filters,
+  setFilters,
+  updateSearchCriteria,
+  setSearchCriteria,
+  filterButtons,
+}: DataTableFilters) {
   const { t } = useI18n();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
-  const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
-  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
-    ...FILTER_DEFAULTS,
-    ...FILTERS_SEARCH_DEFAULTS,
-  });
-
-  const { data: apiFilters } = useSWR<DocumentFilters>(
-    'document-filters',
-    () => fetchFilters({ search_criteria: [] }),
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: true,
-      revalidateIfStale: false,
-      revalidateOnReconnect: false,
-    },
-  );
 
   // Handle filter selection
   const handleFilterSelect = useCallback(
@@ -90,46 +59,13 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
     [filters, setFilters],
   );
 
-  const filterButtons = useMemo(() => {
-    if (!apiFilters) return [];
-
-    console.log('apiFilters', apiFilters);
-
-    return Object.keys(apiFilters)
-      .map(key => {
-        const baseOption: IFilterButton = {
-          key,
-          label: t(`case_exploration.case.filters.${key}`),
-          isVisible: ['data_type', 'format', 'performer_lab'].includes(key), // Show first three by default
-          isOpen: openFilters[key] || false,
-          selectedItems: filters[key] || [],
-          options: [],
-        };
-
-        switch (key) {
-          case 'data_type':
-          case 'format':
-          case 'project':
-          case 'performer_lab':
-          case 'relationship_to_proband':
-            return {
-              ...baseOption,
-              popoverSize: 'lg',
-              withTooltip: true,
-              options: sortOptions(apiFilters[key] || []),
-            };
-          default:
-            return baseOption;
-        }
-      })
-      .filter(option => option.options.length > 0);
-  }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
-
-  console.log('filterButtons', filterButtons);
-
+  // Hidden filter
+  const hiddenFilterOptions = useMemo(
+    () => filterButtons.filter((option: IFilterButton) => !option.isVisible),
+    [filterButtons],
+  );
   // Check if any filters are active
-  const hiddenFilterOptions = useMemo(() => filterButtons.filter(option => !option.isVisible), [filterButtons]);
-  const hasActiveFilters = filterButtons.some(option => option.selectedItems.length > 0);
+  const hasActiveFilters = filterButtons.some((option: IFilterButton) => option.selectedItems.length > 0);
   changedFilterButtons.length > 0;
 
   // Clear all filters function
@@ -162,12 +98,20 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
     setSearchCriteria(updateSearchCriteria(filters));
   }, [filters, setSearchCriteria]);
 
+  /**
+   * Skeleton Loading
+   */
+  if (loading) {
+    return <FiltersGroupSkeleton filterButtons={filterButtons.filter(filter => filter.isVisible)} />;
+  }
+
   return (
     <div id="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
       <div className="flex flex-wrap gap-2 items-end">
         {/* Show visible filters */}
-        {filterButtons.map(filter =>
-          filter.isVisible === true ? (
+        {filterButtons
+          .filter(filter => filter.isVisible)
+          .map(filter => (
             <FilterButton
               key={filter.key}
               popoverSize={filter.popoverSize as PopoverSize}
@@ -178,10 +122,10 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
               isOpen={filter.isOpen}
               withTooltip={filter.withTooltip}
             />
-          ) : null,
-        )}
+          ))}
 
         {/* Additional filters control button - only show if there are hidden options */}
+        {/* @TODO: Update placeholder translation key to a generic one */}
         {hiddenFilterOptions.length > 0 && (
           <FilterButton
             label={t('common.filters.more', 'More')}
@@ -206,4 +150,29 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
     </div>
   );
 }
-export default FilesTableFilters;
+
+/**
+ * Skeleton Loading
+ */
+type FiltersGroupSkeletonProps = {
+  hasAutocomplete?: boolean;
+  filterButtons: IFilterButton[];
+};
+function FiltersGroupSkeleton({ hasAutocomplete, filterButtons }: FiltersGroupSkeletonProps) {
+  return (
+    <div className="flex flex-col justify-start gap-2 min-w-[400px] h-[48px]">
+      {hasAutocomplete && (
+        <div className="flex h-[24px]">
+          <Skeleton className="w-[120px] h-full" />
+        </div>
+      )}
+      <div className="flex gap-2 h-[32px]">
+        {filterButtons.map(button => (
+          <Skeleton key={button.key} className="w-[150px] h-full" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default DataTableFilters;

@@ -583,6 +583,15 @@
       "title": "Prescription"
     }
   },
+  "files": {
+    "filters": {
+      "data_type": "Type",
+      "format": "Format",
+      "project": "Projet",
+      "performer_lab": "Laboratoire de diagnostic",
+      "relationship_to_proband": "Relation"
+    }
+  },
   "interpretation": {
     "title": "Interprétation clinique"
   },

@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ListFilter, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import { DocumentFilters, SearchCriterion } from '@/api/api';
-import FilterButton, { IFilterButton, IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
-import { Button } from '@/components/base/ui/button';
+import { IFilterButton, IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
+import DataTableFilters from '@/components/base/data-table/filters/data-table-filters';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { documentApi } from '@/utils/api';
 
 type FilesTableFilters = {
+  loading: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
 };
 
@@ -40,19 +40,19 @@ async function fetchFilters(searchCriteria: DocumentFiltersInput) {
 function updateSearchCriteria(filters: StringArrayRecord) {
   const search_criteria: SearchCriterion[] = [];
   if (filters.data_type?.length > 0) {
-    search_criteria.push({ field: 'data_type', value: filters.data_type });
+    search_criteria.push({ field: 'data_type_code', value: filters.data_type });
   }
   if (filters.format?.length > 0) {
-    search_criteria.push({ field: 'format', value: filters.format });
+    search_criteria.push({ field: 'data_type_code', value: filters.format });
   }
   if (filters.performer_lab?.length > 0) {
-    search_criteria.push({ field: 'performer_lab', value: filters.performer_lab });
+    search_criteria.push({ field: 'performer_lab_code', value: filters.performer_lab });
   }
   if (filters.project?.length > 0) {
     search_criteria.push({ field: 'project_code', value: filters.project });
   }
   if (filters.relationship_to_proband?.length > 0) {
-    search_criteria.push({ field: 'relationship_to_proband', value: filters.relationship_to_proband });
+    search_criteria.push({ field: 'relationship_to_proband_code', value: filters.relationship_to_proband });
   }
 
   return search_criteria;
@@ -62,15 +62,13 @@ function sortOptions(options: IFilterButtonItem[]) {
   return options.sort((a, b) => (a.label as string).localeCompare(b.label as string));
 }
 
-function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
+function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
   const { t } = useI18n();
-  const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
-  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
+  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('files-filters', {
     ...FILTER_DEFAULTS,
     ...FILTERS_SEARCH_DEFAULTS,
   });
-
   const { data: apiFilters } = useSWR<DocumentFilters>(
     'document-filters',
     () => fetchFilters({ search_criteria: [] }),
@@ -82,25 +80,15 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
     },
   );
 
-  // Handle filter selection
-  const handleFilterSelect = useCallback(
-    (filterKey: string, selectedValues: string[]) => {
-      setFilters({ ...filters, [filterKey]: selectedValues });
-    },
-    [filters, setFilters],
-  );
-
+  // Mesmoize filter buttons to prevent unnecessary re-renders
   const filterButtons = useMemo(() => {
     if (!apiFilters) return [];
-
-    console.log('apiFilters', apiFilters);
-
     return Object.keys(apiFilters)
       .map(key => {
         const baseOption: IFilterButton = {
           key,
-          label: t(`case_exploration.case.filters.${key}`),
-          isVisible: ['data_type', 'format', 'performer_lab'].includes(key), // Show first three by default
+          label: t(`files.filters.${key}`),
+          isVisible: ['format', 'data_type', 'relationship_to_proband'].includes(key), // Show first three by default
           isOpen: openFilters[key] || false,
           selectedItems: filters[key] || [],
           options: [],
@@ -110,11 +98,17 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
           case 'data_type':
           case 'format':
           case 'project':
-          case 'performer_lab':
           case 'relationship_to_proband':
             return {
               ...baseOption,
-              popoverSize: 'lg',
+              popoverSize: 'sm' as PopoverSize,
+              withTooltip: true,
+              options: sortOptions(apiFilters[key] || []),
+            };
+          case 'performer_lab':
+            return {
+              ...baseOption,
+              popoverSize: 'lg' as PopoverSize,
               withTooltip: true,
               options: sortOptions(apiFilters[key] || []),
             };
@@ -123,87 +117,18 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
         }
       })
       .filter(option => option.options.length > 0);
-  }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
-
-  console.log('filterButtons', filterButtons);
-
-  // Check if any filters are active
-  const hiddenFilterOptions = useMemo(() => filterButtons.filter(option => !option.isVisible), [filterButtons]);
-  const hasActiveFilters = filterButtons.some(option => option.selectedItems.length > 0);
-  changedFilterButtons.length > 0;
-
-  // Clear all filters function
-  const clearAllFilters = () => {
-    setFilters({
-      ...FILTER_DEFAULTS,
-      ...FILTERS_SEARCH_DEFAULTS,
-    });
-    setChangedFilterButtons([]);
-    setOpenFilters({});
-  };
-
-  const makeFiltersVisible = useCallback((selectedKeys: string[]) => {
-    // Update changed filter buttons to make them visible
-    setChangedFilterButtons(prev => [...prev, ...selectedKeys.filter(key => !prev.includes(key))]);
-
-    // Set selected filters as open
-    const newOpenFilters = selectedKeys.reduce(
-      (acc, key) => {
-        acc[key] = true;
-        return acc;
-      },
-      {} as Record<string, boolean>,
-    );
-
-    setOpenFilters(prev => ({ ...prev, ...newOpenFilters }));
-  }, []);
-
-  useEffect(() => {
-    setSearchCriteria(updateSearchCriteria(filters));
-  }, [filters, setSearchCriteria]);
+  }, [apiFilters, filters, openFilters, t]);
 
   return (
-    <div id="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
-      <div className="flex flex-wrap gap-2 items-end">
-        {/* Show visible filters */}
-        {filterButtons.map(filter =>
-          filter.isVisible === true ? (
-            <FilterButton
-              key={filter.key}
-              popoverSize={filter.popoverSize as PopoverSize}
-              label={filter.label}
-              options={filter.options}
-              selected={filter.selectedItems}
-              onSelect={values => handleFilterSelect(filter.key, values)}
-              isOpen={filter.isOpen}
-              withTooltip={filter.withTooltip}
-            />
-          ) : null,
-        )}
-
-        {/* Additional filters control button - only show if there are hidden options */}
-        {hiddenFilterOptions.length > 0 && (
-          <FilterButton
-            label={t('common.filters.more', 'More')}
-            options={hiddenFilterOptions}
-            selected={[]}
-            onSelect={makeFiltersVisible}
-            actionMode={true}
-            icon={<ListFilter size={16} />}
-            placeholder={t('case_exploration.filters_group.case.filters.more_placeholder', 'Filters')}
-            closeOnSelect={true}
-          />
-        )}
-
-        {/* Clear button - only show if filters are active */}
-        {hasActiveFilters && (
-          <Button variant="link" onClick={clearAllFilters} className="text-sm py-2 px-3 h-8">
-            <X size={14} />
-            {t('common.actions.clear', 'Clear')}
-          </Button>
-        )}
-      </div>
-    </div>
+    <DataTableFilters
+      filters={filters}
+      setFilters={setFilters}
+      setOpenFilters={setOpenFilters}
+      loading={loading}
+      updateSearchCriteria={updateSearchCriteria}
+      setSearchCriteria={setSearchCriteria}
+      filterButtons={filterButtons}
+    />
   );
 }
 export default FilesTableFilters;

@@ -583,6 +583,15 @@
       "title": "Assays"
     }
   },
+  "files": {
+    "filters": {
+      "data_type": "Type",
+      "format": "Format",
+      "project": "Project",
+      "performer_lab": "Diagnostic lab",
+      "relationship_to_proband": "Relationship"
+    }
+  },
   "interpretation": {
     "title": "Clinical Interpretation"
   },
