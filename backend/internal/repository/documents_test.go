@@ -208,13 +208,13 @@ func Test_SearchDocumentsFilterOnTaskId(t *testing.T) {
 	})
 }
 
-func Test_SearchDocumentsFilterOnProjectId(t *testing.T) {
+func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
-				FieldName: types.CaseProjectIdField.GetName(),
-				Value:     []interface{}{1},
+				FieldName: types.ProjectCodeField.GetAlias(),
+				Value:     []interface{}{"N1"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
