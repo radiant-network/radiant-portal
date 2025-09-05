@@ -156,6 +156,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup := privateRoutes.Group("/documents")
 	documentsGroup.POST("/search", server.SearchDocumentsHandler(repoDocuments))
 	documentsGroup.GET("/autocomplete", server.DocumentsAutocompleteHandler(repoDocuments))
+	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
 
 	r.Use(gin.Recovery())
 	return r
