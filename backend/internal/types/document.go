@@ -39,7 +39,6 @@ type DocumentResult struct {
 
 var DocumentFields = []Field{
 	CaseIdField,
-	CaseProjectIdField,
 	CasePerformerLabCodeField,
 	CasePerformerLabNameField,
 	DocumentIdField,
@@ -50,6 +49,7 @@ var DocumentFields = []Field{
 	DocumentCreatedOnField,
 	DocumentHashField,
 	FamilyRelationshipToProbandCodeField,
+	ProjectCodeField,
 	SampleSubmitterSampleIdField,
 	SampleIdField,
 	SequencingExperimentIdField,

@@ -207,78 +207,37 @@ func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggreg
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
-	tx = joinWithRequest(tx)
-	tx = joinWithProband(tx, userQuery)
-	tx = joinWithCaseAnalysis(tx)
-	tx = joinWithProject(tx)
+	tx = utils.JoinWithRequest(tx)
+	tx = utils.JoinWithProband(tx, userQuery)
+	tx = utils.JoinWithCaseAnalysis(tx)
+	tx = utils.JoinWithProject(tx)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
 		if userQuery.HasFieldFromTables(types.PerformerLabTable) {
-			tx = joinWithPerformerLab(tx)
+			tx = utils.JoinWithPerformerLab(tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.MondoTable) {
-			tx = joinWithMondoTerm(tx)
+			tx = utils.JoinWithMondoTerm(tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.PatientTable) {
-			tx = joinWithPatients(tx)
+			tx = utils.JoinWithPatients(tx)
 		}
 	}
 	return tx, nil
-}
-
-func joinWithRequest(tx *gorm.DB) *gorm.DB {
-	joinWithRequestSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.request_id=%s.id", types.RequestTable.Name, types.RequestTable.Alias, types.CaseTable.Alias, types.RequestTable.Alias)
-	joinWithOrderingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_id=%s.id", types.OrderingOrganizationTable.Name, types.OrderingOrganizationTable.Alias, types.RequestTable.Alias, types.OrderingOrganizationTable.Alias)
-	return tx.Joins(joinWithRequestSql).Joins(joinWithOrderingOrganizationSql)
-}
-
-func joinWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
-	joinWithProbandSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.ProbandTable.Name, types.ProbandTable.Alias, types.CaseTable.Alias, types.ProbandTable.Alias)
-	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.managing_organization_id=%s.id", types.ManagingOrganizationTable.Name, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
-	if userQuery != nil && userQuery.HasFieldFromTables(types.ManagingOrganizationTable) {
-		return tx.Joins(joinWithProbandSql).Joins(joinWithProbandManagingOrganizationSql)
-	}
-	return tx.Joins(joinWithProbandSql)
-}
-
-func joinWithPatients(tx *gorm.DB) *gorm.DB {
-	joinWithSeqExp := fmt.Sprintf("LEFT JOIN %s %s ON %s.case_id=%s.id", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias, types.CaseTable.Alias)
-	joinWithPatientSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.patient_id=%s.id", types.PatientTable.Name, types.PatientTable.Alias, types.SequencingExperimentTable.Alias, types.PatientTable.Alias)
-	return tx.Joins(joinWithSeqExp).Joins(joinWithPatientSql)
-}
-
-func joinWithCaseAnalysis(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.case_analysis_id=%s.id", types.CaseAnalysisTable.Name, types.CaseAnalysisTable.Alias, types.CaseTable.Alias, types.CaseAnalysisTable.Alias))
-}
-
-func joinWithProject(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.project_id=%s.id", types.ProjectTable.Name, types.ProjectTable.Alias, types.CaseTable.Alias, types.ProjectTable.Alias))
-}
-
-func joinWithPerformerLab(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.performer_lab_id=%s.id", types.PerformerLabTable.Name, types.PerformerLabTable.Alias, types.CaseTable.Alias, types.PerformerLabTable.Alias))
-}
-
-func joinWithMondoTerm(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.primary_condition=%s.id", types.MondoTable.Name, types.MondoTable.Alias, types.CaseTable.Alias, types.MondoTable.Alias))
-}
-
-func joinWithFamily(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.case_id=%s.id", types.FamilyTable.Name, types.FamilyTable.Alias, types.FamilyTable.Alias, types.CaseTable.Alias))
 }
 
 func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error) {
 	var caseEntity CaseEntity
 
 	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
-	txCase = joinWithCaseAnalysis(txCase)
-	txCase = joinWithMondoTerm(txCase)
-	txCase = joinWithPerformerLab(txCase)
-	txCase = joinWithRequest(txCase)
-	txCase = joinWithProject(txCase)
+	txCase = utils.JoinWithCaseAnalysis(txCase)
+	txCase = utils.JoinWithMondoTerm(txCase)
+	txCase = utils.JoinWithPerformerLab(txCase)
+	txCase = utils.JoinWithRequest(txCase)
+	txCase = utils.JoinWithProject(txCase)
 	txCase = txCase.Select("c.id as case_id, c.proband_id, ca.code as case_analysis_code, ca.name as case_analysis_name, ca.type_code as case_analysis_type, c.created_on, c.updated_on, c.note, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as performer_lab_code, lab.name as performer_lab_name, c.status_code, order_org.code as requested_by_code, order_org.name as requested_by_name, r.priority_code, r.ordering_physician as prescriber, c.request_id, prj.code as project_code, prj.name as project_name")
 	txCase = txCase.Where("c.id = ?", caseId)
 	if err := txCase.Find(&caseEntity).Error; err != nil {
