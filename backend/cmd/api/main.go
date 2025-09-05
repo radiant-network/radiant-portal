@@ -98,6 +98,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.POST("/filters", server.CasesFiltersHandler(repoCases))
 	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
 	casesGroup.POST("/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repoDocuments))
+	casesGroup.POST("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 
 	hpoGroup := privateRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))

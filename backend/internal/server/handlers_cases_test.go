@@ -331,3 +331,39 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 		"count": 1
 	}`, w.Body.String())
 }
+
+func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/cases/:case_id/documents/filters", CaseEntityDocumentsFiltersHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/cases/1/documents/filters", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"data_type":[
+			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
+			{"count":0, "key":"snv", "label":"Germline SNV"}, 
+			{"count":0, "key":"ssnv", "label":"Somatic SNV"}
+		], 
+		"format":[
+			{"count":0, "key":"cram", "label":"CRAM File"}, 
+			{"count":0, "key":"crai", "label":"CRAI Index File"}, 
+			{"count":0, "key":"vcf", "label":"VCF File"}
+		], 
+		"performer_lab":[
+			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+		], 
+		"project":[
+			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
+			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
+		], 
+		"relationship_to_proband":[
+			{"count":0, "key":"proband", "label":"Proband"}, 
+			{"count":0, "key":"father", "label":"Father"}, 
+			{"count":0, "key":"mother", "label":"Mother"}
+		]}`, w.Body.String())
+}
