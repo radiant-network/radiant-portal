@@ -31,20 +31,19 @@ func (Patient) TableName() string {
 	return PatientTable.Name
 }
 
-var ProbandIdField = Field{
-	Name:          "id",
-	Alias:         "proband_id",
-	CanBeSelected: true,
-	CanBeSorted:   true,
-	Table:         ProbandTable,
-}
-
 var ProbandMrnField = Field{
 	Name:          "mrn",
 	Alias:         "proband_mrn",
 	CanBeSelected: true,
 	CanBeSorted:   true,
 	Table:         ProbandTable,
+}
+
+var PatientIdField = Field{
+	Name:          "id",
+	Alias:         "patient_id",
+	CanBeFiltered: true,
+	Table:         PatientTable,
 }
 
 var PatientMrnField = Field{

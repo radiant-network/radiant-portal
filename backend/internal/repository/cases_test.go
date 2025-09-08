@@ -115,17 +115,55 @@ func Test_SearchCases_OnPatientMRN(t *testing.T) {
 	})
 }
 
+func Test_SearchCases_OnProbandID(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.PatientIdField.GetAlias(),
+				Value:     []interface{}{"3"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		cases, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
+		assert.Len(t, *cases, 1)
+		assert.Equal(t, 3, (*cases)[0].ProbandID)
+		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandMRN)
+	})
+}
+
+func Test_SearchCases_OnPatientID(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.PatientIdField.GetAlias(),
+				Value:     []interface{}{"1"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		cases, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
+		assert.Len(t, *cases, 1)
+		assert.Equal(t, 3, (*cases)[0].ProbandID)
+		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandMRN)
+	})
+}
+
 func Test_Cases_SearchById(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		autocompleteResult, err := repo.SearchById("1", 5)
 		assert.NoError(t, err)
 		assert.Equal(t, len(*autocompleteResult), 5)
-		assert.Equal(t, (*autocompleteResult)[0].Value, "1")
-		assert.Equal(t, (*autocompleteResult)[1].Value, "10")
-		assert.Equal(t, (*autocompleteResult)[2].Value, "10")
-		assert.Equal(t, (*autocompleteResult)[3].Value, "11")
-		assert.Equal(t, (*autocompleteResult)[4].Value, "12")
+		assert.Equal(t, "1", (*autocompleteResult)[0].Value)
+		assert.Equal(t, "1", (*autocompleteResult)[1].Value)
+		assert.Equal(t, "10", (*autocompleteResult)[2].Value)
+		assert.Equal(t, "10", (*autocompleteResult)[3].Value)
+		assert.Equal(t, "11", (*autocompleteResult)[4].Value)
 	})
 }
 

@@ -52,7 +52,7 @@ func Test_SearchCasesHandler_WithSortAndLimit(t *testing.T) {
 	expected := `{"list": [{"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_type":"germline_family", "case_id":21, "created_on":"2020-09-12T13:08:00Z", "proband_id":60, "proband_mrn":"MRN-283832", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2020-09-12T13:08:00Z", "has_variants":false}, {"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_type":"germline_family", "case_id":20, "created_on":"2020-09-12T13:08:00Z", "proband_id":58, "proband_mrn":"MRN-283830", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"completed", "updated_on":"2020-09-12T13:08:00Z", "has_variants":false}], "count": 21}`
 	body := `{
 			"additional_fields":[],
-			"sort":[{"field": "patient_id", "order": "desc"}],
+			"sort":[{"field": "proband_id", "order": "desc"}],
 			"limit": 2
 		}`
 	assertSearchCasesHandler(t, "simple", body, expected)
@@ -84,7 +84,7 @@ func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit i
 }
 
 func Test_CaseIdsAutoComplete(t *testing.T) {
-	expected := `[{"type":"case_id", "value":"1"}, {"type":"case_id", "value":"10"}, {"type":"patient_id", "value":"10"}, {"type":"case_id", "value":"11"}, {"type":"case_id", "value":"12"}]`
+	expected := `[{"type":"case_id", "value":"1"}, {"type":"patient_id", "value":"1"}, {"type":"case_id", "value":"10"}, {"type":"patient_id", "value":"10"}, {"type":"case_id", "value":"11"}]`
 	//expected := `[{"type":"case_id", "value":"1"}, {"type":"request_id", "value":"1"}, {"type":"case_id", "value":"10"}, {"type":"patient_id", "value":"10"}, {"type":"request_id", "value":"10"}]`
 	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
 }

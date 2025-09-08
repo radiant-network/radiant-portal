@@ -145,7 +145,7 @@ func (Case) TableName() string {
 var CasesFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
-	ProbandIdField,
+	PatientIdField,
 	PatientMrnField,
 	ProbandMrnField,
 	RequestPriorityCodeField,
@@ -171,7 +171,7 @@ var CasesFields = []Field{
 
 var CasesDefaultFields = []Field{
 	CaseIdField,
-	ProbandIdField,
+	CaseProbandIdField,
 	ProbandMrnField,
 	RequestPriorityCodeField,
 	CaseStatusCodeField,
@@ -206,9 +206,7 @@ var CaseIdField = Field{
 
 var CaseProbandIdField = Field{
 	Name:          "proband_id",
-	Alias:         "patient_id",
 	CanBeSelected: true,
-	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Table:         CaseTable,
 }

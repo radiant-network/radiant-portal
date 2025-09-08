@@ -92,9 +92,9 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	subQueryCaseId = subQueryCaseId.Select("\"case_id\" as type, id as value")
 	subQueryCaseId = subQueryCaseId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryProbandId := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
-	subQueryProbandId = subQueryProbandId.Select("\"patient_id\" as type, proband_id as value")
-	subQueryProbandId = subQueryProbandId.Where("CAST(proband_id AS TEXT) LIKE ?", searchInput)
+	subQueryProbandId := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
+	subQueryProbandId = subQueryProbandId.Select("\"patient_id\" as type, id as value")
+	subQueryProbandId = subQueryProbandId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
 	subQueryMrn := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
 	subQueryMrn = subQueryMrn.Select("\"mrn\" as type, mrn as value")
