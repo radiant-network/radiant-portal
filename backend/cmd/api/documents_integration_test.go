@@ -310,6 +310,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"count":20, "key":"father", "label":"Father"}, 
 			{"count":20, "key":"mother", "label":"Mother"}, 
 			{"count":0, "key":"brother", "label":"Brother"}, 
+			{"count":0, "key":"sibling", "label":"Sibling"},
 			{"count":0, "key":"sister", "label":"Sister"}
 		]}`
 	assertGetDocumentsFilters(t, "simple", body, expected)
