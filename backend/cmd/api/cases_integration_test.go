@@ -358,6 +358,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":1, "key":"mother", "label":"Mother"},
 			{"count":1, "key":"proband", "label":"Proband"}, 
 			{"count":0, "key":"brother", "label":"Brother"}, 
+			{"count":0, "key":"sibling", "label":"Sibling"}, 
 			{"count":0, "key":"sister", "label":"Sister"}
 		]}`
 	assertCaseEntityDocumentsFiltersHandler(t, "simple", 21, body, expected)
