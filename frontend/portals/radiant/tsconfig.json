@@ -22,6 +22,7 @@
       "variant-entity/*": ["../../apps/variant-entity/src/*"],
       "case-exploration/*": ["../../apps/case-exploration/src/*"],
       "case-entity/*": ["../../apps/case-entity/src/*"],
+      "file-exploration/*": ["../../apps/file-exploration/src/*"],
       "~/*": ["./app/*"],
       "react": ["./node_modules/@types/react"]
     },

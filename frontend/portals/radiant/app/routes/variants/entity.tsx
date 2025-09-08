@@ -1,7 +1,5 @@
 import VariantEntity from 'variant-entity/App';
 
-const VEntity = () => {
-  return <VariantEntity />;
-};
+const VEntity = () => <VariantEntity />;
 
 export default VEntity;

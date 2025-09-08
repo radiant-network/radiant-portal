@@ -11,7 +11,7 @@ import { Skeleton } from '../../ui/skeleton';
 
 import TableFiltersSearch from './data-table-filter-search';
 
-type FilterSearch = { id: string; searchTerm?: string };
+type FilterSearch = { id: string; searchTerm?: string; placeholder?: string; minSearchLength?: number };
 type CriteriaProps = { key: string; weight: number };
 
 type DataTableFilters = {
@@ -25,6 +25,7 @@ type DataTableFilters = {
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
   filterSearchs?: FilterSearch[];
   filterButtons: IFilterButton[];
+  visibleFilters: string[];
   criterias: Record<string, CriteriaProps>;
   defaultFilters: Record<string, string[]>;
   defaultSearchFilters?: Record<string, string[]>;
@@ -58,24 +59,26 @@ function updateSearchCriteria(filters: StringArrayRecord, criterias: Record<stri
 
 /**
  * Skeleton Loading
+ * ButtonFilters can be empty because of useMemo
+ * use criterias instead
  */
 type FiltersGroupSkeletonProps = {
   filterSearchs?: FilterSearch[];
-  filterButtons: IFilterButton[];
+  visibleFilters: string[];
 };
-function FiltersGroupSkeleton({ filterSearchs = [], filterButtons }: FiltersGroupSkeletonProps) {
+function FiltersGroupSkeleton({ filterSearchs, visibleFilters }: FiltersGroupSkeletonProps) {
   return (
-    <div className="flex justify-start gap-2 min-w-[400px] h-[48px]">
-      <div className="flex h-[32px]">
-        {filterSearchs?.map(({ id }) => (
-          <Skeleton key={id} className="w-[120px] h-full" />
-        ))}
-      </div>
-
+    <div className="flex flex-col justify-start gap-2 min-w-[400px] h-[48px]">
+      <Skeleton className="w-[120px] h-[24px]" />
       <div className="flex gap-2 h-[32px]">
-        {filterButtons.map(button => (
-          <Skeleton key={button.key} className="w-[150px] h-full" />
+        {filterSearchs?.map(filter => (
+          <Skeleton key={filter.id} className="w-[260px] h-full" />
         ))}
+        {Object.keys(visibleFilters).map(key => (
+          <Skeleton key={key} className="w-[100px] h-full" />
+        ))}
+        {/* more button */}
+        <Skeleton className="w-[75px] h-full" />
       </div>
     </div>
   );
@@ -90,6 +93,7 @@ function DataTableFilters({
   loading = false,
   openFilters,
   setOpenFilters,
+  visibleFilters,
   filters,
   setFilters,
   changedFilterButtons,
@@ -161,8 +165,9 @@ function DataTableFilters({
     setOpenFilters({ ...openFilters, ...newOpenFilters });
   }, []);
 
-  // Handle autocomplete item selection - only one search term allowed at a time
-  //
+  /*
+   * Handle autocomplete item selection - only one search term allowed at a time
+   */
   const handleAutocompleteSelect = useCallback(
     (type: string, value: string) => {
       // Clear all existing search terms first
@@ -180,7 +185,9 @@ function DataTableFilters({
     [filters, setFilters],
   );
 
-  // Handle clearing the search input
+  /*
+   * Handle clearing the search input
+   */
   const handleSearchClear = useCallback(() => {
     setFilters({
       ...filters,
@@ -199,22 +206,19 @@ function DataTableFilters({
    * Skeleton Loading
    */
   if (loading) {
-    return (
-      <FiltersGroupSkeleton
-        filterSearchs={filterSearchs}
-        filterButtons={filterButtons.filter(filter => filter.isVisible)}
-      />
-    );
+    return <FiltersGroupSkeleton filterSearchs={filterSearchs} visibleFilters={visibleFilters} />;
   }
 
   return (
     <div id="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
-      {filterSearchs?.map(({ id, searchTerm }) => (
+      {filterSearchs?.map(({ id, searchTerm, placeholder, minSearchLength }) => (
         <TableFiltersSearch
           key={`table-filter-search-${id}`}
           onSelect={handleAutocompleteSelect}
           onClear={handleSearchClear}
           selectedValue={searchTerm}
+          placeholder={placeholder}
+          minSearchLength={minSearchLength}
         />
       ))}
       <div className="flex flex-wrap gap-2 items-end">

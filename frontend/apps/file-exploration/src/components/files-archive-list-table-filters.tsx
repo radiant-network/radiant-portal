@@ -6,12 +6,11 @@ import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-but
 import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { caseApi } from '@/utils/api';
+import { documentApi } from '@/utils/api';
 
-const DEFAULT_VISIBLE_FILTERS = ['format', 'data_type', 'relationship_to_proband'];
+const DEFAULT_VISIBLE_FILTERS = ['project', 'performer_lab', 'relationship_to_proband', 'format', 'data_type'];
 
 type FilesTableFilters = {
-  caseId: string;
   loading: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
 };
@@ -28,19 +27,19 @@ export const FILTER_DEFAULTS = {
 };
 
 const CRITERIAS = {
-  format: { key: 'format_code', weight: 1 },
-  data_type: { key: 'data_type_code', weight: 2 },
+  project: { key: 'project_code', weight: 1 },
+  performer_lab: { key: 'performer_lab_code', weight: 2 },
   relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3 },
-  performer_lab: { key: 'performer_lab_code', weight: 4 },
-  project: { key: 'project_code', weight: 5 },
+  format: { key: 'format_code', weight: 4 },
+  data_type: { key: 'data_type_code', weight: 5 },
 };
 
-async function fetchFilters(caseId: string, searchCriteria: DocumentFiltersInput) {
-  const response = await caseApi.caseEntityDocumentsFilters(caseId, searchCriteria);
+async function fetchFilters(searchCriteria: DocumentFiltersInput) {
+  const response = await documentApi.documentsFilters(searchCriteria);
   return response.data;
 }
 
-function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFilters) {
+function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
   const { t } = useI18n();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
@@ -49,7 +48,7 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
   });
   const { data: apiFilters } = useSWR<DocumentFilters>(
     'document-filters',
-    () => fetchFilters(caseId, { search_criteria: [] }),
+    () => fetchFilters({ search_criteria: [] }),
     {
       revalidateOnFocus: false,
       revalidateOnMount: true,
@@ -66,44 +65,57 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
         const baseOption: IFilterButton = {
           key,
           label: t(`files.filters.${key}`),
-          isVisible: DEFAULT_VISIBLE_FILTERS.includes(key), // Show first three by default
+          isVisible: DEFAULT_VISIBLE_FILTERS.includes(key),
           isOpen: openFilters[key] || false,
           selectedItems: filters[key] || [],
-          options: [],
+          options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
         };
 
         switch (key) {
           case 'performer_lab':
             return {
               ...baseOption,
-              isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
               popoverSize: 'lg' as PopoverSize,
               withTooltip: true,
-              options: sortOptions(apiFilters[key] || []),
-            };
-          case 'project':
-            return {
-              ...baseOption,
-              isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
-              popoverSize: 'sm' as PopoverSize,
-              withTooltip: true,
-              options: sortOptions(apiFilters[key] || []),
             };
           default:
             return {
               ...baseOption,
               popoverSize: 'sm' as PopoverSize,
               withTooltip: true,
-              options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
             };
         }
       })
       .filter(option => option.options.length > 0);
   }, [apiFilters, filters, openFilters, t]);
 
+  // Get the current search term for display (only one allowed)
+  const getSearchTerm = () => {
+    const searchTypes = ['id', 'run_name', 'sample_id', 'patient_id', 'case_id', 'task_id'];
+
+    for (const type of searchTypes) {
+      const values = filters[type] || [];
+      if (values.length > 0) {
+        return { type, value: values[0] };
+      }
+    }
+
+    return null;
+  };
+
+  const searchTerm = getSearchTerm();
+
   return (
     <DataTableFilters
       visibleFilters={DEFAULT_VISIBLE_FILTERS}
+      filterSearchs={[
+        {
+          id: 'search',
+          searchTerm: searchTerm?.value,
+          minSearchLength: 1,
+          placeholder: t('file_entity.search_by_id_placeholder'),
+        },
+      ]}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}
       setChangedFilterButtons={setChangedFilterButtons}

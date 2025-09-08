@@ -2,23 +2,25 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
 import { DocumentResult } from '@/api/api';
+import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
+import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 const columnHelper = createColumnHelper<DocumentResult>();
 
-export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
+export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
   return [
     // Name
     columnHelper.accessor(row => row.name, {
       id: 'name',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
-      header: t('case_entity.files.name'),
+      header: t('file_entity.name'),
       size: 200,
       minSize: 124,
     }),
@@ -30,7 +32,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
           {info.getValue()}
         </BadgeCell>
       ),
-      header: t('case_entity.files.format_code'),
+      header: t('file_entity.format_code'),
       size: 124,
       minSize: 124,
       maxSize: 164,
@@ -43,7 +45,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
           {info.getValue()}
         </BadgeCell>
       ),
-      header: t('case_entity.files.data_type_code'),
+      header: t('file_entity.data_type_code'),
       size: 124,
       minSize: 124,
       maxSize: 164,
@@ -52,32 +54,55 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.size, {
       id: 'size',
       cell: info => <DocumentSizeCell value={info.getValue()} />,
-      header: t('case_entity.files.size'),
+      header: t('file_entity.size'),
       size: 124,
       minSize: 124,
       maxSize: 164,
     }),
-    // Patient
-    columnHelper.accessor(row => row.patient_id, {
-      id: 'patient_id',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
-      header: t('case_entity.files.patient_id'),
+    // Case ID
+    columnHelper.accessor(row => row.case_id, {
+      id: 'case_id',
+      cell: info => (
+        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>
+      ),
+      header: t('file_entity.case_id'),
       size: 124,
       minSize: 124,
       maxSize: 164,
+    }),
+    // Performer Lab.
+    columnHelper.accessor(row => row.performer_lab_code, {
+      id: 'performer_lab_code',
+      cell: info => (
+        <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
+      ),
+      header: t('file_entity.performer_lab'),
+      minSize: 100,
+      maxSize: 150,
+      size: 120,
+      enableSorting: false,
     }),
     // Relationship
     columnHelper.accessor(row => row.relationship_to_proband_code, {
       id: 'relationship_to_proband_code',
       cell: info => <RelationshipToProbandCell relationship={info.getValue()} />,
-      header: t('case_entity.files.relationship_to_proband_code'),
+      header: t('file_entity.relationship_to_proband_code'),
       size: 150,
       minSize: 124,
+    }),
+    // Patient
+    columnHelper.accessor(row => row.patient_id, {
+      id: 'patient_id',
+      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      header: t('file_entity.patient_id'),
+      size: 124,
+      minSize: 124,
+      maxSize: 164,
     }),
     // Sample
     columnHelper.accessor(row => row.submitter_sample_id, {
       id: 'submitter_sample_id',
-      header: t('case_entity.files.submitter_sample_id'),
+      header: t('file_entity.submitter_sample_id'),
       size: 124,
       minSize: 124,
       maxSize: 164,
@@ -86,7 +111,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.task_id, {
       id: 'task_id',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
-      header: t('case_entity.files.task_id'),
+      header: t('file_entity.task_id'),
       size: 124,
       minSize: 124,
       maxSize: 164,
@@ -104,11 +129,11 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       minSize: 80,
       maxSize: 150,
     }),
-    // Case
+    // Sequenccing Experiment
     columnHelper.accessor(row => row.seq_id, {
       id: 'seq_id',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
-      header: t('case_entity.files.sequencing_experiment_id'),
+      header: t('file_entity.seq_id'),
       size: 124,
       minSize: 124,
     }),
@@ -116,7 +141,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.hash, {
       id: 'hash',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
-      header: t('case_entity.files.hash'),
+      header: t('file_entity.hash'),
       size: 124,
       minSize: 124,
     }),
@@ -124,7 +149,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.run_alias, {
       id: 'run_alias',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
-      header: t('case_entity.files.run_alias'),
+      header: t('file_entity.run_alias'),
       size: 124,
       minSize: 124,
     }),
@@ -135,42 +160,52 @@ export const defaultSettings = createColumnSettings([
   {
     id: 'name',
     visible: true,
-    label: 'case_entity.files.name',
+    label: 'file_entity.name',
   },
   {
     id: 'format_code',
     visible: true,
-    label: 'case_entity.files.format_code',
+    label: 'file_entity.format_code',
   },
   {
     id: 'data_type_code',
     visible: true,
-    label: 'case_entity.files.data_type_code',
+    label: 'file_entity.data_type_code',
   },
   {
     id: 'size',
     visible: true,
-    label: 'case_entity.files.size',
+    label: 'file_entity.size',
   },
   {
-    id: 'patient_id',
+    id: 'case_id',
     visible: true,
-    label: 'case_entity.files.patient_id',
+    label: 'file_entity.case_id',
+  },
+  {
+    id: 'performer_lab_code',
+    visible: true,
+    label: 'file_entity.performer_lab',
   },
   {
     id: 'relationship_to_proband_code',
     visible: true,
-    label: 'case_entity.files.relationship_to_proband_code',
+    label: 'file_entity.relationship_to_proband_code',
+  },
+  {
+    id: 'patient_id',
+    visible: true,
+    label: 'file_entity.patient_id',
   },
   {
     id: 'submitter_sample_id',
     visible: true,
-    label: 'case_entity.files.submitter_sample_id',
+    label: 'file_entity.submitter_sample_id',
   },
   {
     id: 'task_id',
     visible: true,
-    label: 'case_entity.files.task_id',
+    label: 'file_entity.task_id',
   },
   {
     id: 'created_on',
@@ -180,16 +215,16 @@ export const defaultSettings = createColumnSettings([
   {
     id: 'seq_id',
     visible: false,
-    label: 'case_entity.files.sequencing_experiment_id',
+    label: 'file_entity.seq_id',
   },
   {
     id: 'hash',
     visible: false,
-    label: 'case_entity.files.hash',
+    label: 'file_entity.hash',
   },
   {
     id: 'run_alias',
     visible: false,
-    label: 'case_entity.files.run_alias',
+    label: 'file_entity.run_alias',
   },
 ]);

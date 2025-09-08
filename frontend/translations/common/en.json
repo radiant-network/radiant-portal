@@ -279,7 +279,17 @@
         "clear": "Sort"
       },
       "filters": {
-        "more_placeholder": "Filters"
+        "no_values_found": "No values found",
+        "more_placeholder": "Filters",
+        "search": {
+          "case_id": "Case",
+          "patient_id": "Patient",
+          "mrn": "MRN",
+          "request_id": "Assay",
+          "run_name": "Run Name",
+          "sample_id": "Sample ID",
+          "task_id": "Task"
+        }
       },
       "reset": "Reset",
       "no_result": "No results found",
@@ -573,12 +583,6 @@
         "managing_organization_tooltip": "Organization managing the patient’s file",
         "created_on": "Created On",
         "created_on_tooltip": "Date of case creation (yyyy-mm-dd)"
-      },
-      "search": {
-        "case_id": "Case",
-        "patient_id": "Patient",
-        "mrn": "MRN",
-        "request_id": "Assay"
       }
     },
     "assays": {
@@ -936,6 +940,9 @@
       "case": "Case",
       "unknown": "Unknown"
     },
+    "files": {
+      "title": "Files"
+    },
     "patient_information": {
       "title": "Patient Information",
       "proband": "Proband",
@@ -1036,21 +1043,24 @@
         },
         "snv": "SNV"
       }
-    }, 
-    "files": {
-      "title": "Files",
-      "name": "File Name",
-      "format_code": "Format",
-      "data_type_code": "Type",
-      "size": "Size",
-      "patient_id": "Patient",
-      "relationship_to_proband_code": "Relationship",
-      "submitter_sample_id": "Sample",
-      "task_id": "Task",
-      "sequencing_experiment_id": "Case",
-      "hash": "Hash",
-      "run_alias": "Run"
     }
+  },
+  "file_entity": {
+    "title": "Files",
+    "search_by_id_placeholder": "File, sample, patient, case, run, or assay",
+    "name": "File Name",
+    "format_code": "Format",
+    "data_type_code": "Type",
+    "size": "Size",
+    "case_id": "Case",
+    "performer_lab": "Diag. Lab",
+    "patient_id": "Patient",
+    "relationship_to_proband_code": "Relationship",
+    "submitter_sample_id": "Sample",
+    "task_id": "Task",
+    "seq_id": "Assay",
+    "hash": "Hash",
+    "run_alias": "Run"
   },
   "variant_entity": {
     "not_found": "Variant not found",
@@ -1249,6 +1259,7 @@
     "links": {
       "analysis": "Analysis",
       "cases": "Cases",
+      "files": "Files",
       "dashboard": "Dashboard",
       "data_exploration": "Data Exploration",
       "studies": "Studies",

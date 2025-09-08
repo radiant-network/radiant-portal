@@ -1,7 +1,5 @@
 import CaseExploration from 'case-exploration/App';
 
-const VCaseExploration = () => {
-	return <CaseExploration />;
-};
+const VCaseExploration = () => <CaseExploration />;
 
 export default VCaseExploration;

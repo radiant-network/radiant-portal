@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Link, Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
 import logo from '@assets/logo/header.svg';
-import { FolderIcon } from 'lucide-react';
+import { FileIcon, FolderIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 
 import { SidebarProvider } from '@/components/base/ui/sidebar';
@@ -63,6 +63,13 @@ const _ProtectedLayout = () => {
               to: '/case',
               as: Link,
               active: pathname === '/case',
+            },
+            {
+              title: t('main_navbar.links.files'),
+              icon: <FileIcon />,
+              to: '/file',
+              as: Link,
+              active: pathname === '/file',
             },
           ]}
           actions={

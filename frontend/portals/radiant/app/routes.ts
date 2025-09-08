@@ -1,4 +1,4 @@
-import { type RouteConfig, index, layout, prefix, route } from '@react-router/dev/routes';
+import { index, layout, prefix, route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
   route('health-check', './routes/health-check.tsx'),
@@ -7,6 +7,7 @@ export default [
     route('variants/entity/:locusId', './routes/variants/entity.tsx'),
     route('case/', './routes/cases/list.tsx'),
     route('case/entity/:caseId', './routes/cases/entity.tsx'),
+    route('file/', './routes/files/list.tsx'),
     route('admin/features', './routes/admin/beta-features.tsx'),
   ]),
   route('auth/callback', './routes/auth/callback.ts'),
