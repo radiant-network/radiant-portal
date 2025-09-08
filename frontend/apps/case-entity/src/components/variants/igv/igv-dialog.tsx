@@ -1,0 +1,72 @@
+import { GermlineSNVOccurrence, IGVTracks } from '@/api/api';
+import { Spinner } from '@/components/base/spinner';
+import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/components/base/ui/dialog';
+import { useI18n } from '@/components/hooks/i18n';
+import { igvApi } from '@/utils/api';
+import { ReactNode, useState } from 'react';
+import useSWR from 'swr';
+import IgvContainer from './igv-container';
+
+type IGVDialogProps = {
+  occurrence: GermlineSNVOccurrence;
+  renderTrigger: (handleOpen: () => void) => ReactNode;
+};
+
+const fetchIGVForSeqId = async ({ seqId }: { seqId: number }) => {
+  return igvApi.getIGV(seqId.toString()).then(response => response.data);
+};
+
+const IGVDialog = ({ occurrence, renderTrigger }: IGVDialogProps) => {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+
+  const IGVKey = `igv-${occurrence.seq_id}-${occurrence.locus}`;
+
+  const fetchIGV = useSWR<IGVTracks>(
+    {
+      key: IGVKey,
+      seqId: occurrence.seq_id,
+    },
+    fetchIGVForSeqId,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const handleOpen = () => {
+    setOpen(true);
+    fetchIGV.mutate();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      {renderTrigger(handleOpen)}
+      <DialogContent className="max-w-[calc(100vw-60px)] min-h-[calc(100vh-60px)] w-[1200px]">
+        {fetchIGV.isLoading ? (
+          <DialogBody className="flex items-center justify-center">
+            <Spinner size={32} />
+          </DialogBody>
+        ) : (
+          <div>
+            <DialogHeader>
+              <DialogTitle>{t('variant.igv.title')}</DialogTitle>
+            </DialogHeader>
+            <DialogBody className="relative">
+              <IgvContainer
+                tracks={fetchIGV.data?.alignment || []}
+                locus={formatLocus(occurrence.start, occurrence.chromosome, 100)}
+              />
+            </DialogBody>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export const formatLocus = (start: number, chromosome: string, bound?: number, end?: number) =>
+  `chr${chromosome}:${bound ? `${start - bound}-${end ? end + bound : start + bound}` : start}`;
+
+export default IGVDialog;
