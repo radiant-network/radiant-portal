@@ -764,6 +764,9 @@
       "sequence_alteration": "Sequence Alteration"
     },
     "canonical_transcript": "Canonical transcript",
+    "igv": {
+      "title": "Alignment and variant"
+    },
     "interpretation_form": {
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
@@ -1025,7 +1028,7 @@
         },
         "snv": "SNV"
       }
-    }, 
+    },
     "files": {
       "title": "Files",
       "name": "File Name",

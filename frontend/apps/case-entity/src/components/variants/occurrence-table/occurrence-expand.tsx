@@ -46,7 +46,7 @@ export default function OccurrenceExpand({ occurrence }: GermlineVariantPreviewP
           {isLoading || data === undefined ? (
             <Skeleton className="w-full h-6" />
           ) : (
-            <OccurrenceExpandTranscript occurrence={occurrence} expandedOccurrence={data}/>
+            <OccurrenceExpandTranscript occurrence={occurrence} expandedOccurrence={data} />
           )}
         </div>
         <div className="border rounded-sm p-4 gap-10 grid grid-cols-2 2xl:grid-cols-4">

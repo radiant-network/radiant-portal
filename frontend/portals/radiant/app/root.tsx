@@ -79,6 +79,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           sizes="196x196"
         />
         <link rel="manifest" href={`/${__PROJECT__.portal.name.toLowerCase()}/site.webmanifest`} />
+        <script src="https://cdn.jsdelivr.net/npm/igv@2.10.4/dist/igv.min.js"></script>
       </head>
       <body>
         <I18nProvider initialLanguage={loaderData?.language}>
