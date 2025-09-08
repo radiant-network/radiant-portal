@@ -79,7 +79,7 @@ function CasesTab() {
       <DataTable
         id="case-exploration"
         columns={getCaseExplorationColumns(t)}
-        TableFilters={() => <TableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />}
+        TableFilters={<TableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />}
         data={data?.list ?? []}
         defaultColumnSettings={defaultSettings}
         defaultServerSorting={DEFAULT_SORTING}

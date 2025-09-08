@@ -216,7 +216,7 @@ export const LessThan10Results: Story = {
   render: args => <DataTable {...args} />,
 };
 
-export const TableFiltersAndLessThan10Results: Story = {
+export const DataTableFiltersAndLessThan10Results: Story = {
   args: {
     data: data.slice(0, 1),
     total: 1,
