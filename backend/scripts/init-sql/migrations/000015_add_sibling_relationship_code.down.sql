@@ -1,0 +1,1 @@
+DELETE FROM "family_relationship" WHERE code = 'sibling';
