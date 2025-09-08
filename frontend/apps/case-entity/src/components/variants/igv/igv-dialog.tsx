@@ -20,11 +20,9 @@ const IGVDialog = ({ occurrence, renderTrigger }: IGVDialogProps) => {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
-  const IGVKey = `igv-${occurrence.seq_id}-${occurrence.locus}`;
-
   const fetchIGV = useSWR<IGVTracks>(
     {
-      key: IGVKey,
+      key: `igv-${occurrence.seq_id}-${occurrence.locus}`,
       seqId: occurrence.seq_id,
     },
     fetchIGVForSeqId,
