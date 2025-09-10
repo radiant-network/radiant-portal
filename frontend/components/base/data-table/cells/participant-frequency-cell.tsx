@@ -1,6 +1,6 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import { toExponentialNotation } from '@/components/lib/number-format';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { toExponentialNotation } from '@/components/lib/number-format';
 
 type NumberCellProps = {
   value?: number;
@@ -16,7 +16,7 @@ function ParticipantFrequencyCell({ value, locusId }: NumberCellProps) {
   const scientificNotation = toExponentialNotation(value);
 
   return (
-    <AnchorLink size='sm' href={`/variants/entity/${locusId}#cases`} target="_blank">
+    <AnchorLink size="sm" href={`/variants/entity/${locusId}#patients`} target="_blank">
       {scientificNotation ? scientificNotation : value}
     </AnchorLink>
   );
