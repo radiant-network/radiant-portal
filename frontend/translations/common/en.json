@@ -279,8 +279,8 @@
         "clear": "Sort"
       },
       "filters": {
-        "no_values_found": "No values found",
         "more_placeholder": "Filters",
+        "no_values_found": "No values found",
         "search": {
           "case_id": "Case",
           "patient_id": "Patient",
