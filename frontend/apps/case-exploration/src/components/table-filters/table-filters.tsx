@@ -11,6 +11,8 @@ import { caseApi } from '@/utils/api';
 import filterItemPriority from './filter-item-priority';
 import filterItemStatus from './filter-item-status';
 
+const DEFAULT_VISIBLE_FILTERS = ['priority', 'status', 'case_analysis'];
+
 type CaseFiltersInput = {
   search_criteria: Array<SearchCriterion>;
 };
@@ -79,7 +81,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
         const baseOption: IFilterButton = {
           key,
           label: t(`case_exploration.case.filters.${key}`),
-          isVisible: ['priority', 'status', 'case_analysis'].includes(key), // Show first three by default
+          isVisible: DEFAULT_VISIBLE_FILTERS.includes(key), // Show first three by default
           isOpen: openFilters[key] || false,
           selectedItems: filters[key] || [],
           options: [],
@@ -129,8 +131,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       if (values.length > 0) {
         return {
           type,
-          value: values[0], // Only take the first value since we only allow one
-          label: t(`case_exploration.case.headers.${type}`, type.toUpperCase()) + ': ' + values[0],
+          value: values[0],
         };
       }
     }
@@ -142,7 +143,15 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
 
   return (
     <DataTableFilters
-      filterSearchs={[{ id: 'search', searchTerm: searchTerm?.value }]}
+      visibleFilters={DEFAULT_VISIBLE_FILTERS}
+      filterSearchs={[
+        {
+          id: 'search',
+          searchTerm: searchTerm?.value,
+          placeholder: t('case_exploration.filters_group.search_placeholder'),
+          minSearchLength: 1,
+        },
+      ]}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}
       setChangedFilterButtons={setChangedFilterButtons}

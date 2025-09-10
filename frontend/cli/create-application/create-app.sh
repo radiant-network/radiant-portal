@@ -2,7 +2,8 @@
 
 echo "Radiant: Check Node version"
 
-readonly APPLICATION_FOLDER="../../apps"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+readonly APPLICATION_FOLDER="$SCRIPT_DIR/../../apps"
 readonly MIN_NODE_VERSION="20.18.0"
 
 # Get installed Node.js version
@@ -55,7 +56,8 @@ fi
 
 # Copy template
 echo "📁 Copying template files..."
-cp -rv "$TEMPLATE_DIR" "$TARGET_DIR"
+mkdir -p "$TARGET_DIR"
+cp -rv "$TEMPLATE_DIR"/. "$TARGET_DIR"
 
 # List copied files
 echo ""

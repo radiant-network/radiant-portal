@@ -274,7 +274,16 @@
         "unpin": "Désépingler"
       },
       "filters": {
-        "more_placeholder": "Filters"
+        "more_placeholder": "Filters",
+        "search": {
+          "case_id": "Cas",
+          "patient_id": "Patient",
+          "mrn": "MRN",
+          "request_id": "Analyse",
+          "run_name": "Nom du lot",
+          "sample_id": "Sample ID",
+          "task_id": "Tâche"
+        }
       },
       "sort": {
         "descending": "Décroissant",
@@ -573,12 +582,6 @@
         "managing_organization_tooltip": "Organisation responsable du dossier du patient",
         "created_on": "Créé le",
         "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
-      },
-      "search": {
-        "case_id": "Cas",
-        "patient_id": "Patient",
-        "mrn": "MRN",
-        "request_id": "Analyse"
       }
     },
     "assays": {
@@ -936,6 +939,9 @@
       "case": "Cas",
       "unknown": "Inconnu"
     },
+    "files": {
+      "title": "Fichiers"
+    },
     "patient_information": {
       "title": "Information du Patient",
       "proband": "Proband",
@@ -1028,29 +1034,32 @@
       "filters": {
         "assay": "Prescription",
         "proband": "Proband",
-        "sample_id": "Sample ID",
+        "sample_id": "ID Échantillon",
         "affected_status_code": {
           "affected": "Affecté",
           "non_affected": "Non-affecté",
           "unknown": "Inconnu"
         },
         "snv": "SNV"
-      },
-      "files": {
-        "title": "Fichiers",
-        "name": "Nom du fichier",
-        "format_code": "Format",
-        "data_type_code": "Type",
-        "size": "Taille",
-        "patient_id": "Patient",
-        "relationship_to_proband_code": "Parenté",
-        "submitter_sample_id": "Échantillon",
-        "task_id": "Tâche",
-        "sequencing_experiment_id": "Cas",
-        "hash": "Hash",
-        "run_alias": "Lot"
       }
     }
+  },
+  "file_entity": {
+      "title": "Fichiers",
+      "search_by_id_placeholder": "Fichier, échantillon, patient, cas, lot ou essai",
+      "name": "Nom du fichier",
+      "format_code": "Format",
+      "data_type_code": "Type",
+      "size": "Taille",
+      "case_id": "Cas",
+      "performer_lab": "Lab. de diagnostic",
+      "patient_id": "Patient",
+      "relationship_to_proband_code": "Parenté",
+      "submitter_sample_id": "Échantillon",
+      "task_id": "Tâche",
+      "seq_id": "Essai",
+      "hash": "Hash",
+      "run_alias": "Lot"
   },
   "variant_entity": {
     "not_found": "Variante introuvable",
@@ -1249,6 +1258,7 @@
     "links": {
       "analysis": "Analyse",
       "cases": "Cas",
+      "files": "Fichier",
       "dashboard": "Tableau de bord",
       "data_exploration": "Exploration des données",
       "studies": "Études",

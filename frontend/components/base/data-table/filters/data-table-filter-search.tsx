@@ -15,14 +15,14 @@ import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
 
 export type TableFiltersSearchProps = {
+  placeholder?: string;
   onSelect: (type: string, value: string) => void;
   onClear?: () => void;
   selectedValue?: string;
+  minSearchLength?: number;
 };
 
 type GroupedAutocompleteResults = Record<string, AutocompleteResult[]>;
-
-const MIN_SEARCH_LENGTH = 1;
 
 // Function to get icon for each result type
 function getTypeIcon(type: string) {
@@ -35,8 +35,8 @@ function getTypeIcon(type: string) {
   return iconMap[type.toLowerCase()] || FolderOpen;
 }
 
-async function fetchAutocompleteCases(prefix: string) {
-  if (!prefix || prefix.length < MIN_SEARCH_LENGTH) {
+async function fetchAutocompleteCases(prefix: string, minSearchLength) {
+  if (!prefix || prefix.length < minSearchLength) {
     return {};
   }
   const response = await caseApi.autocompleteCases(prefix, '10');
@@ -54,7 +54,13 @@ async function fetchAutocompleteCases(prefix: string) {
   return {}; //
 }
 
-function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSearchProps) {
+function TableFiltersSearch({
+  onSelect,
+  onClear,
+  selectedValue,
+  placeholder,
+  minSearchLength = 3,
+}: TableFiltersSearchProps) {
   const { t } = useI18n();
   const [searchInput, setSearchInput] = useState<string>('');
   const [debouncedSearchInput, setDebouncedSearchInput] = useState<string>('');
@@ -75,8 +81,8 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
   }, [searchInput]);
 
   const { data: groupedResults } = useSWR<GroupedAutocompleteResults, any, string | null>(
-    debouncedSearchInput && debouncedSearchInput.length >= MIN_SEARCH_LENGTH ? debouncedSearchInput : null,
-    (key: string | null) => (key ? fetchAutocompleteCases(key) : Promise.resolve({})),
+    debouncedSearchInput && debouncedSearchInput.length >= minSearchLength ? debouncedSearchInput : null,
+    (key: string | null) => (key ? fetchAutocompleteCases(key, minSearchLength) : Promise.resolve({})),
     {
       revalidateOnFocus: false,
       dedupingInterval: 300,
@@ -112,7 +118,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
         <CommandInput
           className="px-[6px]"
           wrapperClassName="focus-within:ring-primary focus-visible:outline-none focus-visible:ring-ring focus-visible:ring-offset-0 [&:has(:focus-visible)]:ring-1"
-          placeholder={t('case_exploration.filters_group.search_placeholder')}
+          placeholder={placeholder}
           leftAddon={<Search size={16} />}
           rightAddon={searchInput.length > 0 && <X onClick={handleClear} size={16} />}
           value={searchInput}
@@ -127,7 +133,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
             className="absolute max-h-[240px] left-0 top-full z-50 mt-1 w-full overflow-auto rounded-md border bg-background shadow-lg"
             onMouseDown={e => e.preventDefault()}
           >
-            {!hasResults && <CommandEmpty>{t('common.filters.no_values_found')}</CommandEmpty>}
+            {!hasResults && <CommandEmpty>{t('common.table.filters.no_values_found')}</CommandEmpty>}
             {hasResults &&
               Object.keys(groupedResults || {}).map(category => (
                 <>
@@ -138,7 +144,7 @@ function TableFiltersSearch({ onSelect, onClear, selectedValue }: TableFiltersSe
                     key={category}
                     heading={
                       <span className="h-[28px] &:not(:first-child)]:bg-border">
-                        {t(`case_exploration.case.search.${category}`, category.toUpperCase())}
+                        {t(`common.table.filters.search.${category}`, category.toUpperCase())}
                       </span>
                     }
                   >

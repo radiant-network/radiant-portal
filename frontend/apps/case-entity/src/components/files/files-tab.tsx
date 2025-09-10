@@ -16,8 +16,8 @@ import { Card, CardContent } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
 
+import { defaultSettings, getCaseEntityDocumentsColumns } from './files-table/files-tab-table-settings';
 import FilesTableFilters from './files-table/files-table-filters';
-import { defaultSettings, getCaseEntityDocumentsColumns } from './files-table/table-settings';
 
 const DEFAULT_SORTING = [
   {
@@ -73,7 +73,9 @@ function FilesTab() {
           <DataTable
             id="case-entity-files"
             columns={getCaseEntityDocumentsColumns(t)}
-            TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} loading={isLoading} />}
+            TableFilters={
+              <FilesTableFilters caseId={params.caseId!} setSearchCriteria={setSearchCriteria} loading={isLoading} />
+            }
             defaultServerSorting={DEFAULT_SORTING}
             data={data?.list ?? []}
             defaultColumnSettings={defaultSettings}
