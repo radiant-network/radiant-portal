@@ -95,17 +95,17 @@ export type TableProps<TData> = {
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
 } & (
-    | {
+  | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-    | {
+  | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-  );
+);
 
 export interface BaseColumnSettings {
   id: string;
@@ -308,7 +308,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -672,10 +672,12 @@ function TranstackTable<T>({
       onServerSortingChange(defaultServerSorting);
     } else {
       onServerSortingChange(
-        sorting.map(s => ({
-          field: s.id,
-          order: s.desc ? SortBodyOrderEnum.Desc : SortBodyOrderEnum.Asc,
-        })),
+        sorting
+          .map(s => ({
+            field: s.id,
+            order: s.desc ? SortBodyOrderEnum.Desc : SortBodyOrderEnum.Asc,
+          }))
+          .reverse(),
       );
     }
 
