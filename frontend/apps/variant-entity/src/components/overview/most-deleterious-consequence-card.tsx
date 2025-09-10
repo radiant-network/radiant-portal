@@ -4,6 +4,7 @@ import { InfoIcon } from 'lucide-react';
 import { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
+import ConditionalField from '@/components/base/information/conditional-field';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardProps } from '@/components/base/ui/card';
 import { Separator } from '@/components/base/ui/separator';
@@ -39,31 +40,33 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               )}
               {['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? t('common.no_gene') : '-'}
             </div>
-            <div className="text-xs font-mono">{'-'}</div>
+            <div className="text-xs font-mono">
+              <ConditionalField condition={!!data.aa_change}>{data.aa_change}</ConditionalField>
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.consequence')}</div>
             <div className="flex items-center gap-2">
-              {pickedConsequence && data.vep_impact ? (
-                <ConsequenceIndicator vepImpact={data.vep_impact} consequence={pickedConsequence} />
-              ) : (
-                '-'
-              )}
+              <ConditionalField condition={!!pickedConsequence && !!data.vep_impact}>
+                <ConsequenceIndicator vepImpact={data.vep_impact!} consequence={pickedConsequence} />
+              </ConditionalField>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.clin_var')}</div>
             <div className="flex flex-wrap items-start gap-1">
-              {data?.clinvar?.length
-                ? data?.clinvar.map(clinvar => (
-                  <Link
-                    key={clinvar}
-                    to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
-                  >
-                    <ClassificationBadge key={clinvar} value={clinvar} />
-                  </Link>
-                ))
-                : '-'}
+              <ConditionalField condition={data?.clinvar?.length > 0}>
+                <>
+                  {(data?.clinvar ?? []).map(clinvar => (
+                    <Link
+                      key={clinvar}
+                      to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
+                    >
+                      <ClassificationBadge key={clinvar} value={clinvar} />
+                    </Link>
+                  ))}
+                </>
+              </ConditionalField>
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -77,13 +80,11 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               </Tooltip>
             </div>
             <div className="font-semibold font-mono">
-              {data?.pc_wgs ? (
+              <ConditionalField condition={!!data?.pc_wgs}>
                 <Link to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`} className="hover:underline">
                   {`${data.pc_wgs} (${data.pf_wgs.toExponential(2)})`}
                 </Link>
-              ) : (
-                '-'
-              )}
+              </ConditionalField>
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -97,7 +98,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               </Tooltip>
             </div>
             <div className="font-semibold font-mono">
-              {data?.gnomad_v3_af ? (
+              <ConditionalField condition={!!data?.gnomad_v3_af}>
                 <a
                   href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
                   target="_blank"
@@ -106,9 +107,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                 >
                   {data.gnomad_v3_af.toExponential(2)}
                 </a>
-              ) : (
-                '-'
-              )}
+              </ConditionalField>
             </div>
           </div>
         </div>
