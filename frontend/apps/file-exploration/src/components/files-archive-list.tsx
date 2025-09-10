@@ -19,10 +19,6 @@ import { defaultSettings, getFilesArchiveColumns } from './files-archive-table-s
 
 const DEFAULT_SORTING = [
   {
-    field: 'relationship_to_proband_code',
-    order: SortBodyOrderEnum.Desc,
-  },
-  {
     field: 'document_id',
     order: SortBodyOrderEnum.Desc,
   },

@@ -35,7 +35,7 @@ function getTypeIcon(type: string) {
   return iconMap[type.toLowerCase()] || FolderOpen;
 }
 
-async function fetchAutocompleteCases(prefix: string, minSearchLength) {
+async function fetchAutocompleteCases(prefix: string, minSearchLength: number) {
   if (!prefix || prefix.length < minSearchLength) {
     return {};
   }

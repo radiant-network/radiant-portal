@@ -274,7 +274,8 @@
         "unpin": "Désépingler"
       },
       "filters": {
-        "more_placeholder": "Filters",
+        "more_placeholder": "Filtres",
+        "no_values_found": "Aucune valeur trouvée",
         "search": {
           "case_id": "Cas",
           "patient_id": "Patient",
