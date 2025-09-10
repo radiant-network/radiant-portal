@@ -9,6 +9,7 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import { Button } from '@/components/base/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardSeparator, CardTitle } from '@/components/base/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { PROBAND } from '@/components/feature/constants';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 import { CaseEntityTabs } from '@/types';
@@ -22,7 +23,9 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const proband = data.members[0];
-  const family = data.members.filter(member => member.relationship_to_proband);
+  const family = data.members.filter(
+    member => member.relationship_to_proband && member.relationship_to_proband != PROBAND,
+  );
   const hasFamily = family.length > 0;
   const hasVariants = data.assays.some(assay => assay.has_variants);
 
@@ -114,7 +117,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
 
             <div className={cn('flex flex-col gap-4 flex-1')}>
               {family.map(member => (
-                <Card className="p-4 gap-4 flex shadow-none">
+                <Card key={member.patient_id} className="p-4 gap-4 flex shadow-none">
                   {/* Relationship */}
                   <CardTitle className="capitalize">{member.relationship_to_proband}</CardTitle>
 
