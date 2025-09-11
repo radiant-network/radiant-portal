@@ -595,7 +595,7 @@
       "format": "Format",
       "project": "Projet",
       "performer_lab": "Laboratoire de diagnostic",
-      "relationship_to_proband": "Relation"
+      "relationship_to_proband": "Parenté"
     }
   },
   "interpretation": {
@@ -1183,7 +1183,7 @@
       },
       "common_headers": {
         "patient_id": "Patient",
-        "relationship_to_proband": "Relation"
+        "relationship_to_proband": "Parenté"
       },
       "common_filters": {
         "institutions": {
@@ -1259,7 +1259,7 @@
     "links": {
       "analysis": "Analyse",
       "cases": "Cas",
-      "files": "Fichier",
+      "files": "Fichiers",
       "dashboard": "Tableau de bord",
       "data_exploration": "Exploration des données",
       "studies": "Études",
