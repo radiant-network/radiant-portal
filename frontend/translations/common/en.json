@@ -363,7 +363,7 @@
         "transmission_mode_tooltip": "Mode of inheritance in the family",
         "parental_origin": "Parental Origin",
         "variant_class": "Variant Type",
-        "symbol": "Symbol",
+        "symbol": "Gene Symbol",
         "pf_wgs": "All Patient Freq.",
         "pf_wgs_tooltip": "All Patient Frequency (WGS)",
         "pf_wgs_affected": "Affected Patient Freq.",
