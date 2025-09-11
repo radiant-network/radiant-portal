@@ -25,7 +25,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
       <CardContent className="px-4 md:px-6 py-0 2xl:py-12 grow">
         <div className="flex items-start flex-wrap md:flex-nowrap md:[&>div]:w-40 md:justify-between gap-6">
           <div className="flex flex-col gap-2">
-            <div className="text-2xl font-semibold uppercase">
+            <div className="text-2xl font-semibold">
               {data.symbol && (
                 <a
                   href={getOmimOrgUrl({
@@ -33,12 +33,13 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                   })}
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:underline"
+                  className="hover:underline uppercase"
                 >
                   {data.symbol}
                 </a>
               )}
-              {['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? t('common.no_gene') : '-'}
+              {!data.symbol &&
+                (['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? t('common.no_gene') : '-')}
             </div>
             <div className="text-xs font-mono">
               <ConditionalField condition={!!data.aa_change}>{data.aa_change}</ConditionalField>
