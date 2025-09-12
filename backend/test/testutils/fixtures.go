@@ -37,6 +37,18 @@ func ParallelTestWithDb(t *testing.T, dbName string, testFunc func(t *testing.T,
 	db.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 }
 
+func ParallelTestWithPostgres(t *testing.T, testFunc func(t *testing.T, postgres *gorm.DB)) {
+	t.Parallel()
+	postgres, err := initPostgresDb()
+	if err != nil {
+		log.Fatal("Failed to init PostgreSQL db connection:", err)
+
+	}
+	testFunc(t, postgres)
+	// Clean up
+	cleanUp(postgres)
+}
+
 func ParallelTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFunc func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB)) {
 	t.Parallel()
 	starrocks, dbName, err := initDb(dbName)

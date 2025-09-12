@@ -2341,6 +2341,83 @@ export interface PubmedCitationDetails {
 /**
  * 
  * @export
+ * @interface SavedFilter
+ */
+export interface SavedFilter {
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
+    'created_on': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SavedFilter
+     */
+    'favorite': boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof SavedFilter
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
+    'name': string;
+    /**
+     * 
+     * @type {Array<Sqon>}
+     * @memberof SavedFilter
+     */
+    'queries': Array<Sqon>;
+    /**
+     * 
+     * @type {SavedFilterType}
+     * @memberof SavedFilter
+     */
+    'type': SavedFilterType;
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
+    'updated_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
+    'user_id': string;
+}
+
+
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const SavedFilterType = {
+    GERMLINE_SNV_OCCURRENCE: 'germline_snv_occurrence',
+    GERMLINE_CNV_OCCURRENCE: 'germline_cnv_occurrence',
+    SOMATIC_SNV_OCCURRENCE: 'somatic_snv_occurrence',
+    SOMATIC_CNV_OCCURRENCE: 'somatic_cnv_occurrence',
+    GERMLINE_SNV_VARIANT: 'germline_snv_variant',
+    GERMLINE_CNV_VARIANT: 'germline_cnv_variant',
+    SOMATIC_SNV_VARIANT: 'somatic_snv_variant',
+    SOMATIC_CNV_VARIANT: 'somatic_cnv_variant'
+} as const;
+
+export type SavedFilterType = typeof SavedFilterType[keyof typeof SavedFilterType];
+
+
+/**
+ * 
+ * @export
  * @interface SearchCriterion
  */
 export interface SearchCriterion {
@@ -5988,6 +6065,271 @@ export class OccurrencesApi extends BaseAPI {
      */
     public statisticsGermlineSNVOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).statisticsGermlineSNVOccurrences(seqId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * SavedFiltersApi - axios parameter creator
+ * @export
+ */
+export const SavedFiltersApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get saved filter by id
+         * @summary Get saved filter by id
+         * @param {string} savedFilterId Saved Filter ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSavedFilterById: async (savedFilterId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'savedFilterId' is not null or undefined
+            assertParamExists('getSavedFilterById', 'savedFilterId', savedFilterId)
+            const localVarPath = `/users/saved_filters/{saved_filter_id}`
+                .replace(`{${"saved_filter_id"}}`, encodeURIComponent(String(savedFilterId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get user saved filters
+         * @summary Get user saved filters
+         * @param {string} userId User ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSavedFiltersByUserID: async (userId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getSavedFiltersByUserID', 'userId', userId)
+            const localVarPath = `/users/{user_id}/saved_filters`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get user saved filters by type
+         * @summary Get user saved filters by type
+         * @param {string} userId User ID
+         * @param {string} savedFilterType Saved Filter Type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSavedFiltersByUserIDAndType: async (userId: string, savedFilterType: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getSavedFiltersByUserIDAndType', 'userId', userId)
+            // verify required parameter 'savedFilterType' is not null or undefined
+            assertParamExists('getSavedFiltersByUserIDAndType', 'savedFilterType', savedFilterType)
+            const localVarPath = `/users/{user_id}/saved_filters/{saved_filter_type}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)))
+                .replace(`{${"saved_filter_type"}}`, encodeURIComponent(String(savedFilterType)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SavedFiltersApi - functional programming interface
+ * @export
+ */
+export const SavedFiltersApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SavedFiltersApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get saved filter by id
+         * @summary Get saved filter by id
+         * @param {string} savedFilterId Saved Filter ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSavedFilterById(savedFilterId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SavedFilter>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSavedFilterById(savedFilterId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SavedFiltersApi.getSavedFilterById']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get user saved filters
+         * @summary Get user saved filters
+         * @param {string} userId User ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSavedFiltersByUserID(userId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<SavedFilter>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSavedFiltersByUserID(userId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SavedFiltersApi.getSavedFiltersByUserID']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get user saved filters by type
+         * @summary Get user saved filters by type
+         * @param {string} userId User ID
+         * @param {string} savedFilterType Saved Filter Type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSavedFiltersByUserIDAndType(userId: string, savedFilterType: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<SavedFilter>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSavedFiltersByUserIDAndType(userId, savedFilterType, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SavedFiltersApi.getSavedFiltersByUserIDAndType']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * SavedFiltersApi - factory interface
+ * @export
+ */
+export const SavedFiltersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SavedFiltersApiFp(configuration)
+    return {
+        /**
+         * Get saved filter by id
+         * @summary Get saved filter by id
+         * @param {string} savedFilterId Saved Filter ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSavedFilterById(savedFilterId: string, options?: RawAxiosRequestConfig): AxiosPromise<SavedFilter> {
+            return localVarFp.getSavedFilterById(savedFilterId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get user saved filters
+         * @summary Get user saved filters
+         * @param {string} userId User ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSavedFiltersByUserID(userId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<SavedFilter>> {
+            return localVarFp.getSavedFiltersByUserID(userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get user saved filters by type
+         * @summary Get user saved filters by type
+         * @param {string} userId User ID
+         * @param {string} savedFilterType Saved Filter Type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSavedFiltersByUserIDAndType(userId: string, savedFilterType: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<SavedFilter>> {
+            return localVarFp.getSavedFiltersByUserIDAndType(userId, savedFilterType, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SavedFiltersApi - object-oriented interface
+ * @export
+ * @class SavedFiltersApi
+ * @extends {BaseAPI}
+ */
+export class SavedFiltersApi extends BaseAPI {
+    /**
+     * Get saved filter by id
+     * @summary Get saved filter by id
+     * @param {string} savedFilterId Saved Filter ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SavedFiltersApi
+     */
+    public getSavedFilterById(savedFilterId: string, options?: RawAxiosRequestConfig) {
+        return SavedFiltersApiFp(this.configuration).getSavedFilterById(savedFilterId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get user saved filters
+     * @summary Get user saved filters
+     * @param {string} userId User ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SavedFiltersApi
+     */
+    public getSavedFiltersByUserID(userId: string, options?: RawAxiosRequestConfig) {
+        return SavedFiltersApiFp(this.configuration).getSavedFiltersByUserID(userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get user saved filters by type
+     * @summary Get user saved filters by type
+     * @param {string} userId User ID
+     * @param {string} savedFilterType Saved Filter Type
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SavedFiltersApi
+     */
+    public getSavedFiltersByUserIDAndType(userId: string, savedFilterType: string, options?: RawAxiosRequestConfig) {
+        return SavedFiltersApiFp(this.configuration).getSavedFiltersByUserIDAndType(userId, savedFilterType, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

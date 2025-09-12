@@ -2,9 +2,10 @@ package server
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"net/http"
 )
 
 func HandleValidationError(c *gin.Context, err error) {
@@ -17,4 +18,8 @@ func HandleNotFoundError(c *gin.Context, field string) {
 
 func HandleError(c *gin.Context, err error) {
 	c.JSON(http.StatusInternalServerError, types.ApiError{Status: http.StatusInternalServerError, Message: "Internal Server Error", Detail: err.Error()})
+}
+
+func HandleUnauthorizedError(c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, types.ApiError{Status: http.StatusUnauthorized, Message: "Unauthorized"})
 }
