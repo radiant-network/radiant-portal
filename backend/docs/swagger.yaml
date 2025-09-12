@@ -1089,6 +1089,57 @@ components:
         format:
           type: string
       type: object
+    SavedFilter:
+      properties:
+        created_on:
+          type: string
+        favorite:
+          type: boolean
+        id:
+          type: integer
+        name:
+          type: string
+        queries:
+          items:
+            $ref: '#/components/schemas/Sqon'
+          type: array
+          uniqueItems: false
+        type:
+          $ref: '#/components/schemas/SavedFilterType'
+        updated_on:
+          type: string
+        user_id:
+          type: string
+      required:
+      - created_on
+      - favorite
+      - id
+      - name
+      - queries
+      - type
+      - updated_on
+      - user_id
+      type: object
+    SavedFilterType:
+      enum:
+      - germline_snv_occurrence
+      - germline_cnv_occurrence
+      - somatic_snv_occurrence
+      - somatic_cnv_occurrence
+      - germline_snv_variant
+      - germline_cnv_variant
+      - somatic_snv_variant
+      - somatic_cnv_variant
+      type: string
+      x-enum-varnames:
+      - GERMLINE_SNV_OCCURRENCE
+      - GERMLINE_CNV_OCCURRENCE
+      - SOMATIC_SNV_OCCURRENCE
+      - SOMATIC_CNV_OCCURRENCE
+      - GERMLINE_SNV_VARIANT
+      - GERMLINE_CNV_VARIANT
+      - SOMATIC_SNV_VARIANT
+      - SOMATIC_CNV_VARIANT
     SearchCriterion:
       properties:
         field:
@@ -2793,6 +2844,133 @@ paths:
       summary: Get API status
       tags:
       - status
+  /users/{user_id}/saved_filters:
+    get:
+      description: Get user saved filters
+      operationId: getSavedFiltersByUserID
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SavedFilter'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get user saved filters
+      tags:
+      - saved_filters
+  /users/{user_id}/saved_filters/{saved_filter_type}:
+    get:
+      description: Get user saved filters by type
+      operationId: getSavedFiltersByUserIDAndType
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      - description: Saved Filter Type
+        in: path
+        name: saved_filter_type
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SavedFilter'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get user saved filters by type
+      tags:
+      - saved_filters
+  /users/saved_filters/{saved_filter_id}:
+    get:
+      description: Get saved filter by id
+      operationId: getSavedFilterById
+      parameters:
+      - description: Saved Filter ID
+        in: path
+        name: saved_filter_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedFilter'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get saved filter by id
+      tags:
+      - saved_filters
   /users/sets/{user_set_id}:
     get:
       description: Get user set

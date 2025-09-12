@@ -1,0 +1,143 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
+)
+
+func assertGetSavedFilterByIDHandler(t *testing.T, repo repository.SavedFiltersDAO, savedFilterId int, status int, expected string) {
+	router := gin.Default()
+	router.GET("/users/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repo))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/saved_filters/%d", savedFilterId), bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, status, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetSavedFilterByIDHandler_NotFound(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		assertGetSavedFilterByIDHandler(t, repo, 42, http.StatusNotFound, `{"status": 404, "message":"saved filter not found"}`)
+	})
+}
+
+func Test_GetSavedFilterByIDHandler(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		expected := `{
+			"created_on":"2021-09-12T13:08:00Z", 
+			"favorite":false, 
+			"id":1, 
+			"name":"saved_filter_snv_1", 
+			"queries":[
+				{
+					"content":[{"content":{"field":"chromosome", "value":["X"]}, "op":"in"}], 
+					"op":"and"
+				}
+			], 
+			"type":"germline_snv_occurrence", 
+			"updated_on":"2021-09-12T13:08:00Z", 
+			"user_id":"1"
+		}`
+		assertGetSavedFilterByIDHandler(t, repo, 1, http.StatusOK, expected)
+	})
+}
+
+func assertGetSavedFilterByUserIDHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, status int, expected string) {
+	router := gin.Default()
+	router.GET("/users/:user_id/saved_filters", server.GetSavedFiltersByUserIDHandler(repo, auth))
+
+	req, _ := http.NewRequest("GET", "/users/1/saved_filters", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, status, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetSavedFilterByUserIDHandler(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		expected := `[{
+			"created_on":"2021-09-12T13:08:00Z", 
+			"favorite":false, 
+			"id":1, 
+			"name":"saved_filter_snv_1", 
+			"queries":[
+				{
+					"content":[{"content":{"field":"chromosome", "value":["X"]}, "op":"in"}], 
+					"op":"and"
+				}
+			], 
+			"type":"germline_snv_occurrence", 
+			"updated_on":"2021-09-12T13:08:00Z", 
+			"user_id":"1"
+		},{
+			"created_on":"2021-09-12T13:08:00Z", 
+			"favorite":true, 
+			"id":2, 
+			"name":"saved_filter_cnv_1", 
+			"queries":[
+				{
+					"content":[{"content":{"field":"chromosome", "value":["1"]}, "op":"in"}], 
+					"op":"and"
+				}
+			], 
+			"type":"germline_cnv_occurrence", 
+			"updated_on":"2021-09-12T13:08:00Z", 
+			"user_id":"1"
+		}]`
+		assertGetSavedFilterByUserIDHandler(t, repo, auth, http.StatusOK, expected)
+	})
+}
+
+func assertGetSavedFilterByUserIDAndTypeHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterType types.SavedFilterType, status int, expected string) {
+	router := gin.Default()
+	router.GET("/users/:user_id/saved_filters/:saved_filter_type", server.GetSavedFiltersByUserIDAndTypeHandler(repo, auth))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/1/saved_filters/%s", savedFilterType), bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, status, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetSavedFilterByUserIDAndTypeHandler(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		expected := `[{
+			"created_on":"2021-09-12T13:08:00Z", 
+			"favorite":false, 
+			"id":1, 
+			"name":"saved_filter_snv_1", 
+			"queries":[
+				{
+					"content":[{"content":{"field":"chromosome", "value":["X"]}, "op":"in"}], 
+					"op":"and"
+				}
+			], 
+			"type":"germline_snv_occurrence", 
+			"updated_on":"2021-09-12T13:08:00Z", 
+			"user_id":"1"
+		}]`
+		assertGetSavedFilterByUserIDAndTypeHandler(t, repo, auth, types.GERMLINE_SNV_OCCURRENCE, http.StatusOK, expected)
+	})
+}
