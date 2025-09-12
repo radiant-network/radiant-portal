@@ -818,7 +818,8 @@
         "classification_popover": {
           "consult": "Consulter les ",
           "standards_and_guidelines": "normes et les lignes directrices",
-          "variant_interpretation": "pour l’interprétation des variantes"
+          "variant_interpretation": "pour l'interprétation des variantes",
+          "full_text": "Consulter les <link>normes et les lignes directrices</link> pour l'interprétation des variantes"
         },
         "classification_criteria": "Critères de classification",
         "classification_criteria_placeholder": "Ex : PM1, PS2",

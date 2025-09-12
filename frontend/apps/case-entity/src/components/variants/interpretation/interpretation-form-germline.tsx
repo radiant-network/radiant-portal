@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
@@ -72,17 +73,20 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                 <FormLabel
                   infoCardContent={
                     <div className="leading-6">
-                      {t('variant.interpretation_form.germline.classification_popover.consult')}{' '}
-                      <AnchorLink
-                        className="inline-flex"
-                        href="https://pubmed.ncbi.nlm.nih.gov/25741868/"
-                        target="_blank"
-                        size="sm"
-                        external
-                      >
-                        {t('variant.interpretation_form.germline.classification_popover.standards_and_guidelines')}
-                      </AnchorLink>{' '}
-                      {t('variant.interpretation_form.germline.classification_popover.variant_interpretation')}
+                      <Trans
+                        i18nKey="variant.interpretation_form.germline.classification_popover.full_text"
+                        components={{
+                          link: (
+                            <AnchorLink
+                              className="inline-flex"
+                              href="https://pubmed.ncbi.nlm.nih.gov/25741868/"
+                              target="_blank"
+                              size="sm"
+                              external
+                            />
+                          ),
+                        }}
+                      />
                     </div>
                   }
                 >

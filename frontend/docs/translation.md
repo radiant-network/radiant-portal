@@ -90,6 +90,135 @@ const Header = () => {
 };
 ```
 
+### 5. Complex Translations with HTML Elements
+
+For translations that contain HTML elements like links, use the `Trans` component from react-i18next:
+
+```typescript
+import { Trans } from 'react-i18next';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+
+const MyComponent = () => {
+  return (
+    <div>
+      <Trans
+        i18nKey="documentation.help_text"
+        components={{
+          link: <AnchorLink 
+            href="https://example.com" 
+            target="_blank" 
+            external 
+          />
+        }}
+      />
+    </div>
+  );
+};
+```
+
+**Translation file:**
+```json
+{
+  "documentation": {
+    "help_text": "For more information, consult <link>our documentation</link> for detailed guidance"
+  }
+}
+```
+
+This approach allows different languages to position the link wherever it makes grammatical sense:
+
+```json
+// English
+"help_text": "For more information, consult <link>our documentation</link> for detailed guidance"
+
+// French  
+"help_text": "Pour plus d'informations, consultez <link>notre documentation</link> pour des conseils détaillés"
+```
+
+#### Using Variables with Trans Component
+
+You can also combine variables with HTML elements:
+
+```typescript
+<Trans
+  i18nKey="user.welcome_message"
+  values={{ name: user.name }}
+  components={{
+    link: <AnchorLink href="/profile" />
+  }}
+/>
+```
+
+**Translation file:**
+```json
+{
+  "user": {
+    "welcome_message": "Welcome {{name}}! Please check <link>your profile</link> for updates."
+  }
+}
+```
+
+#### Using Different Components (Not Just Links)
+
+The `Trans` component can work with any React component:
+
+```typescript
+import { Badge } from '@/components/base/ui/badge';
+import { Button } from '@/components/base/ui/button';
+import { InfoIcon } from 'lucide-react';
+
+// With Badge
+<Trans
+  i18nKey="status.processing"
+  components={{
+    badge: <Badge variant="warning" />
+  }}
+/>
+
+// With Button
+<Trans
+  i18nKey="actions.save_reminder"
+  components={{
+    button: <Button size="sm" variant="outline" onClick={handleSave} />
+  }}
+/>
+
+// With Icon
+<Trans
+  i18nKey="help.info_message"
+  components={{
+    icon: <InfoIcon size={16} className="text-blue-500" />
+  }}
+/>
+
+// With styled text
+<Trans
+  i18nKey="emphasis.important_note"
+  components={{
+    strong: <strong className="font-bold text-red-600" />,
+    code: <code className="bg-gray-100 px-1 rounded" />
+  }}
+/>
+```
+
+**Translation files:**
+```json
+{
+  "status": {
+    "processing": "Your request is <badge>Processing</badge> and will be completed soon."
+  },
+  "actions": {
+    "save_reminder": "Don't forget to <button>Save Changes</button> before leaving."
+  },
+  "help": {
+    "info_message": "Click the <icon></icon> icon for more information."
+  },
+  "emphasis": {
+    "important_note": "This is <strong>very important</strong>. Use <code>caution</code> when proceeding."
+  }
+}
+```
+
 ## Translation File Structure
 
 ### Common Translations (translations/common/en.json)
@@ -159,6 +288,29 @@ const Header = () => {
    - Test translations in all supported languages
    - Verify fallback behavior
    - Check for missing translations
+
+5. **Complex Translations with React Components**
+   - Use the `Trans` component for translations containing React components (links, buttons, badges, icons, etc.)
+   - Define React components in the `components` prop with meaningful names
+   - Keep the HTML structure minimal and semantic in translation strings
+   - Prefer single translation keys over multiple concatenated keys
+   - Any React component can be used, not just links
+   
+   **Example:**
+   ```typescript
+   // ✅ Good - Single translation key with Trans component
+   <Trans
+     i18nKey="help.documentation_link"
+     components={{
+       link: <AnchorLink href="https://docs.example.com" />,
+       badge: <Badge variant="info" />,
+       button: <Button onClick={handleAction} />
+     }}
+   />
+   
+   // ❌ Avoid - Multiple translation keys with JSX in between
+   {t('help.read_our')} <AnchorLink href="...">docs</AnchorLink> {t('help.for_more_info')}
+   ```
 
 ## Environment Configuration
 
