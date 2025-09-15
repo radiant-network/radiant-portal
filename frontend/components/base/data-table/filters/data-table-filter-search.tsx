@@ -12,7 +12,8 @@ import {
   CommandList,
 } from '@/components/base/ui/command';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi } from '@/utils/api';
+
+export type AutocompleteFuncProps = (prefix: string, minSearchLength: number) => Promise<GroupedAutocompleteResults>;
 
 export type TableFiltersSearchProps = {
   placeholder?: string;
@@ -20,9 +21,10 @@ export type TableFiltersSearchProps = {
   onClear?: () => void;
   selectedValue?: string;
   minSearchLength?: number;
+  onAutocomplete: AutocompleteFuncProps;
 };
 
-type GroupedAutocompleteResults = Record<string, AutocompleteResult[]>;
+export type GroupedAutocompleteResults = Record<string, AutocompleteResult[]>;
 
 // Function to get icon for each result type
 function getTypeIcon(type: string) {
@@ -35,31 +37,13 @@ function getTypeIcon(type: string) {
   return iconMap[type.toLowerCase()] || FolderOpen;
 }
 
-async function fetchAutocompleteCases(prefix: string, minSearchLength: number) {
-  if (!prefix || prefix.length < minSearchLength) {
-    return {};
-  }
-  const response = await caseApi.autocompleteCases(prefix, '10');
-  if (response?.data && response.data.length > 0) {
-    const grouped = response.data.reduce((acc, result) => {
-      if (!acc[result.type]) {
-        acc[result.type] = [];
-      }
-      acc[result.type].push(result);
-      return acc;
-    }, {} as GroupedAutocompleteResults);
-    return grouped; // Add explicit return
-  }
-
-  return {}; //
-}
-
 function TableFiltersSearch({
   onSelect,
   onClear,
   selectedValue,
   placeholder,
   minSearchLength = 3,
+  onAutocomplete,
 }: TableFiltersSearchProps) {
   const { t } = useI18n();
   const [searchInput, setSearchInput] = useState<string>('');
@@ -82,7 +66,7 @@ function TableFiltersSearch({
 
   const { data: groupedResults } = useSWR<GroupedAutocompleteResults, any, string | null>(
     debouncedSearchInput && debouncedSearchInput.length >= minSearchLength ? debouncedSearchInput : null,
-    (key: string | null) => (key ? fetchAutocompleteCases(key, minSearchLength) : Promise.resolve({})),
+    (key: string | null) => (key ? onAutocomplete(key, minSearchLength) : Promise.resolve({})),
     {
       revalidateOnFocus: false,
       dedupingInterval: 300,

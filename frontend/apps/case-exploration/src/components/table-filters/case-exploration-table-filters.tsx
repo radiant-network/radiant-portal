@@ -3,13 +3,13 @@ import useSWR from 'swr';
 
 import { CaseFilters, SearchCriterion } from '@/api/api';
 import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
+import { GroupedAutocompleteResults } from '@/components/base/data-table/filters/data-table-filter-search';
 import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
+import getItemPriority from '@/components/base/data-table/filters/options/option-priority';
+import getItemStatus from '@/components/base/data-table/filters/options/option-status';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
-
-import filterItemPriority from './filter-item-priority';
-import filterItemStatus from './filter-item-status';
 
 const DEFAULT_VISIBLE_FILTERS = ['priority', 'status', 'case_analysis'];
 
@@ -34,6 +34,28 @@ const CRITERIAS = {
   mrn: { key: 'mrn', weight: 8 },
   request_id: { key: 'request_id', weight: 9 },
 };
+
+/**
+ * Case autocomplte
+ */
+async function fetchAutocompleteCases(prefix: string, minSearchLength: number) {
+  if (!prefix || prefix.length < minSearchLength) {
+    return {};
+  }
+  const response = await caseApi.autocompleteCases(prefix, '10');
+  if (response?.data && response.data.length > 0) {
+    const grouped = response.data.reduce((acc, result) => {
+      if (!acc[result.type]) {
+        acc[result.type] = [];
+      }
+      acc[result.type].push(result);
+      return acc;
+    }, {} as GroupedAutocompleteResults);
+    return grouped; // Add explicit return
+  }
+
+  return {}; //
+}
 
 async function fetchFilters(searchCriteria: CaseFiltersInput) {
   const response = await caseApi.casesFilters(searchCriteria);
@@ -91,7 +113,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           case 'status':
             return {
               ...baseOption,
-              options: sortOptions(filterItemStatus(apiFilters[key] || [], t)),
+              options: sortOptions(getItemStatus(apiFilters[key] || [], t)),
             };
           case 'project':
           case 'performer_lab':
@@ -106,7 +128,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           case 'priority':
             return {
               ...baseOption,
-              options: filterItemPriority(apiFilters[key] || []),
+              options: getItemPriority(apiFilters[key] || []),
             };
           case 'case_analysis':
             return {
@@ -150,6 +172,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           searchTerm: searchTerm?.value,
           placeholder: t('case_exploration.filters_group.search_placeholder'),
           minSearchLength: 1,
+          onAutocomplete: fetchAutocompleteCases,
         },
       ]}
       filterButtons={filterButtons}

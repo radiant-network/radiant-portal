@@ -8,7 +8,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { defaultSettings, getCaseExplorationColumns } from '@/feature/case-table/table-settings';
 import { caseApi } from '@/utils/api';
 
-import TableFilters from '../table-filters/table-filters';
+import TableFilters from '../table-filters/case-exploration-table-filters';
 
 type CaseListInput = {
   listBodyWithCriteria: ListBodyWithCriteria;
