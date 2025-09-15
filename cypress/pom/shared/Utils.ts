@@ -70,6 +70,9 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return data.dbsnp ? `https://www.ncbi.nlm.nih.gov/snp/${data.dbsnp}` : undefined;
     case 'gene':
       return data.gene ? `https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${data.gene}` : undefined;
+    case 'primary_condition':
+      const conditionId = data.primary_condition_id.replace(/:/g, '_');
+      return `http://purl.obolibrary.org/obo/${conditionId}`;
     default:
       return undefined;
   }

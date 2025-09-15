@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import '../../../support/commands';
-import { VariantsTable } from '../../../pom/pages/VariantsTable';
+import { CaseEntity_Variants } from '../../../pom/pages/CaseEntity_Variants';
 
 describe('Case Entity - Variants - Sort', () => {
   const setupTest = () => {
@@ -10,36 +10,36 @@ describe('Case Entity - Variants - Sort', () => {
 
   it('Api request [SJRA-661]', () => {
     setupTest();
-    VariantsTable.validations.shouldRequestOnSort('variant');
+    CaseEntity_Variants.validations.shouldRequestOnSort('variant');
   });
 
   it('Alphanumeric', () => {
     setupTest();
-    VariantsTable.validations.shouldSortColumn('variant');
+    CaseEntity_Variants.validations.shouldSortColumn('variant');
   });
 
   // Activate after SJRA-661
   it.skip('Number', () => {
     setupTest();
-    VariantsTable.validations.shouldSortColumn('exomiser');
+    CaseEntity_Variants.validations.shouldSortColumn('exomiser');
   });
 
   it('Tag', () => {
     setupTest();
-    VariantsTable.validations.shouldSortColumn('acmg_exomiser');
+    CaseEntity_Variants.validations.shouldSortColumn('acmg_exomiser');
   });
 
   // Activate after SJRA-661
   it.skip('Scientific number', () => {
     setupTest();
-    VariantsTable.validations.shouldSortColumn('gnomad');
+    CaseEntity_Variants.validations.shouldSortColumn('gnomad');
   });
 
   it('Multiple [SJRA-661]', () => {
     setupTest();
-    VariantsTable.actions.unsortAllColumns();
-    VariantsTable.actions.sortColumn('gnomad');
-    VariantsTable.actions.sortColumn('type');
-    VariantsTable.validations.shouldHaveFirstRowValue('Deletion', 'type');
+    CaseEntity_Variants.actions.unsortAllColumns();
+    CaseEntity_Variants.actions.sortColumn('gnomad');
+    CaseEntity_Variants.actions.sortColumn('type');
+    CaseEntity_Variants.validations.shouldHaveFirstRowValue('Deletion', 'type');
   });
 });

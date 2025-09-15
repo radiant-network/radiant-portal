@@ -1,7 +1,8 @@
 /// <reference types="cypress"/>
 import createUUID from './createUUID';
 import { CommonSelectors } from '../pom/shared/Selectors';
-import { oneMinute, stringToRegExp } from '../pom/shared/Utils';
+import { oneMinute } from '../pom/shared/Utils';
+import 'cypress-real-events';
 
 // Simple environment variable getter
 const getEnv = (key: string): string => {
@@ -93,6 +94,29 @@ Cypress.Commands.add('resetColumns', () => {
 });
 
 /**
+ * Set the language of the application.
+ * @param lang The language to set (FR|EN).
+ */
+Cypress.Commands.add('setLang', (lang: string) => {
+  cy.get(CommonSelectors.langButton)
+    .contains(/^(FR|EN)$/)
+    .invoke('text')
+    .then(invokeText => {
+      if (invokeText.includes(lang)) {
+        cy.get(CommonSelectors.langButton).contains(lang).clickAndWait({ force: true });
+      }
+    });
+});
+
+/**
+ * Asserts that the given tab is active.
+ * @param subject The tab element.
+ */
+Cypress.Commands.add('shouldBeActiveTab', { prevSubject: 'element' }, subject => {
+  cy.wrap(subject).parents(CommonSelectors.activeTab).should('exist');
+});
+
+/**
  * Asserts that a given element is sortable or not sortable.
  * @param subject The element to check for sortability.
  * @param isSortable Whether the column should be sortable.
@@ -105,11 +129,18 @@ Cypress.Commands.add('shouldBeSortable', { prevSubject: 'element' }, (subject, i
 /**
  * Asserts that a given element has a tooltip with the specified content.
  * @param subject The element to check for tooltip.
- * @param tooltipContent The expected tooltip content.
+ * @param tooltipContent The expected tooltip content (null if no tooltip).
  */
-Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, tooltipContent: string) => {
-  cy.wrap(subject).find(CommonSelectors.underlineHeader).trigger('mouseover', { eventConstructor: 'MouseEvent', force: true });
-  cy.get(CommonSelectors.tooltipPopper).contains(tooltipContent).should('exist');
+Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, tooltipContent: string | RegExp | null) => {
+  if (tooltipContent) {
+    cy.wrap(subject).find(CommonSelectors.underlineHeader).realHover();
+    cy.get(CommonSelectors.tooltipPopper).contains(tooltipContent).first().should('exist');
+    cy.get(CommonSelectors.logo).click();
+    cy.get(CommonSelectors.tooltipPopper).should('not.exist');
+  } else {
+    cy.wrap(subject).realHover();
+    cy.get(CommonSelectors.tooltipPopper).should('not.exist');
+  }
 });
 
 /**
@@ -221,6 +252,28 @@ Cypress.Commands.add('visitAndIntercept', (url: string, methodHTTP: string, rout
 });
 
 /**
+ * Visits the cases page.
+ * @param searchCriteria Optional search criteria to apply (JSON string).
+ */
+Cypress.Commands.add('visitCasesPage', (searchCriteria?: string) => {
+  if (searchCriteria == undefined) {
+    cy.visitAndIntercept('/case', 'POST', '**/cases/search', 1);
+  } else {
+    cy.intercept('POST', '**/cases/search', interception => {
+      const mockBody = { ...interception.body };
+      mockBody.search_criteria = JSON.parse(searchCriteria);
+      interception.alias = 'postSearch';
+      interception.body = mockBody;
+    });
+    cy.visit('/case', { failOnStatusCode: false });
+    cy.wait('@postSearch');
+  }
+
+  cy.setLang('EN');
+  cy.resetColumns();
+});
+
+/**
  * Visits the case variants page for a specific case.
  * @param caseId The case ID to visit.
  * @param sqon Optional query filter to apply (JSON string).
@@ -239,14 +292,7 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, sqon?: string) =>
     cy.wait('@postList');
   }
 
-  cy.get(CommonSelectors.langButton)
-    .contains(/^(FR|EN)$/)
-    .invoke('text')
-    .then(invokeText => {
-      if (invokeText.includes('EN')) {
-        cy.get(CommonSelectors.langButton).contains(/^EN$/).clickAndWait({ force: true });
-      }
-    });
+  cy.setLang('EN');
   cy.resetColumns();
 });
 

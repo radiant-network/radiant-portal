@@ -2,6 +2,27 @@
 import { CommonSelectors } from './Selectors';
 
 export const data = {
+  case: {
+    case: '1',
+    patient: '3',
+    mrn: 'MRN-283775',
+    priority: 'Routine',
+    status: 'In Progress',
+    type: 'Family germline',
+    analysis: 'WGA',
+    primary_condition_name: 'neurodevelopmental disorder',
+    primary_condition_id: 'MONDO:0700092',
+    req_by: 'CHUSJ',
+    project: 'N1',
+    created_on: '2021-09-12',
+    updated_on: '2021-09-12',
+    prescriber: 'Felix Laflamme',
+    diagnostic_lab: 'CQGC',
+    request: '1',
+    managing_org: 'CHUSJ',
+    has_variants: true,
+    search_criteria: '[{"field": "mrn","value": ["MRN-283775"]}]',
+  },
   variantGermline: {
     variant: 'chr1:g.201361940A>G',
     type: 'SNV',

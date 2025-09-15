@@ -1,6 +1,7 @@
 /// <reference types="cypress"/>
 import '../../../support/commands';
 import { data } from '../../../pom/shared/Data';
+import { CaseEntity_Variants } from 'pom/pages/CaseEntity_Variants';
 
 describe('Case Entity - Variants - Custom query', () => {
   const setupTest = () => {
@@ -10,6 +11,6 @@ describe('Case Entity - Variants - Custom query', () => {
 
   it('Save icon', () => {
     setupTest();
-    cy.get('[class*="QueryBar_selected"] [class*="anticon-save"]').should('not.exist');
+    CaseEntity_Variants.validations.shouldHaveCustomQuery();
   });
 });
