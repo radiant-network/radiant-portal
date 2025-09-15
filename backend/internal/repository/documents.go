@@ -59,7 +59,7 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 	/**
 	  	(SELECT "document_id" as type, id as value from `radiant_jdbc`.`public`.`document` WHERE CAST(id AS TEXT) LIKE '1%')
 		UNION
-		(SELECT "name" as type, id as value from `radiant_jdbc`.`public`.`document` WHERE name LIKE '1%')
+		(SELECT "name" as type, name as value from `radiant_jdbc`.`public`.`document` WHERE name LIKE '1%')
 		UNION
 		(SELECT "run_name" as type, run_name as value from `radiant_jdbc`.`public`.`sequencing_experiment` WHERE run_name LIKE '1%')
 		UNION
@@ -80,6 +80,10 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 	subQueryDocumentId := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
 	subQueryDocumentId = subQueryDocumentId.Select("\"document_id\" as type, id as value")
 	subQueryDocumentId = subQueryDocumentId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	subQueryDocumentName := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
+	subQueryDocumentName = subQueryDocumentName.Select("\"name\" as type, name as value")
+	subQueryDocumentName = subQueryDocumentName.Where("name LIKE ?", searchInput)
 
 	subQueryRunName := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
 	subQueryRunName = subQueryRunName.Select("\"run_name\" as type, run_name as value")
@@ -105,7 +109,7 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 	subQueryTaskId = subQueryTaskId.Select("\"task_id\" as type, id as value")
 	subQueryTaskId = subQueryTaskId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	tx := r.db.Table("(? UNION ? UNION ? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryDocumentId, subQueryRunName, subQuerySampleId, subQueryPatientId, subQueryCaseId, subQuerySeqId, subQueryTaskId)
+	tx := r.db.Table("(? UNION ? UNION ? UNION ? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryDocumentId, subQueryDocumentName, subQueryRunName, subQuerySampleId, subQueryPatientId, subQueryCaseId, subQuerySeqId, subQueryTaskId)
 	tx = tx.Order("value asc, type asc")
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {
