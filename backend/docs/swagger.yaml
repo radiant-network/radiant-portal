@@ -1120,6 +1120,22 @@ components:
       - updated_on
       - user_id
       type: object
+    SavedFilterCreationInput:
+      properties:
+        name:
+          type: string
+        queries:
+          items:
+            $ref: '#/components/schemas/Sqon'
+          type: array
+          uniqueItems: false
+        type:
+          $ref: '#/components/schemas/SavedFilterType'
+      required:
+      - name
+      - queries
+      - type
+      type: object
     SavedFilterType:
       enum:
       - germline_snv_occurrence
@@ -2934,6 +2950,47 @@ paths:
       security:
       - bearerauth: []
       summary: Get user saved filters by type
+      tags:
+      - saved_filters
+  /users/saved_filters:
+    post:
+      description: Create a new saved filter
+      operationId: postSavedFilter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedFilterCreationInput'
+        description: New Saved Filter to create
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedFilter'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create a new saved filter
       tags:
       - saved_filters
   /users/saved_filters/{saved_filter_id}:

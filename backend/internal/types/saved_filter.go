@@ -13,9 +13,19 @@ type SavedFilter struct {
 	UpdatedOn time.Time       `json:"updated_on" validate:"required"`
 }
 
+type SavedFilterCreationInput struct {
+	Name    string          `json:"name" binding:"required"`
+	Type    SavedFilterType `json:"type" binding:"required,oneof=germline_snv_occurrence germline_cnv_occurrence somatic_snv_occurrence somatic_cnv_occurrence germline_snv_variant germline_cnv_variant somatic_snv_variant somatic_cnv_variant"`
+	Queries JsonArray[Sqon] `gorm:"type:json" json:"queries" binding:"required"`
+}
+
 var SavedFilterTable = Table{
 	Name:  "saved_filter",
 	Alias: "sf",
+}
+
+func (SavedFilter) TableName() string {
+	return SavedFilterTable.Name
 }
 
 type SavedFilterType = string
