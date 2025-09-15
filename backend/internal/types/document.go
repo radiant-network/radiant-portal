@@ -97,6 +97,7 @@ var DocumentNameField = Field{
 	Name:          "name",
 	CanBeSelected: true,
 	CanBeSorted:   true,
+	CanBeFiltered: true,
 	Table:         DocumentTable,
 }
 

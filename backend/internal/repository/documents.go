@@ -59,6 +59,8 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 	/**
 	  	(SELECT "document_id" as type, id as value from `radiant_jdbc`.`public`.`document` WHERE CAST(id AS TEXT) LIKE '1%')
 		UNION
+		(SELECT "name" as type, id as value from `radiant_jdbc`.`public`.`document` WHERE name LIKE '1%')
+		UNION
 		(SELECT "run_name" as type, run_name as value from `radiant_jdbc`.`public`.`sequencing_experiment` WHERE run_name LIKE '1%')
 		UNION
 		(SELECT "sample_id" as type, id as value from `radiant_jdbc`.`public`.`sample` WHERE CAST(id AS TEXT) LIKE '1%')
