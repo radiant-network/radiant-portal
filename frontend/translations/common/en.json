@@ -437,7 +437,7 @@
         "ad_ratio": "Allelic Ratio ALT",
         "genotype_quality": "Genotype Quality",
         "project_code": "Project",
-        "performer_lab": "Diagnostic lab",
+        "performer_lab": "Diagnostic Lab",
         "requested_by": "Prescribing Institution"
       },
       "operators": {
@@ -516,7 +516,7 @@
       "case_analysis_code": "Analysis",
       "search_placeholder": "Case, assay, patient, or MRN",
       "project_code": "Project",
-      "performer_lab": "Diagnostic lab",
+      "performer_lab": "Diagnostic Lab",
       "requested_by": "Prescribing Institution"
     },
     "priority": {
@@ -556,7 +556,7 @@
         "status": "Status",
         "case_analysis": "Analysis",
         "project": "Project",
-        "performer_lab": "Diagnostic lab",
+        "performer_lab": "Diagnostic Lab",
         "requested_by": "Prescribing Institution"
       },
       "headers": {
@@ -594,7 +594,7 @@
       "data_type": "Type",
       "format": "Format",
       "project": "Project",
-      "performer_lab": "Diagnostic lab",
+      "performer_lab": "Diagnostic Lab",
       "relationship_to_proband": "Relationship"
     }
   },
