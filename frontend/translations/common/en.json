@@ -818,7 +818,8 @@
         "classification_popover": {
           "consult": "Consult",
           "standards_and_guidelines": "standards and guidelines",
-          "variant_interpretation": "for variant interpretation"
+          "variant_interpretation": "for variant interpretation",
+          "full_text": "Consult <link>standards and guidelines</link> for variant interpretation"
         },
         "classification_criteria": "Classification criteria",
         "classification_criteria_placeholder": "e.g. PM1, PS2",
