@@ -88,6 +88,26 @@ func Test_SearchDocumentsFilterOnDocumentId(t *testing.T) {
 	})
 }
 
+func Test_SearchDocumentsFilterOnDocumentName(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.DocumentNameField.GetName(),
+				Value:     []interface{}{"NA12892.recal.crai"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 3)
+		assert.Equal(t, int64(3), *count)
+
+		document62 := (*documents)[0]
+		assert.Equal(t, 62, document62.DocumentID)
+	})
+}
+
 func Test_SearchDocumentsFilterOnRunName(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
