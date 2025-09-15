@@ -108,7 +108,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.seq_id, {
       id: 'seq_id',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
-      header: t('file_entity.sequencing_experiment_id'),
+      header: t('file_entity.seq_id'),
       size: 124,
       minSize: 124,
     }),
@@ -180,7 +180,7 @@ export const defaultSettings = createColumnSettings([
   {
     id: 'seq_id',
     visible: false,
-    label: 'file_entity.sequencing_experiment_id',
+    label: 'file_entity.seq_id',
   },
   {
     id: 'hash',
