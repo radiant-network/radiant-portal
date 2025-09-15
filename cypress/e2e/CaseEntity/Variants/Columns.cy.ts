@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import '../../../support/commands';
-import { VariantsTable } from '../../../pom/pages/VariantsTable';
+import { CaseEntity_Variants } from '../../../pom/pages/CaseEntity_Variants';
 
 describe('Case Entity - Variants - Columns', () => {
   const setupTest = () => {
@@ -10,31 +10,30 @@ describe('Case Entity - Variants - Columns', () => {
 
   it('Default display', () => {
     setupTest();
-    VariantsTable.validations.shouldMatchDefaultColumnVisibility();
+    CaseEntity_Variants.validations.shouldMatchDefaultColumnVisibility();
   });
 
   it('Order', () => {
     setupTest();
-    VariantsTable.validations.shouldShowAllColumns();
+    CaseEntity_Variants.validations.shouldShowAllColumns();
   });
 
   it('Sort', () => {
     setupTest();
-    VariantsTable.validations.shouldShowSortableColumns();
+    CaseEntity_Variants.validations.shouldShowSortableColumns();
   });
 
-  // TODO: Test no tooltip
-  it.skip('Tooltip', () => {
+  it('Tooltip', () => {
     setupTest();
-    VariantsTable.validations.shouldShowColumnTooltips();
+    CaseEntity_Variants.validations.shouldShowColumnTooltips();
   });
 
   it('Hide and show column', () => {
     setupTest();
-    VariantsTable.validations.shouldDisplayColumn('type');
-    VariantsTable.actions.hideColumn('type');
-    VariantsTable.validations.shouldNotDisplayColumn('type');
-    VariantsTable.actions.showColumn('type');
-    VariantsTable.validations.shouldDisplayColumn('type');
+    CaseEntity_Variants.validations.shouldDisplayColumn('type');
+    CaseEntity_Variants.actions.hideColumn('type');
+    CaseEntity_Variants.validations.shouldNotDisplayColumn('type');
+    CaseEntity_Variants.actions.showColumn('type');
+    CaseEntity_Variants.validations.shouldDisplayColumn('type');
   });
 });

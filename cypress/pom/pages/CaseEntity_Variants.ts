@@ -7,6 +7,7 @@ const selectorHead = CommonSelectors.tableHead;
 const selectors = {
   tableCell: (dataVariant: any) => `${CommonSelectors.tableRow}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
   tableHeadCell: `${selectorHead} ${CommonSelectors.tableCellHead}`,
+  tab: '[class*= "lucide-audio-waveform"]',
 };
 
 const tableColumns = [
@@ -17,7 +18,7 @@ const tableColumns = [
     isVisibleByDefault: true,
     isSortable: false,
     position: 1,
-    tooltip: null,
+    tooltip: 'Clinical Interpretation',
   },
   {
     id: 'variant',
@@ -156,7 +157,7 @@ const tableColumns = [
   },
 ];
 
-export const VariantsTable = {
+export const CaseEntity_Variants = {
   actions: {
     /**
      * Clicks the link in a specific table cell for a given variant and column.
@@ -238,10 +239,10 @@ export const VariantsTable = {
      * Unsort all columns of the table.
      */
     unsortAllColumns() {
-      VariantsTable.actions.sortColumn('exomiser');
-      VariantsTable.actions.sortColumn('exomiser');
-      VariantsTable.actions.sortColumn('variant');
-      VariantsTable.actions.sortColumn('variant');
+      CaseEntity_Variants.actions.sortColumn('exomiser');
+      CaseEntity_Variants.actions.sortColumn('exomiser');
+      CaseEntity_Variants.actions.sortColumn('variant');
+      CaseEntity_Variants.actions.sortColumn('variant');
     },
   },
 
@@ -252,6 +253,18 @@ export const VariantsTable = {
      */
     shouldDisplayColumn(columnID: string) {
       cy.get(selectorHead).contains(getColumnName(tableColumns, columnID)).should('exist');
+    },
+    /**
+     * Checks that the tab is active.
+     */
+    shouldHaveActiveTab() {
+      cy.get(selectors.tab).shouldBeActiveTab();
+    },
+    /**
+     * Checks that custom query is not implemented for this page.
+     */
+    shouldHaveCustomQuery() {
+      cy.get(`${CommonSelectors.querybarSelected} ${CommonSelectors.saveIcon}`).should('not.exist');
     },
     /**
      * Validates the value of the first row for a given column.
@@ -283,7 +296,6 @@ export const VariantsTable = {
     /**
      * Validates the link in a specific table cell for a given variant and column.
      * @param dataVariant The variant object.
-     * @param url The expected url (string or RegExp).
      * @param columnID The ID of the column.
      */
     shouldHaveTableCellLink(dataVariant: any, columnID: string) {
@@ -296,6 +308,13 @@ export const VariantsTable = {
           }
         })
       );
+    },
+    /**
+     * Validates the title of the page.
+     * @param dataCase The case object.
+     */
+    shouldHaveTitle(dataCase: any) {
+      cy.get(CommonSelectors.title).contains(`Case ${dataCase.case}`).should('exist');
     },
     /**
      * Validates the default visibility of each column.
@@ -321,7 +340,7 @@ export const VariantsTable = {
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
-      VariantsTable.actions.showAllColumns();
+      CaseEntity_Variants.actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(selectors.tableHeadCell).eq(column.position).find(column.name).should('exist');
@@ -336,7 +355,7 @@ export const VariantsTable = {
      * @param dataVariant The variant object containing the expected values.
      */
     shouldShowColumnContent(columnID: string, dataVariant: any) {
-      VariantsTable.actions.showAllColumns();
+      CaseEntity_Variants.actions.showAllColumns();
       getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {
@@ -402,17 +421,15 @@ export const VariantsTable = {
       });
     },
     /**
-     * Validates the presence of tooltips on columns.
+     * Validates the tooltips on columns.
      */
     shouldShowColumnTooltips() {
-      VariantsTable.actions.showAllColumns();
+      CaseEntity_Variants.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
             if (position !== -1) {
-              if (column.tooltip) {
-                cy.get(selectors.tableHeadCell).eq(position).shouldHaveTooltip(column.tooltip);
-              }
+              cy.get(selectors.tableHeadCell).eq(position).shouldHaveTooltip(column.tooltip);
             } else {
               cy.log(`Warning: Column ${column.id} not found`);
             }
@@ -424,8 +441,8 @@ export const VariantsTable = {
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
-      VariantsTable.actions.showAllColumns();
-      VariantsTable.actions.unsortAllColumns();
+      CaseEntity_Variants.actions.showAllColumns();
+      CaseEntity_Variants.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
@@ -443,13 +460,13 @@ export const VariantsTable = {
      * @param columnID The ID of the column to sort.
      */
     shouldRequestOnSort(columnID: string) {
-      VariantsTable.actions.showAllColumns();
-      VariantsTable.actions.unsortAllColumns();
+      CaseEntity_Variants.actions.showAllColumns();
+      CaseEntity_Variants.actions.unsortAllColumns();
       cy.intercept('POST', '**/list', req => {
         expect(req.body.sort).to.have.length(1);
         expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
       }).as('sortRequest');
-      VariantsTable.actions.sortColumn(columnID, false /*needIntercept*/);
+      CaseEntity_Variants.actions.sortColumn(columnID, false /*needIntercept*/);
       cy.wait('@sortRequest');
     },
     /**
@@ -457,8 +474,8 @@ export const VariantsTable = {
      * @param columnID The ID of the column to sort.
      */
     shouldSortColumn(columnID: string) {
-      VariantsTable.actions.showAllColumns();
-      VariantsTable.actions.unsortAllColumns();
+      CaseEntity_Variants.actions.showAllColumns();
+      CaseEntity_Variants.actions.unsortAllColumns();
       const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
 
       cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
@@ -469,7 +486,7 @@ export const VariantsTable = {
           req.alias = 'sortRequestAsc';
           req.body = mockBody;
         });
-        VariantsTable.actions.sortColumn(columnID, false /*needIntercept*/);
+        CaseEntity_Variants.actions.sortColumn(columnID, false /*needIntercept*/);
         cy.wait('@sortRequestAsc').then(interceptionAsc => {
           const smallest = interceptionAsc.response?.body[0][apiField];
 
@@ -481,7 +498,7 @@ export const VariantsTable = {
               req.alias = 'sortRequestDesc';
               req.body = mockBody;
             });
-            VariantsTable.actions.sortColumn(columnID, false /*needIntercept*/);
+            CaseEntity_Variants.actions.sortColumn(columnID, false /*needIntercept*/);
             cy.wait('@sortRequestDesc').then(interceptionDesc => {
               const biggest = interceptionDesc.response?.body[0][apiField];
               if (typeof smallest === 'number' ? Number(biggest) - Number(smallest) : String(biggest).localeCompare(String(smallest)) < 0) {
