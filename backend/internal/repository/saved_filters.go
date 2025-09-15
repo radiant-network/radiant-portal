@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
 
 type SavedFilter = types.SavedFilter
+type SavedFilterCreationInput = types.SavedFilterCreationInput
 
 type SavedFiltersRepository struct {
 	db *gorm.DB
@@ -19,6 +21,7 @@ type SavedFiltersDAO interface {
 	GetSavedFilterByID(savedFilterId int) (*SavedFilter, error)
 	GetSavedFiltersByUserID(userId string) (*[]SavedFilter, error)
 	GetSavedFiltersByUserIDAndType(userId string, savedFilterType string) (*[]SavedFilter, error)
+	CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error)
 }
 
 func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
@@ -70,4 +73,20 @@ func (r *SavedFiltersRepository) GetSavedFiltersByUserIDAndType(userId string, s
 	}
 
 	return &savedFilters, nil
+}
+
+func (r *SavedFiltersRepository) CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error) {
+	savedFilter := SavedFilter{
+		Name:      savedFilterInput.Name,
+		Type:      savedFilterInput.Type,
+		UserID:    userId,
+		Queries:   savedFilterInput.Queries,
+		CreatedOn: time.Now(),
+		UpdatedOn: time.Now(),
+	}
+	if err := r.db.Create(&savedFilter).Error; err != nil {
+		return nil, fmt.Errorf("error creating saved filter: %w", err)
+	}
+
+	return r.GetSavedFilterByID(savedFilter.ID)
 }

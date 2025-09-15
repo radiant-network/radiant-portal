@@ -126,6 +126,21 @@ func (m *MockRepository) GetSavedFiltersByUserIDAndType(userId string, savedFilt
 	}, nil
 }
 
+func (m *MockRepository) CreateSavedFilter(savedFilterInput types.SavedFilterCreationInput, userId string) (*types.SavedFilter, error) {
+	return &types.SavedFilter{
+		ID:       1,
+		UserID:   userId,
+		Name:     savedFilterInput.Name,
+		Type:     savedFilterInput.Type,
+		Favorite: false,
+		CreatedOn: time.Date(
+			2021, 9, 12, 13, 8, 0, 0, time.UTC),
+		UpdatedOn: time.Date(
+			2021, 9, 12, 13, 8, 0, 0, time.UTC),
+		Queries: savedFilterInput.Queries,
+	}, nil
+}
+
 func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -221,4 +236,67 @@ func Test_GetSavedFiltersByUserIDAndTypeHandler(t *testing.T) {
 		"updated_on":"2021-09-12T13:08:00Z", 
 		"user_id":"1"
 	}]`, w.Body.String())
+}
+
+func Test_PostSavedFilterHandler(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.POST("/users/saved_filters", PostSavedFilterHandler(repo, auth))
+
+	body := `{
+			"name": "new_saved_filter",
+			"type": "somatic_snv_variant",
+			"queries": []
+	}`
+	req, _ := http.NewRequest("POST", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.JSONEq(t, `{
+		"created_on":"2021-09-12T13:08:00Z", 
+		"favorite":false, 
+		"id":1, 
+		"name":"new_saved_filter", 
+		"queries":[], 
+		"type":"somatic_snv_variant", 
+		"updated_on":"2021-09-12T13:08:00Z", 
+		"user_id":"1"
+	}`, w.Body.String())
+}
+
+func Test_PostSavedFilterHandler_InvalidType(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.POST("/users/saved_filters", PostSavedFilterHandler(repo, auth))
+
+	body := `{
+			"name": "new_saved_filter",
+			"type": "not_a_valid_type",
+			"queries": []
+	}`
+	req, _ := http.NewRequest("POST", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PostSavedFilterHandler_MissingField(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.POST("/users/saved_filters", PostSavedFilterHandler(repo, auth))
+
+	body := `{
+			"type": "somatic_snv_variant",
+			"queries": []
+	}`
+	req, _ := http.NewRequest("POST", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }

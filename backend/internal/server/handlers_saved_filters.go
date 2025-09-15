@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
@@ -108,5 +109,45 @@ func GetSavedFiltersByUserIDAndTypeHandler(repo repository.SavedFiltersDAO, auth
 			return
 		}
 		c.JSON(http.StatusOK, savedFilters)
+	}
+}
+
+// PostSavedFilterHandler
+// @Summary Create a new saved filter
+// @Id postSavedFilter
+// @Description Create a new saved filter
+// @Tags saved_filters
+// @Security bearerauth
+// @Param			message	body		types.SavedFilterCreationInput	true	"New Saved Filter to create"
+// @Accept json
+// @Produce json
+// @Success 201 {object} types.SavedFilter
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /users/saved_filters [post]
+func PostSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body types.SavedFilterCreationInput
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		userId, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleNotFoundError(c, "user id")
+			return
+		}
+		savedFilter, err := repo.CreateSavedFilter(body, *userId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusCreated, savedFilter)
 	}
 }

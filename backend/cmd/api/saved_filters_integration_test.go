@@ -30,14 +30,14 @@ func assertGetSavedFilterByIDHandler(t *testing.T, repo repository.SavedFiltersD
 }
 
 func Test_GetSavedFilterByIDHandler_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		assertGetSavedFilterByIDHandler(t, repo, 42, http.StatusNotFound, `{"status": 404, "message":"saved filter not found"}`)
 	})
 }
 
 func Test_GetSavedFilterByIDHandler(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		expected := `{
 			"created_on":"2021-09-12T13:08:00Z", 
@@ -71,7 +71,7 @@ func assertGetSavedFilterByUserIDHandler(t *testing.T, repo repository.SavedFilt
 }
 
 func Test_GetSavedFilterByUserIDHandler(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
 		expected := `[{
@@ -120,7 +120,7 @@ func assertGetSavedFilterByUserIDAndTypeHandler(t *testing.T, repo repository.Sa
 }
 
 func Test_GetSavedFilterByUserIDAndTypeHandler(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
 		expected := `[{
@@ -139,5 +139,55 @@ func Test_GetSavedFilterByUserIDAndTypeHandler(t *testing.T) {
 			"user_id":"1"
 		}]`
 		assertGetSavedFilterByUserIDAndTypeHandler(t, repo, auth, types.GERMLINE_SNV_OCCURRENCE, http.StatusOK, expected)
+	})
+}
+
+func assertPostSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, body string, status int) {
+	router := gin.Default()
+	router.POST("/users/saved_filters", server.PostSavedFilterHandler(repo, auth))
+
+	req, _ := http.NewRequest("POST", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, status, w.Code)
+}
+
+func Test_PostSavedFilterHandler_ErrorDuplicateName(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		body := `{
+			"name": "saved_filter_snv_1",
+			"type": "germline_snv_occurrence",
+			"queries": []
+		}`
+		assertPostSavedFilterHandler(t, repo, auth, body, http.StatusInternalServerError)
+	})
+}
+
+func Test_PostSavedFilterHandler_InvalidInput(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		body := `{
+			"name": "saved_filter_snv_11",
+			"type": "invalid_type",
+			"queries": []
+		}`
+		assertPostSavedFilterHandler(t, repo, auth, body, http.StatusBadRequest)
+	})
+}
+
+func Test_PostSavedFilterHandler_Success(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		body := `{
+			"name": "saved_filter_snv_11",
+			"type": "somatic_snv_occurrence",
+			"queries": []
+		}`
+		assertPostSavedFilterHandler(t, repo, auth, body, http.StatusCreated)
 	})
 }

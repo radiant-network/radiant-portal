@@ -142,6 +142,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoSeqExp))
 
 	usersGroup := privateRoutes.Group("/users")
+	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))
 	usersGroup.GET("/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repoSavedFilters))
 	usersGroup.GET("/:user_id/saved_filters", server.GetSavedFiltersByUserIDHandler(repoSavedFilters, auth))
 	usersGroup.GET("/:user_id/saved_filters/:saved_filter_type", server.GetSavedFiltersByUserIDAndTypeHandler(repoSavedFilters, auth))
