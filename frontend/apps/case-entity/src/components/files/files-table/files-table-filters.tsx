@@ -33,8 +33,6 @@ const CRITERIAS = {
   format: { key: 'format_code', weight: 1 },
   data_type: { key: 'data_type_code', weight: 2 },
   relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3 },
-  performer_lab: { key: 'performer_lab_code', weight: 4 },
-  project: { key: 'project_code', weight: 5 },
 };
 
 async function fetchFilters(caseId: string, searchCriteria: DocumentFiltersInput) {
@@ -75,22 +73,6 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
         };
 
         switch (key) {
-          case 'performer_lab':
-            return {
-              ...baseOption,
-              isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
-              popoverSize: 'lg' as PopoverSize,
-              withTooltip: true,
-              options: sortOptions(apiFilters[key] || []),
-            };
-          case 'project':
-            return {
-              ...baseOption,
-              isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
-              popoverSize: 'sm' as PopoverSize,
-              withTooltip: true,
-              options: sortOptions(apiFilters[key] || []),
-            };
           case 'data_type':
             return {
               ...baseOption,
