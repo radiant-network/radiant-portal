@@ -1,10 +1,10 @@
-import { ArrowUpRightIcon } from 'lucide-react';
 import React from 'react';
+import { ArrowUpRightIcon } from 'lucide-react';
 import { tv, VariantProps } from 'tailwind-variants';
 
 export const anchorLinkVariants = tv({
   slots: {
-    base: 'font-medium hover:underline hover:cursor-pointer underline-offset-3',
+    base: 'font-normal hover:underline hover:cursor-pointer underline-offset-3',
     icon: '',
   },
   variants: {
@@ -15,8 +15,8 @@ export const anchorLinkVariants = tv({
     },
     external: {
       true: {
-        base: 'flex items-center gap-1'
-      }
+        base: 'flex items-center gap-1',
+      },
     },
     variant: {
       primary: {
@@ -78,7 +78,6 @@ function AnchorLink<C extends React.ElementType = 'a'>({
     <Component className={styles.base({ className })} {...props}>
       {children}
       {external && <ArrowUpRightIcon className={styles.icon()} />}
-
     </Component>
   );
 }
