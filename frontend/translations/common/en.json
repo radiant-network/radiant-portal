@@ -950,9 +950,7 @@
       "mother": "Mother",
       "father": "Father",
       "relationships": {
-        "proband": "Proband",
-        "mother": "Mother",
-        "father": "Father"
+        "proband": "Proband"
       },
       "id": "ID",
       "name": "Name (First / Last)",

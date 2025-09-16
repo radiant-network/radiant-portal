@@ -182,14 +182,6 @@
         }
       }
     },
-    "relationships": {
-      "proband": "Proband",
-      "mother": "Mère",
-      "father": "Père",
-      "sister": "Sœur",
-      "brother": "Frère",
-      "sibling": "Fratrie"
-    },
     "toolbar": {
       "combine": "Combiner",
       "newQuery": "Nouvelle requête",
@@ -950,9 +942,7 @@
       "mother": "Mère",
       "father": "Père",
       "relationships": {
-        "proband": "Proband",
-        "mother": "Mère",
-        "father": "Père"
+        "proband": "Proband"
       },
       "id": "ID",
       "name": "Nom (Prénom / Nom)",
