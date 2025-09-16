@@ -5,7 +5,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { http } from 'msw';
 
 import { SortBodyOrderEnum } from '@/api/api';
-import TableFilters from '@/apps/case-exploration/src/components/table-filters/table-filters';
+import TableFilters from '@/apps/case-exploration/src/components/table-filters/case-exploration-table-filters';
 import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
@@ -117,6 +117,7 @@ const meta = {
       pageSize: 10,
     },
     onPaginationChange: () => {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onServerSortingChange: sorting => {},
     total: 10,
   },

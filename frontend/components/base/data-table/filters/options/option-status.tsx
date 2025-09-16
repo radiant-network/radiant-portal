@@ -3,8 +3,11 @@ import { Check, CircleDashed, FileQuestion, Hourglass, OctagonX, Pen, RefreshCcw
 import { Aggregation } from '@/api/api';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
-// Status icon mapping function
-function getStatusIcon(statusKey: string) {
+/**
+ * Item Status
+ */
+const itemStatusTranslationKeyPrefix = 'case_exploration.status';
+function getItemStatusIcon(statusKey: string) {
   const iconMap: { [key: string]: any } = {
     draft: Pen,
     'on-hold': Hourglass, // on-hold key == . submitted
@@ -16,12 +19,10 @@ function getStatusIcon(statusKey: string) {
   return iconMap[statusKey.toLowerCase()] || FileQuestion;
 }
 
-export default function filterItemStatus(options: Aggregation[], t: any): IFilterButtonItem[] {
-  const translationKeyPrefix = 'case_exploration.status';
-
+export default function getItemStatus(options: Aggregation[], t: any): IFilterButtonItem[] {
   return options.map(option => ({
     ...option,
-    label: t(`${translationKeyPrefix}.${option.key}`, option.label || ''),
-    icon: getStatusIcon(option.key || ''),
+    label: t(`${itemStatusTranslationKeyPrefix}.${option.key}`, option.label || ''),
+    icon: getItemStatusIcon(option.key || ''),
   }));
 }

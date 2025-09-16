@@ -3,7 +3,10 @@ import useSWR from 'swr';
 
 import { DocumentFilters, SearchCriterion } from '@/api/api';
 import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
+import { GroupedAutocompleteResults } from '@/components/base/data-table/filters/data-table-filter-search';
 import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
+import getDataTypeOptions from '@/components/base/data-table/filters/options/option-data-type';
+import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { documentApi } from '@/utils/api';
@@ -33,6 +36,28 @@ const CRITERIAS = {
   format: { key: 'format_code', weight: 4 },
   data_type: { key: 'data_type_code', weight: 5 },
 };
+
+/**
+ * Autocomplete for document
+ */
+async function fetchAutocompleteDocuments(prefix: string, minSearchLength: number) {
+  if (!prefix || prefix.length < minSearchLength) {
+    return {};
+  }
+  const response = await documentApi.autocompleteDocuments(prefix, '10');
+  if (response?.data && response.data.length > 0) {
+    const grouped = response.data.reduce((acc, result) => {
+      if (!acc[result.type]) {
+        acc[result.type] = [];
+      }
+      acc[result.type].push(result);
+      return acc;
+    }, {} as GroupedAutocompleteResults);
+    return grouped; // Add explicit return
+  }
+
+  return {}; //
+}
 
 async function fetchFilters(searchCriteria: DocumentFiltersInput) {
   const response = await documentApi.documentsFilters(searchCriteria);
@@ -77,6 +102,18 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
               ...baseOption,
               popoverSize: 'lg' as PopoverSize,
               withTooltip: true,
+              options: sortOptions(apiFilters[key] || []),
+            };
+          case 'data_type':
+            return {
+              ...baseOption,
+              popoverSize: 'md' as PopoverSize,
+              options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
+            };
+          case 'format':
+            return {
+              ...baseOption,
+              options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),
             };
           default:
             return {
@@ -114,6 +151,7 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
           searchTerm: searchTerm?.value,
           minSearchLength: 1,
           placeholder: t('file_entity.search_by_id_placeholder'),
+          onAutocomplete: fetchAutocompleteDocuments,
         },
       ]}
       filterButtons={filterButtons}

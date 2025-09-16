@@ -3,9 +3,9 @@ import { formatDate } from 'date-fns';
 import { User } from 'lucide-react';
 
 import { Aggregation, CaseEntity } from '@/api/api';
-import filterItemPriority from '@/case-exploration/components/table-filters/filter-item-priority';
-import filterItemStatus from '@/case-exploration/components/table-filters/filter-item-status';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import getItemPriority from '@/components/base/data-table/filters/options/option-priority';
+import getItemStatus from '@/components/base/data-table/filters/options/option-status';
 import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
@@ -27,7 +27,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
     { key: 'asap', label: 'ASAP' },
   ];
 
-  const priorityOptions = filterItemPriority(priorityOptionsValues);
+  const priorityOptions = getItemPriority(priorityOptionsValues);
 
   const statusOptionsValues = [
     { key: 'incomplete', label: 'Incomplete' },
@@ -43,7 +43,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
     label: string;
   }
 
-  const statusOptions: IStatusOption[] = filterItemStatus(statusOptionsValues, t) as IStatusOption[];
+  const statusOptions: IStatusOption[] = getItemStatus(statusOptionsValues, t) as IStatusOption[];
 
   const assigneeOptions = [{ value: 'Vincent Ferretti', label: 'Vincent Ferretti' }];
   // State for dropdown values

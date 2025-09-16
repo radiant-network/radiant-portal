@@ -4,6 +4,8 @@ import useSWR from 'swr';
 import { DocumentFilters, SearchCriterion } from '@/api/api';
 import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
 import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
+import getDataTypeOptions from '@/components/base/data-table/filters/options/option-data-type';
+import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
@@ -88,6 +90,17 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
               popoverSize: 'sm' as PopoverSize,
               withTooltip: true,
               options: sortOptions(apiFilters[key] || []),
+            };
+          case 'data_type':
+            return {
+              ...baseOption,
+              popoverSize: 'md' as PopoverSize,
+              options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
+            };
+          case 'format':
+            return {
+              ...baseOption,
+              options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),
             };
           default:
             return {

@@ -9,9 +9,16 @@ import { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
 import { Skeleton } from '../../ui/skeleton';
 
-import TableFiltersSearch from './data-table-filter-search';
+import TableFiltersSearch, { AutocompleteFuncProps } from './data-table-filter-search';
 
-type FilterSearch = { id: string; searchTerm?: string; placeholder?: string; minSearchLength?: number };
+type FilterSearch = {
+  id: string;
+  searchTerm?: string;
+  placeholder?: string;
+  minSearchLength?: number;
+  onAutocomplete: AutocompleteFuncProps;
+};
+
 type CriteriaProps = { key: string; weight: number };
 
 type DataTableFilters = {
@@ -211,7 +218,7 @@ function DataTableFilters({
 
   return (
     <div id="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
-      {filterSearchs?.map(({ id, searchTerm, placeholder, minSearchLength }) => (
+      {filterSearchs?.map(({ id, searchTerm, placeholder, minSearchLength, onAutocomplete }) => (
         <TableFiltersSearch
           key={`table-filter-search-${id}`}
           onSelect={handleAutocompleteSelect}
@@ -219,6 +226,7 @@ function DataTableFilters({
           selectedValue={searchTerm}
           placeholder={placeholder}
           minSearchLength={minSearchLength}
+          onAutocomplete={onAutocomplete}
         />
       ))}
       <div className="flex flex-wrap gap-2 items-end">
