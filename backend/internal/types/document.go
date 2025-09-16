@@ -153,8 +153,8 @@ func (Document) TableName() string {
 }
 
 type DocumentFilters struct {
-	Project               []Aggregation `json:"project" validate:"required"`
-	PerformerLab          []Aggregation `json:"performer_lab" validate:"required"`
+	Project               []Aggregation `json:"project,omitempty"`
+	PerformerLab          []Aggregation `json:"performer_lab,omitempty"`
 	RelationshipToProband []Aggregation `json:"relationship_to_proband" validate:"required"`
 	Format                []Aggregation `json:"format" validate:"required"`
 	DataType              []Aggregation `json:"data_type" validate:"required"`

@@ -37,7 +37,7 @@ func (m *MockRepository) SearchDocuments(userQuery types.ListQuery) (*[]types.Do
 	}, &count, nil
 }
 
-func (m *MockRepository) GetDocumentsFilters(query types.AggQuery) (*types.DocumentFilters, error) {
+func (m *MockRepository) GetDocumentsFilters(query types.AggQuery, withLabAndProject bool) (*types.DocumentFilters, error) {
 	var result = types.DocumentFilters{
 		Project: []types.Aggregation{
 			{Bucket: "N1", Label: "NeuroDev Phase I"},

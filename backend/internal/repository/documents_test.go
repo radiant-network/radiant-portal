@@ -397,7 +397,7 @@ func Test_Documents_SearchById(t *testing.T) {
 	})
 }
 
-func Test_GetDocumentsFilters(t *testing.T) {
+func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
@@ -407,10 +407,30 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			},
 		}
 		query, err := types.NewAggregationQueryFromCriteria(searchCriteria, DocumentsQueryConfigForTest.AllFields)
-		filters, err := repo.GetDocumentsFilters(query)
+		filters, err := repo.GetDocumentsFilters(query, true)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len((*filters).Project))
 		assert.Equal(t, 6, len((*filters).PerformerLab))
+		assert.Equal(t, 6, len((*filters).RelationshipToProband))
+		assert.Equal(t, 15, len((*filters).Format))
+		assert.Equal(t, 15, len((*filters).DataType))
+	})
+}
+
+func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.DocumentDataTypeCodeField.GetAlias(),
+				Value:     []interface{}{"snv"},
+			},
+		}
+		query, err := types.NewAggregationQueryFromCriteria(searchCriteria, DocumentsQueryConfigForTest.AllFields)
+		filters, err := repo.GetDocumentsFilters(query, false)
+		assert.NoError(t, err)
+		assert.Nil(t, (*filters).Project)
+		assert.Nil(t, (*filters).PerformerLab)
 		assert.Equal(t, 6, len((*filters).RelationshipToProband))
 		assert.Equal(t, 15, len((*filters).Format))
 		assert.Equal(t, 15, len((*filters).DataType))

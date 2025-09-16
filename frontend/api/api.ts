@@ -950,13 +950,13 @@ export interface DocumentFilters {
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'performer_lab': Array<Aggregation>;
+    'performer_lab'?: Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'project': Array<Aggregation>;
+    'project'?: Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}

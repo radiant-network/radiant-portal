@@ -235,7 +235,7 @@ func CaseEntityDocumentsFiltersHandler(repo repository.DocumentsDAO) gin.Handler
 			HandleValidationError(c, err)
 			return
 		}
-		filters, err := repo.GetDocumentsFilters(query)
+		filters, err := repo.GetDocumentsFilters(query, false)
 		if err != nil {
 			HandleError(c, err)
 			return

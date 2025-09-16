@@ -21,7 +21,7 @@ type DocumentsRepository struct {
 type DocumentsDAO interface {
 	SearchDocuments(userQuery types.ListQuery) (*[]DocumentResult, *int64, error)
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
-	GetDocumentsFilters(userQuery types.AggQuery) (*DocumentFilters, error)
+	GetDocumentsFilters(userQuery types.AggQuery, withProjectAndLab bool) (*DocumentFilters, error)
 }
 
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
@@ -118,7 +118,7 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 	return &autocompleteResult, nil
 }
 
-func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery) (*DocumentFilters, error) {
+func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProjectAndLab bool) (*DocumentFilters, error) {
 
 	var project []Aggregation
 	var performerLab []Aggregation
@@ -129,12 +129,14 @@ func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery) (*Docume
 	txDocuments := prepareDocumentsQuery(query, r)
 	txDocuments = txDocuments.Select("doc.id, c.project_id, c.performer_lab_id, f.relationship_to_proband_code, doc.format_code, doc.data_type_code")
 
-	if err := r.getDocumentsFilter(txDocuments, &project, types.ProjectTable, "project_id", "id", "name"); err != nil {
-		return nil, err
-	}
+	if withProjectAndLab {
+		if err := r.getDocumentsFilter(txDocuments, &project, types.ProjectTable, "project_id", "id", "name"); err != nil {
+			return nil, err
+		}
 
-	if err := r.getDocumentsFilter(txDocuments, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name"); err != nil {
-		return nil, err
+		if err := r.getDocumentsFilter(txDocuments, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name"); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := r.getDocumentsFilter(txDocuments, &relationship, types.FamilyRelationshipTable, "relationship_to_proband_code", "code", "name_en"); err != nil {

@@ -108,7 +108,7 @@ func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		filters, err := repo.GetDocumentsFilters(query)
+		filters, err := repo.GetDocumentsFilters(query, true)
 		if err != nil {
 			HandleError(c, err)
 			return
