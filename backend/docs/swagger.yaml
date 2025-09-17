@@ -1158,8 +1158,6 @@ components:
       properties:
         favorite:
           type: boolean
-        id:
-          type: integer
         name:
           type: string
         queries:
@@ -1169,7 +1167,6 @@ components:
           uniqueItems: false
       required:
       - favorite
-      - id
       - name
       - queries
       type: object
@@ -3010,9 +3007,51 @@ paths:
       summary: Create a new saved filter
       tags:
       - saved_filters
+  /users/saved_filters/{saved_filter_id}:
+    get:
+      description: Get saved filter by id
+      operationId: getSavedFilterById
+      parameters:
+      - description: Saved Filter ID
+        in: path
+        name: saved_filter_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedFilter'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get saved filter by id
+      tags:
+      - saved_filters
     put:
       description: Update a new saved filter
       operationId: putSavedFilter
+      parameters:
+      - description: Saved Filter ID
+        in: path
+        name: saved_filter_id
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -3048,41 +3087,6 @@ paths:
       security:
       - bearerauth: []
       summary: Update a new saved filter
-      tags:
-      - saved_filters
-  /users/saved_filters/{saved_filter_id}:
-    get:
-      description: Get saved filter by id
-      operationId: getSavedFilterById
-      parameters:
-      - description: Saved Filter ID
-        in: path
-        name: saved_filter_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SavedFilter'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get saved filter by id
       tags:
       - saved_filters
   /users/sets/{user_set_id}:

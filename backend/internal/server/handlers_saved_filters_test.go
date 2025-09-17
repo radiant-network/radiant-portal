@@ -141,9 +141,9 @@ func (m *MockRepository) CreateSavedFilter(savedFilterInput types.SavedFilterCre
 	}, nil
 }
 
-func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpdateInput, userId string) (*types.SavedFilter, error) {
+func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpdateInput, savedFilterId int, userId string) (*types.SavedFilter, error) {
 	return &types.SavedFilter{
-		ID:       1,
+		ID:       savedFilterId,
 		UserID:   userId,
 		Name:     savedFilterInput.Name,
 		Type:     types.GERMLINE_SNV_OCCURRENCE,
@@ -320,15 +320,14 @@ func Test_PutSavedFilterHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.PUT("/users/saved_filters", PutSavedFilterHandler(repo, auth))
+	router.PUT("/users/saved_filters/:saved_filter_id", PutSavedFilterHandler(repo, auth))
 
 	body := `{
-			"id": 1,
 			"favorite": true,
 			"name": "updated_saved_filter",
 			"queries": []
 	}`
-	req, _ := http.NewRequest("PUT", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/users/saved_filters/1", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -349,12 +348,12 @@ func Test_PutSavedFilterHandler_MissingField(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.PUT("/users/saved_filters", PutSavedFilterHandler(repo, auth))
+	router.PUT("/users/saved_filters/:saved_filter_id", PutSavedFilterHandler(repo, auth))
 
 	body := `{
 			"queries": []
 	}`
-	req, _ := http.NewRequest("PUT", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/users/saved_filters/1", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

@@ -23,7 +23,7 @@ type SavedFiltersDAO interface {
 	GetSavedFiltersByUserID(userId string) (*[]SavedFilter, error)
 	GetSavedFiltersByUserIDAndType(userId string, savedFilterType string) (*[]SavedFilter, error)
 	CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error)
-	UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, userId string) (*SavedFilter, error)
+	UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId int, userId string) (*SavedFilter, error)
 }
 
 func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
@@ -93,8 +93,8 @@ func (r *SavedFiltersRepository) CreateSavedFilter(savedFilterInput SavedFilterC
 	return r.GetSavedFilterByID(savedFilter.ID)
 }
 
-func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, userId string) (*SavedFilter, error) {
-	existingSavedFilter, err := r.GetSavedFilterByID(savedFilterInput.ID)
+func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId int, userId string) (*SavedFilter, error) {
+	existingSavedFilter, err := r.GetSavedFilterByID(savedFilterId)
 	if err != nil || existingSavedFilter == nil {
 		return nil, fmt.Errorf("error retrieving saved filter by ID: %w", err)
 	}
@@ -107,9 +107,9 @@ func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterU
 		Queries:   savedFilterInput.Queries,
 		UpdatedOn: time.Now(),
 	}
-	if err := r.db.Where("id = ?", savedFilterInput.ID).Updates(&savedFilter).Error; err != nil {
+	if err := r.db.Where("id = ?", savedFilterId).Updates(&savedFilter).Error; err != nil {
 		return nil, fmt.Errorf("error updating saved filter: %w", err)
 	}
 
-	return r.GetSavedFilterByID(savedFilterInput.ID)
+	return r.GetSavedFilterByID(savedFilterId)
 }

@@ -192,11 +192,11 @@ func Test_PostSavedFilterHandler_Success(t *testing.T) {
 	})
 }
 
-func assertPutSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, body string, status int) {
+func assertPutSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterId int, body string, status int) {
 	router := gin.Default()
-	router.PUT("/users/saved_filters", server.PutSavedFilterHandler(repo, auth))
+	router.PUT("/users/saved_filters/:saved_filter_id", server.PutSavedFilterHandler(repo, auth))
 
-	req, _ := http.NewRequest("PUT", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/saved_filters/%d", savedFilterId), bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -211,7 +211,7 @@ func Test_PutSavedFilterHandler_InvalidInput(t *testing.T) {
 			"name": "saved_filter_snv_11",
 			"queries": []
 		}`
-		assertPutSavedFilterHandler(t, repo, auth, body, http.StatusBadRequest)
+		assertPutSavedFilterHandler(t, repo, auth, 1, body, http.StatusBadRequest)
 	})
 }
 
@@ -220,12 +220,11 @@ func Test_PutSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
 		body := `{
-			"id": 42,
 			"favorite": true,
 			"name": "saved_filter_snv_11",
 			"queries": []
 		}`
-		assertPutSavedFilterHandler(t, repo, auth, body, http.StatusInternalServerError)
+		assertPutSavedFilterHandler(t, repo, auth, 42, body, http.StatusInternalServerError)
 	})
 }
 
@@ -234,12 +233,11 @@ func Test_PutSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
 		body := `{
-			"id": 3,
 			"favorite": true,
 			"name": "saved_filter_snv_11",
 			"queries": []
 		}`
-		assertPutSavedFilterHandler(t, repo, auth, body, http.StatusInternalServerError)
+		assertPutSavedFilterHandler(t, repo, auth, 3, body, http.StatusInternalServerError)
 	})
 }
 
@@ -248,11 +246,10 @@ func Test_PutSavedFilterHandler_Success(t *testing.T) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
 		body := `{
-			"id": 1,
 			"favorite": true,
 			"name": "saved_filter_snv_1.1",
 			"queries": []
 		}`
-		assertPutSavedFilterHandler(t, repo, auth, body, http.StatusOK)
+		assertPutSavedFilterHandler(t, repo, auth, 1, body, http.StatusOK)
 	})
 }

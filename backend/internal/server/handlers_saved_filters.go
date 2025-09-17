@@ -158,6 +158,7 @@ func PostSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gi
 // @Description Update a new saved filter
 // @Tags saved_filters
 // @Security bearerauth
+// @Param saved_filter_id path string true "Saved Filter ID"
 // @Param			message	body		types.SavedFilterUpdateInput	true	"Saved Filter to update"
 // @Accept json
 // @Produce json
@@ -165,7 +166,7 @@ func PostSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gi
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /users/saved_filters [put]
+// @Router /users/saved_filters/{saved_filter_id} [put]
 func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -178,12 +179,17 @@ func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin
 			HandleValidationError(c, err)
 			return
 		}
+		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
+		if err != nil {
+			HandleNotFoundError(c, "saved_filter_id")
+			return
+		}
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
 			HandleNotFoundError(c, "user id")
 			return
 		}
-		savedFilter, err := repo.UpdateSavedFilter(body, *userId)
+		savedFilter, err := repo.UpdateSavedFilter(body, savedFilterId, *userId)
 		if err != nil {
 			HandleError(c, err)
 			return

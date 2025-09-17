@@ -2456,12 +2456,6 @@ export interface SavedFilterUpdateInput {
     'favorite': boolean;
     /**
      * 
-     * @type {number}
-     * @memberof SavedFilterUpdateInput
-     */
-    'id': number;
-    /**
-     * 
      * @type {string}
      * @memberof SavedFilterUpdateInput
      */
@@ -6295,14 +6289,18 @@ export const SavedFiltersApiAxiosParamCreator = function (configuration?: Config
         /**
          * Update a new saved filter
          * @summary Update a new saved filter
+         * @param {string} savedFilterId Saved Filter ID
          * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        putSavedFilter: async (savedFilterUpdateInput: SavedFilterUpdateInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        putSavedFilter: async (savedFilterId: string, savedFilterUpdateInput: SavedFilterUpdateInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'savedFilterId' is not null or undefined
+            assertParamExists('putSavedFilter', 'savedFilterId', savedFilterId)
             // verify required parameter 'savedFilterUpdateInput' is not null or undefined
             assertParamExists('putSavedFilter', 'savedFilterUpdateInput', savedFilterUpdateInput)
-            const localVarPath = `/users/saved_filters`;
+            const localVarPath = `/users/saved_filters/{saved_filter_id}`
+                .replace(`{${"saved_filter_id"}}`, encodeURIComponent(String(savedFilterId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6398,12 +6396,13 @@ export const SavedFiltersApiFp = function(configuration?: Configuration) {
         /**
          * Update a new saved filter
          * @summary Update a new saved filter
+         * @param {string} savedFilterId Saved Filter ID
          * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async putSavedFilter(savedFilterUpdateInput: SavedFilterUpdateInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SavedFilter>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.putSavedFilter(savedFilterUpdateInput, options);
+        async putSavedFilter(savedFilterId: string, savedFilterUpdateInput: SavedFilterUpdateInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SavedFilter>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putSavedFilter(savedFilterId, savedFilterUpdateInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SavedFiltersApi.putSavedFilter']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6462,12 +6461,13 @@ export const SavedFiltersApiFactory = function (configuration?: Configuration, b
         /**
          * Update a new saved filter
          * @summary Update a new saved filter
+         * @param {string} savedFilterId Saved Filter ID
          * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        putSavedFilter(savedFilterUpdateInput: SavedFilterUpdateInput, options?: RawAxiosRequestConfig): AxiosPromise<SavedFilter> {
-            return localVarFp.putSavedFilter(savedFilterUpdateInput, options).then((request) => request(axios, basePath));
+        putSavedFilter(savedFilterId: string, savedFilterUpdateInput: SavedFilterUpdateInput, options?: RawAxiosRequestConfig): AxiosPromise<SavedFilter> {
+            return localVarFp.putSavedFilter(savedFilterId, savedFilterUpdateInput, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -6531,13 +6531,14 @@ export class SavedFiltersApi extends BaseAPI {
     /**
      * Update a new saved filter
      * @summary Update a new saved filter
+     * @param {string} savedFilterId Saved Filter ID
      * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SavedFiltersApi
      */
-    public putSavedFilter(savedFilterUpdateInput: SavedFilterUpdateInput, options?: RawAxiosRequestConfig) {
-        return SavedFiltersApiFp(this.configuration).putSavedFilter(savedFilterUpdateInput, options).then((request) => request(this.axios, this.basePath));
+    public putSavedFilter(savedFilterId: string, savedFilterUpdateInput: SavedFilterUpdateInput, options?: RawAxiosRequestConfig) {
+        return SavedFiltersApiFp(this.configuration).putSavedFilter(savedFilterId, savedFilterUpdateInput, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
