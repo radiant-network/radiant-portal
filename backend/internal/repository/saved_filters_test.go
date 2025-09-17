@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -20,7 +21,7 @@ func Test_GetSavedFilterByID(t *testing.T) {
 		assert.Equal(t, "1", savedFilter.UserID)
 		assert.Equal(t, "saved_filter_snv_1", savedFilter.Name)
 		assert.Equal(t, types.GERMLINE_SNV_OCCURRENCE, savedFilter.Type)
-		assert.Equal(t, false, savedFilter.Favorite)
+		assert.Equal(t, false, *(savedFilter.Favorite))
 		assert.NotNil(t, savedFilter.CreatedOn)
 		assert.NotNil(t, savedFilter.UpdatedOn)
 		assert.Len(t, savedFilter.Queries, 1)
@@ -107,7 +108,7 @@ func Test_CreateSavedFilter(t *testing.T) {
 		assert.NotEmpty(t, (*savedFilter).CreatedOn)
 		assert.NotEmpty(t, (*savedFilter).UpdatedOn)
 		assert.NotEmpty(t, (*savedFilter).ID)
-		assert.False(t, (*savedFilter).Favorite)
+		assert.False(t, *((*savedFilter).Favorite))
 	})
 }
 
@@ -183,7 +184,7 @@ func Test_UpdateSavedFilter(t *testing.T) {
 					},
 				},
 			},
-			Favorite: true,
+			Favorite: utils.BoolPointer(true),
 		}
 
 		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "1")
@@ -211,7 +212,7 @@ func Test_UpdateSavedFilter_NotExisting(t *testing.T) {
 		savedFilterUpdateInput := types.SavedFilterUpdateInput{
 			Name:     "new_saved_filter_somatic_snv_occurrence_updated",
 			Queries:  types.JsonArray[types.Sqon]{},
-			Favorite: true,
+			Favorite: utils.BoolPointer(true),
 		}
 
 		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, 42, "1") // non-existing ID
@@ -235,7 +236,7 @@ func Test_UpdateSavedFilter_NotCreatedByUserId(t *testing.T) {
 		savedFilterUpdateInput := types.SavedFilterUpdateInput{
 			Name:     "new_saved_filter_somatic_snv_occurrence_updated",
 			Queries:  types.JsonArray[types.Sqon]{},
-			Favorite: true,
+			Favorite: utils.BoolPointer(true),
 		}
 
 		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "42") // different user id
@@ -259,7 +260,7 @@ func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 		savedFilterUpdateInput := types.SavedFilterUpdateInput{
 			Name:     "saved_filter_snv_1", // existing name
 			Queries:  types.JsonArray[types.Sqon]{},
-			Favorite: true,
+			Favorite: utils.BoolPointer(true),
 		}
 
 		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "1")
