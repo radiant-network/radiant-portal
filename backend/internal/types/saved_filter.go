@@ -7,7 +7,7 @@ type SavedFilter struct {
 	UserID    string          `json:"user_id" validate:"required"`
 	Name      string          `json:"name" validate:"required"`
 	Type      SavedFilterType `json:"type" validate:"required" enums:"germline_snv_occurrence,germline_cnv_occurrence,somatic_snv_occurrence,somatic_cnv_occurrence,germline_snv_variant,germline_cnv_variant,somatic_snv_variant,somatic_cnv_variant"`
-	Favorite  bool            `json:"favorite" validate:"required"`
+	Favorite  *bool           `json:"favorite" validate:"required" gorm:"default:false"`
 	Queries   JsonArray[Sqon] `gorm:"type:json" json:"queries" validate:"required"`
 	CreatedOn time.Time       `json:"created_on" validate:"required"`
 	UpdatedOn time.Time       `json:"updated_on" validate:"required"`
@@ -22,7 +22,7 @@ type SavedFilterCreationInput struct {
 type SavedFilterUpdateInput struct {
 	Name     string          `json:"name" binding:"required"`
 	Queries  JsonArray[Sqon] `gorm:"type:json" json:"queries" binding:"required"`
-	Favorite bool            `json:"favorite" binding:"required"`
+	Favorite *bool           `json:"favorite" binding:"required"`
 }
 
 var SavedFilterTable = Table{

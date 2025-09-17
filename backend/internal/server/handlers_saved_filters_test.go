@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +20,7 @@ func (m *MockRepository) GetSavedFilterByID(savedFilterId int) (*types.SavedFilt
 		UserID:   "1",
 		Name:     "saved_filter_snv_1",
 		Type:     types.GERMLINE_SNV_OCCURRENCE,
-		Favorite: false,
+		Favorite: utils.BoolPointer(false),
 		CreatedOn: time.Date(
 			2021, 9, 12, 13, 8, 0, 0, time.UTC),
 		UpdatedOn: time.Date(
@@ -48,7 +49,7 @@ func (m *MockRepository) GetSavedFiltersByUserID(userId string) (*[]types.SavedF
 			UserID:   "1",
 			Name:     "saved_filter_snv_1",
 			Type:     types.GERMLINE_SNV_OCCURRENCE,
-			Favorite: false,
+			Favorite: utils.BoolPointer(false),
 			CreatedOn: time.Date(
 				2021, 9, 12, 13, 8, 0, 0, time.UTC),
 			UpdatedOn: time.Date(
@@ -73,7 +74,7 @@ func (m *MockRepository) GetSavedFiltersByUserID(userId string) (*[]types.SavedF
 			UserID:   "1",
 			Name:     "saved_filter_cnv_1",
 			Type:     types.GERMLINE_CNV_OCCURRENCE,
-			Favorite: true,
+			Favorite: utils.BoolPointer(true),
 			CreatedOn: time.Date(
 				2021, 9, 12, 13, 8, 0, 0, time.UTC),
 			UpdatedOn: time.Date(
@@ -103,7 +104,7 @@ func (m *MockRepository) GetSavedFiltersByUserIDAndType(userId string, savedFilt
 			UserID:   "1",
 			Name:     "saved_filter_snv_1",
 			Type:     types.GERMLINE_SNV_OCCURRENCE,
-			Favorite: false,
+			Favorite: utils.BoolPointer(false),
 			CreatedOn: time.Date(
 				2021, 9, 12, 13, 8, 0, 0, time.UTC),
 			UpdatedOn: time.Date(
@@ -132,7 +133,7 @@ func (m *MockRepository) CreateSavedFilter(savedFilterInput types.SavedFilterCre
 		UserID:   userId,
 		Name:     savedFilterInput.Name,
 		Type:     savedFilterInput.Type,
-		Favorite: false,
+		Favorite: utils.BoolPointer(false),
 		CreatedOn: time.Date(
 			2021, 9, 12, 13, 8, 0, 0, time.UTC),
 		UpdatedOn: time.Date(
@@ -147,7 +148,7 @@ func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpd
 		UserID:   userId,
 		Name:     savedFilterInput.Name,
 		Type:     types.GERMLINE_SNV_OCCURRENCE,
-		Favorite: true,
+		Favorite: utils.BoolPointer(true),
 		CreatedOn: time.Date(
 			2021, 9, 12, 13, 8, 0, 0, time.UTC),
 		UpdatedOn: time.Date(
