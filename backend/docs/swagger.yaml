@@ -462,8 +462,6 @@ components:
       required:
       - data_type
       - format
-      - performer_lab
-      - project
       - relationship_to_proband
       type: object
     DocumentResult:

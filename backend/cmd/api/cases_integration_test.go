@@ -341,18 +341,6 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"tsv", "label":"TSV File"}, 
 			{"count":0, "key":"txt", "label":"Text File"}
 		], 
-		"performer_lab":[
-			{"count":1, "key":"CQGC", "label":"Quebec Clinical Genomic Center"}, 
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 
-			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
-			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}
-		], 
-		"project":[
-			{"count":1, "key":"N2", "label":"NeuroDev Phase II"}, 
-			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}
-		], 
 		"relationship_to_proband":[
 			{"count":1, "key":"father", "label":"Father"}, 
 			{"count":1, "key":"mother", "label":"Mother"},
