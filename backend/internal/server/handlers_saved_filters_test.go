@@ -141,6 +141,21 @@ func (m *MockRepository) CreateSavedFilter(savedFilterInput types.SavedFilterCre
 	}, nil
 }
 
+func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpdateInput, userId string) (*types.SavedFilter, error) {
+	return &types.SavedFilter{
+		ID:       1,
+		UserID:   userId,
+		Name:     savedFilterInput.Name,
+		Type:     types.GERMLINE_SNV_OCCURRENCE,
+		Favorite: true,
+		CreatedOn: time.Date(
+			2021, 9, 12, 13, 8, 0, 0, time.UTC),
+		UpdatedOn: time.Date(
+			2021, 9, 12, 13, 8, 0, 0, time.UTC),
+		Queries: savedFilterInput.Queries,
+	}, nil
+}
+
 func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -295,6 +310,51 @@ func Test_PostSavedFilterHandler_MissingField(t *testing.T) {
 			"queries": []
 	}`
 	req, _ := http.NewRequest("POST", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PutSavedFilterHandler(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.PUT("/users/saved_filters", PutSavedFilterHandler(repo, auth))
+
+	body := `{
+			"id": 1,
+			"favorite": true,
+			"name": "updated_saved_filter",
+			"queries": []
+	}`
+	req, _ := http.NewRequest("PUT", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"created_on":"2021-09-12T13:08:00Z", 
+		"favorite": true, 
+		"id":1, 
+		"name":"updated_saved_filter", 
+		"queries":[], 
+		"type":"germline_snv_occurrence", 
+		"updated_on":"2021-09-12T13:08:00Z", 
+		"user_id":"1"
+	}`, w.Body.String())
+}
+
+func Test_PutSavedFilterHandler_MissingField(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.PUT("/users/saved_filters", PutSavedFilterHandler(repo, auth))
+
+	body := `{
+			"queries": []
+	}`
+	req, _ := http.NewRequest("PUT", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

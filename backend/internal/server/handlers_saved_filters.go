@@ -151,3 +151,43 @@ func PostSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gi
 		c.JSON(http.StatusCreated, savedFilter)
 	}
 }
+
+// PutSavedFilterHandler
+// @Summary Update a new saved filter
+// @Id putSavedFilter
+// @Description Update a new saved filter
+// @Tags saved_filters
+// @Security bearerauth
+// @Param			message	body		types.SavedFilterUpdateInput	true	"Saved Filter to update"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.SavedFilter
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /users/saved_filters [put]
+func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body types.SavedFilterUpdateInput
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		userId, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleNotFoundError(c, "user id")
+			return
+		}
+		savedFilter, err := repo.UpdateSavedFilter(body, *userId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, savedFilter)
+	}
+}

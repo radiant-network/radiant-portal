@@ -12,6 +12,7 @@ import (
 
 type SavedFilter = types.SavedFilter
 type SavedFilterCreationInput = types.SavedFilterCreationInput
+type SavedFilterUpdateInput = types.SavedFilterUpdateInput
 
 type SavedFiltersRepository struct {
 	db *gorm.DB
@@ -22,6 +23,7 @@ type SavedFiltersDAO interface {
 	GetSavedFiltersByUserID(userId string) (*[]SavedFilter, error)
 	GetSavedFiltersByUserIDAndType(userId string, savedFilterType string) (*[]SavedFilter, error)
 	CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error)
+	UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, userId string) (*SavedFilter, error)
 }
 
 func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
@@ -89,4 +91,25 @@ func (r *SavedFiltersRepository) CreateSavedFilter(savedFilterInput SavedFilterC
 	}
 
 	return r.GetSavedFilterByID(savedFilter.ID)
+}
+
+func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, userId string) (*SavedFilter, error) {
+	existingSavedFilter, err := r.GetSavedFilterByID(savedFilterInput.ID)
+	if err != nil || existingSavedFilter == nil {
+		return nil, fmt.Errorf("error retrieving saved filter by ID: %w", err)
+	}
+	if existingSavedFilter.UserID != userId {
+		return nil, fmt.Errorf("saved filter user ID does not match user ID")
+	}
+	savedFilter := SavedFilter{
+		Favorite:  savedFilterInput.Favorite,
+		Name:      savedFilterInput.Name,
+		Queries:   savedFilterInput.Queries,
+		UpdatedOn: time.Now(),
+	}
+	if err := r.db.Where("id = ?", savedFilterInput.ID).Updates(&savedFilter).Error; err != nil {
+		return nil, fmt.Errorf("error updating saved filter: %w", err)
+	}
+
+	return r.GetSavedFilterByID(savedFilterInput.ID)
 }
