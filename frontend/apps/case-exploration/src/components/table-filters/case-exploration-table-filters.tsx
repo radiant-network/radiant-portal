@@ -3,15 +3,15 @@ import useSWR from 'swr';
 
 import { CaseFilters, SearchCriterion } from '@/api/api';
 import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
-import { GroupedAutocompleteResults } from '@/components/base/data-table/filters/data-table-filter-search';
-import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
+import DataTableFilters, {
+  getVisibleFiltersByCriterias,
+  sortOptions,
+} from '@/components/base/data-table/filters/data-table-filters';
 import getItemPriority from '@/components/base/data-table/filters/options/option-priority';
 import getItemStatus from '@/components/base/data-table/filters/options/option-status';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
-
-const DEFAULT_VISIBLE_FILTERS = ['priority', 'status', 'case_analysis'];
 
 type CaseFiltersInput = {
   search_criteria: Array<SearchCriterion>;
@@ -23,44 +23,13 @@ type FiltersGroupFormProps = {
 };
 
 const CRITERIAS = {
-  priority: { key: 'priority_code', weight: 1 },
-  status: { key: 'status_code', weight: 2 },
-  case_analysis: { key: 'case_analysis_code', weight: 3 },
-  project: { key: 'project_code', weight: 3 },
-  performer_lab: { key: 'performer_lab_code', weight: 4 },
-  requested_by: { key: 'requested_by_code', weight: 5 },
-  case_id: { key: 'case_id', weight: 6 },
-  patient_id: { key: 'patient_id', weight: 7 },
-  mrn: { key: 'mrn', weight: 8 },
-  request_id: { key: 'request_id', weight: 9 },
+  priority: { key: 'priority_code', weight: 1, visible: true },
+  status: { key: 'status_code', weight: 2, visible: true },
+  case_analysis: { key: 'case_analysis_code', weight: 3, visible: true },
+  project: { key: 'project_code', weight: 3, visible: false },
+  performer_lab: { key: 'performer_lab_code', weight: 4, visible: false },
+  requested_by: { key: 'requested_by_code', weight: 5, visible: false },
 };
-
-/**
- * Case autocomplte
- */
-async function fetchAutocompleteCases(prefix: string, minSearchLength: number) {
-  if (!prefix || prefix.length < minSearchLength) {
-    return {};
-  }
-  const response = await caseApi.autocompleteCases(prefix, '10');
-  if (response?.data && response.data.length > 0) {
-    const grouped = response.data.reduce((acc, result) => {
-      if (!acc[result.type]) {
-        acc[result.type] = [];
-      }
-      acc[result.type].push(result);
-      return acc;
-    }, {} as GroupedAutocompleteResults);
-    return grouped; // Add explicit return
-  }
-
-  return {}; //
-}
-
-async function fetchFilters(searchCriteria: CaseFiltersInput) {
-  const response = await caseApi.casesFilters(searchCriteria);
-  return response.data;
-}
 
 export const FILTER_DEFAULTS = {
   priority: [],
@@ -71,19 +40,16 @@ export const FILTER_DEFAULTS = {
   requested_by: [],
 };
 
-export const FILTERS_SEARCH_DEFAULTS = {
-  case_id: [],
-  patient_id: [],
-  mrn: [],
-  request_id: [],
-};
+async function fetchFilters(searchCriteria: CaseFiltersInput) {
+  const response = await caseApi.casesFilters(searchCriteria);
+  return response.data;
+}
 
 function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFormProps) {
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
     ...FILTER_DEFAULTS,
-    ...FILTERS_SEARCH_DEFAULTS,
   });
   const { t } = useI18n();
 
@@ -103,7 +69,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
         const baseOption: IFilterButton = {
           key,
           label: t(`case_exploration.case.filters.${key}`),
-          isVisible: DEFAULT_VISIBLE_FILTERS.includes(key), // Show first three by default
+          isVisible: getVisibleFiltersByCriterias(CRITERIAS).includes(key),
           isOpen: openFilters[key] || false,
           selectedItems: filters[key] || [],
           options: [],
@@ -144,37 +110,13 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       .filter(option => option.options.length > 0);
   }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
 
-  // Get the current search term for display (only one allowed)
-  const getSearchTerm = () => {
-    const searchTypes = ['case_id', 'patient_id', 'mrn', 'assay_id'];
-
-    for (const type of searchTypes) {
-      const values = filters[type] || [];
-      if (values.length > 0) {
-        return {
-          type,
-          value: values[0],
-        };
-      }
-    }
-
-    return null;
-  };
-
-  const searchTerm = getSearchTerm();
-
   return (
     <DataTableFilters
-      visibleFilters={DEFAULT_VISIBLE_FILTERS}
-      filterSearchs={[
-        {
-          id: 'search',
-          searchTerm: searchTerm?.value,
-          placeholder: t('case_exploration.filters_group.search_placeholder'),
-          minSearchLength: 1,
-          onAutocomplete: fetchAutocompleteCases,
-        },
-      ]}
+      filterSearch={{
+        placeholder: t('case_exploration.filters_group.search_placeholder'),
+        minSearchLength: 1,
+        api: (prefix: string) => caseApi.autocompleteCases(prefix, '10'),
+      }}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}
       setChangedFilterButtons={setChangedFilterButtons}
@@ -186,7 +128,6 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       setSearchCriteria={setSearchCriteria}
       criterias={CRITERIAS}
       defaultFilters={FILTER_DEFAULTS}
-      defaultSearchFilters={FILTERS_SEARCH_DEFAULTS}
     />
   );
 }

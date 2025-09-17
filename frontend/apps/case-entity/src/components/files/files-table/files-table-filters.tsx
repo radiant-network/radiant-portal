@@ -21,18 +21,17 @@ type FilesTableFilters = {
 type DocumentFiltersInput = {
   search_criteria: Array<SearchCriterion>;
 };
+
 export const FILTER_DEFAULTS = {
-  data_type: [],
   format: [],
-  project: [],
-  performer_lab: [],
+  data_type: [],
   relationship_to_proband: [],
 };
 
 const CRITERIAS = {
-  format: { key: 'format_code', weight: 1 },
-  data_type: { key: 'data_type_code', weight: 2 },
-  relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3 },
+  format: { key: 'format_code', weight: 1, visible: true },
+  data_type: { key: 'data_type_code', weight: 2, visible: true },
+  relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3, visible: true },
 };
 
 async function fetchFilters(caseId: string, searchCriteria: DocumentFiltersInput) {
@@ -98,7 +97,6 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
 
   return (
     <DataTableFilters
-      visibleFilters={DEFAULT_VISIBLE_FILTERS}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}
       setChangedFilterButtons={setChangedFilterButtons}
