@@ -191,3 +191,68 @@ func Test_PostSavedFilterHandler_Success(t *testing.T) {
 		assertPostSavedFilterHandler(t, repo, auth, body, http.StatusCreated)
 	})
 }
+
+func assertPutSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, body string, status int) {
+	router := gin.Default()
+	router.PUT("/users/saved_filters", server.PutSavedFilterHandler(repo, auth))
+
+	req, _ := http.NewRequest("PUT", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, status, w.Code)
+}
+
+func Test_PutSavedFilterHandler_InvalidInput(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		body := `{
+			"name": "saved_filter_snv_11",
+			"queries": []
+		}`
+		assertPutSavedFilterHandler(t, repo, auth, body, http.StatusBadRequest)
+	})
+}
+
+func Test_PutSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		body := `{
+			"id": 42,
+			"favorite": true,
+			"name": "saved_filter_snv_11",
+			"queries": []
+		}`
+		assertPutSavedFilterHandler(t, repo, auth, body, http.StatusInternalServerError)
+	})
+}
+
+func Test_PutSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		body := `{
+			"id": 3,
+			"favorite": true,
+			"name": "saved_filter_snv_11",
+			"queries": []
+		}`
+		assertPutSavedFilterHandler(t, repo, auth, body, http.StatusInternalServerError)
+	})
+}
+
+func Test_PutSavedFilterHandler_Success(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		body := `{
+			"id": 1,
+			"favorite": true,
+			"name": "saved_filter_snv_1.1",
+			"queries": []
+		}`
+		assertPutSavedFilterHandler(t, repo, auth, body, http.StatusOK)
+	})
+}

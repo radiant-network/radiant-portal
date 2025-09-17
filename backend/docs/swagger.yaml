@@ -1154,6 +1154,25 @@ components:
       - GERMLINE_CNV_VARIANT
       - SOMATIC_SNV_VARIANT
       - SOMATIC_CNV_VARIANT
+    SavedFilterUpdateInput:
+      properties:
+        favorite:
+          type: boolean
+        id:
+          type: integer
+        name:
+          type: string
+        queries:
+          items:
+            $ref: '#/components/schemas/Sqon'
+          type: array
+          uniqueItems: false
+      required:
+      - favorite
+      - id
+      - name
+      - queries
+      type: object
     SearchCriterion:
       properties:
         field:
@@ -2989,6 +3008,46 @@ paths:
       security:
       - bearerauth: []
       summary: Create a new saved filter
+      tags:
+      - saved_filters
+    put:
+      description: Update a new saved filter
+      operationId: putSavedFilter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedFilterUpdateInput'
+        description: Saved Filter to update
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedFilter'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Update a new saved filter
       tags:
       - saved_filters
   /users/saved_filters/{saved_filter_id}:
