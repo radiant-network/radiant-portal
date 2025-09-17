@@ -168,7 +168,6 @@ func Test_UpdateSavedFilter(t *testing.T) {
 		assert.NotNil(t, savedFilter)
 
 		savedFilterUpdateInput := types.SavedFilterUpdateInput{
-			ID:   savedFilter.ID,
 			Name: "new_saved_filter_somatic_snv_occurrence_updated",
 			Queries: types.JsonArray[types.Sqon]{
 				{
@@ -187,11 +186,11 @@ func Test_UpdateSavedFilter(t *testing.T) {
 			Favorite: true,
 		}
 
-		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, "1")
+		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "1")
 		assert.NoError(t, err2)
 		assert.NotNil(t, savedFilterUpdated)
 		assert.Equal(t, savedFilterUpdateInput.Name, (*savedFilterUpdated).Name)
-		assert.Equal(t, savedFilterUpdateInput.ID, (*savedFilterUpdated).ID)
+		assert.Equal(t, savedFilter.ID, (*savedFilterUpdated).ID)
 		assert.Equal(t, savedFilterUpdateInput.Queries, (*savedFilterUpdated).Queries)
 		assert.Equal(t, savedFilterUpdateInput.Favorite, (*savedFilterUpdated).Favorite)
 	})
@@ -210,13 +209,12 @@ func Test_UpdateSavedFilter_NotExisting(t *testing.T) {
 		assert.NotNil(t, savedFilter)
 
 		savedFilterUpdateInput := types.SavedFilterUpdateInput{
-			ID:       42, // non-existing ID
 			Name:     "new_saved_filter_somatic_snv_occurrence_updated",
 			Queries:  types.JsonArray[types.Sqon]{},
 			Favorite: true,
 		}
 
-		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, "1")
+		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, 42, "1") // non-existing ID
 		assert.Error(t, err2)
 		assert.Nil(t, savedFilterUpdated)
 	})
@@ -235,13 +233,12 @@ func Test_UpdateSavedFilter_NotCreatedByUserId(t *testing.T) {
 		assert.NotNil(t, savedFilter)
 
 		savedFilterUpdateInput := types.SavedFilterUpdateInput{
-			ID:       savedFilter.ID,
 			Name:     "new_saved_filter_somatic_snv_occurrence_updated",
 			Queries:  types.JsonArray[types.Sqon]{},
 			Favorite: true,
 		}
 
-		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, "42") // different user id
+		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "42") // different user id
 		assert.Error(t, err2)
 		assert.Nil(t, savedFilterUpdated)
 	})
@@ -260,13 +257,12 @@ func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 		assert.NotNil(t, savedFilter)
 
 		savedFilterUpdateInput := types.SavedFilterUpdateInput{
-			ID:       savedFilter.ID,
 			Name:     "saved_filter_snv_1", // existing name
 			Queries:  types.JsonArray[types.Sqon]{},
 			Favorite: true,
 		}
 
-		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, "1")
+		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "1")
 		assert.Error(t, err2)
 		assert.Nil(t, savedFilterUpdated)
 	})

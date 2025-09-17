@@ -20,7 +20,6 @@ type SavedFilterCreationInput struct {
 }
 
 type SavedFilterUpdateInput struct {
-	ID       int             `json:"id" binding:"required"`
 	Name     string          `json:"name" binding:"required"`
 	Queries  JsonArray[Sqon] `gorm:"type:json" json:"queries" binding:"required"`
 	Favorite bool            `json:"favorite" binding:"required"`
