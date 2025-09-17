@@ -9,17 +9,15 @@ import { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
 import { Skeleton } from '../../ui/skeleton';
 
-import TableFiltersSearch, { AutocompleteFuncProps } from './data-table-filter-search';
+import TableFiltersSearch, { AutocompleteApiFn } from './data-table-filter-search';
 
 type FilterSearch = {
-  id: string;
-  searchTerm?: string;
   placeholder?: string;
   minSearchLength?: number;
-  onAutocomplete: AutocompleteFuncProps;
+  api: AutocompleteApiFn;
 };
 
-type CriteriaProps = { key: string; weight: number };
+type CriteriaProps = { key: string; weight: number; visible: boolean };
 
 type DataTableFilters = {
   loading?: boolean;
@@ -30,12 +28,10 @@ type DataTableFilters = {
   filters: StringArrayRecord;
   setFilters: (value: StringArrayRecord) => void;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
-  filterSearchs?: FilterSearch[];
+  filterSearch?: FilterSearch;
   filterButtons: IFilterButton[];
-  visibleFilters: string[];
   criterias: Record<string, CriteriaProps>;
   defaultFilters: Record<string, string[]>;
-  defaultSearchFilters?: Record<string, string[]>;
 };
 
 /**
@@ -46,7 +42,15 @@ export function sortOptions(options: IFilterButtonItem[]) {
 }
 
 /**
+ * A reusable function to get the list of visible criterias
+ */
+export function getVisibleFiltersByCriterias(criterias: Record<string, CriteriaProps>): string[] {
+  return Object.keys(criterias).filter(key => criterias[key].visible);
+}
+
+/**
  * Mapping function for FilterApi.
+ * If a value existing in criteria, the key will be used.
  * - key: key to be send to the api
  * - weight: used to reorder field in render function
  * _code or _id must be added to the correct field
@@ -55,13 +59,51 @@ export function sortOptions(options: IFilterButtonItem[]) {
  */
 function updateSearchCriteria(filters: StringArrayRecord, criterias: Record<string, CriteriaProps>): SearchCriterion[] {
   const searchCriteria: SearchCriterion[] = [];
-  for (const key in criterias) {
-    if (filters[key].length > 0) {
+  const quickFilterKeys = Object.keys(criterias);
+
+  for (const key in filters) {
+    if (filters[key].length === 0) continue;
+
+    // filters use a mapping criteria. e.g. data_type => data_type_code
+    if (quickFilterKeys.includes(key)) {
       searchCriteria.push({ field: criterias[key].key, value: filters[key] });
+      continue;
     }
+
+    // autocomplete value, use what the api send
+    searchCriteria.push({ field: key, value: filters[key] });
   }
 
   return searchCriteria;
+}
+
+/**
+ * Autocomplete values aren't persistent. When requesting a filter through a autocomplete
+ * field, we msut clear previous values and only keep the persistent filters (quickfilter, non-autocomplete field)
+ */
+function getPersistentFilters(filters: StringArrayRecord, criterias: Record<string, CriteriaProps>): StringArrayRecord {
+  const persistentFilters: StringArrayRecord = {};
+  for (const key in filters) {
+    if (Object.keys(criterias).includes(key)) {
+      persistentFilters[key] = filters[key];
+    }
+  }
+  return persistentFilters;
+}
+
+/**
+ * Retrieve the current search term for an autocomplete field
+ *
+ * @NOTE: there is no multi-select at the moment, so always return the first value
+ */
+function getSearchTerm(filters: StringArrayRecord, criterias: Record<string, CriteriaProps>): string | undefined {
+  for (const key in filters) {
+    if (!Object.keys(criterias).includes(key) && filters[key].length > 0) {
+      return filters[key][0];
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -70,17 +112,15 @@ function updateSearchCriteria(filters: StringArrayRecord, criterias: Record<stri
  * use criterias instead
  */
 type FiltersGroupSkeletonProps = {
-  filterSearchs?: FilterSearch[];
+  filterSearch?: FilterSearch;
   visibleFilters: string[];
 };
-function FiltersGroupSkeleton({ filterSearchs, visibleFilters }: FiltersGroupSkeletonProps) {
+function FiltersGroupSkeleton({ filterSearch, visibleFilters }: FiltersGroupSkeletonProps) {
   return (
     <div className="flex flex-col justify-start gap-2 min-w-[400px] h-[48px]">
       <Skeleton className="w-[120px] h-[24px]" />
       <div className="flex gap-2 h-[32px]">
-        {filterSearchs?.map(filter => (
-          <Skeleton key={filter.id} className="w-[260px] h-full" />
-        ))}
+        {filterSearch && <Skeleton className="w-[260px] h-full" />}
         {Object.keys(visibleFilters).map(key => (
           <Skeleton key={key} className="w-[100px] h-full" />
         ))}
@@ -100,17 +140,15 @@ function DataTableFilters({
   loading = false,
   openFilters,
   setOpenFilters,
-  visibleFilters,
   filters,
   setFilters,
   changedFilterButtons,
   setChangedFilterButtons,
   setSearchCriteria,
   filterButtons,
-  filterSearchs,
+  filterSearch,
   criterias,
   defaultFilters,
-  defaultSearchFilters = {},
 }: DataTableFilters) {
   const { t } = useI18n();
 
@@ -142,10 +180,7 @@ function DataTableFilters({
    * Clear all filters function
    */
   const clearAllFilters = () => {
-    setFilters({
-      ...defaultFilters,
-      ...defaultSearchFilters,
-    });
+    setFilters(defaultFilters);
     setChangedFilterButtons([]);
     setOpenFilters({});
   };
@@ -177,15 +212,9 @@ function DataTableFilters({
    */
   const handleAutocompleteSelect = useCallback(
     (type: string, value: string) => {
-      // Clear all existing search terms first
-      const clearedFilters = {
-        ...filters,
-        ...defaultSearchFilters,
-      };
-
       // Set the new search term
       setFilters({
-        ...clearedFilters,
+        ...getPersistentFilters(filters, criterias),
         [type]: [value],
       });
     },
@@ -196,10 +225,7 @@ function DataTableFilters({
    * Handle clearing the search input
    */
   const handleSearchClear = useCallback(() => {
-    setFilters({
-      ...filters,
-      ...defaultSearchFilters,
-    });
+    setFilters(getPersistentFilters(filters, criterias));
   }, [filters, setFilters]);
 
   /*
@@ -213,22 +239,26 @@ function DataTableFilters({
    * Skeleton Loading
    */
   if (loading) {
-    return <FiltersGroupSkeleton filterSearchs={filterSearchs} visibleFilters={visibleFilters} />;
+    return (
+      <FiltersGroupSkeleton
+        filterSearch={filterSearch}
+        visibleFilters={Object.keys(criterias).filter(key => criterias[key].visible)}
+      />
+    );
   }
 
   return (
     <div id="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
-      {filterSearchs?.map(({ id, searchTerm, placeholder, minSearchLength, onAutocomplete }) => (
+      {filterSearch && (
         <TableFiltersSearch
-          key={`table-filter-search-${id}`}
           onSelect={handleAutocompleteSelect}
           onClear={handleSearchClear}
-          selectedValue={searchTerm}
-          placeholder={placeholder}
-          minSearchLength={minSearchLength}
-          onAutocomplete={onAutocomplete}
+          selectedValue={getSearchTerm(filters, criterias)}
+          placeholder={filterSearch.placeholder}
+          minSearchLength={filterSearch.minSearchLength}
+          api={filterSearch.api}
         />
-      ))}
+      )}
       <div className="flex flex-wrap gap-2 items-end">
         {/* Show visible filters */}
         {filterButtons

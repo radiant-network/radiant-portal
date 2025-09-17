@@ -3,15 +3,15 @@ import useSWR from 'swr';
 
 import { DocumentFilters, SearchCriterion } from '@/api/api';
 import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
-import { GroupedAutocompleteResults } from '@/components/base/data-table/filters/data-table-filter-search';
-import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
+import DataTableFilters, {
+  getVisibleFiltersByCriterias,
+  sortOptions,
+} from '@/components/base/data-table/filters/data-table-filters';
 import getDataTypeOptions from '@/components/base/data-table/filters/options/option-data-type';
 import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { documentApi } from '@/utils/api';
-
-const DEFAULT_VISIBLE_FILTERS = ['project', 'performer_lab', 'relationship_to_proband', 'format', 'data_type'];
 
 type FilesTableFilters = {
   loading: boolean;
@@ -21,7 +21,7 @@ type FilesTableFilters = {
 type DocumentFiltersInput = {
   search_criteria: Array<SearchCriterion>;
 };
-export const FILTER_DEFAULTS = {
+const FILTER_DEFAULTS = {
   data_type: [],
   format: [],
   project: [],
@@ -30,34 +30,12 @@ export const FILTER_DEFAULTS = {
 };
 
 const CRITERIAS = {
-  project: { key: 'project_code', weight: 1 },
-  performer_lab: { key: 'performer_lab_code', weight: 2 },
-  relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3 },
-  format: { key: 'format_code', weight: 4 },
-  data_type: { key: 'data_type_code', weight: 5 },
+  project: { key: 'project_code', weight: 1, visible: true },
+  performer_lab: { key: 'performer_lab_code', weight: 2, visible: true },
+  relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3, visible: true },
+  format: { key: 'format_code', weight: 4, visible: true },
+  data_type: { key: 'data_type_code', weight: 5, visible: true },
 };
-
-/**
- * Autocomplete for document
- */
-async function fetchAutocompleteDocuments(prefix: string, minSearchLength: number) {
-  if (!prefix || prefix.length < minSearchLength) {
-    return {};
-  }
-  const response = await documentApi.autocompleteDocuments(prefix, '10');
-  if (response?.data && response.data.length > 0) {
-    const grouped = response.data.reduce((acc, result) => {
-      if (!acc[result.type]) {
-        acc[result.type] = [];
-      }
-      acc[result.type].push(result);
-      return acc;
-    }, {} as GroupedAutocompleteResults);
-    return grouped; // Add explicit return
-  }
-
-  return {}; //
-}
 
 async function fetchFilters(searchCriteria: DocumentFiltersInput) {
   const response = await documentApi.documentsFilters(searchCriteria);
@@ -90,7 +68,7 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
         const baseOption: IFilterButton = {
           key,
           label: t(`files.filters.${key}`),
-          isVisible: DEFAULT_VISIBLE_FILTERS.includes(key),
+          isVisible: getVisibleFiltersByCriterias(CRITERIAS).includes(key),
           isOpen: openFilters[key] || false,
           selectedItems: filters[key] || [],
           options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
@@ -126,34 +104,13 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
       .filter(option => option.options.length > 0);
   }, [apiFilters, filters, openFilters, t]);
 
-  // Get the current search term for display (only one allowed)
-  const getSearchTerm = () => {
-    const searchTypes = ['id', 'run_name', 'sample_id', 'patient_id', 'case_id', 'task_id'];
-
-    for (const type of searchTypes) {
-      const values = filters[type] || [];
-      if (values.length > 0) {
-        return { type, value: values[0] };
-      }
-    }
-
-    return null;
-  };
-
-  const searchTerm = getSearchTerm();
-
   return (
     <DataTableFilters
-      visibleFilters={DEFAULT_VISIBLE_FILTERS}
-      filterSearchs={[
-        {
-          id: 'search',
-          searchTerm: searchTerm?.value,
-          minSearchLength: 1,
-          placeholder: t('file_entity.search_by_id_placeholder'),
-          onAutocomplete: fetchAutocompleteDocuments,
-        },
-      ]}
+      filterSearch={{
+        minSearchLength: 1,
+        placeholder: t('file_entity.search_by_id_placeholder'),
+        api: (prefix: string) => documentApi.autocompleteDocuments(prefix, '10'),
+      }}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}
       setChangedFilterButtons={setChangedFilterButtons}
