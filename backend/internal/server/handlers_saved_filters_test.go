@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,9 +16,12 @@ import (
 )
 
 func (m *MockRepository) GetSavedFilterByID(savedFilterId int) (*types.SavedFilter, error) {
+	if savedFilterId > 3 {
+		return nil, fmt.Errorf("mock saved filter not found")
+	}
 	return &types.SavedFilter{
-		ID:       1,
-		UserID:   "1",
+		ID:       savedFilterId,
+		UserID:   fmt.Sprintf("%d", savedFilterId),
 		Name:     "saved_filter_snv_1",
 		Type:     types.GERMLINE_SNV_OCCURRENCE,
 		Favorite: utils.BoolPointer(false),
@@ -349,6 +353,23 @@ func Test_PutSavedFilterHandler(t *testing.T) {
 	}`, w.Body.String())
 }
 
+func Test_PutSavedFilterHandler_MissingSavedFilterId(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.PUT("/users/saved_filters/:saved_filter_id", PutSavedFilterHandler(repo, auth))
+	body := `{
+			"favorite": true,
+			"name": "updated_saved_filter",
+			"queries": []
+	}`
+	req, _ := http.NewRequest("PUT", "/users/saved_filters/", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
 func Test_PutSavedFilterHandler_MissingField(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
@@ -363,6 +384,40 @@ func Test_PutSavedFilterHandler_MissingField(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PutSavedFilterHandler_NotExisting(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.PUT("/users/saved_filters/:saved_filter_id", PutSavedFilterHandler(repo, auth))
+	body := `{
+			"favorite": true,
+			"name": "updated_saved_filter",
+			"queries": []
+	}`
+	req, _ := http.NewRequest("PUT", "/users/saved_filters/42", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_PutSavedFilterHandler_NotCreatedByUserId(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.PUT("/users/saved_filters/:saved_filter_id", PutSavedFilterHandler(repo, auth))
+	body := `{
+			"favorite": true,
+			"name": "updated_saved_filter",
+			"queries": []
+	}`
+	req, _ := http.NewRequest("PUT", "/users/saved_filters/3", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }
 
 func Test_DeleteSavedFilterHandler(t *testing.T) {
@@ -384,7 +439,33 @@ func Test_DeleteSavedFilterHandler_MissingSavedFilterId(t *testing.T) {
 	router := gin.Default()
 	router.DELETE("/users/saved_filters/:saved_filter_id", DeleteSavedFilterHandler(repo, auth))
 
-	req, _ := http.NewRequest("PUT", "/users/saved_filters/", bytes.NewBuffer([]byte("")))
+	req, _ := http.NewRequest("DELETE", "/users/saved_filters/", bytes.NewBuffer([]byte("")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteSavedFilterHandler_NotExisting(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.DELETE("/users/saved_filters/:saved_filter_id", DeleteSavedFilterHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", "/users/saved_filters/42", bytes.NewBuffer([]byte("")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteSavedFilterHandler_NotCreatedByUserId(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.DELETE("/users/saved_filters/:saved_filter_id", DeleteSavedFilterHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", "/users/saved_filters/3", bytes.NewBuffer([]byte("")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

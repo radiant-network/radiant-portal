@@ -179,22 +179,27 @@ func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin
 			HandleValidationError(c, err)
 			return
 		}
-		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
-		if err != nil {
-			HandleNotFoundError(c, "saved_filter_id")
-			return
-		}
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
 			HandleNotFoundError(c, "user id")
 			return
 		}
-		savedFilter, err := repo.UpdateSavedFilter(body, savedFilterId, *userId)
+		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
+		if err != nil {
+			HandleNotFoundError(c, "saved_filter_id")
+			return
+		}
+		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
+		if err != nil || savedFilter == nil || (*savedFilter).UserID != *userId {
+			HandleNotFoundError(c, "saved filter")
+			return
+		}
+		updatedSavedFilter, err := repo.UpdateSavedFilter(body, savedFilterId, *userId)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		c.JSON(http.StatusOK, savedFilter)
+		c.JSON(http.StatusOK, updatedSavedFilter)
 	}
 }
 
@@ -212,14 +217,19 @@ func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin
 // @Router /users/saved_filters/{saved_filter_id} [delete]
 func DeleteSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		userId, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleNotFoundError(c, "user id")
+			return
+		}
 		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
 		if err != nil {
 			HandleNotFoundError(c, "saved_filter_id")
 			return
 		}
-		userId, err := auth.RetrieveUserIdFromToken(c)
-		if err != nil {
-			HandleNotFoundError(c, "user id")
+		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
+		if err != nil || savedFilter == nil || (*savedFilter).UserID != *userId {
+			HandleNotFoundError(c, "saved filter")
 			return
 		}
 		err = repo.DeleteSavedFilter(savedFilterId, *userId)
