@@ -157,15 +157,16 @@ Cypress.Commands.add('showColumn', (column: string) => {
 /**
  * Sorts a table column and intercepts API calls.
  * @param position The column position index to sort.
+ * @param routeMatcher The route pattern to match for interception.
  * @param nbCalls The number of API calls to wait for.
  */
-Cypress.Commands.add('sortTableAndIntercept', (position: number, nbCalls: number) => {
-  cy.intercept('POST', '**/list').as('postList');
+Cypress.Commands.add('sortTableAndIntercept', (position: number, routeMatcher: string, nbCalls: number) => {
+  cy.intercept('POST', routeMatcher).as('routeMatcher');
 
   cy.get(`${CommonSelectors.tableHead} ${CommonSelectors.tableCellHead}`).eq(position).find(CommonSelectors.sortIcon).clickAndWait({ force: true });
 
   for (let i = 0; i < nbCalls; i++) {
-    cy.wait('@postList', { timeout: oneMinute });
+    cy.wait('@routeMatcher', { timeout: oneMinute });
   }
 });
 
@@ -266,6 +267,28 @@ Cypress.Commands.add('visitCasesPage', (searchCriteria?: string) => {
       interception.body = mockBody;
     });
     cy.visit('/case', { failOnStatusCode: false });
+    cy.wait('@postSearch');
+  }
+
+  cy.setLang('EN');
+  cy.resetColumns();
+});
+
+/**
+ * Visits the files page.
+ * @param searchCriteria Optional search criteria to apply (JSON string).
+ */
+Cypress.Commands.add('visitFilesPage', (searchCriteria?: string) => {
+  if (searchCriteria == undefined) {
+    cy.visitAndIntercept('/file', 'POST', '**/documents/search', 1);
+  } else {
+    cy.intercept('POST', '**/documents/search', interception => {
+      const mockBody = { ...interception.body };
+      mockBody.search_criteria = JSON.parse(searchCriteria);
+      interception.alias = 'postSearch';
+      interception.body = mockBody;
+    });
+    cy.visit('/file', { failOnStatusCode: false });
     cy.wait('@postSearch');
   }
 
