@@ -13,6 +13,21 @@ var OrganizationTable = Table{
 	Alias: "org",
 }
 
+var PerformerLabTable = Table{
+	Name:  OrganizationTable.Name,
+	Alias: "lab",
+}
+
+var ManagingOrganizationTable = Table{
+	Name:  OrganizationTable.Name,
+	Alias: "mgmt_org",
+}
+
+var OrderingOrganizationTable = Table{
+	Name:  OrganizationTable.Name,
+	Alias: "order_org",
+}
+
 func (Organization) TableName() string {
 	return OrganizationTable.Name
 }

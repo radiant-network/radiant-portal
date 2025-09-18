@@ -317,6 +317,7 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 
 	txPerformerLab := r.db.Table(fmt.Sprintf("%s %s", types.PerformerLabTable.Name, types.PerformerLabTable.Alias))
 	txPerformerLab = txPerformerLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.PerformerLabTable.Alias, types.PerformerLabTable.Alias))
+	txPerformerLab = txPerformerLab.Where(fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.PerformerLabTable.Alias))
 	if err := txPerformerLab.Find(&performerLab).Error; err != nil {
 		return nil, fmt.Errorf("error fetching performer lab: %w", err)
 	}

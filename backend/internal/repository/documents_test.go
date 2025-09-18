@@ -410,7 +410,7 @@ func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 		filters, err := repo.GetDocumentsFilters(query, true)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len((*filters).Project))
-		assert.Equal(t, 6, len((*filters).PerformerLab))
+		assert.Equal(t, 2, len((*filters).PerformerLab))
 		assert.Equal(t, 6, len((*filters).RelationshipToProband))
 		assert.Equal(t, 15, len((*filters).Format))
 		assert.Equal(t, 15, len((*filters).DataType))

@@ -130,24 +130,25 @@ func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProj
 	txDocuments = txDocuments.Select("doc.id, c.project_id, c.performer_lab_id, f.relationship_to_proband_code, doc.format_code, doc.data_type_code")
 
 	if withProjectAndLab {
-		if err := r.getDocumentsFilter(txDocuments, &project, types.ProjectTable, "project_id", "id", "name"); err != nil {
+		if err := r.getDocumentsFilter(txDocuments, &project, types.ProjectTable, "project_id", "id", "name", nil); err != nil {
 			return nil, err
 		}
 
-		if err := r.getDocumentsFilter(txDocuments, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name"); err != nil {
+		isDiagnosticLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.PerformerLabTable.Alias)
+		if err := r.getDocumentsFilter(txDocuments, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name", &isDiagnosticLabCondition); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := r.getDocumentsFilter(txDocuments, &relationship, types.FamilyRelationshipTable, "relationship_to_proband_code", "code", "name_en"); err != nil {
+	if err := r.getDocumentsFilter(txDocuments, &relationship, types.FamilyRelationshipTable, "relationship_to_proband_code", "code", "name_en", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getDocumentsFilter(txDocuments, &format, types.FileFormatTable, "format_code", "code", "name_en"); err != nil {
+	if err := r.getDocumentsFilter(txDocuments, &format, types.FileFormatTable, "format_code", "code", "name_en", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getDocumentsFilter(txDocuments, &dataType, types.DataTypeTable, "data_type_code", "code", "name_en"); err != nil {
+	if err := r.getDocumentsFilter(txDocuments, &dataType, types.DataTypeTable, "data_type_code", "code", "name_en", nil); err != nil {
 		return nil, err
 	}
 
@@ -160,13 +161,16 @@ func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProj
 	}, nil
 }
 
-func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destination *[]Aggregation, filterTable types.Table, documentsJoinColumn string, filterJoinColumn string, filterLabelColumn string) error {
-	txProject := r.db.Table(fmt.Sprintf("%s %s", filterTable.Name, filterTable.Alias))
-	txProject = txProject.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct documents.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	txProject = txProject.Joins(fmt.Sprintf("LEFT JOIN (?) documents ON documents.%s = %s.%s", documentsJoinColumn, filterTable.Alias, filterJoinColumn), txDocument)
-	txProject = txProject.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	txProject = txProject.Order("count desc, bucket asc")
-	if err := txProject.Find(destination).Error; err != nil {
+func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destination *[]Aggregation, filterTable types.Table, documentsJoinColumn string, filterJoinColumn string, filterLabelColumn string, filterCondition *string) error {
+	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.Name, filterTable.Alias))
+	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct documents.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) documents ON documents.%s = %s.%s", documentsJoinColumn, filterTable.Alias, filterJoinColumn), txDocument)
+	tx = tx.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	tx = tx.Order("count desc, bucket asc")
+	if filterCondition != nil {
+		tx = tx.Where(*filterCondition)
+	}
+	if err := tx.Find(destination).Error; err != nil {
 		return fmt.Errorf("error fetching filter %s: %w", filterTable.Name, err)
 	}
 	return nil

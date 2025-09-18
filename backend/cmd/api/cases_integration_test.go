@@ -115,12 +115,8 @@ func Test_GetCasesFilters(t *testing.T) {
 			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
 			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"}], 
 		"performer_lab":[
-			{"count":1, "key":"CQGC", "label":"Quebec Clinical Genomic Center"},
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
 			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
-			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
-			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}], 
+			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}],
 		"priority":[
 			{"count":1, "key":"routine", "label":"Routine"}, 
 			{"count":0, "key":"asap", "label":"Asap"},

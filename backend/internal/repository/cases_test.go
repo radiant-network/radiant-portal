@@ -199,7 +199,7 @@ func Test_GetCasesFilters(t *testing.T) {
 		assert.Equal(t, len((*filters).Priority), 4)
 		assert.Equal(t, len((*filters).CaseAnalysis), 4)
 		assert.Equal(t, len((*filters).Project), 2)
-		assert.Equal(t, len((*filters).PerformerLab), 6)
+		assert.Equal(t, len((*filters).PerformerLab), 2)
 		assert.Equal(t, len((*filters).RequestedBy), 6)
 	})
 }

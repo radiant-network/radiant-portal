@@ -22,11 +22,6 @@ var ProbandTable = Table{
 	Alias: "pro",
 }
 
-var ManagingOrganizationTable = Table{
-	Name:  OrganizationTable.Name,
-	Alias: "mgmt_org",
-}
-
 func (Patient) TableName() string {
 	return PatientTable.Name
 }

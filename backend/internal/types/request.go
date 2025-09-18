@@ -15,11 +15,6 @@ var RequestTable = Table{
 	Alias: "r",
 }
 
-var OrderingOrganizationTable = Table{
-	Name:  OrganizationTable.Name,
-	Alias: "order_org",
-}
-
 func (Request) TableName() string {
 	return RequestTable.Name
 }
