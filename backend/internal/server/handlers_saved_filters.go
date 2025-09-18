@@ -153,9 +153,9 @@ func PostSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gi
 }
 
 // PutSavedFilterHandler
-// @Summary Update a new saved filter
+// @Summary Update a saved filter
 // @Id putSavedFilter
-// @Description Update a new saved filter
+// @Description Update a saved filter
 // @Tags saved_filters
 // @Security bearerauth
 // @Param saved_filter_id path string true "Saved Filter ID"
@@ -179,21 +179,64 @@ func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin
 			HandleValidationError(c, err)
 			return
 		}
-		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
-		if err != nil {
-			HandleNotFoundError(c, "saved_filter_id")
-			return
-		}
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
 			HandleNotFoundError(c, "user id")
 			return
 		}
-		savedFilter, err := repo.UpdateSavedFilter(body, savedFilterId, *userId)
+		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
+		if err != nil {
+			HandleNotFoundError(c, "saved_filter_id")
+			return
+		}
+		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
+		if err != nil || savedFilter == nil || (*savedFilter).UserID != *userId {
+			HandleNotFoundError(c, "saved filter")
+			return
+		}
+		updatedSavedFilter, err := repo.UpdateSavedFilter(body, savedFilterId, *userId)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		c.JSON(http.StatusOK, savedFilter)
+		c.JSON(http.StatusOK, updatedSavedFilter)
+	}
+}
+
+// DeleteSavedFilterHandler
+// @Summary Delete a saved filter
+// @Id deleteSavedFilter
+// @Description Delete a saved filter
+// @Tags saved_filters
+// @Security bearerauth
+// @Param saved_filter_id path string true "Saved Filter ID"
+// @Produce json
+// @Success 204
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /users/saved_filters/{saved_filter_id} [delete]
+func DeleteSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleNotFoundError(c, "user id")
+			return
+		}
+		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
+		if err != nil {
+			HandleNotFoundError(c, "saved_filter_id")
+			return
+		}
+		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
+		if err != nil || savedFilter == nil || (*savedFilter).UserID != *userId {
+			HandleNotFoundError(c, "saved filter")
+			return
+		}
+		err = repo.DeleteSavedFilter(savedFilterId, *userId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.Status(http.StatusNoContent)
 	}
 }

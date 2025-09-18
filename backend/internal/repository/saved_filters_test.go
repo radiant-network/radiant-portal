@@ -197,54 +197,6 @@ func Test_UpdateSavedFilter(t *testing.T) {
 	})
 }
 
-func Test_UpdateSavedFilter_NotExisting(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
-		savedFilterCreationInput := types.SavedFilterCreationInput{
-			Name:    "new_saved_filter_somatic_snv_occurrence",
-			Type:    types.SOMATIC_SNV_OCCURRENCE,
-			Queries: types.JsonArray[types.Sqon]{},
-		}
-		savedFilter, err1 := repo.CreateSavedFilter(savedFilterCreationInput, "1")
-		assert.NoError(t, err1)
-		assert.NotNil(t, savedFilter)
-
-		savedFilterUpdateInput := types.SavedFilterUpdateInput{
-			Name:     "new_saved_filter_somatic_snv_occurrence_updated",
-			Queries:  types.JsonArray[types.Sqon]{},
-			Favorite: utils.BoolPointer(true),
-		}
-
-		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, 42, "1") // non-existing ID
-		assert.Error(t, err2)
-		assert.Nil(t, savedFilterUpdated)
-	})
-}
-
-func Test_UpdateSavedFilter_NotCreatedByUserId(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
-		savedFilterCreationInput := types.SavedFilterCreationInput{
-			Name:    "new_saved_filter_somatic_snv_occurrence",
-			Type:    types.SOMATIC_SNV_OCCURRENCE,
-			Queries: types.JsonArray[types.Sqon]{},
-		}
-		savedFilter, err1 := repo.CreateSavedFilter(savedFilterCreationInput, "1")
-		assert.NoError(t, err1)
-		assert.NotNil(t, savedFilter)
-
-		savedFilterUpdateInput := types.SavedFilterUpdateInput{
-			Name:     "new_saved_filter_somatic_snv_occurrence_updated",
-			Queries:  types.JsonArray[types.Sqon]{},
-			Favorite: utils.BoolPointer(true),
-		}
-
-		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "42") // different user id
-		assert.Error(t, err2)
-		assert.Nil(t, savedFilterUpdated)
-	})
-}
-
 func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
@@ -266,5 +218,26 @@ func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "1")
 		assert.Error(t, err2)
 		assert.Nil(t, savedFilterUpdated)
+	})
+}
+
+func Test_DeleteSavedFilter(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewSavedFiltersRepository(db)
+		savedFilterCreationInput := types.SavedFilterCreationInput{
+			Name:    "new_saved_filter_somatic_snv_occurrence",
+			Type:    types.GERMLINE_SNV_OCCURRENCE,
+			Queries: types.JsonArray[types.Sqon]{},
+		}
+		savedFilter, err1 := repo.CreateSavedFilter(savedFilterCreationInput, "1")
+		assert.NoError(t, err1)
+		assert.NotNil(t, savedFilter)
+
+		err2 := repo.DeleteSavedFilter(savedFilter.ID, "1")
+		assert.NoError(t, err2)
+
+		savedFilter, err3 := repo.GetSavedFilterByID(savedFilter.ID)
+		assert.NoError(t, err3)
+		assert.Nil(t, savedFilter)
 	})
 }
