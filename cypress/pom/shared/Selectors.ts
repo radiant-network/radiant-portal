@@ -1,7 +1,10 @@
 /// <reference types="cypress"/>
 export const CommonSelectors = {
+  actionButton: '[class*="lucide-ellipsis-vertical"]',
   activeTab: '[data-active="true"]',
   anchorIcon: '[class*="lucide-arrow-up-right"]',
+  colorIndicator: (color: string) => `[class*="text-indicator-${color}"]`,
+  familyIcon: '[class*="lucide-users"]',
   gnomadRedIcon: '[class*="text-red-500 bg-red-500"]',
   interpretationIcon: '[class*="lucide-zap"]',
   langButton: 'button[class*="text-muted-foreground px-3 text-base md:text-sm"]',
@@ -22,14 +25,15 @@ export const CommonSelectors = {
   settingsIcon: '[class*="lucide-settings"]',
   settingsPopper: '[class*="radix-dropdown-menu-content"]',
   sortIcon: '[class*="lucide-arrow-up"], [class*="lucide lucide-arrow-down"]',
+  statusIcon: (icon: string) => `[class*="lucide-${icon}"]`,
   tableCellData: 'td',
   tableCellHead: 'th',
   tableHead: 'table thead',
   tableRow: 'table tbody tr',
   tag: (color: string) => `[class*="bg-${color}/20 text-${color}-foreground"]`,
+  tagBlank: '[class*="text-foreground"]',
   tagDefault: '[class*="bg-primary text-primary-foreground"]',
   title: 'h1',
   tooltipPopper: '[class*="radix-tooltip-content"]',
   underlineHeader: '[class*="decoration-dotted"]',
-  vepIndicator: (color: string) => `[class*="text-indicator-${color}"]`,
 };

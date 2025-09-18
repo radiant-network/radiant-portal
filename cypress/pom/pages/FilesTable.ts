@@ -1,101 +1,101 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from '../shared/Selectors';
-import { getPriorityColor, getStatusColor, getStatusIcon, getUrlLink, stringToRegExp } from '../shared/Utils';
+import { getUrlLink, stringToRegExp } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectorHead = CommonSelectors.tableHead;
 const selectors = {
-  tableCell: (dataCase: any) => `${CommonSelectors.tableRow}:contains("${dataCase.case}") ${CommonSelectors.tableCellData}`,
+  tableCell: (dataFile: any) => `${CommonSelectors.tableRow}:contains("${dataFile.name}") ${CommonSelectors.tableCellData}`,
   tableHeadCell: `${selectorHead} ${CommonSelectors.tableCellHead}`,
 };
 
 const tableColumns = [
   {
-    id: 'case',
-    name: 'Case',
-    apiField: 'case_id',
+    id: 'name',
+    name: 'File Name',
+    apiField: 'name',
     isVisibleByDefault: true,
     isSortable: true,
     position: 0,
     tooltip: null,
   },
   {
-    id: 'patient',
-    name: 'Patient',
-    apiField: 'proband_id',
-    isVisibleByDefault: false,
+    id: 'format',
+    name: 'Format',
+    apiField: 'format_code',
+    isVisibleByDefault: true,
     isSortable: true,
     position: 1,
     tooltip: null,
   },
   {
-    id: 'mrn',
-    name: 'MRN',
-    apiField: 'proband_mrn',
+    id: 'type',
+    name: 'Type',
+    apiField: 'data_type_code',
     isVisibleByDefault: true,
     isSortable: true,
     position: 2,
-    tooltip: `Patient's medical record number`,
+    tooltip: null,
   },
   {
-    id: 'priority',
-    name: 'Priority',
-    apiField: 'priority_code',
+    id: 'size',
+    name: 'Size',
+    apiField: 'size',
     isVisibleByDefault: true,
     isSortable: true,
     position: 3,
     tooltip: null,
   },
   {
-    id: 'status',
-    name: 'Status',
-    apiField: 'status_code',
+    id: 'case',
+    name: 'Case',
+    apiField: 'case_id',
     isVisibleByDefault: true,
     isSortable: true,
     position: 4,
     tooltip: null,
   },
   {
-    id: 'type',
-    name: 'Type',
-    apiField: 'case_type',
+    id: 'diag_lab',
+    name: 'Diag. Lab',
+    apiField: 'performer_lab_code',
     isVisibleByDefault: true,
     isSortable: false,
     position: 5,
-    tooltip: /(?=.*Somatic)(?=.*Solo germline)(?=.*Family germline)/, // RegExp that checks that all 3 are present (in any order)
+    tooltip: null,
   },
   {
-    id: 'analysis',
-    name: 'Analysis',
-    apiField: 'case_analysis_code',
+    id: 'relationship',
+    name: 'Relationship',
+    apiField: 'relationship_to_proband_code',
     isVisibleByDefault: true,
     isSortable: true,
     position: 6,
     tooltip: null,
   },
   {
-    id: 'primary_condition',
-    name: 'Primary Condition',
-    apiField: 'primary_condition_id',
-    isVisibleByDefault: false,
+    id: 'patient',
+    name: 'Patient',
+    apiField: 'patient_id',
+    isVisibleByDefault: true,
     isSortable: true,
     position: 7,
     tooltip: null,
   },
   {
-    id: 'req_by',
-    name: 'Req. By',
-    apiField: 'requested_by_code',
+    id: 'sample',
+    name: 'Sample',
+    apiField: 'submitter_sample_id',
     isVisibleByDefault: true,
     isSortable: true,
     position: 8,
-    tooltip: 'Requested by',
+    tooltip: null,
   },
   {
-    id: 'project',
-    name: 'Project',
-    apiField: 'project_code',
-    isVisibleByDefault: false,
+    id: 'task',
+    name: 'Task',
+    apiField: 'task_id',
+    isVisibleByDefault: true,
     isSortable: true,
     position: 9,
     tooltip: null,
@@ -104,81 +104,54 @@ const tableColumns = [
     id: 'created_on',
     name: 'Created On',
     apiField: 'created_on',
-    isVisibleByDefault: false,
+    isVisibleByDefault: true,
     isSortable: true,
     position: 10,
     tooltip: 'Date of case creation (yyyy-mm-dd)',
   },
   {
-    id: 'updated_on',
-    name: 'Updated',
-    apiField: 'updated_on',
-    isVisibleByDefault: true,
+    id: 'assay',
+    name: 'Assay',
+    apiField: 'seq_id',
+    isVisibleByDefault: false,
     isSortable: true,
     position: 11,
-    tooltip: 'Date of last case modification (yyyy-mm-dd)',
-  },
-  {
-    id: 'prescriber',
-    name: 'Prescriber',
-    apiField: 'prescriber',
-    isVisibleByDefault: false,
-    isSortable: true,
-    position: 12,
-    tooltip: 'Prescribing doctor',
-  },
-  {
-    id: 'diagnostic_lab',
-    name: 'Diagnostic Lab',
-    apiField: 'performer_lab_code',
-    isVisibleByDefault: false,
-    isSortable: true,
-    position: 13,
-    tooltip: 'Molecular diagnostic laboratory',
-  },
-  {
-    id: 'request',
-    name: 'Request',
-    apiField: 'request_id',
-    isVisibleByDefault: false,
-    isSortable: true,
-    position: 14,
     tooltip: null,
   },
   {
-    id: 'managing_org',
-    name: 'Managing Org.',
-    apiField: 'managing_organization_code',
+    id: 'hash',
+    name: 'Hash',
+    apiField: 'hash',
     isVisibleByDefault: false,
     isSortable: true,
-    position: 15,
-    tooltip: 'Organization managing the patient’s file',
+    position: 12,
+    tooltip: null,
   },
   {
-    id: 'actions',
-    name: '',
-    apiField: 'has_variants',
-    isVisibleByDefault: true,
-    isSortable: false,
-    position: 16,
+    id: 'run',
+    name: 'Run',
+    apiField: 'run_alias',
+    isVisibleByDefault: false,
+    isSortable: true,
+    position: 13,
     tooltip: null,
   },
 ];
 
-export const CasesTable = {
+export const FilesTable = {
   actions: {
     /**
-     * Clicks the link in a specific table cell for a given case and column.
-     * @param dataCase The case object.
+     * Clicks the link in a specific table cell for a given file and column.
+     * @param dataFile The file object.
      * @param columnID The ID of the column.
      */
-    clickTableCellLink(dataCase: any, columnID: string) {
+    clickTableCellLink(dataFile: any, columnID: string) {
       cy.then(() =>
         getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
           if (position !== -1) {
             switch (columnID) {
               default:
-                cy.get(selectors.tableCell(dataCase)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
+                cy.get(selectors.tableCell(dataFile)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
                 break;
             }
           } else {
@@ -196,14 +169,14 @@ export const CasesTable = {
     },
     /**
      * Select an object view with the table action button.
-     * @param dataCase The case object.
-     * @param object The object to view (Case | Variants).
+     * @param dataFile The file object.
+     * @param object The object to view (File | Variants).
      */
-    selectAction(dataCase: any, object: string) {
+    selectAction(dataFile: any, object: string) {
       cy.then(() =>
         getColumnPosition(selectorHead, tableColumns, 'actions').then(position => {
           if (position !== -1) {
-            cy.get(selectors.tableCell(dataCase)).eq(position).find('button').clickAndWait({ force: true });
+            cy.get(selectors.tableCell(dataFile)).eq(position).find('button').clickAndWait({ force: true });
             cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
           } else {
             cy.log('Warning: Column actions not found');
@@ -238,7 +211,7 @@ export const CasesTable = {
         getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
           if (position !== -1) {
             if (needIntercept) {
-              cy.sortTableAndIntercept(position, '**/list', 1);
+              cy.sortTableAndIntercept(position, '**/documents/search', 1);
             } else {
               cy.sortTableAndWait(position);
             }
@@ -271,15 +244,15 @@ export const CasesTable = {
       );
     },
     /**
-     * Validates the link in a specific table cell for a given case and column.
-     * @param dataCase The case object.
+     * Validates the link in a specific table cell for a given file and column.
+     * @param dataFile The file object.
      * @param columnID The ID of the column.
      */
-    shouldHaveTableCellLink(dataCase: any, columnID: string) {
+    shouldHaveTableCellLink(dataFile: any, columnID: string) {
       cy.then(() =>
         getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
           if (position !== -1) {
-            cy.get(selectors.tableCell(dataCase)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataCase));
+            cy.get(selectors.tableCell(dataFile)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataFile));
           } else {
             cy.log(`Warning: Column ${columnID} not found`);
           }
@@ -310,7 +283,7 @@ export const CasesTable = {
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
-      CasesTable.actions.showAllColumns();
+      FilesTable.actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(selectors.tableHeadCell).eq(column.position).find(column.name).should('exist');
@@ -320,36 +293,23 @@ export const CasesTable = {
       });
     },
     /**
-     * Validates the content of a specific column in the table for a given case.
+     * Validates the content of a specific column in the table for a given file.
      * @param columnID The ID of the column to validate.
-     * @param dataCase The case object containing the expected values.
+     * @param dataFile The file object containing the expected values.
      */
-    shouldShowColumnContent(columnID: string, dataCase: any) {
-      CasesTable.actions.showAllColumns();
+    shouldShowColumnContent(columnID: string, dataFile: any) {
+      FilesTable.actions.showAllColumns();
       getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {
-            case 'priority':
-              cy.validateTableFirstRowContent(dataCase[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.colorIndicator(getPriorityColor(dataCase[columnID])), position);
-              break;
-            case 'status':
-              cy.validateTableFirstRowContent(dataCase[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(dataCase[columnID])), position);
-              cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataCase[columnID])), position);
-              break;
+            case 'format':
             case 'type':
-              cy.validateTableFirstRowClass(dataCase[columnID], position);
-              break;
-            case 'primary_condition':
-              cy.validateTableFirstRowContent(dataCase.primary_condition_name, position);
-              cy.validateTableFirstRowContent(dataCase.primary_condition_id, position);
-              break;
-            case 'actions':
-              cy.validateTableFirstRowClass(CommonSelectors.actionButton, position);
+            case 'relationship':
+              cy.validateTableFirstRowContent(dataFile[columnID], position);
+              cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
               break;
             default:
-              cy.validateTableFirstRowContent(dataCase[columnID], position);
+              cy.validateTableFirstRowContent(dataFile[columnID], position);
               break;
           }
         } else {
@@ -361,7 +321,7 @@ export const CasesTable = {
      * Validates the tooltips on columns.
      */
     shouldShowColumnTooltips() {
-      CasesTable.actions.showAllColumns();
+      FilesTable.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
@@ -378,7 +338,7 @@ export const CasesTable = {
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
-      CasesTable.actions.showAllColumns();
+      FilesTable.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
@@ -396,12 +356,12 @@ export const CasesTable = {
      * @param columnID The ID of the column to sort.
      */
     shouldRequestOnSort(columnID: string) {
-      CasesTable.actions.showAllColumns();
-      cy.intercept('POST', '**/cases/search', req => {
+      FilesTable.actions.showAllColumns();
+      cy.intercept('POST', '**/documents/search', req => {
         expect(req.body.sort).to.have.length(1);
         expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
       }).as('sortRequest');
-      CasesTable.actions.sortColumn(columnID, false /*needIntercept*/);
+      FilesTable.actions.sortColumn(columnID, false /*needIntercept*/);
       cy.wait('@sortRequest');
     },
     /**
@@ -409,30 +369,30 @@ export const CasesTable = {
      * @param columnID The ID of the column to sort.
      */
     shouldSortColumn(columnID: string) {
-      CasesTable.actions.showAllColumns();
+      FilesTable.actions.showAllColumns();
       const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
 
-      cy.fixture('RequestBody/SortCase.json').then(mockRequestBody => {
-        cy.intercept('POST', '**/cases/search', req => {
+      cy.fixture('RequestBody/SortFile.json').then(mockRequestBody => {
+        cy.intercept('POST', '**/documents/search', req => {
           const mockBody = { ...mockRequestBody };
           mockBody.sort.field = apiField;
           mockBody.sort.order = 'asc';
           req.alias = 'sortRequestAsc';
           req.body = mockBody;
         });
-        CasesTable.actions.sortColumn(columnID, false /*needIntercept*/);
+        FilesTable.actions.sortColumn(columnID, false /*needIntercept*/);
         cy.wait('@sortRequestAsc').then(interceptionAsc => {
           const smallest = interceptionAsc.response?.body.list[0][apiField];
 
-          cy.fixture('RequestBody/SortCase.json').then(mockRequestBody => {
-            cy.intercept('POST', '**/cases/search', req => {
+          cy.fixture('RequestBody/SortFile.json').then(mockRequestBody => {
+            cy.intercept('POST', '**/documents/search', req => {
               const mockBody = { ...mockRequestBody };
               mockBody.sort.field = apiField;
               mockBody.sort.order = 'desc';
               req.alias = 'sortRequestDesc';
               req.body = mockBody;
             });
-            CasesTable.actions.sortColumn(columnID, false /*needIntercept*/);
+            FilesTable.actions.sortColumn(columnID, false /*needIntercept*/);
             cy.wait('@sortRequestDesc').then(interceptionDesc => {
               const biggest = interceptionDesc.response?.body.list[0][apiField];
               if (typeof smallest === 'number' ? Number(biggest) - Number(smallest) : String(biggest).localeCompare(String(smallest)) < 0) {

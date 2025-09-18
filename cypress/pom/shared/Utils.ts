@@ -59,6 +59,62 @@ export const getDateTime = () => {
 };
 
 /**
+ * Gets the color associated with a priority.
+ * @param priority The priority (e.g., 'Routine', 'ASAP', etc.).
+ * @returns The color string.
+ */
+export const getPriorityColor = (priority: string) => {
+  const mapping: Record<string, string> = {
+    Routine: 'grey',
+    Urgent: 'blue',
+    ASAP: 'amber',
+    STAT: 'red',
+  };
+
+  return mapping[priority];
+};
+
+/**
+ * Gets the color associated with a status.
+ * @param priority The status (e.g., 'Completed', 'In Progress', etc.).
+ * @returns The color string.
+ */
+export const getStatusColor = (status: string) => {
+  const concatenatedStatus = status.replace(/\s+/g, '');
+  const mapping: Record<string, string> = {
+    Completed: 'green',
+    Draft: 'neutral',
+    InProgress: 'blue',
+    Incomplete: 'orange',
+    Revoke: 'red',
+    Submitted: 'yellow',
+    Unknown: 'blank',
+  };
+
+  return mapping[concatenatedStatus];
+};
+
+/**
+ * Gets the icon associated with a status.
+ * @param priority The status (e.g., 'Completed', 'In Progress', etc.).
+ * @returns The icon string.
+ */
+export const getStatusIcon = (status: string) => {
+  const concatenatedStatus = status.replace(/\s+/g, '');
+  const mapping: Record<string, string> = {
+    Completed: 'check',
+    Draft: 'pen',
+    InProgress: 'refresh-ccw',
+    Incomplete: 'circle-dashed',
+    Revoke: 'circle-x',
+    Submitted: 'hourglass',
+    Unknown: 'file-question',
+  };
+
+  return mapping[concatenatedStatus];
+};
+
+/**
  * Returns the URL for a given columnID and data object.
  * @param columnID The column identifier (e.g., 'dbsnp', 'gene', 'omim', etc.).
  * @param data The data object containing the necessary fields.

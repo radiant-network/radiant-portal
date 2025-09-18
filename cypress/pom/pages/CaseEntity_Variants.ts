@@ -225,7 +225,7 @@ export const CaseEntity_Variants = {
         getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
           if (position !== -1) {
             if (needIntercept) {
-              cy.sortTableAndIntercept(position, 1);
+              cy.sortTableAndIntercept(position, '**/list', 1);
             } else {
               cy.sortTableAndWait(position);
             }
