@@ -253,12 +253,8 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 			{"count": 0, "key":"LA6675-8", "label":"benign"} 
 		],
 		"performer_lab":[
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"},
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 			
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
-			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"}]
+			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}]
 	}`
 	assertGetVariantCasesFilters(t, "simple", expected)
 }

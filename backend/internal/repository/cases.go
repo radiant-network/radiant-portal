@@ -129,27 +129,28 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 	}
 	txCases = txCases.Select("c.id, c.status_code, r.priority_code, c.case_analysis_id, c.project_id, c.performer_lab_id, r.ordering_organization_id")
 
-	if err := r.getCasesFilter(txCases, &status, types.StatusTable, "status_code", "code", "name_en"); err != nil {
+	if err := r.getCasesFilter(txCases, &status, types.StatusTable, "status_code", "code", "name_en", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &priority, types.PriorityTable, "priority_code", "code", "name_en"); err != nil {
+	if err := r.getCasesFilter(txCases, &priority, types.PriorityTable, "priority_code", "code", "name_en", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &caseAnalysis, types.CaseAnalysisTable, "case_analysis_id", "id", "name"); err != nil {
+	if err := r.getCasesFilter(txCases, &caseAnalysis, types.CaseAnalysisTable, "case_analysis_id", "id", "name", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &project, types.ProjectTable, "project_id", "id", "name"); err != nil {
+	if err := r.getCasesFilter(txCases, &project, types.ProjectTable, "project_id", "id", "name", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name"); err != nil {
+	isDiagnosticLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.PerformerLabTable.Alias)
+	if err := r.getCasesFilter(txCases, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name", &isDiagnosticLabCondition); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &requestedBy, types.OrderingOrganizationTable, "ordering_organization_id", "id", "name"); err != nil {
+	if err := r.getCasesFilter(txCases, &requestedBy, types.OrderingOrganizationTable, "ordering_organization_id", "id", "name", nil); err != nil {
 		return nil, err
 	}
 
@@ -193,13 +194,17 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	return caseEntity, nil
 }
 
-func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggregation, filterTable types.Table, casesJoinColumn string, filterJoinColumn string, filterLabelColumn string) error {
-	txProject := r.db.Table(fmt.Sprintf("%s %s", filterTable.Name, filterTable.Alias))
-	txProject = txProject.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct cases.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	txProject = txProject.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.%s = %s.%s", casesJoinColumn, filterTable.Alias, filterJoinColumn), txCases)
-	txProject = txProject.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	txProject = txProject.Order("count desc, bucket asc")
-	if err := txProject.Find(destination).Error; err != nil {
+func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggregation, filterTable types.Table, casesJoinColumn string, filterJoinColumn string, filterLabelColumn string, filterCondition *string) error {
+	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.Name, filterTable.Alias))
+	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct cases.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.%s = %s.%s", casesJoinColumn, filterTable.Alias, filterJoinColumn), txCases)
+
+	tx = tx.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	tx = tx.Order("count desc, bucket asc")
+	if filterCondition != nil {
+		tx = tx.Where(*filterCondition)
+	}
+	if err := tx.Find(destination).Error; err != nil {
 		return fmt.Errorf("error fetching filter %s: %w", filterTable.Name, err)
 	}
 	return nil

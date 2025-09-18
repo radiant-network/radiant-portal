@@ -133,11 +133,6 @@ var CaseTable = Table{
 	Alias: "c",
 }
 
-var PerformerLabTable = Table{
-	Name:  OrganizationTable.Name,
-	Alias: "lab",
-}
-
 func (Case) TableName() string {
 	return CaseTable.Name
 }
