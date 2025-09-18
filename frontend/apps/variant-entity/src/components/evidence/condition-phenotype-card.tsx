@@ -88,18 +88,18 @@ function ConditionPhenotypeCard() {
             <TabsList>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Omim}>
                 {t('variant_entity.evidence.gene.filters.omim', {
-                  count: 20,
+                  count: data?.count_omim ?? 0,
                 })}
               </TabsTrigger>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Orphanet}>
                 {t('variant_entity.evidence.gene.filters.orphanet', {
-                  count: 10,
+                  count: data?.count_orphanet ?? 0,
                 })}
               </TabsTrigger>
               <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Hpo}>
                 {' '}
                 {t('variant_entity.evidence.gene.filters.hpo', {
-                  count: 54,
+                  count: data?.count_hpo ?? 0,
                 })}
               </TabsTrigger>
             </TabsList>
@@ -112,9 +112,9 @@ function ConditionPhenotypeCard() {
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
-        {isLoading ? (
-          <Skeleton className="h-[150px] w-full" />
-        ) : isEmpty ? (
+        {isLoading && <Skeleton className="h-[150px] w-full" />}
+
+        {!isLoading && isEmpty && (
           <Card className="shadow-none">
             <Empty
               title={t('common.table.no_result')}
@@ -123,7 +123,9 @@ function ConditionPhenotypeCard() {
               icon={SearchIcon}
             />
           </Card>
-        ) : (
+        )}
+
+        {!isLoading && !isEmpty && (
           <Accordion type="multiple" defaultValue={Object.keys(filteredData || {})} className="space-y-2">
             {Object.entries(filteredData || {}).map(([symbol, conditions], index) => (
               <GeneAccordionItem
