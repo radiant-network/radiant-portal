@@ -253,3 +253,38 @@ func Test_PutSavedFilterHandler_Success(t *testing.T) {
 		assertPutSavedFilterHandler(t, repo, auth, 1, body, http.StatusOK)
 	})
 }
+
+func assertDeleteSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterId int, status int) {
+	router := gin.Default()
+	router.DELETE("/users/saved_filters/:saved_filter_id", server.DeleteSavedFilterHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/users/saved_filters/%d", savedFilterId), bytes.NewBuffer([]byte("")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, status, w.Code)
+}
+
+func Test_DeleteSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		assertDeleteSavedFilterHandler(t, repo, auth, 42, http.StatusInternalServerError)
+	})
+}
+
+func Test_DeleteSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		assertDeleteSavedFilterHandler(t, repo, auth, 3, http.StatusInternalServerError)
+	})
+}
+
+func Test_DeleteSavedFilterHandler_Success(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewSavedFiltersRepository(db)
+		auth := &testutils.MockAuth{}
+		assertDeleteSavedFilterHandler(t, repo, auth, 2, http.StatusNoContent)
+	})
+}

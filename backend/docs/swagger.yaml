@@ -3008,6 +3008,36 @@ paths:
       tags:
       - saved_filters
   /users/saved_filters/{saved_filter_id}:
+    delete:
+      description: Delete a saved filter
+      operationId: deleteSavedFilter
+      parameters:
+      - description: Saved Filter ID
+        in: path
+        name: saved_filter_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Delete a saved filter
+      tags:
+      - saved_filters
     get:
       description: Get saved filter by id
       operationId: getSavedFilterById
@@ -3043,7 +3073,7 @@ paths:
       tags:
       - saved_filters
     put:
-      description: Update a new saved filter
+      description: Update a saved filter
       operationId: putSavedFilter
       parameters:
       - description: Saved Filter ID
@@ -3086,7 +3116,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Update a new saved filter
+      summary: Update a saved filter
       tags:
       - saved_filters
   /users/sets/{user_set_id}:

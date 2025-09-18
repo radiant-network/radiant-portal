@@ -6129,6 +6129,44 @@ export class OccurrencesApi extends BaseAPI {
 export const SavedFiltersApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Delete a saved filter
+         * @summary Delete a saved filter
+         * @param {string} savedFilterId Saved Filter ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteSavedFilter: async (savedFilterId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'savedFilterId' is not null or undefined
+            assertParamExists('deleteSavedFilter', 'savedFilterId', savedFilterId)
+            const localVarPath = `/users/saved_filters/{saved_filter_id}`
+                .replace(`{${"saved_filter_id"}}`, encodeURIComponent(String(savedFilterId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get saved filter by id
          * @summary Get saved filter by id
          * @param {string} savedFilterId Saved Filter ID
@@ -6287,8 +6325,8 @@ export const SavedFiltersApiAxiosParamCreator = function (configuration?: Config
             };
         },
         /**
-         * Update a new saved filter
-         * @summary Update a new saved filter
+         * Update a saved filter
+         * @summary Update a saved filter
          * @param {string} savedFilterId Saved Filter ID
          * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
          * @param {*} [options] Override http request option.
@@ -6340,6 +6378,19 @@ export const SavedFiltersApiAxiosParamCreator = function (configuration?: Config
 export const SavedFiltersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SavedFiltersApiAxiosParamCreator(configuration)
     return {
+        /**
+         * Delete a saved filter
+         * @summary Delete a saved filter
+         * @param {string} savedFilterId Saved Filter ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteSavedFilter(savedFilterId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSavedFilter(savedFilterId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SavedFiltersApi.deleteSavedFilter']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
         /**
          * Get saved filter by id
          * @summary Get saved filter by id
@@ -6394,8 +6445,8 @@ export const SavedFiltersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Update a new saved filter
-         * @summary Update a new saved filter
+         * Update a saved filter
+         * @summary Update a saved filter
          * @param {string} savedFilterId Saved Filter ID
          * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
          * @param {*} [options] Override http request option.
@@ -6417,6 +6468,16 @@ export const SavedFiltersApiFp = function(configuration?: Configuration) {
 export const SavedFiltersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = SavedFiltersApiFp(configuration)
     return {
+        /**
+         * Delete a saved filter
+         * @summary Delete a saved filter
+         * @param {string} savedFilterId Saved Filter ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteSavedFilter(savedFilterId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteSavedFilter(savedFilterId, options).then((request) => request(axios, basePath));
+        },
         /**
          * Get saved filter by id
          * @summary Get saved filter by id
@@ -6459,8 +6520,8 @@ export const SavedFiltersApiFactory = function (configuration?: Configuration, b
             return localVarFp.postSavedFilter(savedFilterCreationInput, options).then((request) => request(axios, basePath));
         },
         /**
-         * Update a new saved filter
-         * @summary Update a new saved filter
+         * Update a saved filter
+         * @summary Update a saved filter
          * @param {string} savedFilterId Saved Filter ID
          * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
          * @param {*} [options] Override http request option.
@@ -6479,6 +6540,18 @@ export const SavedFiltersApiFactory = function (configuration?: Configuration, b
  * @extends {BaseAPI}
  */
 export class SavedFiltersApi extends BaseAPI {
+    /**
+     * Delete a saved filter
+     * @summary Delete a saved filter
+     * @param {string} savedFilterId Saved Filter ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SavedFiltersApi
+     */
+    public deleteSavedFilter(savedFilterId: string, options?: RawAxiosRequestConfig) {
+        return SavedFiltersApiFp(this.configuration).deleteSavedFilter(savedFilterId, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Get saved filter by id
      * @summary Get saved filter by id
@@ -6529,8 +6602,8 @@ export class SavedFiltersApi extends BaseAPI {
     }
 
     /**
-     * Update a new saved filter
-     * @summary Update a new saved filter
+     * Update a saved filter
+     * @summary Update a saved filter
      * @param {string} savedFilterId Saved Filter ID
      * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
      * @param {*} [options] Override http request option.

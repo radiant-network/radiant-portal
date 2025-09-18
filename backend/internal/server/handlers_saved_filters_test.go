@@ -157,6 +157,10 @@ func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpd
 	}, nil
 }
 
+func (m *MockRepository) DeleteSavedFilter(savedFilterId int, userId string) error {
+	return nil
+}
+
 func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -359,4 +363,30 @@ func Test_PutSavedFilterHandler_MissingField(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_DeleteSavedFilterHandler(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.DELETE("/users/saved_filters/:saved_filter_id", DeleteSavedFilterHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", "/users/saved_filters/1", bytes.NewBuffer([]byte("")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+}
+
+func Test_DeleteSavedFilterHandler_MissingSavedFilterId(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.DELETE("/users/saved_filters/:saved_filter_id", DeleteSavedFilterHandler(repo, auth))
+
+	req, _ := http.NewRequest("PUT", "/users/saved_filters/", bytes.NewBuffer([]byte("")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }

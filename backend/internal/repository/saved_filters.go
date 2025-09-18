@@ -24,6 +24,7 @@ type SavedFiltersDAO interface {
 	GetSavedFiltersByUserIDAndType(userId string, savedFilterType string) (*[]SavedFilter, error)
 	CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error)
 	UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId int, userId string) (*SavedFilter, error)
+	DeleteSavedFilter(savedFilterId int, userId string) error
 }
 
 func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
@@ -112,4 +113,18 @@ func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterU
 	}
 
 	return r.GetSavedFilterByID(savedFilterId)
+}
+
+func (r *SavedFiltersRepository) DeleteSavedFilter(savedFilterId int, userId string) error {
+	savedFilter, err := r.GetSavedFilterByID(savedFilterId)
+	if err != nil || savedFilter == nil {
+		return fmt.Errorf("error retrieving saved filter by ID: %w", err)
+	}
+	if savedFilter.UserID != userId {
+		return fmt.Errorf("saved filter user ID does not match user ID")
+	}
+	if err := r.db.Where("id = ?", savedFilterId).Delete(&savedFilter).Error; err != nil {
+		return fmt.Errorf("error deleting saved filter: %w", err)
+	}
+	return nil
 }
