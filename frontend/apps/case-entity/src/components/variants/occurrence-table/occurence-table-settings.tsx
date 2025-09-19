@@ -73,33 +73,6 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       size: 148,
       minSize: 40,
     }),
-    // Type
-    columnHelper.accessor(row => row.variant_class, {
-      id: 'variant_class',
-      cell: info => (
-        <TextTooltipCell tooltipText={info.getValue()}>
-          {t(`variant.classes.${info.getValue().toLowerCase()}`)}
-        </TextTooltipCell>
-      ),
-      header: t('variant.headers.variant_class'),
-      size: 96,
-      minSize: 40,
-    }),
-    // dbSNP
-    columnHelper.accessor(row => row.rsnumber, {
-      id: 'dbSNP',
-      cell: info => (
-        <AnchorLinkCell
-          href={info.getValue() ? `https://www.ncbi.nlm.nih.gov/snp/${info.getValue()}` : undefined}
-          target="_blank"
-          external
-        />
-      ),
-      header: t('variant.headers.dbSNP'),
-      size: 96,
-      minSize: 40,
-      enableSorting: false,
-    }),
     // Gene
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
@@ -118,6 +91,18 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
       enableSorting: false,
+    }),
+    // Type
+    columnHelper.accessor(row => row.variant_class, {
+      id: 'variant_class',
+      cell: info => (
+        <TextTooltipCell tooltipText={info.getValue()}>
+          {t(`variant.classes.${info.getValue().toLowerCase()}`)}
+        </TextTooltipCell>
+      ),
+      header: t('variant.headers.variant_class'),
+      size: 96,
+      minSize: 40,
     }),
     // Consequence
     columnHelper.accessor(row => row, {
@@ -152,7 +137,24 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
     }),
-    // OMIM
+    // dbSNP
+    columnHelper.accessor(row => row.rsnumber, {
+      id: 'dbSNP',
+      cell: info => (
+        <AnchorLinkCell
+          href={info.getValue() ? `https://www.ncbi.nlm.nih.gov/snp/${info.getValue()}` : undefined}
+          target="_blank"
+          external
+        >
+          {info.getValue()}
+        </AnchorLinkCell>
+      ),
+      header: t('variant.headers.dbSNP'),
+      size: 96,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // omim
     columnHelper.accessor(row => row.omim_inheritance_code, {
       id: 'omim_inheritance_code',
       cell: info => <OmimCell codes={info.getValue()} />,
@@ -281,16 +283,6 @@ const defaultSettings = createColumnSettings([
     label: 'variant.headers.hgvsg',
   },
   {
-    id: 'variant_class',
-    visible: true,
-    label: 'variant.headers.variant_class',
-  },
-  {
-    id: 'dbSNP',
-    visible: true,
-    label: 'variant.headers.dbSNP',
-  },
-  {
     id: 'symbol',
     visible: true,
     label: 'variant.headers.symbol',
@@ -301,6 +293,11 @@ const defaultSettings = createColumnSettings([
     label: 'variant.headers.aa_change',
   },
   {
+    id: 'variant_class',
+    visible: true,
+    label: 'variant.headers.variant_class',
+  },
+  {
     id: 'picked_consequences',
     visible: true,
     label: 'variant.headers.picked_consequences',
@@ -309,6 +306,11 @@ const defaultSettings = createColumnSettings([
     id: 'is_mane_select',
     visible: true,
     label: 'variant.headers.is_mane_select',
+  },
+  {
+    id: 'dbSNP',
+    visible: true,
+    label: 'variant.headers.dbSNP',
   },
   {
     id: 'omim_inheritance_code',
