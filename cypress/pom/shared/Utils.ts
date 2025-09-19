@@ -26,21 +26,18 @@ export const getColumnName = (columns: any, columnID: string) => {
  */
 export const getColumnPosition = (tableHead: string, columns: any, columnID: string) => {
   const columnName = getColumnName(columns, columnID);
-  return cy
-    .get(`${tableHead} ${CommonSelectors.tableCellHead}`)
-    .should('be.visible')
-    .then($cells => {
-      let position;
-      if (columnName.startsWith('[')) {
-        position = Array.from($cells).findIndex($cell => {
-          return Cypress.$($cell).find(columnName).length > 0;
-        });
-      } else {
-        position = Array.from($cells).findIndex($cell => $cell.textContent?.match(stringToRegExp(columnName, true)));
-      }
+  return cy.get(`${tableHead} ${CommonSelectors.tableCellHead}`).then($cells => {
+    let position;
+    if (columnName.startsWith('[')) {
+      position = Array.from($cells).findIndex($cell => {
+        return Cypress.$($cell).find(columnName).length > 0;
+      });
+    } else {
+      position = Array.from($cells).findIndex($cell => $cell.textContent?.match(stringToRegExp(columnName, true)));
+    }
 
-      return position;
-    });
+    return position;
+  });
 };
 
 /**

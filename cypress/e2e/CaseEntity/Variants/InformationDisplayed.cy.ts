@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
-import '../../../support/commands';
-import { data } from '../../../pom/shared/Data';
-import { CaseEntity_Variants } from '../../../pom/pages/CaseEntity_Variants';
+import 'support/commands';
+import { data } from 'pom/shared/Data';
+import { CaseEntity_Variants } from 'pom/pages/CaseEntity_Variants';
 
 describe('Case Entity - Variants - Information displayed', () => {
   const setupTest = () => {
@@ -27,6 +27,11 @@ describe('Case Entity - Variants - Information displayed', () => {
   it('Gene', () => {
     setupTest();
     CaseEntity_Variants.validations.shouldShowColumnContent('gene', data.variantGermline);
+  });
+
+  it('AA', () => {
+    setupTest();
+    CaseEntity_Variants.validations.shouldShowColumnContent('aa_change', data.variantGermline);
   });
 
   it('Consequence', () => {

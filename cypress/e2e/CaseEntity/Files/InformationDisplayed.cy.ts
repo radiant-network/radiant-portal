@@ -3,10 +3,10 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { FilesTable } from 'pom/pages/FilesTable';
 
-describe('Files - Information displayed', () => {
+describe('CaseEntity - Files - Information displayed', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitFilesPage(data.file.search_criteria);
+    cy.visitCaseFilesPage(data.file.case, data.file.search_criteria);
   };
 
   it('File Name', () => {
@@ -29,24 +29,14 @@ describe('Files - Information displayed', () => {
     FilesTable.validations.shouldShowColumnContent('size', data.file);
   });
 
-  it('Case', () => {
+  it('Patient', () => {
     setupTest();
-    FilesTable.validations.shouldShowColumnContent('case', data.file);
-  });
-
-  it('Diag. Lab', () => {
-    setupTest();
-    FilesTable.validations.shouldShowColumnContent('diag_lab', data.file);
+    FilesTable.validations.shouldShowColumnContent('patient', data.file);
   });
 
   it('Relationship', () => {
     setupTest();
     FilesTable.validations.shouldShowColumnContent('relationship', data.file);
-  });
-
-  it('Patient', () => {
-    setupTest();
-    FilesTable.validations.shouldShowColumnContent('patient', data.file);
   });
 
   it('Sample', () => {

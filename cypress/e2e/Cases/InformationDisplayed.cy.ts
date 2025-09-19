@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
-import '../../support/commands';
-import { data } from '../../pom/shared/Data';
-import { CasesTable } from '../../pom/pages/CasesTable';
+import 'support/commands';
+import { data } from 'pom/shared/Data';
+import { CasesTable } from 'pom/pages/CasesTable';
 
 describe('Cases - Information displayed', () => {
   const setupTest = () => {
@@ -9,87 +9,87 @@ describe('Cases - Information displayed', () => {
     cy.visitCasesPage(data.case.search_criteria);
   };
 
-  it('case', () => {
+  it('Case', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('case', data.case);
   });
 
-  it('patient', () => {
+  it('Patient', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('patient', data.case);
   });
 
-  it('mrn', () => {
+  it('MRN', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('mrn', data.case);
   });
 
-  it('priority', () => {
+  it('Priority', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('priority', data.case);
   });
 
-  it('status', () => {
+  it('Status', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('status', data.case);
   });
 
-  it('type', () => {
+  it('Type', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('type', data.case);
   });
 
-  it('analysis', () => {
+  it('Analysis', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('analysis', data.case);
   });
 
-  it('primary_condition', () => {
+  it('Primary Condition', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('primary_condition', data.case);
   });
 
-  it('req_by', () => {
+  it('Req. By', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('req_by', data.case);
   });
 
-  it('project', () => {
+  it('Project', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('project', data.case);
   });
 
-  it('created_on', () => {
+  it('Created On', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('created_on', data.case);
   });
 
-  it('updated_on', () => {
+  it('Updated', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('updated_on', data.case);
   });
 
-  it('prescriber', () => {
+  it('Prescriber', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('prescriber', data.case);
   });
 
-  it('diagnostic_lab', () => {
+  it('Diagnostic Lab', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('diagnostic_lab', data.case);
   });
 
-  it('request', () => {
+  it('Request', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('request', data.case);
   });
 
-  it('managing_org', () => {
+  it('Managing Org.', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('managing_org', data.case);
   });
 
-  it('actions', () => {
+  it('Actions', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('actions', data.case);
   });

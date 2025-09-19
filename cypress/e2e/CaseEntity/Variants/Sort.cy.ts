@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
-import '../../../support/commands';
-import { CaseEntity_Variants } from '../../../pom/pages/CaseEntity_Variants';
+import 'support/commands';
+import { CaseEntity_Variants } from 'pom/pages/CaseEntity_Variants';
 
 describe('Case Entity - Variants - Sort', () => {
   const setupTest = () => {
