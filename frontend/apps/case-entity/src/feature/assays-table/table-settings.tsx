@@ -22,7 +22,7 @@ function getColumns(t: TFunction<string, undefined>) {
       cell: info => info.getValue(),
       header: t('case_entity.details.assay_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Sample ID
     columnHelper.accessor(row => row.sample_id, {
@@ -34,7 +34,7 @@ function getColumns(t: TFunction<string, undefined>) {
       ),
       header: t('case_entity.details.sample_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Sample Type
     columnHelper.accessor(row => row.sample_type_code, {
@@ -46,7 +46,7 @@ function getColumns(t: TFunction<string, undefined>) {
       ),
       header: t('case_entity.details.sample_type_code'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Histology
     columnHelper.accessor(row => row.histology_code, {
@@ -58,7 +58,7 @@ function getColumns(t: TFunction<string, undefined>) {
       ),
       header: t('case_entity.details.histology_code'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Exp. Strat.
     columnHelper.accessor(row => row.experimental_strategy_code, {
@@ -70,7 +70,7 @@ function getColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Assay status
     columnHelper.accessor(row => row.status_code, {
@@ -78,7 +78,7 @@ function getColumns(t: TFunction<string, undefined>) {
       cell: info => <AssayStatusCell status={info.getValue()} />,
       header: t('case_entity.details.status_code'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Last update
     columnHelper.accessor(row => row.updated_on, {
@@ -90,7 +90,7 @@ function getColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Actions Buttons
     {

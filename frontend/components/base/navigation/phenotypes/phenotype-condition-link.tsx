@@ -11,8 +11,8 @@ enum PhenotypeType {
 }
 
 function getBaseUrl(code: string) {
-  var type = code.split(':')[0] as PhenotypeType;
-  var id = code.split(':')[1];
+  const type = code.split(':')[0] as PhenotypeType;
+  const id = code.split(':')[1];
   switch (type) {
     case PhenotypeType.MONDO:
       return `${MONDO_URL}_${id}`;
@@ -32,15 +32,10 @@ function PhenotypeConditionLink({ name, code, onsetCode, ...props }: PhenotypeCo
   }
 
   return (
-    <span className="text-sm inline-flex gap-1 text-foreground" {...props}>
-      {name}
-      <span>
-        (
-        <AnchorLink className="inline-flex text-sm" size="sm" href={getBaseUrl(code)} target="_blank">
-          {code}
-        </AnchorLink>
-        )
-      </span>
+    <span className="text-sm flex gap-1 text-foreground truncate" {...props}>
+      <AnchorLink className="text-sm truncate" size="sm" href={getBaseUrl(code)} target="_blank">
+        {name} ({code})
+      </AnchorLink>
       {onsetCode && <Badge variant="outline">{onsetCode}</Badge>}
     </span>
   );

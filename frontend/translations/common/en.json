@@ -619,6 +619,8 @@
   "variant": {
     "no_data_for_variant": "No data for this variant.",
     "headers": {
+      "aa_change": "AA",
+      "aa_change_tooltip": "Amino acid change",
       "ad_ratio": "AD Ratio",
       "clinvar": "ClinVar",
       "exomiser_acmg_classification": "ACMG Exo.",

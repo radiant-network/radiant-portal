@@ -406,7 +406,6 @@ export const secondSetCellColumns = [
       <MostDeleteriousConsequenceCell
         vepImpact={info.getValue().vep_impact}
         consequences={info.getValue().picked_consequences}
-        aaChange={info.getValue().aa_change}
       />
     ),
     header: 'MostDeleteriousConsequenceCell',

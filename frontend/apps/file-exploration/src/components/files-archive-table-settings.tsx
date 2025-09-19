@@ -22,7 +22,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.name'),
       size: 200,
-      minSize: 124,
+      minSize: 40,
     }),
     // Format
     columnHelper.accessor(row => row.format_code, {
@@ -34,7 +34,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       ),
       header: t('file_entity.format_code'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
       maxSize: 164,
     }),
     // Type
@@ -47,7 +47,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       ),
       header: t('file_entity.data_type_code'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
       maxSize: 164,
     }),
     // Size
@@ -56,7 +56,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       cell: info => <DocumentSizeCell value={info.getValue()} />,
       header: t('file_entity.size'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
       maxSize: 164,
     }),
     // Case ID
@@ -67,7 +67,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       ),
       header: t('file_entity.case_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
       maxSize: 164,
     }),
     // Performer Lab.
@@ -77,7 +77,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
         <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('file_entity.performer_lab'),
-      minSize: 100,
+      minSize: 40,
       maxSize: 150,
       size: 120,
       enableSorting: false,
@@ -88,7 +88,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       cell: info => <RelationshipToProbandCell relationship={info.getValue()} />,
       header: t('file_entity.relationship_to_proband_code'),
       size: 150,
-      minSize: 124,
+      minSize: 40,
     }),
     // Patient
     columnHelper.accessor(row => row.patient_id, {
@@ -96,7 +96,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.patient_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
       maxSize: 164,
     }),
     // Sample
@@ -104,7 +104,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       id: 'submitter_sample_id',
       header: t('file_entity.submitter_sample_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
       maxSize: 164,
     }),
     // Task
@@ -113,7 +113,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.task_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
       maxSize: 164,
     }),
     // Created on
@@ -126,7 +126,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 120,
-      minSize: 80,
+      minSize: 40,
       maxSize: 150,
     }),
     // Sequenccing Experiment
@@ -135,7 +135,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.seq_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Hash
     columnHelper.accessor(row => row.hash, {
@@ -143,7 +143,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.hash'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Run
     columnHelper.accessor(row => row.run_alias, {
@@ -151,7 +151,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.run_alias'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
   ] as TableColumnDef<DocumentResult, any>[];
 }

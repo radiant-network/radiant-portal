@@ -20,7 +20,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.name'),
       size: 200,
-      minSize: 124,
+      minSize: 40,
     }),
     // Format
     columnHelper.accessor(row => row.format_code, {
@@ -31,8 +31,8 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
         </BadgeCell>
       ),
       header: t('file_entity.format_code'),
-      size: 124,
-      minSize: 124,
+      size: 96,
+      minSize: 40,
       maxSize: 164,
     }),
     // Type
@@ -44,8 +44,8 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
         </BadgeCell>
       ),
       header: t('file_entity.data_type_code'),
-      size: 124,
-      minSize: 124,
+      size: 96,
+      minSize: 40,
       maxSize: 164,
     }),
     // Size
@@ -53,8 +53,8 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       id: 'size',
       cell: info => <DocumentSizeCell value={info.getValue()} />,
       header: t('file_entity.size'),
-      size: 124,
-      minSize: 124,
+      size: 96,
+      minSize: 40,
       maxSize: 164,
     }),
     // Patient
@@ -62,8 +62,8 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       id: 'patient_id',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.patient_id'),
-      size: 124,
-      minSize: 124,
+      size: 96,
+      minSize: 40,
       maxSize: 164,
     }),
     // Relationship
@@ -72,14 +72,14 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       cell: info => <RelationshipToProbandCell relationship={info.getValue()} />,
       header: t('file_entity.relationship_to_proband_code'),
       size: 150,
-      minSize: 124,
+      minSize: 40,
     }),
     // Sample
     columnHelper.accessor(row => row.submitter_sample_id, {
       id: 'submitter_sample_id',
       header: t('file_entity.submitter_sample_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
       maxSize: 164,
     }),
     // Task
@@ -87,8 +87,8 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       id: 'task_id',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.task_id'),
-      size: 124,
-      minSize: 124,
+      size: 96,
+      minSize: 40,
       maxSize: 164,
     }),
     // Created on
@@ -101,7 +101,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 120,
-      minSize: 80,
+      minSize: 40,
       maxSize: 150,
     }),
     // Case
@@ -110,7 +110,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.seq_id'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Hash
     columnHelper.accessor(row => row.hash, {
@@ -118,7 +118,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.hash'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Run
     columnHelper.accessor(row => row.run_alias, {
@@ -126,7 +126,7 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('file_entity.run_alias'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
   ] as TableColumnDef<DocumentResult, any>[];
 }
