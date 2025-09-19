@@ -85,7 +85,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.transcript_id, {
       id: 'inheritance',
-      cell: info => <EmptyCell />,
+      cell: () => <EmptyCell />,
       header: t('variant_entity.cases.interpreted_table.headers.inheritance'),
       size: 130,
       minSize: 130,
@@ -124,7 +124,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row, {
       id: 'action',
-      cell: info => (
+      cell: () => (
         <Button iconOnly variant="outline" className="size-6">
           <EllipsisVertical />
         </Button>

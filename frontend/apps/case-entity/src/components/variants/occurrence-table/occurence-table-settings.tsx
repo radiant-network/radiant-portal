@@ -70,8 +70,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         </AnchorLinkCell>
       ),
       header: t('variant.headers.hgvsg'),
-      size: 150,
-      minSize: 120,
+      size: 148,
+      minSize: 40,
     }),
     // Type
     columnHelper.accessor(row => row.variant_class, {
@@ -82,7 +82,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         </TextTooltipCell>
       ),
       header: t('variant.headers.variant_class'),
-      minSize: 120,
+      size: 96,
+      minSize: 40,
     }),
     // dbSNP
     columnHelper.accessor(row => row.rsnumber, {
@@ -95,8 +96,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         />
       ),
       header: t('variant.headers.dbSNP'),
-      size: 100,
-      minSize: 100,
+      size: 96,
+      minSize: 40,
       enableSorting: false,
     }),
     // Gene
@@ -104,7 +105,18 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'symbol',
       cell: info => <GeneCell symbol={info.getValue()} />,
       header: t('variant.headers.symbol'),
-      minSize: 120,
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // AA Change
+    columnHelper.accessor(row => row.aa_change, {
+      id: 'aa_change',
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.aa_change_tooltip')}>{t('variant.headers.aa_change')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
       enableSorting: false,
     }),
     // Consequence
@@ -114,7 +126,6 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         <MostDeleteriousConsequenceCell
           vepImpact={info.getValue().vep_impact}
           consequences={info.getValue().picked_consequences}
-          aaChange={info.getValue().aa_change}
         />
       ),
       header: () => (
@@ -124,7 +135,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       ),
       size: 225,
       enableSorting: false,
-      minSize: 160,
+      minSize: 40,
     }),
     // Mane
     columnHelper.accessor(row => row, {
@@ -138,7 +149,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       ),
       header: t('variant.headers.is_mane_select'),
       enableSorting: false,
-      minSize: 120,
+      size: 124,
+      minSize: 40,
     }),
     // OMIM
     columnHelper.accessor(row => row.omim_inheritance_code, {
@@ -149,7 +161,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           {t('variant.headers.omim_inheritance_code')}
         </TooltipHeader>
       ),
-      minSize: 120,
+      size: 124,
+      minSize: 40,
       enableSorting: false,
     }),
     // ClinVar
@@ -157,7 +170,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'clinvar',
       cell: info => <ClassificationCell codes={info.getValue()} />,
       header: t('variant.headers.clinvar'),
-      minSize: 120,
+      size: 124,
+      minSize: 40,
       enableSorting: false,
     }),
     //Exo.
@@ -169,7 +183,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           {t('variant.headers.exomiser_gene_combined_score')}
         </TooltipHeader>
       ),
-      minSize: 100,
+      size: 96,
+      minSize: 40,
     }),
     //ACMG. Exo.
     columnHelper.accessor(row => row.exomiser_acmg_classification, {
@@ -180,7 +195,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           {t('variant.headers.exomiser_acmg_classification')}
         </TooltipHeader>
       ),
-      minSize: 100,
+      size: 96,
+      minSize: 40,
     }),
     // gnomAD
     columnHelper.accessor(row => row.gnomad_v3_af, {
@@ -191,7 +207,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           {t('variant.headers.gnomad_v3_af')}
         </TooltipHeader>
       ),
-      minSize: 120,
+      size: 124,
+      minSize: 40,
     }),
     // Freq.
     columnHelper.accessor(row => row.pf_wgs, {
@@ -200,7 +217,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.pf_wgs_tooltip')}>{t('variant.headers.pf_wgs')}</TooltipHeader>
       ),
-      minSize: 120,
+      size: 124,
+      minSize: 40,
     }),
     // GQ.
     columnHelper.accessor(row => row.genotype_quality, {
@@ -211,7 +229,8 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           {t('variant.headers.genotype_quality')}
         </TooltipHeader>
       ),
-      minSize: 120,
+      size: 124,
+      minSize: 40,
     }),
     // Zyg.
     columnHelper.accessor(row => row.zygosity, {
@@ -220,14 +239,16 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.zygosity_tooltip')}>{t('variant.headers.zygosity')}</TooltipHeader>
       ),
-      minSize: 120,
+      size: 124,
+      minSize: 40,
       enableSorting: false,
     }),
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'ad_ratio',
       cell: info => <NumberCell value={info.getValue()} />,
       header: t('variant.headers.ad_ratio'),
-      minSize: 120,
+      size: 124,
+      minSize: 40,
     }),
   ] as TableColumnDef<GermlineSNVOccurrence, any>[];
 }
@@ -273,6 +294,11 @@ const defaultSettings = createColumnSettings([
     id: 'symbol',
     visible: true,
     label: 'variant.headers.symbol',
+  },
+  {
+    id: 'aa_change',
+    visible: true,
+    label: 'variant.headers.aa_change',
   },
   {
     id: 'picked_consequences',

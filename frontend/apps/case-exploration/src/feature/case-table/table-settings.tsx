@@ -27,16 +27,16 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>
       ),
       header: t('case_exploration.case.headers.case_id'),
-      size: 124,
-      minSize: 124,
+      size: 48,
+      minSize: 40,
     }),
     // Patient
     columnHelper.accessor(row => row.proband_id, {
       id: 'proband_id',
       cell: info => <>{info.getValue()}</>,
       header: t('case_exploration.case.headers.patient_id'),
-      size: 124,
-      minSize: 124,
+      size: 48,
+      minSize: 40,
     }),
     // MRN
     columnHelper.accessor(row => row.proband_mrn, {
@@ -48,7 +48,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Priority
     columnHelper.accessor(row => row.priority_code, {
@@ -56,7 +56,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       cell: info => <PriorityIndicatorCell code={info.getValue()} />,
       header: t('case_exploration.case.headers.priority_code'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Status
     columnHelper.accessor(row => row.status_code, {
@@ -64,7 +64,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       cell: info => <AssayStatusCell status={info.getValue()} />,
       header: t('case_exploration.case.headers.status_code'),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Type
     columnHelper.accessor(row => row.case_type, {
@@ -75,8 +75,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
           {t('case_exploration.case.headers.case_type')}
         </TooltipHeader>
       ),
-      size: 120,
-      minSize: 120,
+      size: 48,
+      minSize: 40,
       enableSorting: false,
     }),
     // Analysis
@@ -86,8 +86,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         <TextTooltipCell tooltipText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('case_exploration.case.headers.case_analysis_code'),
-      size: 124,
-      minSize: 124,
+      size: 48,
+      minSize: 40,
     }),
     // Primary Condition
     columnHelper.accessor(row => row.primary_condition_id, {
@@ -96,8 +96,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.primary_condition_name} />
       ),
       header: t('case_exploration.case.headers.primary_condition'),
-      size: 124,
-      minSize: 124,
+      size: 208,
+      minSize: 40,
     }),
     // Req. by
     columnHelper.accessor(row => row.requested_by_code, {
@@ -110,16 +110,16 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
           {t('case_exploration.case.headers.requested_by_code')}
         </TooltipHeader>
       ),
-      size: 124,
-      minSize: 124,
+      size: 48,
+      minSize: 40,
     }),
     // Project
     columnHelper.accessor(row => row.project_code, {
       id: 'project_code',
       cell: info => <TextTooltipCell tooltipText={info.row.original.project_name}>{info.getValue()}</TextTooltipCell>,
       header: t('case_exploration.case.headers.project_code'),
-      size: 124,
-      minSize: 124,
+      size: 48,
+      minSize: 40,
     }),
     // Created on
     columnHelper.accessor(row => row.created_on, {
@@ -130,8 +130,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
           {t('case_exploration.case.headers.created_on')}
         </TooltipHeader>
       ),
-      size: 124,
-      minSize: 124,
+      size: 96,
+      minSize: 40,
     }),
     // Updated
     columnHelper.accessor(row => row.updated_on, {
@@ -142,8 +142,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
           {t('case_exploration.case.headers.updated_on')}
         </TooltipHeader>
       ),
-      size: 124,
-      minSize: 124,
+      size: 96,
+      minSize: 40,
     }),
     // Prescriber
     columnHelper.accessor(row => row.prescriber, {
@@ -155,7 +155,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Diagnostic lab
     columnHelper.accessor(row => row.performer_lab_code, {
@@ -169,15 +169,15 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Request
     columnHelper.accessor(row => row.request_id, {
       id: 'request_id',
       cell: info => info.getValue(),
       header: t('case_exploration.case.headers.request_id'),
-      size: 124,
-      minSize: 124,
+      size: 48,
+      minSize: 40,
     }),
     // Patient managing organization
     columnHelper.accessor(row => row.managing_organization_code, {
@@ -191,7 +191,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 124,
-      minSize: 124,
+      minSize: 40,
     }),
     // Actions Buttons
     {

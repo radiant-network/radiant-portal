@@ -14,14 +14,17 @@ function TooltipHeader({ tooltip, children, iconOnly = false }: TooltipHeaderPro
   return (
     <Tooltip>
       <TooltipTrigger
-        className={cn('underline decoration-dotted underline-offset-4 text-left', {
+        asChild
+        className={cn('underline truncate decoration-dotted underline-offset-4 text-left', {
           relative: iconOnly,
         })}
       >
-        {children}
-        {iconOnly && (
-          <span className="absolute inset-0 -z-10 after:content-['\00a0\00a0\00a0'] after:absolute after:inset-0 after:underline after:decoration-dotted after:underline-offset-4" />
-        )}
+        <span>
+          {children}
+          {iconOnly && (
+            <span className="absolute inset-0 -z-10 after:content-['\00a0\00a0\00a0'] after:absolute after:inset-0 after:underline after:decoration-dotted after:underline-offset-4" />
+          )}
+        </span>
       </TooltipTrigger>
       <TooltipContent>{tooltip}</TooltipContent>
     </Tooltip>
