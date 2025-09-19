@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
-import '../../support/commands';
-import { CasesTable } from '../../pom/pages/CasesTable';
+import 'support/commands';
+import { CasesTable } from 'pom/pages/CasesTable';
 
 describe('Cases - Columns', () => {
   const setupTest = () => {

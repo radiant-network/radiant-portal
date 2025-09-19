@@ -3,10 +3,8 @@ import { CommonSelectors } from '../shared/Selectors';
 import { getUrlLink, stringToRegExp } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
-const selectorHead = CommonSelectors.tableHead;
 const selectors = {
-  tableCell: (dataVariant: any) => `${CommonSelectors.tableRow}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
-  tableHeadCell: `${selectorHead} ${CommonSelectors.tableCellHead}`,
+  tableCell: (dataVariant: any) => `${CommonSelectors.tableRow()}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
   tab: '[class*= "lucide-audio-waveform"]',
 };
 
@@ -30,29 +28,29 @@ const tableColumns = [
     tooltip: null,
   },
   {
-    id: 'type',
-    name: 'Type',
-    apiField: 'variant_class',
-    isVisibleByDefault: true,
-    isSortable: true,
-    position: 3,
-    tooltip: null,
-  },
-  {
-    id: 'dbsnp',
-    name: 'dbSNP',
-    apiField: 'rsnumber',
-    isVisibleByDefault: true,
-    isSortable: false,
-    position: 4,
-    tooltip: null,
-  },
-  {
     id: 'gene',
     name: 'Gene',
     apiField: 'symbol',
     isVisibleByDefault: true,
     isSortable: false,
+    position: 3,
+    tooltip: null,
+  },
+  {
+    id: 'aa_change',
+    name: 'AA',
+    apiField: 'aa_change',
+    isVisibleByDefault: true,
+    isSortable: false,
+    position: 4,
+    tooltip: 'Amino acid change',
+  },
+  {
+    id: 'type',
+    name: 'Type',
+    apiField: 'variant_class',
+    isVisibleByDefault: true,
+    isSortable: true,
     position: 5,
     tooltip: null,
   },
@@ -75,12 +73,21 @@ const tableColumns = [
     tooltip: null,
   },
   {
+    id: 'dbsnp',
+    name: 'dbSNP',
+    apiField: 'rsnumber',
+    isVisibleByDefault: true,
+    isSortable: false,
+    position: 8,
+    tooltip: null,
+  },
+  {
     id: 'omim',
     name: 'OMIM',
     apiField: 'omim_inheritance_code',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 8,
+    position: 9,
     tooltip: 'MIM inheritance modes',
   },
   {
@@ -89,7 +96,7 @@ const tableColumns = [
     apiField: 'clinvar',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 9,
+    position: 10,
     tooltip: null,
   },
   {
@@ -98,7 +105,7 @@ const tableColumns = [
     apiField: 'exomiser_gene_combined_score',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 10,
+    position: 11,
     tooltip: 'Exomiser score based on variant properties and patient phenotypes',
   },
   {
@@ -107,7 +114,7 @@ const tableColumns = [
     apiField: 'exomiser_acmg_classification',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 11,
+    position: 12,
     tooltip: 'Exomiser ACMG',
   },
   {
@@ -116,7 +123,7 @@ const tableColumns = [
     apiField: 'gnomad_v3_af',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 12,
+    position: 13,
     tooltip: 'gnomAD Genome 3.1.2 (allele Frequency)',
   },
   {
@@ -125,7 +132,7 @@ const tableColumns = [
     apiField: 'pf_wgs',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 13,
+    position: 14,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this organization. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculations.',
   },
   {
@@ -134,7 +141,7 @@ const tableColumns = [
     apiField: 'genotype_quality',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 14,
+    position: 15,
     tooltip: 'Genotype quality. Only occurrences with GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -143,7 +150,7 @@ const tableColumns = [
     apiField: 'zygosity',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 15,
+    position: 16,
     tooltip: 'Zygosity',
   },
   {
@@ -152,7 +159,7 @@ const tableColumns = [
     apiField: 'ad_ratio',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 16,
+    position: 17,
     tooltip: null,
   },
 ];
@@ -167,7 +174,7 @@ export const CaseEntity_Variants = {
      */
     clickTableCellLink(dataVariant: any, columnID: string, onPlusIcon: boolean = false) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
             switch (columnID) {
               case 'variant':
@@ -222,7 +229,7 @@ export const CaseEntity_Variants = {
      */
     sortColumn(columnID: string, needIntercept: boolean = true) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
             if (needIntercept) {
               cy.sortTableAndIntercept(position, '**/list', 1);
@@ -252,7 +259,7 @@ export const CaseEntity_Variants = {
      * @param columnID The ID of the column to check.
      */
     shouldDisplayColumn(columnID: string) {
-      cy.get(selectorHead).contains(getColumnName(tableColumns, columnID)).should('exist');
+      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('exist');
     },
     /**
      * Checks that the tab is active.
@@ -273,7 +280,7 @@ export const CaseEntity_Variants = {
      */
     shouldHaveFirstRowValue(value: string | RegExp, columnID: string) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           cy.validateTableFirstRowContent(value, position);
         })
       );
@@ -300,7 +307,7 @@ export const CaseEntity_Variants = {
      */
     shouldHaveTableCellLink(dataVariant: any, columnID: string) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
             cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataVariant));
           } else {
@@ -323,9 +330,9 @@ export const CaseEntity_Variants = {
       tableColumns.forEach(column => {
         const expectedExist = column.isVisibleByDefault ? 'exist' : 'not.exist';
         if (column.name.startsWith('[')) {
-          cy.get(selectorHead).find(column.name).should(expectedExist);
+          cy.get(CommonSelectors.tableHead()).find(column.name).should(expectedExist);
         } else {
-          cy.get(selectorHead).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+          cy.get(CommonSelectors.tableHead()).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
         }
       });
     },
@@ -334,7 +341,7 @@ export const CaseEntity_Variants = {
      * @param columnID The ID of the column to check.
      */
     shouldNotDisplayColumn(columnID: string) {
-      cy.get(selectorHead).contains(getColumnName(tableColumns, columnID)).should('not.exist');
+      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('not.exist');
     },
     /**
      * Validates that all columns are displayed in the correct order in the table.
@@ -343,9 +350,9 @@ export const CaseEntity_Variants = {
       CaseEntity_Variants.actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
-          cy.get(selectors.tableHeadCell).eq(column.position).find(column.name).should('exist');
+          cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
         } else {
-          cy.get(selectors.tableHeadCell).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+          cy.get(CommonSelectors.tableHeadCell()).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
         }
       });
     },
@@ -356,7 +363,7 @@ export const CaseEntity_Variants = {
      */
     shouldShowColumnContent(columnID: string, dataVariant: any) {
       CaseEntity_Variants.actions.showAllColumns();
-      getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {
             case 'interpretation':
@@ -369,10 +376,12 @@ export const CaseEntity_Variants = {
               cy.validateTableFirstRowContent(dataVariant[columnID], position);
               cy.validateTableFirstRowClass(CommonSelectors.plusIcon, position);
               break;
+            case 'aa_change':
+              cy.validateTableFirstRowContent(dataVariant.aa_change, position);
+              break;
             case 'consequence':
               cy.validateTableFirstRowClass(dataVariant.consequenceImpact, position);
               cy.validateTableFirstRowContent(dataVariant[columnID], position);
-              cy.validateTableFirstRowContent(dataVariant.aa_change, position);
               break;
             case 'mane':
               cy.get(selectors.tableCell(dataVariant))
@@ -389,23 +398,18 @@ export const CaseEntity_Variants = {
                 .should(dataVariant.maneP ? 'exist' : 'not.exist');
               break;
             case 'omim':
-              dataVariant[columnID].forEach((value: string | RegExp) => {
-                cy.validateTableFirstRowContent(value, position);
-              });
-              cy.validateTableFirstRowClass(CommonSelectors.tagDefault, position);
+              cy.validateTableFirstRowContent(dataVariant.omim.inheritance, position);
+              cy.validateTableFirstRowClass(CommonSelectors.tagLevel('primary'), position);
               break;
             case 'clinvar':
-              dataVariant[columnID].forEach((value: string | RegExp) => {
-                cy.validateTableFirstRowContent(value, position);
-              });
-              cy.validateTableFirstRowClass(CommonSelectors.tag('green'), position);
-              cy.validateTableFirstRowClass(CommonSelectors.tag('yellow'), position);
+              cy.validateTableFirstRowContent(dataVariant.clinvar.classification, position);
+              cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
               break;
             case 'acmg_exomiser':
               dataVariant[columnID].forEach((value: string | RegExp) => {
                 cy.validateTableFirstRowContent(value, position);
               });
-              cy.validateTableFirstRowClass(CommonSelectors.tag('yellow'), position);
+              cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
               break;
             case 'gnomad':
               cy.validateTableFirstRowContent(dataVariant[columnID], position);
@@ -427,9 +431,9 @@ export const CaseEntity_Variants = {
       CaseEntity_Variants.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
-          getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
+          getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              cy.get(selectors.tableHeadCell).eq(position).shouldHaveTooltip(column.tooltip);
+              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column.tooltip);
             } else {
               cy.log(`Warning: Column ${column.id} not found`);
             }
@@ -445,9 +449,9 @@ export const CaseEntity_Variants = {
       CaseEntity_Variants.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
-          getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
+          getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              cy.get(selectors.tableHeadCell).eq(position).shouldBeSortable(column.isSortable);
+              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBeSortable(column.isSortable);
             } else {
               cy.log(`Warning: Column ${column.id} not found`);
             }

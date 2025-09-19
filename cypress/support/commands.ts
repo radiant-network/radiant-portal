@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import createUUID from './createUUID';
-import { CommonSelectors } from '../pom/shared/Selectors';
-import { oneMinute } from '../pom/shared/Utils';
+import { CommonSelectors } from 'pom/shared/Selectors';
+import { oneMinute } from 'pom/shared/Utils';
 import 'cypress-real-events';
 
 // Simple environment variable getter
@@ -133,12 +133,12 @@ Cypress.Commands.add('shouldBeSortable', { prevSubject: 'element' }, (subject, i
  */
 Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, tooltipContent: string | RegExp | null) => {
   if (tooltipContent) {
-    cy.wrap(subject).find(CommonSelectors.underlineHeader).realHover();
+    cy.wrap(subject).invoke('css', 'width', '200px' /*Widen column for tooltip access*/).find(CommonSelectors.underlineHeader).scrollIntoView().realHover();
     cy.get(CommonSelectors.tooltipPopper).contains(tooltipContent).first().should('exist');
     cy.get(CommonSelectors.logo).click();
     cy.get(CommonSelectors.tooltipPopper).should('not.exist');
   } else {
-    cy.wrap(subject).realHover();
+    cy.wrap(subject).invoke('css', 'width', '200px' /*Widen column for tooltip access*/).scrollIntoView().realHover();
     cy.get(CommonSelectors.tooltipPopper).should('not.exist');
   }
 });
@@ -159,11 +159,15 @@ Cypress.Commands.add('showColumn', (column: string) => {
  * @param position The column position index to sort.
  * @param routeMatcher The route pattern to match for interception.
  * @param nbCalls The number of API calls to wait for.
+ * @param tableId The table ID to sort (default: '').
  */
-Cypress.Commands.add('sortTableAndIntercept', (position: number, routeMatcher: string, nbCalls: number) => {
+Cypress.Commands.add('sortTableAndIntercept', (position: number, routeMatcher: string, nbCalls: number, tableId: string = '') => {
   cy.intercept('POST', routeMatcher).as('routeMatcher');
 
-  cy.get(`${CommonSelectors.tableHead} ${CommonSelectors.tableCellHead}`).eq(position).find(CommonSelectors.sortIcon).clickAndWait({ force: true });
+  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+    .eq(position)
+    .find(CommonSelectors.sortIcon)
+    .clickAndWait({ force: true });
 
   for (let i = 0; i < nbCalls; i++) {
     cy.wait('@routeMatcher', { timeout: oneMinute });
@@ -173,9 +177,13 @@ Cypress.Commands.add('sortTableAndIntercept', (position: number, routeMatcher: s
 /**
  * Sorts a table column and waits for a fixed duration.
  * @param position The column position index to sort.
+ * @param tableId The table ID to sort (default: '').
  */
-Cypress.Commands.add('sortTableAndWait', (position: number) => {
-  cy.get(`${CommonSelectors.tableHead} ${CommonSelectors.tableCellHead}`).eq(position).find(CommonSelectors.sortIcon).click({ force: true });
+Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = '') => {
+  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+    .eq(position)
+    .find(CommonSelectors.sortIcon)
+    .click({ force: true });
   cy.wait(1000);
 });
 
@@ -202,10 +210,11 @@ Cypress.Commands.add('validatePillSelectedQuery', (facetTitle: string | RegExp, 
  * @param expectedAttr The attribute name to check.
  * @param expectedValue The expected attribute value.
  * @param columnIndex The column index to check.
+ * @param tableId The table ID to check (default: '').
  */
-Cypress.Commands.add('validateTableFirstRowAttr', (expectedAttr: string, expectedValue: string, columnIndex: number) => {
+Cypress.Commands.add('validateTableFirstRowAttr', (expectedAttr: string, expectedValue: string, columnIndex: number, tableId: string = '') => {
   cy.wait(2000);
-  cy.get(CommonSelectors.tableRow)
+  cy.get(CommonSelectors.tableRow(tableId))
     .eq(0)
     .find(CommonSelectors.tableCellData)
     .eq(columnIndex)
@@ -217,20 +226,22 @@ Cypress.Commands.add('validateTableFirstRowAttr', (expectedAttr: string, expecte
  * Validates that the first table row has a specific CSS class.
  * @param expectedClass The CSS class name to check for.
  * @param columnIndex The column index to check.
+ * @param tableId The table ID to check (default: '').
  */
-Cypress.Commands.add('validateTableFirstRowClass', (expectedClass: string, columnIndex: number) => {
+Cypress.Commands.add('validateTableFirstRowClass', (expectedClass: string, columnIndex: number, tableId: string = '') => {
   cy.wait(2000);
-  cy.get(CommonSelectors.tableRow).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).find(expectedClass).should('exist');
+  cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).find(expectedClass).should('exist');
 });
 
 /**
  * Validates that the first table row contains the expected content.
  * @param expectedValue The expected value (string or RegExp).
  * @param columnIndex The column index to check.
+ * @param tableId The table ID to check (default: '').
  */
-Cypress.Commands.add('validateTableFirstRowContent', (expectedValue: string | RegExp, columnIndex: number) => {
+Cypress.Commands.add('validateTableFirstRowContent', (expectedValue: string | RegExp, columnIndex: number, tableId: string = '') => {
   cy.wait(2000);
-  cy.get(CommonSelectors.tableRow).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).contains(expectedValue).should('exist');
+  cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).contains(expectedValue).should('exist');
 });
 
 /**
@@ -297,6 +308,38 @@ Cypress.Commands.add('visitFilesPage', (searchCriteria?: string) => {
 });
 
 /**
+ * Visits the case details page for a specific case.
+ * @param caseId The case ID to visit.
+ */
+Cypress.Commands.add('visitCaseDetailsPage', (caseId: string) => {
+  cy.visitAndIntercept(`/case/entity/${caseId}?tab=details`, 'GET', `**/cases/${caseId}`, 1);
+  cy.setLang('EN');
+});
+
+/**
+ * Visits the case files page for a specific case.
+ * @param caseId The case ID to visit.
+ * @param searchCriteria Optional search criteria to apply (JSON string).
+ */
+Cypress.Commands.add('visitCaseFilesPage', (caseId: string, searchCriteria?: string) => {
+  if (searchCriteria == undefined) {
+    cy.visitAndIntercept(`/case/entity/${caseId}?tab=files`, 'POST', '**/documents/search', 1);
+  } else {
+    cy.intercept('POST', '**/documents/search', interception => {
+      const mockBody = { ...interception.body };
+      mockBody.search_criteria = JSON.parse(searchCriteria);
+      interception.alias = 'postSearch';
+      interception.body = mockBody;
+    });
+    cy.visit(`/case/entity/${caseId}?tab=files`, { failOnStatusCode: false });
+    cy.wait('@postSearch');
+  }
+
+  cy.setLang('EN');
+  cy.resetColumns();
+});
+
+/**
  * Visits the case variants page for a specific case.
  * @param caseId The case ID to visit.
  * @param sqon Optional query filter to apply (JSON string).
@@ -317,6 +360,24 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, sqon?: string) =>
 
   cy.setLang('EN');
   cy.resetColumns();
+});
+
+/**
+ * Visits the variant evidence and conditions page for a specific variant.
+ * @param locusID The locus ID to visit.
+ */
+Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
+  cy.visitAndIntercept(`/variants/entity/${locusID}#evidenceAndConditions`, 'GET', `**/conditions/omim`, 1);
+  cy.setLang('EN');
+});
+
+/**
+ * Visits the variant patients page for a specific variant.
+ * @param locusID The locus ID to visit.
+ */
+Cypress.Commands.add('visitVariantPatientsPage', (locusID: string) => {
+  cy.visitAndIntercept(`/variants/entity/${locusID}#patients`, 'POST', `**/cases/interpreted`, 1);
+  cy.setLang('EN');
 });
 
 /**

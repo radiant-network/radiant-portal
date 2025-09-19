@@ -3,10 +3,8 @@ import { CommonSelectors } from '../shared/Selectors';
 import { getUrlLink, stringToRegExp } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
-const selectorHead = CommonSelectors.tableHead;
 const selectors = {
-  tableCell: (dataFile: any) => `${CommonSelectors.tableRow}:contains("${dataFile.name}") ${CommonSelectors.tableCellData}`,
-  tableHeadCell: `${selectorHead} ${CommonSelectors.tableCellHead}`,
+  tableCell: (dataFile: any) => `${CommonSelectors.tableRow()}:contains("${dataFile.name}") ${CommonSelectors.tableCellData}`,
 };
 
 const tableColumns = [
@@ -147,7 +145,7 @@ export const FilesTable = {
      */
     clickTableCellLink(dataFile: any, columnID: string) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
             switch (columnID) {
               default:
@@ -174,7 +172,7 @@ export const FilesTable = {
      */
     selectAction(dataFile: any, object: string) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, 'actions').then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, 'actions').then(position => {
           if (position !== -1) {
             cy.get(selectors.tableCell(dataFile)).eq(position).find('button').clickAndWait({ force: true });
             cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
@@ -208,7 +206,7 @@ export const FilesTable = {
      */
     sortColumn(columnID: string, needIntercept: boolean = true) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
             if (needIntercept) {
               cy.sortTableAndIntercept(position, '**/documents/search', 1);
@@ -229,7 +227,7 @@ export const FilesTable = {
      * @param columnID The ID of the column to check.
      */
     shouldDisplayColumn(columnID: string) {
-      cy.get(selectorHead).contains(getColumnName(tableColumns, columnID)).should('exist');
+      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('exist');
     },
     /**
      * Validates the value of the first row for a given column.
@@ -238,7 +236,7 @@ export const FilesTable = {
      */
     shouldHaveFirstRowValue(value: string | RegExp, columnID: string) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           cy.validateTableFirstRowContent(value, position);
         })
       );
@@ -250,7 +248,7 @@ export const FilesTable = {
      */
     shouldHaveTableCellLink(dataFile: any, columnID: string) {
       cy.then(() =>
-        getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
             cy.get(selectors.tableCell(dataFile)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataFile));
           } else {
@@ -266,9 +264,9 @@ export const FilesTable = {
       tableColumns.forEach(column => {
         const expectedExist = column.isVisibleByDefault ? 'exist' : 'not.exist';
         if (column.name.startsWith('[')) {
-          cy.get(selectorHead).find(column.name).should(expectedExist);
+          cy.get(CommonSelectors.tableHead()).find(column.name).should(expectedExist);
         } else {
-          cy.get(selectorHead).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+          cy.get(CommonSelectors.tableHead()).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
         }
       });
     },
@@ -277,7 +275,7 @@ export const FilesTable = {
      * @param columnID The ID of the column to check.
      */
     shouldNotDisplayColumn(columnID: string) {
-      cy.get(selectorHead).contains(getColumnName(tableColumns, columnID)).should('not.exist');
+      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('not.exist');
     },
     /**
      * Validates that all columns are displayed in the correct order in the table.
@@ -286,9 +284,9 @@ export const FilesTable = {
       FilesTable.actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
-          cy.get(selectors.tableHeadCell).eq(column.position).find(column.name).should('exist');
+          cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
         } else {
-          cy.get(selectors.tableHeadCell).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+          cy.get(CommonSelectors.tableHeadCell()).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
         }
       });
     },
@@ -299,7 +297,7 @@ export const FilesTable = {
      */
     shouldShowColumnContent(columnID: string, dataFile: any) {
       FilesTable.actions.showAllColumns();
-      getColumnPosition(selectorHead, tableColumns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {
             case 'format':
@@ -324,9 +322,9 @@ export const FilesTable = {
       FilesTable.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
-          getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
+          getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              cy.get(selectors.tableHeadCell).eq(position).shouldHaveTooltip(column.tooltip);
+              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column.tooltip);
             } else {
               cy.log(`Warning: Column ${column.id} not found`);
             }
@@ -341,9 +339,9 @@ export const FilesTable = {
       FilesTable.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
-          getColumnPosition(selectorHead, tableColumns, column.id).then(position => {
+          getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              cy.get(selectors.tableHeadCell).eq(position).shouldBeSortable(column.isSortable);
+              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBeSortable(column.isSortable);
             } else {
               cy.log(`Warning: Column ${column.id} not found`);
             }

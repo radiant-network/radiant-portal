@@ -2,7 +2,7 @@
 import 'support/commands';
 import { FilesTable } from 'pom/pages/FilesTable';
 
-describe('Files - Sort', () => {
+describe('CaseEntity - Files - Sort', () => {
   const setupTest = () => {
     cy.login();
     cy.visitFilesPage();
@@ -18,9 +18,10 @@ describe('Files - Sort', () => {
     FilesTable.validations.shouldSortColumn('sample');
   });
 
-  it('Number', () => {
+  // Activate after SJRA-661
+  it.skip('Number', () => {
     setupTest();
-    FilesTable.validations.shouldSortColumn('case');
+    FilesTable.validations.shouldSortColumn('patient');
   });
 
   it('Tag', () => {

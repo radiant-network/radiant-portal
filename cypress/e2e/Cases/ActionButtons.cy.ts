@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
-import '../../support/commands';
-import { data } from '../../pom/shared/Data';
-import { CasesTable } from '../../pom/pages/CasesTable';
+import 'support/commands';
+import { data } from 'pom/shared/Data';
+import { CasesTable } from 'pom/pages/CasesTable';
 import { CaseEntity_Variants } from 'pom/pages/CaseEntity_Variants';
 import { CaseEntity_Details } from 'pom/pages/CaseEntity_Details';
 
