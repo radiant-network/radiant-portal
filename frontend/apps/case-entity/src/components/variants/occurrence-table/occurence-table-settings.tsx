@@ -27,7 +27,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     {
       id: 'row_expand',
       cell: RowExpandCell,
-      size: 40,
+      size: 30,
       enableResizing: false,
       enablePinning: false,
     },
@@ -51,7 +51,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           </TooltipHeader>
         </div>
       ),
-      size: 40,
+      size: 30,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,
@@ -70,7 +70,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
         </AnchorLinkCell>
       ),
       header: t('variant.headers.hgvsg'),
-      size: 148,
+      size: 70,
       minSize: 40,
     }),
     // Gene
