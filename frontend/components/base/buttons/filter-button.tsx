@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 
-export type PopoverSize = 'default' | 'lg';
+export type PopoverSize = 'sm' | 'lg' | 'md' | 'xs';
 
 // Extended Aggregation type to include optional icon
 export interface IFilterButtonItem {
@@ -142,7 +142,7 @@ export default function FilterButton({
   selected,
   onSelect,
   className,
-  popoverSize = 'default',
+  popoverSize = 'sm',
   placeholder,
   actionMode = false, // if true, there will be now count and no checkboxes
   icon,
@@ -208,7 +208,9 @@ export default function FilterButton({
       </PopoverTrigger>
       <PopoverContent
         className={cn('p-0 flex flex-col', {
-          'w-[229px] max-h-[240px]': popoverSize === 'default',
+          'w-[180px] max-h-[280px]': popoverSize === 'xs',
+          'w-[229px] max-h-[280px]': popoverSize === 'sm',
+          'w-[300px] max-h-[280px]': popoverSize === 'md',
           'w-[470px] max-h-[280px]': popoverSize === 'lg',
         })}
         align="start"

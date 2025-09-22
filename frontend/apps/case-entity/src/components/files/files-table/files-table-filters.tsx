@@ -6,6 +6,7 @@ import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-but
 import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
 import getDataTypeOptions from '@/components/base/data-table/filters/options/option-data-type';
 import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';
+import getRelationshipOptions from '@/components/base/data-table/filters/options/option-relationship';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
@@ -78,6 +79,12 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
               popoverSize: 'md' as PopoverSize,
               options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
             };
+          case 'relationship_to_proband':
+            return {
+              ...baseOption,
+              popoverSize: 'xs' as PopoverSize,
+              options: sortOptions(getRelationshipOptions(apiFilters[key]) || []),
+            };
           case 'format':
             return {
               ...baseOption,
@@ -86,7 +93,6 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
           default:
             return {
               ...baseOption,
-              popoverSize: 'sm' as PopoverSize,
               withTooltip: true,
               options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
             };
