@@ -13,6 +13,7 @@ import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
@@ -85,6 +86,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
     // AA Change
     columnHelper.accessor(row => row.aa_change, {
       id: 'aa_change',
+      cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.aa_change_tooltip')}>{t('variant.headers.aa_change')}</TooltipHeader>
       ),
