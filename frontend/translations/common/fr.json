@@ -423,9 +423,9 @@
           "hom": "Homozygote",
           "unk": "Inconnu"
         },
-        "info_qd": "Profondeur de Qualité",
-        "ad_alt": "ALT Profondeur Allélique",
-        "ad_total": "Profondeur Totale ALT + REF",
+        "info_qd": "Qualité de Profondeur",
+        "ad_alt": "Profondeur allélique ALT",
+        "ad_total": "Profondeur totale ALT + REF",
         "ad_ratio": "Ratio Allélique ALT",
         "genotype_quality": "Qualité du Génotype",
         "project_code": "Projet",
