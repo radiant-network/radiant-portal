@@ -26,9 +26,9 @@ const CRITERIAS = {
   priority: { key: 'priority_code', weight: 1, visible: true },
   status: { key: 'status_code', weight: 2, visible: true },
   case_analysis: { key: 'case_analysis_code', weight: 3, visible: true },
-  project: { key: 'project_code', weight: 3, visible: false },
-  performer_lab: { key: 'performer_lab_code', weight: 4, visible: false },
-  requested_by: { key: 'requested_by_code', weight: 5, visible: false },
+  project: { key: 'project_code', visible: false },
+  performer_lab: { key: 'performer_lab_code', visible: false },
+  requested_by: { key: 'requested_by_code', visible: false },
 };
 
 export const FILTER_DEFAULTS = {
@@ -64,50 +64,48 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
   const filterButtons = useMemo(() => {
     if (!apiFilters) return [];
 
-    return Object.keys(apiFilters)
-      .map(key => {
-        const baseOption: IFilterButton = {
-          key,
-          label: t(`case_exploration.case.filters.${key}`),
-          isVisible: getVisibleFiltersByCriterias(CRITERIAS).includes(key),
-          isOpen: openFilters[key] || false,
-          selectedItems: filters[key] || [],
-          options: [],
-        };
+    return Object.keys(apiFilters).map(key => {
+      const baseOption: IFilterButton = {
+        key,
+        label: t(`case_exploration.case.filters.${key}`),
+        isVisible: getVisibleFiltersByCriterias(CRITERIAS).includes(key),
+        isOpen: openFilters[key] || false,
+        selectedItems: filters[key] || [],
+        options: [],
+      };
 
-        switch (key) {
-          case 'status':
-            return {
-              ...baseOption,
-              options: sortOptions(getItemStatus(apiFilters[key] || [], t)),
-            };
-          case 'project':
-          case 'performer_lab':
-          case 'requested_by':
-            return {
-              ...baseOption,
-              popoverSize: 'lg' as PopoverSize,
-              isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
-              options: sortOptions(apiFilters[key] || []),
-              withTooltip: true,
-            };
-          case 'priority':
-            return {
-              ...baseOption,
-              options: getItemPriority(apiFilters[key] || []),
-            };
-          case 'case_analysis':
-            return {
-              ...baseOption,
-              options: sortOptions(apiFilters[key] || []),
-              popoverSize: 'lg' as PopoverSize,
-              withTooltip: true,
-            };
-          default:
-            return baseOption;
-        }
-      })
-      .filter(option => option.options.length > 0);
+      switch (key) {
+        case 'status':
+          return {
+            ...baseOption,
+            options: sortOptions(getItemStatus(apiFilters[key] || [], t)),
+          };
+        case 'project':
+        case 'performer_lab':
+        case 'requested_by':
+          return {
+            ...baseOption,
+            popoverSize: 'lg' as PopoverSize,
+            isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
+            options: sortOptions(apiFilters[key] || []),
+            withTooltip: true,
+          };
+        case 'priority':
+          return {
+            ...baseOption,
+            options: getItemPriority(apiFilters[key] || []),
+          };
+        case 'case_analysis':
+          return {
+            ...baseOption,
+            options: sortOptions(apiFilters[key] || []),
+            popoverSize: 'lg' as PopoverSize,
+            withTooltip: true,
+          };
+        default:
+          return baseOption;
+      }
+    });
   }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
 
   return (

@@ -64,50 +64,48 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
   // Mesmoize filter buttons to prevent unnecessary re-renders
   const filterButtons = useMemo(() => {
     if (!apiFilters) return [];
-    return Object.keys(apiFilters)
-      .map(key => {
-        const baseOption: IFilterButton = {
-          key,
-          label: t(`files.filters.${key}`),
-          isVisible: getVisibleFiltersByCriterias(CRITERIAS).includes(key),
-          isOpen: openFilters[key] || false,
-          selectedItems: filters[key] || [],
-          options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
-        };
+    return Object.keys(apiFilters).map(key => {
+      const baseOption: IFilterButton = {
+        key,
+        label: t(`files.filters.${key}`),
+        isVisible: getVisibleFiltersByCriterias(CRITERIAS).includes(key),
+        isOpen: openFilters[key] || false,
+        selectedItems: filters[key] || [],
+        options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
+      };
 
-        switch (key) {
-          case 'performer_lab':
-            return {
-              ...baseOption,
-              popoverSize: 'lg' as PopoverSize,
-              withTooltip: true,
-              options: sortOptions(apiFilters[key] || []),
-            };
-          case 'data_type':
-            return {
-              ...baseOption,
-              popoverSize: 'md' as PopoverSize,
-              options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
-            };
-          case 'relationship_to_proband':
-            return {
-              ...baseOption,
-              popoverSize: 'xs' as PopoverSize,
-              options: sortOptions(getRelationshipOptions(apiFilters[key]) || []),
-            };
-          case 'format':
-            return {
-              ...baseOption,
-              options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),
-            };
-          default:
-            return {
-              ...baseOption,
-              withTooltip: true,
-            };
-        }
-      })
-      .filter(option => option.options.length > 0);
+      switch (key) {
+        case 'performer_lab':
+          return {
+            ...baseOption,
+            popoverSize: 'lg' as PopoverSize,
+            withTooltip: true,
+            options: sortOptions(apiFilters[key] || []),
+          };
+        case 'data_type':
+          return {
+            ...baseOption,
+            popoverSize: 'md' as PopoverSize,
+            options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
+          };
+        case 'relationship_to_proband':
+          return {
+            ...baseOption,
+            popoverSize: 'xs' as PopoverSize,
+            options: sortOptions(getRelationshipOptions(apiFilters[key]) || []),
+          };
+        case 'format':
+          return {
+            ...baseOption,
+            options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),
+          };
+        default:
+          return {
+            ...baseOption,
+            withTooltip: true,
+          };
+      }
+    });
   }, [apiFilters, filters, openFilters, t]);
 
   return (

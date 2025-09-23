@@ -61,44 +61,42 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
   // Mesmoize filter buttons to prevent unnecessary re-renders
   const filterButtons = useMemo(() => {
     if (!apiFilters) return [];
-    return Object.keys(apiFilters)
-      .map(key => {
-        const baseOption: IFilterButton = {
-          key,
-          label: t(`files.filters.${key}`),
-          isVisible: DEFAULT_VISIBLE_FILTERS.includes(key), // Show first three by default
-          isOpen: openFilters[key] || false,
-          selectedItems: filters[key] || [],
-          options: [],
-        };
+    return Object.keys(apiFilters).map(key => {
+      const baseOption: IFilterButton = {
+        key,
+        label: t(`files.filters.${key}`),
+        isVisible: DEFAULT_VISIBLE_FILTERS.includes(key), // Show first three by default
+        isOpen: openFilters[key] || false,
+        selectedItems: filters[key] || [],
+        options: [],
+      };
 
-        switch (key) {
-          case 'data_type':
-            return {
-              ...baseOption,
-              popoverSize: 'md' as PopoverSize,
-              options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
-            };
-          case 'relationship_to_proband':
-            return {
-              ...baseOption,
-              popoverSize: 'xs' as PopoverSize,
-              options: sortOptions(getRelationshipOptions(apiFilters[key]) || []),
-            };
-          case 'format':
-            return {
-              ...baseOption,
-              options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),
-            };
-          default:
-            return {
-              ...baseOption,
-              withTooltip: true,
-              options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
-            };
-        }
-      })
-      .filter(option => option.options.length > 0);
+      switch (key) {
+        case 'data_type':
+          return {
+            ...baseOption,
+            popoverSize: 'md' as PopoverSize,
+            options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
+          };
+        case 'relationship_to_proband':
+          return {
+            ...baseOption,
+            popoverSize: 'xs' as PopoverSize,
+            options: sortOptions(getRelationshipOptions(apiFilters[key]) || []),
+          };
+        case 'format':
+          return {
+            ...baseOption,
+            options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),
+          };
+        default:
+          return {
+            ...baseOption,
+            withTooltip: true,
+            options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
+          };
+      }
+    });
   }, [apiFilters, filters, openFilters, t]);
 
   return (

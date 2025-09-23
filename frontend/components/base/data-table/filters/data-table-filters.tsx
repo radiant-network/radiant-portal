@@ -17,7 +17,7 @@ type FilterSearch = {
   api: AutocompleteApiFn;
 };
 
-type CriteriaProps = { key: string; weight: number; visible: boolean };
+type CriteriaProps = { key: string; weight?: number; visible: boolean };
 
 type DataTableFilters = {
   loading?: boolean;
@@ -52,7 +52,7 @@ export function getVisibleFiltersByCriterias(criterias: Record<string, CriteriaP
  * Mapping function for FilterApi.
  * If a value existing in criteria, the key will be used.
  * - key: key to be send to the api
- * - weight: used to reorder field in render function
+ * - weight: used to reorder field in render function, optional for fields hidden by default
  * _code or _id must be added to the correct field
  * @EXAMPLE: {'data_type': {key: 'data_type_code', weight: 1}}
  * @EXAMPLE: {'file_id': {key: 'file_id', weight: 2}}
@@ -189,13 +189,14 @@ function DataTableFilters({
    * Make filter in more button available in the filter list for the user
    */
   const makeFiltersVisible = useCallback((selectedKeys: string[]) => {
-    // Update changed filter buttons to make them visible
-    setChangedFilterButtons([
+    const newChangedFilter = [
       ...changedFilterButtons,
       ...selectedKeys.filter(key => !changedFilterButtons.includes(key)),
-    ]);
+    ];
 
-    // Set selected filters as open
+    // Update changed filter buttons to make them visible
+    setChangedFilterButtons(newChangedFilter);
+
     const newOpenFilters = selectedKeys.reduce(
       (acc, key) => {
         acc[key] = true;
@@ -263,7 +264,13 @@ function DataTableFilters({
         {/* Show visible filters */}
         {filterButtons
           .filter(filter => filter.isVisible)
-          .sort((a, b) => criterias[a.key].weight - criterias[b.key].weight)
+          .sort((a, b) => {
+            const strongestWeigth = Math.max(...Object.keys(criterias).map(key => criterias[key].weight ?? -1));
+            return (
+              (criterias[a.key].weight ?? strongestWeigth + changedFilterButtons.indexOf(a.key)) -
+              (criterias[b.key].weight ?? strongestWeigth + changedFilterButtons.indexOf(b.key))
+            );
+          })
           .map(filter => (
             <FilterButton
               key={filter.key}
@@ -282,7 +289,7 @@ function DataTableFilters({
           <FilterButton
             label={t('common.filters.more', 'More')}
             options={hiddenFilterOptions}
-            selected={[]}
+            selected={changedFilterButtons}
             onSelect={makeFiltersVisible}
             actionMode={true}
             icon={<ListFilter size={16} />}
@@ -291,7 +298,7 @@ function DataTableFilters({
           />
         )}
 
-        {/* Clear button - only show if filters are active */}
+        {/* Clear button */}
         {hasActiveFilters && (
           <Button variant="link" onClick={clearAllFilters} className="text-sm py-2 px-3 h-8">
             <X size={14} />
