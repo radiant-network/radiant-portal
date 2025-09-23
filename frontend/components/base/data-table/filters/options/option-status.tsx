@@ -10,11 +10,12 @@ const itemStatusTranslationKeyPrefix = 'case_exploration.status';
 function getItemStatusIcon(statusKey: string) {
   const iconMap: { [key: string]: any } = {
     draft: Pen,
-    'on-hold': Hourglass, // on-hold key == . submitted
-    active: RefreshCcw, // active key == . in_progress
+    submitted: Hourglass,
+    in_progress: RefreshCcw,
     completed: Check,
     incomplete: CircleDashed,
     revoke: OctagonX,
+    unknown: FileQuestion,
   };
   return iconMap[statusKey.toLowerCase()] || FileQuestion;
 }
