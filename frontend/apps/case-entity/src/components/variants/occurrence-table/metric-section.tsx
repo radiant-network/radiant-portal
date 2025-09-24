@@ -26,10 +26,10 @@ export default function MetricSection({ data }: MetricSectionProps) {
 
   return (
     <DetailSection title={t('occurrence_expand.metrics.title')}>
-      <DetailItem title={t('occurrence_expand.metrics.quality_depth')} value="-" />
-      <DetailItem title={t('occurrence_expand.metrics.allele_depth_alt')} value={data?.ad_alt ? data.ad_alt : '-'} />
-      <DetailItem title={t('occurrence_expand.metrics.total_depth_alt_ref')} value={data?.ad_total || '-'} />
-      <DetailItem title={t('occurrence_expand.metrics.genotype_quality')} value={genotypeQualityValue} />
+      <DetailItem title={t('common.filters.labels.info_qd')} value="-" />
+      <DetailItem title={t('common.filters.labels.ad_alt')} value={data?.ad_alt ? data.ad_alt : '-'} />
+      <DetailItem title={t('common.filters.labels.ad_total')} value={data?.ad_total || '-'} />
+      <DetailItem title={t('common.filters.labels.genotype_quality')} value={genotypeQualityValue} />
       <DetailItem title={t('occurrence_expand.metrics.filter')} value={data?.filter ? data?.filter : '-'} />
     </DetailSection>
   );
