@@ -1135,9 +1135,9 @@
         "title": "Affections et phénotypes associés par gène",
         "filters": {
           "search_placeholder": "Filtrer par condition ou phenotype",
-          "omim": "OMIM",
-          "orphanet": "Orphanet",
-          "hpo": "HPO"
+          "omim": "OMIM ({{count}})",
+          "orphanet": "Orphanet ({{count}})",
+          "hpo": "HPO ({{count}})"
         },
         "table": {
           "headers": {
