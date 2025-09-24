@@ -125,7 +125,7 @@ function TableFiltersSearch({
       <Command className="relative h-8 w-[260px] overflow-visible" shouldFilter={false}>
         <CommandInput
           className="px-[6px]"
-          wrapperClassName="focus-within:ring-primary focus-visible:outline-none focus-visible:ring-ring focus-visible:ring-offset-0 [&:has(:focus-visible)]:ring-1"
+          variant="search"
           placeholder={placeholder}
           leftAddon={<Search size={16} />}
           rightAddon={searchInput.length > 0 && <X onClick={handleClear} size={16} />}
