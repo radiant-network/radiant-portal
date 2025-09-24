@@ -1,8 +1,10 @@
+/* eslint-disable react/no-unknown-property */
 'use client';
 
 import * as React from 'react';
 import { type DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive, useCommandState } from 'cmdk';
+import { tv, VariantProps } from 'tailwind-variants';
 
 import { Checkbox } from '@/components/base/ui/checkbox';
 import { Dialog, DialogContent } from '@/components/base/ui/dialog';
@@ -31,27 +33,43 @@ const CommandDialog = ({ children, ...props }: DialogProps) => (
   </Dialog>
 );
 
+const CommandInputVariants = tv({
+  slots: {
+    base: 'flex h-9 items-center px-3 bg-background rounded-md border',
+  },
+  variants: {
+    variant: {
+      default: 'enabled:focus-within:ring-1 enabled:focus-within:ring-ring',
+      search:
+        'focus-within:ring-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-0 [&:has(:focus-visible)]:ring-1',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
+
+type CommandInputProps = React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> &
+  VariantProps<typeof CommandInputVariants> & {
+    wrapperClassName?: string;
+    rightAddon?: React.ReactNode;
+    leftAddon?: React.ReactNode;
+  };
 function CommandInput({
   className,
   wrapperClassName,
   leftAddon,
   rightAddon,
   disabled,
+  variant,
   ...props
-}: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
-  wrapperClassName?: string;
-  rightAddon?: React.ReactNode;
-  leftAddon?: React.ReactNode;
-}) {
+}: CommandInputProps) {
+  const styles = CommandInputVariants({ variant });
   return (
     <div
-      className={cn(
-        'flex h-9 items-center px-3 bg-background rounded-md border enabled:focus-within:ring-1 enabled:focus-within:ring-ring',
-        wrapperClassName,
-        {
-          'cursor-not-allowed opacity-50': disabled,
-        },
-      )}
+      className={cn(styles.base({ variant }), wrapperClassName, {
+        'cursor-not-allowed opacity-50': disabled,
+      })}
       cmdk-input-wrapper=""
     >
       {leftAddon}
@@ -117,7 +135,7 @@ CommandItem.displayName = CommandPrimitive.Item.displayName;
 /**
  * Custom Component added. We be overrided if shadcn command is run
  */
-function CommandItemCheckbox({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>) {
+function CommandItemCheckbox({ ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>) {
   const [checked, setChecked] = React.useState<boolean>(false);
   return (
     <CommandItem
