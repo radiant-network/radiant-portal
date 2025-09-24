@@ -261,7 +261,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
                 <DialogHeader>
                   <DialogTitle>{t('variant_entity.overview.prediction_scores')}</DialogTitle>
                 </DialogHeader>
-                <DialogBody className="text-sm space-y-6">{predictionScoreList}</DialogBody>
+                <DialogBody className="text-sm space-y-2">{predictionScoreList}</DialogBody>
               </DialogContent>
             </Dialog>
           )}
