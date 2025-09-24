@@ -252,6 +252,25 @@ export interface Assay {
 /**
  * 
  * @export
+ * @interface AutoCompleteGene
+ */
+export interface AutoCompleteGene {
+    /**
+     * 
+     * @type {Term}
+     * @memberof AutoCompleteGene
+     */
+    'highlight'?: Term;
+    /**
+     * 
+     * @type {Term}
+     * @memberof AutoCompleteGene
+     */
+    'source'?: Term;
+}
+/**
+ * 
+ * @export
  * @interface AutoCompleteTerm
  */
 export interface AutoCompleteTerm {
@@ -4538,6 +4557,129 @@ export class DocumentsApi extends BaseAPI {
      */
     public searchDocuments(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return DocumentsApiFp(this.configuration).searchDocuments(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * GenesApi - axios parameter creator
+ * @export
+ */
+export const GenesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Retrieve AutoCompleteGene list of genes matching input string with highlighted
+         * @summary Get AutoCompleteGene list of matching input string with highlighted
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        geneAutoComplete: async (prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'prefix' is not null or undefined
+            assertParamExists('geneAutoComplete', 'prefix', prefix)
+            const localVarPath = `/genes/autocomplete`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (prefix !== undefined) {
+                localVarQueryParameter['prefix'] = prefix;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * GenesApi - functional programming interface
+ * @export
+ */
+export const GenesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = GenesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Retrieve AutoCompleteGene list of genes matching input string with highlighted
+         * @summary Get AutoCompleteGene list of matching input string with highlighted
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteGene>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.geneAutoComplete(prefix, limit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GenesApi.geneAutoComplete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * GenesApi - factory interface
+ * @export
+ */
+export const GenesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = GenesApiFp(configuration)
+    return {
+        /**
+         * Retrieve AutoCompleteGene list of genes matching input string with highlighted
+         * @summary Get AutoCompleteGene list of matching input string with highlighted
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteGene>> {
+            return localVarFp.geneAutoComplete(prefix, limit, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * GenesApi - object-oriented interface
+ * @export
+ * @class GenesApi
+ * @extends {BaseAPI}
+ */
+export class GenesApi extends BaseAPI {
+    /**
+     * Retrieve AutoCompleteGene list of genes matching input string with highlighted
+     * @summary Get AutoCompleteGene list of matching input string with highlighted
+     * @param {string} prefix Prefix
+     * @param {string} [limit] Limit
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GenesApi
+     */
+    public geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return GenesApiFp(this.configuration).geneAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

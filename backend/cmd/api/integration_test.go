@@ -45,6 +45,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"assays/1",
 			"cases/1",
 			"cases/autocomplete",
+			"genes/autocomplete",
 			"hpo/autocomplete",
 			"igv/1",
 			"interpretations/pubmed/1",
