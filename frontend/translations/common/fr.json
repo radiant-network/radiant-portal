@@ -918,10 +918,6 @@
     },
     "metrics": {
       "title": "Métriques",
-      "quality_depth": "Profondeur de Qualité",
-      "allele_depth_alt": "Profondeur de l'Allèle ALT",
-      "total_depth_altRef": "Profondeur Totale ALT + REF",
-      "genotype_quality": "Qualité du Génotype",
       "filter": "Filtre"
     }
   },
