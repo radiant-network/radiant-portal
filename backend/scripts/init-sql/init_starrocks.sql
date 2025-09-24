@@ -460,6 +460,41 @@ VALUES
     (1, 1, 'CNV2_1', 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250]),
     (1, 2, 'CNV3_2', 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350]);
 
+CREATE TABLE `ensembl_gene` (
+                                `gene_id` varchar(128) NULL COMMENT "",
+                                `chromosome` varchar(10) NULL COMMENT "",
+                                `start` bigint(20) NULL COMMENT "",
+                                `end` bigint(20) NULL COMMENT "",
+                                `version` tinyint(4) NULL COMMENT "",
+                                `type` varchar(128) NULL COMMENT "",
+                                `strand` char(1) NULL COMMENT "",
+                                `phase` tinyint(4) NULL COMMENT "",
+                                `name` varchar(128) NULL COMMENT "",
+                                `alias` array<varchar(128)> NULL COMMENT "",
+                                `biotype` varchar(128) NULL COMMENT "",
+                                `ccdsid` varchar(128) NULL COMMENT "",
+                                `constitutive` varchar(128) NULL COMMENT "",
+                                `description` varchar(500) NULL COMMENT "",
+                                `ensembl_end_phase` varchar(10) NULL COMMENT "",
+                                `ensembl_phase` varchar(10) NULL COMMENT "",
+                                `external_name` varchar(128) NULL COMMENT "",
+                                `logic_name` varchar(500) NULL COMMENT "",
+                                `length` bigint(20) NULL COMMENT ""
+) ENGINE=OLAP
+    DUPLICATE KEY(`gene_id`, `chromosome`);
+
+INSERT INTO test_db.ensembl_gene(gene_id, name, alias) VALUES
+                                                       ('ENSG00000000003', 'TSPAN6', ['T245','TM4SF6','TSPAN-6']),
+                                                       ('ENSG00000000005', 'TNMD', ['BRICD4','CHM1L','MYODULIN', 'TEM', 'TENDIN']),
+                                                       ('ENSG00000000419', 'DPM1', ['CDGIE','MPDS']),
+                                                       ('ENSG00000000457', 'SCYL3', ['PACE-1','PACE1']),
+                                                       ('ENSG00000000460', 'FIRRM', ['APOLO1','C1ORF112','FLIP', 'FLJ10706', 'MEICA1']),
+                                                       ('ENSG00000000938', 'FGR', ['C-FGR','P55C-FGR','SRC2']),
+                                                       ('ENSG00000000971', 'CFH', ['ARMD4','ARMS1','FHL1','HF','HF1','HF2','HUS']),
+                                                       ('ENSG00000001036', 'FUCA2', ['DJ20N2.5','MGC1314']),
+                                                       ('ENSG00000001084', 'GCLC', ['GCS','GLCL','GLCLC']),
+                                                       ('ENSG00000001167', 'NFYA', ['CBF-B','HAP2','NF-YA']),
+                                                       ('ENSG00000143420', 'ENSA', ['ARPP-19E','MGC4319','MGC78563','MGC8394']);
 
 CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
 		PROPERTIES

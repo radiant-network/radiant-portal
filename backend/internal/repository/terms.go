@@ -16,7 +16,7 @@ type TermsRepository struct {
 }
 
 type TermsDAO interface {
-	GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error)
+	GetTermAutoComplete(termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
 }
 
 func NewTermsRepository(db *gorm.DB) *TermsRepository {
@@ -27,7 +27,7 @@ func NewTermsRepository(db *gorm.DB) *TermsRepository {
 	return &TermsRepository{db: db}
 }
 
-func mapToAutoCompleteTerm(term *types.Term, input string) *types.AutoCompleteTerm {
+func mapToAutoCompleteTerm(term *types.Term, input string) types.AutoCompleteTerm {
 	regex := regexp.MustCompile("(?i)" + input)
 	id := ""
 	name := ""
@@ -38,7 +38,7 @@ func mapToAutoCompleteTerm(term *types.Term, input string) *types.AutoCompleteTe
 		id = term.ID
 		name = term.Name
 	}
-	return &types.AutoCompleteTerm{
+	return types.AutoCompleteTerm{
 		HighLight: types.Term{
 			ID:   id,
 			Name: name,
@@ -50,7 +50,7 @@ func mapToAutoCompleteTerm(term *types.Term, input string) *types.AutoCompleteTe
 	}
 }
 
-func (r *TermsRepository) GetTermAutoComplete(termsTable string, input string, limit int) ([]*types.AutoCompleteTerm, error) {
+func (r *TermsRepository) GetTermAutoComplete(termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error) {
 	like := fmt.Sprintf("%%%s%%", input)
 	tx := r.db.Table(termsTable).Select("id, name").Where("LOWER(name) like ? or UPPER(id) like ?", strings.ToLower(like), strings.ToUpper(like)).Order("id asc").Limit(limit)
 
@@ -63,10 +63,10 @@ func (r *TermsRepository) GetTermAutoComplete(termsTable string, input string, l
 		}
 	}
 
-	output := make([]*types.AutoCompleteTerm, len(terms))
+	output := make([]types.AutoCompleteTerm, len(terms))
 	for i, term := range terms {
 		output[i] = mapToAutoCompleteTerm(&term, input)
 	}
 
-	return output, nil
+	return &output, nil
 }

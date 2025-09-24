@@ -43,6 +43,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoSeqExp := repository.NewSequencingRepository(dbStarrocks)
 	repoVariants := repository.NewVariantsRepository(dbStarrocks)
 	repoExomiser := repository.NewExomiserRepository(dbStarrocks)
+	repoGenes := repository.NewGenesRepository(dbStarrocks)
 	repoGermlineCNVOccurrences := repository.NewGermlineCNVOccurrencesRepository(dbStarrocks)
 	repoGermlineSNVOccurrences := repository.NewGermlineSNVOccurrencesRepository(dbStarrocks)
 	repoTerms := repository.NewTermsRepository(dbStarrocks)
@@ -102,6 +103,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
 	casesGroup.POST("/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.POST("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
+
+	geneGroup := privateRoutes.Group("/genes")
+	geneGroup.GET("/autocomplete", server.GetGeneAutoCompleteHandler(repoGenes))
 
 	hpoGroup := privateRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))

@@ -87,6 +87,13 @@ components:
       required:
       - is_paired_end
       type: object
+    AutoCompleteGene:
+      properties:
+        highlight:
+          $ref: '#/components/schemas/Term'
+        source:
+          $ref: '#/components/schemas/Term'
+      type: object
     AutoCompleteTerm:
       properties:
         highlight:
@@ -2079,6 +2086,43 @@ paths:
       summary: Search documents
       tags:
       - documents
+  /genes/autocomplete:
+    get:
+      description: Retrieve AutoCompleteGene list of genes matching input string
+        with highlighted
+      operationId: geneAutoComplete
+      parameters:
+      - description: Prefix
+        in: query
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - description: Limit
+        in: query
+        name: limit
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AutoCompleteGene'
+                type: array
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get AutoCompleteGene list of matching input string with highlighted
+      tags:
+      - genes
   /hpo/autocomplete:
     get:
       description: Retrieve AutoCompleteTerm list of HPO terms matching input string
