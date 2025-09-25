@@ -195,7 +195,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     }),
     // Actions Buttons
     {
-      id: 'actions_menu',
+      id: 'actions',
       cell: CaseActionsMenuCell,
       size: 44,
       maxSize: 44,
@@ -287,9 +287,10 @@ const defaultSettings = createColumnSettings([
     label: 'case_exploration.case.headers.managing_organization',
   },
   {
-    id: 'actions_menu',
+    id: 'actions',
     visible: true,
     fixed: true,
+    pinningPosition: 'right',
   },
 ]);
 
