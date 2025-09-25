@@ -20,6 +20,7 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 import InterpretationCell from './cells/interpretation-cell';
+import OccurenceActionsMenu from './cells/occurence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
@@ -254,6 +255,14 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
     }),
+    // Actions Buttons
+    {
+      id: 'actions',
+      cell: OccurenceActionsMenu,
+      size: 74,
+      enableResizing: false,
+      enablePinning: true,
+    },
   ] as TableColumnDef<GermlineSNVOccurrence, any>[];
 }
 
@@ -358,6 +367,12 @@ const defaultSettings = createColumnSettings([
     id: 'ad_ratio',
     visible: true,
     label: 'variant.headers.ad_ratio',
+  },
+  {
+    id: 'actions',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'right',
   },
 ]);
 

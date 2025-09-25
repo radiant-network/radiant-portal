@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ZapIcon } from 'lucide-react';
+import { ClipboardCheckIcon, ClipboardIcon } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import { Button } from '@/components/base/ui/button';
@@ -13,14 +13,10 @@ type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;
 };
 
-/**
- * If an interpretation is updated, we update the icon localy to prevent
- * unecessary call to api
- */
 function InterpretationCell({ occurrence }: InterpretationCellProps) {
   const { t } = useI18n();
   const [hasInterpretation, setHasInterpretation] = useState<boolean>(occurrence.has_interpretation);
-  const handleSaveCallback = function () {
+  const handleSaveCallback = () => {
     if (!occurrence.has_interpretation) {
       setHasInterpretation(true);
     }
@@ -42,7 +38,11 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
               variant="ghost"
               onClick={handleOpen}
             >
-              <ZapIcon className={cn({ 'fill-primary': hasInterpretation })} size={16} />
+              {hasInterpretation ? (
+                <ClipboardCheckIcon className="color-primary" size={16} />
+              ) : (
+                <ClipboardIcon size={16} />
+              )}
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t('variant.interpretation.tooltip')}</TooltipContent>
