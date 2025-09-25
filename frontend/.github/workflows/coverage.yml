@@ -1,0 +1,36 @@
+name: 'Quality'
+
+on:
+    pull_request:
+        branches:
+            - main
+
+permissions:
+      actions: write
+      checks: write
+      contents: write
+      deployments: write
+      issues: write
+      packages: write
+      pull-requests: write
+      repository-projects: write
+      security-events: write
+      statuses: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: ArtiomTr/jest-coverage-report-action@v2
+        id: coverage
+        with:
+          test-script: npm run test -- --coverage
+          output: report-markdown
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: PR Coverage
+          message: ${{ steps.coverage.outputs.report }}
