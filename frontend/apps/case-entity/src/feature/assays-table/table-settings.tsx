@@ -94,7 +94,7 @@ function getColumns(t: TFunction<string, undefined>) {
     }),
     // Actions Buttons
     {
-      id: 'actions_menu',
+      id: 'actions',
       cell: ActionsMenuCell,
       size: 44,
       maxSize: 44,
@@ -139,6 +139,12 @@ const defaultSettings = createColumnSettings([
     id: 'updated_on',
     visible: true,
     label: 'caseEntity.details.updated_on',
+  },
+  {
+    id: 'actions',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'right',
   },
 ]);
 
