@@ -1,3 +1,73 @@
+/**
+ * Numerical Filter Component
+ *
+ * A React component that provides numerical filtering capabilities for data exploration.
+ * This component allows users to filter numerical data using various operators and ranges.
+ *
+ * ## Key Features:
+ * - Support for multiple range operators (greater than, less than, between, etc.)
+ * - Integration with statistics API for dynamic min/max values
+ * - Configurable decimal precision and intervals
+ * - Unit selection for range types
+ * - "No data" option for missing values
+ *
+ * ## Interval Decimal:
+ * The `intervalDecimal` configuration controls the decimal precision displayed in the filter.
+ * - For integer fields (API type 'integer'): defaults to 0 decimal places
+ * - For other numerical fields: defaults to 3 decimal places
+ * - Can be overridden in the aggregation configuration via `intervalDecimal` property
+ *
+ * ## Configuration Usage: (aggConfig)
+ * The component uses the `IFilterRangeConfig` interface for configuration:
+ * ```typescript
+ * {
+ *   min?: number;                    // Minimum allowed value
+ *   max?: number;                    // Maximum allowed value
+ *   defaultMin?: number;             // Default minimum value
+ *   defaultMax?: number;             // Default maximum value
+ *   defaultOperator?: RangeOperators; // Default operator selection
+ *   intervalDecimal?: number;        // Decimal precision for display
+ *   rangeTypes?: IFilterRangeTypes[]; // Available unit types
+ *   noDataInputOption?: boolean;     // Show "no data" checkbox
+ * }
+ *
+ * example in config/radiant.json
+ * {
+ *   min: 0,
+ *   max: 100,
+ *   defaultMin: 0,
+ *   defaultMax: 100,
+ *   defaultOperator: RangeOperators.Between,
+ *   intervalDecimal: 0,
+ * }
+ * ```
+ *
+ * ## Statistics API Integration:
+ * The component fetches statistical data using the `statisticsGermlineSNVOccurrences` API:
+ * - Automatically retrieves min/max values from the current dataset
+ * - Uses the active query context to filter statistics appropriately
+ * - Falls back to configuration defaults when statistics are unavailable
+ * - Updates decimal precision based on the data type returned by the API
+ *
+ * ## Usage Example:
+ * ```tsx
+ * <NumericalFilter field={{
+ *   key: 'age',
+ *   type: 'numerical',
+ *   defaults: {
+ *     min: 0,
+ *     max: 120,
+ *     intervalDecimal: 0,
+ *     defaultOperator: RangeOperators.Between,
+ *     rangeTypes: [
+ *       { key: 'years', name: 'Years' },
+ *       { key: 'months', name: 'Months' }
+ *     ]
+ *   }
+ * }} />
+ * ```
+ */
+
 import { useCallback, useContext, useEffect, useState } from 'react';
 import useSWR from 'swr';
 
