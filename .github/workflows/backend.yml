@@ -4,8 +4,6 @@
 name: Test and build backend
 
 on:
-  push:
-    branches: [ "**" ]
   pull_request:
     branches: [ "**" ]
 
