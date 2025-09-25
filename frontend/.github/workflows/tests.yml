@@ -1,0 +1,40 @@
+name: 'Quality'
+
+on:
+    pull_request:
+        branches:
+            - main
+
+permissions:
+      actions: write
+      checks: write
+      contents: write
+      deployments: write
+      issues: write
+      packages: write
+      pull-requests: write
+      repository-projects: write
+      security-events: write
+      statuses: write
+
+jobs:
+  tests:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            submodules: true
+        - name: Install modules
+          run: npm i
+        - name: Run tests
+          id: tests
+          run: |
+            echo " " >> results.log
+            echo "## Project Coverage and Test" >> results.log
+            echo "" >> results.log
+            echo "`npm run test -- --reporter=verbose 2>&1 | sed 's/=//g' | tail -n 11`" >> results.log
+            echo " " >> results.log
+        - uses: marocchino/sticky-pull-request-comment@v2
+          with:
+            header: Project Coverage and Test
+            path: results.log
