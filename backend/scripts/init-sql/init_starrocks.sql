@@ -460,7 +460,7 @@ VALUES
     (1, 1, 'CNV2_1', 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250]),
     (1, 2, 'CNV3_2', 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350]);
 
-CREATE TABLE `ensembl_gene` (
+CREATE TABLE IF NOT EXISTS `ensembl_gene` (
                                 `gene_id` varchar(128) NULL COMMENT "",
                                 `chromosome` varchar(10) NULL COMMENT "",
                                 `start` bigint(20) NULL COMMENT "",
