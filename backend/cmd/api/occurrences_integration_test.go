@@ -196,7 +196,7 @@ func Test_CNVOccurrence_List(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		expected := `[{"id":"CNV1_1","seq_id":1,"aliquot":"AQ001","chromosome":"1","start":10000,"end":10500,"type":"DEL","length":500,"name":"CNV1","quality":0.995,"calls":[1,0,1],"filter":"PASS","bc":10,"cn":2,"pe":[5,3],"sm":0.95,"svtype":"DEL","svlen":500,"ciend":[100,200],"cipos":[50,60]},{"id":"CNV2_1","seq_id":1,"aliquot":"AQ002","chromosome":"2","start":20000,"end":20500,"type":"DUP","length":500,"name":"CNV2","quality":0.887,"calls":[0,1,1],"filter":"PASS","bc":12,"cn":3,"pe":[2,4],"sm":0.85,"svtype":"DUP","svlen":500,"ciend":[150,250],"cipos":[70,80]}]`
+		expected := `[{"seq_id":1,"aliquot":"AQ001","chromosome":"1","start":10000,"end":10500,"type":"DEL","length":500,"name":"CNV1","quality":0.995,"calls":[1,0,1],"filter":"PASS","bc":10,"cn":2,"pe":[5,3],"sm":0.95,"svtype":"DEL","svlen":500,"ciend":[100,200],"cipos":[50,60]},{"seq_id":1,"aliquot":"AQ002","chromosome":"2","start":20000,"end":20500,"type":"DUP","length":500,"name":"CNV2","quality":0.887,"calls":[0,1,1],"filter":"PASS","bc":12,"cn":3,"pe":[2,4],"sm":0.85,"svtype":"DUP","svlen":500,"ciend":[150,250],"cipos":[70,80]}]`
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }
@@ -228,7 +228,7 @@ func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		expected := `[{"id":"CNV2_1","seq_id":1,"aliquot":"AQ002","chromosome":"2","start":20000,"end":20500,"type":"DUP","length":500,"name":"CNV2","quality":0.887,"calls":[0,1,1],"filter":"PASS","bc":12,"cn":3,"pe":[2,4],"sm":0.85,"svtype":"DUP","svlen":500,"ciend":[150,250],"cipos":[70,80]}]`
+		expected := `[{"seq_id":1,"aliquot":"AQ002","chromosome":"2","start":20000,"end":20500,"type":"DUP","length":500,"name":"CNV2","quality":0.887,"calls":[0,1,1],"filter":"PASS","bc":12,"cn":3,"pe":[2,4],"sm":0.85,"svtype":"DUP","svlen":500,"ciend":[150,250],"cipos":[70,80]}]`
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }

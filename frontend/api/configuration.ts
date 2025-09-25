@@ -90,10 +90,10 @@ export class Configuration {
         this.basePath = param.basePath;
         this.serverIndex = param.serverIndex;
         this.baseOptions = {
-            ...param.baseOptions,
             headers: {
                 ...param.baseOptions?.headers,
             },
+            ...param.baseOptions
         };
         this.formDataCtor = param.formDataCtor;
     }

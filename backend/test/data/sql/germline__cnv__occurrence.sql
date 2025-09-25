@@ -1,7 +1,6 @@
 CREATE TABLE `germline__cnv__occurrence` (
      `part`         INT NOT NULL,
      `seq_id`       INT NOT NULL,
-     `id`           VARCHAR(256),
      `aliquot`      VARCHAR(255) NOT NULL,
      `chromosome`   VARCHAR(2) NOT NULL,
      `start`        BIGINT NOT NULL,
@@ -20,7 +19,15 @@ CREATE TABLE `germline__cnv__occurrence` (
      `svlen`        INT,
      `reflen`       INT,
      `ciend`        ARRAY<INT>,
-     `cipos`        ARRAY<INT>
+     `cipos`        ARRAY<INT>,
+     `phased`       BOOLEAN NULL,
+     `cytoband`     ARRAY<VARCHAR(10)> NULL,
+     `symbol`       ARRAY<VARCHAR(128)> NULL,
+     `nb_genes`     INT NULL,
+     `nb_snv`       INT NULL,
+     `gnomad_sc`    INT NULL,
+     `gnomad_sn`    INT NULL,
+     `gnomad_sf`    FLOAT NULL
 )
 ENGINE=OLAP
-DUPLICATE KEY(`part`, `seq_id`, `id`);
+DUPLICATE KEY(`part`, `seq_id`);

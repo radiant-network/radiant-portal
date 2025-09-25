@@ -16,7 +16,6 @@ type MockCNVRepository struct{}
 func (m *MockCNVRepository) GetOccurrences(int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
 	return []types.GermlineCNVOccurrence{
 		{
-			Id:         "occ1",
 			SeqID:      1,
 			Aliquot:    "A1",
 			Chromosome: "chr1",
@@ -56,7 +55,6 @@ func Test_CNVOccurrencesListHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{
-		"id":"occ1",
 		"seq_id":1,
 		"aliquot":"A1",
 		"chromosome":"chr1",

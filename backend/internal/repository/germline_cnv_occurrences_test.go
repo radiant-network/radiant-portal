@@ -16,14 +16,14 @@ var allCNVOccurrencesFields = sliceutils.Map(types.GermlineCNVOccurrencesFields,
 })
 
 var defaultCNVOccurrencesFieldsForTest = []types.Field{
-	types.GermlineCNVIdField,
+	types.GermlineCNVNameField,
 }
 
 var CNVOccurrencesQueryConfigForTest = types.QueryConfig{
 	AllFields:     types.GermlineCNVOccurrencesFields,
 	DefaultFields: defaultCNVOccurrencesFieldsForTest,
 	DefaultSort:   nil,
-	IdField:       types.GermlineCNVIdField,
+	IdField:       types.GermlineCNVNameField,
 }
 
 func Test_GermlineCNV_GetOccurrences(t *testing.T) {
@@ -56,7 +56,7 @@ func Test_GermlineCNV_GetOccurrences_QualityFilter(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
-			assert.Equal(t, "CNV1_1", occurrences[0].Id)
+			assert.Equal(t, "CNV1", occurrences[0].Name)
 		}
 	})
 }
@@ -83,7 +83,7 @@ func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
-			assert.Equal(t, "CNV2_1", occurrences[0].Id)
+			assert.Equal(t, "CNV2", occurrences[0].Name)
 		}
 
 		pagination = &types.Pagination{
@@ -97,7 +97,7 @@ func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
-			assert.Equal(t, "CNV1_1", occurrences[0].Id)
+			assert.Equal(t, "CNV1", occurrences[0].Name)
 		}
 	})
 }
