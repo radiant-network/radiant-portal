@@ -287,6 +287,12 @@ var GermlineCNVOccurrencesFields = []Field{
 	GermlineCNVGnomadSF,
 	GermlineCNVCytobandField,
 	GermlineCNVSymbolField,
+	OmimGenePanelField,
+	HpoGenePanelField,
+	DddGenePanelField,
+	CosmicGenePanelField,
+	OmimInheritanceField,
+	OrphanetGenePanelField,
 }
 
 var GermlineCNVOccurrencesDefaultFields = []Field{
