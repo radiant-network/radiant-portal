@@ -8,16 +8,6 @@ import TableFilters from '@/apps/case-exploration/src/components/table-filters/c
 import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
-import {
-  applicationFirstSetCellColumns,
-  defaultColumnSettings,
-  firstSetCellColumns,
-  firstSetCellData,
-  secondSetCellColumns,
-  secondSetCellData,
-  thirdSetCellColumns,
-  thirdSetCellData,
-} from './cells-mock';
 import { data, MockData } from './table-mock';
 
 const columnHelper = createColumnHelper<MockData>();
@@ -374,46 +364,4 @@ export const Footer: Story = {
     ],
   },
   render: args => <DataTable {...args} />,
-};
-
-export const BaseCell: Story = {
-  args: {
-    paginationHidden: true,
-  },
-  render: args => (
-    <>
-      <DataTable
-        {...args}
-        columns={firstSetCellColumns}
-        data={firstSetCellData}
-        defaultColumnSettings={defaultColumnSettings}
-      />
-      <DataTable
-        {...args}
-        columns={secondSetCellColumns}
-        data={secondSetCellData}
-        defaultColumnSettings={defaultColumnSettings}
-      />
-      <DataTable
-        {...args}
-        columns={thirdSetCellColumns}
-        data={thirdSetCellData}
-        defaultColumnSettings={defaultColumnSettings}
-      />
-    </>
-  ),
-};
-
-export const ApplicationFeatureCell: Story = {
-  args: {
-    paginationHidden: true,
-  },
-  render: args => (
-    <DataTable
-      {...args}
-      columns={applicationFirstSetCellColumns}
-      data={secondSetCellColumns}
-      defaultColumnSettings={defaultColumnSettings}
-    />
-  ),
 };

@@ -638,6 +638,13 @@
       "zygosity": "Zyg.",
       "zygosity_tooltip": "Zygosité"
     },
+    "actions": {
+      "preview": "Aperçu",
+      "open_page": "Ouvrir la page",
+      "open_in_igv": "Ouvrir dans IGV ",
+      "ucsc": "UCSC",
+      "litvar": "LitVar"
+    },
     "splice_ai": {
       "AG": "Acceptor Gain",
       "AL": "Acceptor Loss",

@@ -2,6 +2,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { Term, VepImpact } from '@/api/api';
 import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence-table/cells/interpretation-cell';
+import OccurenceActionsMenu from '@/apps/case-entity/src/components/variants/occurrence-table/cells/occurence-actions-cell';
 import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
@@ -670,6 +671,12 @@ export const thirdSetCellColumns = [
 
 export const thirdSetCellData = [
   {
+    locus_id: '-7744322778257424381',
+    chromosome: '5',
+    start: 141178734,
+    rsnumber: 'rs782180361',
+    exomiser_acmg_classification: '',
+    exomiser_acpmg_evidence: '',
     relationship_to_proband: 'proband',
     priority_code: 'asap',
     case_type: 'somatic',
@@ -682,6 +689,10 @@ export const thirdSetCellData = [
     size: 8,
   },
   {
+    locus_id: '-7485572602358923261',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
     priority_code: 'routine',
     case_type: 'germline',
     sample_id: 2,
@@ -695,6 +706,10 @@ export const thirdSetCellData = [
     size: 12345,
   },
   {
+    locus_id: '-7485572602358923261',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
     priority_code: 'stat',
     case_type: 'germline_family',
     sample_id: 3,
@@ -708,6 +723,10 @@ export const thirdSetCellData = [
     size: 25000000,
   },
   {
+    locus_id: '-7485572602358923261',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
     priority_code: 'urgent',
     case_type: 'germline_family',
     sample_id: 4,
@@ -721,6 +740,10 @@ export const thirdSetCellData = [
     size: 5678000000,
   },
   {
+    locus_id: '-7485572602358923261',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
     priority_code: 'urgent',
     case_type: 'germline_family',
     sample_id: undefined,
@@ -734,6 +757,10 @@ export const thirdSetCellData = [
     size: 9000000000000,
   },
   {
+    locus_id: '-7485572602358923261',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
     priority_code: 'stat',
     case_type: 'germline_family',
     sample_id: undefined,
@@ -747,6 +774,10 @@ export const thirdSetCellData = [
     size: 90000000000000,
   },
   {
+    locus_id: '-7485572602358923261',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
     priority_code: undefined,
     case_type: undefined,
     sample_id: undefined,
@@ -776,9 +807,18 @@ export const applicationFirstSetCellColumns = [
     enableSorting: false,
   }),
   {
-    id: 'actions_menu',
+    id: 'case-actions-menu',
     cell: CaseActionsMenuCell,
     header: 'CaseActionsMenuCell (Case-Exploration)',
+    size: 64,
+    maxSize: 64,
+    enableResizing: false,
+    enablePinning: false,
+  },
+  {
+    id: 'occurence-actions-menu',
+    cell: OccurenceActionsMenu,
+    header: 'OccurenceActionsMenu (Case-Entity#variant)',
     size: 64,
     maxSize: 64,
     enableResizing: false,
