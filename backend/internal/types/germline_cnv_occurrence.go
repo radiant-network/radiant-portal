@@ -21,7 +21,7 @@ type GermlineCNVOccurrence struct {
 	SM         float32           `json:"sm,omitempty"`
 	SVType     string            `json:"svtype,omitempty" gorm:"column:svtype"`
 	SVLen      int               `json:"svlen,omitempty" gorm:"column:svlen"`
-	RefLen     int               `json:"reflen,omitempty" gorm:"column:refle"`
+	RefLen     int               `json:"reflen,omitempty" gorm:"column:reflen"`
 	CIEnd      JsonArray[int]    `json:"ciend,omitempty" gorm:"column:ciend"`
 	CIPos      JsonArray[int]    `json:"cipos,omitempty" gorm:"column:cipos"`
 	NbGenes    int               `json:"nb_genes,omitempty" gorm:"column:nb_genes"`

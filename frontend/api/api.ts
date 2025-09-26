@@ -1557,6 +1557,12 @@ export interface GermlineCNVOccurrence {
     'cn'?: number;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'cytoband'?: Array<string>;
+    /**
+     * 
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */
@@ -1569,10 +1575,22 @@ export interface GermlineCNVOccurrence {
     'filter'?: string;
     /**
      * 
-     * @type {string}
+     * @type {number}
      * @memberof GermlineCNVOccurrence
      */
-    'id'?: string;
+    'gnomad_sc'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'gnomad_sf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'gnomad_sn'?: number;
     /**
      * 
      * @type {number}
@@ -1585,6 +1603,18 @@ export interface GermlineCNVOccurrence {
      * @memberof GermlineCNVOccurrence
      */
     'name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'nb_genes'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'nb_snv'?: number;
     /**
      * 
      * @type {Array<number>}
