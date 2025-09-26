@@ -89,7 +89,38 @@ func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t 
 				}
 		}
 		}`
-	expected := `[{"ad_ratio":1, "chromosome": "1", "filter":"PASS", "exomiser_acmg_classification":"", "exomiser_acmg_evidence":null, "exomiser_gene_combined_score":0, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "hgvsg":"hgvsg1", "locus":"locus_1_1000", "locus_id":"1000", "max_impact_score":4, "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "pc_wgs":3, "pf_wgs":0.99, "picked_consequences": null, "seq_id":1, "task_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
+	expected := `[
+			{
+				"ad_ratio": 1,
+				"chromosome": "1",
+				"filter": "PASS",
+				"exomiser_acmg_classification": "",
+				"exomiser_acmg_evidence": null,
+				"exomiser_gene_combined_score": 0,
+				"exomiser_moi": "",
+				"exomiser_variant_score": 0,
+				"genotype_quality": 100,
+				"gnomad_v3_af": 0.001,
+				"has_interpretation": true,
+				"hgvsg": "hgvsg1",
+				"locus": "locus_1_1000",
+				"locus_id": "1000",
+				"max_impact_score": 4,
+				"is_canonical": false,
+				"is_mane_plus": false,
+				"is_mane_select": true,
+				"pc_wgs": 3,
+				"pf_wgs": 0.99,
+				"picked_consequences": null,
+				"seq_id": 1,
+				"task_id": 1,
+				"start": 1111,
+				"symbol": "symbol1",
+				"variant_class": "class1",
+				"vep_impact": "impact1",
+				"zygosity": "HET"
+			}
+		]`
 	testList(t, "multiple", body, expected)
 }
 
@@ -179,7 +210,38 @@ func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
 			},
 			"size": 10
 		}`
-	expected := `[{"ad_ratio":1, "chromosome": "1", "filter":"PASS", "exomiser_acmg_classification":"", "exomiser_acmg_evidence":null, "exomiser_gene_combined_score":0, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "hgvsg":"hgvsg1", "locus":"locus_1_1000", "locus_id":"1000", "max_impact_score":4, "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "pc_wgs":3, "pf_wgs":0.99, "picked_consequences": null, "seq_id":1, "task_id":1, "start": 1111, "symbol":"symbol1", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`
+	expected := `[
+		{
+			"ad_ratio": 1,
+			"chromosome": "1",
+			"filter": "PASS",
+			"exomiser_acmg_classification": "",
+			"exomiser_acmg_evidence": null,
+			"exomiser_gene_combined_score": 0,
+			"exomiser_moi": "",
+			"exomiser_variant_score": 0,
+			"genotype_quality": 100,
+			"gnomad_v3_af": 0.001,
+			"has_interpretation": true,
+			"hgvsg": "hgvsg1",
+			"locus": "locus_1_1000",
+			"locus_id": "1000",
+			"max_impact_score": 4,
+			"is_canonical": false,
+			"is_mane_plus": false,
+			"is_mane_select": true,
+			"pc_wgs": 3,
+			"pf_wgs": 0.99,
+			"picked_consequences": null,
+			"seq_id": 1,
+			"task_id": 1,
+			"start": 1111,
+			"symbol": "symbol1",
+			"variant_class": "class1",
+			"vep_impact": "impact1",
+			"zygosity": "HET"
+		}
+	]`
 	testList(t, "multiple", body, expected)
 }
 
@@ -196,7 +258,52 @@ func Test_CNVOccurrence_List(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		expected := `[{"seq_id":1,"aliquot":"AQ001","chromosome":"1","start":10000,"end":10500,"type":"DEL","length":500,"name":"CNV1","quality":0.995,"calls":[1,0,1],"filter":"PASS","bc":10,"cn":2,"pe":[5,3],"sm":0.95,"svtype":"DEL","svlen":500,"ciend":[100,200],"cipos":[50,60]},{"seq_id":1,"aliquot":"AQ002","chromosome":"2","start":20000,"end":20500,"type":"DUP","length":500,"name":"CNV2","quality":0.887,"calls":[0,1,1],"filter":"PASS","bc":12,"cn":3,"pe":[2,4],"sm":0.85,"svtype":"DUP","svlen":500,"ciend":[150,250],"cipos":[70,80]}]`
+		expected := `[
+			{
+				"seq_id": 1,
+				"aliquot": "AQ001",
+				"chromosome": "1",
+				"start": 10000,
+				"end": 10500,
+				"type": "DEL",
+				"length": 500,
+				"name": "CNV1",
+				"quality": 0.995,
+				"reflen": 500,
+				"calls": [1, 0, 1],
+				"filter": "PASS",
+				"bc": 10,
+				"cn": 2,
+				"pe": [5, 3],
+				"sm": 0.95,
+				"svtype": "DEL",
+				"svlen": 500,
+				"ciend": [100, 200],
+				"cipos": [50, 60]
+			},
+			{
+				"seq_id": 1,
+				"aliquot": "AQ002",
+				"chromosome": "2",
+				"start": 20000,
+				"end": 20500,
+				"type": "DUP",
+				"length": 500,
+				"name": "CNV2",
+				"quality": 0.887,
+				"reflen": 500,
+				"calls": [0, 1, 1],
+				"filter": "PASS",
+				"bc": 12,
+				"cn": 3,
+				"pe": [2, 4],
+				"sm": 0.85,
+				"svtype": "DUP",
+				"svlen": 500,
+				"ciend": [150, 250],
+				"cipos": [70, 80]
+			}
+		]`
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }
@@ -228,7 +335,30 @@ func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		expected := `[{"seq_id":1,"aliquot":"AQ002","chromosome":"2","start":20000,"end":20500,"type":"DUP","length":500,"name":"CNV2","quality":0.887,"calls":[0,1,1],"filter":"PASS","bc":12,"cn":3,"pe":[2,4],"sm":0.85,"svtype":"DUP","svlen":500,"ciend":[150,250],"cipos":[70,80]}]`
+		expected := `[
+			{
+				"seq_id": 1,
+				"aliquot": "AQ002",
+				"chromosome": "2",
+				"start": 20000,
+				"end": 20500,
+				"type": "DUP",
+				"length": 500,
+				"name": "CNV2",
+				"quality": 0.887,
+				"reflen": 500,
+				"calls": [0, 1, 1],
+				"filter": "PASS",
+				"bc": 12,
+				"cn": 3,
+				"pe": [2, 4],
+				"sm": 0.85,
+				"svtype": "DUP",
+				"svlen": 500,
+				"ciend": [150, 250],
+				"cipos": [70, 80]
+			}
+		]`
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }
