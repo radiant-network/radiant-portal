@@ -740,16 +740,29 @@ components:
           uniqueItems: false
         cn:
           type: integer
+        cytoband:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         end:
           type: integer
         filter:
           type: string
-        id:
-          type: string
+        gnomad_sc:
+          type: integer
+        gnomad_sf:
+          type: number
+        gnomad_sn:
+          type: integer
         length:
           type: integer
         name:
           type: string
+        nb_genes:
+          type: integer
+        nb_snv:
+          type: integer
         pe:
           items:
             type: integer

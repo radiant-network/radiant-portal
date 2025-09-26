@@ -1,4 +1,4 @@
-part	seq_id	id	aliquot	chromosome	start	end	type	length	name	quality	calls	filter	bc	cn	pe	sm	svtype	svlen	reflen	ciend	cipos
-1	1	CNV1_1	AQ001	1	10000	10500	DEL	500	CNV1	0.995	[1,0,1]	PASS	10	2	[5,3]	0.95	DEL	500	500	[100,200]	[50,60]
-1	2	CNV2_2	AQ002	2	20000	20500	DUP	500	CNV2	0.887	[0,1,1]	PASS	12	3	[2,4]	0.85	DUP	500	500	[150,250]	[70,80]
-2	7	CNV3_7	AQ003	X	30000	30500	INS	500	CNV3	0.772	[1,1,0]	FAIL	8	1	[1,2]	0.65	INS	500	500	[120,220]	[55,65]
+part	seq_id	aliquot	chromosome	start	end	type	length	name	quality	calls	filter	bc	cn	pe	sm	svtype	svlen	reflen	ciend	cipos
+1	1	AQ001	1	10000	10500	DEL	500	CNV1	0.995	[1,0,1]	PASS	10	2	[5,3]	0.95	DEL	500	500	[100,200]	[50,60]
+1	2	AQ002	2	20000	20500	DUP	500	CNV2	0.887	[0,1,1]	PASS	12	3	[2,4]	0.85	DUP	500	500	[150,250]	[70,80]
+2	7	AQ003	X	30000	30500	INS	500	CNV3	0.772	[1,1,0]	FAIL	8	1	[1,2]	0.65	INS	500	500	[120,220]	[55,65]
