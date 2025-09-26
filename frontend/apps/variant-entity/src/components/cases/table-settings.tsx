@@ -13,6 +13,7 @@ import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell'
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
@@ -173,9 +174,9 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.updated_on, {
-      id: 'updated_on',
-      cell: info => <DateCell date={info.getValue()} />,
+    otherCasesColumnHelper.accessor(row => row.submitter_sample_id, {
+      id: 'submitter_sample_id',
+      cell: info => <TextCell>{info.getValue()}</TextCell>,
       header: t('variant_entity.cases.other_table.headers.sample'),
       minSize: 80,
       maxSize: 150,
@@ -352,7 +353,7 @@ const otherCasesDefaultSettings = createColumnSettings([
     label: 'variant.headers.patient_id',
   },
   {
-    id: 'updated_on',
+    id: 'submitter_sample_id',
     visible: true,
     label: 'variant.headers.sample',
   },
