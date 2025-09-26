@@ -61,6 +61,28 @@ func Test_GermlineCNV_GetOccurrences_QualityFilter(t *testing.T) {
 	})
 }
 
+func Test_GermlineCNV_GetOccurrences_PanelFilter(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+
+		sqon := &types.Sqon{
+			Content: types.SqonArray{
+				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
+			},
+			Op: "and",
+		}
+
+		query, err := types.NewListQueryFromSqon(CNVOccurrencesQueryConfigForTest, allCNVOccurrencesFields, sqon, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, 1, occurrences[0].SeqID)
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+		}
+	})
+}
+
 func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineCNVOccurrencesRepository(db)
@@ -120,6 +142,25 @@ func Test_GermlineCNV_CountOccurrences_With_Filtering(t *testing.T) {
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: ">", Content: types.LeafContent{Field: "quality", Value: []interface{}{0.9}}},
+			},
+			Op: "and",
+		}
+
+		query, err := types.NewListQueryFromSqon(CNVOccurrencesQueryConfigForTest, allCNVOccurrencesFields, sqon, nil, nil)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(1, query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), count)
+	})
+}
+
+func Test_GermlineCNV_CountOccurrences_PanelFilter(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+
+		sqon := &types.Sqon{
+			Content: types.SqonArray{
+				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel1", "panel2"}}},
 			},
 			Op: "and",
 		}
