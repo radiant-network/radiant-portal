@@ -40,7 +40,7 @@
     "@hookform/resolvers": "^4.0.0",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/vite": "^4.1.8",
-    "axios": "^1.11.0",
+    "axios": "^1.12.2",
     "commitlint": "^19.8.1",
     "date-fns": "^4.1.0",
     "react": "^19.1.0",
