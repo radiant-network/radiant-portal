@@ -15,7 +15,7 @@ describe('Case Entity - Variants - Hyperlinks', () => {
   it('Variant', () => {
     setupTest();
     CaseEntity_Variants.actions.clickTableCellLink(data.variantGermline, 'variant');
-    VariantEntity_Overview.validations.shouldHaveTitle(data.variantGermline);
+    CaseEntity_Variants.validations.shouldDrawerOpen(data.variantGermline);
   });
 
   it('dbSNP', () => {
@@ -28,7 +28,7 @@ describe('Case Entity - Variants - Hyperlinks', () => {
     CaseEntity_Variants.validations.shouldHaveTableCellLink(data.variantGermline, 'gene');
   });
 
-  it('Gene Plus [SJRA-680]', () => {
+  it('Gene Plus', () => {
     setupTest();
     CaseEntity_Variants.actions.clickTableCellLink(data.variantGermline, 'gene', true /*onPlusIcon*/);
     CaseEntity_Variants.validations.shouldHaveSelectedQueryPill(data.variantGermline, 'gene');

@@ -15,7 +15,8 @@ const tableColumns = [
     apiField: 'has_interpretation',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 1,
+    isPinnable: false,
+    position: 0,
     tooltip: 'Clinical Interpretation',
   },
   {
@@ -24,7 +25,8 @@ const tableColumns = [
     apiField: 'hgvsg',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 2,
+    isPinnable: true,
+    position: 1,
     tooltip: null,
   },
   {
@@ -33,7 +35,8 @@ const tableColumns = [
     apiField: 'symbol',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 3,
+    isPinnable: true,
+    position: 2,
     tooltip: null,
   },
   {
@@ -42,7 +45,8 @@ const tableColumns = [
     apiField: 'aa_change',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 4,
+    isPinnable: true,
+    position: 3,
     tooltip: 'Amino acid change',
   },
   {
@@ -51,7 +55,8 @@ const tableColumns = [
     apiField: 'variant_class',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 5,
+    isPinnable: true,
+    position: 4,
     tooltip: null,
   },
   {
@@ -60,7 +65,8 @@ const tableColumns = [
     apiField: 'picked_consequences',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 6,
+    isPinnable: true,
+    position: 5,
     tooltip: 'Most deleterious consequence annotated using VEP',
   },
   {
@@ -69,7 +75,8 @@ const tableColumns = [
     apiField: 'is_canonical',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 7,
+    isPinnable: true,
+    position: 6,
     tooltip: null,
   },
   {
@@ -78,7 +85,8 @@ const tableColumns = [
     apiField: 'rsnumber',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 8,
+    isPinnable: true,
+    position: 7,
     tooltip: null,
   },
   {
@@ -87,7 +95,8 @@ const tableColumns = [
     apiField: 'omim_inheritance_code',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 9,
+    isPinnable: true,
+    position: 8,
     tooltip: 'MIM inheritance modes',
   },
   {
@@ -96,7 +105,8 @@ const tableColumns = [
     apiField: 'clinvar',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 10,
+    isPinnable: true,
+    position: 9,
     tooltip: null,
   },
   {
@@ -105,7 +115,8 @@ const tableColumns = [
     apiField: 'exomiser_gene_combined_score',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 11,
+    isPinnable: true,
+    position: 10,
     tooltip: 'Exomiser score based on variant properties and patient phenotypes',
   },
   {
@@ -114,7 +125,8 @@ const tableColumns = [
     apiField: 'exomiser_acmg_classification',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 12,
+    isPinnable: true,
+    position: 11,
     tooltip: 'Exomiser ACMG',
   },
   {
@@ -123,7 +135,8 @@ const tableColumns = [
     apiField: 'gnomad_v3_af',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 13,
+    isPinnable: true,
+    position: 12,
     tooltip: 'gnomAD Genome 3.1.2 (allele Frequency)',
   },
   {
@@ -132,7 +145,8 @@ const tableColumns = [
     apiField: 'pf_wgs',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 14,
+    isPinnable: true,
+    position: 13,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this organization. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculations.',
   },
   {
@@ -141,7 +155,8 @@ const tableColumns = [
     apiField: 'genotype_quality',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 15,
+    isPinnable: true,
+    position: 14,
     tooltip: 'Genotype quality. Only occurrences with GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -150,7 +165,8 @@ const tableColumns = [
     apiField: 'zygosity',
     isVisibleByDefault: true,
     isSortable: false,
-    position: 16,
+    isPinnable: true,
+    position: 15,
     tooltip: 'Zygosity',
   },
   {
@@ -159,7 +175,8 @@ const tableColumns = [
     apiField: 'ad_ratio',
     isVisibleByDefault: true,
     isSortable: true,
-    position: 17,
+    isPinnable: true,
+    position: 16,
     tooltip: null,
   },
 ];
@@ -223,6 +240,20 @@ export const CaseEntity_Variants = {
       cy.showColumn(getColumnName(tableColumns, columnID));
     },
     /**
+     * Shrink all columns in the table.
+     */
+    shrinkAllColumns() {
+      tableColumns.forEach(column => {
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
+          if (position !== -1) {
+            cy.get(CommonSelectors.tableHeadCell()).eq(position).invoke('css', 'width', '1px');
+          } else {
+            cy.log(`Warning: Column ${column.id} not found`);
+          }
+        });
+      });
+    },
+    /**
      * Sorts a column, optionally using an intercept.
      * @param columnID The ID of the column to sort.
      * @param needIntercept Whether to use an intercept (default: true).
@@ -254,6 +285,13 @@ export const CaseEntity_Variants = {
   },
 
   validations: {
+    /**
+     * Validates the pill in the selected query.
+     * @param dataVariant The variant object.
+     */
+    shouldDrawerOpen(dataVariant: any) {
+      cy.get('[class*="data-[state=open]:animate-in"]').contains(dataVariant.variant).should('exist');
+    },
     /**
      * Checks that a specific column is displayed.
      * @param columnID The ID of the column to check.
@@ -293,7 +331,7 @@ export const CaseEntity_Variants = {
     shouldHaveSelectedQueryPill(dataVariant: any, columnID: string) {
       switch (columnID) {
         case 'gene':
-          cy.validatePillSelectedQuery('Gene Symbol', [dataVariant[columnID]]);
+          cy.validatePillSelectedQuery('Gene Symbol', [dataVariant[columnID].toLowerCase()]);
           break;
         default:
           cy.validatePillSelectedQuery(getColumnName(tableColumns, columnID), [dataVariant[columnID]]);
@@ -433,7 +471,8 @@ export const CaseEntity_Variants = {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column.tooltip);
+              CaseEntity_Variants.actions.shrinkAllColumns();
+              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column);
             } else {
               cy.log(`Warning: Column ${column.id} not found`);
             }
