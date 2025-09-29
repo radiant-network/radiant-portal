@@ -22,6 +22,7 @@ const tableColumns = {
       apiField: '',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: false,
       position: 0,
       tooltip: null,
     },
@@ -31,6 +32,7 @@ const tableColumns = {
       apiField: 'case_id',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 1,
       tooltip: null,
     },
@@ -40,6 +42,7 @@ const tableColumns = {
       apiField: 'interpretation_updated_on',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 2,
       tooltip: 'Last intepretation date',
     },
@@ -49,6 +52,7 @@ const tableColumns = {
       apiField: 'condition_name',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 3,
       tooltip: null,
     },
@@ -58,6 +62,7 @@ const tableColumns = {
       apiField: 'classification',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 4,
       tooltip: null,
     },
@@ -67,6 +72,7 @@ const tableColumns = {
       apiField: 'zygosity',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 5,
       tooltip: null,
     },
@@ -76,6 +82,7 @@ const tableColumns = {
       apiField: 'inheritance_code',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 6,
       tooltip: null,
     },
@@ -85,6 +92,7 @@ const tableColumns = {
       apiField: 'performer_lab_code',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 7,
       tooltip: null,
     },
@@ -94,6 +102,7 @@ const tableColumns = {
       apiField: 'case_analysis_code',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 8,
       tooltip: null,
     },
@@ -103,6 +112,7 @@ const tableColumns = {
       apiField: 'status_code',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 9,
       tooltip: null,
     },
@@ -114,6 +124,7 @@ const tableColumns = {
       apiField: 'case_id',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 0,
       tooltip: null,
     },
@@ -123,6 +134,7 @@ const tableColumns = {
       apiField: 'seq_id',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 1,
       tooltip: null,
     },
@@ -132,6 +144,7 @@ const tableColumns = {
       apiField: 'patient_id',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 2,
       tooltip: null,
     },
@@ -141,6 +154,7 @@ const tableColumns = {
       apiField: 'submitter_sample_id',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 3,
       tooltip: null,
     },
@@ -150,6 +164,7 @@ const tableColumns = {
       apiField: 'affected_status',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 4,
       tooltip: null,
     },
@@ -159,6 +174,7 @@ const tableColumns = {
       apiField: '',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 5,
       tooltip: null,
     },
@@ -168,6 +184,7 @@ const tableColumns = {
       apiField: 'zygosity',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 6,
       tooltip: null,
     },
@@ -177,6 +194,7 @@ const tableColumns = {
       apiField: 'performer_lab_code',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 7,
       tooltip: null,
     },
@@ -186,6 +204,7 @@ const tableColumns = {
       apiField: 'case_analysis_code',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 8,
       tooltip: null,
     },
@@ -195,6 +214,7 @@ const tableColumns = {
       apiField: 'created_on',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 9,
       tooltip: 'Date received',
     },
@@ -204,6 +224,7 @@ const tableColumns = {
       apiField: 'status_code',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 10,
       tooltip: null,
     },
@@ -293,7 +314,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
           if (position !== -1) {
-            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldHaveTooltip(column.tooltip);
+            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldHaveTooltip(column);
           } else {
             cy.log(`Warning: Column ${column.id} not found`);
           }
@@ -397,7 +418,7 @@ const uninterpretedColumnContentHandler = (columnID: string, dataUninterpreted: 
       break;
     case 'aff_status':
       cy.validateTableFirstRowContent(dataUninterpreted[columnID], position, tableId);
-      cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, tableId);
+      cy.validateTableFirstRowClass(CommonSelectors.tag('red'), position, tableId);
       break;
     case 'zygosity':
       cy.validateTableFirstRowContent(dataUninterpreted[columnID], position, tableId);

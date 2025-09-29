@@ -129,16 +129,22 @@ Cypress.Commands.add('shouldBeSortable', { prevSubject: 'element' }, (subject, i
 /**
  * Asserts that a given element has a tooltip with the specified content.
  * @param subject The element to check for tooltip.
- * @param tooltipContent The expected tooltip content (null if no tooltip).
+ * @param column The column object containing the necessary fields.
  */
-Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, tooltipContent: string | RegExp | null) => {
-  if (tooltipContent) {
-    cy.wrap(subject).invoke('css', 'width', '200px' /*Widen column for tooltip access*/).find(CommonSelectors.underlineHeader).scrollIntoView().realHover();
-    cy.get(CommonSelectors.tooltipPopper).contains(tooltipContent).first().should('exist');
+Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, column: any) => {
+  let scrollIntoSubject;
+  if (column.isSortable || column.isPinnable) {
+    scrollIntoSubject = cy.wrap(subject).invoke('css', 'width', '125px' /*Widen column for tooltip access*/).scrollIntoView().should('be.visible');
+  } else {
+    scrollIntoSubject = cy.wrap(subject).scrollIntoView().should('be.visible');
+  }
+  if (column.tooltip) {
+    scrollIntoSubject.find(CommonSelectors.underlineHeader).realHover();
+    cy.get(CommonSelectors.tooltipPopper).contains(column.tooltip).first().should('exist');
     cy.get(CommonSelectors.logo).click();
     cy.get(CommonSelectors.tooltipPopper).should('not.exist');
   } else {
-    cy.wrap(subject).invoke('css', 'width', '200px' /*Widen column for tooltip access*/).scrollIntoView().realHover();
+    scrollIntoSubject.realHover();
     cy.get(CommonSelectors.tooltipPopper).should('not.exist');
   }
 });

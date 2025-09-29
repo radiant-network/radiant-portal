@@ -25,7 +25,7 @@ describe('VariantEntity - Patients - Uninterpreted - Information displayed', () 
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('patient', data.variantGermline.uninterpreted);
   });
 
-  it('Sample [SJRA-724]', () => {
+  it('Sample', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sample', data.variantGermline.uninterpreted);
   });

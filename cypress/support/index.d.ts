@@ -10,7 +10,7 @@ declare namespace Cypress {
     setLang(lang: string): cy & CyEventEmitter;
     shouldBeActiveTab(): cy & CyEventEmitter;
     shouldBeSortable(isSortable: boolean): Chainable<Element>;
-    shouldHaveTooltip(tooltipContent: string | RegExp | null): cy & CyEventEmitter;
+    shouldHaveTooltip(column: any): cy & CyEventEmitter;
     showColumn(column: string): cy & CyEventEmitter;
     sortTableAndIntercept(position: number, routeMatcher: string, nbCalls: number, tableId: string = ''): cy & CyEventEmitter;
     sortTableAndWait(position: number, tableId: string = ''): cy & CyEventEmitter;

@@ -15,6 +15,7 @@ const tableColumns = [
     apiField: 'name',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 0,
     tooltip: null,
   },
@@ -24,6 +25,7 @@ const tableColumns = [
     apiField: 'format_code',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 1,
     tooltip: null,
   },
@@ -33,6 +35,7 @@ const tableColumns = [
     apiField: 'data_type_code',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 2,
     tooltip: null,
   },
@@ -42,6 +45,7 @@ const tableColumns = [
     apiField: 'size',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 3,
     tooltip: null,
   },
@@ -51,6 +55,7 @@ const tableColumns = [
     apiField: 'patient_id',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 4,
     tooltip: null,
   },
@@ -60,6 +65,7 @@ const tableColumns = [
     apiField: 'relationship_to_proband_code',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 5,
     tooltip: null,
   },
@@ -69,6 +75,7 @@ const tableColumns = [
     apiField: 'submitter_sample_id',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 6,
     tooltip: null,
   },
@@ -78,6 +85,7 @@ const tableColumns = [
     apiField: 'task_id',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 7,
     tooltip: null,
   },
@@ -87,6 +95,7 @@ const tableColumns = [
     apiField: 'created_on',
     isVisibleByDefault: true,
     isSortable: true,
+    isPinnable: true,
     position: 8,
     tooltip: 'Date of case creation (yyyy-mm-dd)',
   },
@@ -96,6 +105,7 @@ const tableColumns = [
     apiField: 'seq_id',
     isVisibleByDefault: false,
     isSortable: true,
+    isPinnable: true,
     position: 9,
     tooltip: null,
   },
@@ -105,6 +115,7 @@ const tableColumns = [
     apiField: 'hash',
     isVisibleByDefault: false,
     isSortable: true,
+    isPinnable: true,
     position: 10,
     tooltip: null,
   },
@@ -114,6 +125,7 @@ const tableColumns = [
     apiField: 'run_alias',
     isVisibleByDefault: false,
     isSortable: true,
+    isPinnable: true,
     position: 11,
     tooltip: null,
   },
@@ -320,7 +332,7 @@ export const CaseEntity_Files = {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column.tooltip);
+              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column);
             } else {
               cy.log(`Warning: Column ${column.id} not found`);
             }

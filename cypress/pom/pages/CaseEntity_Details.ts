@@ -19,6 +19,7 @@ const tableColumns = {
       apiField: 'assay_id',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 0,
       tooltip: null,
     },
@@ -28,6 +29,7 @@ const tableColumns = {
       apiField: 'sample_id',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 1,
       tooltip: null,
     },
@@ -37,6 +39,7 @@ const tableColumns = {
       apiField: 'sample_type',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 2,
       tooltip: null,
     },
@@ -46,6 +49,7 @@ const tableColumns = {
       apiField: 'histology',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 3,
       tooltip: null,
     },
@@ -55,6 +59,7 @@ const tableColumns = {
       apiField: 'exp_strat',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 4,
       tooltip: 'Experimental Strategy',
     },
@@ -64,6 +69,7 @@ const tableColumns = {
       apiField: 'assay_status',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 5,
       tooltip: null,
     },
@@ -73,6 +79,7 @@ const tableColumns = {
       apiField: 'last_update',
       isVisibleByDefault: true,
       isSortable: true,
+      isPinnable: true,
       position: 6,
       tooltip: 'yyyy-mm-dd',
     },
@@ -82,6 +89,7 @@ const tableColumns = {
       apiField: 'actions',
       isVisibleByDefault: true,
       isSortable: false,
+      isPinnable: true,
       position: 7,
       tooltip: null,
     },
@@ -229,7 +237,7 @@ export const CaseEntity_Details = {
           cy.then(() =>
             getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, column.id).then(position => {
               if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldHaveTooltip(column.tooltip);
+                cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldHaveTooltip(column);
               } else {
                 cy.log(`Warning: Column ${column.id} not found`);
               }
