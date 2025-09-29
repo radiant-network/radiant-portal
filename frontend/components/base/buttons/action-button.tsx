@@ -4,12 +4,15 @@ import { VariantProps } from 'tailwind-variants';
 import { cn } from '@/lib/utils';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Separator } from '../ui/separator';
 
 import { actionButtonVariants } from './button.variants';
 
 interface Action {
   label: string;
+  icon?: React.ReactElement;
   onClick: () => void;
+  hasSeparator?: boolean;
 }
 
 interface ActionButtonProps
@@ -47,11 +50,15 @@ function ActionButton({
           </button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent>
+        <DropdownMenuContent className="py-1 px-0">
           {actions.map((action, index) => (
-            <DropdownMenuItem key={index} onClick={action.onClick}>
-              {action.label}
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem key={index} onClick={action.onClick}>
+                {action.icon}
+                {action.label}
+              </DropdownMenuItem>
+              {action.hasSeparator && <Separator className="my-1" />}
+            </>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>

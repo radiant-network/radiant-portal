@@ -22,19 +22,24 @@ function OccurenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) 
       actions={[
         // @TODO: to be added when the slider is implemented https://d3b.atlassian.net/browse/SJRA-558
         // {
+        //   icon: <EyeIcon />,
         //   label: t('variant.actions.preview'),
         //   onClick: () => { },
         // },
         {
+          icon: <ArrowUpRight />,
           label: t('variant.actions.open_page'),
           onClick: onNavigateToVariantPage,
+          hasSeparator: true,
         },
         //@TODO: to be added when IGV view is implemented https://d3b.atlassian.net/browse/SJRA-650
         // {
+        //   icon: <FlipHorizontal2Icon />,
         //   label: t('variant.actions.open_in_igv'),
         //   onClick: () => { },
         // },
         {
+          icon: <ArrowUpRight />,
           label: t('variant.actions.ucsc'),
           onClick: () => {
             window.open(
@@ -45,6 +50,7 @@ function OccurenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) 
           },
         },
         {
+          icon: <ArrowUpRight />,
           label: t('variant.actions.litvar'),
           onClick: () => {
             window.open(
