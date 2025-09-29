@@ -245,11 +245,12 @@ var GermlineCNVGnomadSF = Field{
 }
 
 var GermlineCNVCytobandField = Field{
-	Name:          "cytoband",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	Type:          ArrayType,
-	Table:         GermlineCNVOccurrenceTable,
+	Name:            "cytoband",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Type:            ArrayType,
+	Table:           GermlineCNVOccurrenceTable,
 }
 
 var GermlineCNVSymbolField = Field{

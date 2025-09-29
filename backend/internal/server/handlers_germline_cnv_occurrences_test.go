@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"github.com/radiant-network/radiant-api/internal/repository"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,14 @@ import (
 )
 
 type MockCNVRepository struct{}
+
+func (m *MockCNVRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
+	return []types.Aggregation{
+			{Bucket: "p1", Count: 2},
+			{Bucket: "p2", Count: 1},
+		},
+		nil
+}
 
 func (m *MockCNVRepository) GetOccurrences(int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
 	return []types.GermlineCNVOccurrence{
@@ -89,4 +98,29 @@ func Test_CNVOccurrencesCountHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"count":15}`, w.Body.String())
+}
+
+func Test_CNVOccurrencesAggregateHandler(t *testing.T) {
+	repo := &MockCNVRepository{}
+	router := gin.Default()
+	router.POST("/occurrences/germline/cnv/:seq_id/aggregate", OccurrencesGermlineCNVAggregateHandler(repo))
+
+	body := `{
+			"field": "cytoband",
+			"sqon":{
+				"op":"in",
+				"content":{
+					"field": "filter",
+					"value": ["PASS"]
+				}
+		    },
+			"size": 10
+	}`
+	req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/aggregate", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `[{"key": "p1", "count": 2}, {"key": "p2", "count": 1}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
 }

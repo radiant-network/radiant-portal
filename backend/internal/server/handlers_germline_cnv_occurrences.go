@@ -104,3 +104,51 @@ func OccurrencesGermlineCNVCountHandler(repo repository.GermlineCNVOccurrencesDA
 		c.JSON(http.StatusOK, countResponse)
 	}
 }
+
+// OccurrencesGermlineCNVAggregateHandler handles aggregation of germline CNV occurrences
+// @Summary Aggregate germline CNV occurrences
+// @Id aggregateGermlineCNVOccurrences
+// @Description Aggregate germline CNV occurrences for a given sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param seq_id path string true "Sequence ID"
+// @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
+// @Accept json
+// @Produce json
+// @Success 200 {array} types.Aggregation
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /occurrences/germline/cnv/{seq_id}/aggregate [post]
+func OccurrencesGermlineCNVAggregateHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body  types.AggregationBodyWithSqon
+			query types.AggQuery
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+
+		query, err := types.NewAggregationQueryFromSqon(body.Field, body.Sqon, types.GermlineCNVOccurrencesFields)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		aggregation, err := repo.AggregateOccurrences(seqID, query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, aggregation)
+	}
+}
