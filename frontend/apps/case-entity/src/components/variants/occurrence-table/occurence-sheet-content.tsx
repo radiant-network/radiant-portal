@@ -1,4 +1,4 @@
-import { ExpandedOccurrence, Occurrence } from '@/api/api';
+import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
 import useSWR from 'swr';
 import { occurrencesApi } from '@/utils/api';
 import { Skeleton } from '@/components/base/ui/skeleton';
@@ -11,7 +11,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { Separator } from '@/components/base/ui/separator';
 
 type OccurenceSheetContentProps = {
-  occurrence: Occurrence;
+  occurrence: GermlineSNVOccurrence;
 };
 
 type OccurrenceExpandInput = {
@@ -20,14 +20,14 @@ type OccurrenceExpandInput = {
 };
 
 async function fetchOccurrenceExpand(input: OccurrenceExpandInput) {
-  const response = await occurrencesApi.getExpandedGermlineOccurrence(input.seqId, input.locusId);
+  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(input.seqId, input.locusId);
   return response.data;
 }
 
 function OccurenceSheetContent({ occurrence }: OccurenceSheetContentProps) {
   const { t } = useI18n();
 
-  const { data, isLoading } = useSWR<ExpandedOccurrence, any, OccurrenceExpandInput>(
+  const { data, isLoading } = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
       locusId: occurrence.locus_id.toString(),
       seqId: occurrence.seq_id.toString(),
@@ -47,17 +47,17 @@ function OccurenceSheetContent({ occurrence }: OccurenceSheetContentProps) {
             occurrence={occurrence}
             renderTrigger={handleOpen => (
               <Button size="xs" onClick={handleOpen}>
-                <Edit2Icon /> {t('occurrenceExpand.actions.interpret')}
+                <Edit2Icon /> {t('occurrence_expand.actions.interpret')}
               </Button>
             )}
           />
           {/* SJRA-389 <Button color="primary" size="xs">
             <Download />
-            {t('occurrenceExpand.actions.downloadReport')}
+            {t('occurrence_expand.actions.downloadReport')}
           </Button>
           <Button color="primary" size="xs">
             <VariantIcon />
-            {t('occurrenceExpand.actions.openIGV')}
+            {t('occurrence_expand.actions.openIGV')}
           </Button> */}
         </div>
         <Separator orientation="vertical" className="h-5" />

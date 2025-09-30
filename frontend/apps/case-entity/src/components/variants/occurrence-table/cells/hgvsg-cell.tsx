@@ -1,11 +1,11 @@
-import { Occurrence } from '@/api/api';
+import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/base/ui/sheet';
 import { useState } from 'react';
 import OccurrenceSheetContent from '../occurence-sheet-content';
 
 type HgvsgCellProps = {
-  occurrence: Occurrence;
+  occurrence: GermlineSNVOccurrence;
 };
 
 function HgvsgCell({ occurrence }: HgvsgCellProps) {

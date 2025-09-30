@@ -27,13 +27,6 @@ const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
 function getVariantColumns(t: TFunction<string, undefined>) {
   return [
-    {
-      id: 'row_expand',
-      cell: RowExpandCell,
-      size: 30,
-      enableResizing: false,
-      enablePinning: false,
-    },
     // TODO: To be enabled when row selection function are implemented
     // {
     //   id: 'row_selection',
@@ -54,7 +47,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
           </TooltipHeader>
         </div>
       ),
-      size: 30,
+      size: 40,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,
