@@ -8,6 +8,8 @@ import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
 
 import InterpretationDialog from '../interpretation/interpretation-dialog';
+import VariantIcon from '@/components/base/icons/variant-icon';
+import IGVDialog from '../igv/igv-dialog';
 
 type OccurrenceExpandHeaderProps = {
   occurrence: GermlineSNVOccurrence;
@@ -34,11 +36,16 @@ export default function OccurrenceExpandHeader({ occurrence }: OccurrenceExpandH
           {/* SJRA-389 <Button color="primary" size="xs">
             <Download />
             {t('occurrence_expand.actions.download_report')}
-          </Button>
-          <Button color="primary" size="xs">
-            <VariantIcon />
-            {t('occurrence_expand.actions.open_igv')}
           </Button> */}
+          <IGVDialog
+            occurrence={occurrence}
+            renderTrigger={handleOpen => (
+              <Button color="primary" size="xs" onClick={handleOpen}>
+                <VariantIcon />
+                {t('occurrence_expand.actions.open_igv')}
+              </Button>
+            )}
+          />
         </div>
         <Separator orientation="vertical" className="h-5" />
         <div className="flex gap-4 items-center">

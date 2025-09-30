@@ -788,6 +788,9 @@
       "sequence_alteration": "Sequence Alteration"
     },
     "canonical_transcript": "Canonical transcript",
+    "igv": {
+      "title": "Alignment and variant"
+    },
     "interpretation_form": {
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
@@ -946,9 +949,6 @@
       "case": "Case",
       "unknown": "Unknown"
     },
-    "files": {
-      "title": "Files"
-    },
     "patient_information": {
       "title": "Patient Information",
       "proband": "Proband",
@@ -1047,6 +1047,20 @@
         },
         "snv": "SNV"
       }
+    },
+    "files": {
+      "title": "Files",
+      "name": "File Name",
+      "format_code": "Format",
+      "data_type_code": "Type",
+      "size": "Size",
+      "patient_id": "Patient",
+      "relationship_to_proband_code": "Relationship",
+      "submitter_sample_id": "Sample",
+      "task_id": "Task",
+      "sequencing_experiment_id": "Case",
+      "hash": "Hash",
+      "run_alias": "Run"
     }
   },
   "file_entity": {

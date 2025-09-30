@@ -780,6 +780,9 @@
       "sequence_alteration": "Modification de séquence"
     },
     "canonical_transcript": "Canonical transcript",
+    "igv": {
+      "title": "Alignement et variant"
+    },
     "interpretation_form": {
       "title": "Interprétation clinique",
       "cancel_text": "Annuler",

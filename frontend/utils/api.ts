@@ -7,6 +7,7 @@ import {
   MondoApi,
   OccurrencesApi,
   VariantApi,
+  IgvApi,
 } from '../api';
 import { BASE_PATH } from '../api/base';
 
@@ -23,3 +24,4 @@ export const mondoApi = new MondoApi(config, BASE_PATH, axiosClient);
 export const caseApi = new CasesApi(config, BASE_PATH, axiosClient);
 export const documentApi = new DocumentsApi(config, BASE_PATH, axiosClient);
 export const assayApi = new AssaysApi(config, BASE_PATH, axiosClient);
+export const igvApi = new IgvApi(config, BASE_PATH, axiosClient);
