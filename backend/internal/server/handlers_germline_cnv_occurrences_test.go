@@ -22,6 +22,15 @@ func (m *MockCNVRepository) AggregateOccurrences(seqId int, userQuery types.AggQ
 		nil
 }
 
+func (m *MockCNVRepository) GetStatisticsOccurrences(int, types.StatisticsQuery) (*types.Statistics, error) {
+	return &types.Statistics{
+			Min:  0,
+			Max:  100,
+			Type: types.IntegerType,
+		},
+		nil
+}
+
 func (m *MockCNVRepository) GetOccurrences(int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
 	return []types.GermlineCNVOccurrence{
 		{
@@ -121,6 +130,31 @@ func Test_CNVOccurrencesAggregateHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	expected := `[{"key": "p1", "count": 2}, {"key": "p2", "count": 1}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_CNVOccurrencesStatisticsHandler(t *testing.T) {
+	repo := &MockCNVRepository{}
+	router := gin.Default()
+	router.POST("/occurrences/germline/cnv/:seq_id/statistics", OccurrencesGermlineCNVStatisticsHandler(repo))
+
+	body := `{
+			"field": "length",
+			"sqon":{
+				"op":"in",
+				"content":{
+					"field": "filter",
+					"value": ["PASS"]
+				}
+		    },
+			"size": 10
+	}`
+	req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/statistics", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `{"min": 0, "max": 100, "type": "integer"}`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }

@@ -11,7 +11,6 @@ type Table struct {
 }
 
 const (
-	ArrayType   = "array"
 	IntegerType = "integer"
 	DecimalType = "decimal"
 )
@@ -27,6 +26,7 @@ type Field struct {
 	DefaultOp       string // Default operation to use if no custom one exists
 	Table           Table  // Table to which the field belongs
 	Type            string // Type of the field
+	IsArray         bool   // Whether the field is an array
 }
 
 // GetAlias returns the alias of the field if it is set, otherwise returns the name
@@ -43,9 +43,6 @@ func (f *Field) GetName() string {
 	return f.Name
 }
 
-func (f *Field) IsArray() bool {
-	return f.Type == ArrayType
-}
 func (f *Field) IsNumeric() bool {
 	return f.Type == IntegerType || f.Type == DecimalType
 }

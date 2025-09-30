@@ -113,7 +113,8 @@ var GermlineCNVCallsField = Field{
 	Name:          "calls",
 	CanBeSelected: true,
 	CanBeFiltered: true,
-	Type:          ArrayType,
+	IsArray:       true,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -146,7 +147,8 @@ var GermlineCNVPEField = Field{
 	Name:          "pe",
 	CanBeSelected: true,
 	CanBeFiltered: true,
-	Type:          ArrayType,
+	IsArray:       true,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -187,7 +189,8 @@ var GermlineCNVCIEndField = Field{
 	Name:          "ciend",
 	CanBeSelected: true,
 	CanBeFiltered: true,
-	Type:          ArrayType,
+	IsArray:       true,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -195,7 +198,8 @@ var GermlineCNVCIPosField = Field{
 	Name:          "cipos",
 	CanBeSelected: true,
 	CanBeFiltered: true,
-	Type:          ArrayType,
+	IsArray:       true,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -249,14 +253,14 @@ var GermlineCNVCytobandField = Field{
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            ArrayType,
+	IsArray:         true,
 	Table:           GermlineCNVOccurrenceTable,
 }
 
 var GermlineCNVSymbolField = Field{
 	Name:          "symbol",
 	CanBeFiltered: true,
-	Type:          ArrayType,
+	IsArray:       true,
 	Table:         GermlineCNVOccurrenceTable,
 }
 

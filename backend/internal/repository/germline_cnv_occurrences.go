@@ -20,6 +20,7 @@ type GermlineCNVOccurrencesDAO interface {
 	GetOccurrences(seqId int, userFilter types.ListQuery) ([]GermlineCNVOccurrence, error)
 	CountOccurrences(seqId int, userFilter types.CountQuery) (int64, error)
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
+	GetStatisticsOccurrences(seqId int, query types.StatisticsQuery) (*Statistics, error)
 }
 
 func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRepository {
@@ -117,7 +118,7 @@ func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(seqId int, userQ
 	var aggregation []Aggregation
 	var aggCol = userQuery.GetAggregateField()
 	var sel string
-	if aggCol.IsArray() {
+	if aggCol.IsArray {
 		//Example :
 		// SELECT unnest as bucket, count(distinct cnvo.name) as count
 		// FROM germline__cnv__occurrence cnvo join unnest(cnvo.cytoband) as unnest on true
@@ -136,4 +137,25 @@ func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(seqId int, userQ
 		return nil, fmt.Errorf("error query aggregation: %w", err)
 	}
 	return aggregation, nil
+}
+
+func (r *GermlineCNVOccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	tx, err := r.prepareQuery(seqId, userQuery)
+	var statistics types.Statistics
+	if err != nil {
+		return &statistics, fmt.Errorf("error during query preparation %w", err)
+	}
+	targetCol := userQuery.GetTargetedField()
+	var sel string
+	if targetCol.IsArray {
+		sel = fmt.Sprintf("MIN(ARRAY_MIN(%s.%s)) as min, MAX(ARRAY_MAX(%s.%s)) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
+	} else {
+		sel = fmt.Sprintf("MIN(%s.%s) as min, MAX(%s.%s) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
+	}
+	tx = tx.Select(sel)
+	if err = tx.Find(&statistics).Error; err != nil {
+		return nil, fmt.Errorf("error query statistics: %w", err)
+	}
+	statistics.Type = targetCol.Type
+	return &statistics, nil
 }

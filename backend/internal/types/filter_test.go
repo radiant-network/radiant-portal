@@ -13,7 +13,7 @@ var EmployeeTable = Table{
 var ageField = Field{Name: "age", CanBeSelected: true, CanBeFiltered: true, CanBeAggregated: true, DefaultOp: "default", Table: EmployeeTable}
 var salaryField = Field{Name: "salary", CanBeSelected: true, CanBeFiltered: true, CanBeAggregated: true, DefaultOp: "default", Table: EmployeeTable}
 var cityField = Field{Name: "city", CanBeSelected: true, CanBeFiltered: true, CanBeAggregated: true, DefaultOp: "default", Table: EmployeeTable}
-var hobbiesField = Field{Name: "hobbies", CanBeFiltered: true, CanBeAggregated: false, CustomOp: "array_contains", Type: ArrayType, Table: EmployeeTable}
+var hobbiesField = Field{Name: "hobbies", CanBeFiltered: true, CanBeAggregated: false, CustomOp: "array_contains", IsArray: true, Table: EmployeeTable}
 
 var allEmpoyeeFields = []Field{
 	ageField,
