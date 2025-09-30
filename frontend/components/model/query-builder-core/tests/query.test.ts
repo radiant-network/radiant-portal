@@ -3,6 +3,7 @@ import { CoreQueryBuilderProps, createQueryBuilder, QueryBuilderInstance, QueryB
 import { BooleanOperators, ISyntheticSqon, IValueQuery } from '../../sqon';
 import { isEmptySqon } from '../utils/sqon';
 import { SavedFilterTypeEnum } from '../../saved-filter';
+import { SavedFilterType } from '../../../../api/api';
 
 const defaultQueries: ISyntheticSqon[] = [
   {
@@ -54,6 +55,7 @@ let defaultProps: CoreQueryBuilderProps = {
     selectedQueryIndexes: [],
     savedFilters: [],
   },
+  savedFilterType: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
 };
 
 const mockUUID = 'abababab-abab-4bab-abab-abababababab';
@@ -282,7 +284,7 @@ describe('Query Manipulation', () => {
   it('should add pill to the query', () => {
     const pill: IValueQuery = {
       id: 'pill-id',
-      title: 'Pill Title',
+      name: 'Pill Title',
       content: [
         {
           content: {
@@ -305,7 +307,7 @@ describe('Query Manipulation', () => {
   it('should remove pill by id from the query', () => {
     const pill: IValueQuery = {
       id: 'pill-id',
-      title: 'Pill Title',
+      name: 'Pill Title',
       content: [
         {
           content: {
@@ -627,9 +629,9 @@ describe('Query Manipulation', () => {
       },
     }));
 
-    const customPillTitle = 'Custom pill title';
+    const customPillName = 'Custom pill title';
 
-    await qb.getQuery('1')?.saveAsCustomPill(customPillTitle);
+    await qb.getQuery('1')?.saveAsCustomPill(customPillName);
 
     const updatedQuery = state.queries.find(q => q.id === initialQuery.id)!;
     const customPillContent = updatedQuery.content[0] as ISyntheticSqon;
@@ -637,14 +639,14 @@ describe('Query Manipulation', () => {
     expect(customPillContent.id).toEqual(mockUUID);
     expect(customPillContent.op).toEqual(initialQuery.op);
     expect(customPillContent.content).toEqual(initialQuery.content);
-    expect(customPillContent.title).toEqual(customPillTitle);
+    expect(customPillContent.title).toEqual(customPillName);
     expect(mockOnCustomPillSave).toHaveBeenCalledTimes(1);
     expect(mockOnCustomPillSave).toHaveBeenCalledWith({
       favorite: false,
       id: mockUUID,
       queries: [initialQuery],
-      title: customPillTitle,
-      type: SavedFilterTypeEnum.Query,
+      name: customPillName,
+      type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
     });
   });
 });

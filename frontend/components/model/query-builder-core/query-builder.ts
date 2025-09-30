@@ -1,21 +1,25 @@
-import { BooleanOperators, ISyntheticSqon, TSyntheticSqonContent } from '../sqon';
-import { getNewSavedFilter } from './utils/saved-filter';
-import { ISavedFilter, IUserSavedFilter } from '../saved-filter';
-import { createSavedFilter, SavedFilterInstance } from './saved-filter';
-import { createQuery, QueryInstance } from './query';
 import { v4 } from 'uuid';
+
+import { SavedFilterType, Sqon } from '@/api/api';
+
+import { ISavedFilter, IUserSavedFilter } from '../saved-filter';
+import { BooleanOperators, ISyntheticSqon, TSyntheticSqonContent } from '../sqon';
+
+import { getNewSavedFilter } from './utils/saved-filter';
 import { cleanUpQueries, formatQueriesWithPill, getDefaultSyntheticSqon } from './utils/sqon';
+import { createQuery, QueryInstance } from './query';
+import { createSavedFilter, SavedFilterInstance } from './saved-filter';
 
 export type QueryBuilderState = {
   /**
    * Id of the active query
    */
-  activeQueryId: string;
+  activeQueryId: any;
 
   /**
    * List of queries
    */
-  queries: ISyntheticSqon[];
+  queries: Sqon[];
 
   /**
    * List of saved filters
@@ -32,7 +36,7 @@ export type CoreQueryBuilderProps = {
   /**
    * Unique ID for the QueryBuilder
    */
-  id: string;
+  id: any;
 
   /**
    * State of the QueryBuilder. Use this to control the QueryBuilder
@@ -48,6 +52,11 @@ export type CoreQueryBuilderProps = {
    * Default title for a SavedFilter
    */
   savedFilterDefaultTitle?: string;
+
+  /**
+   * Sent to User Saved Filter api
+   */
+  savedFilterType: SavedFilterType;
 
   /**
    * Callback when the state of the QueryBuilder changes
@@ -67,12 +76,12 @@ export type CoreQueryBuilderProps = {
   /**
    * Callback when a new query is deleted
    */
-  onQueryDelete?(id: string): void;
+  onQueryDelete?(id: any): void;
 
   /**
    * Callback when a SavedFilter is deleted
    */
-  onSavedFilterDelete?(id: string): { savedFilterId: string } | Promise<{ savedFilterId: string }>;
+  onSavedFilterDelete?(id: any): { savedFilterId: any } | Promise<{ savedFilterId: any }>;
 
   /**
    * Callback when a SavedFilter is created
@@ -82,12 +91,12 @@ export type CoreQueryBuilderProps = {
   /**
    * Callback when a SavedFilter is saved
    */
-  onSavedFilterSave?(filter: ISavedFilter): void | Promise<IUserSavedFilter>;
+  onSavedFilterSave?(filter: ISavedFilter): Promise<IUserSavedFilter>;
 
   /**
    * Callback when a SavedFilter is updated
    */
-  onSavedFilterUpdate?(filter: ISavedFilter): void | Promise<IUserSavedFilter>;
+  onSavedFilterUpdate?(filter: ISavedFilter): Promise<IUserSavedFilter>;
 
   /**
    * Callback when a custom pill is saved
@@ -139,7 +148,7 @@ export type QueryBuilderInstance = {
   /**
    * Call this function to save the current filter
    */
-  saveNewFilter: (params?: { title?: string; favorite?: boolean }) => Promise<void>;
+  saveNewFilter: (params?: Partial<ISavedFilter>) => Promise<void>;
 
   /**
    * Call this function to create a new SavedFilter.
@@ -277,7 +286,7 @@ export const getDefaultQueryBuilderState = (): QueryBuilderState => {
 
   return {
     activeQueryId: defaultUUID,
-    queries: [getDefaultSyntheticSqon(defaultUUID)],
+    queries: [getDefaultSyntheticSqon(defaultUUID)] as Sqon[],
     savedFilters: [],
     selectedQueryIndexes: [],
   };
@@ -294,9 +303,7 @@ export const createQueryBuilder = (coreProps: CoreQueryBuilderProps): QueryBuild
     setState: updater => {
       queryBuilder.coreProps.onStateChange?.(updater(queryBuilder.coreProps.state));
     },
-    getState: () => {
-      return queryBuilder.coreProps.state as QueryBuilderState;
-    },
+    getState: () => queryBuilder.coreProps.state as QueryBuilderState,
     reset: () => {
       queryBuilder.setState(() => queryBuilder.coreProps.initialState!);
     },
@@ -307,40 +314,52 @@ export const createQueryBuilder = (coreProps: CoreQueryBuilderProps): QueryBuild
       queryBuilder.setState(prev => ({
         ...prev,
         activeQueryId: newActiveId,
-        queries: [defaultQuery],
+        queries: [defaultQuery] as Sqon[],
       }));
 
       queryBuilder.coreProps.onActiveQueryChange?.(defaultQuery);
     },
-    saveNewFilter: async params => {
+    saveNewFilter: async filter => {
       const savedFilterToSave: ISavedFilter = {
-        id: v4(),
-        title: params?.title || queryBuilder.coreProps.savedFilterDefaultTitle || 'New Filter',
-        favorite: params?.favorite === undefined ? false : params.favorite,
-        queries: queryBuilder.getRawQueries(),
+        id: filter?.id || (v4() as any),
+        name: filter?.name || queryBuilder.coreProps.savedFilterDefaultTitle || 'New Filter',
+        favorite: filter?.favorite === undefined ? false : filter.favorite,
+        queries: filter?.queries || (queryBuilder.getRawQueries() as Sqon[]),
+        type: filter?.type || queryBuilder.coreProps.savedFilterType,
       };
 
       return Promise.resolve(
         queryBuilder.coreProps.onSavedFilterSave?.({
           ...savedFilterToSave,
-          queries: formatQueriesWithPill(savedFilterToSave.queries),
+          queries: formatQueriesWithPill(savedFilterToSave.queries as ISyntheticSqon[]) as Sqon[],
         }),
-      ).then(() =>
-        queryBuilder.setState(prev => ({
-          ...prev,
-          savedFilters: [
-            ...prev.savedFilters,
-            {
-              ...savedFilterToSave,
-              isNew: false,
-              isDirty: false,
-            },
-          ],
-        })),
-      );
+      ).then(newSavedFilter => {
+        if (!newSavedFilter) return;
+
+        queryBuilder.setState(prev => {
+          // Remove the saved filter to save from the list of saved filters
+          // ID can change when saving a filter, we need to remove the old one and add the new one
+          const savedFiltersFiltered = prev.savedFilters.filter(filter => filter.id !== savedFilterToSave.id);
+
+          return {
+            ...prev,
+            savedFilters: [
+              ...savedFiltersFiltered,
+              {
+                ...newSavedFilter,
+                isNew: false,
+                isDirty: false,
+              },
+            ],
+          };
+        });
+      });
     },
     createSavedFilter: () => {
-      const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();
+      const { newActiveQueryId, newSavedFilter } = getNewSavedFilter({
+        type: queryBuilder.coreProps.savedFilterType,
+        defaultTitle: queryBuilder.coreProps.savedFilterDefaultTitle,
+      });
 
       queryBuilder.setState(prev => ({
         ...prev,
@@ -370,26 +389,24 @@ export const createQueryBuilder = (coreProps: CoreQueryBuilderProps): QueryBuild
     },
     getSavedFilters: () => {
       if (queryBuilder.coreProps.state.savedFilters && queryBuilder.coreProps.state.savedFilters.length > 0) {
-        return queryBuilder.coreProps.state.savedFilters.map(savedFilter =>
+        const savedFilters = queryBuilder.coreProps.state.savedFilters.map(savedFilter =>
           createSavedFilter(savedFilter, queryBuilder),
         );
+
+        return savedFilters;
       }
 
       return [];
     },
     getQueries: () => {
       if (queryBuilder.coreProps.state.queries && queryBuilder.coreProps.state.queries.length > 0) {
-        return queryBuilder.coreProps.state.queries.map(query => createQuery(query, queryBuilder));
+        return queryBuilder.coreProps.state.queries.map(query => createQuery(query as ISyntheticSqon, queryBuilder));
       }
 
       return [];
     },
-    getRawQueries: () => {
-      return queryBuilder.coreProps.state.queries || [];
-    },
-    getSelectedQueryIndexes: () => {
-      return queryBuilder.getState().selectedQueryIndexes;
-    },
+    getRawQueries: () => (queryBuilder.coreProps.state.queries as ISyntheticSqon[]) || [],
+    getSelectedQueryIndexes: () => queryBuilder.getState().selectedQueryIndexes,
     toggleQuerySelect: (id, selected) => {
       queryBuilder.getQuery(id)?.toggleSelect(selected);
     },
@@ -406,7 +423,7 @@ export const createQueryBuilder = (coreProps: CoreQueryBuilderProps): QueryBuild
       queryBuilder.setState(prev => ({
         ...prev,
         activeQueryId: newQuery.id,
-        queries: cleanUpQueries([...queryBuilder.getRawQueries(), newQuery]),
+        queries: cleanUpQueries([...queryBuilder.getRawQueries(), newQuery]) as Sqon[],
       }));
 
       queryBuilder.coreProps.onActiveQueryChange?.(newQuery);
@@ -414,9 +431,7 @@ export const createQueryBuilder = (coreProps: CoreQueryBuilderProps): QueryBuild
 
       return newQuery.id;
     },
-    getQuery: id => {
-      return queryBuilder.getQueries().find(query => query.id === id) || null;
-    },
+    getQuery: id => queryBuilder.getQueries().find(query => query.id === id) || null,
     setActiveQuery: id => {
       queryBuilder.getQuery(id)?.setAsActive();
     },
@@ -444,15 +459,9 @@ export const createQueryBuilder = (coreProps: CoreQueryBuilderProps): QueryBuild
     changeQueryCombineOperator: (id, operator) => {
       queryBuilder.getQuery(id)?.changeCombineOperator(operator);
     },
-    hasEmptyQuery: () => {
-      return queryBuilder.getQueries().some(query => query.isEmpty());
-    },
-    hasQueries: () => {
-      return queryBuilder.getQueries().length > 0;
-    },
-    canCombine: () => {
-      return queryBuilder.getQueries().length > 1 && queryBuilder.getSelectedQueryIndexes().length > 1;
-    },
+    hasEmptyQuery: () => queryBuilder.getQueries().some(query => query.isEmpty()),
+    hasQueries: () => queryBuilder.getQueries().length > 0,
+    canCombine: () => queryBuilder.getQueries().length > 1 && queryBuilder.getSelectedQueryIndexes().length > 1,
     resetQueries: activeQueryId => {
       const newActiveQuery = getDefaultSyntheticSqon(activeQueryId);
 
@@ -461,7 +470,7 @@ export const createQueryBuilder = (coreProps: CoreQueryBuilderProps): QueryBuild
       queryBuilder.setState(prev => ({
         ...prev,
         activeQueryId,
-        queries: [newActiveQuery],
+        queries: [newActiveQuery] as Sqon[],
       }));
     },
     combineSelectedQueries: (operator: BooleanOperators) => {
@@ -480,16 +489,14 @@ export const createQueryBuilder = (coreProps: CoreQueryBuilderProps): QueryBuild
       queryBuilder.setState(prev => ({
         ...prev,
         activeQueryId: combinedQuery.id,
-        queries: cleanUpQueries([...prev.queries, combinedQuery]),
+        queries: cleanUpQueries([...prev.queries, combinedQuery] as ISyntheticSqon[]) as Sqon[],
         selectedQueryIndexes,
       }));
       queryBuilder.coreProps.onActiveQueryChange?.(combinedQuery);
       queryBuilder.coreProps.onQueryCreate?.(combinedQuery);
       queryBuilder.coreProps.onQuerySelectChange?.(selectedQueryIndexes);
     },
-    isEmpty: () => {
-      return queryBuilder.getQueries().length === 1 && queryBuilder.getQueries()[0].isEmpty();
-    },
+    isEmpty: () => queryBuilder.getQueries().length === 1 && queryBuilder.getQueries()[0].isEmpty(),
   };
 
   Object.assign(queryBuilder, coreInstance);

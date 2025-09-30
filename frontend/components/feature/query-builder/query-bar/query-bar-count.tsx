@@ -9,33 +9,37 @@ import { Sqon } from '@/api/api';
 import { numberFormat } from '@/components/lib/number-format';
 
 function QueryBarCount() {
-  const { queryBuilder, queryCountIcon, fetchQueryCount } = useQueryBuilderContext();
+  const { queryBuilder, queryCountIcon, fetchQueryCount, loading: QBLoading } = useQueryBuilderContext();
   const { query } = useQueryBarContext();
 
   const previousQuery = useRef<ISqonGroupFilter | null>(null);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loadingCount, setLoadingCount] = useState(true);
 
   useEffect(() => {
+    if (QBLoading) {
+      return;
+    }
+
     if (queryBuilder.getRawQueries().find(q => q.id === query.id)) {
       const previous = previousQuery.current;
       const resolvedCurrent = resolveSyntheticSqon(query.raw(), queryBuilder.getRawQueries());
 
       if (!previousQuery.current || !isEqual(previous, resolvedCurrent)) {
         previousQuery.current = resolvedCurrent;
-        setLoading(true);
+        setLoadingCount(true);
         fetchQueryCount(resolvedCurrent as Sqon)
           .then(setTotal)
           .finally(() => {
-            setLoading(false);
+            setLoadingCount(false);
           });
       }
     }
-  }, [fetchQueryCount, query.raw(), queryBuilder.getRawQueries()]);
+  }, [fetchQueryCount, query.raw(), queryBuilder.getRawQueries(), QBLoading]);
 
   return (
     <div className="flex items-center gap-1">
-      {loading ? (
+      {loadingCount ? (
         <Spinner />
       ) : (
         <>

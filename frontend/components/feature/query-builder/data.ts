@@ -3,7 +3,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { ArrayTenOrMore, QueryBuilderDictionary } from './types';
 
 export const useQueryBuilderDictionary = (): QueryBuilderDictionary => {
-  const { t } = useI18n('common');
+  const { t } = useI18n();
 
   return {
     queryBar: {
@@ -125,6 +125,18 @@ export const useQueryBuilderDictionary = (): QueryBuilderDictionary => {
       },
       discardTooltip: t('common.saved_filter.discard_tooltip'),
       noSavedFilters: t('common.saved_filter.no_saved_filters'),
+      notifications: {
+        created: t('common.saved_filter.notifications.created'),
+        deleted: t('common.saved_filter.notifications.deleted'),
+        updated: t('common.saved_filter.notifications.updated'),
+        errors: {
+          duplicated: t('common.saved_filter.notifications.errors.duplicated'),
+          fetching: t('common.saved_filter.notifications.errors.fetching'),
+          updated: t('common.saved_filter.notifications.errors.updated'),
+          deleted: t('common.saved_filter.notifications.errors.deleted'),
+          created: t('common.saved_filter.notifications.errors.created'),
+        },
+      },
     },
   };
 };

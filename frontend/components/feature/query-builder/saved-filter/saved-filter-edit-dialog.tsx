@@ -1,3 +1,8 @@
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+import { Button } from '@/components/base/ui/button';
 import {
   Dialog,
   DialogBody,
@@ -7,18 +12,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
-import { Button } from '@/components/base/ui/button';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { Form, FormField, FormControl, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/ui/form';
 import { Input } from '@/components/base/ui/input';
 import { SavedFilterInstance } from '@/components/model/query-builder-core';
-import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
 import { SavedFilterTypeEnum } from '@/components/model/saved-filter';
 
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { toast } from 'sonner';
+
 const formSchema = z.object({
-  title: z.string().min(2, 'Min 2 characters').max(50, 'Max 50 characters'),
+  name: z.string().min(2, 'Min 2 characters').max(50, 'Max 50 characters'),
 });
 
 function SavedFiltersEditDialog({
@@ -36,15 +39,22 @@ function SavedFiltersEditDialog({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     values: {
-      title: savedFilter?.raw().title || '',
+      name: savedFilter?.raw().name || '',
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (savedFilter) {
-      savedFilter.save(SavedFilterTypeEnum.Filter, { title: values.title });
+    if (savedFilter && !savedFilter.isNew()) {
+      savedFilter
+        .save(SavedFilterTypeEnum.Filter, { name: values.name })
+        .then(() => {
+          toast.success(dict.savedFilter.notifications.updated);
+        })
+        .catch(() => {
+          toast.error(dict.savedFilter.notifications.errors.updated);
+        });
     } else {
-      queryBuilder.saveNewFilter({ title: values.title });
+      queryBuilder.saveNewFilter({ name: values.name });
     }
 
     onOpenChange(false);
@@ -61,7 +71,7 @@ function SavedFiltersEditDialog({
             <DialogBody>
               <FormField
                 control={form.control}
-                name="title"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{dict.savedFilter.editDialog.fields.title.label}</FormLabel>
@@ -71,6 +81,7 @@ function SavedFiltersEditDialog({
                     <FormMessage />
                   </FormItem>
                 )}
+                schema={formSchema}
               />
             </DialogBody>
             <DialogFooter>

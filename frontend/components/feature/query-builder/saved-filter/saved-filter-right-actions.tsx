@@ -1,10 +1,11 @@
 import { cn } from '@/components/lib/utils';
+
+import SavedFiltersDeleteAction from './saved-filter-delete-action';
 import SavedFiltersDuplicateAction from './saved-filter-duplicate-action';
 import SavedFiltersNewAction from './saved-filter-new-action';
 import SavedFiltersSaveAction from './saved-filter-save-action';
-import SavedFiltersDeleteAction from './saved-filter-delete-action';
-import SavedFiltersShareAction from './saved-filter-share-action';
 import SavedFiltersSelect from './saved-filter-select';
+import SavedFiltersShareAction from './saved-filter-share-action';
 
 function SavedFiltersRightActions({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (

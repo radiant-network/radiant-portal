@@ -9,7 +9,8 @@ function SavedFiltersShareAction() {
 
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
-  const handleShare = function () {
+  // TODO: To be added
+  const handleShare = function() {
     // Share
   };
 

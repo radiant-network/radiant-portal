@@ -1,12 +1,14 @@
+import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { action } from '@storybook/addon-actions';
-import QueryBuilder from '@/components/feature/query-builder/query-builder';
-import { defaultQueryReferenceColors } from '@/components/feature/query-builder/data';
-import { Button } from '@/components/base/ui/button';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
-import { v4 } from 'uuid';
 import { UserIcon } from 'lucide-react';
+import { v4 } from 'uuid';
+
+import { Button } from '@/components/base/ui/button';
+import { defaultQueryReferenceColors } from '@/components/feature/query-builder/data';
+import QueryBuilder from '@/components/feature/query-builder/query-builder';
+import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+
 import { generateRandomQuery, generateRandomUserSavedFilter } from './utils';
 
 const mockDictionary = {
@@ -236,14 +238,12 @@ export const Default: Story = {
     onSavedFilterSave: fn(),
     onSavedFilterUpdate: fn(),
   },
-  render: args => {
-    return (
-      <div className="space-y-3">
-        <QueryBuilder {...args} />
-        <TestingTools queryBuilderId={qbId} />
-      </div>
-    );
-  },
+  render: args => (
+    <div className="space-y-3">
+      <QueryBuilder {...args} />
+      <TestingTools queryBuilderId={qbId} />
+    </div>
+  ),
 };
 
 const customPillActiveQueryId = v4();
@@ -291,9 +291,7 @@ export const CustomPill: Story = {
         ),
     },
   },
-  render: args => {
-    return <QueryBuilder {...args} />;
-  },
+  render: args => <QueryBuilder {...args} />,
 };
 
 export const QueryPillFilter: Story = {
@@ -324,12 +322,10 @@ export const QueryPillFilter: Story = {
       },
     },
   },
-  render: args => {
-    return (
-      <div className="space-y-3">
-        <QueryBuilder {...args} />
-        <TestingTools queryBuilderId={qbQueryPillFilterId} />
-      </div>
-    );
-  },
+  render: args => (
+    <div className="space-y-3">
+      <QueryBuilder {...args} />
+      <TestingTools queryBuilderId={qbQueryPillFilterId} />
+    </div>
+  ),
 };

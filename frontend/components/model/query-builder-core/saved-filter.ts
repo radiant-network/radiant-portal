@@ -1,17 +1,20 @@
-import { ISyntheticSqon } from '../sqon';
-import { createQuery, QueryInstance } from './query';
-import { ISavedFilter, SavedFilterTypeEnum } from '../saved-filter';
-import { QueryBuilderInstance } from './query-builder';
-import { v4 } from 'uuid';
-import { getNewSavedFilter } from './utils/saved-filter';
 import isEqual from 'lodash/isEqual';
+import { v4 } from 'uuid';
+
+import { ISavedFilter, SavedFilterTypeEnum } from '../saved-filter';
+import { ISyntheticSqon } from '../sqon';
+
+import { getNewSavedFilter } from './utils/saved-filter';
 import { formatQueriesWithPill } from './utils/sqon';
+import { createQuery, QueryInstance } from './query';
+import { QueryBuilderInstance } from './query-builder';
+import { Sqon } from '@/api/api';
 
 export type CoreSavedFilter = {
   /**
    * Id of the SavedFilter
    */
-  id: string;
+  id: any;
 
   /**
    * Call this function to get the SavedFilter's raw data
@@ -62,7 +65,7 @@ export type CoreSavedFilter = {
   save(
     type: SavedFilterTypeEnum,
     params?: {
-      title?: string;
+      name?: string;
       favorite?: boolean;
     },
   ): Promise<void>;
@@ -112,17 +115,13 @@ export const createSavedFilter = (
     raw: () => rawSavedFilter,
     getQueries: () => {
       if (rawSavedFilter.queries && rawSavedFilter.queries.length > 0) {
-        return rawSavedFilter.queries.map(query => createQuery(query, queryBuilder));
+        return rawSavedFilter.queries.map(query => createQuery(query as ISyntheticSqon, queryBuilder));
       }
 
       return [];
     },
-    getRawQueries: () => {
-      return rawSavedFilter.queries;
-    },
-    getQueryById: id => {
-      return _savedFilter.getQueries().find(query => query.id === id) || null;
-    },
+    getRawQueries: () => rawSavedFilter.queries as ISyntheticSqon[],
+    getQueryById: id => _savedFilter.getQueries().find(query => query.id === id) || null,
     copy: () => {
       const copiedQueries: ISyntheticSqon[] = _savedFilter.getRawQueries().map(query => ({
         ...query,
@@ -130,16 +129,17 @@ export const createSavedFilter = (
       }));
 
       const existingSavedFilters = queryBuilder.getSavedFilters().filter(filter => !filter.isNew());
-      const existingTitles = existingSavedFilters.filter(filter => filter.raw().title.includes(rawSavedFilter.title));
-      const copiedTitle = `${rawSavedFilter.title} COPY${existingTitles.length > 1 ? ` ${existingTitles.length - 1}` : ''}`;
+      const existingNames = existingSavedFilters.filter(filter => filter.raw().name.includes(rawSavedFilter.name));
+      const copiedName = `${rawSavedFilter.name} COPY${existingNames.length > 1 ? ` ${existingNames.length - 1}` : ''}`;
 
       const copiedSavedFilter: ISavedFilter = {
         favorite: false,
-        id: v4(),
-        queries: copiedQueries,
-        title: copiedTitle,
+        id: v4() as any,
+        queries: copiedQueries as Sqon[],
+        name: copiedName,
         isDirty: false,
         isNew: true,
+        type: queryBuilder.coreProps.savedFilterType,
       };
 
       return copiedSavedFilter;
@@ -150,7 +150,7 @@ export const createSavedFilter = (
 
         queryBuilder.setState(prev => ({
           ...prev,
-          activeQueryId: copiedSavedFilter.queries[0].id,
+          activeQueryId: copiedSavedFilter.queries[0].id!,
           queries: copiedSavedFilter.queries,
           savedFilters: [...prev.savedFilters, copiedSavedFilter],
         }));
@@ -160,9 +160,12 @@ export const createSavedFilter = (
         console.error('Can only duplicate the selected saved filter');
       }
     },
-    delete: async () => {
-      return Promise.resolve(queryBuilder.coreProps.onSavedFilterDelete?.(savedFilterId)).then(() => {
-        const { newActiveQueryId, newSavedFilter } = getNewSavedFilter();
+    delete: async () =>
+      Promise.resolve(queryBuilder.coreProps.onSavedFilterDelete?.(savedFilterId)).then(() => {
+        const { newActiveQueryId, newSavedFilter } = getNewSavedFilter({
+          type: queryBuilder.coreProps.savedFilterType,
+          defaultTitle: queryBuilder.coreProps.savedFilterDefaultTitle,
+        });
 
         queryBuilder.setState(prev => ({
           ...prev,
@@ -171,44 +174,45 @@ export const createSavedFilter = (
           savedFilters: [...prev.savedFilters.filter(filter => filter.id !== savedFilterId), newSavedFilter],
         }));
 
-        queryBuilder.coreProps.onActiveQueryChange?.(newSavedFilter.queries[0]);
+        queryBuilder.coreProps.onActiveQueryChange?.(newSavedFilter.queries[0] as ISyntheticSqon);
         queryBuilder.coreProps.onSavedFilterCreate?.(newSavedFilter);
-      });
-    },
+      }),
     save: async (type, params) => {
       const savedFilterToSave: ISavedFilter = {
         ..._savedFilter.raw(),
-        title: params?.title || _savedFilter.raw().title,
+        name: params?.name || _savedFilter.raw().name,
         favorite: params?.favorite !== undefined ? params.favorite : _savedFilter.raw().favorite,
-        type,
-        queries: queryBuilder.getRawQueries(),
+        queries: queryBuilder.getRawQueries() as Sqon[],
       };
 
       const asCustomPill = type === SavedFilterTypeEnum.Query;
 
       if (asCustomPill) {
         return Promise.resolve(queryBuilder.coreProps.onCustomPillUpdate?.(savedFilterToSave)).then(() => {});
-      } else {
-        return Promise.resolve(
-          queryBuilder.coreProps.onSavedFilterUpdate?.({
-            ...savedFilterToSave,
-            queries: formatQueriesWithPill(savedFilterToSave.queries),
-          }),
-        ).then(() =>
-          queryBuilder.setState(prev => ({
-            ...prev,
-            savedFilters: prev.savedFilters.map(filter =>
-              filter.id === savedFilterId
-                ? {
-                    ...savedFilterToSave,
-                    isNew: false,
-                    isDirty: false,
-                  }
-                : filter,
-            ),
-          })),
-        );
       }
+
+      return Promise.resolve(
+        queryBuilder.coreProps.onSavedFilterUpdate?.({
+          ...savedFilterToSave,
+          queries: formatQueriesWithPill(savedFilterToSave.queries as ISyntheticSqon[]) as Sqon[],
+        }),
+      ).then(newSavedFilter => {
+        if (!newSavedFilter) return;
+
+        queryBuilder.setState(prev => ({
+          ...prev,
+          savedFilters: prev.savedFilters.map(filter => {
+            if (filter.id === newSavedFilter.id) {
+              return {
+                ...newSavedFilter,
+                isNew: false,
+                isDirty: false,
+              };
+            }
+            return filter;
+          }),
+        }));
+      });
     },
     select: () => {
       queryBuilder.setState(prev => ({
@@ -236,12 +240,8 @@ export const createSavedFilter = (
        */
       return rawSavedFilter.queries.find(query => currentQueryIds.includes(query.id)) !== undefined;
     },
-    isFavorite: () => {
-      return rawSavedFilter.favorite || false;
-    },
-    isNew: () => {
-      return rawSavedFilter.isNew || false;
-    },
+    isFavorite: () => rawSavedFilter.favorite || false,
+    isNew: () => rawSavedFilter.isNew || false,
     isDirty: () => {
       if (!_savedFilter.isSelected() || rawSavedFilter.isNew) {
         return false;
@@ -263,20 +263,14 @@ export const createSavedFilter = (
       return !rawSavedFilter.queries.every(savedFilterQuery => {
         const foundQuery = queryBuilder.getRawQueries().find(query => query.id == savedFilterQuery.id);
 
-        return foundQuery
-          ? isEqual(
-              {
-                content: foundQuery.content,
-                id: foundQuery.id,
-                op: foundQuery.op,
-              },
-              {
-                content: savedFilterQuery.content,
-                id: savedFilterQuery.id,
-                op: savedFilterQuery.op,
-              },
-            )
-          : false;
+        if (foundQuery) {
+          return isEqual(
+            { content: foundQuery.content, id: foundQuery.id, op: foundQuery.op },
+            { content: savedFilterQuery.content, id: savedFilterQuery.id, op: savedFilterQuery.op },
+          );
+        }
+
+        return false;
       });
     },
   };

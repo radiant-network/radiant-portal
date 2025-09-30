@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
+      '@/portals': path.resolve(__dirname, '../../portals'),
       '@/utils': path.resolve(__dirname, '../../utils'),
       '@/components': path.resolve(__dirname, '../../components'),
       '@/base': path.resolve(__dirname, '../../components/base'),

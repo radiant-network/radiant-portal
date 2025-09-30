@@ -1,8 +1,10 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { CopyIcon } from 'lucide-react';
-import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
-import { openOverwriteSavedFilterAlert } from '../alerts';
+
 import { Button } from '@/components/base/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+
+import { openOverwriteSavedFilterAlert } from '../alerts';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
 
 function SavedFiltersDuplicateAction() {
   const dict = useQueryBuilderDictContext();

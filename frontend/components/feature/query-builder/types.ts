@@ -1,10 +1,11 @@
+import { ReactNode } from 'react';
+import { DeepPartial } from 'react-hook-form';
+
 import { Sqon } from '@/api/api';
 import { PartialKeys } from '@/components/lib/utils';
 import { CoreQueryBuilderProps, QueryBuilderInstance } from '@/components/model/query-builder-core';
 import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
 import { IValueFilter, ResolveSyntheticSqonFunc } from '@/components/model/sqon';
-import { ReactNode } from 'react';
-import { DeepPartial } from 'react-hook-form';
 
 export type ArrayTenOrMore<T> = {
   0: T;
@@ -45,7 +46,7 @@ export type QueryPillCustomConfig = {
   /**
    * Get the filters by custom pill id
    */
-  fetchSavedFiltersByCustomPillId: (id: string) => Promise<ISavedFilter[]>;
+  fetchSavedFiltersByCustomPillId: (id: any) => Promise<ISavedFilter[]>;
 };
 
 type QueryPillFacetFilterConfig = {
@@ -111,22 +112,27 @@ type QueryBuilderSharedProps = {
 
 export type QueryBuilderProps = PartialKeys<
   CoreQueryBuilderProps &
-  QueryBuilderSharedProps & {
-    /**
-     * Initial state of the show/hide labels feature
-     */
-    initialShowHideLabels?: boolean;
+    QueryBuilderSharedProps & {
+      /**
+       * Initial state of the show/hide labels feature
+       */
+      initialShowHideLabels?: boolean;
 
-    /**
-     * Colors to use for query reference
-     */
-    queryReferenceColors?: ArrayTenOrMore<string>;
+      /**
+       * Colors to use for query reference
+       */
+      queryReferenceColors?: ArrayTenOrMore<string>;
 
-    /**
-     * Dictionary for copies
-     */
-    dictionary?: DeepPartial<QueryBuilderDictionary>;
-  },
+      /**
+       * If query builder is in loading state
+       */
+      loading?: boolean;
+
+      /**
+       * Dictionary for copies
+       */
+      dictionary?: DeepPartial<QueryBuilderDictionary>;
+    },
   'state'
 >;
 
@@ -135,6 +141,7 @@ export type QueryBuilderContextType = QueryBuilderSharedProps & {
   showLabels?: boolean;
   toggleLabels?: (show: boolean) => void;
   getQueryReferenceColor: (refIndex: number) => string;
+  loading?: boolean;
 };
 
 export type QueryBuilderDictionary = {
@@ -255,5 +262,17 @@ export type QueryBuilderDictionary = {
     };
     discardTooltip: string;
     noSavedFilters: string;
+    notifications: {
+      created: string;
+      deleted: string;
+      updated: string;
+      errors: {
+        duplicated: string;
+        fetching: string;
+        updated: string;
+        deleted: string;
+        created: string;
+      };
+    };
   };
 };

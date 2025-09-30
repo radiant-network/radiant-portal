@@ -13,13 +13,14 @@ import {
 import { Separator } from '@/components/base/ui/separator';
 import { updateQueriesWithCustomPill, useQueryBuilder } from '@/components/model/query-builder-core';
 import { ISavedFilter, IUserSavedFilter, SavedFilterTypeEnum } from '@/components/model/saved-filter';
-import { ISqonGroupFilter } from '@/components/model/sqon';
+import { ISqonGroupFilter, ISyntheticSqon } from '@/components/model/sqon';
 
 import { openCustomPillCantBeEmptyDialog, openCustomPillSaveDialog, openCustomPillTitleExistsDialog } from '../alerts';
 import { QueryBarContext } from '../query-bar/query-bar-context';
 import { QueryBuilderContext, useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
 
 import QueryPillBoolean from './query-pill-boolean';
+import { Sqon } from '@/api/api';
 
 function QueryPillCustomEditDialog({
   open,
@@ -45,7 +46,7 @@ function QueryPillCustomEditDialog({
         response => {
           rootQueryBuilder.setState(prev => ({
             ...prev,
-            queries: updateQueriesWithCustomPill(prev.queries, customPill),
+            queries: updateQueriesWithCustomPill(prev.queries as ISyntheticSqon[], customPill) as Sqon[],
           }));
 
           onOpenChange(false);
@@ -56,16 +57,17 @@ function QueryPillCustomEditDialog({
 
       return result as IUserSavedFilter;
     },
+    savedFilterType: queryPill.type,
   });
 
-  const [title, setTitle] = useState(queryPill.title);
+  const [name, setName] = useState(queryPill.name);
   const [saving, setSaving] = useState(false);
 
   const coreQuery = customQueryBuilder.getQueries()[0];
   const coreSavedFilter = customQueryBuilder.getSelectedSavedFilter();
 
-  const titleChanged = title !== queryPill.title;
-  const hasChanged = titleChanged || coreSavedFilter?.isDirty();
+  const nameChanged = name !== queryPill.name;
+  const hasChanged = nameChanged || coreSavedFilter?.isDirty();
 
   const handleOnOpenChange = useCallback(
     (open: boolean) => {
@@ -87,8 +89,8 @@ function QueryPillCustomEditDialog({
 
     setSaving(true);
 
-    if (titleChanged) {
-      const valid = await customPillConfig?.validateCustomPillTitle(title);
+    if (nameChanged) {
+      const valid = await customPillConfig?.validateCustomPillTitle(name);
 
       if (valid !== undefined && valid === false) {
         setSaving(false);
@@ -101,12 +103,12 @@ function QueryPillCustomEditDialog({
       ?.fetchSavedFiltersByCustomPillId(queryPill.id)
       .finally(() => setSaving(false));
 
-    openCustomPillSaveDialog(dict, title, associatedSavedFilters, async () =>
+    openCustomPillSaveDialog(dict, name, associatedSavedFilters, async () =>
       coreSavedFilter?.save(SavedFilterTypeEnum.Query, {
-        title,
+        name,
       }),
     );
-  }, [coreQuery, coreSavedFilter, dict, title, queryPill.id, customPillConfig]);
+  }, [coreQuery, coreSavedFilter, dict, name, queryPill.id, customPillConfig]);
 
   return (
     <Dialog open={open} onOpenChange={handleOnOpenChange}>
@@ -130,7 +132,7 @@ function QueryPillCustomEditDialog({
               </DialogHeader>
               <Separator />
               <div>
-                <EditableText onChangeText={setTitle}>{title}</EditableText>
+                <EditableText onChangeText={setName}>{name}</EditableText>
               </div>
               <div data-query-active className="flex flex-wrap group/query">
                 <QueryBarContext.Provider value={{ query: coreQuery }}>

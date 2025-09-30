@@ -1,7 +1,7 @@
-import { CountBodyWithSqon, ListBodyWithSqon } from "@/api/api";
-import { occurrencesApi } from "@/utils/api";
-import { useCallback } from "react";
+import { useCallback } from 'react';
 
+import { CountBodyWithSqon, ListBodyWithSqon } from '@/api/api';
+import { occurrencesApi } from '@/utils/api';
 
 export type OccurrencesListInput = {
   seqId: string;
@@ -14,22 +14,22 @@ export type OccurrenceCountInput = {
 };
 
 export function useOccurencesListHelper(input: OccurrencesListInput) {
-  const fetch = useCallback(async () => {
-    return occurrencesApi.listGermlineSNVOccurrences(input.seqId, input.listBody)
-      .then(response => response.data);
-  }, [input]);
+  const fetch = useCallback(
+    async () => occurrencesApi.listGermlineSNVOccurrences(input.seqId, input.listBody).then(response => response.data),
+    [input],
+  );
 
   return {
     fetch,
   };
 }
 
-
 export function useOccurencesCountHelper(input: OccurrenceCountInput) {
-  const fetch = useCallback(async () => {
-    return occurrencesApi.countGermlineSNVOccurrences(input.seqId, input.countBody)
-      .then(response => response.data);
-  }, [input]);
+  const fetch = useCallback(
+    async () =>
+      occurrencesApi.countGermlineSNVOccurrences(input.seqId, input.countBody).then(response => response.data),
+    [input],
+  );
 
   return {
     fetch,

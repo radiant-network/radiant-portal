@@ -1,5 +1,13 @@
 import isEmpty from 'lodash/isEmpty';
-import { BooleanOperators, ISyntheticSqon, IValueQuery, TSyntheticSqonContentValue } from '../sqon';
+import {
+  BooleanOperators,
+  ISyntheticSqon,
+  IValueQuery,
+  TSqonContent,
+  TSqonGroupOp,
+  TSyntheticSqonContent,
+  TSyntheticSqonContentValue,
+} from '../sqon';
 import { QueryBuilderInstance } from './query-builder';
 import {
   changeCombineOperatorForQuery,
@@ -13,6 +21,7 @@ import {
 import cloneDeep from 'lodash/cloneDeep';
 import { ISavedFilter, SavedFilterTypeEnum } from '../saved-filter';
 import { v4 } from 'uuid';
+import { Sqon } from '@/api/api';
 
 export type CoreQuery = {
   /**
@@ -48,7 +57,7 @@ export type CoreQuery = {
   /**
    * Call this function to save the Query as a custom pill
    */
-  saveAsCustomPill(title: string): void | Promise<void>;
+  saveAsCustomPill(name: string): void | Promise<void>;
 
   /**
    * Call this function to duplicate the Query
@@ -121,17 +130,13 @@ export type QueryInstance = CoreQuery;
 
 export const createQuery = (syntheticSqon: ISyntheticSqon, queryBuilder: QueryBuilderInstance): QueryInstance => {
   const query: QueryInstance = {} as QueryInstance;
-  const queryId = syntheticSqon.id;
+  const queryId = syntheticSqon.id ?? v4();
 
   const coreInstance: CoreQuery = {
     id: queryId,
     raw: () => syntheticSqon,
-    index: () => {
-      return queryBuilder.getState().queries.findIndex(query => query.id === queryId);
-    },
-    isActive: () => {
-      return queryBuilder.getState().activeQueryId === queryId;
-    },
+    index: () => queryBuilder.getState().queries.findIndex(query => query.id === queryId),
+    isActive: () => queryBuilder.getState().activeQueryId === queryId,
     isEmpty: (): boolean => isEmptySqon(syntheticSqon),
     isNotEmpty: (): boolean => !isEmptySqon(syntheticSqon),
     toggleSelect: selected => {
@@ -162,13 +167,13 @@ export const createQuery = (syntheticSqon: ISyntheticSqon, queryBuilder: QueryBu
 
       return queries.length > 1 && query.isNotEmpty();
     },
-    saveAsCustomPill: async title => {
+    saveAsCustomPill: async name => {
       const customPill: ISavedFilter = {
         favorite: false,
-        id: v4(),
-        queries: [query.raw()],
-        title,
-        type: SavedFilterTypeEnum.Query,
+        id: v4() as any,
+        queries: [query.raw()] as Sqon[],
+        name,
+        type: queryBuilder.coreProps.savedFilterType,
       };
 
       return Promise.resolve(queryBuilder.coreProps.onCustomPillSave?.(customPill)).then(() =>
@@ -177,9 +182,9 @@ export const createQuery = (syntheticSqon: ISyntheticSqon, queryBuilder: QueryBu
           content: [
             {
               id: customPill.id,
-              op: customPill.queries[0].op,
-              content: customPill.queries[0].content,
-              title: customPill.title,
+              op: customPill.queries[0].op as TSqonGroupOp,
+              content: customPill.queries[0].content as TSqonContent,
+              title: customPill.name,
             },
           ],
         }),
@@ -206,7 +211,7 @@ export const createQuery = (syntheticSqon: ISyntheticSqon, queryBuilder: QueryBu
 
         queryBuilder.setState(prev => ({
           ...prev,
-          queries: cleanUpQueries(updatedQueries),
+          queries: cleanUpQueries(updatedQueries) as Sqon[],
         }));
         queryBuilder.coreProps.onQueryUpdate?.(newQuery);
 
@@ -246,7 +251,7 @@ export const createQuery = (syntheticSqon: ISyntheticSqon, queryBuilder: QueryBu
 
       queryBuilder.setState(prev => ({
         ...prev,
-        queries: cleanUpQueries(clonedQueries),
+        queries: cleanUpQueries(clonedQueries) as Sqon[],
       }));
 
       queryBuilder.coreProps.onActiveQueryChange?.(clonedQueries[currentQueryIndex]);
@@ -277,7 +282,7 @@ export const createQuery = (syntheticSqon: ISyntheticSqon, queryBuilder: QueryBu
         .raw()
         .content.some(
           (queryPart: TSyntheticSqonContentValue) =>
-            (queryPart as IValueQuery).title || !(queryPart as IValueQuery).content,
+            (queryPart as IValueQuery).name || !(queryPart as IValueQuery).content,
         );
     },
   };

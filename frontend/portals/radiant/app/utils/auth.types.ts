@@ -1,4 +1,4 @@
-export const AuthStrategyName = "radiant-auth";
+export const AuthStrategyName = 'radiant-auth';
 
 export interface IAuthUser {
   sub: string;

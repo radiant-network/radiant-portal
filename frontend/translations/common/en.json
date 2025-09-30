@@ -251,7 +251,19 @@
       },
       "discard_tooltip": "Discard unsaved changes",
       "no_saved_filters": "You have no saved filters",
-      "untitled_filter": "Untitled filter"
+      "untitled_filter": "Untitled filter",
+      "notifications": {
+        "created": "Filter saved",
+        "deleted": "Filter deleted",
+        "updated": "Filter updated",
+        "errors": {
+          "fetching": "Unable to fetch filters",
+          "duplicated": "A filter with this name already exists",
+          "created": "Unable to create filter",
+          "updated": "Unable to update filter",
+          "deleted": "Unable to delete filter"
+        }
+      }
     },
     "components": {
       "query_pill_remote": "Composant Query Pill Remote",
