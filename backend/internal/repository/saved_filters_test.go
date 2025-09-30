@@ -37,40 +37,40 @@ func Test_GetSavedFilterByID_NotFound(t *testing.T) {
 	})
 }
 
-func Test_GetSavedFiltersByUserID(t *testing.T) {
+func Test_GetSavedFiltersByUserID_NotType(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilters, err := repo.GetSavedFiltersByUserID("1")
+		savedFilters, err := repo.GetSavedFiltersByUserID("1", "")
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
 		assert.Len(t, *savedFilters, 2)
 	})
 }
 
-func Test_GetSavedFiltersByUserID_NotFound(t *testing.T) {
+func Test_GetSavedFiltersByUserID_UserIdNotFound(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilters, err := repo.GetSavedFiltersByUserID("not_existing_user")
+		savedFilters, err := repo.GetSavedFiltersByUserID("not_existing_user", "")
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
 		assert.Len(t, *savedFilters, 0)
 	})
 }
 
-func Test_GetSavedFiltersByUserIDAndType(t *testing.T) {
+func Test_GetSavedFiltersByUserID(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilters, err := repo.GetSavedFiltersByUserIDAndType("1", types.GERMLINE_SNV_OCCURRENCE)
+		savedFilters, err := repo.GetSavedFiltersByUserID("1", types.GERMLINE_SNV_OCCURRENCE)
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
 		assert.Len(t, *savedFilters, 1)
 	})
 }
 
-func Test_GetSavedFiltersByUserIDAndType_NotFound(t *testing.T) {
+func Test_GetSavedFiltersByUserID_NotFound(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilters, err := repo.GetSavedFiltersByUserIDAndType("1", types.SOMATIC_SNV_VARIANT)
+		savedFilters, err := repo.GetSavedFiltersByUserID("1", types.SOMATIC_SNV_VARIANT)
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
 		assert.Len(t, *savedFilters, 0)

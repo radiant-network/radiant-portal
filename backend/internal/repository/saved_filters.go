@@ -20,8 +20,7 @@ type SavedFiltersRepository struct {
 
 type SavedFiltersDAO interface {
 	GetSavedFilterByID(savedFilterId int) (*SavedFilter, error)
-	GetSavedFiltersByUserID(userId string) (*[]SavedFilter, error)
-	GetSavedFiltersByUserIDAndType(userId string, savedFilterType string) (*[]SavedFilter, error)
+	GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]SavedFilter, error)
 	CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error)
 	UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId int, userId string) (*SavedFilter, error)
 	DeleteSavedFilter(savedFilterId int, userId string) error
@@ -52,24 +51,17 @@ func (r *SavedFiltersRepository) GetSavedFilterByID(savedFilterId int) (*SavedFi
 	return &savedFilter, nil
 }
 
-func (r *SavedFiltersRepository) GetSavedFiltersByUserID(userId string) (*[]SavedFilter, error) {
+func (r *SavedFiltersRepository) GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]SavedFilter, error) {
 	var savedFilters []SavedFilter
+	var tx *gorm.DB
 
-	tx := r.db.
-		Table(types.SavedFilterTable.Name).Where("user_id = ?", userId)
-
-	if err := tx.Find(&savedFilters).Error; err != nil {
-		return nil, fmt.Errorf("error retrieve saved filter by user ID: %w", err)
+	if savedFilterType != "" {
+		tx = r.db.
+			Table(types.SavedFilterTable.Name).Where("user_id = ? and type = ?", userId, savedFilterType)
+	} else {
+		tx = r.db.
+			Table(types.SavedFilterTable.Name).Where("user_id = ?", userId)
 	}
-
-	return &savedFilters, nil
-}
-
-func (r *SavedFiltersRepository) GetSavedFiltersByUserIDAndType(userId string, savedFilterType string) (*[]SavedFilter, error) {
-	var savedFilters []SavedFilter
-
-	tx := r.db.
-		Table(types.SavedFilterTable.Name).Where("user_id = ? and type = ?", userId, savedFilterType)
 
 	if err := tx.Find(&savedFilters).Error; err != nil {
 		return nil, fmt.Errorf("error retrieve saved filter by user ID and type: %w", err)

@@ -3029,15 +3029,14 @@ paths:
       summary: Get API status
       tags:
       - status
-  /users/{user_id}/saved_filters:
+  /users/saved_filters:
     get:
       description: Get user saved filters
-      operationId: getSavedFiltersByUserID
+      operationId: getSavedFilters
       parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
+      - description: Saved Filter Type
+        in: query
+        name: type
         schema:
           type: string
       responses:
@@ -3072,56 +3071,6 @@ paths:
       summary: Get user saved filters
       tags:
       - saved_filters
-  /users/{user_id}/saved_filters/{saved_filter_type}:
-    get:
-      description: Get user saved filters by type
-      operationId: getSavedFiltersByUserIDAndType
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        schema:
-          type: string
-      - description: Saved Filter Type
-        in: path
-        name: saved_filter_type
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/SavedFilter'
-                type: array
-          description: OK
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Unauthorized
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get user saved filters by type
-      tags:
-      - saved_filters
-  /users/saved_filters:
     post:
       description: Create a new saved filter
       operationId: postSavedFilter
