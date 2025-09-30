@@ -4,7 +4,7 @@ package types
 // @Description GermlineCNVOccurrence represents a germline CNV occurrence
 type GermlineCNVOccurrence struct {
 	SeqID      int               `json:"seq_id"`
-	Aliquot    string            `json:"aliquot"`
+	Aliquot    string            `json:"aliquot,omitempty"`
 	Chromosome string            `json:"chromosome"`
 	Start      int               `json:"start"`
 	End        int               `json:"end"`
@@ -53,10 +53,11 @@ var GermlineCNVAliquotField = Field{
 }
 
 var GermlineCNVChromosomeField = Field{
-	Name:          "chromosome",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	Table:         GermlineCNVOccurrenceTable,
+	Name:            "chromosome",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           GermlineCNVOccurrenceTable,
 }
 
 var GermlineCNVStartField = Field{
@@ -78,10 +79,12 @@ var GermlineCNVEndField = Field{
 }
 
 var GermlineCNVTypeField = Field{
-	Name:          "type",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	Table:         GermlineCNVOccurrenceTable,
+	Name:            "type",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	CanBeSorted:     true,
+	Table:           GermlineCNVOccurrenceTable,
 }
 
 var GermlineCNVLengthField = Field{
@@ -119,10 +122,11 @@ var GermlineCNVCallsField = Field{
 }
 
 var GermlineCNVFilterField = Field{
-	Name:          "filter",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	Table:         GermlineCNVOccurrenceTable,
+	Name:            "filter",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           GermlineCNVOccurrenceTable,
 }
 
 var GermlineCNVBCField = Field{
@@ -302,30 +306,17 @@ var GermlineCNVOccurrencesFields = []Field{
 
 var GermlineCNVOccurrencesDefaultFields = []Field{
 	GermlineCNVSeqIdField,
-	GermlineCNVAliquotField,
 	GermlineCNVChromosomeField,
 	GermlineCNVStartField,
 	GermlineCNVEndField,
 	GermlineCNVTypeField,
 	GermlineCNVLengthField,
 	GermlineCNVNameField,
-	GermlineCNVQualityField,
-	GermlineCNVCallsField,
-	GermlineCNVFilterField,
-	GermlineCNVBCField,
 	GermlineCNVCNField,
-	GermlineCNVPEField,
-	GermlineCNVSMField,
-	GermlineCNVSVTypeField,
-	GermlineCNVSVLenField,
-	GermlineCNVRefLenField,
-	GermlineCNVCIEndField,
-	GermlineCNVCIPosField,
 	GermlineCNVNbGenesField,
 	GermlineCNVNbSNVField,
-	GermlineCNVGnomadSC,
-	GermlineCNVGnomadSN,
 	GermlineCNVGnomadSF,
+	GermlineCNVSymbolField,
 	GermlineCNVCytobandField,
 }
 
