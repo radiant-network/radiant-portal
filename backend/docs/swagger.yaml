@@ -2546,6 +2546,56 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
+  /occurrences/germline/cnv/{seq_id}/aggregate:
+    post:
+      description: Aggregate germline CNV occurrences for a given sequence ID
+      operationId: aggregateGermlineCNVOccurrences
+      parameters:
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AggregationBodyWithSqon'
+        description: Aggregation Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Aggregation'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Aggregate germline CNV occurrences
+      tags:
+      - occurrences
   /occurrences/germline/cnv/{seq_id}/count:
     post:
       description: Counts germline CNV occurrences for a given sequence ID
@@ -2642,6 +2692,54 @@ paths:
       security:
       - bearerauth: []
       summary: List germline CNV occurrences
+      tags:
+      - occurrences
+  /occurrences/germline/cnv/{seq_id}/statistics:
+    post:
+      description: Return statistics about a field for a given sequence ID
+      operationId: statisticsGermlineCNVOccurrences
+      parameters:
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatisticsBodyWithSqon'
+        description: Statistics Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Statistics of germline CNV occurrences
       tags:
       - occurrences
   /occurrences/germline/snv/{seq_id}/{locus_id}/expanded:

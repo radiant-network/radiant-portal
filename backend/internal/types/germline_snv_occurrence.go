@@ -222,7 +222,7 @@ var GermlineSNVExomiserAcmgEvidenceField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Type:            ArrayType,
+	IsArray:         true,
 	Table:           GermlineSNVOccurrenceTable,
 }
 var GermlineSNVExomiserVariantScoreField = Field{

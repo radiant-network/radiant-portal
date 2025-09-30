@@ -134,6 +134,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
 	occurrencesGermlineCNVGroup.POST("/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))
 	occurrencesGermlineCNVGroup.POST("/:seq_id/list", server.OccurrencesGermlineCNVListHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineCNVAggregateHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineCNVStatisticsHandler(repoGermlineCNVOccurrences))
 
 	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")
 	occurrencesGermlineSNVGroup.POST("/:seq_id/count", server.OccurrencesGermlineSNVCountHandler(repoGermlineSNVOccurrences))

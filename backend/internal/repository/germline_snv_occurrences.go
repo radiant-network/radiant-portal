@@ -214,7 +214,7 @@ func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(seqId int, userQ
 	}
 	aggCol := userQuery.GetAggregateField()
 	var sel string
-	if aggCol.IsArray() {
+	if aggCol.IsArray {
 		//Example :  select unnest  as bucket, count(distinct o.locus_id) as c from occurrences o
 		//join variants v on v.locus_id=o.locus_id
 		//join unnest(v.clinvar_interpretation) as unnest  on true where o.seq_id=4586 and o.part=11 and o.has_alt
@@ -237,12 +237,17 @@ func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(seqId int, userQ
 
 func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
 	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
-	var statistics Statistics
+	var statistics types.Statistics
 	if err != nil {
 		return &statistics, fmt.Errorf("error during query preparation %w", err)
 	}
 	targetCol := userQuery.GetTargetedField()
-	sel := fmt.Sprintf("MIN(%s.%s) as min, MAX(%s.%s) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
+	var sel string
+	if targetCol.IsArray {
+		sel = fmt.Sprintf("MIN(ARRAY_MIN(%s.%s)) as min, MAX(ARRAY_MAX(%s.%s)) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
+	} else {
+		sel = fmt.Sprintf("MIN(%s.%s) as min, MAX(%s.%s) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
+	}
 	tx = tx.Select(sel)
 	if err = tx.Find(&statistics).Error; err != nil {
 		return nil, fmt.Errorf("error query statistics: %w", err)

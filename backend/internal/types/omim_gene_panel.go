@@ -31,7 +31,7 @@ var OmimInheritanceField = Field{
 	Alias:           "omim_inheritance",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
-	Type:            ArrayType,
+	IsArray:         true,
 	Table:           OmimGenePanelTable,
 }
 

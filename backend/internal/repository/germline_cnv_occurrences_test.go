@@ -231,3 +231,29 @@ func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By
 		}
 	})
 }
+
+func Test_GermlineCNV_GetStatisticsOccurrences_Length(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+		query, err := types.NewStatisticsQueryFromSqon("length", nil, types.GermlineCNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(2, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 100, statistics.Min)
+		assert.EqualValues(t, 300, statistics.Max)
+		assert.EqualValues(t, types.IntegerType, statistics.Type)
+	})
+}
+
+func Test_GermlineCNV_GetStatisticsOccurrences_Pe(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+		query, err := types.NewStatisticsQueryFromSqon("pe", nil, types.GermlineCNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(2, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, statistics.Min)
+		assert.EqualValues(t, 18, statistics.Max)
+		assert.EqualValues(t, types.IntegerType, statistics.Type)
+	})
+}

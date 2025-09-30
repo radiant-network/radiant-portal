@@ -265,7 +265,7 @@ var ClinvarField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Type:            ArrayType,
+	IsArray:         true,
 	Table:           VariantTable,
 }
 
@@ -292,7 +292,7 @@ var PickedConsequencesField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Type:            ArrayType,
+	IsArray:         true,
 	Table:           VariantTable,
 }
 var PickedVepImpactField = Field{
@@ -334,7 +334,7 @@ var PickedOmimInheritanceCodeField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          ArrayType,
+	IsArray:       true,
 	Table:         VariantTable,
 }
 var GnomadV3AfField = Field{
