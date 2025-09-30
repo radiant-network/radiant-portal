@@ -58,11 +58,16 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	})
 }
 
-func assertGetSavedFilterByUserIDHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, status int, expected string) {
+func assertGetSavedFiltersHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterType *types.SavedFilterType, status int, expected string) {
 	router := gin.Default()
-	router.GET("/users/:user_id/saved_filters", server.GetSavedFiltersByUserIDHandler(repo, auth))
+	router.GET("/users/saved_filters", server.GetSavedFiltersHandler(repo, auth))
 
-	req, _ := http.NewRequest("GET", "/users/1/saved_filters", bytes.NewBuffer([]byte("{}")))
+	var req *http.Request
+	if savedFilterType != nil {
+		req, _ = http.NewRequest("GET", fmt.Sprintf("/users/saved_filters?type=%s", *savedFilterType), bytes.NewBuffer([]byte("{}")))
+	} else {
+		req, _ = http.NewRequest("GET", "/users/saved_filters", bytes.NewBuffer([]byte("{}")))
+	}
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -70,7 +75,7 @@ func assertGetSavedFilterByUserIDHandler(t *testing.T, repo repository.SavedFilt
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
-func Test_GetSavedFilterByUserIDHandler(t *testing.T) {
+func Test_GetSavedFiltersHandler(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
@@ -103,26 +108,15 @@ func Test_GetSavedFilterByUserIDHandler(t *testing.T) {
 			"updated_on":"2021-09-12T13:08:00Z", 
 			"user_id":"1"
 		}]`
-		assertGetSavedFilterByUserIDHandler(t, repo, auth, http.StatusOK, expected)
+		assertGetSavedFiltersHandler(t, repo, auth, nil, http.StatusOK, expected)
 	})
 }
 
-func assertGetSavedFilterByUserIDAndTypeHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterType types.SavedFilterType, status int, expected string) {
-	router := gin.Default()
-	router.GET("/users/:user_id/saved_filters/:saved_filter_type", server.GetSavedFiltersByUserIDAndTypeHandler(repo, auth))
-
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/1/saved_filters/%s", savedFilterType), bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, status, w.Code)
-	assert.JSONEq(t, expected, w.Body.String())
-}
-
-func Test_GetSavedFilterByUserIDAndTypeHandler(t *testing.T) {
+func Test_GetSavedFiltersHandler_FilterOnType(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
+		savedFilterType := types.GERMLINE_SNV_OCCURRENCE
 		expected := `[{
 			"created_on":"2021-09-12T13:08:00Z", 
 			"favorite":false, 
@@ -138,7 +132,7 @@ func Test_GetSavedFilterByUserIDAndTypeHandler(t *testing.T) {
 			"updated_on":"2021-09-12T13:08:00Z", 
 			"user_id":"1"
 		}]`
-		assertGetSavedFilterByUserIDAndTypeHandler(t, repo, auth, types.GERMLINE_SNV_OCCURRENCE, http.StatusOK, expected)
+		assertGetSavedFiltersHandler(t, repo, auth, &savedFilterType, http.StatusOK, expected)
 	})
 }
 

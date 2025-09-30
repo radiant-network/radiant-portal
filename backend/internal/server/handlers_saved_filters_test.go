@@ -46,62 +46,7 @@ func (m *MockRepository) GetSavedFilterByID(savedFilterId int) (*types.SavedFilt
 	}, nil
 }
 
-func (m *MockRepository) GetSavedFiltersByUserID(userId string) (*[]types.SavedFilter, error) {
-	return &[]types.SavedFilter{
-		{
-			ID:       1,
-			UserID:   "1",
-			Name:     "saved_filter_snv_1",
-			Type:     types.GERMLINE_SNV_OCCURRENCE,
-			Favorite: utils.BoolPointer(false),
-			CreatedOn: time.Date(
-				2021, 9, 12, 13, 8, 0, 0, time.UTC),
-			UpdatedOn: time.Date(
-				2021, 9, 12, 13, 8, 0, 0, time.UTC),
-			Queries: types.JsonArray[types.Sqon]{
-				{
-					Op: "and",
-					Content: types.SqonArray{
-						{
-							Op: "in",
-							Content: types.LeafContent{
-								Field: "chromosome",
-								Value: []interface{}{"1"},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			ID:       2,
-			UserID:   "1",
-			Name:     "saved_filter_cnv_1",
-			Type:     types.GERMLINE_CNV_OCCURRENCE,
-			Favorite: utils.BoolPointer(true),
-			CreatedOn: time.Date(
-				2021, 9, 12, 13, 8, 0, 0, time.UTC),
-			UpdatedOn: time.Date(
-				2021, 9, 12, 13, 8, 0, 0, time.UTC),
-			Queries: types.JsonArray[types.Sqon]{
-				{
-					Op: "and",
-					Content: types.SqonArray{
-						{
-							Op: "in",
-							Content: types.LeafContent{
-								Field: "chromosome",
-								Value: []interface{}{"1"},
-							},
-						},
-					},
-				},
-			},
-		},
-	}, nil
-}
-
-func (m *MockRepository) GetSavedFiltersByUserIDAndType(userId string, savedFilterType string) (*[]types.SavedFilter, error) {
+func (m *MockRepository) GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]types.SavedFilter, error) {
 	return &[]types.SavedFilter{
 		{
 			ID:       1,
@@ -192,13 +137,13 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	}`, w.Body.String())
 }
 
-func Test_GetSavedFiltersByUserIDHandler(t *testing.T) {
+func Test_GetSavedFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.GET("/users/:user_id/saved_filters", GetSavedFiltersByUserIDHandler(repo, auth))
+	router.GET("/users/saved_filters", GetSavedFiltersHandler(repo, auth))
 
-	req, _ := http.NewRequest("GET", "/users/1/saved_filters", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/users/saved_filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -217,20 +162,6 @@ func Test_GetSavedFiltersByUserIDHandler(t *testing.T) {
 		"type":"germline_snv_occurrence", 
 		"updated_on":"2021-09-12T13:08:00Z", 
 		"user_id":"1"
-	}, {
-		"created_on":"2021-09-12T13:08:00Z", 
-		"favorite":true, 
-		"id":2, 
-		"name":"saved_filter_cnv_1", 
-		"queries":[
-			{
-				"content":[{"content":{"field":"chromosome", "value":["1"]}, "op":"in"}], 
-				"op":"and"
-			}
-		], 
-		"type":"germline_cnv_occurrence", 
-		"updated_on":"2021-09-12T13:08:00Z", 
-		"user_id":"1"
 	}]`, w.Body.String())
 }
 
@@ -238,9 +169,9 @@ func Test_GetSavedFiltersByUserIDAndTypeHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.GET("/users/:user_id/saved_filters/:saved_filter_type", GetSavedFiltersByUserIDAndTypeHandler(repo, auth))
+	router.GET("/users/saved_filters", GetSavedFiltersHandler(repo, auth))
 
-	req, _ := http.NewRequest("GET", "/users/1/saved_filters/germline-snv-occurrence", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/users/saved_filters?type=germline-snv-occurrence", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
