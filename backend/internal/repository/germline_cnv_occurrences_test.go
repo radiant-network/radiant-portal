@@ -172,3 +172,62 @@ func Test_GermlineCNV_CountOccurrences_PanelFilter(t *testing.T) {
 		assert.Equal(t, int64(1), count)
 	})
 }
+
+func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+		query, err := types.NewAggregationQueryFromSqon("omim_gene_panel", nil, CNVOccurrencesQueryConfigForTest.AllFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(2, query)
+		assert.NoError(t, err)
+		if assert.Len(t, aggregate, 4) {
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "panel4", aggregate[0].Bucket)
+			assert.EqualValues(t, 2, aggregate[1].Count)
+			assert.Equal(t, "panel2", aggregate[1].Bucket)
+			assert.EqualValues(t, 2, aggregate[2].Count)
+			assert.Equal(t, "panel3", aggregate[2].Bucket)
+			assert.EqualValues(t, 3, aggregate[3].Count)
+			assert.Equal(t, "panel1", aggregate[3].Bucket)
+		}
+	})
+}
+
+func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Cytoband(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+		query, err := types.NewAggregationQueryFromSqon("cytoband", nil, CNVOccurrencesQueryConfigForTest.AllFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(2, query)
+		assert.NoError(t, err)
+		if assert.Len(t, aggregate, 2) {
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "p2", aggregate[0].Bucket)
+			assert.EqualValues(t, 2, aggregate[1].Count)
+			assert.Equal(t, "p1", aggregate[1].Bucket)
+		}
+	})
+}
+
+func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Cytoband_Filter_By_Panel(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+		sqon := &types.Sqon{
+			Content: types.SqonArray{
+				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel4"}}},
+			},
+			Op: "and",
+		}
+		query, err := types.NewAggregationQueryFromSqon("cytoband", sqon, CNVOccurrencesQueryConfigForTest.AllFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(2, query)
+		assert.NoError(t, err)
+		if assert.Len(t, aggregate, 2) {
+			assert.EqualValues(t, 1, aggregate[0].Count)
+			assert.Equal(t, "p1", aggregate[0].Bucket)
+			assert.EqualValues(t, 1, aggregate[1].Count)
+			assert.Equal(t, "p2", aggregate[1].Bucket)
+
+		}
+	})
+}

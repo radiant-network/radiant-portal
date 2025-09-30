@@ -19,6 +19,7 @@ type GermlineCNVOccurrencesRepository struct {
 type GermlineCNVOccurrencesDAO interface {
 	GetOccurrences(seqId int, userFilter types.ListQuery) ([]GermlineCNVOccurrence, error)
 	CountOccurrences(seqId int, userFilter types.CountQuery) (int64, error)
+	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 }
 
 func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRepository {
@@ -31,7 +32,7 @@ func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRep
 
 func (r *GermlineCNVOccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
 	var occurrences []GermlineCNVOccurrence
-	tx, err := r.prepareListOrCountQuery(seqId, userQuery)
+	tx, err := r.prepareQuery(seqId, userQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -71,7 +72,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(seqId int, userQuery t
 }
 
 func (r *GermlineCNVOccurrencesRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
-	tx, err := r.prepareListOrCountQuery(seqId, userQuery)
+	tx, err := r.prepareQuery(seqId, userQuery)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -86,7 +87,7 @@ func (r *GermlineCNVOccurrencesRepository) CountOccurrences(seqId int, userQuery
 	return count, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) prepareListOrCountQuery(seqId int, userQuery types.Query) (*gorm.DB, error) {
+func (r *GermlineCNVOccurrencesRepository) prepareQuery(seqId int, userQuery types.Query) (*gorm.DB, error) {
 	part, err := utils.GetSequencingPart(seqId, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during partition fetch %w", err)
@@ -96,7 +97,7 @@ func (r *GermlineCNVOccurrencesRepository) prepareListOrCountQuery(seqId int, us
 		fmt.Sprintf("%s %s", types.GermlineCNVOccurrenceTable.Name, types.GermlineCNVOccurrenceTable.Alias),
 	).Where("seq_id = ? and part=?", seqId, part)
 
-	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
+	if userQuery != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
 		selectedPanelsTables := utils.GetDistinctTablesFromFields(selectedPanelsField)
 		for _, panelsTable := range selectedPanelsTables {
@@ -106,4 +107,33 @@ func (r *GermlineCNVOccurrencesRepository) prepareListOrCountQuery(seqId int, us
 	}
 	utils.AddWhere(userQuery, tx)
 	return tx, nil
+}
+
+func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
+	tx, err := r.prepareQuery(seqId, userQuery)
+	if err != nil {
+		return nil, fmt.Errorf("error during query preparation %w", err)
+	}
+	var aggregation []Aggregation
+	var aggCol = userQuery.GetAggregateField()
+	var sel string
+	if aggCol.IsArray() {
+		//Example :
+		// SELECT unnest as bucket, count(distinct cnvo.name) as count
+		// FROM germline__cnv__occurrence cnvo join unnest(cnvo.cytoband) as unnest on true
+		// WHERE (seq_id = 2 and part=1) AND cnvo.cytoband is not null GROUP BY `bucket` ORDER BY count asc, bucket asc
+		unnestJoin := fmt.Sprintf("join unnest(%s.%s) as unnest on true", aggCol.Table.Alias, aggCol.Name)
+		tx = tx.Joins(unnestJoin)
+		sel = fmt.Sprintf("unnest as bucket, count(distinct %s.name) as count", types.GermlineCNVOccurrenceTable.Alias)
+	} else {
+		sel = fmt.Sprintf("%s.%s as bucket, count(distinct %s.name) as count", aggCol.Table.Alias, aggCol.Name, types.GermlineCNVOccurrenceTable.Alias)
+	}
+
+	tx = tx.Select(sel).
+		Where(fmt.Sprintf("%s.%s is not null", aggCol.Table.Alias, aggCol.Name)). //We don't want to count null values
+		Group("bucket").Order("count asc, bucket asc")
+	if err = tx.Find(&aggregation).Error; err != nil {
+		return nil, fmt.Errorf("error query aggregation: %w", err)
+	}
+	return aggregation, nil
 }
