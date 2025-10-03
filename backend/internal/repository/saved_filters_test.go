@@ -25,6 +25,7 @@ func Test_GetSavedFilterByID(t *testing.T) {
 		assert.NotNil(t, savedFilter.CreatedOn)
 		assert.NotNil(t, savedFilter.UpdatedOn)
 		assert.Len(t, savedFilter.Queries, 1)
+		assert.Equal(t, "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5", savedFilter.Queries[0].Id)
 	})
 }
 
@@ -85,6 +86,7 @@ func Test_CreateSavedFilter(t *testing.T) {
 			Type: types.SOMATIC_SNV_OCCURRENCE,
 			Queries: types.JsonArray[types.Sqon]{
 				{
+					Id: "UUID_of_the_query_1",
 					Op: "and",
 					Content: types.SqonArray{
 						{
@@ -120,6 +122,7 @@ func Test_CreateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 			Type: types.SOMATIC_SNV_OCCURRENCE,
 			Queries: types.JsonArray[types.Sqon]{
 				{
+					Id: "UUID_of_the_query_1",
 					Op: "and",
 					Content: types.SqonArray{
 						{
@@ -151,6 +154,7 @@ func Test_UpdateSavedFilter(t *testing.T) {
 			Type: types.SOMATIC_SNV_OCCURRENCE,
 			Queries: types.JsonArray[types.Sqon]{
 				{
+					Id: "UUID_of_the_query_1",
 					Op: "and",
 					Content: types.SqonArray{
 						{
@@ -172,6 +176,7 @@ func Test_UpdateSavedFilter(t *testing.T) {
 			Name: "new_saved_filter_somatic_snv_occurrence_updated",
 			Queries: types.JsonArray[types.Sqon]{
 				{
+					Id: "UUID_of_the_query_2",
 					Op: "and",
 					Content: types.SqonArray{
 						{
