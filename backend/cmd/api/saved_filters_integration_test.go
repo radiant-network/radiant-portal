@@ -46,6 +46,7 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 			"name":"saved_filter_snv_1", 
 			"queries":[
 				{
+					"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 					"content":[{"content":{"field":"chromosome", "value":["X"]}, "op":"in"}], 
 					"op":"and"
 				}
@@ -86,6 +87,7 @@ func Test_GetSavedFiltersHandler(t *testing.T) {
 			"name":"saved_filter_snv_1", 
 			"queries":[
 				{
+					"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 					"content":[{"content":{"field":"chromosome", "value":["X"]}, "op":"in"}], 
 					"op":"and"
 				}
@@ -100,6 +102,7 @@ func Test_GetSavedFiltersHandler(t *testing.T) {
 			"name":"saved_filter_cnv_1", 
 			"queries":[
 				{
+					"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 					"content":[{"content":{"field":"chromosome", "value":["1"]}, "op":"in"}], 
 					"op":"and"
 				}
@@ -124,6 +127,7 @@ func Test_GetSavedFiltersHandler_FilterOnType(t *testing.T) {
 			"name":"saved_filter_snv_1", 
 			"queries":[
 				{
+					"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 					"content":[{"content":{"field":"chromosome", "value":["X"]}, "op":"in"}], 
 					"op":"and"
 				}

@@ -2688,6 +2688,12 @@ export interface Sqon {
      * @type {string}
      * @memberof Sqon
      */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sqon
+     */
     'op'?: SqonOpEnum;
 }
 

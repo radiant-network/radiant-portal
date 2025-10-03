@@ -31,6 +31,7 @@ func (m *MockRepository) GetSavedFilterByID(savedFilterId int) (*types.SavedFilt
 			2021, 9, 12, 13, 8, 0, 0, time.UTC),
 		Queries: types.JsonArray[types.Sqon]{
 			{
+				Id: "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 				Op: "and",
 				Content: types.SqonArray{
 					{
@@ -60,6 +61,7 @@ func (m *MockRepository) GetSavedFiltersByUserID(userId string, savedFilterType 
 				2021, 9, 12, 13, 8, 0, 0, time.UTC),
 			Queries: types.JsonArray[types.Sqon]{
 				{
+					Id: "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 					Op: "and",
 					Content: types.SqonArray{
 						{
@@ -127,6 +129,7 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 		"name":"saved_filter_snv_1", 
 		"queries":[
 			{
+				"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 				"content":[{"content":{"field":"chromosome", "value":["1"]}, "op":"in"}], 
 				"op":"and"
 			}
@@ -155,6 +158,7 @@ func Test_GetSavedFiltersHandler(t *testing.T) {
 		"name":"saved_filter_snv_1", 
 		"queries":[
 			{
+				"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 				"content":[{"content":{"field":"chromosome", "value":["1"]}, "op":"in"}], 
 				"op":"and"
 			}
@@ -183,6 +187,7 @@ func Test_GetSavedFiltersByUserIDAndTypeHandler(t *testing.T) {
 		"name":"saved_filter_snv_1", 
 		"queries":[
 			{
+				"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
 				"content":[{"content":{"field":"chromosome", "value":["1"]}, "op":"in"}], 
 				"op":"and"
 			}

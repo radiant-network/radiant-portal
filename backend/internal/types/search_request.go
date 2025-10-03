@@ -9,6 +9,7 @@ import (
 // Sqon represents a node in the tree.
 // Every Sqon has an operator (op) and content.
 type Sqon struct {
+	Id      string      `json:"id,omitempty"`
 	Op      string      `json:"op" enums:"in,and,or,not,between,>,<,>=,<=,not-in,all"`
 	Content SqonContent `json:"content" oneOf:"LeafContent,SqonArray"`
 }
@@ -47,6 +48,7 @@ func (a SqonArray) Children() SqonArray { return a }
 func (s *Sqon) UnmarshalJSON(data []byte) error {
 	// Create an alias to avoid recursion.
 	type sqonAlias struct {
+		Id      string          `json:"id,omitempty"`
 		Op      string          `json:"op"`
 		Content json.RawMessage `json:"content"`
 	}
@@ -55,6 +57,7 @@ func (s *Sqon) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	s.Op = aux.Op
+	s.Id = aux.Id
 
 	// Trim any leading whitespace.
 	trimmed := strings.TrimSpace(string(aux.Content))

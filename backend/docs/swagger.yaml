@@ -1255,6 +1255,8 @@ components:
           - items:
               $ref: '#/components/schemas/Sqon'
             type: array
+        id:
+          type: string
         op:
           enum:
           - in
