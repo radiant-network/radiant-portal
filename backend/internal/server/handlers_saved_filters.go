@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -24,11 +23,7 @@ import (
 // @Router /users/saved_filters/{saved_filter_id} [get]
 func GetSavedFilterByIDHandler(repo repository.SavedFiltersDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
-		if err != nil {
-			HandleNotFoundError(c, "saved_filter_id")
-			return
-		}
+		savedFilterId := c.Param("saved_filter_id")
 		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
 		if err != nil {
 			HandleError(c, err)
@@ -146,7 +141,7 @@ func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin
 			HandleNotFoundError(c, "user id")
 			return
 		}
-		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
+		savedFilterId := c.Param("saved_filter_id")
 		if err != nil {
 			HandleNotFoundError(c, "saved_filter_id")
 			return
@@ -184,7 +179,7 @@ func DeleteSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) 
 			HandleNotFoundError(c, "user id")
 			return
 		}
-		savedFilterId, err := strconv.Atoi(c.Param("saved_filter_id"))
+		savedFilterId := c.Param("saved_filter_id")
 		if err != nil {
 			HandleNotFoundError(c, "saved_filter_id")
 			return

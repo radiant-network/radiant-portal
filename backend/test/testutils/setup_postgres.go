@@ -26,7 +26,7 @@ func cleanUp(gormDb *gorm.DB) {
 	db.Exec("TRUNCATE TABLE interpretation_germline_history")
 	db.Exec("TRUNCATE TABLE interpretation_somatic")
 	db.Exec("TRUNCATE TABLE interpretation_somatic_history")
-	db.Exec("DELETE from saved_filter where id > 3")
+	db.Exec("DELETE FROM saved_filter WHERE user_id != '1' AND user_id != '2'")
 }
 
 func initPostgresDb() (*gorm.DB, error) {
