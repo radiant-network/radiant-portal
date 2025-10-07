@@ -17,11 +17,11 @@ import (
 	"gorm.io/gorm"
 )
 
-func assertGetSavedFilterByIDHandler(t *testing.T, repo repository.SavedFiltersDAO, savedFilterId int, status int, expected string) {
+func assertGetSavedFilterByIDHandler(t *testing.T, repo repository.SavedFiltersDAO, savedFilterId string, status int, expected string) {
 	router := gin.Default()
 	router.GET("/users/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repo))
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/saved_filters/%d", savedFilterId), bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/saved_filters/%s", savedFilterId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -32,7 +32,7 @@ func assertGetSavedFilterByIDHandler(t *testing.T, repo repository.SavedFiltersD
 func Test_GetSavedFilterByIDHandler_NotFound(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
-		assertGetSavedFilterByIDHandler(t, repo, 42, http.StatusNotFound, `{"status": 404, "message":"saved filter not found"}`)
+		assertGetSavedFilterByIDHandler(t, repo, "ac2df672-9702-4dcf-8cfd-457494384762", http.StatusNotFound, `{"status": 404, "message":"saved filter not found"}`)
 	})
 }
 
@@ -42,7 +42,7 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 		expected := `{
 			"created_on":"2021-09-12T13:08:00Z", 
 			"favorite":false, 
-			"id":1, 
+			"id":"1e1c5bc3-4f65-496a-ad61-cab239bf72d5", 
 			"name":"saved_filter_snv_1", 
 			"queries":[
 				{
@@ -55,7 +55,7 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 			"updated_on":"2021-09-12T13:08:00Z", 
 			"user_id":"1"
 		}`
-		assertGetSavedFilterByIDHandler(t, repo, 1, http.StatusOK, expected)
+		assertGetSavedFilterByIDHandler(t, repo, "1e1c5bc3-4f65-496a-ad61-cab239bf72d5", http.StatusOK, expected)
 	})
 }
 
@@ -83,7 +83,7 @@ func Test_GetSavedFiltersHandler(t *testing.T) {
 		expected := `[{
 			"created_on":"2021-09-12T13:08:00Z", 
 			"favorite":false, 
-			"id":1, 
+			"id":"1e1c5bc3-4f65-496a-ad61-cab239bf72d5", 
 			"name":"saved_filter_snv_1", 
 			"queries":[
 				{
@@ -98,7 +98,7 @@ func Test_GetSavedFiltersHandler(t *testing.T) {
 		},{
 			"created_on":"2021-09-12T13:08:00Z", 
 			"favorite":true, 
-			"id":2, 
+			"id": "bef3b28c-9ead-4793-99a9-4a4f905faaed", 
 			"name":"saved_filter_cnv_1", 
 			"queries":[
 				{
@@ -123,7 +123,7 @@ func Test_GetSavedFiltersHandler_FilterOnType(t *testing.T) {
 		expected := `[{
 			"created_on":"2021-09-12T13:08:00Z", 
 			"favorite":false, 
-			"id":1, 
+			"id":"1e1c5bc3-4f65-496a-ad61-cab239bf72d5", 
 			"name":"saved_filter_snv_1", 
 			"queries":[
 				{
@@ -190,11 +190,11 @@ func Test_PostSavedFilterHandler_Success(t *testing.T) {
 	})
 }
 
-func assertPutSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterId int, body string, status int) {
+func assertPutSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterId string, body string, status int) {
 	router := gin.Default()
 	router.PUT("/users/saved_filters/:saved_filter_id", server.PutSavedFilterHandler(repo, auth))
 
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/saved_filters/%d", savedFilterId), bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/saved_filters/%s", savedFilterId), bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -209,7 +209,7 @@ func Test_PutSavedFilterHandler_InvalidInput(t *testing.T) {
 			"name": "saved_filter_snv_11",
 			"queries": []
 		}`
-		assertPutSavedFilterHandler(t, repo, auth, 1, body, http.StatusBadRequest)
+		assertPutSavedFilterHandler(t, repo, auth, "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5", body, http.StatusBadRequest)
 	})
 }
 
@@ -222,7 +222,7 @@ func Test_PutSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
 			"name": "saved_filter_snv_11",
 			"queries": []
 		}`
-		assertPutSavedFilterHandler(t, repo, auth, 42, body, http.StatusNotFound)
+		assertPutSavedFilterHandler(t, repo, auth, "ac2df672-9702-4dcf-8cfd-457494384762", body, http.StatusNotFound)
 	})
 }
 
@@ -235,7 +235,7 @@ func Test_PutSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
 			"name": "saved_filter_snv_11",
 			"queries": []
 		}`
-		assertPutSavedFilterHandler(t, repo, auth, 3, body, http.StatusNotFound)
+		assertPutSavedFilterHandler(t, repo, auth, "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5", body, http.StatusNotFound)
 	})
 }
 
@@ -248,15 +248,15 @@ func Test_PutSavedFilterHandler_Success(t *testing.T) {
 			"name": "saved_filter_snv_1.1",
 			"queries": []
 		}`
-		assertPutSavedFilterHandler(t, repo, auth, 1, body, http.StatusOK)
+		assertPutSavedFilterHandler(t, repo, auth, "1e1c5bc3-4f65-496a-ad61-cab239bf72d5", body, http.StatusOK)
 	})
 }
 
-func assertDeleteSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterId int, status int) {
+func assertDeleteSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterId string, status int) {
 	router := gin.Default()
 	router.DELETE("/users/saved_filters/:saved_filter_id", server.DeleteSavedFilterHandler(repo, auth))
 
-	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/users/saved_filters/%d", savedFilterId), bytes.NewBuffer([]byte("")))
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/users/saved_filters/%s", savedFilterId), bytes.NewBuffer([]byte("")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -267,7 +267,7 @@ func Test_DeleteSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
-		assertDeleteSavedFilterHandler(t, repo, auth, 42, http.StatusNotFound)
+		assertDeleteSavedFilterHandler(t, repo, auth, "ac2df672-9702-4dcf-8cfd-457494384762", http.StatusNotFound)
 	})
 }
 
@@ -275,7 +275,7 @@ func Test_DeleteSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
-		assertDeleteSavedFilterHandler(t, repo, auth, 3, http.StatusNotFound)
+		assertDeleteSavedFilterHandler(t, repo, auth, "dddfa647-b0df-4ce7-807d-5b8775ee8fcb", http.StatusNotFound)
 	})
 }
 
@@ -283,6 +283,6 @@ func Test_DeleteSavedFilterHandler_Success(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSavedFiltersRepository(db)
 		auth := &testutils.MockAuth{}
-		assertDeleteSavedFilterHandler(t, repo, auth, 2, http.StatusNoContent)
+		assertDeleteSavedFilterHandler(t, repo, auth, "1e1c5bc3-4f65-496a-ad61-cab239bf72d5", http.StatusNoContent)
 	})
 }

@@ -19,11 +19,11 @@ type SavedFiltersRepository struct {
 }
 
 type SavedFiltersDAO interface {
-	GetSavedFilterByID(savedFilterId int) (*SavedFilter, error)
+	GetSavedFilterByID(savedFilterId string) (*SavedFilter, error)
 	GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]SavedFilter, error)
 	CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error)
-	UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId int, userId string) (*SavedFilter, error)
-	DeleteSavedFilter(savedFilterId int, userId string) error
+	UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId string, userId string) (*SavedFilter, error)
+	DeleteSavedFilter(savedFilterId string, userId string) error
 }
 
 func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
@@ -34,7 +34,7 @@ func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
 	return &SavedFiltersRepository{db: db}
 }
 
-func (r *SavedFiltersRepository) GetSavedFilterByID(savedFilterId int) (*SavedFilter, error) {
+func (r *SavedFiltersRepository) GetSavedFilterByID(savedFilterId string) (*SavedFilter, error) {
 	var savedFilter SavedFilter
 
 	tx := r.db.
@@ -86,7 +86,7 @@ func (r *SavedFiltersRepository) CreateSavedFilter(savedFilterInput SavedFilterC
 	return r.GetSavedFilterByID(savedFilter.ID)
 }
 
-func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId int, userId string) (*SavedFilter, error) {
+func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId string, userId string) (*SavedFilter, error) {
 	savedFilter := SavedFilter{
 		Favorite:  savedFilterInput.Favorite,
 		Name:      savedFilterInput.Name,
@@ -100,7 +100,7 @@ func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterU
 	return r.GetSavedFilterByID(savedFilterId)
 }
 
-func (r *SavedFiltersRepository) DeleteSavedFilter(savedFilterId int, userId string) error {
+func (r *SavedFiltersRepository) DeleteSavedFilter(savedFilterId string, userId string) error {
 	if err := r.db.Where("id = ? and user_id = ?", savedFilterId, userId).Delete(&SavedFilter{}).Error; err != nil {
 		return fmt.Errorf("error deleting saved filter: %w", err)
 	}

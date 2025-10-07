@@ -15,13 +15,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetSavedFilterByID(savedFilterId int) (*types.SavedFilter, error) {
-	if savedFilterId > 3 {
+func (m *MockRepository) GetSavedFilterByID(savedFilterId string) (*types.SavedFilter, error) {
+	if savedFilterId == "42" {
 		return nil, fmt.Errorf("mock saved filter not found")
 	}
 	return &types.SavedFilter{
 		ID:       savedFilterId,
-		UserID:   fmt.Sprintf("%d", savedFilterId),
+		UserID:   savedFilterId,
 		Name:     "saved_filter_snv_1",
 		Type:     types.GERMLINE_SNV_OCCURRENCE,
 		Favorite: utils.BoolPointer(false),
@@ -50,7 +50,7 @@ func (m *MockRepository) GetSavedFilterByID(savedFilterId int) (*types.SavedFilt
 func (m *MockRepository) GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]types.SavedFilter, error) {
 	return &[]types.SavedFilter{
 		{
-			ID:       1,
+			ID:       "1",
 			UserID:   "1",
 			Name:     "saved_filter_snv_1",
 			Type:     types.GERMLINE_SNV_OCCURRENCE,
@@ -80,7 +80,7 @@ func (m *MockRepository) GetSavedFiltersByUserID(userId string, savedFilterType 
 
 func (m *MockRepository) CreateSavedFilter(savedFilterInput types.SavedFilterCreationInput, userId string) (*types.SavedFilter, error) {
 	return &types.SavedFilter{
-		ID:       1,
+		ID:       "1",
 		UserID:   userId,
 		Name:     savedFilterInput.Name,
 		Type:     savedFilterInput.Type,
@@ -93,7 +93,7 @@ func (m *MockRepository) CreateSavedFilter(savedFilterInput types.SavedFilterCre
 	}, nil
 }
 
-func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpdateInput, savedFilterId int, userId string) (*types.SavedFilter, error) {
+func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpdateInput, savedFilterId string, userId string) (*types.SavedFilter, error) {
 	return &types.SavedFilter{
 		ID:       savedFilterId,
 		UserID:   userId,
@@ -108,7 +108,7 @@ func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpd
 	}, nil
 }
 
-func (m *MockRepository) DeleteSavedFilter(savedFilterId int, userId string) error {
+func (m *MockRepository) DeleteSavedFilter(savedFilterId string, userId string) error {
 	return nil
 }
 
@@ -125,7 +125,7 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	assert.JSONEq(t, `{
 		"created_on":"2021-09-12T13:08:00Z", 
 		"favorite":false, 
-		"id":1, 
+		"id":"1", 
 		"name":"saved_filter_snv_1", 
 		"queries":[
 			{
@@ -154,7 +154,7 @@ func Test_GetSavedFiltersHandler(t *testing.T) {
 	assert.JSONEq(t, `[{
 		"created_on":"2021-09-12T13:08:00Z", 
 		"favorite":false, 
-		"id":1, 
+		"id":"1", 
 		"name":"saved_filter_snv_1", 
 		"queries":[
 			{
@@ -183,7 +183,7 @@ func Test_GetSavedFiltersByUserIDAndTypeHandler(t *testing.T) {
 	assert.JSONEq(t, `[{
 		"created_on":"2021-09-12T13:08:00Z", 
 		"favorite":false, 
-		"id":1, 
+		"id":"1", 
 		"name":"saved_filter_snv_1", 
 		"queries":[
 			{
@@ -217,7 +217,7 @@ func Test_PostSavedFilterHandler(t *testing.T) {
 	assert.JSONEq(t, `{
 		"created_on":"2021-09-12T13:08:00Z", 
 		"favorite":false, 
-		"id":1, 
+		"id":"1", 
 		"name":"new_saved_filter", 
 		"queries":[], 
 		"type":"somatic_snv_variant", 
@@ -280,7 +280,7 @@ func Test_PutSavedFilterHandler(t *testing.T) {
 	assert.JSONEq(t, `{
 		"created_on":"2021-09-12T13:08:00Z", 
 		"favorite": true, 
-		"id":1, 
+		"id":"1", 
 		"name":"updated_saved_filter", 
 		"queries":[], 
 		"type":"germline_snv_occurrence", 

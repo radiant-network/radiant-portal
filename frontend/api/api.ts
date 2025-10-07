@@ -2407,10 +2407,10 @@ export interface SavedFilter {
     'favorite': boolean;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof SavedFilter
      */
-    'id': number;
+    'id': string;
     /**
      * 
      * @type {string}

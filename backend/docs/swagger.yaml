@@ -1114,7 +1114,7 @@ components:
         favorite:
           type: boolean
         id:
-          type: integer
+          type: string
         name:
           type: string
         queries:
