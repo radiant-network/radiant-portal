@@ -1,14 +1,16 @@
-import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
-import useSWR from 'swr';
-import { occurrencesApi } from '@/utils/api';
-import { Skeleton } from '@/components/base/ui/skeleton';
-import OccurrenceExpandDetails from './occurrence-expand-details';
-import OccurrenceExpandTranscript from './occurrence-expand-transcript';
-import { Button } from '@/components/base/ui/button';
-import InterpretationDialog from '../interpretation/interpretation-dialog';
 import { Edit2Icon } from 'lucide-react';
-import { useI18n } from '@/components/hooks/i18n';
+import useSWR from 'swr';
+
+import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
+import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
+import { Skeleton } from '@/components/base/ui/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
+import { occurrencesApi } from '@/utils/api';
+
+import InterpretationDialog from '../../interpretation/interpretation-dialog';
+import OccurrenceExpandDetails from '../occurrence-expand-details';
+import OccurrenceExpandTranscript from '../occurrence-expand-transcript';
 
 type OccurenceSheetContentProps = {
   occurrence: GermlineSNVOccurrence;

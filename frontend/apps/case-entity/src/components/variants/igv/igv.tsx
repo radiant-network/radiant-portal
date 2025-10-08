@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { IIGVBrowser, IIGVBrowserOptions } from './types';
 
-import { cn } from '@/components/lib/utils';
-
 import './igv.css';
 
 declare global {

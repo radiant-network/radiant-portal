@@ -59,7 +59,7 @@ export default function GeneSection({ data }: GeneSectionProps) {
               <span className="text-xs text-muted-foreground">
                 {data.spliceai_ds}{' '}
                 {data.spliceai_type.map(v => (
-                  <Badge>{v}</Badge>
+                  <Badge key={v}>{v}</Badge>
                 ))}
               </span>
             </AnchorLink>

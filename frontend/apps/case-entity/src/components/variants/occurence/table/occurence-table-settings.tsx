@@ -12,16 +12,15 @@ import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/m
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
+import HgvsgCell from './cells/hgvsg-cell';
 import InterpretationCell from './cells/interpretation-cell';
 import OccurenceActionsMenu from './cells/occurence-actions-cell';
-import HgvsgCell from './cells/hgvsg-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 

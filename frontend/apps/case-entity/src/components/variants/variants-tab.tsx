@@ -31,7 +31,7 @@ import { queryBuilderRemote } from '@/components/model/query-builder-core/query-
 import { occurrencesApi } from '@/utils/api';
 
 import AssayVariantFilters from './filters/assay-variant-filters';
-import { defaultSettings, getVariantColumns } from './occurrence-table/occurence-table-settings';
+import { defaultSettings, getVariantColumns } from './occurence/table/occurence-table-settings';
 import { OccurrenceCountInput, useOccurencesCountHelper, useOccurencesListHelper } from './hook';
 
 export const SeqIDContext = createContext<string>('');
