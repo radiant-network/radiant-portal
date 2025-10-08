@@ -10,7 +10,6 @@ import { Input } from '@/components/base/ui/input';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
-import { replaceUnderscore } from '@/components/lib/string-format';
 import { useConfig } from '@/components/model/applications-config';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
@@ -93,16 +92,9 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
      * Ignore word in parenthese
      */
     aggregationData?.forEach(item => {
-      item.label = item.key
-        ? replaceUnderscore(item.key)
-            .replace(/\([^)]+\)|[^()]+/g, part => {
-              if (part.startsWith('(') && part.endsWith(')')) {
-                return part;
-              }
-              return part.toLowerCase();
-            })
-            .replace(/^\w/, c => c.toUpperCase())
-        : item.key;
+      item.label = t(`common.filters.labels.${field.key}_value.${item.key}`, {
+        defaultValue: String(item.key),
+      });
     });
 
     setItems(aggregationData || []);

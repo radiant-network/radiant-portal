@@ -30,7 +30,7 @@ export function AccordionContainer({ field, children }: AccordionContainerProps)
   function renderTrigger() {
     return (
       <div className="flex items-center justify-between w-full text-xs">
-        <span className="capitalize">{label}</span>
+        <span>{label}</span>
       </div>
     );
   }
