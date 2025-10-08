@@ -56,11 +56,11 @@ function OccurenceSheetContent({ occurrence }: OccurenceSheetContentProps) {
           {/* SJRA-389 <Button color="primary" size="xs">
             <Download />
             {t('occurrence_expand.actions.downloadReport')}
-          </Button>
+          </Button>*/}
           <Button color="primary" size="xs">
             <VariantIcon />
             {t('occurrence_expand.actions.openIGV')}
-          </Button> */}
+          </Button>
         </div>
         <Separator orientation="vertical" className="h-5" />
         <div className="flex gap-4 items-center">
