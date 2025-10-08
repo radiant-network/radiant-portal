@@ -1,0 +1,8 @@
+import{j as n}from"./jsx-runtime-D_zvdyIk.js";import{f as s}from"./index-DtL3pAzF.js";import{a as r}from"./index-B-lxVbXh.js";import{u as l}from"./i18n-ClJAw0c2.js";import{R as m}from"./rich-text-editor-D0SqZOSl.js";import"./v4-CtRu48qb.js";import"./iframe-BUbpyrdY.js";import"./i18next-DOi7g2fS.js";import"./index-CGj_12n1.js";import"./index-D8dqFcAi.js";import"./index-BBPXtLXU.js";import"./utils-D-KgF5mV.js";import"./index-CcLUv2_A.js";import"./index-COcwYKbe.js";import"./index-C66Dxnp2.js";import"./separator-6xmuS_PL.js";import"./dropdown-menu-CFPCuvYI.js";import"./index-CphM_NEg.js";import"./Combination-Bb6GvI2f.js";import"./index-ButkbYdn.js";import"./index-A6VgBoaw.js";import"./index-BOEjv1S3.js";import"./index-CIckazZy.js";import"./check-DRc1RmCY.js";import"./createLucideIcon-8Lr1oLzj.js";import"./chevron-down-BLzVWgYU.js";const q={title:"Inputs/RichText Editor",component:m,args:{value:"<h3>Hello</h3>",onChange:s(),placeholder:"Placeholder"}},o={render:p=>{const{t:i}=l();return n.jsx(m,{value:p.value,onChange:r("onChange"),onBlur:r("onBlur"),placeholder:i("common.editor.placeholder"),wrapperClassName:"max-w-[500px]",autoFocus:!0})}};var t,e,a;o.parameters={...o.parameters,docs:{...(t=o.parameters)==null?void 0:t.docs,source:{originalSource:`{
+  render: args => {
+    const {
+      t
+    } = useI18n();
+    return <RichTextEditor value={args.value} onChange={action('onChange')} onBlur={action('onBlur')} placeholder={t('common.editor.placeholder')} wrapperClassName="max-w-[500px]" autoFocus />;
+  }
+}`,...(a=(e=o.parameters)==null?void 0:e.docs)==null?void 0:a.source}}};const y=["Default"];export{o as Default,y as __namedExportsOrder,q as default};
