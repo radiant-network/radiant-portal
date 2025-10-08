@@ -1,10 +1,12 @@
+import { ReactNode, useState } from 'react';
+import useSWR from 'swr';
+
 import { GermlineSNVOccurrence, IGVTracks } from '@/api/api';
 import { Spinner } from '@/components/base/spinner';
 import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/components/base/ui/dialog';
 import { useI18n } from '@/components/hooks/i18n';
 import { igvApi } from '@/utils/api';
-import { ReactNode, useState } from 'react';
-import useSWR from 'swr';
+
 import IgvContainer from './igv-container';
 
 type IGVDialogProps = {
@@ -12,9 +14,8 @@ type IGVDialogProps = {
   renderTrigger: (handleOpen: () => void) => ReactNode;
 };
 
-const fetchIGVForSeqId = async ({ seqId }: { seqId: number }) => {
-  return igvApi.getIGV(seqId.toString()).then(response => response.data);
-};
+const fetchIGVForSeqId = async ({ seqId }: { seqId: number }) =>
+  igvApi.getIGV(seqId.toString()).then(response => response.data);
 
 const IGVDialog = ({ occurrence, renderTrigger }: IGVDialogProps) => {
   const { t } = useI18n();

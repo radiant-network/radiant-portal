@@ -2,14 +2,14 @@ import { Link } from 'react-router';
 import { Edit2Icon } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
+import VariantIcon from '@/components/base/icons/variant-icon';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
 
-import InterpretationDialog from '../interpretation/interpretation-dialog';
-import VariantIcon from '@/components/base/icons/variant-icon';
 import IGVDialog from '../igv/igv-dialog';
+import InterpretationDialog from '../interpretation/interpretation-dialog';
 
 type OccurrenceExpandHeaderProps = {
   occurrence: GermlineSNVOccurrence;

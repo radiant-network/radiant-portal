@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
-import InterpretationDialog from '../../interpretation/interpretation-dialog';
+import InterpretationDialog from '../../../interpretation/interpretation-dialog';
 
 type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;

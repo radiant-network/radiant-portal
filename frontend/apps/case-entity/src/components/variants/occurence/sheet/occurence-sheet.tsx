@@ -1,23 +1,20 @@
 import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/base/ui/sheet';
-import { useState } from 'react';
-import OccurrenceSheetContent from '../occurence-sheet-content';
 
-type HgvsgCellProps = {
+import OccurrenceSheetContent from './occurence-sheet-content';
+
+type OccurenceSheetProps = {
+  setOpen: (value: boolean) => void;
+  open: boolean;
   occurrence: GermlineSNVOccurrence;
+  children?: React.ReactElement;
 };
 
-function HgvsgCell({ occurrence }: HgvsgCellProps) {
-  const [open, setOpen] = useState(false);
-
+function OccurenceSheet({ children, open, occurrence, setOpen }: OccurenceSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <AnchorLink size="sm" variant="secondary" className="overflow-hidden text-ellipsis block">
-          {occurrence.hgvsg}
-        </AnchorLink>
-      </SheetTrigger>
+      <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent side="right" className="max-w-[800px] sm:max-w-[1100px] w-full space-y-4 overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
@@ -26,10 +23,10 @@ function HgvsgCell({ occurrence }: HgvsgCellProps) {
             </AnchorLink>
           </SheetTitle>
         </SheetHeader>
-        <OccurrenceSheetContent occurrence={occurrence} />
+        {<OccurrenceSheetContent occurrence={occurrence} />}
       </SheetContent>
     </Sheet>
   );
 }
 
-export default HgvsgCell;
+export default OccurenceSheet;

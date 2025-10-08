@@ -1,5 +1,6 @@
-import { Separator } from '@/components/base/ui/separator';
 import { PropsWithChildren, ReactNode } from 'react';
+
+import { Separator } from '@/components/base/ui/separator';
 
 interface DetailSectionProps {
   title: ReactNode;
@@ -24,7 +25,10 @@ export function DetailItem({ title, value, colon = true }: DetailItemProps) {
   return (
     <div>
       <div className="flex justify-between items-center">
-        <div className="text-sm text-muted-foreground truncate">{title}{colon && ':'}</div>
+        <div className="text-sm text-muted-foreground truncate">
+          {title}
+          {colon && ':'}
+        </div>
         <div className="text-sm">{value}</div>
       </div>
       <Separator className="mt-1" />

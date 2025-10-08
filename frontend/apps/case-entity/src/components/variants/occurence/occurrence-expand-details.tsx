@@ -1,13 +1,14 @@
+import { ExpandedGermlineSNVOccurrence } from '@/api/api';
+
 import ClassificationSection from './classification-section';
-import PredictionSection from './prediction-section';
-import GeneSection from './gene-section';
+import ClinicalAssociationSection from './clinical-association-section';
+import FamilySection from './family-section';
 import FrequencySection from './frequency-section';
 import FunctionalScoreSection from './functional-score-section';
-import ZygositySection from './zygosity-section';
-import FamilySection from './family-section';
-import ClinicalAssociationSection from './clinical-association-section';
+import GeneSection from './gene-section';
 import MetricSection from './metric-section';
-import { ExpandedGermlineSNVOccurrence } from '@/api/api';
+import PredictionSection from './prediction-section';
+import ZygositySection from './zygosity-section';
 
 type ExpandedOccurrenceDetailsProps = {
   data: ExpandedGermlineSNVOccurrence;
