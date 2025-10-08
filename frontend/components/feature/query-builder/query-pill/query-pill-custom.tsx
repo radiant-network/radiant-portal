@@ -1,12 +1,15 @@
-import QueryPillContainer from './query-pill-container';
-import QueryPillValuesContainer from './query-pill-values-container';
-import { useQueryBarContext } from '../query-bar/query-bar-context';
-import { IValueQuery } from '@/components/model/sqon';
-import { PencilLineIcon } from 'lucide-react';
 import { useState } from 'react';
-import { ISavedFilter } from '@/components/model/saved-filter';
-import QueryPillCustomEditDialog from './query-pill-custom-edit-dialog';
+import { PencilLineIcon } from 'lucide-react';
+
 import { Button } from '@/components/base/ui/button';
+import { ISavedFilter } from '@/components/model/saved-filter';
+import { IValueQuery } from '@/components/model/sqon';
+
+import { useQueryBarContext } from '../query-bar/query-bar-context';
+
+import QueryPillContainer from './query-pill-container';
+import QueryPillCustomEditDialog from './query-pill-custom-edit-dialog';
+import QueryPillValuesContainer from './query-pill-values-container';
 
 export type QueryPillCustomProps = {
   valueQuery: IValueQuery;
@@ -20,7 +23,7 @@ function QueryPillCustom({ valueQuery }: QueryPillCustomProps) {
   const { title, ...rest } = valueQuery;
   const queryPill: ISavedFilter = {
     id: valueQuery.id,
-    title: valueQuery.title,
+    name: valueQuery.title,
     queries: [rest],
     favorite: false,
   };

@@ -1,11 +1,12 @@
-import { OAuth2Strategy } from 'remix-auth-oauth2';
-import { Authenticator } from 'remix-auth';
 import { createCookieSessionStorage, redirect } from 'react-router';
+import { Authenticator } from 'remix-auth';
+import { OAuth2Strategy } from 'remix-auth-oauth2';
+
 import { AuthStrategyName, type IAuthUser, type IAuthUserWithToken } from './auth.types';
 import { isTokenValid } from './tokens';
 
-const createSessionStorage = (cookieName: string) => {
-  return createCookieSessionStorage({
+const createSessionStorage = (cookieName: string) =>
+  createCookieSessionStorage({
     cookie: {
       name: cookieName,
       sameSite: 'lax',
@@ -15,7 +16,6 @@ const createSessionStorage = (cookieName: string) => {
       secure: process.env.NODE_ENV === 'production',
     },
   });
-};
 
 const userSessionStorage = createSessionStorage('session.user');
 const accessTokenSessionStorage = createSessionStorage('session.token');

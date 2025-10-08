@@ -3,6 +3,7 @@ import { StarIcon } from 'lucide-react';
 import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
 import { SavedFilterTypeEnum } from '@/components/model/saved-filter';
 import { Button } from '@/components/base/ui/button';
+import { toast } from 'sonner';
 
 function SavedFiltersStarAction() {
   const dict = useQueryBuilderDictContext();
@@ -16,9 +17,16 @@ function SavedFiltersStarAction() {
 
   const handleStar = function () {
     if (selectedSavedFilter) {
-      selectedSavedFilter.save(SavedFilterTypeEnum.Filter, {
-        favorite: !selectedSavedFilter.isFavorite(),
-      });
+      selectedSavedFilter
+        .save(SavedFilterTypeEnum.Filter, {
+          favorite: !selectedSavedFilter.isFavorite(),
+        })
+        .then(() => {
+          toast.success(dict.savedFilter.notifications.updated);
+        })
+        .catch(() => {
+          toast.error(dict.savedFilter.notifications.errors.updated);
+        });
     } else {
       queryBuilder.saveNewFilter({ favorite: true });
     }

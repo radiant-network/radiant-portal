@@ -1,4 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { formatDistance } from 'date-fns';
+import { frCA } from 'date-fns/locale/fr-CA';
+
+import List from '@/components/base/list/list';
+import ListItemAction from '@/components/base/list/list-item-with-action';
+import { Button } from '@/components/base/ui/button';
 import {
   Dialog,
   DialogBody,
@@ -8,16 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
-import { Button } from '@/components/base/ui/button';
-import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
-import List from '@/components/base/list/list';
-import ListItemAction from '@/components/base/list/list-item-with-action';
 import { SavedFilterInstance } from '@/components/model/query-builder-core';
-import SavedFiltersEditDialog from './saved-filter-edit-dialog';
-import { frCA } from 'date-fns/locale/fr-CA';
-import { formatDistance } from 'date-fns';
 import { ISavedFilter } from '@/components/model/saved-filter';
+
 import { openDeleteSavedFilterAlert } from '../alerts';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+
+import SavedFiltersEditDialog from './saved-filter-edit-dialog';
 
 function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const dict = useQueryBuilderDictContext();
@@ -81,7 +84,7 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilterInstance
     <>
       <ListItemAction
         key={savedFilter.id}
-        title={savedFilter.raw().title}
+        title={savedFilter.raw().name}
         description={getLastSaveAtDisplay()}
         className="border-b last:border-b-0 relative px-3 py-2 group"
         onEdit={() => setOpenEdit(true)}

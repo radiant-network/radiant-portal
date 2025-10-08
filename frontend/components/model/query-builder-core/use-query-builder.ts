@@ -20,15 +20,23 @@ import {
   QueryBuilderUpdateEventType,
 } from './query-builder-remote';
 
+/**
+ * Initialize and register QueryBuilder.
+ * - Fetch saved filters by type
+ * - Create QueryBuilder state
+ * - Set coreProps
+ * - Map translations
+ */
 export function useQueryBuilder(props: PartialKeys<CoreQueryBuilderProps, 'state'>): QueryBuilderInstance {
-  const { t } = useI18n('common');
+  const { t } = useI18n();
   const defaultProps: CoreQueryBuilderProps = {
     state: {
       ...getDefaultQueryBuilderState(),
       savedFilters: [],
       selectedQueryIndexes: [],
     },
-    onStateChange: () => {},
+    // eslint-disable-next-line prettier/prettier
+    onStateChange: () => { },
     ...props,
   };
 
@@ -37,6 +45,11 @@ export function useQueryBuilder(props: PartialKeys<CoreQueryBuilderProps, 'state
   }));
 
   const [state, setState] = useState(() => defaultProps.initialState || defaultProps.state);
+
+  /**
+   * Fetch saved filters
+   * Sync with local saved filters
+   */
 
   useEffect(() => {
     if (state) {
@@ -83,8 +96,6 @@ export function useQueryBuilder(props: PartialKeys<CoreQueryBuilderProps, 'state
       window.removeEventListener(QUERY_BUILDER_UPDATE_EVENT_KEY, listener as EventListener);
     };
   }, [props.state]);
-
-  props.fieldsToIgnore;
 
   const mergedState: QueryBuilderState = {
     ...state,

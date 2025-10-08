@@ -1,7 +1,8 @@
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
-import { QueryBuilderDictionary } from './types';
 import { QueryBuilderInstance, SavedFilterInstance } from '@/components/model/query-builder-core';
 import { ISavedFilter } from '@/components/model/saved-filter';
+
+import { QueryBuilderDictionary } from './types';
 
 export function openDeleteSavedFilterAlert(savedFilter: SavedFilterInstance, dict: QueryBuilderDictionary) {
   alertDialog.open({

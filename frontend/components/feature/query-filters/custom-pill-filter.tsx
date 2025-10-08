@@ -22,16 +22,18 @@ import { useI18n } from '@/components/hooks/i18n';
 import { createSavedFilter, useQueryBuilder } from '@/components/model/query-builder-core';
 import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
 import { ISqonGroupFilter } from '@/components/model/sqon';
+import { SavedFilterType } from '@/api/api';
 
 export interface CustomPillFilterProps {
   customPills: IUserSavedFilter[];
-  onSelectPill: (pill: ISavedFilter) => void;
+  onSelectPill: (pill: IUserSavedFilter) => void;
   onSavePill: (pill: ISavedFilter) => Promise<IUserSavedFilter>;
   onDuplicatePill: (pill: ISavedFilter) => void;
-  onDeletePill: (pillId: string) => void;
+  onDeletePill: (pillId: number) => void;
   validateCustomPillTitle: QueryPillCustomConfig['validateCustomPillTitle'];
   fetchSavedFiltersByCustomPillId: QueryPillCustomConfig['fetchSavedFiltersByCustomPillId'];
   learnMoreLink: string;
+  savedFilterType: SavedFilterType;
 }
 
 /**
@@ -48,6 +50,7 @@ function CustomPillFilter({
   validateCustomPillTitle,
   fetchSavedFiltersByCustomPillId,
   learnMoreLink,
+  savedFilterType,
 }: CustomPillFilterProps) {
   const { t } = useI18n();
   const defaultDictionary = useQueryBuilderDictionary();
@@ -65,6 +68,7 @@ function CustomPillFilter({
       savedFilters: customPills,
     },
     onCustomPillUpdate: async customPill => await onSavePill(customPill),
+    savedFilterType,
   });
 
   const openConfirmDeleteDialog = (pill: IUserSavedFilter) =>
@@ -74,8 +78,8 @@ function CustomPillFilter({
         defaultValue: 'Delete this query?',
       }),
       description: t('common.custom_pill_filter.delete_dialog.description', {
-        title: pill.title,
-        defaultValue: `You are about to delete this custom query "${pill.title}", which may affect your results."`,
+        title: pill.name,
+        defaultValue: `You are about to delete this custom query "${pill.name}", which may affect your results."`,
       }),
       cancelProps: {
         children: t('common.custom_pill_filter.delete_dialog.cancel', {
@@ -154,7 +158,7 @@ function CustomPillFilter({
                   className="flex items-center border-2 rounded-xs border-primary px-2 h-6 text-xs whitespace-nowrap overflow-hidden hover:underline"
                   onClick={() => onSelectPill(pill)}
                 >
-                  <span className="overflow-hidden text-ellipsis">{pill.title}</span>
+                  <span className="overflow-hidden text-ellipsis">{pill.name}</span>
                 </button>
                 <div className="hidden items-center group-hover:flex gap-1">
                   <Button

@@ -1,8 +1,10 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { TrashIcon } from 'lucide-react';
-import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
-import { openDeleteSavedFilterAlert } from '../alerts';
+
 import { Button } from '@/components/base/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+
+import { openDeleteSavedFilterAlert } from '../alerts';
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
 
 function SavedFiltersDeleteAction() {
   const dict = useQueryBuilderDictContext();

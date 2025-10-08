@@ -1,22 +1,13 @@
-import { ISyntheticSqon } from "./sqon";
+import { SavedFilter } from '@/api/api';
 
 export enum SavedFilterTypeEnum {
-  Filter = "filter",
-  Query = "query",
+  Filter = 'filter',
+  Query = 'query',
 }
-export interface ISavedFilter {
-  id: string;
-  title: string;
-  favorite: boolean;
-  queries: ISyntheticSqon[];
-  type?: string;
+
+export interface ISavedFilter extends Omit<SavedFilter, 'created_on' | 'updated_on' | 'user_id'> {
   isDirty?: boolean;
   isNew?: boolean;
 }
 
-export interface IUserSavedFilter extends ISavedFilter {
-  keycloak_id: string;
-  tag: string;
-  creation_date: string;
-  updated_date: string;
-}
+export interface IUserSavedFilter extends SavedFilter {}

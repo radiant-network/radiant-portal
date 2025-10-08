@@ -4,12 +4,21 @@ import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 
-import { CaseEntity, Count, GermlineSNVOccurrence, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
+import {
+  CaseEntity,
+  Count,
+  GermlineSNVOccurrence,
+  SavedFilterType,
+  SortBody,
+  SortBodyOrderEnum,
+  Sqon,
+} from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Card, CardContent } from '@/components/base/ui/card';
 import { SidebarProvider } from '@/components/base/ui/sidebar';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
+import UserSavedFiltersProps, { getUserSavedFilters } from '@/components/feature/query-builder/user-saved-filters';
 import { FilterComponent } from '@/components/feature/query-filters/filter-container';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { SidebarGroups } from '@/components/feature/query-filters/sidebar-groups';
@@ -54,6 +63,8 @@ async function fetchQueryCount(input: OccurrenceCountInput) {
 
 function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const config = useConfig();
+  const [isQBLoading, setQbLoading] = useState(true);
+  const [isQBInitialized, setQBInitialized] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useI18n();
 
@@ -129,15 +140,31 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
    * Restore activeSqon
    */
   useEffect(() => {
-    const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);
+    if (isQBInitialized) return;
 
-    setQbState({
-      ...localQbState,
-      savedFilters: [],
-      selectedQueryIndexes: [0],
+    getUserSavedFilters({
+      savedFilterType: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
+    }).then(res => {
+      const localQbState = queryBuilderRemote.getLocalQueryBuilderState(appId);
+
+      setQbState({
+        ...localQbState,
+        savedFilters: res,
+        selectedQueryIndexes: [0],
+      });
+      setActiveSqon(queryBuilderRemote.getResolvedActiveQuery(appId) as Sqon);
+      setQBInitialized(true);
     });
-    setActiveSqon(queryBuilderRemote.getResolvedActiveQuery(appId) as Sqon);
-  }, []);
+  }, [isQBInitialized]);
+
+  /**
+   * Set QB loading to false only when both initialized and seqId is available
+   */
+  useEffect(() => {
+    if (isQBInitialized && seqId) {
+      setQbLoading(false);
+    }
+  }, [isQBInitialized, seqId]);
 
   /**
    * Set proband based on searchParams
@@ -233,6 +260,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                   enableCombine
                   enableFavorite
                   enableShowHideLabels
+                  loading={isQBLoading}
                   queryCountIcon={<VariantIcon size={14} />}
                   fetchQueryCount={async resolvedSqon => {
                     if (!seqId) {
@@ -264,6 +292,8 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                       return <FilterComponent field={fields} isOpen={true} />;
                     },
                   }}
+                  savedFilterType={SavedFilterType.GERMLINE_SNV_OCCURRENCE}
+                  {...UserSavedFiltersProps}
                 />
               </div>
               <Card>

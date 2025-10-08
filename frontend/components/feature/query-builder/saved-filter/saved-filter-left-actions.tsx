@@ -1,13 +1,15 @@
-import { cn } from '@/components/lib/utils';
 import React from 'react';
-import SavedFiltersEditAction from './saved-filter-edit-action';
-import SavedFiltersUndoAction from './saved-filter-undo-action';
-import SavedFiltersStarAction from './saved-filter-star-action';
+
+import { cn } from '@/components/lib/utils';
+
 import { useQueryBuilderContext } from '../query-builder-context';
+
+import SavedFiltersEditAction from './saved-filter-edit-action';
+import SavedFiltersStarAction from './saved-filter-star-action';
+import SavedFiltersUndoAction from './saved-filter-undo-action';
 
 function SavedFiltersLeftActions({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   const { queryBuilder } = useQueryBuilderContext();
-
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
 
   return (
@@ -16,7 +18,7 @@ function SavedFiltersLeftActions({ className, ...props }: React.HTMLAttributes<H
       {...props}
     >
       <div className="text-ellipsis overflow-hidden text-base">
-        {selectedSavedFilter ? selectedSavedFilter.raw().title : queryBuilder.coreProps.savedFilterDefaultTitle}
+        {selectedSavedFilter?.raw().name ?? queryBuilder.coreProps.savedFilterDefaultTitle}
       </div>
       <div className="flex items-center" onClick={e => e.stopPropagation()}>
         <SavedFiltersEditAction />

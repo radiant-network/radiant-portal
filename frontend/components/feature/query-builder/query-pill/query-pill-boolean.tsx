@@ -5,54 +5,61 @@ import {
   isRemoteComponent,
   isSet,
   isUploadedList,
-} from "@/components/model/query-builder-core";
-import {
-  ISqonGroupFilter,
-  ISyntheticSqon,
-  IValueQuery,
-} from "@/components/model/sqon";
-import QueryPillField from "./query-pill-field";
-import QueryPillRemoteComponent from "./query-pill-remote-component";
-import QueryPillUploadList from "./query-pill-upload-list";
-import QueryPillSet from "./query-pill-set";
-import QueryPillReference from "./query-pill-reference";
-import QueryPillCustom from "./query-pill-custom";
-import QueryPillIsolatedBoolean from "./query-pill-isolated-boolean";
-import QueryCombiner from "./query-pill-combiner";
+} from '@/components/model/query-builder-core';
+import { ISqonGroupFilter, ISyntheticSqon, IValueQuery } from '@/components/model/sqon';
+
+import QueryCombiner from './query-pill-combiner';
+import QueryPillCustom from './query-pill-custom';
+import QueryPillField from './query-pill-field';
+import QueryPillIsolatedBoolean from './query-pill-isolated-boolean';
+import QueryPillReference from './query-pill-reference';
+import QueryPillRemoteComponent from './query-pill-remote-component';
+import QueryPillSet from './query-pill-set';
+import QueryPillUploadList from './query-pill-upload-list';
 
 export type QueryPillBooleanProps = {
   sqon: ISyntheticSqon;
   customPillEditEnabled?: boolean;
 };
 
-function QueryPillBoolean({
-  sqon,
-  customPillEditEnabled,
-}: QueryPillBooleanProps) {
+function getQueryPill(f: any, customPillEditEnabled?: boolean) {
+  if (f.skipBooleanOperatorCheck) {
+    return <QueryPillIsolatedBoolean groupFilter={f as ISqonGroupFilter} />;
+  }
+
+  if (isCustomPill(f)) {
+    return <QueryPillCustom valueQuery={f as IValueQuery} />;
+  }
+
+  if (isBooleanOperator(f)) {
+    return <QueryPillBoolean sqon={f} />;
+  }
+
+  if (isReference(f)) {
+    return <QueryPillReference refIndex={f as number} />;
+  }
+
+  if (isSet(f)) {
+    return <QueryPillSet valueFilter={f} />;
+  }
+
+  if (isUploadedList(f)) {
+    return <QueryPillUploadList valueFilter={f} />;
+  }
+
+  if (isRemoteComponent(f)) {
+    return <QueryPillRemoteComponent />;
+  }
+
+  return <QueryPillField valueFilter={f} customPillEditEnabled={customPillEditEnabled} />;
+}
+
+function QueryPillBoolean({ sqon, customPillEditEnabled }: QueryPillBooleanProps) {
   return (
     <>
       {sqon.content.map((f: any, i: number) => (
         <div key={i} className="flex items-center py-[2px]">
-          {f.skipBooleanOperatorCheck ? (
-            <QueryPillIsolatedBoolean groupFilter={f as ISqonGroupFilter} />
-          ) : isCustomPill(f) ? (
-            <QueryPillCustom valueQuery={f as IValueQuery} />
-          ) : isBooleanOperator(f) ? (
-            <QueryPillBoolean sqon={f} />
-          ) : isReference(f) ? (
-            <QueryPillReference refIndex={f as number} />
-          ) : isSet(f) ? (
-            <QueryPillSet valueFilter={f} />
-          ) : isUploadedList(f) ? (
-            <QueryPillUploadList valueFilter={f} />
-          ) : isRemoteComponent(f) ? (
-            <QueryPillRemoteComponent />
-          ) : (
-            <QueryPillField
-              valueFilter={f}
-              customPillEditEnabled={customPillEditEnabled}
-            />
-          )}
+          {getQueryPill(f, customPillEditEnabled)}
           {isNotEnd(sqon.content, i) && <QueryCombiner />}
         </div>
       ))}

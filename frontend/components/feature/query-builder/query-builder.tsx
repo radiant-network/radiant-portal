@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { Card } from '@/components/base/ui/card';
+import { Skeleton } from '@/components/base/ui/skeleton';
 import { deepMerge } from '@/components/lib/merge';
 
 import { useQueryBuilder } from '../../model/query-builder-core';
@@ -13,6 +14,7 @@ import SavedFiltersRightActions from './saved-filter/saved-filter-right-actions'
 import { defaultQueryReferenceColors, useQueryBuilderDictionary } from './data';
 import { QueryBuilderContext, QueryBuilderDictContext } from './query-builder-context';
 import { QueryBuilderContextType, QueryBuilderProps } from './types';
+import { Separator } from '@/components/base/ui/separator';
 
 function QueryBuilder({
   enableCombine = true,
@@ -26,6 +28,7 @@ function QueryBuilder({
   customPillConfig,
   queryPillFacetFilterConfig,
   resolveSyntheticSqon,
+  loading,
   ...hookProps
 }: QueryBuilderProps) {
   const queryBuilder = useQueryBuilder(hookProps);
@@ -57,6 +60,7 @@ function QueryBuilder({
       customPillConfig,
       queryPillFacetFilterConfig,
       resolveSyntheticSqon,
+      loading,
     }),
     [
       queryBuilder,
@@ -72,8 +76,13 @@ function QueryBuilder({
       customPillConfig,
       queryPillFacetFilterConfig,
       resolveSyntheticSqon,
+      loading,
     ],
   );
+
+  if (loading) {
+    return <QueryBuilderSkeleton />;
+  }
 
   return (
     <QueryBuilderDictContext.Provider value={mergeDictionary}>
@@ -101,6 +110,40 @@ function QueryBuilder({
         </Card>
       </QueryBuilderContext.Provider>
     </QueryBuilderDictContext.Provider>
+  );
+}
+
+function QueryBuilderSkeleton() {
+  return (
+    <Card className="py-0">
+      <div className="flex flex-col">
+        <div className="py-4 px-6 flex justify-between">
+          <div className="flex gap-4">
+            <Skeleton className="h-8 w-32" />
+            {new Array(2).fill(0).map((_, index) => (
+              <Skeleton key={index} className="size-8" />
+            ))}
+          </div>
+          <div className="flex gap-2">
+            {new Array(5).fill(0).map((_, index) => (
+              <Skeleton key={index} className="size-8" />
+            ))}
+            <Skeleton className="h-8 w-36" />
+          </div>
+        </div>
+        <Separator />
+        <div className="flex flex-col py-4 gap-4">
+          <div className="px-6 flex flex-col gap-2">
+            <Skeleton className="h-[50px] w-full" />
+            <Skeleton className="h-[50px] w-full" />
+          </div>
+          <div className="px-6 flex gap-3">
+            <Skeleton className="h-7 w-26" />
+            <Skeleton className="h-7 w-16" />
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }
 

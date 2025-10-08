@@ -1,10 +1,13 @@
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from '@/components/base/ui/select';
-import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
-import { FolderIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { FolderIcon } from 'lucide-react';
+
 import { Button } from '@/components/base/ui/button';
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from '@/components/base/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+
 import SavedFiltersManageDialog from './saved-filter-manage-dialog';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/base/ui/tooltip';
 
 function SavedFiltersSelect() {
   const dict = useQueryBuilderDictContext();
@@ -46,7 +49,7 @@ function SavedFiltersSelect() {
         <SelectContent>
           {savedFilters.map(filter => (
             <SelectItem key={filter.id} value={filter.id}>
-              {filter.raw().title}
+              {filter.raw().name}
             </SelectItem>
           ))}
           <SelectSeparator />

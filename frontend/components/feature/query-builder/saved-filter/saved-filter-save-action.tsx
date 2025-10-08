@@ -1,8 +1,11 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { SaveIcon } from 'lucide-react';
-import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
-import { SavedFilterTypeEnum } from '@/components/model/saved-filter';
+
 import { Button } from '@/components/base/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { SavedFilterTypeEnum } from '@/components/model/saved-filter';
+
+import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
+import { toast } from 'sonner';
 
 function SavedFiltersSaveAction() {
   const dict = useQueryBuilderDictContext();
@@ -12,12 +15,35 @@ function SavedFiltersSaveAction() {
   const isDisabled =
     selectedSavedFilter && !selectedSavedFilter.isNew() ? !selectedSavedFilter.isDirty() : queryBuilder.isEmpty();
 
-  const handleSave = function () {
-    if (selectedSavedFilter) {
+  const handleSave = () => {
+    if (selectedSavedFilter && !selectedSavedFilter.isNew()) {
       selectedSavedFilter.save(SavedFilterTypeEnum.Filter);
     } else {
-      queryBuilder.saveNewFilter();
+      queryBuilder
+        .saveNewFilter(selectedSavedFilter?.raw())
+        .then(() => {
+          toast.success(dict.savedFilter.notifications.created);
+        })
+        .catch((error: any) => {
+          if (error.response.data.detail.includes('unique_saved_filter')) {
+            toast.error(dict.savedFilter.notifications.errors.duplicated);
+            return;
+          }
+          toast.error(dict.savedFilter.notifications.errors.created);
+        });
     }
+  };
+
+  const getTooptipContent = () => {
+    if (queryBuilder.isEmpty()) {
+      return dict.savedFilter.saveTooltip.whenEmpty;
+    }
+
+    if (selectedSavedFilter?.isDirty()) {
+      return dict.savedFilter.saveTooltip.whenDirty;
+    }
+
+    return dict.savedFilter.saveTooltip.default;
   };
 
   return (
@@ -36,13 +62,7 @@ function SavedFiltersSaveAction() {
           </Button>
         </span>
       </TooltipTrigger>
-      <TooltipContent>
-        {queryBuilder.isEmpty()
-          ? dict.savedFilter.saveTooltip.whenEmpty
-          : selectedSavedFilter?.isDirty()
-            ? dict.savedFilter.saveTooltip.whenDirty
-            : dict.savedFilter.saveTooltip.default}
-      </TooltipContent>
+      <TooltipContent>{getTooptipContent()}</TooltipContent>
     </Tooltip>
   );
 }
