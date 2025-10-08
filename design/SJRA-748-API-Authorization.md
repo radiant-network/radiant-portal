@@ -147,6 +147,10 @@ The following changes will need to be implemented.
 - Implement contextual tuple building
 - Implement authorization check for protected endpoints
 
+### 6.3 Radiant Sandbox
+
+- Add K8s deployment for OpenFGA
+
 **Note**:
 > Since the clinical data API doesn't exist, the list above doesn't cover the OpenFGA tuple management for clinical data (projects, cases, etc...).
 > This will need to be addressed as well in the future.
