@@ -35,6 +35,7 @@ func (m *MockCNVRepository) GetOccurrences(int, types.ListQuery) ([]types.Germli
 	return []types.GermlineCNVOccurrence{
 		{
 			SeqID:      1,
+			CnvID:      1,
 			Aliquot:    "A1",
 			Chromosome: "chr1",
 			Start:      1000,
@@ -74,6 +75,7 @@ func Test_CNVOccurrencesListHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{
 		"seq_id":1,
+		"cnv_id":1,
 		"aliquot":"A1",
 		"chromosome":"chr1",
 		"start":1000,

@@ -1,6 +1,7 @@
 CREATE TABLE `germline__cnv__occurrence` (
      `part`         INT NOT NULL,
      `seq_id`       INT NOT NULL,
+     `cnv_id`       INT NOT NULL,
      `aliquot`      VARCHAR(255) NOT NULL,
      `chromosome`   VARCHAR(2) NOT NULL,
      `start`        BIGINT NOT NULL,
