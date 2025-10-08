@@ -1,9 +1,10 @@
+/* eslint-disable no-console */
 /// <reference types="vite/client" />
 
-import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 import { useTranslation } from 'react-i18next';
+import i18next from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Load pre-merged translations (no runtime merging needed)
 const loadTranslations = async (lang: string) => {
@@ -12,7 +13,9 @@ const loadTranslations = async (lang: string) => {
     const translations = await import(`@translations-merged/${lang}.json`);
     return translations.default;
   } catch (error) {
-    console.error(`Failed to load merged translations for ${lang}. Make sure the build process has run to generate merged translation files.`);
+    console.error(
+      `Failed to load merged translations for ${lang}. Make sure the build process has run to generate merged translation files.`,
+    );
     throw new Error(`Missing merged translation file for language: ${lang}`);
   }
 };
@@ -107,7 +110,7 @@ export const useI18n = () => {
         return; // Don't change language if loading failed
       }
     }
-    
+
     await i18n.changeLanguage(lang);
   };
 
@@ -119,7 +122,7 @@ export const useI18n = () => {
     // Backward compatibility
     setLanguage: changeLanguage,
     currentLanguage: i18n.language,
-    i18n
+    i18n,
   };
 };
 

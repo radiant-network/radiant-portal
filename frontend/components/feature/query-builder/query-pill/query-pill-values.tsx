@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { SqonOpEnum } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
-import { replaceUnderscore } from '@/components/lib/string-format';
 import { IValueFilter } from '@/components/model/sqon';
 
 import IntersectionOperator from '../operator/operator-intersection';
@@ -18,7 +17,7 @@ export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canEx
 
 function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
-  const { t } = useI18n('common');
+  const { t } = useI18n();
 
   const canExpand = valueFilter.content.value.length > 3;
   const values = expanded ? valueFilter.content.value : take(valueFilter.content.value, 3);
@@ -34,9 +33,7 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
           <div key={`${val}-${i}`}>
             <span>
               {t(`common.filters.labels.${valueFilter.content.field}_value.${val}`, {
-                defaultValue: replaceUnderscore(String(val))
-                  .toLowerCase()
-                  .replace(/^\w/, c => c.toUpperCase()),
+                defaultValue: String(val),
               })}
             </span>
             {values.length - 1 > i &&
