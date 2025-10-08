@@ -2,6 +2,7 @@ import { Edit2Icon } from 'lucide-react';
 import useSWR from 'swr';
 
 import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
+import VariantIcon from '@/components/base/icons/variant-icon';
 import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
