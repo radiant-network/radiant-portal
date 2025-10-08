@@ -1,0 +1,150 @@
+name: Radiant Model
+model_file: ./radiant_model.fga
+
+tuples:
+  # application level tuples
+  - user: user:anne
+    relation: data_manager
+    object: application:radiant
+
+  - user: application:radiant
+    relation: parent
+    object: project:CBTN
+
+  - user: application:radiant
+    relation: parent
+    object: project:UDN
+
+  # knowledge base level tuples
+  - user: application:radiant
+    relation: parent
+    object: knowledge_base:kb1
+
+  - user: project:CBTN#geneticist
+    relation: can_browse
+    object: knowledge_base:kb1
+
+  # project level tuples
+  - user: user:bob
+    relation: geneticist
+    object: project:CBTN
+
+  - user: user:charlie
+    relation: requester
+    object: project:CBTN
+
+  - user: user:charlie
+    relation: requester
+    object: project:UDN
+
+  # case level tuples
+  - user: project:CBTN
+    relation: parent
+    object: case:case1
+
+  - user: project:UDN
+    relation: parent
+    object: case:case2
+
+tests:
+  - name: Check application data_manager permissions
+    check:
+      - user: user:anne
+        object: application:radiant
+        assertions:
+          data_manager: true
+          can_create_project: true
+          can_create_gene_panel: true
+          can_edit_system: true
+
+  - name: Check project roles and permissions
+    check:
+      - user: user:bob
+        object: project:CBTN
+        assertions:
+          geneticist: true
+          requester: false
+          assignee: true
+          can_assign_user: false
+          can_create_case: false
+
+      - user: user:charlie
+        object: project:CBTN
+        assertions:
+          geneticist: false
+          requester: true
+          assignee: true
+          can_assign_user: false
+          can_create_case: true
+
+  - name: Check case roles
+    check:
+      - user: user:bob
+        object: case:case1
+        assertions:
+          approver: true
+          assigner: true
+          editor: true
+          interpreter: true
+          creator: false
+          researcher: true
+          viewer: true
+
+      - user: user:bob
+        object: case:case2
+        assertions:
+          approver: false
+          assigner: false
+          editor: false
+          interpreter: false
+          creator: false
+          researcher: false
+          viewer: false
+
+      - user: user:charlie
+        object: case:case1
+        assertions:
+          approver: false
+          assigner: false
+          creator: true
+          editor: false
+          interpreter: false
+          researcher: true
+          viewer: true
+
+      - user: user:charlie
+        object: case:case2
+        assertions:
+          approver: false
+          assigner: false
+          creator: true
+          editor: false
+          interpreter: false
+          researcher: true
+          viewer: true
+
+  - name: List users assigned as assignee to project proj1
+    list_users:
+      - object: project:CBTN
+        user_filter:
+          - type: user
+        assertions:
+          assignee:
+            users:
+              - user:bob
+              - user:charlie
+
+  - name: List projects where bob is geneticist
+    list_objects:
+      - user: user:bob
+        type: project
+        assertions:
+          geneticist:
+            - project:CBTN
+
+  - name: Assert geneticist can browse knowledge base
+    check:
+      - user: user:bob
+        object: knowledge_base:kb1
+        assertions:
+          can_browse: true

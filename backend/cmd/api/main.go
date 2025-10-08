@@ -65,12 +65,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	var corsAllowedOrigins = strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
 
-	var keycloakConfig = ginkeycloak.BuilderConfig{
-		Service: os.Getenv("KEYCLOAK_CLIENT"),
-		Url:     os.Getenv("KEYCLOAK_HOST"),
-		Realm:   os.Getenv("KEYCLOAK_REALM"),
-	}
-
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     corsAllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
@@ -78,12 +72,12 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 		AllowCredentials: true, // Enable cookies/auth
 	}))
 
-	role := os.Getenv("KEYCLOAK_CLIENT_ROLE")
-	// check if role belongs of either ResourceAccess or RealmAccess
-	roleAccessMiddleware := ginkeycloak.NewAccessBuilder(keycloakConfig).
-		RestrictButForRole(role).
-		RestrictButForRealm(role).
-		Build()
+	// TODO : Change this to enable dependency injection
+	//        We will create the roleAccessMiddleware in a separate file and inject it here
+	roleAccessMiddleware, err := server.InitAuthorizer()
+	if err != nil {
+		log.Fatalf("Failed to initialize authorizer: %v", err)
+	}
 
 	// Initialize public routes explicitly
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres))
