@@ -1,8 +1,9 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { Term, VepImpact } from '@/api/api';
-import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence-table/cells/interpretation-cell';
-import OccurenceActionsMenu from '@/apps/case-entity/src/components/variants/occurrence-table/cells/occurence-actions-cell';
+import HgvsgCell from '@/apps/case-entity/src/components/variants/occurence/table/cells/hgvsg-cell';
+import InterpretationCell from '@/apps/case-entity/src/components/variants/occurence/table/cells/interpretation-cell';
+import OccurenceActionsMenu from '@/apps/case-entity/src/components/variants/occurence/table/cells/occurence-actions-cell';
 import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
@@ -160,7 +161,7 @@ const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
  *   - TextCell
  *   - AnchorLinkCell
  *   - AssayStatusCell
- *   - BadgeCell
+ *   - BadgeCel
  *   - BadgeListCell
  *   - PhenotypeConditionLinkCell
  *   - TextTooltipCell
@@ -364,11 +365,6 @@ export const firstSetCellData = [
  *   - ZygosityCell
  */
 export const secondSetCellColumns = [
-  baseCellColumnHelper.accessor(row => row, {
-    id: 'hgvsg',
-    cell: info => <HgvsgCell occurrence={info.row.original} />,
-    header: 'HgvsgCell',
-  }),
   baseCellColumnHelper.accessor(row => row.clinvar, {
     id: 'clinvar',
     cell: info => <ClassificationCell codes={info.getValue()} />,
@@ -454,7 +450,6 @@ export const secondSetCellData = [
     pf_wgs: 0.5,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
-    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: ['likely_benign', 'likely_pathogenic', '_low_penetrance', 'low_penetrance'],
@@ -469,7 +464,6 @@ export const secondSetCellData = [
     pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HET',
-    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: ['risk_factor', 'association', 'uncertain_risk_allele', 'pathogenic'],
@@ -484,7 +478,6 @@ export const secondSetCellData = [
     pf_wgs: 100,
     locus_id: '-7485572602358923261',
     zygosity: 'HET',
-    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: [
@@ -506,7 +499,6 @@ export const secondSetCellData = [
     pf_wgs: 0.0001,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
-    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: [
@@ -527,7 +519,6 @@ export const secondSetCellData = [
     pf_wgs: 0.01,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
-    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: ['likely_risk_allele', 'drug_response', 'benign', 'confers_sensitivity', ''],
@@ -558,7 +549,6 @@ export const secondSetCellData = [
     pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
-    hgvsg: 'NM_000000.1:c.1234A>G',
   },
   {
     clinvar: undefined,
@@ -684,6 +674,7 @@ export const thirdSetCellColumns = [
 export const thirdSetCellData = [
   {
     locus_id: '-7744322778257424381',
+    hgvsg: 'NM_000000.1:c.1234A>G',
     chromosome: '5',
     start: 141178734,
     rsnumber: 'rs782180361',
@@ -702,6 +693,7 @@ export const thirdSetCellData = [
   },
   {
     locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
     chromosome: '6',
     start: 31356430,
     rsnumber: 'rs753354858',
@@ -719,6 +711,7 @@ export const thirdSetCellData = [
   },
   {
     locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
     chromosome: '6',
     start: 31356430,
     rsnumber: 'rs753354858',
@@ -736,6 +729,7 @@ export const thirdSetCellData = [
   },
   {
     locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
     chromosome: '6',
     start: 31356430,
     rsnumber: 'rs753354858',
@@ -753,6 +747,7 @@ export const thirdSetCellData = [
   },
   {
     locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
     chromosome: '6',
     start: 31356430,
     rsnumber: 'rs753354858',
@@ -770,6 +765,7 @@ export const thirdSetCellData = [
   },
   {
     locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
     chromosome: '6',
     start: 31356430,
     rsnumber: 'rs753354858',
@@ -787,6 +783,7 @@ export const thirdSetCellData = [
   },
   {
     locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
     chromosome: '6',
     start: 31356430,
     rsnumber: 'rs753354858',
@@ -809,6 +806,11 @@ export const thirdSetCellData = [
  *   - CaseActionsMenuCell (Case-Exploration)
  */
 export const applicationFirstSetCellColumns = [
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'hgvsg',
+    cell: info => <HgvsgCell occurrence={info.row.original} />,
+    header: 'HgvsgCell',
+  }),
   baseCellColumnHelper.accessor(row => row, {
     id: 'clinical_interpretation',
     cell: info => <InterpretationCell occurrence={info.getValue()} />,
@@ -835,5 +837,134 @@ export const applicationFirstSetCellColumns = [
     maxSize: 64,
     enableResizing: false,
     enablePinning: false,
+  },
+];
+
+export const applicationCellData = [
+  {
+    locus_id: '-7744322778257424381',
+    hgvsg: 'NM_000000.1:c.1234A>G',
+    chromosome: '5',
+    start: 141178734,
+    rsnumber: 'rs782180361',
+    exomiser_acmg_classification: '',
+    exomiser_acpmg_evidence: '',
+    relationship_to_proband: 'proband',
+    priority_code: 'asap',
+    case_type: 'somatic',
+    review_status_stars: 1,
+    review_status: 'review status 1 stars',
+    affected_status: 'affected',
+    condition_id: 'HP:12345',
+    condition_name: 'Abnormal Delivery',
+    observed_phenotypes,
+    size: 8,
+  },
+  {
+    locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
+    priority_code: 'routine',
+    case_type: 'germline',
+    sample_id: 2,
+    relationship_to_proband: 'mother',
+    review_status_stars: 2,
+    review_status: 'review status 2 stars',
+    affected_status: 'affected',
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
+    observed_phenotypes: observed_phenotypes.slice(0, 5),
+    size: 12345,
+  },
+  {
+    locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
+    priority_code: 'stat',
+    case_type: 'germline_family',
+    sample_id: 3,
+    relationship_to_proband: 'father',
+    review_status_stars: 3,
+    review_status: 'review status 3 stars',
+    affected_status: 'non_affected',
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
+    observed_phenotypes: observed_phenotypes.slice(0, 2),
+    size: 25000000,
+  },
+  {
+    locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
+    priority_code: 'urgent',
+    case_type: 'germline_family',
+    sample_id: 4,
+    relationship_to_proband: 'sister',
+    review_status_stars: 4,
+    review_status: 'review status 4 stars',
+    affected_status: 'unknown',
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
+    observed_phenotypes: observed_phenotypes.slice(0, 1),
+    size: 5678000000,
+  },
+  {
+    locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
+    priority_code: 'urgent',
+    case_type: 'germline_family',
+    sample_id: undefined,
+    relationship_to_proband: 'brother',
+    review_status_stars: 4,
+    review_status: 'review status 4 stars',
+    affected_status: 'unknown',
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
+    observed_phenotypes: observed_phenotypes.slice(0, 1),
+    size: 9000000000000,
+  },
+  {
+    locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
+    priority_code: 'stat',
+    case_type: 'germline_family',
+    sample_id: undefined,
+    relationship_to_proband: 'sibling',
+    review_status_stars: 4,
+    review_status: 'review status 4 stars',
+    affected_status: 'unknown',
+    condition_id: 'HP:32345',
+    condition_name: 'Abnormal Delivery',
+    observed_phenotypes: observed_phenotypes.slice(0, 1),
+    size: 90000000000000,
+  },
+  {
+    locus_id: '-7485572602358923261',
+    hgvsg: 'NM_000000.1:c.1234A>G',
+    chromosome: '6',
+    start: 31356430,
+    rsnumber: 'rs753354858',
+    priority_code: undefined,
+    case_type: undefined,
+    sample_id: undefined,
+    relationship_to_proband: undefined,
+    review_status_stars: undefined,
+    review_status: undefined,
+    condition_id: undefined,
+    condition_name: undefined,
+    observed_phenotypes: undefined,
+    size: undefined,
   },
 ];

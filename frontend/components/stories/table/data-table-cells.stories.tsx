@@ -8,6 +8,7 @@ import DataTable, { createColumnSettings, TableColumnDef } from '@/components/ba
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
 import {
+  applicationCellData,
   applicationFirstSetCellColumns,
   defaultColumnSettings,
   firstSetCellColumns,
@@ -171,7 +172,7 @@ export const ApplicationFeatureCell: Story = {
     <DataTable
       {...args}
       columns={applicationFirstSetCellColumns}
-      data={secondSetCellColumns}
+      data={applicationCellData}
       defaultColumnSettings={defaultColumnSettings}
     />
   ),
