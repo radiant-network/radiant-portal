@@ -12,6 +12,7 @@ import { occurrencesApi } from '@/utils/api';
 import InterpretationDialog from '../../interpretation/interpretation-dialog';
 import OccurrenceExpandDetails from '../occurrence-expand-details';
 import OccurrenceExpandTranscript from '../occurrence-expand-transcript';
+import IGVDialog from '../../igv/igv-dialog';
 
 type OccurenceSheetContentProps = {
   occurrence: GermlineSNVOccurrence;
@@ -58,10 +59,15 @@ function OccurenceSheetContent({ occurrence }: OccurenceSheetContentProps) {
             <Download />
             {t('occurrence_expand.actions.downloadReport')}
           </Button>*/}
-          <Button color="primary" size="xs">
-            <VariantIcon />
-            {t('occurrence_expand.actions.openIGV')}
-          </Button>
+          <IGVDialog
+            occurrence={occurrence}
+            renderTrigger={handleOpen => (
+              <Button color="primary" size="xs" onClick={handleOpen}>
+                <VariantIcon />
+                {t('occurrence_expand.actions.open_igv')}
+              </Button>
+            )}
+          />
         </div>
         <Separator orientation="vertical" className="h-5" />
         <div className="flex gap-4 items-center">
