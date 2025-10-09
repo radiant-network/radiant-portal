@@ -18,6 +18,10 @@ go get github.com/swaggo/swag/v2@v2.0.0-rc4
 go install github.com/swaggo/swag/v2/cmd/swag@v2.0.0-rc4
 ```
 
+### Install OpenFGA CLI
+
+https://github.com/openfga/cli?tab=readme-ov-file#installation
+
 ### Create keycloak User
 
 Realm settings are imported at start, still a user needs to be created manually in the UI `http://localhost:8080`.

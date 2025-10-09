@@ -1,4 +1,4 @@
-# SJRA-748: API Authorization with OpenFGA
+# [Design Notes] SJRA-748: API Authorization with OpenFGA
 
 ## 1. Overview
 

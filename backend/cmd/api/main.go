@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/authorization"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 
@@ -72,9 +73,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 		AllowCredentials: true, // Enable cookies/auth
 	}))
 
-	// TODO : Change this to enable dependency injection
-	//        We will create the roleAccessMiddleware in a separate file and inject it here
-	roleAccessMiddleware, err := server.InitAuthorizer()
+	roleAccessMiddleware, err := authorization.InitAuthorizer()
 	if err != nil {
 		log.Fatalf("Failed to initialize authorizer: %v", err)
 	}
