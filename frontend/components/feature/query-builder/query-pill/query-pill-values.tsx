@@ -17,7 +17,7 @@ export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canEx
 
 function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
-  const { t } = useI18n();
+  const { t, sanitize, lazyTranslate } = useI18n();
 
   const canExpand = valueFilter.content.value.length > 3;
   const values = expanded ? valueFilter.content.value : take(valueFilter.content.value, 3);
@@ -32,8 +32,8 @@ function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
         values.map((val, i) => (
           <div key={`${val}-${i}`}>
             <span>
-              {t(`common.filters.labels.${valueFilter.content.field}_value.${val}`, {
-                defaultValue: String(val),
+              {t(`common.filters.values.${valueFilter.content.field}.${sanitize(val)}`, {
+                defaultValue: lazyTranslate(val),
               })}
             </span>
             {values.length - 1 > i &&

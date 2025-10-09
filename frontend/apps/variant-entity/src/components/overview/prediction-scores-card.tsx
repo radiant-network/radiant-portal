@@ -38,7 +38,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // sift
   if (data.sift_pred && data.sift_score !== undefined) {
-    const siftPref = t(`common.filters.labels.sift_pred_value.${data.sift_pred}`);
+    const siftPref = t(`common.filters.values.sift_pred.${data.sift_pred}`);
     predictions.push({
       key: 'sift',
       label: t('variant.predictions.sift'),
@@ -92,7 +92,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // fathmm
   if (data.fathmm_pred && data.fathmm_score !== undefined) {
-    const fatmmPref = t(`common.filters.labels.fathmm_pred_value.${data.fathmm_pred}`);
+    const fatmmPref = t(`common.filters.values.fathmm_pred.${data.fathmm_pred}`);
     predictions.push({
       key: 'fathmm',
       label: t('variant.predictions.fathmm'),
@@ -149,7 +149,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // lrt
   if (data?.lrt_pred && data.lrt_score !== undefined) {
-    const lrtPred = t(`common.filters.labels.lrt_pred_value.${data.lrt_pred}`);
+    const lrtPred = t(`common.filters.values.lrt_pred.${data.lrt_pred}`);
     predictions.push({
       key: 'lrt',
       label: t('variant.predictions.lrt'),
@@ -164,7 +164,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // polyphen2_hvar
   if (data.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined) {
-    const hvarPred = t(`common.filters.labels.polyphen2_hvar_pred_value.${data.polyphen2_hvar_pred}`);
+    const hvarPred = t(`common.filters.values.polyphen2_hvar_pred.${data.polyphen2_hvar_pred}`);
     predictions.push({
       key: 'polyphen2_hvar',
       label: t('variant.predictions.polyphen2hvar'),

@@ -9,62 +9,62 @@ export const getTransmissionModes = (
   color?: string;
 })[] => [
   {
-    label: t('variant.transmission_mode.autosomal_dominant_de_novo'),
+    label: t('common.filters.values.transmission_mode.autosomal_dominant_de_novo'),
     value: 'autosomal_dominant_de_novo',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.autosomal_dominant'),
+    label: t('common.filters.values.transmission_mode.autosomal_dominant'),
     value: 'autosomal_dominant',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.autosomal_recessive'),
+    label: t('common.filters.values.transmission_mode.autosomal_recessive'),
     value: 'autosomal_recessive',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.x_linked_dominant_de_novo'),
+    label: t('common.filters.values.transmission_mode.x_linked_dominant_de_novo'),
     value: 'x_linked_dominant_de_novo',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.x_linked_recessive_de_novo'),
+    label: t('common.filters.values.transmission_mode.x_linked_recessive_de_novo'),
     value: 'x_linked_recessive_de_novo',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.x_linked_dominant'),
+    label: t('common.filters.values.transmission_mode.x_linked_dominant'),
     value: 'x_linked_dominant',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.x_linked_recessive'),
+    label: t('common.filters.values.transmission_mode.x_linked_recessive'),
     value: 'x_linked_recessive',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.non_carrier_proband'),
+    label: t('common.filters.values.transmission_mode.non_carrier_proband'),
     value: 'non_carrier_proband',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.unknown_parents_genotype'),
+    label: t('common.filters.values.transmission_mode.unknown_parents_genotype'),
     value: 'unknown_parents_genotype',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.unknown_father_genotype'),
+    label: t('common.filters.values.transmission_mode.unknown_father_genotype'),
     value: 'unknown_father_genotype',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.unknown_mother_genotype'),
+    label: t('common.filters.values.transmission_mode.unknown_mother_genotype'),
     value: 'unknown_mother_genotype',
     title: '',
   },
   {
-    label: t('variant.transmission_mode.unknown_proband_genotype'),
+    label: t('common.filters.values.transmission_mode.unknown_proband_genotype'),
     value: 'unknown_proband_genotype',
     title: '',
   },

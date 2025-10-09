@@ -160,10 +160,10 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
             <Tooltip key={inheritance}>
               <TooltipTrigger>
                 <Badge variant="outline" key={inheritance}>
-                  {t(`variant.transmission_mode.${inheritance}.abbrev`)}
+                  {t(`common.filters.values.transmission_mode.${inheritance}_abbrev`)}
                 </Badge>
               </TooltipTrigger>
-              <TooltipContent>{t(`variant.transmission_mode.${inheritance}`)}</TooltipContent>
+              <TooltipContent>{t(`common.filters.values.transmission_mode.${inheritance}`)}</TooltipContent>
             </Tooltip>
           ))}
         </div>
@@ -180,6 +180,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
             <div className="underline hover:cursor-pointer space-x-2">
               {expandedData?.pubmed_ids.map(pubmed => (
                 <a
+                  key={pubmed}
                   href={`https://pubmed.ncbi.nlm.nih.gov/${pubmed}`}
                   target="_blank"
                   rel="noreferrer"

@@ -46,7 +46,7 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
 }
 
 export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
-  const { t } = useI18n();
+  const { t, sanitize, lazyTranslate } = useI18n();
   const config = useConfig();
   const appId = config.variant_exploration.app_id;
 
@@ -92,8 +92,8 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
      * Ignore word in parenthese
      */
     aggregationData?.forEach(item => {
-      item.label = t(`common.filters.labels.${field.key}_value.${item.key}`, {
-        defaultValue: String(item.key),
+      item.label = t(`common.filters.values.${field.key}.${sanitize(item.key)}`, {
+        defaultValue: lazyTranslate(item.key),
       });
     });
 

@@ -2,7 +2,6 @@ import { tv, VariantProps } from 'tailwind-variants';
 
 import { VepImpact } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
-import { replaceUnderscore } from '@/components/lib/string-format';
 
 import ImpactIndicator from '../../base/indicators/impact-indicator';
 
@@ -32,15 +31,15 @@ interface ConsequenceIndicatorProps
 }
 
 function ConsequenceIndicator({ consequence, vepImpact, size, className, ...props }: ConsequenceIndicatorProps) {
-  const { t } = useI18n();
+  const { t, sanitize } = useI18n();
   const styles = consequenceVariant({ size });
 
   return (
     <div className={styles.base({ className })} {...props}>
       <ImpactIndicator value={vepImpact} size={size} />
       <span className="text-ellipsis overflow-hidden">
-        {t(`variant.consequences.${consequence}`, {
-          defaultValue: replaceUnderscore(consequence),
+        {t(`common.filters.values.consequence.${sanitize(consequence)}`, {
+          defaultValue: consequence,
         })}
       </span>
     </div>

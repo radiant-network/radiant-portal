@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
+import { replaceUnderscore } from '../lib/string-format';
+
 // Load pre-merged translations (no runtime merging needed)
 const loadTranslations = async (lang: string) => {
   try {
@@ -97,6 +99,19 @@ const initializeI18n = async () => {
 export const useI18n = () => {
   const { t, i18n } = useTranslation();
 
+  /**
+   * APIs key does not always respect snake_case.
+   * Sanitize ensure to transform the key in a correct snake_case format
+   * Some key in apis can start with _ like _low_penetrance
+   */
+  const sanitize = (key?: string | number | boolean) => String(key).replace(/^_+/, '').toLowerCase();
+
+  /**
+   * Automatic translation where values are stripped from underscore
+   * To be used with value that are always displayed in english
+   */
+  const lazyTranslate = (key?: string | number | boolean) => replaceUnderscore(String(key)).toLowerCase();
+
   const changeLanguage = async (lang: string) => {
     // Load the language if it's not already loaded
     if (!i18n.hasResourceBundle(lang, 'common')) {
@@ -116,6 +131,8 @@ export const useI18n = () => {
 
   return {
     t,
+    sanitize,
+    lazyTranslate,
     changeLanguage,
     language: i18n.language,
     languages: ['en', 'fr'],
@@ -125,7 +142,6 @@ export const useI18n = () => {
     i18n,
   };
 };
-
 // Export functions for initialization control
 export const waitForI18n = () => {
   if (!initializationPromise) {
