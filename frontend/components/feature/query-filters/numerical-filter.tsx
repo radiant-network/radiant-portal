@@ -427,7 +427,7 @@ export function NumericalFilter({ field }: IProps) {
             {selectedRange === RangeOperators.Between ? (
               <div className="flex gap-2 flex-row">
                 <Input
-                  variant="facet"
+                  size="xs"
                   className="w-half"
                   value={minValue}
                   onChange={e => {
@@ -442,7 +442,7 @@ export function NumericalFilter({ field }: IProps) {
                   data-testid={`${fieldKey}_min`}
                 />
                 <Input
-                  variant="facet"
+                  size="xs"
                   className="w-half"
                   value={maxValue}
                   onChange={e => {
@@ -459,7 +459,7 @@ export function NumericalFilter({ field }: IProps) {
               </div>
             ) : (
               <Input
-                variant="facet"
+                size="xs"
                 className="w-full"
                 value={numericValue}
                 onChange={e => {

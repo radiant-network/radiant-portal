@@ -1,9 +1,10 @@
-import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { action } from '@storybook/addon-actions';
+import { Car } from 'lucide-react';
+
 import { Input } from '@/components/base/ui/input';
-import { Car, ListFilter } from 'lucide-react';
+
+import { sizes } from './utils';
 
 const meta = {
   title: 'Inputs/Input',
@@ -20,41 +21,26 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => {
-    const [value, setValue] = useState('');
-
-    return (
-      <Input
-        value={value}
-        onChange={e => {
-          setValue(e.target.value);
-          action('onChange')(e);
-        }}
-        className="max-w-[300px]"
-        placeholder="Placeholder"
-        autoFocus
-      />
-    );
-  },
-};
-
-export const WithIcon: Story = {
-  render: () => {
-    const [value, setValue] = useState('');
-
-    return (
-      <Input
-        value={value}
-        startIcon={ListFilter}
-        endIcon={Car}
-        onChange={e => {
-          setValue(e.target.value);
-          action('onChange')(e);
-        }}
-        className="max-w-[300px]"
-        placeholder="Placeholder"
-        autoFocus
-      />
-    );
-  },
+  render: () => (
+    <div className="flex flex-col gap-2">
+      {sizes.map(size => (
+        <div key={size}>
+          <span>{size}</span>
+          <div className="flex gap-2">
+            <Input size={size} className="max-w-[300px]" placeholder="Placeholder" autoFocus />
+            <Input size={size} value="loremp ipsum" className="max-w-[300px]" placeholder="Placeholder" autoFocus />
+            <Input endIcon={Car} size={size} className="max-w-[300px]" placeholder="Placeholder" autoFocus />
+            <Input
+              endIcon={Car}
+              value="loremp ipsum"
+              size={size}
+              className="max-w-[300px]"
+              placeholder="Placeholder"
+              autoFocus
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
 };
