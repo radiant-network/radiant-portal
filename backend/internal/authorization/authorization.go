@@ -1,7 +1,7 @@
 package authorization
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +13,8 @@ func InitAuthorizer() (gin.HandlerFunc, error) {
 	} else if os.Getenv("RADIANT_AUTHORIZATION_PROVIDER") == "openfga" {
 		return NewOpenFGAAuthorizer()
 	} else {
-		return nil, fmt.Errorf("unsupported auth provider: %s", os.Getenv("RADIANT_AUTHORIZATION_PROVIDER"))
+		// To avoid breaking existing deployments, we default if nothing is set
+		log.Print("RADIANT_AUTHORIZATION_PROVIDER not set or unrecognized, defaulting to Keycloak")
+		return NewKeyCloakAuthorizer()
 	}
 }

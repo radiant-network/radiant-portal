@@ -14,16 +14,6 @@ import (
 	. "github.com/openfga/go-sdk/client"
 )
 
-type CheckRequest struct {
-	User     string
-	Relation string
-	Object   string
-}
-
-type CheckResponse struct {
-	Allowed bool
-}
-
 type OpenFGAModelConfiguration struct {
 	Endpoint             string
 	StoreID              string
