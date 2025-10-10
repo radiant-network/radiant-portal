@@ -38,8 +38,11 @@ docker-down:
 
 # Test the application
 test:
+	@echo "Testing Authorization model..."
+	@fga model test --tests ./scripts/init-openfga/tests.fga.yaml
 	@echo "Testing..."
 	@go test ./... -v
+
 # Integrations Tests for the application
 itest:
 	@echo "Running integration tests..."

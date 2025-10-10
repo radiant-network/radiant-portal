@@ -1,5 +1,5 @@
 name: Radiant Model
-model_file: ./radiant_model.fga
+model_file: ./model.fga
 
 tuples:
   # application level tuples
@@ -9,40 +9,40 @@ tuples:
 
   - user: application:radiant
     relation: parent
-    object: project:CBTN
+    object: project:p1
 
   - user: application:radiant
     relation: parent
-    object: project:UDN
+    object: project:p2
 
   # knowledge base level tuples
   - user: application:radiant
     relation: parent
     object: knowledge_base:kb1
 
-  - user: project:CBTN#geneticist
+  - user: project:p1#geneticist
     relation: can_browse
     object: knowledge_base:kb1
 
   # project level tuples
   - user: user:bob
     relation: geneticist
-    object: project:CBTN
+    object: project:p1
 
   - user: user:charlie
     relation: requester
-    object: project:CBTN
+    object: project:p1
 
   - user: user:charlie
     relation: requester
-    object: project:UDN
+    object: project:p2
 
   # case level tuples
-  - user: project:CBTN
+  - user: project:p1
     relation: parent
     object: case:case1
 
-  - user: project:UDN
+  - user: project:p2
     relation: parent
     object: case:case2
 
@@ -60,7 +60,7 @@ tests:
   - name: Check project roles and permissions
     check:
       - user: user:bob
-        object: project:CBTN
+        object: project:p1
         assertions:
           geneticist: true
           requester: false
@@ -69,7 +69,7 @@ tests:
           can_create_case: false
 
       - user: user:charlie
-        object: project:CBTN
+        object: project:p1
         assertions:
           geneticist: false
           requester: true
@@ -125,7 +125,7 @@ tests:
 
   - name: List users assigned as assignee to project proj1
     list_users:
-      - object: project:CBTN
+      - object: project:p1
         user_filter:
           - type: user
         assertions:
@@ -140,7 +140,7 @@ tests:
         type: project
         assertions:
           geneticist:
-            - project:CBTN
+            - project:p1
 
   - name: Assert geneticist can browse knowledge base
     check:
