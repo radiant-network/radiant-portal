@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { CellContext } from '@tanstack/react-table';
-import { ArrowUpRight, EyeIcon } from 'lucide-react';
+import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
 
+import IGVDialog from '../../../igv/igv-dialog';
 import OccurenceSheet from '../../sheet/occurence-sheet';
 
 function OccurenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
   const { t } = useI18n();
-  const [open, setOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
+  const [igvOpen, setIgvOpen] = useState<boolean>(false);
 
   const { locus_id, chromosome, start, rsnumber } = row.original;
 
@@ -20,7 +22,8 @@ function OccurenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) 
 
   return (
     <>
-      <OccurenceSheet open={open} setOpen={setOpen} occurrence={row.original as GermlineSNVOccurrence} />
+      <OccurenceSheet open={sheetOpen} setOpen={setSheetOpen} occurrence={row.original as GermlineSNVOccurrence} />
+      <IGVDialog open={igvOpen} setOpen={setIgvOpen} occurrence={row.original as GermlineSNVOccurrence} />
       <ActionButton
         className="px-0"
         variant="outline"
@@ -29,7 +32,7 @@ function OccurenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) 
           {
             icon: <EyeIcon />,
             label: t('variant.actions.preview'),
-            onClick: () => setOpen(true),
+            onClick: () => setSheetOpen(true),
           },
           {
             icon: <ArrowUpRight />,
@@ -37,11 +40,11 @@ function OccurenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) 
             onClick: onNavigateToVariantPage,
             hasSeparator: true,
           },
-          // {
-          //   icon: <FlipHorizontal2Icon />,
-          //   label: t('variant.actions.open_in_igv'),
-          //   onClick: () => {},
-          // },
+          {
+            icon: <FlipHorizontal2Icon />,
+            label: t('variant.actions.open_in_igv'),
+            onClick: () => setIgvOpen(true),
+          },
           {
             icon: <ArrowUpRight />,
             label: t('variant.actions.ucsc'),

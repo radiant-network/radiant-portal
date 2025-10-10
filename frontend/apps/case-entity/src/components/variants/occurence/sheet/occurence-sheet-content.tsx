@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Edit2Icon } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -9,10 +10,10 @@ import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 import { occurrencesApi } from '@/utils/api';
 
+import IGVDialog from '../../igv/igv-dialog';
 import InterpretationDialog from '../../interpretation/interpretation-dialog';
 import OccurrenceExpandDetails from '../occurrence-expand-details';
 import OccurrenceExpandTranscript from '../occurrence-expand-transcript';
-import IGVDialog from '../../igv/igv-dialog';
 
 type OccurenceSheetContentProps = {
   occurrence: GermlineSNVOccurrence;
@@ -30,6 +31,7 @@ async function fetchOccurrenceExpand(input: OccurrenceExpandInput) {
 
 function OccurenceSheetContent({ occurrence }: OccurenceSheetContentProps) {
   const { t } = useI18n();
+  const [igvOpen, setIGVOpen] = useState<boolean>(false);
 
   const { data, isLoading } = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
@@ -60,6 +62,8 @@ function OccurenceSheetContent({ occurrence }: OccurenceSheetContentProps) {
             {t('occurrence_expand.actions.downloadReport')}
           </Button>*/}
           <IGVDialog
+            open={igvOpen}
+            setOpen={setIGVOpen}
             occurrence={occurrence}
             renderTrigger={handleOpen => (
               <Button color="primary" size="xs" onClick={handleOpen}>
