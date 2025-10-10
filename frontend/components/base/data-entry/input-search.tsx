@@ -1,8 +1,9 @@
-import { cn } from '@/lib/utils';
-import { Button, ButtonProps } from '@/components/base/ui/button';
-import { SearchIcon } from 'lucide-react';
-import { Input, InputProps } from '@/components/base/ui/input';
 import { useCallback, useRef, useState } from 'react';
+import { SearchIcon } from 'lucide-react';
+
+import { Button, ButtonProps } from '@/components/base/ui/button';
+import { Input, InputProps } from '@/components/base/ui/input';
+import { cn } from '@/lib/utils';
 
 export type InputSearchProps = InputProps & {
   onSearch: (value: string) => void | Promise<void>;
