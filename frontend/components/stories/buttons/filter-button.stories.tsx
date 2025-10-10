@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Calendar, Database, FileText, Filter, Settings, Users } from 'lucide-react';
 
-import FilterButton, { IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import FilterButton, { IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
 
 const meta: Meta<typeof FilterButton> = {
   title: 'Buttons/Filter Button',
@@ -77,6 +77,25 @@ const InteractiveFilterButton = ({ initialSelected = [], ...props }: any) => {
   const [selected, setSelected] = useState<string[]>(initialSelected);
 
   return <FilterButton {...props} selected={selected} onSelect={setSelected} />;
+};
+
+export const PopOverSize: Story = {
+  render: () => (
+    <div className="p-4 flex gap-2">
+      {['xs', 'sm', 'md', 'lg'].map(size => (
+        <FilterButton
+          key={size}
+          popoverSize={size as PopoverSize}
+          label={`size ${size}`}
+          options={basicOptions}
+          selected={[]}
+          onSelect={function (_selected: string[]): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      ))}
+    </div>
+  ),
 };
 
 export const WithCheckboxList: Story = {

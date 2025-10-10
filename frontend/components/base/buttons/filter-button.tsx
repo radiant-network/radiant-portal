@@ -206,12 +206,13 @@ export default function FilterButton({
           )}
         </Button>
       </PopoverTrigger>
+
       <PopoverContent
         className={cn('p-0 flex flex-col', {
-          'w-[180px] max-h-[280px]': popoverSize === 'xs',
-          'w-[229px] max-h-[280px]': popoverSize === 'sm',
-          'w-[300px] max-h-[280px]': popoverSize === 'md',
-          'w-[470px] max-h-[280px]': popoverSize === 'lg',
+          'w-48 max-h-96': popoverSize === 'xs',
+          'w-56 max-h-96': popoverSize === 'sm',
+          'w-72 max-h-96': popoverSize === 'md',
+          'w-120 max-h-96': popoverSize === 'lg',
         })}
         align="start"
         onMouseLeave={() => setOpen(false)}
