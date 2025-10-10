@@ -13,9 +13,6 @@
 # Output of the go build tool
 _build/
 
-# Output of fga model transform for json
-scripts/init-openfga/model.json
-
 # Temporary files
 *.tmp
 *.temp
