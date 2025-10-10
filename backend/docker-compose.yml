@@ -16,7 +16,7 @@ services:
     image: postgres
     container_name: postgres_radiant
     ports:
-      - "54321:5432"
+      - "5432:5432"
     environment:
       POSTGRES_PASSWORD: radiant
       POSTGRES_USER: radiant
