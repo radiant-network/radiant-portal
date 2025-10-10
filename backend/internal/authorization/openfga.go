@@ -53,40 +53,41 @@ func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 }
 
 func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
-	// TODO : Validate this with KeyCloak token
-	token := c.GetHeader("Authorization")
-	if token == "" {
-		c.AbortWithStatusJSON(401, gin.H{"error": "missing authorization token"})
-		return
-	}
+	c.AbortWithStatusJSON(501, gin.H{"error": "OpenFGA authorizer not implemented yet"})
 
-	parsedToken, err := parseJWT(token)
-	if err != nil {
-		c.AbortWithStatusJSON(401, gin.H{"error": "invalid token"})
-		return
-	}
-
-	user := parsedToken["sub"].(string)
-	if user == "" {
-		c.AbortWithStatusJSON(401, gin.H{"error": "invalid sub claim"})
-		return
-	}
-	object := c.FullPath() // Use route path
-	relation := "access"
-
-	contextualTuples := extractContextualTuplesFromToken(token)
-
-	allowed, err := o.check(user, object, relation, contextualTuples)
-	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": "unexpected error during authorization check"})
-		return
-	}
-	if !allowed {
-		c.AbortWithStatusJSON(403, gin.H{"error": "forbidden"})
-		return
-	}
-
-	c.Next()
+	//token := c.GetHeader("Authorization")
+	//if token == "" {
+	//	c.AbortWithStatusJSON(401, gin.H{"error": "missing authorization token"})
+	//	return
+	//}
+	//
+	//parsedToken, err := parseJWT(token)
+	//if err != nil {
+	//	c.AbortWithStatusJSON(401, gin.H{"error": "invalid token"})
+	//	return
+	//}
+	//
+	//user := parsedToken["sub"].(string)
+	//if user == "" {
+	//	c.AbortWithStatusJSON(401, gin.H{"error": "invalid sub claim"})
+	//	return
+	//}
+	//object := c.FullPath() // Use route path
+	//relation := "access"
+	//
+	//contextualTuples := extractContextualTuplesFromToken(token)
+	//
+	//allowed, err := o.check(user, object, relation, contextualTuples)
+	//if err != nil {
+	//	c.AbortWithStatusJSON(500, gin.H{"error": "unexpected error during authorization check"})
+	//	return
+	//}
+	//if !allowed {
+	//	c.AbortWithStatusJSON(403, gin.H{"error": "forbidden"})
+	//	return
+	//}
+	//
+	//c.Next()
 }
 
 func (o *OpenFGAAuthorizer) check(user, object, relation string, contextualTuples []ClientTupleKey) (bool, error) {
@@ -120,7 +121,7 @@ func (o *OpenFGAAuthorizer) check(user, object, relation string, contextualTuple
 }
 
 func extractContextualTuplesFromToken(token string) []ClientContextualTupleKey {
-	// TODO : Implement me
+	// TODO : Work in progress
 	return []ClientContextualTupleKey{}
 }
 
