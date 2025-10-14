@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -26,14 +27,27 @@ type OpenFGAAuthorizer struct {
 
 func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 	endpoint := os.Getenv("RADIANT_AUTHORIZATION_OPENFGA_ENDPOINT")
+	storeId := os.Getenv("RADIANT_AUTHORIZATION_OPENFGA_STORE_ID")
 
 	if endpoint == "" {
 		return nil, fmt.Errorf("openfga: invalid endpoint: %s", endpoint)
 	}
 
-	openfgaAuthModel, err := initStore(endpoint)
-	if err != nil {
-		return nil, err
+	var openfgaAuthModel *OpenFGAModelConfiguration
+	var err error
+
+	if storeId != "" {
+		log.Printf("openfga: using existing store id: %s", storeId)
+		openfgaAuthModel = &OpenFGAModelConfiguration{
+			Endpoint: endpoint,
+			StoreID:  storeId,
+		}
+	} else {
+		log.Print("openfga: no store id specified, initializing new store and model")
+		openfgaAuthModel, err = initStore(endpoint)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	client, err := NewSdkClient(&ClientConfiguration{
@@ -53,41 +67,41 @@ func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 }
 
 func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
-	c.AbortWithStatusJSON(501, gin.H{"error": "OpenFGA authorizer not implemented yet"})
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.AbortWithStatusJSON(401, gin.H{"error": "missing authorization token"})
+		return
+	}
 
-	//token := c.GetHeader("Authorization")
-	//if token == "" {
-	//	c.AbortWithStatusJSON(401, gin.H{"error": "missing authorization token"})
-	//	return
-	//}
-	//
-	//parsedToken, err := parseJWT(token)
-	//if err != nil {
-	//	c.AbortWithStatusJSON(401, gin.H{"error": "invalid token"})
-	//	return
-	//}
-	//
-	//user := parsedToken["sub"].(string)
-	//if user == "" {
-	//	c.AbortWithStatusJSON(401, gin.H{"error": "invalid sub claim"})
-	//	return
-	//}
-	//object := c.FullPath() // Use route path
-	//relation := "access"
-	//
-	//contextualTuples := extractContextualTuplesFromToken(token)
-	//
-	//allowed, err := o.check(user, object, relation, contextualTuples)
-	//if err != nil {
-	//	c.AbortWithStatusJSON(500, gin.H{"error": "unexpected error during authorization check"})
-	//	return
-	//}
-	//if !allowed {
-	//	c.AbortWithStatusJSON(403, gin.H{"error": "forbidden"})
-	//	return
-	//}
-	//
-	//c.Next()
+	parsedToken, err := parseJWT(token)
+	if err != nil {
+		c.AbortWithStatusJSON(401, gin.H{"error": "invalid token"})
+		return
+	}
+
+	user := parsedToken["sub"].(string)
+	if user == "" {
+		c.AbortWithStatusJSON(401, gin.H{"error": "invalid sub claim"})
+		return
+	}
+
+	// TODO : Get required relations from a lookup table based on the route and method
+	object := c.FullPath()
+	relation := "access"
+
+	contextualTuples := extractContextualTuplesFromToken(parsedToken)
+
+	allowed, err := o.check(user, object, relation, contextualTuples)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "unexpected error during authorization check"})
+		return
+	}
+	if !allowed {
+		c.AbortWithStatusJSON(403, gin.H{"error": "forbidden"})
+		return
+	}
+
+	c.Next()
 }
 
 func (o *OpenFGAAuthorizer) check(user, object, relation string, contextualTuples []ClientTupleKey) (bool, error) {
@@ -120,9 +134,46 @@ func (o *OpenFGAAuthorizer) check(user, object, relation string, contextualTuple
 	return *data.Allowed, nil
 }
 
-func extractContextualTuplesFromToken(token string) []ClientContextualTupleKey {
-	// TODO : Work in progress
-	return []ClientContextualTupleKey{}
+func extractContextualTuplesFromToken(jwtClaims jwt.MapClaims) []ClientContextualTupleKey {
+	var contextualTuples []ClientContextualTupleKey
+
+	sub := jwtClaims["sub"].(string)
+	if sub == "" {
+		return contextualTuples
+	}
+
+	// Extract the `ressource_access` claim.
+	resourceAccess, ok := jwtClaims["resource_access"].(map[string]interface{})
+	if !ok {
+		return contextualTuples
+	}
+
+	// Iterate over each resource in `resource_access`
+	for resource, access := range resourceAccess {
+		roles, ok := access.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		roleList, ok := roles["roles"].([]interface{})
+		if !ok {
+			continue
+		}
+
+		for _, role := range roleList {
+			contextualTuples = append(contextualTuples, ClientContextualTupleKey{
+				Object:   fmt.Sprintf("project:%s", resource),
+				Relation: role.(string),
+				User:     sub,
+			})
+			contextualTuples = append(contextualTuples, ClientContextualTupleKey{
+				Object:   fmt.Sprintf("application:%s", resource),
+				Relation: role.(string),
+				User:     sub,
+			})
+		}
+	}
+
+	return contextualTuples
 }
 
 func initStore(endpoint string) (*OpenFGAModelConfiguration, error) {
