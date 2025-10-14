@@ -142,13 +142,11 @@ func extractContextualTuplesFromToken(jwtClaims jwt.MapClaims) []ClientContextua
 		return contextualTuples
 	}
 
-	// Extract the `ressource_access` claim.
 	resourceAccess, ok := jwtClaims["resource_access"].(map[string]interface{})
 	if !ok {
 		return contextualTuples
 	}
 
-	// Iterate over each resource in `resource_access`
 	for resource, access := range resourceAccess {
 		roles, ok := access.(map[string]interface{})
 		if !ok {
