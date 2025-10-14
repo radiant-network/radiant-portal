@@ -1342,6 +1342,7 @@
     "links": {
       "analysis": "Analysis",
       "cases": "Cases",
+      "cnv_exploration": "CNV",
       "files": "Files",
       "dashboard": "Dashboard",
       "data_exploration": "Data Exploration",
