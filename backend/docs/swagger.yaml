@@ -545,6 +545,8 @@ components:
           type: number
         cadd_score:
           type: number
+        case_id:
+          type: integer
         chromosome:
           type: string
         clinvar:
@@ -663,6 +665,7 @@ components:
         zygosity:
           type: string
       required:
+      - case_id
       - exomiser_acmg_evidence
       - exomiser_gene_combined_score
       - genotype_quality

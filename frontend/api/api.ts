@@ -1149,6 +1149,12 @@ export interface ExpandedGermlineSNVOccurrence {
     'cadd_score'?: number;
     /**
      * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'case_id': number;
+    /**
+     * 
      * @type {string}
      * @memberof ExpandedGermlineSNVOccurrence
      */

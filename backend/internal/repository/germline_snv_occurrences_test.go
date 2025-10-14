@@ -677,5 +677,6 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, 0, expandedOccurrence.PnWgsNotAffected)
 		assert.Equal(t, float64(0), expandedOccurrence.PfWgsNotAffected)
 		assert.Equal(t, "UNCERTAIN_SIGNIFICANCE", expandedOccurrence.ExomiserAcmgClassification)
+		assert.Equal(t, 1, expandedOccurrence.CaseId)
 	})
 }

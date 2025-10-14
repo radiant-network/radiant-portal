@@ -260,7 +260,8 @@ func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(seqId int, locu
 	tx := r.db.Table("germline__snv__occurrence o")
 	tx = tx.Joins("JOIN germline__snv__consequence c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
 	tx = tx.Joins("JOIN germline__snv__variant v ON o.locus_id=v.locus_id")
-	tx = tx.Select("c.locus_id, v.hgvsg, v.locus, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, " +
+	tx = tx.Joins(fmt.Sprintf("JOIN %s %s ON o.seq_id=%s.id", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
+	tx = tx.Select("s.case_id, c.locus_id, v.hgvsg, v.locus, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, " +
 		"v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, " +
 		"v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, " +
 		"v.pf_wgs, v.gnomad_v3_af, c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, " +

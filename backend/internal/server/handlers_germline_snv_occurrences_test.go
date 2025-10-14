@@ -80,6 +80,7 @@ func (m *MockRepository) GetExpandedOccurrence(int, int) (*types.ExpandedGermlin
 		Filter:       "PASS",
 		Gq:           100,
 		Consequences: []string{"splice acceptor"},
+		CaseId:       1,
 	}, nil
 }
 
@@ -204,6 +205,7 @@ func Test_GetExpandedOccurrenceHandler(t *testing.T) {
 	assert.JSONEq(t, `{
 		"cadd_phred":0.1, 
 		"cadd_score":0.1,
+		"case_id": 1,
 		"chromosome":"1",
 		"fathmm_pred":"T",
 		"fathmm_score":0.1, 
