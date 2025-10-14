@@ -1,9 +1,10 @@
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { VepImpact } from '@/api/api';
-import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
+import ToggleButtonGroup from '@/components/base/toggle-button-group/toggle-button-group';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+
+import { buttonSizes } from './utils';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -28,8 +29,8 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Indicators/ConsequenceIndicator',
-  component: ConsequenceIndicator,
+  title: 'Buttons/ToggleButtonGroup',
+  component: ToggleButtonGroup,
   args: {},
   decorators: [
     Story => (
@@ -40,20 +41,35 @@ const meta = {
       </BrowserRouter>
     ),
   ],
-} satisfies Meta<typeof ConsequenceIndicator>;
+} satisfies Meta<typeof ToggleButtonGroup>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => (
+  args: {
+    defaultValue: 'Button 1',
+    onValueChange: (_value: String) => { },
+  },
+  render: args => (
     <div className="flex flex-col gap-2">
-      {Object.keys(VepImpact).map(impact => (
-        <>
-          <ConsequenceIndicator size="sm" vepImpact={impact as VepImpact} consequence={`consequence-${impact}`} />
-          <ConsequenceIndicator size="lg" vepImpact={impact as VepImpact} consequence={`consequence-${impact}`} />
-        </>
+      {buttonSizes.map(size => (
+        <ToggleButtonGroup
+          key={size}
+          size={size}
+          {...args}
+          items={[
+            {
+              label: 'Button 1',
+              value: 'Button 1',
+            },
+            {
+              label: 'Button 2',
+              value: 'Button 2',
+            },
+          ]}
+        />
       ))}
     </div>
   ),

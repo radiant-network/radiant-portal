@@ -5,47 +5,95 @@ import { delay, http, HttpResponse } from 'msw';
 
 import { SidebarProvider } from '@/components/base/ui/sidebar';
 import { FilterList } from '@/components/feature/query-filters/filter-list';
-import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { RangeOperators } from '@/components/model/sqon';
 
 import { httpOccurenceApiResponse, httpStatisticsApiResponse, occurenceApi, statisticApi } from '../api/api-occurence';
 
 const config: PortalConfig = {
   variant_entity: {
-    app_id: 'variant_entity',
+    app_id: ApplicationId.variant_entity,
   },
-  variant_exploration: {
-    app_id: 'variant_exploration_multi_select_filter',
+  snv_occurrence: {
+    app_id: ApplicationId.snv_occurrence,
     aggregations: {
-      example: {
+      variant: {
         items: [
           {
             key: 'multiple',
+            translation_key: 'multiple',
             type: 'multiple',
           },
           {
             key: 'numerical (decimal)',
+            translation_key: 'numerical (decimal)',
             type: 'numerical',
             defaults: {
               min: 0,
               max: 100,
-              defaultOperator: 'LessThan',
+              defaultOperator: RangeOperators.LessThan,
               defaultMin: 0,
               defaultMax: 100,
             },
           },
           {
             key: 'numerical (integer)',
+            translation_key: 'numerical (integer)',
             type: 'numerical',
             defaults: {
               min: 0,
               max: 100,
-              defaultOperator: 'LessThan',
+              defaultOperator: RangeOperators.LessThan,
               defaultMin: 0,
               defaultMax: 100,
             },
           },
           {
             key: 'boolean',
+            translation_key: 'boolean',
+            type: 'boolean',
+          },
+        ],
+      },
+    },
+  },
+  cnv_occurrence: {
+    app_id: ApplicationId.cnv_occurrence,
+    aggregations: {
+      variant: {
+        items: [
+          {
+            key: 'multiple',
+            translation_key: 'multiple',
+            type: 'multiple',
+          },
+          {
+            key: 'numerical (decimal)',
+            translation_key: 'numerical (decimal)',
+            type: 'numerical',
+            defaults: {
+              min: 0,
+              max: 100,
+              defaultOperator: RangeOperators.LessThan,
+              defaultMin: 0,
+              defaultMax: 100,
+            },
+          },
+          {
+            key: 'numerical (integer)',
+            translation_key: 'numerical (integer)',
+            type: 'numerical',
+            defaults: {
+              min: 0,
+              max: 100,
+              defaultOperator: RangeOperators.LessThan,
+              defaultMin: 0,
+              defaultMax: 100,
+            },
+          },
+          {
+            key: 'boolean',
+            translation_key: 'boolean',
             type: 'boolean',
           },
         ],
@@ -54,7 +102,7 @@ const config: PortalConfig = {
   },
   admin: {
     admin_code: 'admin',
-    app_id: 'admin',
+    app_id: ApplicationId.admin,
   },
   portal: {
     name: '',
@@ -66,7 +114,9 @@ const meta = {
   title: 'Facets/FilterList',
   component: FilterList,
   args: {
-    groupKey: 'example',
+    appId: config.snv_occurrence.app_id,
+    aggregations: config.snv_occurrence.aggregations,
+    groupKey: 'variant',
   },
   decorators: [
     Story => (

@@ -11,8 +11,8 @@ import { config as configMock } from './config-mock';
 
 const config: PortalConfig = {
   ...configMock,
-  variant_exploration: {
-    ...configMock.variant_exploration,
+  snv_occurrence: {
+    ...configMock.snv_occurrence,
     aggregations: {
       variant: {
         items: [
@@ -106,7 +106,7 @@ export const Default: Story = {
 export const NoDataToggle: Story = {
   render: args => {
     action('activeQuery')(
-      queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
+      queryBuilderRemote.updateActiveQueryField(config.snv_occurrence.app_id, {
         field: 'impact_score',
         value: [],
       }),
@@ -153,7 +153,7 @@ export const RangeFilterWithInterval: Story = {
   },
   render: args => {
     action('activeQuery')(
-      queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
+      queryBuilderRemote.updateActiveQueryField(config.snv_occurrence.app_id, {
         field: 'age',
         value: [],
       }),
@@ -196,7 +196,7 @@ export const RangeFilterWithRangeTypes: Story = {
   },
   render: args => {
     action('activeQuery')(
-      queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
+      queryBuilderRemote.updateActiveQueryField(config.snv_occurrence.app_id, {
         field: 'age_unit',
         value: [],
       }),

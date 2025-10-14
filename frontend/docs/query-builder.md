@@ -122,3 +122,10 @@ The main difference is from the field `user_id`. Since an user can share a field
 
 
 
+## Related Components
+
+- [Table](./table.md) 
+- Facets (filters): Facets are external component that interact with the `QueryBuilder`.  The list of facets for a page is generated through an [ApplicationConfig](./application-config.md) file. 
+
+
+

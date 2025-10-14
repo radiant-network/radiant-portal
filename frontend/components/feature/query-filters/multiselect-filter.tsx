@@ -10,11 +10,11 @@ import { Input } from '@/components/base/ui/input';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
-import { useConfig } from '@/components/model/applications-config';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/model/sqon';
 
+import { useFilterConfig } from './filter-list';
 import { useAggregationBuilder } from './use-aggregation-builder';
 
 interface IProps {
@@ -47,8 +47,7 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
 
 export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
-  const config = useConfig();
-  const appId = config.variant_exploration.app_id;
+  const { appId } = useFilterConfig();
 
   // Use the hook directly instead of receiving data as a prop
   const { data: aggregationData, isLoading } = useAggregationBuilder(field.key, undefined, true, appId);

@@ -2,6 +2,13 @@ import { createContext, type ReactNode, useContext } from 'react';
 
 import { RangeOperators } from '@/components/model/sqon';
 
+export enum ApplicationId {
+  'admin' = 'admin',
+  'snv_occurrence' = 'snv_occurrence',
+  'cnv_occurrence' = 'cnv_occurrence',
+  'variant_entity' = 'snv_occurrence',
+}
+
 export interface IFilterRangeTypes {
   key: string;
   name: string | React.ReactNode;
@@ -45,6 +52,7 @@ export type TFilterGroupConfig = IFilterRangeConfig | IFilterTextInputConfig | I
 
 export interface Aggregation {
   key: string;
+  translation_key: string;
   type: 'multiple' | 'boolean' | 'numerical' | 'divider';
   defaults?: TFilterGroupConfig;
   tooltips?: string[];
@@ -60,7 +68,7 @@ export type AggregationConfig = {
 };
 
 export interface BaseAppsConfig {
-  app_id: string;
+  app_id: ApplicationId;
 }
 
 export interface AppsConfig extends BaseAppsConfig {
@@ -73,8 +81,9 @@ export interface AppsAdminConfig extends BaseAppsConfig {
 
 export interface PortalConfig {
   admin: AppsAdminConfig;
-  variant_exploration: AppsConfig;
   variant_entity: BaseAppsConfig;
+  snv_occurrence: AppsConfig;
+  cnv_occurrence: AppsConfig;
   portal: {
     name: string;
     navigation: {

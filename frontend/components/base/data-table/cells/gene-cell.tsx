@@ -22,7 +22,7 @@ type GeneCellProps = {
  */
 function GeneCell({ className, symbol }: GeneCellProps) {
   const config = useConfig();
-  const appId = config.variant_exploration.app_id;
+  const appId = config.snv_occurrence.app_id;
 
   if (!symbol) return <EmptyCell />;
 

@@ -1,9 +1,11 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { Term, VepImpact } from '@/api/api';
-import HgvsgCell from '@/apps/case-entity/src/components/variants/occurence/table/cells/hgvsg-cell';
-import InterpretationCell from '@/apps/case-entity/src/components/variants/occurence/table/cells/interpretation-cell';
-import OccurenceActionsMenu from '@/apps/case-entity/src/components/variants/occurence/table/cells/occurence-actions-cell';
+import ClingenCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/clingen-cell';
+import CNVNameCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/cnv-name-cell';
+import HgvsgCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/hgvsg-cell';
+import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/interpretation-cell';
+import OccurenceActionsMenu from '@/apps/case-entity/src/components/variants/occurrence/table/cells/occurence-actions-cell';
 import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
@@ -820,6 +822,24 @@ export const applicationFirstSetCellColumns = [
     enableResizing: false,
     enableSorting: false,
   }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'cnv_name',
+    cell: info => <CNVNameCell occurrence={info.getValue()} />,
+    header: 'CNVNameCell(Variant-Tab/CNV)',
+    size: 40,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'clingen',
+    cell: info => <ClingenCell occurrence={info.getValue()} />,
+    header: 'Clingen (Variant-Tab/CNV)',
+    size: 40,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
   {
     id: 'case-actions-menu',
     cell: CaseActionsMenuCell,
@@ -859,6 +879,7 @@ export const applicationCellData = [
     condition_name: 'Abnormal Delivery',
     observed_phenotypes,
     size: 8,
+    name: 'DRAGEN:GAIN:chr10:38526737-38528684',
   },
   {
     locus_id: '-7485572602358923261',
@@ -877,6 +898,7 @@ export const applicationCellData = [
     condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 5),
     size: 12345,
+    name: 'DRAGEN:GAIN:chr10:46514860-46560711',
   },
   {
     locus_id: '-7485572602358923261',
@@ -895,6 +917,7 @@ export const applicationCellData = [
     condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 2),
     size: 25000000,
+    name: 'DRAGEN:GAIN:chr10:89035066-89041642',
   },
   {
     locus_id: '-7485572602358923261',
@@ -913,6 +936,7 @@ export const applicationCellData = [
     condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 1),
     size: 5678000000,
+    name: 'DRAGEN:GAIN:chr10:38526737-38528684',
   },
   {
     locus_id: '-7485572602358923261',
@@ -931,6 +955,7 @@ export const applicationCellData = [
     condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 1),
     size: 9000000000000,
+    name: 'DRAGEN:GAIN:chr11:50136017-50165606',
   },
   {
     locus_id: '-7485572602358923261',
@@ -949,6 +974,7 @@ export const applicationCellData = [
     condition_name: 'Abnormal Delivery',
     observed_phenotypes: observed_phenotypes.slice(0, 1),
     size: 90000000000000,
+    name: 'DRAGEN:GAIN:chr11:54543136-54548754',
   },
   {
     locus_id: '-7485572602358923261',
@@ -966,5 +992,6 @@ export const applicationCellData = [
     condition_name: undefined,
     observed_phenotypes: undefined,
     size: undefined,
+    name: undefined,
   },
 ];

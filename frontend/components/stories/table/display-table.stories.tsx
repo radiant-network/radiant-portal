@@ -1,31 +1,36 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
-import DisplayTable from '@/components/base/data-table/display-table';
-import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import type { Meta, StoryObj } from '@storybook/react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { data, MockData } from './table-mock';
+
 import { TableColumnDef } from '@/components/base/data-table/data-table';
+import DisplayTable from '@/components/base/data-table/display-table';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+
+import { data, MockData } from './table-mock';
 
 const columnHelper = createColumnHelper<MockData>();
 
 const config: PortalConfig = {
   variant_entity: {
-    app_id: 'variant_entity',
+    app_id: ApplicationId.variant_entity,
   },
-  variant_exploration: {
-    app_id: 'variant_exploration_multi_select_filter',
+  snv_occurrence: {
+    app_id: ApplicationId.snv_occurrence,
+    aggregations: [] as any,
+  },
+  cnv_occurrence: {
+    app_id: ApplicationId.cnv_occurrence,
     aggregations: [] as any,
   },
   admin: {
     admin_code: 'admin',
-    app_id: 'admin',
+    app_id: ApplicationId.admin,
   },
   portal: {
     name: '',
     navigation: {},
   },
 };
-
 
 const meta = {
   title: 'Tables/Display Table',
@@ -83,7 +88,6 @@ export const Borderless: Story = {
   },
   render: args => <DisplayTable {...args} />,
 };
-
 
 export const Border: Story = {
   args: {

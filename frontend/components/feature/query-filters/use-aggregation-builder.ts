@@ -1,25 +1,34 @@
 import React from 'react';
 import useSWR from 'swr';
-import { AggregationBodyWithSqon, SqonContent, SqonOpEnum, type Aggregation } from '@/api/api';
-import { occurrencesApi } from '@/utils/api';
+
+import { type Aggregation, AggregationBodyWithSqon, SqonContent, SqonOpEnum } from '@/api/api';
+import { ApplicationId } from '@/components/model/applications-config';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { occurrencesApi } from '@/utils/api';
 
 type AggregateContextProps = {
   seqId: string;
-}
+};
 export const AggregateContext = React.createContext<AggregateContextProps>({ seqId: '1' });
-
 
 type OccurrenceAggregationInput = {
   seqId: string;
   aggregationBody: AggregationBodyWithSqon;
 };
 
-
-const fetcher = (input: OccurrenceAggregationInput): Promise<Aggregation[]> => {
-  return occurrencesApi
-    .aggregateGermlineSNVOccurrences(input.seqId, input.aggregationBody)
-    .then(response => response.data);
+const fetcher = (appId: ApplicationId) => {
+  switch (appId) {
+    case ApplicationId.cnv_occurrence:
+      return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
+        occurrencesApi
+          .aggregateGermlineCNVOccurrences(input.seqId, input.aggregationBody)
+          .then(response => response.data);
+    default:
+      return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
+        occurrencesApi
+          .aggregateGermlineSNVOccurrences(input.seqId, input.aggregationBody)
+          .then(response => response.data);
+  }
 };
 
 export function useAggregationBuilder(field: string, size: number = 30, shouldFetch: boolean = false, appId: string) {
@@ -47,7 +56,7 @@ export function useAggregationBuilder(field: string, size: number = 30, shouldFe
       op: activeQuery.op as SqonOpEnum,
     };
   }
-  return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(data, fetcher, {
+  return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(data, fetcher(appId), {
     revalidateOnFocus: false,
   });
 }
