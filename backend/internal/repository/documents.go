@@ -80,10 +80,12 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 	subQueryDocumentId := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
 	subQueryDocumentId = subQueryDocumentId.Select("\"document_id\" as type, id as value")
 	subQueryDocumentId = subQueryDocumentId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+	filterOutIndexFiles(subQueryDocumentId)
 
 	subQueryDocumentName := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
 	subQueryDocumentName = subQueryDocumentName.Select("\"name\" as type, name as value")
 	subQueryDocumentName = subQueryDocumentName.Where("name LIKE ?", searchInput)
+	filterOutIndexFiles(subQueryDocumentName)
 
 	subQueryRunName := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
 	subQueryRunName = subQueryRunName.Select("\"run_name\" as type, run_name as value")
@@ -163,8 +165,8 @@ func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProj
 
 func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destination *[]Aggregation, filterTable types.Table, documentsJoinColumn string, filterJoinColumn string, filterLabelColumn string, filterCondition *string) error {
 	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.Name, filterTable.Alias))
-	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct documents.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) documents ON documents.%s = %s.%s", documentsJoinColumn, filterTable.Alias, filterJoinColumn), txDocument)
+	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct doc.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) doc ON doc.%s = %s.%s", documentsJoinColumn, filterTable.Alias, filterJoinColumn), txDocument)
 	tx = tx.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
 	tx = tx.Order("count desc, bucket asc")
 	if filterCondition != nil {
@@ -196,5 +198,11 @@ func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.
 	if userQuery.Filters() != nil {
 		utils.AddWhere(userQuery, tx)
 	}
+
+	filterOutIndexFiles(tx)
 	return tx
+}
+
+func filterOutIndexFiles(tx *gorm.DB) {
+	tx.Where(fmt.Sprintf("%s.format_code not in ('crai', 'tbi')", types.DocumentTable.Alias))
 }

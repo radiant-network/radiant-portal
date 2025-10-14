@@ -247,37 +247,37 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 			{
 				"case_id":21, 
 				"created_on":"2021-09-12T13:08:00Z",
-				"data_type_code":"snv", 
-				"document_id":204, 
-				"format_code":"tbi", 
-				"name":"FI0037905.S14786.vcf.gz.tbi", 
+				"data_type_code":"alignment", 
+				"document_id":21, 
+				"format_code":"cram", 
+				"name":"FI0037702.S13229.cram", 
 				"patient_id":60, 
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"proband", 
-				"size":2.432696e+06, 
+				"size":9.1235842785e+10, 
 				"submitter_sample_id":"S14857", 
 				"task_id":21
 			}, {
 				"case_id":21, 
 				"created_on":"2021-09-12T13:08:00Z",
-				"data_type_code":"snv", 
-				"document_id":204, 
-				"format_code":"tbi", 
-				"name":"FI0037905.S14786.vcf.gz.tbi", 
+				"data_type_code":"alignment", 
+				"document_id":21, 
+				"format_code":"cram", 
+				"name":"FI0037702.S13229.cram", 
 				"patient_id":61, 
 				"performer_lab_code":"CQGC", 
 				"performer_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"mother", 
-				"size":2.432696e+06, 
+				"size":9.1235842785e+10, 
 				"submitter_sample_id":"S14858", 
 				"task_id":21
 			}
 		], 
-		"count": 12}`
+		"count": 6}`
 	body := `{
 			"additional_fields":[],
-			"sort":[{"field": "name", "order": "desc"}, {"field": "relationship_to_proband_code", "order": "desc"}],
+			"sort":[{"field": "name", "order": "asc"}, {"field": "relationship_to_proband_code", "order": "desc"}],
 			"limit": 2
 		}`
 	assertCaseEntityDocumentsSearchHandler(t, "simple", 21, body, expected)
