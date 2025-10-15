@@ -70,25 +70,25 @@ func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 	if token == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Bearer token empty or missing"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	parsedToken, err := parseJWT(token)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token", "details": err.Error()})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	user, err := parsedToken.GetSubject()
 	if user == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "empty sub claim"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	azp, ok := parsedToken["azp"].(string)
 	if !ok || azp == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "empty azp claim"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
@@ -97,11 +97,11 @@ func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 
 	allowed, err := o.listRelations(user, "project", relation, contextualTuples)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims, error while extracting contextual tuples"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 	if len(allowed) == 0 {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden, no relations allowed for this user"})
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 		return
 	}
 
