@@ -87,7 +87,7 @@ func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 	}
 
 	contextualTuples := extractContextualTuplesFromToken(parsedToken)
-	relation := extractRelation(c.Request)
+	relation := extractRelation(c.Request, c.FullPath())
 
 	allowed, err := o.listRelations(user, "project", relation, contextualTuples)
 	if err != nil {
@@ -132,23 +132,23 @@ func (o *OpenFGAAuthorizer) listRelations(user, relType, relation string, contex
 	return data.Objects, nil
 }
 
-func extractRelation(r *http.Request) string {
+func extractRelation(r *http.Request, fullPath string) string {
 	method := strings.ToLower(r.Method)
-	path := strings.ReplaceAll(r.URL.Path, "/", "_")
+	path := strings.ReplaceAll(strings.ReplaceAll(fullPath, "/", "_"), ":", "")
 	return fmt.Sprintf("%s_%s", method, path)
 }
 
 func extractContextualTuplesFromToken(jwtClaims jwt.MapClaims) []ClientContextualTupleKey {
 	var contextualTuples []ClientContextualTupleKey
 
-	sub := jwtClaims["sub"].(string)
-	if sub == "" {
+	sub, err := jwtClaims.GetSubject()
+	if err != nil || sub == "" {
 		log.Printf("openfga: missing sub claim")
 		return contextualTuples
 	}
 
-	azp := jwtClaims["azp"].(string)
-	if azp == "" {
+	azp, ok := jwtClaims["azp"].(string)
+	if !ok || azp == "" {
 		log.Printf("openfga: missing azp claim")
 		return contextualTuples
 	}
