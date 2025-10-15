@@ -70,25 +70,25 @@ func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 	if token == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
 		return
 	}
 
 	parsedToken, err := parseJWT(token)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
 		return
 	}
 
 	user, err := parsedToken.GetSubject()
 	if user == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
 		return
 	}
 
 	azp, ok := parsedToken["azp"].(string)
 	if !ok || azp == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
 		return
 	}
 
@@ -97,11 +97,11 @@ func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 
 	allowed, err := o.listRelations(user, "project", relation, contextualTuples)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
 		return
 	}
 	if len(allowed) == 0 {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
+		c.AbortWithStatusJSON(http.StatusForbidden, nil)
 		return
 	}
 
