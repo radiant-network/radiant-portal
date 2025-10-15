@@ -1800,7 +1800,7 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       responses:
         "200":
           content:

@@ -123,7 +123,7 @@ func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Description Retrieve types.CaseEntity by its ID
 // @Tags cases
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
+// @Param case_id path int true "Case ID"
 // @Produce json
 // @Success 200 {object} types.CaseEntity
 // @Failure 404 {object} types.ApiError

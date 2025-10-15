@@ -3876,11 +3876,11 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve CaseEntity by its ID
          * @summary Get CaseEntity case entity
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntity: async (caseId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseEntity: async (caseId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('caseEntity', 'caseId', caseId)
             const localVarPath = `/cases/{case_id}`
@@ -4106,11 +4106,11 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve CaseEntity by its ID
          * @summary Get CaseEntity case entity
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseEntity(caseId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseEntity>> {
+        async caseEntity(caseId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseEntity>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntity(caseId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntity']?.[localVarOperationServerIndex]?.url;
@@ -4194,11 +4194,11 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
         /**
          * Retrieve CaseEntity by its ID
          * @summary Get CaseEntity case entity
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntity(caseId: string, options?: RawAxiosRequestConfig): AxiosPromise<CaseEntity> {
+        caseEntity(caseId: number, options?: RawAxiosRequestConfig): AxiosPromise<CaseEntity> {
             return localVarFp.caseEntity(caseId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4269,12 +4269,12 @@ export class CasesApi extends BaseAPI {
     /**
      * Retrieve CaseEntity by its ID
      * @summary Get CaseEntity case entity
-     * @param {string} caseId Case ID
+     * @param {number} caseId Case ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseEntity(caseId: string, options?: RawAxiosRequestConfig) {
+    public caseEntity(caseId: number, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).caseEntity(caseId, options).then((request) => request(this.axios, this.basePath));
     }
 
