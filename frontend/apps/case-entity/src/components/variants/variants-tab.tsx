@@ -93,6 +93,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
 
   const appId = config.variant_exploration.app_id;
+  const aggregations = config.variant_exploration.aggregations;
 
   // Variant list request
   const { fetch: fetchOccurrencesListHelper } = useOccurencesListHelper({
@@ -224,12 +225,16 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
           }}
         />
         <div className="bg-muted w-full">
-          <div className={`flex flex-1 h-screen overflow-hidden`}>
+          <div className="flex flex-1 h-screen overflow-hidden">
             <aside className="w-auto min-w-fit h-full shrink-0">
               <AggregateContext value={{ seqId }}>
                 <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
                   <div className="z-10">
-                    <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
+                    <SidebarGroups
+                      aggregationGroups={aggregations}
+                      selectedItemId={selectedSidebarItem}
+                      onItemSelect={setSelectedSidebarItem}
+                    />
                   </div>
                   <div
                     className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
@@ -246,7 +251,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                           <X size={16} />
                         </button>
                       </div>
-                      <FilterList groupKey={selectedSidebarItem} />
+                      <FilterList aggregations={aggregations} groupKey={selectedSidebarItem} />
                     </div>
                   </div>
                 </SidebarProvider>

@@ -60,14 +60,8 @@ const MyComponent = () => {
 };
 ```
 
-### 2. With Namespaces
 
-```typescript
-const { t } = useI18n('common');
-return <h1>{t('common.welcome')}</h1>;
-```
-
-### 3. Language Switching
+### 2. Language Switching
 
 ```typescript
 const { setLanguage, currentLanguage } = useI18n();
@@ -76,7 +70,7 @@ const { setLanguage, currentLanguage } = useI18n();
 setLanguage('fr');
 ```
 
-### 4. Using the Language Switcher Component
+### 3. Using the Language Switcher Component
 
 ```typescript
 import { LanguageSwitcher } from "@/components/base/language-switcher";
@@ -90,7 +84,7 @@ const Header = () => {
 };
 ```
 
-### 5. Complex Translations with HTML Elements
+### 4. Complex Translations with HTML Elements
 
 For translations that contain HTML elements like links, use the `Trans` component from react-i18next:
 
@@ -250,10 +244,19 @@ import { InfoIcon } from 'lucide-react';
 }
 ```
 
+
+### Facets and APIs values
+
+```json
+{ "key": "variant_class", "translation_key": "variant_class", "type": "multiple" },
+```
+
+
+
 ## Best Practices
 
 1. **Key Naming**
-   - Use dot notation for nested keys
+   - Use nesting notation for keys
    - Keep keys short but descriptive
    - Use consistent naming patterns
    - Use `snake_case` when nesting can be overkill

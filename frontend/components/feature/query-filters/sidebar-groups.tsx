@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Droplet, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { BadgeCheckIcon, Droplet, PanelLeftClose, PanelLeftOpen, UserRoundIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 
 import FrequencyIcon from '@/components/base/icons/frequency-icon';
@@ -19,7 +19,7 @@ import {
 } from '@/components/base/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { useConfig } from '@/components/model/applications-config';
+import { AggregationConfig } from '@/components/model/applications-config';
 
 // Icon mapping for different aggregation groups
 const iconMap = {
@@ -29,6 +29,8 @@ const iconMap = {
   pathogenicity: PathogenicityIcon,
   frequency: FrequencyIcon,
   occurrence: OccurrenceIcon,
+  parental_analysis: UserRoundIcon,
+  metric_qc: BadgeCheckIcon,
 };
 
 const buttonVariants = tv({
@@ -45,11 +47,15 @@ const buttonVariants = tv({
 interface SidebarGroupsProps {
   onItemSelect?: (itemId: string | null) => void;
   selectedItemId?: string | null;
+  aggregationGroups: AggregationConfig;
 }
 
-export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedItemId }: SidebarGroupsProps) {
+export function SidebarGroups({
+  onItemSelect,
+  aggregationGroups,
+  selectedItemId: externalSelectedItemId,
+}: SidebarGroupsProps) {
   const { t } = useI18n();
-  const config = useConfig();
   const { open, toggleSidebar } = useSidebar();
   const [internalSelectedItemId, setInternalSelectedItemId] = useState<string | null>(null);
 
@@ -63,9 +69,6 @@ export function SidebarGroups({ onItemSelect, selectedItemId: externalSelectedIt
       onItemSelect(newSelectedId);
     }
   };
-
-  // Get aggregation groups from config
-  const aggregationGroups = config.variant_exploration.aggregations;
 
   return (
     <Sidebar

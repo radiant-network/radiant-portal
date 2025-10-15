@@ -4,16 +4,15 @@ import { Accordion } from '@/components/base/ui/accordion';
 import { Button } from '@/components/base/ui/button';
 import { FilterContainer } from '@/components/feature/query-filters/filter-container';
 import { useI18n } from '@/components/hooks/i18n';
-import { useConfig } from '@/components/model/applications-config';
+import { AggregationConfig } from '@/components/model/applications-config';
 
 interface FilterListProps {
   groupKey?: string | null;
+  aggregations: AggregationConfig;
 }
 
-export function FilterList({ groupKey }: FilterListProps) {
+export function FilterList({ groupKey, aggregations }: FilterListProps) {
   const { t } = useI18n();
-  const config = useConfig();
-  const aggregations = config.variant_exploration.aggregations;
   const [toggleExpandAll, setToggleExpandAll] = useState<boolean>(false);
   const [expandedFilters, setExpandedFilters] = useState<string[]>([]);
 

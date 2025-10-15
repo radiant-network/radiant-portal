@@ -45,6 +45,7 @@ export type TFilterGroupConfig = IFilterRangeConfig | IFilterTextInputConfig | I
 
 export interface Aggregation {
   key: string;
+  translation_key: string;
   type: 'multiple' | 'boolean' | 'numerical' | 'divider';
   defaults?: TFilterGroupConfig;
   tooltips?: string[];
@@ -75,6 +76,7 @@ export interface PortalConfig {
   admin: AppsAdminConfig;
   variant_exploration: AppsConfig;
   variant_entity: BaseAppsConfig;
+  cnv_exploration: AppsConfig;
   portal: {
     name: string;
     navigation: {

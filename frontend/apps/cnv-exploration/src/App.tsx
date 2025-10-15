@@ -43,6 +43,7 @@ export default function App() {
   // Facets
   const [open, setOpen] = useState(false);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
+  const aggregations = config.cnv_exploration.aggregations;
 
   // Table
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
@@ -51,7 +52,7 @@ export default function App() {
     pageSize: 10,
   });
 
-  const appId = config.variant_exploration.app_id;
+  const appId = config.cnv_exploration.app_id;
 
   /**
    * Restore activeSqon
@@ -96,16 +97,17 @@ export default function App() {
   return (
     <main className="bg-muted h-screen overflow-auto">
       <div className="bg-background flex flex-col">
-        {/* CNV FORM */}
         <div className="inline-flex gap-4 items-center border-b px-3 py-4">Form</div>
-
         <div className="bg-muted w-full">
           <div className="flex flex-1 h-screen overflow-hidden">
-            {/* SideBar */}
             <aside className="w-auto min-w-fit h-full shrink-0">
               <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
                 <div className="z-10">
-                  <SidebarGroups selectedItemId={selectedSidebarItem} onItemSelect={setSelectedSidebarItem} />
+                  <SidebarGroups
+                    aggregationGroups={aggregations}
+                    selectedItemId={selectedSidebarItem}
+                    onItemSelect={setSelectedSidebarItem}
+                  />
                 </div>
                 <div
                   className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
@@ -122,7 +124,7 @@ export default function App() {
                         <X size={16} />
                       </button>
                     </div>
-                    <FilterList groupKey={selectedSidebarItem} />
+                    <FilterList aggregations={aggregations} groupKey={selectedSidebarItem} />
                   </div>
                 </div>
               </SidebarProvider>
