@@ -216,19 +216,6 @@
           { "key": "cosmic_gene_panel", "translation_key": "cosmic_gene_panel", "type": "multiple" }
         ]
       },
-      "pathogenicity": {
-        "items": [
-          { "key": "pathogenicity_exomiser_divider", "translation_key": "pathogenicity_exomiser_divider", "type": "divider" },
-          { "key": "exomiser_gene_combined_score", "translation_key": "cnv_exomiser_gene_combined_score", "type": "numerical", "defaults": {
-            "min": 0,
-            "max": 1,
-            "defaultOperator": "GreaterThan",
-            "defaultMin": 0,
-            "defaultMax": 1
-          } },
-          { "key": "exomiser_acmg_classification", "translation_key": "cnv_exomiser_acmg_classification", "type": "multiple" }
-        ]
-      },
       "frequency": {
         "items": [
           { "key": "frequency_divider_pulic_cohorts", "translation_key": "frequency_divider_pulic_cohorts", "type": "divider" }, 

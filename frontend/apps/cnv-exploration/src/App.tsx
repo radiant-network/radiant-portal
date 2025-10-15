@@ -6,6 +6,7 @@ import { SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Card, CardContent } from '@/components/base/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/base/ui/select';
 import { SidebarProvider } from '@/components/base/ui/sidebar';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
 import UserSavedFiltersProps, { getUserSavedFilters } from '@/components/feature/query-builder/user-saved-filters';
@@ -97,7 +98,14 @@ export default function App() {
   return (
     <main className="bg-muted h-screen overflow-auto">
       <div className="bg-background flex flex-col">
-        <div className="inline-flex gap-4 items-center border-b px-3 py-4">Form</div>
+        <div className="inline-flex gap-4 items-center border-b px-3 py-4">
+          <Select>
+            <SelectTrigger>Proband</SelectTrigger>
+            <SelectContent>
+              <SelectItem value="proband-1">Proband1</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="bg-muted w-full">
           <div className="flex flex-1 h-screen overflow-hidden">
             <aside className="w-auto min-w-fit h-full shrink-0">
@@ -124,7 +132,7 @@ export default function App() {
                         <X size={16} />
                       </button>
                     </div>
-                    <FilterList aggregations={aggregations} groupKey={selectedSidebarItem} />
+                    <FilterList appId={appId} aggregations={aggregations} groupKey={selectedSidebarItem} />
                   </div>
                 </div>
               </SidebarProvider>

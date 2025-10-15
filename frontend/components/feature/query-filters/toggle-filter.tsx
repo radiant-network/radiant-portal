@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
+
+import { Aggregation } from '@/api/api';
 import { Button } from '@/components/base/ui/button';
 import { Label } from '@/components/base/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/base/ui/radio-group';
-import { Aggregation } from '@/api/api';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
-import { useConfig } from '@/components/model/applications-config';
-import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
-import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
+import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
+import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
+
+import { useFilterConfig } from './filter-list';
 
 interface IProps {
   data?: Aggregation[];
@@ -19,19 +21,16 @@ export function ToggleFilter({ data, field }: IProps) {
   const [items, setItems] = useState<Aggregation[]>(data || []);
   // items that are include in the search
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const config = useConfig();
-  const appId = config.variant_exploration.app_id;
+  const { appId } = useFilterConfig();
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
-    let prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
       .getActiveQuery(appId)
       // @ts-ignore
-      .content.find((x: IValueFilter) => {
-        return x.content.field === field.key;
-      });
+      .content.find((x: IValueFilter) => x.content.field === field.key);
     if (prevSelectedItems) {
-      let items = prevSelectedItems.content.value;
+      const items = prevSelectedItems.content.value;
       if (items.length >= 1) {
         setSelectedItem(items[0] as string);
       }
@@ -43,7 +42,6 @@ export function ToggleFilter({ data, field }: IProps) {
   }, [data]);
 
   // Memoize these functions with useCallback
-  //
   const onSelect = useCallback(
     (item: Aggregation) => {
       if (item.key === selectedItem) return;

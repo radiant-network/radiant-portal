@@ -2,6 +2,13 @@ import { createContext, type ReactNode, useContext } from 'react';
 
 import { RangeOperators } from '@/components/model/sqon';
 
+export enum ApplicationId {
+  'admin' = 'admin',
+  'variant_exploration' = 'variant_exploration',
+  'cnv_exploration' = 'cnv_exploration',
+  'variant_entity' = 'variant_entity',
+}
+
 export interface IFilterRangeTypes {
   key: string;
   name: string | React.ReactNode;
@@ -61,7 +68,7 @@ export type AggregationConfig = {
 };
 
 export interface BaseAppsConfig {
-  app_id: string;
+  app_id: ApplicationId;
 }
 
 export interface AppsConfig extends BaseAppsConfig {
