@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -85,18 +86,15 @@ func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 		return
 	}
 
-	// TODO : Get required relations from a lookup table based on the route and method
-	object := c.FullPath()
-	relation := "access"
-
 	contextualTuples := extractContextualTuplesFromToken(parsedToken)
+	relation := extractRelation(c.Request)
 
-	allowed, err := o.check(user, object, relation, contextualTuples)
+	allowed, err := o.listRelations(user, "project", relation, contextualTuples)
 	if err != nil {
 		c.AbortWithStatusJSON(500, gin.H{"error": "unexpected error during authorization check"})
 		return
 	}
-	if !allowed {
+	if len(allowed) == 0 {
 		c.AbortWithStatusJSON(403, gin.H{"error": "forbidden"})
 		return
 	}
@@ -104,34 +102,40 @@ func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 	c.Next()
 }
 
-func (o *OpenFGAAuthorizer) check(user, object, relation string, contextualTuples []ClientTupleKey) (bool, error) {
-	body := ClientCheckRequest{
-		User:             user,
+func (o *OpenFGAAuthorizer) listRelations(user, relType, relation string, contextualTuples []ClientTupleKey) ([]string, error) {
+	body := ClientListObjectsRequest{
+		User:             fmt.Sprintf("user:%s", user),
 		Relation:         relation,
-		Object:           object,
+		Type:             relType,
 		ContextualTuples: contextualTuples,
 	}
 
 	authId, err := o.Client.GetAuthorizationModelId()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	storeId, err := o.Client.GetStoreId()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	options := ClientCheckOptions{
+	options := ClientListObjectsOptions{
 		AuthorizationModelId: openfga.PtrString(authId),
 		StoreId:              openfga.PtrString(storeId),
 	}
-	data, err := o.Client.Check(context.Background()).Body(body).Options(options).Execute()
+	data, err := o.Client.ListObjects(context.Background()).Body(body).Options(options).Execute()
 	if err != nil {
-		return false, nil
+		return nil, nil
 	}
 
-	return *data.Allowed, nil
+	return data.Objects, nil
+}
+
+func extractRelation(r *http.Request) string {
+	method := strings.ToLower(r.Method)
+	path := strings.ReplaceAll(r.URL.Path, "/", "_")
+	return fmt.Sprintf("%s_%s", method, path)
 }
 
 func extractContextualTuplesFromToken(jwtClaims jwt.MapClaims) []ClientContextualTupleKey {
@@ -139,35 +143,55 @@ func extractContextualTuplesFromToken(jwtClaims jwt.MapClaims) []ClientContextua
 
 	sub := jwtClaims["sub"].(string)
 	if sub == "" {
+		log.Printf("openfga: missing sub claim")
+		return contextualTuples
+	}
+
+	azp := jwtClaims["azp"].(string)
+	if azp == "" {
+		log.Printf("openfga: missing azp claim")
 		return contextualTuples
 	}
 
 	resourceAccess, ok := jwtClaims["resource_access"].(map[string]interface{})
 	if !ok {
+		log.Printf("openfga: missing resource_access claim")
 		return contextualTuples
 	}
 
 	for resource, access := range resourceAccess {
+		if resource == "account" {
+			// Skip default Keycloak account resource
+			continue
+		}
+
 		roles, ok := access.(map[string]interface{})
 		if !ok {
+			log.Printf("openfga: invalid resource %s", resource)
 			continue
 		}
 		roleList, ok := roles["roles"].([]interface{})
 		if !ok {
+			log.Printf("openfga: no roles for resource %s", resource)
 			continue
 		}
 
 		for _, role := range roleList {
-			contextualTuples = append(contextualTuples, ClientContextualTupleKey{
-				Object:   fmt.Sprintf("project:%s", resource),
-				Relation: role.(string),
-				User:     sub,
-			})
-			contextualTuples = append(contextualTuples, ClientContextualTupleKey{
-				Object:   fmt.Sprintf("application:%s", resource),
-				Relation: role.(string),
-				User:     sub,
-			})
+			if azp == resource {
+				// Application (client) level role
+				contextualTuples = append(contextualTuples, ClientContextualTupleKey{
+					Object:   fmt.Sprintf("application:%s", resource),
+					Relation: role.(string),
+					User:     fmt.Sprintf("user:%s", sub),
+				})
+			} else {
+				// Project level role
+				contextualTuples = append(contextualTuples, ClientContextualTupleKey{
+					Object:   fmt.Sprintf("project:%s", resource),
+					Relation: role.(string),
+					User:     fmt.Sprintf("user:%s", sub),
+				})
+			}
 		}
 	}
 

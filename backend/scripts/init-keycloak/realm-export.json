@@ -67,9 +67,6 @@
             "uma_authorization"
           ],
           "client": {
-            "radiant": [
-              "radiant"
-            ],
             "account": [
               "manage-account",
               "view-profile"
@@ -305,15 +302,6 @@
       ],
       "CBTN": [
         {
-          "id": "aed23d1a-a0aa-4be3-bed1-a524243d9544",
-          "name": "data_manager",
-          "description": "",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "71dd3aff-390a-4c0b-b42f-b05104e03373",
-          "attributes": {}
-        },
-        {
           "id": "20e0dd0b-91cb-4b03-bf6f-0b079e490748",
           "name": "geneticist",
           "description": "",
@@ -355,45 +343,9 @@
           "clientRole": true,
           "containerId": "81635516-20ff-43f1-aba0-6dda1994350f",
           "attributes": {}
-        },
-        {
-          "id": "897da53c-b3fe-489b-8f64-00eb6ef44459",
-          "name": "geneticist",
-          "description": "",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "81635516-20ff-43f1-aba0-6dda1994350f",
-          "attributes": {}
-        },
-        {
-          "id": "ed06e4be-c7d7-4801-af3c-f89adfb25f69",
-          "name": "radiant",
-          "description": "",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "81635516-20ff-43f1-aba0-6dda1994350f",
-          "attributes": {}
-        },
-        {
-          "id": "65bbdd3e-cb03-49d3-9476-8548a3149e12",
-          "name": "requester",
-          "description": "",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "81635516-20ff-43f1-aba0-6dda1994350f",
-          "attributes": {}
         }
       ],
       "UDN": [
-        {
-          "id": "e9b3df93-fc7d-4adf-b5d2-9eac29f09db1",
-          "name": "data_manager",
-          "description": "",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "79626af9-7351-42e0-b950-bf07b3e75d19",
-          "attributes": {}
-        },
         {
           "id": "e1164816-a246-4f18-804c-a09c4a5bdcbb",
           "name": "geneticist",
@@ -1810,14 +1762,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-attribute-mapper",
             "oidc-usermodel-property-mapper",
-            "saml-user-property-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "oidc-full-name-mapper",
             "oidc-sha256-pairwise-sub-mapper",
+            "oidc-full-name-mapper",
+            "oidc-address-mapper",
             "saml-role-list-mapper",
-            "oidc-address-mapper"
+            "oidc-usermodel-attribute-mapper",
+            "saml-user-attribute-mapper",
+            "saml-user-property-mapper"
           ]
         }
       },
@@ -1872,14 +1824,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-role-list-mapper",
             "oidc-address-mapper",
-            "saml-user-attribute-mapper",
-            "oidc-usermodel-property-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
-            "oidc-full-name-mapper",
             "saml-user-property-mapper",
-            "oidc-usermodel-attribute-mapper"
+            "saml-user-attribute-mapper",
+            "oidc-full-name-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-usermodel-property-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "saml-role-list-mapper"
           ]
         }
       }
