@@ -65,63 +65,30 @@ func Test_ExtractContextualTuples_ValidClaimsWithRoles(t *testing.T) {
 		{Object: "project:projectA", Relation: "editor", User: "user:user123"},
 		{Object: "project:projectB", Relation: "viewer", User: "user:user123"},
 	}
-	result := extractContextualTuplesFromToken(jwtClaims)
+	result := extractContextualTuplesFromToken("user123", "client123", jwtClaims)
 	assert.ElementsMatch(t, expected, result)
 }
 
-func Test_ExtractContextualTuples_MissingSubClaim(t *testing.T) {
-	jwtClaims := jwt.MapClaims{
-		"azp": "client123",
-		"resource_access": map[string]interface{}{
-			"projectA": map[string]interface{}{
-				"roles": []interface{}{"admin"},
-			},
-		},
-	}
-	result := extractContextualTuplesFromToken(jwtClaims)
-	assert.Empty(t, result)
-}
-
-func Test_ExtractContextualTuples_MissingAzpClaim(t *testing.T) {
-	jwtClaims := jwt.MapClaims{
-		"sub": "user123",
-		"resource_access": map[string]interface{}{
-			"projectA": map[string]interface{}{
-				"roles": []interface{}{"admin"},
-			},
-		},
-	}
-	result := extractContextualTuplesFromToken(jwtClaims)
-	assert.Empty(t, result)
-}
-
 func Test_ExtractContextualTuples_MissingResourceAccessClaim(t *testing.T) {
-	jwtClaims := jwt.MapClaims{
-		"sub": "user123",
-		"azp": "client123",
-	}
-	result := extractContextualTuplesFromToken(jwtClaims)
+	jwtClaims := jwt.MapClaims{}
+	result := extractContextualTuplesFromToken("user123", "client123", jwtClaims)
 	assert.Empty(t, result)
 }
 
 func Test_ExtractContextualTuples_EmptyRoles(t *testing.T) {
 	jwtClaims := jwt.MapClaims{
-		"sub": "user123",
-		"azp": "client123",
 		"resource_access": map[string]interface{}{
 			"projectA": map[string]interface{}{
 				"roles": []interface{}{},
 			},
 		},
 	}
-	result := extractContextualTuplesFromToken(jwtClaims)
+	result := extractContextualTuplesFromToken("user123", "client123", jwtClaims)
 	assert.Empty(t, result)
 }
 
 func Test_ExtractContextualTuples_SkipAccountResource(t *testing.T) {
 	jwtClaims := jwt.MapClaims{
-		"sub": "user123",
-		"azp": "client123",
 		"resource_access": map[string]interface{}{
 			"account": map[string]interface{}{
 				"roles": []interface{}{"user"},
@@ -134,6 +101,6 @@ func Test_ExtractContextualTuples_SkipAccountResource(t *testing.T) {
 	expected := []ClientContextualTupleKey{
 		{Object: "project:projectA", Relation: "admin", User: "user:user123"},
 	}
-	result := extractContextualTuplesFromToken(jwtClaims)
+	result := extractContextualTuplesFromToken("user123", "client123", jwtClaims)
 	assert.ElementsMatch(t, expected, result)
 }

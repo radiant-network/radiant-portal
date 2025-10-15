@@ -70,32 +70,38 @@ func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 	if token == "" {
-		c.AbortWithStatusJSON(401, gin.H{"error": "missing authorization token"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Bearer token empty or missing"})
 		return
 	}
 
 	parsedToken, err := parseJWT(token)
 	if err != nil {
-		c.AbortWithStatusJSON(401, gin.H{"error": "invalid token"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token", "details": err.Error()})
 		return
 	}
 
-	user := parsedToken["sub"].(string)
+	user, err := parsedToken.GetSubject()
 	if user == "" {
-		c.AbortWithStatusJSON(401, gin.H{"error": "invalid sub claim"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "empty sub claim"})
 		return
 	}
 
-	contextualTuples := extractContextualTuplesFromToken(parsedToken)
+	azp, ok := parsedToken["azp"].(string)
+	if !ok || azp == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "empty azp claim"})
+		return
+	}
+
+	contextualTuples := extractContextualTuplesFromToken(user, azp, parsedToken)
 	relation := extractRelation(c.Request, c.FullPath())
 
 	allowed, err := o.listRelations(user, "project", relation, contextualTuples)
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": "unexpected error during authorization check"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims, error while extracting contextual tuples"})
 		return
 	}
 	if len(allowed) == 0 {
-		c.AbortWithStatusJSON(403, gin.H{"error": "forbidden"})
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden, no relations allowed for this user"})
 		return
 	}
 
@@ -138,20 +144,8 @@ func extractRelation(r *http.Request, fullPath string) string {
 	return fmt.Sprintf("%s_%s", method, path)
 }
 
-func extractContextualTuplesFromToken(jwtClaims jwt.MapClaims) []ClientContextualTupleKey {
+func extractContextualTuplesFromToken(user, azp string, jwtClaims jwt.MapClaims) []ClientContextualTupleKey {
 	var contextualTuples []ClientContextualTupleKey
-
-	sub, err := jwtClaims.GetSubject()
-	if err != nil || sub == "" {
-		log.Printf("openfga: missing sub claim")
-		return contextualTuples
-	}
-
-	azp, ok := jwtClaims["azp"].(string)
-	if !ok || azp == "" {
-		log.Printf("openfga: missing azp claim")
-		return contextualTuples
-	}
 
 	resourceAccess, ok := jwtClaims["resource_access"].(map[string]interface{})
 	if !ok {
@@ -182,14 +176,14 @@ func extractContextualTuplesFromToken(jwtClaims jwt.MapClaims) []ClientContextua
 				contextualTuples = append(contextualTuples, ClientContextualTupleKey{
 					Object:   fmt.Sprintf("application:%s", resource),
 					Relation: role.(string),
-					User:     fmt.Sprintf("user:%s", sub),
+					User:     fmt.Sprintf("user:%s", user),
 				})
 			} else {
 				// Project level role
 				contextualTuples = append(contextualTuples, ClientContextualTupleKey{
 					Object:   fmt.Sprintf("project:%s", resource),
 					Relation: role.(string),
-					User:     fmt.Sprintf("user:%s", sub),
+					User:     fmt.Sprintf("user:%s", user),
 				})
 			}
 		}
