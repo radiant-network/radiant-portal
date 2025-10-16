@@ -921,6 +921,25 @@ export interface ClinvarRCV {
     'version'?: number;
 }
 /**
+ * 
+ * @export
+ * @interface ColumnPinningConfig
+ */
+export interface ColumnPinningConfig {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ColumnPinningConfig
+     */
+    'left'?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ColumnPinningConfig
+     */
+    'right'?: Array<string>;
+}
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -2364,6 +2383,19 @@ export interface OmimGenePanel {
 /**
  * 
  * @export
+ * @interface PaginationConfig
+ */
+export interface PaginationConfig {
+    /**
+     * 
+     * @type {number}
+     * @memberof PaginationConfig
+     */
+    'pageSize'?: number;
+}
+/**
+ * 
+ * @export
  * @interface PubmedCitation
  */
 export interface PubmedCitation {
@@ -2772,6 +2804,43 @@ export interface StatisticsBodyWithSqon {
 /**
  * 
  * @export
+ * @interface TableConfig
+ */
+export interface TableConfig {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof TableConfig
+     */
+    'columnOrder'?: Array<string>;
+    /**
+     * 
+     * @type {ColumnPinningConfig}
+     * @memberof TableConfig
+     */
+    'columnPinning'?: ColumnPinningConfig;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof TableConfig
+     */
+    'columnSizing'?: { [key: string]: number; };
+    /**
+     * 
+     * @type {{ [key: string]: boolean; }}
+     * @memberof TableConfig
+     */
+    'columnVisibility'?: { [key: string]: boolean; };
+    /**
+     * 
+     * @type {PaginationConfig}
+     * @memberof TableConfig
+     */
+    'pagination'?: PaginationConfig;
+}
+/**
+ * 
+ * @export
  * @interface Term
  */
 export interface Term {
@@ -2947,6 +3016,25 @@ export interface Transcript {
 }
 
 
+/**
+ * 
+ * @export
+ * @interface UserPreference
+ */
+export interface UserPreference {
+    /**
+     * 
+     * @type {{ [key: string]: TableConfig; }}
+     * @memberof UserPreference
+     */
+    'table_display': { [key: string]: TableConfig; };
+    /**
+     * 
+     * @type {string}
+     * @memberof UserPreference
+     */
+    'user_id': string;
+}
 /**
  * 
  * @export
@@ -7094,6 +7182,186 @@ export class StatusApi extends BaseAPI {
      */
     public statusGet(options?: RawAxiosRequestConfig) {
         return StatusApiFp(this.configuration).statusGet(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * UserPreferencesApi - axios parameter creator
+ * @export
+ */
+export const UserPreferencesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get user preferences
+         * @summary Get user preferences
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserPreferences: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/users/preferences`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create or update user preference
+         * @summary Create or update user preference
+         * @param {UserPreference} userPreference User Preference to create or update
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postUserPreferences: async (userPreference: UserPreference, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userPreference' is not null or undefined
+            assertParamExists('postUserPreferences', 'userPreference', userPreference)
+            const localVarPath = `/users/preferences`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(userPreference, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * UserPreferencesApi - functional programming interface
+ * @export
+ */
+export const UserPreferencesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UserPreferencesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get user preferences
+         * @summary Get user preferences
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserPreferences(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserPreferences(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UserPreferencesApi.getUserPreferences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create or update user preference
+         * @summary Create or update user preference
+         * @param {UserPreference} userPreference User Preference to create or update
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postUserPreferences(userPreference, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UserPreferencesApi.postUserPreferences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * UserPreferencesApi - factory interface
+ * @export
+ */
+export const UserPreferencesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UserPreferencesApiFp(configuration)
+    return {
+        /**
+         * Get user preferences
+         * @summary Get user preferences
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserPreferences(options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
+            return localVarFp.getUserPreferences(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create or update user preference
+         * @summary Create or update user preference
+         * @param {UserPreference} userPreference User Preference to create or update
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
+            return localVarFp.postUserPreferences(userPreference, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * UserPreferencesApi - object-oriented interface
+ * @export
+ * @class UserPreferencesApi
+ * @extends {BaseAPI}
+ */
+export class UserPreferencesApi extends BaseAPI {
+    /**
+     * Get user preferences
+     * @summary Get user preferences
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UserPreferencesApi
+     */
+    public getUserPreferences(options?: RawAxiosRequestConfig) {
+        return UserPreferencesApiFp(this.configuration).getUserPreferences(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create or update user preference
+     * @summary Create or update user preference
+     * @param {UserPreference} userPreference User Preference to create or update
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UserPreferencesApi
+     */
+    public postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig) {
+        return UserPreferencesApiFp(this.configuration).postUserPreferences(userPreference, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
