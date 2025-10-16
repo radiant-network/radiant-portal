@@ -1,20 +1,20 @@
-import { useState } from 'react';
 import { CellContext } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
+import { useState } from 'react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
 
-import IGVDialog from '../../../igv/igv-dialog';
-import OccurenceSheet from '../../sheet/occurrence-sheet';
+import IGVDialog from '@/components/feature/igv/igv-dialog';
+import OccurencePreviewSheet from '@/components/feature/preview/occurence-preview-sheet';
 
 function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
   const { t } = useI18n();
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
 
-  const { locus_id, chromosome, start, rsnumber } = row.original;
+  const { locus_id, chromosome, start, rsnumber, seq_id, locus } = row.original;
 
   const onNavigateToVariantPage = () => {
     window.open(`/variants/entity/${locus_id}`, '_blank');
@@ -22,8 +22,19 @@ function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>)
 
   return (
     <>
-      <OccurenceSheet open={sheetOpen} setOpen={setSheetOpen} occurrence={row.original as GermlineSNVOccurrence} />
-      <IGVDialog open={igvOpen} setOpen={setIgvOpen} occurrence={row.original as GermlineSNVOccurrence} />
+      <OccurencePreviewSheet
+        open={sheetOpen}
+        setOpen={setSheetOpen}
+        occurrence={row.original as GermlineSNVOccurrence}
+      />
+      <IGVDialog
+        open={igvOpen}
+        setOpen={setIgvOpen}
+        seqId={seq_id}
+        locus={locus}
+        start={start}
+        chromosome={chromosome}
+      />
       <ActionButton
         className="px-0"
         variant="outline"

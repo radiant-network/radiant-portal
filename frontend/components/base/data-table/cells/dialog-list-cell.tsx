@@ -34,7 +34,7 @@ function DialogListCell({ visibleCount, header, items = [], renderItem }: Dialog
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger>
+      <AlertDialogTrigger asChild>
         <div className="flex flex-col justify-normal items-baseline">
           {items.slice(0, visibleCount).map(item => renderItem(item))}
           <Button variant="link" size="xs" className="flex px-0 justify-normal">

@@ -19,6 +19,11 @@
         "h6": "Titre 6"
       }
     },
+    "sex": {
+      "male": "Masculin",
+      "female": "Féminin",
+      "other": "Autre"
+    },
     "classification": {
       "other": "Autre",
       "other.abbrev": "O",
@@ -870,12 +875,53 @@
       }
     }
   },
-  "occurrence_expand": {
+  "preview_sheet": {
     "actions": {
       "download_report": "Télécharger le rapport",
       "open_igv": "Ouvrir IGV",
       "interpret": "Interpréter"
     },
+    "occurence_details": {
+      "title": "Détails de l'occurence",
+      "actions": {
+        "view_in_igv": "Ouvrir dans IGV"
+      },
+      "sections": {
+        "inheritance": {
+          "title": "Héritabilité",
+          "zygosity": "Zygosité",
+          "compound_het": "Hétérozygote Composite",
+          "potential_compound_het": "Hétérozygote Composite Potentiel",
+          "inheritance": "Héritabilité",
+          "parental_origin": "Origine Parentale"
+        },
+        "family": {
+          "title": "Famille",
+          "mother_genotype": "Génotype de la Mère",
+          "father_genotype": "Génotype du Père",
+          "affected_tooltip": "Affecté",
+          "not_affected_tooltip": "Non affecté"
+        },
+        "metrics": {
+          "title": "Métriques",
+          "quality_depth": "Profondeur Qualité",
+          "allele_depth_alt": "Profondeur Aléle ALT",
+          "total_depth_alt_ref": "Profondeur Total ALT + REF",
+          "genotype_quality": "Qualité de Génotype",
+          "filter": "Filtre",
+          "pass": "Pass",
+          "fail": "Fail"
+        }
+      }
+    },
+    "case": {
+      "title": "Cas {{id}}",
+      "actions": {
+        "open_case": "Ouvrir le cas"
+      }
+    }
+  },
+  "occurrence_expand": {
     "classifications": {
       "title": "Classifications",
       "clinvar": "ClinVar"

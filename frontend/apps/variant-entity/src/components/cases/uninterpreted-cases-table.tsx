@@ -1,6 +1,6 @@
+import { PaginationState } from '@tanstack/table-core';
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
-import { PaginationState } from '@tanstack/table-core';
 import useSWR from 'swr';
 
 import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
@@ -95,7 +95,7 @@ function UninterpretedCasesTable() {
       <OtherCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="uninterpreted-cases"
-        columns={getOtherCasesColumns(t)}
+        columns={getOtherCasesColumns(t, params.locusId!)}
         data={data?.list || []}
         defaultColumnSettings={otherCasesDefaultSettings}
         defaultServerSorting={[]}

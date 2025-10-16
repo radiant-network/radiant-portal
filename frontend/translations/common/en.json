@@ -19,6 +19,11 @@
         "h6": "Heading 6"
       }
     },
+    "sex": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
     "classification": {
       "other": "Other",
       "other.abbrev": "O",
@@ -993,12 +998,53 @@
       }
     }
   },
-  "occurrence_expand": {
+  "preview_sheet": {
     "actions": {
       "download_report": "Download report",
       "open_igv": "Open IGV",
       "interpret": "Interpret"
     },
+    "occurence_details": {
+      "title": "Occurence Details",
+      "actions": {
+        "view_in_igv": "View in IGV"
+      },
+      "sections": {
+        "inheritance": {
+          "title": "Inheritance",
+          "zygosity": "Zygosity",
+          "compound_het": "Compound Het.",
+          "potential_compound_het": "Potential Compound Het.",
+          "inheritance": "Inheritance",
+          "parental_origin": "Parental Origin"
+        },
+        "family": {
+          "title": "Family",
+          "mother_genotype": "Mother's Genotype",
+          "father_genotype": "Father's Genotype",
+          "affected_tooltip": "Affected",
+          "not_affected_tooltip": "Not affected"
+        },
+        "metrics": {
+          "title": "Metrics",
+          "quality_depth": "Quality Depth",
+          "allele_depth_alt": "Allele Depth ALT",
+          "total_depth_alt_ref": "Total Depth ALT + REF",
+          "genotype_quality": "Genotype Quality",
+          "filter": "Filter",
+          "pass": "Pass",
+          "fail": "Fail"
+        }
+      }
+    },
+    "case": {
+      "title": "Case {{id}}",
+      "actions": {
+        "open_case": "Open Case"
+      }
+    }
+  },
+  "occurrence_expand": {
     "classifications": {
       "title": "Classifications",
       "clinvar": "ClinVar"
@@ -1031,8 +1077,8 @@
       "cadd_raw": "CADD (Raw)",
       "cadd_phred": "CADD (Phred)"
     },
-    "zygosity": {
-      "title": "Zygosity",
+    "inheritance": {
+      "title": "Inheritance",
       "zygosity": "Zygosity",
       "compound_het": "Compound Het.",
       "potential_compound_het": "Potential Compound Het.",

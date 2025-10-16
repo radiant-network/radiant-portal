@@ -37,6 +37,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../components/feature/igv", "../../components/feature/assays"],
   "exclude": ["node_modules", "dist"]
 }
