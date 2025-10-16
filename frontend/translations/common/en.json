@@ -443,6 +443,7 @@
         "unit": "Unit",
         "variantexternal_reference": "Variant External Reference",
         "variant_class": "Variant Type",
+        "variant_type": "Variant Type",
         "vep_impact": "VEP",
         "vep_impact_tooltip": "Ensembl Variant Effect Predictor",
         "zygosity": "Zygosity"
