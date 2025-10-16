@@ -71,13 +71,6 @@ const _ProtectedLayout = () => {
               as: Link,
               active: pathname === '/file',
             },
-            {
-              title: t('main_navbar.links.cnv_exploration'),
-              icon: <FolderIcon />,
-              to: '/cnv',
-              as: Link,
-              active: pathname === '/cnv',
-            },
           ]}
           actions={
             [

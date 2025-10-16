@@ -16,8 +16,8 @@ const config: PortalConfig = {
   variant_entity: {
     app_id: 'variant_entity',
   },
-  variant_exploration: {
-    app_id: 'variant_exploration_multi_select_filter',
+  snv_occurrence: {
+    app_id: 'snv_occurrence_multi_select_filter',
     aggregations: [] as any,
   },
   admin: {

@@ -4,9 +4,9 @@ import { RangeOperators } from '@/components/model/sqon';
 
 export enum ApplicationId {
   'admin' = 'admin',
-  'variant_exploration' = 'variant_exploration',
-  'cnv_exploration' = 'cnv_exploration',
-  'variant_entity' = 'variant_entity',
+  'snv_occurrence' = 'snv_occurrence',
+  'cnv_occurrence' = 'cnv_occurrence',
+  'variant_entity' = 'snv_occurrence',
 }
 
 export interface IFilterRangeTypes {
@@ -81,9 +81,9 @@ export interface AppsAdminConfig extends BaseAppsConfig {
 
 export interface PortalConfig {
   admin: AppsAdminConfig;
-  variant_exploration: AppsConfig;
   variant_entity: BaseAppsConfig;
-  cnv_exploration: AppsConfig;
+  snv_occurrence: AppsConfig;
+  cnv_occurrence: AppsConfig;
   portal: {
     name: string;
     navigation: {

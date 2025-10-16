@@ -7,8 +7,8 @@ import { config as configMock } from './config-mock';
 
 const config: PortalConfig = {
   ...configMock,
-  variant_exploration: {
-    ...configMock.variant_exploration,
+  snv_occurrence: {
+    ...configMock.snv_occurrence,
     aggregations: {
       variant: {
         items: [
@@ -58,7 +58,7 @@ export const Default: Story = {
 export const DataAppliedToQueryBuilder: Story = {
   render: args => {
     action('activeQuery')(
-      queryBuilderRemote.updateActiveQueryField(config.variant_exploration.app_id, {
+      queryBuilderRemote.updateActiveQueryField(config.snv_occurrence.app_id, {
         field: 'chromosome',
         value: ['Option1', 'Option4'],
       }),

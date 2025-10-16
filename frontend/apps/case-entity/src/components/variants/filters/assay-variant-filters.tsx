@@ -6,8 +6,11 @@ import { Badge } from '@/components/base/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
+import { ToggleGroup, ToggleGroupItem } from '@/components/base/ui/toggle-group';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
+
+import { VariantInterface } from '../variants-tab';
 
 function AssayVariantFiltersSelectValue({ relationship_to_proband, request_id }: CaseAssay) {
   const { t } = useI18n();
@@ -47,6 +50,8 @@ type AssayVariantFiltersProps = {
   value?: string;
   handleChange: (value: string) => void;
   isLoading: boolean;
+  activeInterface: VariantInterface;
+  onActiveInterfaceChange: (value: VariantInterface) => void;
 };
 
 /**
@@ -57,18 +62,25 @@ type AssayVariantFiltersProps = {
  *
  * But the order can change if the proband doesn't have variants.
  */
-function AssayVariantFilters({ assays = [], value, handleChange, isLoading }: AssayVariantFiltersProps) {
+function AssayVariantFilters({
+  assays = [],
+  value,
+  handleChange,
+  isLoading,
+  activeInterface,
+}: AssayVariantFiltersProps) {
   const { t } = useI18n();
 
   const selectedAssay = assays.find(assay => assay.seq_id.toString() === value);
 
   if (isLoading || assays.length === 0) {
     return (
-      <div className="inline-flex gap-4 items-center border-b px-6 py-4">
+      <div className="inline-flex gap-4 items-center border-b px-2 py-4">
         <Skeleton className="w-[100px] h-[32px]" />
         <Skeleton className="w-[200px] h-[32px]" />
         <Skeleton className="w-[60px] h-[32px]" />
         <Separator className="h-6" orientation="vertical" />
+        <Skeleton className="w-[50px] h-[32px]" />
         <Skeleton className="w-[50px] h-[32px]" />
       </div>
     );
@@ -102,7 +114,21 @@ function AssayVariantFilters({ assays = [], value, handleChange, isLoading }: As
         {selectedAssay?.sample_id}
       </Badge>
       <Separator className="h-6" orientation="vertical" />
-      <Badge>{t('case_entity.variants.filters.snv')}</Badge>
+      <ToggleGroup
+        defaultValue={activeInterface as string}
+        type="single"
+        variant="outline"
+        onValueChange={e => {
+          console.log('e', e);
+        }}
+      >
+        <ToggleGroupItem value={VariantInterface.SNV} aria-label={VariantInterface.SNV}>
+          {t('case_entity.variants.filters.snv')}
+        </ToggleGroupItem>
+        <ToggleGroupItem value={VariantInterface.CNV} aria-label={VariantInterface.CNV}>
+          {t('case_entity.variants.filters.cnv')}
+        </ToggleGroupItem>
+      </ToggleGroup>
     </div>
   );
 }

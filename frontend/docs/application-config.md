@@ -22,8 +22,8 @@ We use radiant for this example.
   export enum ApplicationId {
     'admin' = 'admin',
     'variant_exploration' = 'variant_exploration',
-    'cnv_exploration' = 'cnv_exploration',
-    'variant_entity' = 'variant_entity',
+    'cnv_occurrence' = 'cnv_occurrence',
+    'snv_occurrence' = 'snv_occurrence',
     'example_id' = 'example_id' // <== New ID
   }
   ```
@@ -66,7 +66,7 @@ We use radiant for this example.
   ```typescript
   const fetcher = (appId: ApplicationId) => {
     switch (appId) {
-      case ApplicationId.cnv_exploration:
+      case ApplicationId.cnv_occurrence:
         return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
           occurrencesApi
             .aggregateGermlineCNVOccurrences(input.seqId, input.aggregationBody)
@@ -85,7 +85,7 @@ We use radiant for this example.
   ```typescript
   const statisticsFetcher = (appId: ApplicationId) => {
     switch (appId) {
-      case ApplicationId.cnv_exploration:
+      case ApplicationId.cnv_occurrence:
         return (input: OccurrenceStatisticsInput): Promise<Statistics> =>
           occurrencesApi
             .statisticsGermlineCNVOccurrences(input.seqId, input.statisticsBody)

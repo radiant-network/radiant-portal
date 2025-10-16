@@ -1131,7 +1131,8 @@
           "non_affected": "Unaffected",
           "unknown": "Unknown"
         },
-        "snv": "SNV"
+        "snv": "SNV",
+        "cnv": "CNV"
       }
     },
     "files": {
@@ -1363,7 +1364,6 @@
     "links": {
       "analysis": "Analysis",
       "cases": "Cases",
-      "cnv_exploration": "CNV",
       "files": "Files",
       "dashboard": "Dashboard",
       "data_exploration": "Data Exploration",

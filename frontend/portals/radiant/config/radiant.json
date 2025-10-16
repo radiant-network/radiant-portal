@@ -3,8 +3,8 @@
     "app_id": "admin",
     "admin_code": "admin"
   },
-  "variant_exploration": {
-    "app_id": "variant_exploration",
+  "snv_occurrence": {
+    "app_id": "snv_occurrence",
     "aggregations": {
       "variant": {
         "items": [
@@ -191,8 +191,8 @@
       }
     }
   },
-  "cnv_exploration": {
-    "app_id": "cnv_exploration",
+  "cnv_occurrence": {
+    "app_id": "cnv_occurrence",
     "aggregations": {
       "variant": {
         "items": [

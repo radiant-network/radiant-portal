@@ -1,10 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/base/ui/collapsible"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/ui/collapsible';
 import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 import { Button } from '@/components/base/ui/button';
 
@@ -12,8 +8,8 @@ const config: PortalConfig = {
   variant_entity: {
     app_id: 'variant_entity',
   },
-  variant_exploration: {
-    app_id: 'variant_exploration_multi_select_filter',
+  snv_occurrence: {
+    app_id: 'snv_occurrence_multi_select_filter',
     aggregations: [] as any,
   },
   admin: {
@@ -29,8 +25,7 @@ const config: PortalConfig = {
 const meta = {
   title: 'Collapsibles/Collapsible',
   component: Collapsible,
-  args: {
-  },
+  args: {},
   decorators: [
     Story => (
       <BrowserRouter>
@@ -51,12 +46,9 @@ export const Default: Story = {
   render: args => (
     <Collapsible {...args}>
       <CollapsibleTrigger asChild>
-        <Button variant='outline'>Trigger</Button>
+        <Button variant="outline">Trigger</Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="flex flex-col gap-2">
-        Content
-      </CollapsibleContent>
+      <CollapsibleContent className="flex flex-col gap-2">Content</CollapsibleContent>
     </Collapsible>
   ),
 };
-
