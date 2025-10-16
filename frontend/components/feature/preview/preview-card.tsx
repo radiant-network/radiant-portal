@@ -1,14 +1,14 @@
 import { Card, CardContent, CardHeader } from '@/components/base/ui/card';
 import { LucideIcon } from 'lucide-react';
 
-type OccurenceSheetCardProps = {
+type PreviewCardProps = {
   icon: LucideIcon;
   title: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
 };
 
-const OccurrenceSheetCard = ({ icon: Icon, title, actions, children }: OccurenceSheetCardProps) => {
+const PreviewCard = ({ icon: Icon, title, actions, children }: PreviewCardProps) => {
   return (
     <Card className="py-4 gap-4">
       <CardHeader className="px-4">
@@ -27,4 +27,4 @@ const OccurrenceSheetCard = ({ icon: Icon, title, actions, children }: Occurence
   );
 };
 
-export default OccurrenceSheetCard;
+export default PreviewCard;

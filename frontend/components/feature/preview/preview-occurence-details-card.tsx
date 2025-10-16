@@ -1,46 +1,68 @@
+import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-female-not-affected-icon';
+import PedigreeMaleNotAffectedIcon from '@/components/base/icons/pedigree-male-not-affected-icon';
+import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
 import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
-import { FlipVertical2, Triangle } from 'lucide-react';
-import { Users } from 'lucide-react';
-import PedigreeMaleNotAffectedIcon from '@/components/base/icons/pedigree-male-not-affected-icon';
-import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-female-not-affected-icon';
-import { useI18n } from '@/components/hooks/i18n';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { DescriptionRow, DescriptionSection } from './description';
-import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
+import IGVDialog from '@/components/feature/igv/igv-dialog';
+import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
-import OccurrenceSheetCard from './occurence-sheet-card';
-import IGVDialog from '../../igv/igv-dialog';
+import { FlipVertical2, Triangle, Users } from 'lucide-react';
 import { useState } from 'react';
-import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
+import { DescriptionRow, DescriptionSection } from './description';
+import PreviewCard from './preview-card';
 
-const OccurrenceSheetDetailsCard = ({
-  data,
-  occurrence,
-}: {
-  data: ExpandedGermlineSNVOccurrence;
-  occurrence: GermlineSNVOccurrence;
-}) => {
+type PreviewOccurenceDetailsCardProps = {
+  seqId: number;
+  locus: string;
+  start: number;
+  chromosome: string;
+  zygosity?: string;
+  transmission?: string;
+  parental_origin?: string;
+  genotype_quality?: number;
+  filter?: string;
+  father_calls?: number[];
+  mother_calls?: number[];
+  ad_alt?: number;
+  ad_total?: number;
+};
+
+const PreviewOccurenceDetailsCard = ({
+  seqId,
+  locus,
+  start,
+  chromosome,
+  zygosity: zygosityProp,
+  transmission,
+  parental_origin,
+  genotype_quality,
+  filter,
+  father_calls,
+  mother_calls,
+  ad_alt,
+  ad_total,
+}: PreviewOccurenceDetailsCardProps) => {
   const { t } = useI18n();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
 
-  const zygosity = data.zygosity ? data.zygosity : '-';
-  const inheritance = data.transmission ? titleCase(replaceUnderscore(data.transmission)) : '-';
-  const parentalOrigin = data.parental_origin ? titleCase(replaceUnderscore(data.parental_origin)) : '-';
+  const zygosity = zygosityProp ? zygosityProp : '-';
+  const inheritance = transmission ? titleCase(replaceUnderscore(transmission)) : '-';
+  const parentalOrigin = parental_origin ? titleCase(replaceUnderscore(parental_origin)) : '-';
 
   const genotypeQualityValue = (
     <span className="inline-flex gap-1 items-center">
-      {data?.genotype_quality >= 20 ? (
+      {genotype_quality && genotype_quality >= 20 ? (
         <Triangle strokeWidth={1.5} className={`w-[13px] h-[13px] text-opacity-50`} />
       ) : (
         <ShapeTriangleUpIcon className="w-[13px] h-[13px] text-destructive" />
       )}
-      {data?.genotype_quality ? data?.genotype_quality : '-'}
+      {genotype_quality ? genotype_quality : '-'}
     </span>
   );
 
-  const filterValue = data.filter ? (
-    data.filter === 'PASS' ? (
+  const filterValue = filter ? (
+    filter === 'PASS' ? (
       <Badge variant="green">{t('preview_sheet.occurence_details.sections.metrics.pass')}</Badge>
     ) : (
       <Badge variant="red">{t('preview_sheet.occurence_details.sections.metrics.fail')}</Badge>
@@ -50,16 +72,19 @@ const OccurrenceSheetDetailsCard = ({
   );
 
   return (
-    <OccurrenceSheetCard
+    <PreviewCard
       icon={Users}
       title={t('preview_sheet.occurence_details.title')}
       actions={
         <IGVDialog
           open={igvOpen}
           setOpen={setIGVOpen}
-          occurrence={occurrence}
+          seqId={seqId}
+          locus={locus}
+          start={start}
+          chromosome={chromosome}
           renderTrigger={handleOpen => (
-            <Button variant="outline" size="sm" onClick={handleOpen}>
+            <Button variant="outline" size="xs" onClick={handleOpen}>
               <FlipVertical2 />
               {t('preview_sheet.occurence_details.actions.view_in_igv')}
             </Button>
@@ -69,9 +94,8 @@ const OccurrenceSheetDetailsCard = ({
     >
       <div className="rounded-md w-full border">
         <div className="size-full">
-          <div className="flex flex-wrap gap-20 items-start p-3 w-full">
-            {/* Inheritance & Family Section */}
-            <div className="flex flex-col gap-4 grow max-w-72 min-w-56">
+          <div className="flex flex-wrap gap-4 sm:gap-20 items-start p-3 w-full">
+            <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
               <DescriptionSection title={t('preview_sheet.occurence_details.sections.inheritance.title')}>
                 <DescriptionRow label={t('preview_sheet.occurence_details.sections.inheritance.zygosity')}>
                   {zygosity}
@@ -94,7 +118,7 @@ const OccurrenceSheetDetailsCard = ({
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {data.father_calls && data.father_calls[0] > 0
+                        {father_calls && father_calls[0] > 0
                           ? t('preview_sheet.occurence_details.sections.family.affected_tooltip')
                           : t('preview_sheet.occurence_details.sections.family.not_affected_tooltip')}
                       </TooltipContent>
@@ -113,7 +137,7 @@ const OccurrenceSheetDetailsCard = ({
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {data.mother_calls && data.mother_calls[0] > 0
+                        {mother_calls && mother_calls[0] > 0
                           ? t('preview_sheet.occurence_details.sections.family.affected_tooltip')
                           : t('preview_sheet.occurence_details.sections.family.not_affected_tooltip')}
                       </TooltipContent>
@@ -124,18 +148,16 @@ const OccurrenceSheetDetailsCard = ({
                 </DescriptionRow>
               </DescriptionSection>
             </div>
-
-            {/* Metrics Section */}
-            <div className="flex flex-col gap-4 grow max-w-72 min-w-56">
+            <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
               <DescriptionSection title="Metrics">
                 <DescriptionRow label={t('preview_sheet.occurence_details.sections.metrics.quality_depth')}>
                   <span className="font-mono">-</span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurence_details.sections.metrics.allele_depth_alt')}>
-                  <span className="font-mono">{data?.ad_alt ? data?.ad_alt : '-'}</span>
+                  <span className="font-mono">{ad_alt ? ad_alt : '-'}</span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurence_details.sections.metrics.total_depth_alt_ref')}>
-                  <span className="font-mono">{data?.ad_total ? data?.ad_total : '-'}</span>
+                  <span className="font-mono">{ad_total ? ad_total : '-'}</span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurence_details.sections.metrics.genotype_quality')}>
                   {genotypeQualityValue}
@@ -148,8 +170,8 @@ const OccurrenceSheetDetailsCard = ({
           </div>
         </div>
       </div>
-    </OccurrenceSheetCard>
+    </PreviewCard>
   );
 };
 
-export default OccurrenceSheetDetailsCard;
+export default PreviewOccurenceDetailsCard;

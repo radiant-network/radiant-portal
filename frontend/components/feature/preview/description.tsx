@@ -12,10 +12,10 @@ function DescriptionSection({ title, children }: { title: string; children: Reac
 function DescriptionRow({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 w-full">
-      <div className="text-muted-foreground  text-sm">{label}</div>
+      <div className="text-muted-foreground text-sm">{label}</div>
       <div className="flex items-center justify-end text-sm">{children}</div>
     </div>
   );
 }
 
-export { DescriptionSection, DescriptionRow };
+export { DescriptionRow, DescriptionSection };

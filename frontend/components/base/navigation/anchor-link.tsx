@@ -5,7 +5,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 export const anchorLinkVariants = tv({
   slots: {
     base: 'font-normal hover:underline hover:cursor-pointer underline-offset-3',
-    icon: '',
+    icon: 'shrink-0',
   },
   variants: {
     mono: {

@@ -1,5 +1,5 @@
+import { Slot, Slottable } from '@radix-ui/react-slot';
 import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
 import { VariantProps } from 'tailwind-variants';
 
 import { buttonVariants } from '@/base/buttons';
@@ -28,7 +28,7 @@ const Button = function ({
   return (
     <Comp className={style.base({ className })} disabled={disabled || loading} {...props}>
       {loading && <Spinner />}
-      {iconOnly && loading ? null : children}
+      {iconOnly && loading ? null : <Slottable>{children}</Slottable>}
     </Comp>
   );
 };
