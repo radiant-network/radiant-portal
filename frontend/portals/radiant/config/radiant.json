@@ -235,12 +235,6 @@
           } }
         ]
       },
-      "parental_analysis": {
-        "items": [
-          { "key": "parental_origin", "translation_key": "parental_origin", "type": "multiple" },
-          { "key": "transmission_mode", "translation_key": "cnv_transmission_mode", "type": "multiple" }
-        ]
-      },
       "metric_qc": {
         "items": [
           { "key": "filter", "translation_key": "filter", "type": "multiple" },
