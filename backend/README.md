@@ -106,6 +106,24 @@ make clean
 docker compose up
 ```
 
+## Creating a user in Keycloak with OpenFGA authorization
+
+(Note: **This section applies only if you are running the API with OpenFGA enabled.**)
+
+OpenFGA creates contextual tuples using the claims in a JWT token generate by Keycloak.
+To make this work, you need to create a user in Keycloak and assign them roles that correspond to the OpenFGA model.
+
+Test clients were created to simulate project scopes with specific roles for each.
+
+![keycloak_client_roles.png](assets/keycloak_client_roles.png)
+
+The only difference is for the KeyCloak client specified in the `azp` claim of the JWT token (in this case `radiant` client).
+It will be treated as the `application` level in the OpenFGA model.
+
+In the example below, `radiant` is `application` scope (because it's client used to generate the JWT) and `CBTN` and `UDN` are `project` scopes.
+
+![keycloak_role_scopes.png](assets/keycloak_role_scopes.png)
+
 ## Run frontend
 
 Then use this .env in front-end

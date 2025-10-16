@@ -6,21 +6,6 @@ model
   type application
     relations
       define data_manager: [user]
-      define can_create_gene_panel: data_manager
-      define can_create_project: data_manager
-      define can_create_user: data_manager
-      define can_edit_system: data_manager
-      define can_import_results: data_manager
-
-  type knowledge_base
-    relations
-      define parent: [application]
-      define can_browse: [project#geneticist]
-
-  type gene_panel
-    relations
-      define parent: [application]
-      define can_edit: data_manager from parent
 
   type project
     relations
@@ -28,16 +13,5 @@ model
       define geneticist: [user]
       define requester: [user]
       define assignee: geneticist or requester
-      define can_assign_user: data_manager from parent
-      define can_create_case: requester
 
-  type case
-    relations
-      define parent: [project]
-      define approver: geneticist from parent
-      define assigner: geneticist from parent
-      define creator: requester from parent
-      define editor: geneticist from parent
-      define interpreter: geneticist from parent
-      define researcher: assignee from parent
-      define viewer: assignee from parent
+	  define post__cases_search: assignee

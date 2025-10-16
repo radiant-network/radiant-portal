@@ -50,6 +50,19 @@ services:
     ports:
       - "8080:8080"
       - "9000:9000"
+  openfga:
+    image: openfga/openfga:latest
+    container_name: openfga
+    ports:
+      - "3000:3000"
+      - "8081:8080"
+      - "8082:8081"
+    command: ["run", "--playground-enabled", "--playground-port=3000"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build: .

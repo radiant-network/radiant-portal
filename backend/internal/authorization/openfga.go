@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -26,14 +28,27 @@ type OpenFGAAuthorizer struct {
 
 func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 	endpoint := os.Getenv("RADIANT_AUTHORIZATION_OPENFGA_ENDPOINT")
+	storeId := os.Getenv("RADIANT_AUTHORIZATION_OPENFGA_STORE_ID")
 
 	if endpoint == "" {
 		return nil, fmt.Errorf("openfga: invalid endpoint: %s", endpoint)
 	}
 
-	openfgaAuthModel, err := initStore(endpoint)
-	if err != nil {
-		return nil, err
+	var openfgaAuthModel *OpenFGAModelConfiguration
+	var err error
+
+	if storeId != "" {
+		log.Printf("openfga: using existing store id: %s", storeId)
+		openfgaAuthModel = &OpenFGAModelConfiguration{
+			Endpoint: endpoint,
+			StoreID:  storeId,
+		}
+	} else {
+		log.Print("openfga: no store id specified, initializing new store and model")
+		openfgaAuthModel, err = initStore(endpoint)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	client, err := NewSdkClient(&ClientConfiguration{
@@ -53,76 +68,128 @@ func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 }
 
 func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
-	c.AbortWithStatusJSON(501, gin.H{"error": "OpenFGA authorizer not implemented yet"})
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
+		return
+	}
 
-	//token := c.GetHeader("Authorization")
-	//if token == "" {
-	//	c.AbortWithStatusJSON(401, gin.H{"error": "missing authorization token"})
-	//	return
-	//}
-	//
-	//parsedToken, err := parseJWT(token)
-	//if err != nil {
-	//	c.AbortWithStatusJSON(401, gin.H{"error": "invalid token"})
-	//	return
-	//}
-	//
-	//user := parsedToken["sub"].(string)
-	//if user == "" {
-	//	c.AbortWithStatusJSON(401, gin.H{"error": "invalid sub claim"})
-	//	return
-	//}
-	//object := c.FullPath() // Use route path
-	//relation := "access"
-	//
-	//contextualTuples := extractContextualTuplesFromToken(token)
-	//
-	//allowed, err := o.check(user, object, relation, contextualTuples)
-	//if err != nil {
-	//	c.AbortWithStatusJSON(500, gin.H{"error": "unexpected error during authorization check"})
-	//	return
-	//}
-	//if !allowed {
-	//	c.AbortWithStatusJSON(403, gin.H{"error": "forbidden"})
-	//	return
-	//}
-	//
-	//c.Next()
+	parsedToken, err := parseJWT(token)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	user, err := parsedToken.GetSubject()
+	if user == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	azp, ok := parsedToken["azp"].(string)
+	if !ok || azp == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	contextualTuples := extractContextualTuplesFromToken(user, azp, parsedToken)
+	relation := extractRelation(c.Request, c.FullPath())
+
+	allowed, err := o.listRelations(user, "project", relation, contextualTuples)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
+		return
+	}
+	if len(allowed) == 0 {
+		c.AbortWithStatusJSON(http.StatusForbidden, nil)
+		return
+	}
+
+	c.Next()
 }
 
-func (o *OpenFGAAuthorizer) check(user, object, relation string, contextualTuples []ClientTupleKey) (bool, error) {
-	body := ClientCheckRequest{
-		User:             user,
+func (o *OpenFGAAuthorizer) listRelations(user, relType, relation string, contextualTuples []ClientTupleKey) ([]string, error) {
+	body := ClientListObjectsRequest{
+		User:             fmt.Sprintf("user:%s", user),
 		Relation:         relation,
-		Object:           object,
+		Type:             relType,
 		ContextualTuples: contextualTuples,
 	}
 
 	authId, err := o.Client.GetAuthorizationModelId()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	storeId, err := o.Client.GetStoreId()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	options := ClientCheckOptions{
+	options := ClientListObjectsOptions{
 		AuthorizationModelId: openfga.PtrString(authId),
 		StoreId:              openfga.PtrString(storeId),
 	}
-	data, err := o.Client.Check(context.Background()).Body(body).Options(options).Execute()
+	data, err := o.Client.ListObjects(context.Background()).Body(body).Options(options).Execute()
 	if err != nil {
-		return false, nil
+		return nil, nil
 	}
 
-	return *data.Allowed, nil
+	return data.Objects, nil
 }
 
-func extractContextualTuplesFromToken(token string) []ClientContextualTupleKey {
-	// TODO : Work in progress
-	return []ClientContextualTupleKey{}
+func extractRelation(r *http.Request, fullPath string) string {
+	method := strings.ToLower(r.Method)
+	path := strings.ReplaceAll(strings.ReplaceAll(fullPath, "/", "_"), ":", "")
+	return fmt.Sprintf("%s_%s", method, path)
+}
+
+func extractContextualTuplesFromToken(user, azp string, jwtClaims jwt.MapClaims) []ClientContextualTupleKey {
+	var contextualTuples []ClientContextualTupleKey
+
+	resourceAccess, ok := jwtClaims["resource_access"].(map[string]interface{})
+	if !ok {
+		log.Printf("openfga: missing resource_access claim")
+		return contextualTuples
+	}
+
+	for resource, access := range resourceAccess {
+		if resource == "account" {
+			// Skip default Keycloak account resource
+			continue
+		}
+
+		roles, ok := access.(map[string]interface{})
+		if !ok {
+			log.Printf("openfga: invalid resource %s", resource)
+			continue
+		}
+		roleList, ok := roles["roles"].([]interface{})
+		if !ok {
+			log.Printf("openfga: no roles for resource %s", resource)
+			continue
+		}
+
+		for _, role := range roleList {
+			if azp == resource {
+				// Application (client) level role
+				contextualTuples = append(contextualTuples, ClientContextualTupleKey{
+					Object:   fmt.Sprintf("application:%s", resource),
+					Relation: role.(string),
+					User:     fmt.Sprintf("user:%s", user),
+				})
+			} else {
+				// Project level role
+				contextualTuples = append(contextualTuples, ClientContextualTupleKey{
+					Object:   fmt.Sprintf("project:%s", resource),
+					Relation: role.(string),
+					User:     fmt.Sprintf("user:%s", user),
+				})
+			}
+		}
+	}
+
+	return contextualTuples
 }
 
 func initStore(endpoint string) (*OpenFGAModelConfiguration, error) {
