@@ -57,6 +57,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoIGV := repository.NewIGVRepository(dbStarrocks)
 	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
 	repoSavedFilters := repository.NewSavedFiltersRepository(dbPostgres)
+	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -147,6 +148,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	usersGroup.GET("/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repoSavedFilters))
 	usersGroup.GET("/saved_filters", server.GetSavedFiltersHandler(repoSavedFilters, auth))
 	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoPostgres.UserSets))
+	usersGroup.GET("/preferences", server.GetUserPreferencesHandler(repoUserPreferences, auth))
+	usersGroup.POST("/preferences", server.GetUserPreferencesHandler(repoUserPreferences, auth))
 
 	variantsGroup := privateRoutes.Group("/variants")
 	variantsGermlineGroup := variantsGroup.Group("/germline")

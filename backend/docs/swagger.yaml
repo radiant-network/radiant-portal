@@ -427,6 +427,19 @@ components:
       - clinvar_id
       - locus_id
       type: object
+    ColumnPinningConfig:
+      properties:
+        left:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        right:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
     Count:
       description: Count represents count result
       properties:
@@ -1030,6 +1043,18 @@ components:
         updated_by_name:
           type: string
       type: object
+    JsonMap-string-bool:
+      additionalProperties:
+        type: boolean
+      type: object
+    JsonMap-string-int:
+      additionalProperties:
+        type: integer
+      type: object
+    JsonMap-string-types_TableConfig:
+      additionalProperties:
+        $ref: '#/components/schemas/TableConfig'
+      type: object
     LeafContent:
       properties:
         field:
@@ -1097,6 +1122,11 @@ components:
           type: string
         panel:
           type: string
+      type: object
+    PaginationConfig:
+      properties:
+        pageSize:
+          type: integer
       type: object
     PubmedCitation:
       properties:
@@ -1295,6 +1325,22 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
+    TableConfig:
+      properties:
+        columnOrder:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        columnPinning:
+          $ref: '#/components/schemas/ColumnPinningConfig'
+        columnSizing:
+          $ref: '#/components/schemas/JsonMap-string-int'
+        columnVisibility:
+          $ref: '#/components/schemas/JsonMap-string-bool'
+        pagination:
+          $ref: '#/components/schemas/PaginationConfig'
+      type: object
     Term:
       properties:
         id:
@@ -1357,6 +1403,16 @@ components:
           type: string
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
+      type: object
+    UserPreference:
+      properties:
+        table_display:
+          $ref: '#/components/schemas/JsonMap-string-types_TableConfig'
+        user_id:
+          type: string
+      required:
+      - table_display
+      - user_id
       type: object
     UserSet:
       properties:
@@ -3034,6 +3090,74 @@ paths:
       summary: Get API status
       tags:
       - status
+  /users/preferences:
+    get:
+      description: Get user preferences
+      operationId: getUserPreferences
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get user preferences
+      tags:
+      - user_preferences
+    post:
+      description: Create or update user preference
+      operationId: postUserPreferences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreference'
+        description: User Preference to create or update
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create or update user preference
+      tags:
+      - user_preferences
   /users/saved_filters:
     get:
       description: Get user saved filters
