@@ -1,10 +1,23 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from './Selectors';
+import { CommonTexts } from './Texts';
 
 /**
  * Constant represents one minute
  */
 export const oneMinute = 60 * 1000;
+
+/**
+ * Builds a RegExp that matches either the English or French text from CommonTexts.
+ * Special RegExp characters are automatically escaped.
+ * @param commonTextsId The identifier key in CommonTexts (e.g., 'loginContent').
+ * @returns A RegExp matching either EN or FR text exactly.
+ */
+export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
+  const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const keyOfCommonTextsId = commonTextsId as keyof typeof CommonTexts.en;
+  return new RegExp(`^(${escapeRegExp(CommonTexts.en[keyOfCommonTextsId])}|${escapeRegExp(CommonTexts.fr[keyOfCommonTextsId])})$`);
+};
 
 /**
  * Gets the column name from a columns array by column ID.

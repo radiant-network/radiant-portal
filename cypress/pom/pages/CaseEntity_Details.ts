@@ -18,6 +18,7 @@ const tableColumns = {
       name: 'Assay ID',
       apiField: 'assay_id',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 0,
@@ -28,6 +29,7 @@ const tableColumns = {
       name: 'Sample ID',
       apiField: 'sample_id',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 1,
@@ -38,6 +40,7 @@ const tableColumns = {
       name: 'Sample Type',
       apiField: 'sample_type',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 2,
@@ -48,6 +51,7 @@ const tableColumns = {
       name: 'Histology',
       apiField: 'histology',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 3,
@@ -58,6 +62,7 @@ const tableColumns = {
       name: 'Exp. Strat.',
       apiField: 'exp_strat',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 4,
@@ -68,6 +73,7 @@ const tableColumns = {
       name: 'Assay Status',
       apiField: 'assay_status',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 5,
@@ -78,6 +84,7 @@ const tableColumns = {
       name: 'Last Update',
       apiField: 'last_update',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 6,
@@ -88,6 +95,7 @@ const tableColumns = {
       name: '',
       apiField: 'actions',
       isVisibleByDefault: true,
+      pinByDefault: 'right',
       isSortable: false,
       isPinnable: true,
       position: 7,
@@ -137,6 +145,17 @@ export const CaseEntity_Details = {
         );
       },
       /**
+       * Pins a column in the table by its ID.
+       * @param columnID The ID of the column to pin.
+       */
+      pinColumn(columnID: string) {
+        cy.then(() =>
+          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
+            cy.pinColumn(position, selectors.assaysCard.tableId);
+          })
+        );
+      },
+      /**
        * Sorts a column, optionally using an intercept.
        * @param columnID The ID of the column to sort.
        */
@@ -148,6 +167,17 @@ export const CaseEntity_Details = {
             } else {
               cy.log(`Warning: Column ${columnID} not found`);
             }
+          })
+        );
+      },
+      /**
+       * Unpins a column in the table by its ID.
+       * @param columnID The ID of the column to unpin.
+       */
+      unpinColumn(columnID: string) {
+        cy.then(() =>
+          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
+            cy.unpinColumn(position, selectors.assaysCard.tableId);
           })
         );
       },
@@ -176,6 +206,24 @@ export const CaseEntity_Details = {
           } else {
             cy.get(CommonSelectors.tableHead(selectors.assaysCard.tableId)).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
           }
+        });
+      },
+      /**
+       * Validates the default pin state of each column.
+       */
+      shouldMatchDefaultPinnedColumns() {
+        tableColumns.assaysCard.forEach(column => {
+          cy.then(() =>
+            getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, column.id).then(position => {
+              if (position !== -1) {
+                cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId))
+                  .eq(position)
+                  .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
+              } else {
+                cy.log(`Warning: Column ${column.id} not found`);
+              }
+            })
+          );
         });
       },
       /**
@@ -246,6 +294,33 @@ export const CaseEntity_Details = {
         });
       },
       /**
+       * Validates that pinnable columns are correctly marked as pinnable.
+       */
+      shouldShowPinnableColumns() {
+        tableColumns.assaysCard.forEach(column => {
+          cy.then(() =>
+            getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, column.id).then(position => {
+              if (position !== -1) {
+                cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldBePinnable(column.isPinnable);
+              } else {
+                cy.log(`Warning: Column ${column.id} not found`);
+              }
+            })
+          );
+        });
+      },
+      /**
+       * Validates that a specific column is pinned.
+       * @param columnID The ID of the column to check.
+       */
+      shouldPinnedColumn(columnID: string) {
+        cy.then(() =>
+          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
+            cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldBePinned('left');
+          })
+        );
+      },
+      /**
        * Validates that sortable columns are correctly marked as sortable.
        */
       shouldShowSortableColumns() {
@@ -260,6 +335,17 @@ export const CaseEntity_Details = {
             })
           );
         });
+      },
+      /**
+       * Validates that a specific column is unpinned.
+       * @param columnID The ID of the column to check.
+       */
+      shouldUnpinnedColumn(columnID: string) {
+        cy.then(() =>
+          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
+            cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldBePinned(null);
+          })
+        );
       },
       /**
        * Validates the sorting functionality of a column.

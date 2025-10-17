@@ -2,7 +2,6 @@
 import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants } from 'pom/pages/CaseEntity_Variants';
-import { VariantEntity_Overview } from 'pom/pages/VariantEntity_Overview';
 import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 
 describe('Case Entity - Variants - Hyperlinks', () => {
@@ -34,7 +33,7 @@ describe('Case Entity - Variants - Hyperlinks', () => {
     CaseEntity_Variants.validations.shouldHaveSelectedQueryPill(data.variantGermline, 'gene');
   });
 
-  it('Freq.', () => {
+  it('Freq. [SJRA-778]', () => {
     setupTest();
     CaseEntity_Variants.actions.clickTableCellLink(data.variantGermline, 'freq');
     VariantEntity_Patients.validations.shouldHaveActiveTab();

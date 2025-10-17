@@ -18,6 +18,16 @@ describe('Files - Columns', () => {
     FilesTable.validations.shouldShowAllColumns();
   });
 
+  it('Pin', () => {
+    setupTest();
+    FilesTable.validations.shouldShowPinnableColumns();
+  });
+
+  it('Default pin state', () => {
+    setupTest();
+    FilesTable.validations.shouldMatchDefaultPinnedColumns();
+  });
+
   it('Sort', () => {
     setupTest();
     FilesTable.validations.shouldShowSortableColumns();
@@ -35,5 +45,14 @@ describe('Files - Columns', () => {
     FilesTable.validations.shouldNotDisplayColumn('name');
     FilesTable.actions.showColumn('name');
     FilesTable.validations.shouldDisplayColumn('name');
+  });
+
+  it('Pin and unpin column', () => {
+    setupTest();
+    FilesTable.validations.shouldUnpinnedColumn('type');
+    FilesTable.actions.pinColumn('type');
+    FilesTable.validations.shouldPinnedColumn('type');
+    FilesTable.actions.unpinColumn('type');
+    FilesTable.validations.shouldUnpinnedColumn('type');
   });
 });

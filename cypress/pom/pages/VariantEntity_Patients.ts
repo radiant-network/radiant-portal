@@ -3,13 +3,13 @@ import { CommonSelectors } from 'pom/shared/Selectors';
 import { getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
-  tab: '[class*= "group-data-[active=true]"]:contains("Patients")',
+  tab: '[class*= "z-1 group"]:contains("Patients")',
 
   interpreted: {
     tableId: '[id="interpreted-cases"]',
   },
   uninterpreted: {
-    tab: '[class*= "group-data-[active=true]"]:contains("Non-interpreted")',
+    tab: '[class*= "z-1 group"]:contains("Non-interpreted")',
     tableId: '[id="uninterpreted-cases"]',
   },
 };
@@ -21,6 +21,7 @@ const tableColumns = {
       name: '',
       apiField: '',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: false,
       position: 0,
@@ -31,6 +32,7 @@ const tableColumns = {
       name: 'Case',
       apiField: 'case_id',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 1,
@@ -41,6 +43,7 @@ const tableColumns = {
       name: 'Date',
       apiField: 'interpretation_updated_on',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 2,
@@ -51,6 +54,7 @@ const tableColumns = {
       name: 'Condition (Mondo)',
       apiField: 'condition_name',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 3,
@@ -61,6 +65,7 @@ const tableColumns = {
       name: 'Classification',
       apiField: 'classification',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 4,
@@ -71,6 +76,7 @@ const tableColumns = {
       name: 'Zygosity',
       apiField: 'zygosity',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 5,
@@ -81,6 +87,7 @@ const tableColumns = {
       name: 'Inheritance',
       apiField: 'inheritance_code',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 6,
@@ -91,6 +98,7 @@ const tableColumns = {
       name: 'Diagnostic Lab',
       apiField: 'performer_lab_code',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 7,
@@ -101,6 +109,7 @@ const tableColumns = {
       name: 'Analysis',
       apiField: 'case_analysis_code',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 8,
@@ -111,6 +120,7 @@ const tableColumns = {
       name: 'Status',
       apiField: 'status_code',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 9,
@@ -123,6 +133,7 @@ const tableColumns = {
       name: 'Case',
       apiField: 'case_id',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 0,
@@ -133,6 +144,7 @@ const tableColumns = {
       name: 'Assay',
       apiField: 'seq_id',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 1,
@@ -143,6 +155,7 @@ const tableColumns = {
       name: 'Patient',
       apiField: 'patient_id',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 2,
@@ -153,6 +166,7 @@ const tableColumns = {
       name: 'Sample',
       apiField: 'submitter_sample_id',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 3,
@@ -163,6 +177,7 @@ const tableColumns = {
       name: 'Aff. Status',
       apiField: 'affected_status',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 4,
@@ -173,6 +188,7 @@ const tableColumns = {
       name: 'Phenotype (HPO)',
       apiField: '',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 5,
@@ -183,6 +199,7 @@ const tableColumns = {
       name: 'Zygosity',
       apiField: 'zygosity',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 6,
@@ -193,6 +210,7 @@ const tableColumns = {
       name: 'Diagnostic Lab',
       apiField: 'performer_lab_code',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 7,
@@ -203,6 +221,7 @@ const tableColumns = {
       name: 'Analysis',
       apiField: 'case_analysis_code',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: false,
       isPinnable: true,
       position: 8,
@@ -213,6 +232,7 @@ const tableColumns = {
       name: 'Date',
       apiField: 'created_on',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 9,
@@ -223,6 +243,7 @@ const tableColumns = {
       name: 'Status',
       apiField: 'status_code',
       isVisibleByDefault: true,
+      pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 10,
@@ -232,6 +253,17 @@ const tableColumns = {
 };
 
 const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
+  /**
+   * Pins a column in the table by its ID.
+   * @param columnID The ID of the column to pin.
+   */
+  pinColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.pinColumn(position, tableId);
+      })
+    );
+  },
   /**
    * Sorts a column, optionally using an intercept.
    * @param columnID The ID of the column to sort.
@@ -244,6 +276,17 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
         } else {
           cy.log(`Warning: Column ${columnID} not found`);
         }
+      })
+    );
+  },
+  /**
+   * Unpins a column in the table by its ID.
+   * @param columnID The ID of the column to unpin.
+   */
+  unpinColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.unpinColumn(position, tableId);
       })
     );
   },
@@ -273,6 +316,24 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
       } else {
         cy.get(CommonSelectors.tableHead(tableId)).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
       }
+    });
+  },
+  /**
+   * Validates the default pin state of each column.
+   */
+  shouldMatchDefaultPinnedColumns() {
+    columns.forEach(column => {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
+          if (position !== -1) {
+            cy.get(CommonSelectors.tableHeadCell(tableId))
+              .eq(position)
+              .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
+          } else {
+            cy.log(`Warning: Column ${column.id} not found`);
+          }
+        })
+      );
     });
   },
   /**
@@ -323,6 +384,33 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
     });
   },
   /**
+   * Validates that pinnable columns are correctly marked as pinnable.
+   */
+  shouldShowPinnableColumns() {
+    columns.forEach(column => {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
+          if (position !== -1) {
+            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinnable(column.isPinnable);
+          } else {
+            cy.log(`Warning: Column ${column.id} not found`);
+          }
+        })
+      );
+    });
+  },
+  /**
+   * Validates that a specific column is pinned.
+   * @param columnID The ID of the column to check.
+   */
+  shouldPinnedColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinned('left');
+      })
+    );
+  },
+  /**
    * Validates that sortable columns are correctly marked as sortable.
    */
   shouldShowSortableColumns() {
@@ -337,6 +425,17 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
         })
       );
     });
+  },
+  /**
+   * Validates that a specific column is unpinned.
+   * @param columnID The ID of the column to check.
+   */
+  shouldUnpinnedColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinned(null);
+      })
+    );
   },
   /**
    * Validates the sorting functionality of a column.

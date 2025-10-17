@@ -19,6 +19,16 @@ describe('CaseEntity - Details - Assays - Columns', () => {
     CaseEntity_Details.assaysCard.validations.shouldShowAllColumns();
   });
 
+  it('Pin', () => {
+    setupTest();
+    CaseEntity_Details.assaysCard.validations.shouldShowPinnableColumns();
+  });
+
+  it('Default pin state', () => {
+    setupTest();
+    CaseEntity_Details.assaysCard.validations.shouldMatchDefaultPinnedColumns();
+  });
+
   it('Sort', () => {
     setupTest();
     CaseEntity_Details.assaysCard.validations.shouldShowSortableColumns();
@@ -27,5 +37,14 @@ describe('CaseEntity - Details - Assays - Columns', () => {
   it('Tooltip', () => {
     setupTest();
     CaseEntity_Details.assaysCard.validations.shouldShowColumnTooltips();
+  });
+
+  it('Pin and unpin column', () => {
+    setupTest();
+    CaseEntity_Details.assaysCard.validations.shouldUnpinnedColumn('assay_id');
+    CaseEntity_Details.assaysCard.actions.pinColumn('assay_id');
+    CaseEntity_Details.assaysCard.validations.shouldPinnedColumn('assay_id');
+    CaseEntity_Details.assaysCard.actions.unpinColumn('assay_id');
+    CaseEntity_Details.assaysCard.validations.shouldUnpinnedColumn('assay_id');
   });
 });
