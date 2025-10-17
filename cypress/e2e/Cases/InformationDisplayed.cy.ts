@@ -21,7 +21,7 @@ describe('Cases - Information displayed', () => {
 
   it('Organization Patient Id', () => {
     setupTest();
-    CasesTable.validations.shouldShowColumnContent('organization_patient_id', data.case);
+    CasesTable.validations.shouldShowColumnContent('mrn', data.case);
   });
 
   it('Priority', () => {

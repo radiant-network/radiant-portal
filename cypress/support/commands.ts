@@ -3,6 +3,7 @@ import createUUID from './createUUID';
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { oneMinute } from 'pom/shared/Utils';
 import 'cypress-real-events';
+import { CaseEntity_Variants_CNV } from 'pom/pages/CaseEntity_Variants_CNV';
 
 // Simple environment variable getter
 const getEnv = (key: string): string => {
@@ -172,6 +173,15 @@ Cypress.Commands.add('shouldBePinned', { prevSubject: 'element' }, (subject, pos
 Cypress.Commands.add('shouldBeSortable', { prevSubject: 'element' }, (subject, isSortable: boolean) => {
   const strExpectedSortable = isSortable ? 'exist' : 'not.exist';
   cy.wrap(subject).find(CommonSelectors.sortIcon).should(strExpectedSortable);
+});
+
+/**
+ * Asserts that the given element has tag pattern level (e.g., [class*="bg-${level} text-${level}-foreground"]).
+ * @param subject The element.
+ * @param level The expected level of the element.
+ */
+Cypress.Commands.add('shouldBeTagPatternLevel', { prevSubject: 'element' }, (subject, level: string) => {
+  cy.wrap(subject).should('match', CommonSelectors.tagLevel(level));
 });
 
 /**
@@ -410,20 +420,40 @@ Cypress.Commands.add('visitCaseFilesPage', (caseId: string, searchCriteria?: str
 /**
  * Visits the case variants page for a specific case.
  * @param caseId The case ID to visit.
+ * @param type The type of variants (SNV | CNV).
  * @param sqon Optional query filter to apply (JSON string).
  */
-Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, sqon?: string) => {
-  if (sqon == undefined) {
+Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, type: string, sqon?: string) => {
+  if (type === 'SNV') {
+    if (sqon == undefined) {
+      cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants`, 'POST', '**/list', 1);
+    } else {
+      cy.intercept('POST', '**/list', interception => {
+        const mockBody = { ...interception.body };
+        mockBody.sqon = JSON.parse(sqon);
+        interception.alias = 'postListSNV';
+        interception.body = mockBody;
+      });
+      cy.visit(`/case/entity/${caseId}?tab=variants`, { failOnStatusCode: false });
+      cy.wait('@postListSNV');
+    }
+  } else if (type === 'CNV') {
     cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants`, 'POST', '**/list', 1);
-  } else {
-    cy.intercept('POST', '**/list', interception => {
-      const mockBody = { ...interception.body };
-      mockBody.sqon = JSON.parse(sqon);
-      interception.alias = 'postList';
-      interception.body = mockBody;
-    });
-    cy.visit(`/case/entity/${caseId}?tab=variants`, { failOnStatusCode: false });
-    cy.wait('@postList');
+
+    if (sqon == undefined) {
+      cy.intercept('POST', '**/list').as('postListCNV');
+      CaseEntity_Variants_CNV.actions.clickToggle();
+      cy.wait('@postListCNV');
+    } else {
+      cy.intercept('POST', '**/list', interception => {
+        const mockBody = { ...interception.body };
+        mockBody.sqon = JSON.parse(sqon);
+        interception.alias = 'postListCNV';
+        interception.body = mockBody;
+      });
+      CaseEntity_Variants_CNV.actions.clickToggle();
+      cy.wait('@postListCNV');
+    }
   }
 
   cy.setLang('EN');

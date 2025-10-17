@@ -31,8 +31,8 @@ const tableColumns = [
     tooltip: null,
   },
   {
-    id: 'organization_patient_id',
-    name: 'Organization Patient Id',
+    id: 'mrn',
+    name: 'MRN',
     apiField: 'proband_organization_id',
     isVisibleByDefault: true,
     pinByDefault: null,

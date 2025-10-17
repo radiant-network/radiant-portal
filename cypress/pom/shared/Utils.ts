@@ -132,6 +132,11 @@ export const getStatusIcon = (status: string) => {
  */
 export const getUrlLink = (columnID: string, data: any): string | undefined => {
   switch (columnID) {
+    case 'clingen':
+      return data.cnv_variant ? `https://search.clinicalgenome.org/kb/regions?page=1&type=GRCh38&region=chr${data.chromosome}%3A${data.start}-${data.end}&size=25&search=` : undefined;
+    case 'cnv_variant':
+      const DupDel = data.type == 'GAIN' ? 'DUP' : 'DEL';
+      return data.cnv_variant ? `https://franklin.genoox.com/clinical-db/variant/sv/chr${data.chromosome}-${data.start}-${data.end}-${DupDel}-HG38` : undefined;
     case 'dbsnp':
       return data.dbsnp ? `https://www.ncbi.nlm.nih.gov/snp/${data.dbsnp}` : undefined;
     case 'gene':
