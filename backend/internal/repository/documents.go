@@ -14,6 +14,8 @@ import (
 type DocumentResult = types.DocumentResult
 type DocumentFilters = types.DocumentFilters
 
+var INDEX_FORMATS = "('crai', 'tbi')"
+
 type DocumentsRepository struct {
 	db *gorm.DB
 }
@@ -146,7 +148,8 @@ func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProj
 		return nil, err
 	}
 
-	if err := r.getDocumentsFilter(txDocuments, &format, types.FileFormatTable, "format_code", "code", "name_en", nil); err != nil {
+	isNotIndexFormatCodeCondition := fmt.Sprintf("%s.code not in %s", types.FileFormatTable.Alias, INDEX_FORMATS)
+	if err := r.getDocumentsFilter(txDocuments, &format, types.FileFormatTable, "format_code", "code", "name_en", &isNotIndexFormatCodeCondition); err != nil {
 		return nil, err
 	}
 
@@ -172,6 +175,7 @@ func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destinatio
 	if filterCondition != nil {
 		tx = tx.Where(*filterCondition)
 	}
+
 	if err := tx.Find(destination).Error; err != nil {
 		return fmt.Errorf("error fetching filter %s: %w", filterTable.Name, err)
 	}
@@ -204,5 +208,5 @@ func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.
 }
 
 func filterOutIndexFiles(tx *gorm.DB) {
-	tx.Where(fmt.Sprintf("%s.format_code not in ('crai', 'tbi')", types.DocumentTable.Alias))
+	tx.Where(fmt.Sprintf("%s.format_code not in %s", types.DocumentTable.Alias, INDEX_FORMATS))
 }
