@@ -111,6 +111,31 @@ components:
       - type
       - value
       type: object
+    CNVGeneOverlap:
+      description: CNVGeneOverlap represents a gene overlap with a CNV
+      properties:
+        cytoband:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        gene_id:
+          type: string
+        gene_length:
+          type: integer
+        nb_exons:
+          type: integer
+        nb_overlap_bases:
+          type: integer
+        overlap_type:
+          type: string
+        overlapping_cnv_percent:
+          type: number
+        overlapping_gene_percent:
+          type: number
+        symbol:
+          type: string
+      type: object
     CaseAssay:
       description: Assay to display in a Case
       properties:
@@ -2614,6 +2639,49 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
+  /occurrences/germline/cnv/{seq_id}/{cnv_id}/genes_overlap:
+    get:
+      description: List genes overlapping a CNV with a given ID
+      operationId: listGermlineCNVGenesOverlap
+      parameters:
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: cnv_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CNVGeneOverlap'
+                type: array
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: List genes overlapping a CNV with a given ID
+      tags:
+      - occurrences
   /occurrences/germline/cnv/{seq_id}/aggregate:
     post:
       description: Aggregate germline CNV occurrences for a given sequence ID

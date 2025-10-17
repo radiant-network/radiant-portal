@@ -378,3 +378,52 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 	expected := `{"aa_change":"p.Arg19His", "case_id": 1, "cadd_phred":0.1, "cadd_score":0.1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "is_canonical":true, "is_mane_plus":false, "is_mane_select":true, "locus":"locus1", "locus_id":"1000", "is_mane_select":true, "omim_conditions":[{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, {"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}], "pc_wgs_affected":3, "pf_wgs":0.99, "pf_wgs_affected":1, "picked_consequences":["splice acceptor"], "pn_wgs_affected":3, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "start":1111, "symbol":"BRAF", "vep_impact":"impact1", "zygosity":"HET"}`
 	assertGetExpandedOccurrence(t, "simple", 1, 1000, expected)
 }
+func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
+	expected := `[
+		  {
+			"cytoband": ["p1.1"],
+			"gene_id": "ENSG00000000003",
+			"gene_length": 200,
+			"nb_exons": 1,
+			"nb_overlap_bases": 200,
+			"overlap_type": "full_gene",
+			"overlapping_cnv_percent": 40,
+			"overlapping_gene_percent": 100,
+			"symbol": "TSPAN6"
+		  },
+		  {
+			"cytoband": ["p1.2"],
+			"gene_id": "ENSG00000000419",
+			"gene_length": 500,
+			"nb_exons": 0,
+			"nb_overlap_bases": 250,
+			"overlap_type": "partial",
+			"overlapping_cnv_percent": 50,
+			"overlapping_gene_percent": 50,
+			"symbol": "DPM1"
+		  },
+		  {
+			"cytoband": ["p1.1", "p1.2"],
+			"gene_id": "ENSG00000000005",
+			"gene_length": 10000,
+			"nb_exons": 3,
+			"nb_overlap_bases": 500,
+			"overlap_type": "full_cnv",
+			"overlapping_cnv_percent": 100,
+			"overlapping_gene_percent": 5,
+			"symbol": "TNMD"
+		  }
+		]`
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		router := gin.Default()
+		router.GET("/occurrences/germline/cnv/:seq_id/:cnv_id/genes_overlap", server.OccurrencesGermlineCNVGenesOverlapHandler(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/cnv/%d/%d/genes_overlap", 1, 1), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
