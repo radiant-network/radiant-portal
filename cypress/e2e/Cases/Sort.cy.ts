@@ -36,7 +36,7 @@ describe('Cases - Sort', () => {
   it('Multiple [SJRA-661]', () => {
     setupTest();
     CasesTable.actions.sortColumn('analysis');
-    CasesTable.actions.sortColumn('organization_patient_id');
-    CasesTable.validations.shouldHaveFirstRowValue('MRN-283782', 'organization_patient_id');
+    CasesTable.actions.sortColumn('mrn');
+    CasesTable.validations.shouldHaveFirstRowValue('MRN-283782', 'mrn');
   });
 });

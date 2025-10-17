@@ -4,226 +4,226 @@ import { getUrlLink, stringToRegExp } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
-  tableCell: (dataVariant: any) => `${CommonSelectors.tableRow()}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
+  tableCell: (dataCNV: any) => `${CommonSelectors.tableRow()}:contains("${dataCNV.cnv_variant}") ${CommonSelectors.tableCellData}`,
   tab: '[class*= "lucide-audio-waveform"]',
+  toggle: '[class*= "h-6 p-2"]:contains("CNV")',
 };
 
 const tableColumns = [
   {
-    id: 'interpretation',
-    name: CommonSelectors.interpretationIcon,
-    apiField: 'has_interpretation',
-    isVisibleByDefault: true,
-    pinByDefault: 'left',
-    isSortable: false,
-    isPinnable: false,
-    position: 0,
-    tooltip: 'Clinical Interpretation',
-  },
-  {
-    id: 'variant',
-    name: 'Variant',
-    apiField: 'hgvsg',
-    isVisibleByDefault: true,
-    pinByDefault: 'left',
-    isSortable: true,
-    isPinnable: true,
-    position: 1,
-    tooltip: null,
-  },
-  {
-    id: 'gene',
+    id: 'genes',
     name: 'Genes',
     apiField: 'symbol',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 2,
-    tooltip: null,
+    position: 0,
+    tooltip: 'List of genes overlapped by CNV',
   },
   {
-    id: 'aa_change',
-    name: 'AA',
-    apiField: 'aa_change',
+    id: 'cytoband',
+    name: 'Cytoband',
+    apiField: 'cytoband',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 3,
-    tooltip: 'Amino acid change',
+    position: 1,
+    tooltip: null,
   },
   {
-    id: 'type',
-    name: 'Type',
-    apiField: 'variant_class',
+    id: 'nb_snv',
+    name: '# SNVs',
+    apiField: 'nb_snv',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,
+    isPinnable: true,
+    position: 2,
+    tooltip: 'Number of SNVs included in the CNV',
+  },
+  {
+    id: 'cnv_variant',
+    name: 'Variant',
+    apiField: 'name',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 3,
+    tooltip: null,
+  },
+  {
+    id: 'clingen',
+    name: 'ClinGen',
+    apiField: null,
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
     isPinnable: true,
     position: 4,
     tooltip: null,
   },
   {
-    id: 'consequence',
-    name: 'Consequence',
-    apiField: 'picked_consequences',
+    id: 'chromosome',
+    name: 'Chr',
+    apiField: 'chromosome',
     isVisibleByDefault: true,
     pinByDefault: null,
-    isSortable: false,
+    isSortable: true,
     isPinnable: true,
     position: 5,
-    tooltip: 'Most deleterious consequence annotated using VEP',
+    tooltip: 'Chromosome',
   },
   {
-    id: 'mane',
-    name: 'MANE',
-    apiField: 'is_canonical',
+    id: 'start',
+    name: 'Start',
+    apiField: 'start',
     isVisibleByDefault: true,
     pinByDefault: null,
-    isSortable: false,
+    isSortable: true,
     isPinnable: true,
     position: 6,
     tooltip: null,
   },
   {
-    id: 'dbsnp',
-    name: 'dbSNP',
-    apiField: 'rsnumber',
+    id: 'end',
+    name: 'End',
+    apiField: 'end',
     isVisibleByDefault: true,
     pinByDefault: null,
-    isSortable: false,
+    isSortable: true,
     isPinnable: true,
     position: 7,
     tooltip: null,
   },
   {
-    id: 'omim',
-    name: 'OMIM',
-    apiField: 'omim_inheritance_code',
+    id: 'type',
+    name: 'Type',
+    apiField: 'type',
     isVisibleByDefault: true,
     pinByDefault: null,
-    isSortable: false,
+    isSortable: true,
     isPinnable: true,
     position: 8,
-    tooltip: 'MIM inheritance modes',
-  },
-  {
-    id: 'clinvar',
-    name: 'ClinVar',
-    apiField: 'clinvar',
-    isVisibleByDefault: true,
-    pinByDefault: null,
-    isSortable: false,
-    isPinnable: true,
-    position: 9,
     tooltip: null,
   },
   {
-    id: 'exomiser',
-    name: 'Exo.',
-    apiField: 'exomiser_gene_combined_score',
+    id: 'length',
+    name: 'Length',
+    apiField: 'length',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 9,
+    tooltip: 'CNV bases length',
+  },
+  {
+    id: 'cn',
+    name: 'CN',
+    apiField: 'cn',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 10,
-    tooltip: 'Exomiser score based on variant properties and patient phenotypes',
+    tooltip: 'Estimated copy number',
   },
   {
-    id: 'acmg_exomiser',
-    name: 'ACMG Exo.',
-    apiField: 'exomiser_acmg_classification',
+    id: 'gnomad',
+    name: 'gnomAD',
+    apiField: 'gnomad_sf',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 11,
-    tooltip: 'Exomiser ACMG',
+    tooltip: 'gnomAD 4.1.0 (Allele Frequency)',
   },
   {
-    id: 'gnomad',
-    name: 'gnomAD',
-    apiField: 'gnomad_v3_af',
+    id: 'nb_genes',
+    name: '# Genes',
+    apiField: 'nb_genes',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 12,
-    tooltip: 'gnomAD Genome 3.1.2 (allele Frequency)',
+    tooltip: 'Number of genes overlapped by CNV',
   },
   {
-    id: 'freq',
-    name: 'Freq.',
-    apiField: 'pf_wgs',
-    isVisibleByDefault: true,
+    id: 'gt',
+    name: 'GT',
+    apiField: 'gt',
+    isVisibleByDefault: false,
     pinByDefault: null,
-    isSortable: true,
+    isSortable: false,
     isPinnable: true,
     position: 13,
-    tooltip: 'Number of germline genomes containing this variant and their frequency across this organization. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculations.',
+    tooltip: 'Genotype',
   },
   {
-    id: 'gq',
-    name: 'GQ',
-    apiField: 'genotype_quality',
-    isVisibleByDefault: true,
+    id: 'filter',
+    name: 'Filter',
+    apiField: 'filter',
+    isVisibleByDefault: false,
     pinByDefault: null,
-    isSortable: true,
+    isSortable: false,
     isPinnable: true,
     position: 14,
-    tooltip: 'Genotype quality. Only occurrences with GQ ≥ 20 are taken into account for frequency calculation.',
+    tooltip: null,
   },
   {
-    id: 'zyg',
-    name: 'Zyg.',
-    apiField: 'zygosity',
-    isVisibleByDefault: true,
+    id: 'quality',
+    name: 'Qual.',
+    apiField: 'quality',
+    isVisibleByDefault: false,
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 15,
-    tooltip: 'Zygosity',
+    tooltip: 'CNV Quality',
   },
   {
-    id: 'ad_ratio',
-    name: 'AD Ratio',
-    apiField: 'ad_ratio',
-    isVisibleByDefault: true,
+    id: 'bc',
+    name: 'BC',
+    apiField: 'bc',
+    isVisibleByDefault: false,
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 16,
-    tooltip: null,
+    tooltip: 'Number of bins in the region',
+  },
+  {
+    id: 'pe',
+    name: 'PE',
+    apiField: 'pe',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 17,
+    tooltip: 'Number of improperly paired end reads at start and stop breakpoints',
   },
 ];
 
-export const CaseEntity_Variants = {
+export const CaseEntity_Variants_CNV = {
   actions: {
     /**
-     * Clicks the link in a specific table cell for a given variant and column.
-     * @param dataVariant The variant object.
+     * Clicks the link in a specific table cell for a given cnv and column.
+     * @param dataCNV The cnv object.
      * @param columnID The ID of the column.
-     * @param onPlusIcon Click on the plus icon (default: false).
      */
-    clickTableCellLink(dataVariant: any, columnID: string, onPlusIcon: boolean = false) {
+    clickTableCellLink(dataCNV: any, columnID: string) {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
             switch (columnID) {
-              case 'variant':
-              case 'freq':
-                cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).invoke('removeAttr', 'target').clickAndWait({ force: true });
-                break;
-              case 'gene':
-                if (onPlusIcon) {
-                  cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.plusIcon).clickAndWait({ force: true });
-                } else {
-                  cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
-                }
-                break;
               default:
-                cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
+                cy.get(selectors.tableCell(dataCNV)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
                 break;
             }
           } else {
@@ -231,6 +231,12 @@ export const CaseEntity_Variants = {
           }
         })
       );
+    },
+    /**
+     * Click the toggle button to change variants type
+     */
+    clickToggle() {
+      cy.get(selectors.toggle).clickAndWait({ force: true });
     },
     /**
      * Hides a specific column in the table.
@@ -320,20 +326,17 @@ export const CaseEntity_Variants = {
      * Unsort all columns of the table.
      */
     unsortAllColumns() {
-      CaseEntity_Variants.actions.sortColumn('exomiser');
-      CaseEntity_Variants.actions.sortColumn('exomiser');
-      CaseEntity_Variants.actions.sortColumn('variant');
-      CaseEntity_Variants.actions.sortColumn('variant');
+      CaseEntity_Variants_CNV.actions.sortColumn('cnv_variant');
     },
   },
 
   validations: {
     /**
-     * Validates the pill in the selected query.
-     * @param dataVariant The variant object.
+     * Checks that the drawer is displayed.
+     * @param dataCNV The cnv object.
      */
-    shouldDrawerOpen(dataVariant: any) {
-      cy.get('[class*="data-[state=open]:animate-in"]').contains(dataVariant.variant).should('exist');
+    shouldDrawerOpen(dataCNV: any) {
+      cy.get(CommonSelectors.animateIn).contains(dataCNV.cnv).should('exist');
     },
     /**
      * Checks that a specific column is displayed.
@@ -343,10 +346,11 @@ export const CaseEntity_Variants = {
       cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('exist');
     },
     /**
-     * Checks that the tab is active.
+     * Checks that the tab and toggle are active.
      */
-    shouldHaveActiveTab() {
+    shouldHaveActiveTabAndToggle() {
       cy.get(selectors.tab).shouldBeActiveTab();
+      cy.get(selectors.toggle).shouldBeTagPatternLevel('primary');
     },
     /**
      * Checks that custom query is not implemented for this page.
@@ -368,29 +372,29 @@ export const CaseEntity_Variants = {
     },
     /**
      * Validates the pill in the selected query.
-     * @param dataVariant The variant object.
+     * @param dataCNV The cnv object.
      * @param columnID The ID of the column to check.
      */
-    shouldHaveSelectedQueryPill(dataVariant: any, columnID: string) {
+    shouldHaveSelectedQueryPill(dataCNV: any, columnID: string) {
       switch (columnID) {
         case 'gene':
-          cy.validatePillSelectedQuery('Gene Symbol', [dataVariant[columnID].toLowerCase()]);
+          cy.validatePillSelectedQuery('Gene Symbol', [dataCNV[columnID].toLowerCase()]);
           break;
         default:
-          cy.validatePillSelectedQuery(getColumnName(tableColumns, columnID), [dataVariant[columnID]]);
+          cy.validatePillSelectedQuery(getColumnName(tableColumns, columnID), [dataCNV[columnID]]);
           break;
       }
     },
     /**
-     * Validates the link in a specific table cell for a given variant and column.
-     * @param dataVariant The variant object.
+     * Validates the link in a specific table cell for a given cnv and column.
+     * @param dataCNV The cnv object.
      * @param columnID The ID of the column.
      */
-    shouldHaveTableCellLink(dataVariant: any, columnID: string) {
+    shouldHaveTableCellLink(dataCNV: any, columnID: string) {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
-            cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataVariant));
+            cy.get(selectors.tableCell(dataCNV)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataCNV));
           } else {
             cy.log(`Warning: Column ${columnID} not found`);
           }
@@ -421,7 +425,7 @@ export const CaseEntity_Variants = {
      * Validates the default pin state of each column.
      */
     shouldMatchDefaultPinnedColumns() {
-      CaseEntity_Variants.actions.showAllColumns();
+      CaseEntity_Variants_CNV.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -444,6 +448,12 @@ export const CaseEntity_Variants = {
       cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('not.exist');
     },
     /**
+     * Checks that the overlapping modal is displayed.
+     */
+    shouldOverlappingModalOpen() {
+      cy.get(CommonSelectors.animateIn).contains(`Overlapping Genes with CNV`).should('exist');
+    },
+    /**
      * Validates that a specific column is pinned to the left side.
      * @param columnID The ID of the column to check.
      */
@@ -463,20 +473,20 @@ export const CaseEntity_Variants = {
      * @param columnID The ID of the column to sort.
      */
     shouldRequestOnSort(columnID: string) {
-      CaseEntity_Variants.actions.showAllColumns();
-      CaseEntity_Variants.actions.unsortAllColumns();
+      CaseEntity_Variants_CNV.actions.showAllColumns();
+      CaseEntity_Variants_CNV.actions.unsortAllColumns();
       cy.intercept('POST', '**/list', req => {
         expect(req.body.sort).to.have.length(1);
         expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
       }).as('sortRequest');
-      CaseEntity_Variants.actions.sortColumn(columnID, false /*needIntercept*/);
+      CaseEntity_Variants_CNV.actions.sortColumn(columnID, false /*needIntercept*/);
       cy.wait('@sortRequest');
     },
     /**
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
-      CaseEntity_Variants.actions.showAllColumns();
+      CaseEntity_Variants_CNV.actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
@@ -486,66 +496,24 @@ export const CaseEntity_Variants = {
       });
     },
     /**
-     * Validates the content of a specific column in the table for a given variant.
+     * Validates the content of a specific column in the table for a given cnv.
      * @param columnID The ID of the column to validate.
-     * @param dataVariant The variant object containing the expected values.
+     * @param dataCNV The cnv object containing the expected values.
      */
-    shouldShowColumnContent(columnID: string, dataVariant: any) {
-      CaseEntity_Variants.actions.showAllColumns();
+    shouldShowColumnContent(columnID: string, dataCNV: any) {
+      CaseEntity_Variants_CNV.actions.showAllColumns();
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {
-            case 'interpretation':
-              cy.validateTableFirstRowClass(CommonSelectors.interpretationIcon, position);
-              break;
-            case 'dbsnp':
+            case 'clingen':
               cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
               break;
-            case 'gene':
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.plusIcon, position);
-              break;
-            case 'aa_change':
-              cy.validateTableFirstRowContent(dataVariant.aa_change, position);
-              break;
-            case 'consequence':
-              cy.validateTableFirstRowClass(dataVariant.consequenceImpact, position);
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
-              break;
-            case 'mane':
-              cy.get(selectors.tableCell(dataVariant))
-                .eq(position)
-                .find(CommonSelectors.maneCPath)
-                .should(dataVariant.maneC ? 'exist' : 'not.exist');
-              cy.get(selectors.tableCell(dataVariant))
-                .eq(position)
-                .find(CommonSelectors.maneMPath)
-                .should(dataVariant.maneM ? 'exist' : 'not.exist');
-              cy.get(selectors.tableCell(dataVariant))
-                .eq(position)
-                .find(CommonSelectors.manePPath)
-                .should(dataVariant.maneP ? 'exist' : 'not.exist');
-              break;
-            case 'omim':
-              cy.validateTableFirstRowContent(dataVariant.omim.inheritance, position);
-              cy.validateTableFirstRowClass(CommonSelectors.tagLevel('primary'), position);
-              break;
-            case 'clinvar':
-              cy.validateTableFirstRowContent(dataVariant.clinvar.classification, position);
-              cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
-              break;
-            case 'acmg_exomiser':
-              dataVariant[columnID].forEach((value: string | RegExp) => {
-                cy.validateTableFirstRowContent(value, position);
-              });
-              cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
-              break;
             case 'gnomad':
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
+              cy.validateTableFirstRowContent(dataCNV[columnID], position);
               cy.validateTableFirstRowClass(CommonSelectors.gnomadRedIcon, position);
               break;
             default:
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
+              cy.validateTableFirstRowContent(dataCNV[columnID], position);
               break;
           }
         } else {
@@ -557,12 +525,12 @@ export const CaseEntity_Variants = {
      * Validates the tooltips on columns.
      */
     shouldShowColumnTooltips() {
-      CaseEntity_Variants.actions.showAllColumns();
+      CaseEntity_Variants_CNV.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              CaseEntity_Variants.actions.shrinkAllColumns();
+              CaseEntity_Variants_CNV.actions.shrinkAllColumns();
               cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column);
             } else {
               cy.log(`Warning: Column ${column.id} not found`);
@@ -575,8 +543,8 @@ export const CaseEntity_Variants = {
      * Validates that pinnable columns are correctly marked as pinnable.
      */
     shouldShowPinnableColumns() {
-      CaseEntity_Variants.actions.showAllColumns();
-      CaseEntity_Variants.actions.unsortAllColumns();
+      CaseEntity_Variants_CNV.actions.showAllColumns();
+      CaseEntity_Variants_CNV.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -593,8 +561,8 @@ export const CaseEntity_Variants = {
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
-      CaseEntity_Variants.actions.showAllColumns();
-      CaseEntity_Variants.actions.unsortAllColumns();
+      CaseEntity_Variants_CNV.actions.showAllColumns();
+      CaseEntity_Variants_CNV.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -612,11 +580,11 @@ export const CaseEntity_Variants = {
      * @param columnID The ID of the column to sort.
      */
     shouldSortColumn(columnID: string) {
-      CaseEntity_Variants.actions.showAllColumns();
-      CaseEntity_Variants.actions.unsortAllColumns();
+      CaseEntity_Variants_CNV.actions.showAllColumns();
+      CaseEntity_Variants_CNV.actions.unsortAllColumns();
       const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
 
-      cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
+      cy.fixture('RequestBody/SortCNV.json').then(mockRequestBody => {
         cy.intercept('POST', '**/list', req => {
           const mockBody = { ...mockRequestBody };
           mockBody.sort.field = apiField;
@@ -624,11 +592,11 @@ export const CaseEntity_Variants = {
           req.alias = 'sortRequestAsc';
           req.body = mockBody;
         });
-        CaseEntity_Variants.actions.sortColumn(columnID, false /*needIntercept*/);
+        CaseEntity_Variants_CNV.actions.sortColumn(columnID, false /*needIntercept*/);
         cy.wait('@sortRequestAsc').then(interceptionAsc => {
           const smallest = interceptionAsc.response?.body[0][apiField];
 
-          cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
+          cy.fixture('RequestBody/SortCNV.json').then(mockRequestBody => {
             cy.intercept('POST', '**/list', req => {
               const mockBody = { ...mockRequestBody };
               mockBody.sort.field = apiField;
@@ -636,7 +604,7 @@ export const CaseEntity_Variants = {
               req.alias = 'sortRequestDesc';
               req.body = mockBody;
             });
-            CaseEntity_Variants.actions.sortColumn(columnID, false /*needIntercept*/);
+            CaseEntity_Variants_CNV.actions.sortColumn(columnID, false /*needIntercept*/);
             cy.wait('@sortRequestDesc').then(interceptionDesc => {
               const biggest = interceptionDesc.response?.body[0][apiField];
               if (typeof smallest === 'number' ? Number(biggest) - Number(smallest) : String(biggest).localeCompare(String(smallest)) < 0) {

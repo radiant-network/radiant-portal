@@ -3,6 +3,7 @@ export const CommonSelectors = {
   actionButton: '[class*="lucide-ellipsis-vertical"]',
   activeTab: '[data-active="true"]',
   anchorIcon: '[class*="lucide-arrow-up-right"]',
+  animateIn: '[class*="data-[state=open]:animate-in"]',
   colorIndicator: (color: string) => `[class*="text-indicator-${color}"]`,
   expandIcon: '[class*="lucide-chevron-righ"]',
   familyIcon: '[class*="lucide-users"]',
