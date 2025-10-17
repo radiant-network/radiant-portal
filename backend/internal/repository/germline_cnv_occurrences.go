@@ -21,6 +21,7 @@ type GermlineCNVOccurrencesDAO interface {
 	CountOccurrences(seqId int, userFilter types.CountQuery) (int64, error)
 	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
 	GetStatisticsOccurrences(seqId int, query types.StatisticsQuery) (*Statistics, error)
+	GetGenesOverlap(seqId int, cnvId int) ([]types.CNVGeneOverlap, error)
 }
 
 func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRepository {
@@ -164,4 +165,83 @@ func (r *GermlineCNVOccurrencesRepository) GetStatisticsOccurrences(seqId int, u
 	}
 	statistics.Type = targetCol.Type
 	return &statistics, nil
+}
+
+func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(seqId int, cnvId int) ([]types.CNVGeneOverlap, error) {
+	part, err := utils.GetSequencingPart(seqId, r.db)
+	if err != nil {
+		return nil, fmt.Errorf("error during partition fetch %w", err)
+	}
+	var chromosome string
+	var start, end, length int
+
+	err = r.db.Table(types.GermlineCNVOccurrenceTable.Name).
+		Where("seq_id = ? AND part = ? AND cnv_id = ?", seqId, part, cnvId).
+		Select("chromosome, start, end, length").
+		Row().
+		Scan(&chromosome, &start, &end, &length)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch CNV info: %w", err)
+	}
+
+	sql := `WITH gene_overlap AS (
+    	SELECT
+    	    g.gene_id,
+    	    g.name AS symbol,
+    	    g.length AS gene_length,
+    	    GREATEST(0, LEAST(g.end, @cnv_end) - GREATEST(g.start, @cnv_start)) AS nb_overlap_bases,
+    	    g.start AS gene_start,
+    	    g.end AS gene_end
+    	FROM ensembl_gene g
+    	WHERE g.chromosome = @cnv_chromosome
+    	  AND g.end >= @cnv_start
+    	  AND g.start <= @cnv_end
+     ),
+     exon_overlap AS (
+         SELECT
+             go.gene_id,
+             COUNT(DISTINCT e.exon_id) AS nb_exons
+         FROM gene_overlap go
+                  JOIN ensembl_exon_by_gene e
+                       ON go.gene_id = e.gene_id
+                           AND e.end >= @cnv_start
+                           AND e.start <= @cnv_end
+         GROUP BY go.gene_id
+     ),
+     gene_overlap_cytoband AS (
+         SELECT
+             go.gene_id,
+             array_agg(distinct cb.cytoband) AS cytoband
+         FROM gene_overlap go
+                  JOIN cytoband cb
+                       ON cb.chromosome = @cnv_chromosome
+                           AND cb.start <= go.gene_end
+                           AND cb.end >= go.gene_start
+         GROUP BY go.gene_id
+     )
+	SELECT
+    	gc.cytoband,
+    	go.symbol,
+    	go.gene_id,
+    	go.gene_length,
+    	go.nb_overlap_bases,
+    	COALESCE(eo.nb_exons, 0) AS nb_exons,
+    	ROUND(100.0 * go.nb_overlap_bases  / go.gene_length, 2) AS overlapping_gene_percent,
+    	ROUND(100.0 * go.nb_overlap_bases  / @cnv_length, 2) AS overlapping_cnv_percent,
+    	CASE
+    	    WHEN @cnv_start <= go.gene_start AND @cnv_end >= go.gene_end THEN 'full_gene'
+    	    WHEN @cnv_start >= go.gene_start AND @cnv_end <= go.gene_end THEN 'full_cnv'
+    	    ELSE 'partial'
+    	    END AS overlap_type
+		FROM gene_overlap go
+    	     LEFT JOIN exon_overlap eo ON go.gene_id = eo.gene_id
+    	     LEFT JOIN gene_overlap_cytoband gc ON go.gene_id=gc.gene_id
+		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`
+	var overlaps []types.CNVGeneOverlap
+	query := r.db.Raw(sql, map[string]interface{}{"cnv_chromosome": chromosome, "cnv_start": start, "cnv_end": end, "cnv_length": length})
+	if err = query.Find(&overlaps).Error; err != nil {
+		return nil, fmt.Errorf("error query gene overlap: %w", err)
+	}
+	return overlaps, nil
 }
