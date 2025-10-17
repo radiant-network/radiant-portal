@@ -84,6 +84,31 @@ Cypress.Commands.add('login', () => {
 });
 
 /**
+ * Logs out the current user.
+ */
+Cypress.Commands.add('logout', () => {
+  cy.visit('/');
+  cy.wait(2000);
+
+  cy.get(CommonSelectors.userIcon).eq(0).click();
+  cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.logoutIcon}`).clickAndWait();
+});
+
+/**
+ * Pins a column in the table to the left side.
+ * @param position The column position index to pin.
+ * @param tableId The table ID to pin the column in (default: '').
+ */
+Cypress.Commands.add('pinColumn', (position: number, tableId: string = '') => {
+  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+    .eq(position)
+    .find(CommonSelectors.pinIcon)
+    .click({ force: true });
+  cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.pinLeftIcon}`).click({ force: true });
+  cy.wait(1000);
+});
+
+/**
  * Resets all table columns to their default configuration.
  */
 Cypress.Commands.add('resetColumns', () => {
@@ -114,6 +139,29 @@ Cypress.Commands.add('setLang', (lang: string) => {
  */
 Cypress.Commands.add('shouldBeActiveTab', { prevSubject: 'element' }, subject => {
   cy.wrap(subject).parents(CommonSelectors.activeTab).should('exist');
+});
+
+/**
+ * Asserts that a given element is pinnable or not pinnable.
+ * @param subject The element to check for pinnability.
+ * @param isPinnable Whether the column should be pinnable.
+ */
+Cypress.Commands.add('shouldBePinnable', { prevSubject: 'element' }, (subject, isPinnable: boolean) => {
+  const strExpectedPinnable = isPinnable ? 'exist' : 'not.exist';
+  cy.wrap(subject).find(CommonSelectors.pinIcon).should(strExpectedPinnable);
+});
+
+/**
+ * Validates if a column is pinned or not.
+ * @param subject The element to check for pin state.
+ * @param position The side of the pinned column ('left', 'right', or null if not pinned).
+ */
+Cypress.Commands.add('shouldBePinned', { prevSubject: 'element' }, (subject, position: 'left' | 'right' | null) => {
+  if (position) {
+    cy.wrap(subject).should('match', CommonSelectors.pinned(position));
+  } else {
+    cy.wrap(subject).should('not.match', `${CommonSelectors.pinned('left')}, ${CommonSelectors.pinned('right')}`);
+  }
 });
 
 /**
@@ -190,6 +238,20 @@ Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = ''
     .eq(position)
     .find(CommonSelectors.sortIcon)
     .click({ force: true });
+  cy.wait(1000);
+});
+
+/**
+ * Unpins a column in the table.
+ * @param position The column position index to unpin.
+ * @param tableId The table ID to unpin the column in (default: '').
+ */
+Cypress.Commands.add('unpinColumn', (position: number, tableId: string = '') => {
+  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+    .eq(position)
+    .find(CommonSelectors.pinIcon)
+    .click({ force: true });
+  cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.unpinIcon}`).click({ force: true });
   cy.wait(1000);
 });
 
@@ -373,7 +435,7 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, sqon?: string) =>
  * @param locusID The locus ID to visit.
  */
 Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
-  cy.visitAndIntercept(`/variants/entity/${locusID}#evidenceAndConditions`, 'GET', `**/conditions/omim`, 1);
+  cy.visitAndIntercept(`/variants/entity/${locusID}?tab=evidenceAndConditions`, 'GET', `**/conditions/omim`, 1);
   cy.setLang('EN');
 });
 
@@ -382,7 +444,7 @@ Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
  * @param locusID The locus ID to visit.
  */
 Cypress.Commands.add('visitVariantPatientsPage', (locusID: string) => {
-  cy.visitAndIntercept(`/variants/entity/${locusID}#patients`, 'POST', `**/cases/interpreted`, 1);
+  cy.visitAndIntercept(`/variants/entity/${locusID}?tab=patients`, 'POST', `**/cases/interpreted`, 1);
   cy.setLang('EN');
 });
 

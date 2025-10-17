@@ -30,6 +30,6 @@
     ]
   },
   "dependencies": {
-    "cypress": "^15.0.0"
+    "cypress": "^15.5.0"
   }
 }

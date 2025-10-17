@@ -20,6 +20,16 @@ describe('VariantEntity - CondPhen - Orphanet - Columns', () => {
     VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldShowAllColumns();
   });
 
+  it('Pin', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldShowPinnableColumns();
+  });
+
+  it('Default pin state', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldMatchDefaultPinnedColumns();
+  });
+
   it('Sort', () => {
     setupTest();
     VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldShowSortableColumns();
@@ -28,5 +38,14 @@ describe('VariantEntity - CondPhen - Orphanet - Columns', () => {
   it('Tooltip', () => {
     setupTest();
     VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldShowColumnTooltips();
+  });
+
+  it('Pin and unpin column', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldUnpinnedColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.orphanet.actions.pinColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldPinnedColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.orphanet.actions.unpinColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldUnpinnedColumn('condition');
   });
 });

@@ -19,6 +19,16 @@ describe('VariantEntity - CondPhen - Omim - Columns', () => {
     VariantEntity_EvidCond.condPhenCard.omim.validations.shouldShowAllColumns();
   });
 
+  it('Pin', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldShowPinnableColumns();
+  });
+
+  it('Default pin state', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldMatchDefaultPinnedColumns();
+  });
+
   it('Sort', () => {
     setupTest();
     VariantEntity_EvidCond.condPhenCard.omim.validations.shouldShowSortableColumns();
@@ -27,5 +37,14 @@ describe('VariantEntity - CondPhen - Omim - Columns', () => {
   it('Tooltip', () => {
     setupTest();
     VariantEntity_EvidCond.condPhenCard.omim.validations.shouldShowColumnTooltips();
+  });
+
+  it('Pin and unpin column', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldUnpinnedColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.omim.actions.pinColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldPinnedColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.omim.actions.unpinColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldUnpinnedColumn('condition');
   });
 });

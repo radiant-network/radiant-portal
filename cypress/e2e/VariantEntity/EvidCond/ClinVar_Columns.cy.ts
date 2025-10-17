@@ -19,6 +19,16 @@ describe('VariantEntity - EvidCond - ClinVar - Columns', () => {
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowAllColumns();
   });
 
+  it('Pin', () => {
+    setupTest();
+    VariantEntity_EvidCond.clinvarCard.validations.shouldShowPinnableColumns();
+  });
+
+  it('Default pin state', () => {
+    setupTest();
+    VariantEntity_EvidCond.clinvarCard.validations.shouldMatchDefaultPinnedColumns();
+  });
+
   it('Sort', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowSortableColumns();
@@ -27,5 +37,14 @@ describe('VariantEntity - EvidCond - ClinVar - Columns', () => {
   it('Tooltip', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnTooltips();
+  });
+
+  it('Pin and unpin column', () => {
+    setupTest();
+    VariantEntity_EvidCond.clinvarCard.validations.shouldUnpinnedColumn('condition');
+    VariantEntity_EvidCond.clinvarCard.actions.pinColumn('condition');
+    VariantEntity_EvidCond.clinvarCard.validations.shouldPinnedColumn('condition');
+    VariantEntity_EvidCond.clinvarCard.actions.unpinColumn('condition');
+    VariantEntity_EvidCond.clinvarCard.validations.shouldUnpinnedColumn('condition');
   });
 });

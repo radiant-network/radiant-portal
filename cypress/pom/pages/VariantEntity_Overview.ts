@@ -2,7 +2,7 @@
 import { CommonSelectors } from 'pom/shared/Selectors';
 
 const selectors = {
-  tab: '[class*= "group-data-[active=true]"]:contains("Overview")',
+  tab: '[class*= "z-1 group"]:contains("Overview")',
 };
 
 export const VariantEntity_Overview = {

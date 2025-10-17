@@ -19,6 +19,16 @@ describe('VariantEntity - Patients - Interpreted - Columns', () => {
     VariantEntity_Patients.interpreted.validations.shouldShowAllColumns();
   });
 
+  it('Pin', () => {
+    setupTest();
+    VariantEntity_Patients.interpreted.validations.shouldShowPinnableColumns();
+  });
+
+  it('Default pin state', () => {
+    setupTest();
+    VariantEntity_Patients.interpreted.validations.shouldMatchDefaultPinnedColumns();
+  });
+
   it('Sort', () => {
     setupTest();
     VariantEntity_Patients.interpreted.validations.shouldShowSortableColumns();
@@ -27,5 +37,14 @@ describe('VariantEntity - Patients - Interpreted - Columns', () => {
   it('Tooltip', () => {
     setupTest();
     VariantEntity_Patients.interpreted.validations.shouldShowColumnTooltips();
+  });
+
+  it('Pin and unpin column', () => {
+    setupTest();
+    VariantEntity_Patients.interpreted.validations.shouldUnpinnedColumn('case');
+    VariantEntity_Patients.interpreted.actions.pinColumn('case');
+    VariantEntity_Patients.interpreted.validations.shouldPinnedColumn('case');
+    VariantEntity_Patients.interpreted.actions.unpinColumn('case');
+    VariantEntity_Patients.interpreted.validations.shouldUnpinnedColumn('case');
   });
 });

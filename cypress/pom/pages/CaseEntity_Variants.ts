@@ -14,6 +14,7 @@ const tableColumns = [
     name: CommonSelectors.interpretationIcon,
     apiField: 'has_interpretation',
     isVisibleByDefault: true,
+    pinByDefault: 'left',
     isSortable: false,
     isPinnable: false,
     position: 0,
@@ -24,6 +25,7 @@ const tableColumns = [
     name: 'Variant',
     apiField: 'hgvsg',
     isVisibleByDefault: true,
+    pinByDefault: 'left',
     isSortable: true,
     isPinnable: true,
     position: 1,
@@ -31,9 +33,10 @@ const tableColumns = [
   },
   {
     id: 'gene',
-    name: 'Gene',
+    name: 'Genes',
     apiField: 'symbol',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 2,
@@ -44,6 +47,7 @@ const tableColumns = [
     name: 'AA',
     apiField: 'aa_change',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 3,
@@ -54,6 +58,7 @@ const tableColumns = [
     name: 'Type',
     apiField: 'variant_class',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 4,
@@ -64,6 +69,7 @@ const tableColumns = [
     name: 'Consequence',
     apiField: 'picked_consequences',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 5,
@@ -74,6 +80,7 @@ const tableColumns = [
     name: 'MANE',
     apiField: 'is_canonical',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 6,
@@ -84,6 +91,7 @@ const tableColumns = [
     name: 'dbSNP',
     apiField: 'rsnumber',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 7,
@@ -94,6 +102,7 @@ const tableColumns = [
     name: 'OMIM',
     apiField: 'omim_inheritance_code',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 8,
@@ -104,6 +113,7 @@ const tableColumns = [
     name: 'ClinVar',
     apiField: 'clinvar',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 9,
@@ -114,6 +124,7 @@ const tableColumns = [
     name: 'Exo.',
     apiField: 'exomiser_gene_combined_score',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 10,
@@ -124,6 +135,7 @@ const tableColumns = [
     name: 'ACMG Exo.',
     apiField: 'exomiser_acmg_classification',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 11,
@@ -134,6 +146,7 @@ const tableColumns = [
     name: 'gnomAD',
     apiField: 'gnomad_v3_af',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 12,
@@ -144,6 +157,7 @@ const tableColumns = [
     name: 'Freq.',
     apiField: 'pf_wgs',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 13,
@@ -154,6 +168,7 @@ const tableColumns = [
     name: 'GQ',
     apiField: 'genotype_quality',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 14,
@@ -164,6 +179,7 @@ const tableColumns = [
     name: 'Zyg.',
     apiField: 'zygosity',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: false,
     isPinnable: true,
     position: 15,
@@ -174,6 +190,7 @@ const tableColumns = [
     name: 'AD Ratio',
     apiField: 'ad_ratio',
     isVisibleByDefault: true,
+    pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 16,
@@ -223,6 +240,21 @@ export const CaseEntity_Variants = {
       cy.hideColumn(getColumnName(tableColumns, columnID));
     },
     /**
+     * Pins a specific column in the table.
+     * @param columnID The ID of the column to pin.
+     */
+    pinColumn(columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          if (position !== -1) {
+            cy.pinColumn(position);
+          } else {
+            cy.log(`Warning: Column ${columnID} not found`);
+          }
+        })
+      );
+    },
+    /**
      * Shows all columns in the table.
      */
     showAllColumns() {
@@ -238,6 +270,17 @@ export const CaseEntity_Variants = {
      */
     showColumn(columnID: string) {
       cy.showColumn(getColumnName(tableColumns, columnID));
+    },
+    /**
+     * Unpins a specific column in the table.
+     * @param columnID The ID of the column to unpin.
+     */
+    unpinColumn(columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.unpinColumn(position);
+        })
+      );
     },
     /**
      * Shrink all columns in the table.
@@ -375,11 +418,59 @@ export const CaseEntity_Variants = {
       });
     },
     /**
+     * Validates the default pin state of each column.
+     */
+    shouldMatchDefaultPinnedColumns() {
+      CaseEntity_Variants.actions.showAllColumns();
+      tableColumns.forEach(column => {
+        cy.then(() =>
+          getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
+            if (position !== -1) {
+              cy.get(CommonSelectors.tableHeadCell())
+                .eq(position)
+                .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
+            } else {
+              cy.log(`Warning: Column ${column.id} not found`);
+            }
+          })
+        );
+      });
+    },
+    /**
      * Checks that a specific column is not displayed.
      * @param columnID The ID of the column to check.
      */
     shouldNotDisplayColumn(columnID: string) {
       cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('not.exist');
+    },
+    /**
+     * Validates that a specific column is pinned to the left side.
+     * @param columnID The ID of the column to check.
+     */
+    shouldPinnedColumn(columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          if (position !== -1) {
+            cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned('left');
+          } else {
+            cy.log(`Warning: Column ${columnID} not found`);
+          }
+        })
+      );
+    },
+    /**
+     * Validates the request sent to api on sorting functionality of a column.
+     * @param columnID The ID of the column to sort.
+     */
+    shouldRequestOnSort(columnID: string) {
+      CaseEntity_Variants.actions.showAllColumns();
+      CaseEntity_Variants.actions.unsortAllColumns();
+      cy.intercept('POST', '**/list', req => {
+        expect(req.body.sort).to.have.length(1);
+        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
+      }).as('sortRequest');
+      CaseEntity_Variants.actions.sortColumn(columnID, false /*needIntercept*/);
+      cy.wait('@sortRequest');
     },
     /**
      * Validates that all columns are displayed in the correct order in the table.
@@ -481,6 +572,24 @@ export const CaseEntity_Variants = {
       });
     },
     /**
+     * Validates that pinnable columns are correctly marked as pinnable.
+     */
+    shouldShowPinnableColumns() {
+      CaseEntity_Variants.actions.showAllColumns();
+      CaseEntity_Variants.actions.unsortAllColumns();
+      tableColumns.forEach(column => {
+        cy.then(() =>
+          getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
+            if (position !== -1) {
+              cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinnable(column.isPinnable);
+            } else {
+              cy.log(`Warning: Column ${column.id} not found`);
+            }
+          })
+        );
+      });
+    },
+    /**
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
@@ -497,20 +606,6 @@ export const CaseEntity_Variants = {
           })
         );
       });
-    },
-    /**
-     * Validates the request sent to api on sorting functionality of a column.
-     * @param columnID The ID of the column to sort.
-     */
-    shouldRequestOnSort(columnID: string) {
-      CaseEntity_Variants.actions.showAllColumns();
-      CaseEntity_Variants.actions.unsortAllColumns();
-      cy.intercept('POST', '**/list', req => {
-        expect(req.body.sort).to.have.length(1);
-        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
-      }).as('sortRequest');
-      CaseEntity_Variants.actions.sortColumn(columnID, false /*needIntercept*/);
-      cy.wait('@sortRequest');
     },
     /**
      * Validates the sorting functionality of a column with mocked data.
@@ -551,6 +646,17 @@ export const CaseEntity_Variants = {
           });
         });
       });
+    },
+    /**
+     * Validates that a specific column is unpinned.
+     * @param columnID The ID of the column to check.
+     */
+    shouldUnpinnedColumn(columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned(null);
+        })
+      );
     },
   },
 };

@@ -20,6 +20,16 @@ describe('VariantEntity - CondPhen - Hpo - Columns', () => {
     VariantEntity_EvidCond.condPhenCard.hpo.validations.shouldShowAllColumns();
   });
 
+  it('Pin', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.hpo.validations.shouldShowPinnableColumns();
+  });
+
+  it('Default pin state', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.hpo.validations.shouldMatchDefaultPinnedColumns();
+  });
+
   it('Sort', () => {
     setupTest();
     VariantEntity_EvidCond.condPhenCard.hpo.validations.shouldShowSortableColumns();
@@ -28,5 +38,14 @@ describe('VariantEntity - CondPhen - Hpo - Columns', () => {
   it('Tooltip', () => {
     setupTest();
     VariantEntity_EvidCond.condPhenCard.hpo.validations.shouldShowColumnTooltips();
+  });
+
+  it('Pin and unpin column', () => {
+    setupTest();
+    VariantEntity_EvidCond.condPhenCard.hpo.validations.shouldUnpinnedColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.hpo.actions.pinColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.hpo.validations.shouldPinnedColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.hpo.actions.unpinColumn('condition');
+    VariantEntity_EvidCond.condPhenCard.hpo.validations.shouldUnpinnedColumn('condition');
   });
 });

@@ -18,6 +18,16 @@ describe('Cases - Columns', () => {
     CasesTable.validations.shouldShowAllColumns();
   });
 
+  it('Pin', () => {
+    setupTest();
+    CasesTable.validations.shouldShowPinnableColumns();
+  });
+
+  it('Default pin state', () => {
+    setupTest();
+    CasesTable.validations.shouldMatchDefaultPinnedColumns();
+  });
+
   it('Sort', () => {
     setupTest();
     CasesTable.validations.shouldShowSortableColumns();
@@ -35,5 +45,14 @@ describe('Cases - Columns', () => {
     CasesTable.validations.shouldNotDisplayColumn('case');
     CasesTable.actions.showColumn('case');
     CasesTable.validations.shouldDisplayColumn('case');
+  });
+
+  it('Pin and unpin column', () => {
+    setupTest();
+    CasesTable.validations.shouldUnpinnedColumn('status');
+    CasesTable.actions.pinColumn('status');
+    CasesTable.validations.shouldPinnedColumn('status');
+    CasesTable.actions.unpinColumn('status');
+    CasesTable.validations.shouldUnpinnedColumn('status');
   });
 });
