@@ -1582,6 +1582,12 @@ export interface GermlineCNVOccurrence {
     'cn'?: number;
     /**
      * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'cnv_id'?: number;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof GermlineCNVOccurrence
      */
@@ -1688,6 +1694,12 @@ export interface GermlineCNVOccurrence {
      * @memberof GermlineCNVOccurrence
      */
     'svtype'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'symbol'?: Array<string>;
     /**
      * 
      * @type {string}

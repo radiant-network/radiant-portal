@@ -15,6 +15,7 @@ type GermlineCNVOccurrence struct {
 	Quality    float32           `json:"quality,omitempty"`
 	Calls      JsonArray[int]    `json:"calls,omitempty"`
 	Cytoband   JsonArray[string] `json:"cytoband,omitempty"`
+	Symbol     JsonArray[string] `json:"symbol,omitempty"`
 	Filter     string            `json:"filter,omitempty"`
 	BC         int               `json:"bc,omitempty"`
 	CN         int               `json:"cn,omitempty"`
@@ -273,6 +274,7 @@ var GermlineCNVCytobandField = Field{
 var GermlineCNVSymbolField = Field{
 	Name:          "symbol",
 	CanBeFiltered: true,
+	CanBeSelected: true,
 	IsArray:       true,
 	Table:         GermlineCNVOccurrenceTable,
 }
