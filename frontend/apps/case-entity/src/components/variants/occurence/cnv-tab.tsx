@@ -173,6 +173,7 @@ function CNVTab({ seqId }: CNVTabProps) {
 
   return (
     <div className="bg-muted w-full">
+      CNV
       <div className="flex flex-1 h-screen overflow-hidden">
         <aside className="w-auto min-w-fit h-full shrink-0">
           <AggregateContext value={{ seqId }}>

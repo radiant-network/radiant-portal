@@ -68,6 +68,7 @@ function AssayVariantFilters({
   handleChange,
   isLoading,
   activeInterface,
+  onActiveInterfaceChange,
 }: AssayVariantFiltersProps) {
   const { t } = useI18n();
 
@@ -119,7 +120,9 @@ function AssayVariantFilters({
         type="single"
         variant="outline"
         onValueChange={e => {
-          console.log('e', e);
+          if (e != '') {
+            onActiveInterfaceChange(e);
+          }
         }}
       >
         <ToggleGroupItem value={VariantInterface.SNV} aria-label={VariantInterface.SNV}>
