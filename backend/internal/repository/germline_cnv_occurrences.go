@@ -41,13 +41,13 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(seqId int, userQuery t
 		// We group by name to avoid duplicates when joining with gene panels tables
 		// and use any_value for other fields to satisfy sql requirements
 		// Example of query :
-		// SELECT cnvo.name as name,any_value(cnvo.seq_id) as seq_id,any_value(cnvo.aliquot) as aliquot,any_value(cnvo.chromosome) as chromosome,...
+		// SELECT cnvo.cnv_id as id,any_value(cnvo.seq_id) as seq_id,any_value(cnvo.aliquot) as aliquot,any_value(cnvo.chromosome) as chromosome,...
 		// LEFT JOIN omim_gene_panel om ON array_contains(cnvo.symbol, om.symbol)
 		// WHERE (seq_id = 1 and part=1) AND om.panel IN ('panel1', 'panel2') GROUP BY `name`
-		// ORDER BY cnvo.name asc LIMIT 10
-		tx = tx.Group("name")
+		// ORDER BY name asc LIMIT 10
+		tx = tx.Group("cnv_id")
 		var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
-			if field.Name == "name" {
+			if field.Name == "cnv_id" {
 				return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 			}
 
@@ -55,15 +55,21 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(seqId int, userQuery t
 		})
 
 		tx = tx.Select(columns)
+		// We dont use AdddSort because we want to sort on aggregated fields
+		for _, sort := range userQuery.SortedFields() {
+			s := fmt.Sprintf("%s %s", sort.Field.GetAlias(), sort.Order)
+			tx = tx.Order(s)
+		}
+
 	} else {
 		var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
 			return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 		})
 		tx = tx.Select(columns)
+		utils.AddSort(tx, userQuery)
 	}
 
 	utils.AddLimit(tx, userQuery)
-	utils.AddSort(tx, userQuery)
 
 	if err = tx.Find(&occurrences).Error; err != nil {
 		return nil, fmt.Errorf("error fetching CNV occurrences: %w", err)
@@ -79,7 +85,7 @@ func (r *GermlineCNVOccurrencesRepository) CountOccurrences(seqId int, userQuery
 	}
 
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-		tx = tx.Distinct(fmt.Sprintf("%s.name", types.GermlineCNVOccurrenceTable.Alias))
+		tx = tx.Distinct(fmt.Sprintf("%s.cnv_id", types.GermlineCNVOccurrenceTable.Alias))
 	}
 	var count int64
 	if err = tx.Count(&count).Error; err != nil {
@@ -125,9 +131,9 @@ func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(seqId int, userQ
 		// WHERE (seq_id = 2 and part=1) AND cnvo.cytoband is not null GROUP BY `bucket` ORDER BY count asc, bucket asc
 		unnestJoin := fmt.Sprintf("join unnest(%s.%s) as unnest on true", aggCol.Table.Alias, aggCol.Name)
 		tx = tx.Joins(unnestJoin)
-		sel = fmt.Sprintf("unnest as bucket, count(distinct %s.name) as count", types.GermlineCNVOccurrenceTable.Alias)
+		sel = fmt.Sprintf("unnest as bucket, count(distinct %s.cnv_id) as count", types.GermlineCNVOccurrenceTable.Alias)
 	} else {
-		sel = fmt.Sprintf("%s.%s as bucket, count(distinct %s.name) as count", aggCol.Table.Alias, aggCol.Name, types.GermlineCNVOccurrenceTable.Alias)
+		sel = fmt.Sprintf("%s.%s as bucket, count(distinct %s.cnv_id) as count", aggCol.Table.Alias, aggCol.Name, types.GermlineCNVOccurrenceTable.Alias)
 	}
 
 	tx = tx.Select(sel).
