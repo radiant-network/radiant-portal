@@ -54,7 +54,6 @@ func (m *MockRepository) GetDocumentsFilters(query types.AggQuery, withLabAndPro
 		},
 		Format: []types.Aggregation{
 			{Bucket: "cram", Label: "CRAM File"},
-			{Bucket: "crai", Label: "CRAI Index File"},
 			{Bucket: "vcf", Label: "VCF File"},
 		},
 		DataType: []types.Aggregation{
@@ -136,7 +135,6 @@ func Test_DocumentsFiltersHandler(t *testing.T) {
 		], 
 		"format":[
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
-			{"count":0, "key":"crai", "label":"CRAI Index File"}, 
 			{"count":0, "key":"vcf", "label":"VCF File"}
 		], 
 		"performer_lab":[

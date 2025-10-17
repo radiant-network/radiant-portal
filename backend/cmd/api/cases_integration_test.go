@@ -324,7 +324,6 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":1, "key":"vcf", "label":"VCF File"}, 
 			{"count":0, "key":"bed", "label":"BED File"}, 
 			{"count":0, "key":"bw", "label":"BW File"}, 
-			{"count":0, "key":"crai", "label":"CRAI Index File"}, 
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
 			{"count":0, "key":"csv", "label":"CSV File"}, 
 			{"count":0, "key":"gvcf", "label":"gVCF File"}, 
@@ -332,7 +331,6 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"json", "label":"JSON File"}, 
 			{"count":0, "key":"pdf", "label":"PDF File"}, 
 			{"count":0, "key":"png", "label":"PNG File"}, 
-			{"count":0, "key":"tbi", "label":"TBI Index File"}, 
 			{"count":0, "key":"tgz", "label":"TGZ Archive File"}, 
 			{"count":0, "key":"tsv", "label":"TSV File"}, 
 			{"count":0, "key":"txt", "label":"Text File"}

@@ -350,7 +350,6 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 		], 
 		"format":[
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
-			{"count":0, "key":"crai", "label":"CRAI Index File"}, 
 			{"count":0, "key":"vcf", "label":"VCF File"}
 		], 
 		"performer_lab":[
