@@ -756,6 +756,8 @@ components:
           uniqueItems: false
         cn:
           type: integer
+        cnv_id:
+          type: integer
         cytoband:
           items:
             type: string
@@ -798,6 +800,11 @@ components:
           type: integer
         svtype:
           type: string
+        symbol:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         type:
           type: string
       type: object
