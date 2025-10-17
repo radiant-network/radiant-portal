@@ -14,6 +14,11 @@ import (
 
 type MockCNVRepository struct{}
 
+func (m *MockCNVRepository) GetGenesOverlap(seqId int, cnvId int) ([]types.CNVGeneOverlap, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *MockCNVRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
 	return []types.Aggregation{
 			{Bucket: "p1", Count: 2},
