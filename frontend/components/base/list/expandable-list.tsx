@@ -10,9 +10,10 @@ export interface ExpandableListProps<T> {
   items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
   onExpand?: () => void;
+  className?: string;
 }
 
-function ExpandableList<T>({ visibleCount = 3, items, renderItem, onExpand }: ExpandableListProps<T>) {
+function ExpandableList<T>({ visibleCount = 3, items, renderItem, onExpand, className }: ExpandableListProps<T>) {
   const { t } = useI18n();
   const [collapse, setCollpase] = useState(true);
   const totalItemsCount = items?.length || 0;
@@ -27,7 +28,7 @@ function ExpandableList<T>({ visibleCount = 3, items, renderItem, onExpand }: Ex
 
   return (
     <div>
-      <ul>
+      <ul className={className}>
         {slicedData.map((item, index: number) => (
           <li key={index}>{renderItem(item, index)}</li>
         ))}

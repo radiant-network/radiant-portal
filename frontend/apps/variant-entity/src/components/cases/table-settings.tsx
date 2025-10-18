@@ -20,6 +20,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import { Button } from '@/components/base/ui/button';
+import CasePreviewCell from './case-preview-cell';
 
 const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>();
 const otherCasesColumnHelper = createColumnHelper<VariantUninterpretedCase>();
@@ -144,11 +145,10 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
     otherCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband}>
-          <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs">
-            {info.getValue()}
-          </AnchorLink>
-        </RelationshipToProbandCell>
+        <CasePreviewCell
+          caseId={info.row.original.case_id}
+          relationshipToProband={info.row.original.relationship_to_proband}
+        />
       ),
       header: t('variant_entity.cases.other_table.headers.case'),
       minSize: 80,

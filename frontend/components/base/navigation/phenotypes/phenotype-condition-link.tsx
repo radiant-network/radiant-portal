@@ -25,8 +25,9 @@ export type PhenotypeConditionLinkProps = React.ComponentProps<'span'> & {
   name?: string;
   code?: string;
   onsetCode?: string;
+  showCode?: boolean;
 };
-function PhenotypeConditionLink({ name, code, onsetCode, ...props }: PhenotypeConditionLinkProps) {
+function PhenotypeConditionLink({ name, code, onsetCode, showCode = true, ...props }: PhenotypeConditionLinkProps) {
   if (!name || !code) {
     return <Skeleton />;
   }
@@ -34,7 +35,7 @@ function PhenotypeConditionLink({ name, code, onsetCode, ...props }: PhenotypeCo
   return (
     <span className="text-sm flex gap-1 text-foreground truncate" {...props}>
       <AnchorLink className="text-sm truncate" size="sm" href={getBaseUrl(code)} target="_blank">
-        {name} ({code})
+        {name} {showCode && `(${code})`}
       </AnchorLink>
       {onsetCode && <Badge variant="outline">{onsetCode}</Badge>}
     </span>

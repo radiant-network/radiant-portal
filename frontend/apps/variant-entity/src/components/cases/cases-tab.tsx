@@ -39,7 +39,7 @@ function CasesTab() {
 
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.InterpretedCases);
 
-  const { data, isLoading } = useSWR<VariantCasesCount, ApiError, CasesCountInput>(
+  const { data } = useSWR<VariantCasesCount, ApiError, CasesCountInput>(
     {
       key: 'cases-count',
       locusId: params.locusId!,
