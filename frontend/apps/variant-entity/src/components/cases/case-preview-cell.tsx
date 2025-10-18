@@ -21,13 +21,11 @@ function CasePreviewCell({ caseId, relationshipToProband }: CasePreviewCellProps
   };
 
   return (
-    <span>
-      <RelationshipToProbandCell relationship={relationshipToProband}>
-        <AnchorLink mono size="xs" variant="secondary" onClick={handleClick}>
-          {caseId}
-        </AnchorLink>
-      </RelationshipToProbandCell>
-    </span>
+    <RelationshipToProbandCell relationship={relationshipToProband}>
+      <AnchorLink mono size="xs" variant="secondary" onClick={handleClick}>
+        {caseId}
+      </AnchorLink>
+    </RelationshipToProbandCell>
   );
 }
 

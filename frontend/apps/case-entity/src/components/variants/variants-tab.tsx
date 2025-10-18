@@ -31,6 +31,7 @@ import { queryBuilderRemote } from '@/components/model/query-builder-core/query-
 import { occurrencesApi } from '@/utils/api';
 
 import OccurencePreviewSheet from '@/components/feature/preview/occurence-preview-sheet';
+import { usePreviewOccurrenceNavigation } from '@/components/feature/preview/use-preview-occurrence-navigation';
 import { ISyntheticSqon } from '@/components/model/sqon';
 import { SELECTED_VARIANT_PARAM } from './constants';
 import AssayVariantFilters from './filters/assay-variant-filters';
@@ -140,13 +141,6 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     shouldRetryOnError: false,
   });
 
-  const handleClosePreview = () => {
-    setSearchParams(prev => {
-      prev.delete(SELECTED_VARIANT_PARAM);
-      return prev;
-    });
-  };
-
   /**
    * Restore activeSqon
    */
@@ -222,49 +216,21 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   }, [activeSqon]);
 
   const occurencesData = useMemo(() => fetchOccurrencesList.data ?? [], [fetchOccurrencesList.data]);
-  const selectedVariant = searchParams.get(SELECTED_VARIANT_PARAM);
-  const selectedOccurrence = occurencesData.find(occurrence => occurrence.hgvsg === selectedVariant);
 
-  const selectedOccurrenceIndex = selectedVariant
-    ? occurencesData.findIndex(occurrence => occurrence.hgvsg === selectedVariant)
-    : -1;
-
-  // Navigation handlers
-  const handlePreviousOccurrence = () => {
-    if (selectedOccurrenceIndex > 0) {
-      const previousOccurrence = occurencesData[selectedOccurrenceIndex - 1];
-      setSearchParams(prev => {
-        prev.set(SELECTED_VARIANT_PARAM, previousOccurrence.hgvsg);
-        return prev;
-      });
-    }
-  };
-
-  const handleNextOccurrence = () => {
-    if (selectedOccurrenceIndex >= 0 && selectedOccurrenceIndex < occurencesData.length - 1) {
-      const nextOccurrence = occurencesData[selectedOccurrenceIndex + 1];
-      setSearchParams(prev => {
-        prev.set(SELECTED_VARIANT_PARAM, nextOccurrence.hgvsg);
-        return prev;
-      });
-    }
-  };
-
-  const hasPrevious = selectedOccurrenceIndex > 0;
-  const hasNext = selectedOccurrenceIndex >= 0 && selectedOccurrenceIndex < occurencesData.length - 1;
-
-  useEffect(() => {
-    if (selectedVariant && occurencesData.length > 0) {
-      const rowIndex = occurencesData.findIndex(occurrence => occurrence.hgvsg === selectedVariant);
-      if (rowIndex !== -1) {
-        setRowSelection({ [rowIndex]: true });
-      } else {
-        setRowSelection({});
-      }
-    } else {
-      setRowSelection({});
-    }
-  }, [selectedVariant, occurencesData]);
+  const {
+    selectedOccurrence,
+    hasPrevious,
+    hasNext,
+    handleClosePreview,
+    handlePreviousOccurrence,
+    handleNextOccurrence,
+  } = usePreviewOccurrenceNavigation({
+    occurrencesData: occurencesData,
+    searchParams,
+    setSearchParams,
+    selectedOccurrenceParamKey: SELECTED_VARIANT_PARAM,
+    setRowSelection,
+  });
 
   return (
     <SeqIDContext value={seqId}>
