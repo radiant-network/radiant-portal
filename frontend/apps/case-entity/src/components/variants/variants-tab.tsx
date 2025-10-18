@@ -1,7 +1,7 @@
-import { createContext, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
+import { createContext, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
 import {
@@ -30,9 +30,12 @@ import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/quer
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { occurrencesApi } from '@/utils/api';
 
+import OccurencePreviewSheet from '@/components/feature/preview/occurence-preview-sheet';
+import { ISyntheticSqon } from '@/components/model/sqon';
+import { SELECTED_VARIANT_PARAM } from './constants';
 import AssayVariantFilters from './filters/assay-variant-filters';
-import { defaultSettings, getVariantColumns } from './occurence/table/occurence-table-settings';
 import { OccurrenceCountInput, useOccurencesCountHelper, useOccurencesListHelper } from './hook';
+import { defaultSettings, getVariantColumns } from './occurence/table/occurence-table-settings';
 
 export const SeqIDContext = createContext<string>('');
 
@@ -77,6 +80,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   }
   const [seqId, setSeqId] = useState<string>(defaultSeqId);
 
+  const [rowSelection, setRowSelection] = useState({});
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
     op: 'and',
@@ -135,6 +139,13 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     revalidateOnMount: false,
     shouldRetryOnError: false,
   });
+
+  const handleClosePreview = () => {
+    setSearchParams(prev => {
+      prev.delete(SELECTED_VARIANT_PARAM);
+      return prev;
+    });
+  };
 
   /**
    * Restore activeSqon
@@ -210,6 +221,51 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     });
   }, [activeSqon]);
 
+  const occurencesData = useMemo(() => fetchOccurrencesList.data ?? [], [fetchOccurrencesList.data]);
+  const selectedVariant = searchParams.get(SELECTED_VARIANT_PARAM);
+  const selectedOccurrence = occurencesData.find(occurrence => occurrence.hgvsg === selectedVariant);
+
+  const selectedOccurrenceIndex = selectedVariant
+    ? occurencesData.findIndex(occurrence => occurrence.hgvsg === selectedVariant)
+    : -1;
+
+  // Navigation handlers
+  const handlePreviousOccurrence = () => {
+    if (selectedOccurrenceIndex > 0) {
+      const previousOccurrence = occurencesData[selectedOccurrenceIndex - 1];
+      setSearchParams(prev => {
+        prev.set(SELECTED_VARIANT_PARAM, previousOccurrence.hgvsg);
+        return prev;
+      });
+    }
+  };
+
+  const handleNextOccurrence = () => {
+    if (selectedOccurrenceIndex >= 0 && selectedOccurrenceIndex < occurencesData.length - 1) {
+      const nextOccurrence = occurencesData[selectedOccurrenceIndex + 1];
+      setSearchParams(prev => {
+        prev.set(SELECTED_VARIANT_PARAM, nextOccurrence.hgvsg);
+        return prev;
+      });
+    }
+  };
+
+  const hasPrevious = selectedOccurrenceIndex > 0;
+  const hasNext = selectedOccurrenceIndex >= 0 && selectedOccurrenceIndex < occurencesData.length - 1;
+
+  useEffect(() => {
+    if (selectedVariant && occurencesData.length > 0) {
+      const rowIndex = occurencesData.findIndex(occurrence => occurrence.hgvsg === selectedVariant);
+      if (rowIndex !== -1) {
+        setRowSelection({ [rowIndex]: true });
+      } else {
+        setRowSelection({});
+      }
+    } else {
+      setRowSelection({});
+    }
+  }, [selectedVariant, occurencesData]);
+
   return (
     <SeqIDContext value={seqId}>
       <div className="bg-background flex flex-col">
@@ -276,7 +332,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                   }}
                   resolveSyntheticSqon={resolveSyntheticSqon}
                   onActiveQueryChange={sqon =>
-                    setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)
+                    setActiveSqon(resolveSyntheticSqon(sqon, (qbState?.queries || []) as ISyntheticSqon[]) as Sqon)
                   }
                   onStateChange={state => {
                     setQbState(state);
@@ -301,7 +357,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                   <DataTable
                     id="variant-occurrence"
                     columns={getVariantColumns(t)}
-                    data={fetchOccurrencesList.data ?? []}
+                    data={occurencesData}
                     defaultColumnSettings={defaultSettings}
                     defaultServerSorting={DEFAULT_SORTING}
                     loadingStates={{
@@ -314,9 +370,20 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
                     total={fetchOccurrencesCount.data?.count ?? 0}
                     enableColumnOrdering
                     enableFullscreen
+                    rowSelection={rowSelection}
+                    onRowSelectionChange={setRowSelection}
                   />
                 </CardContent>
               </Card>
+              <OccurencePreviewSheet
+                open={!!selectedOccurrence}
+                setOpen={() => handleClosePreview()}
+                occurrence={selectedOccurrence!}
+                onPrevious={handlePreviousOccurrence}
+                onNext={handleNextOccurrence}
+                hasPrevious={hasPrevious}
+                hasNext={hasNext}
+              />
             </main>
           </div>
         </div>

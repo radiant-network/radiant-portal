@@ -1,9 +1,19 @@
-function DescriptionSection({ title, children }: { title: string; children: React.ReactNode }) {
+import { cn } from '@/components/lib/utils';
+
+function DescriptionSection({
+  title,
+  children,
+  fullWidth = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  fullWidth?: boolean;
+}) {
   return (
-    <div className="flex flex-col gap-1 items-start w-full">
+    <div className={cn('flex flex-col gap-1 items-start', { 'w-full': fullWidth })}>
       <h4 className="font-semibold text-sm">{title}</h4>
-      <div className="flex gap-3 items-center w-full">
-        <div className="flex flex-col gap-2 items-start w-full">{children}</div>
+      <div className={cn('flex gap-3 items-center', { 'w-full': fullWidth })}>
+        <div className={cn('flex flex-col gap-2 items-start', { 'w-full': fullWidth })}>{children}</div>
       </div>
     </div>
   );

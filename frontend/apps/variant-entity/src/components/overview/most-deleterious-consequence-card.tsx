@@ -1,16 +1,15 @@
-import { Link, useParams } from 'react-router';
 import { InfoIcon } from 'lucide-react';
+import { Link, useParams } from 'react-router';
 
 import { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import ConditionalField from '@/components/base/information/conditional-field';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardProps } from '@/components/base/ui/card';
 import { Separator } from '@/components/base/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import TranscriptIdLink from '@/components/feature/variant/transcript-id-link';
-import { getDbSnpUrl, getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { getOmimOrgUrl } from '@/components/feature/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { VariantEntityTabs } from '@/types';
 
@@ -56,7 +55,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.clin_var')}</div>
             <div className="flex flex-wrap items-start gap-1">
-              <ConditionalField condition={data?.clinvar?.length > 0}>
+              <ConditionalField condition={data?.clinvar ? data?.clinvar?.length > 0 : false}>
                 <>
                   {(data?.clinvar ?? []).map(clinvar => (
                     <Link
@@ -129,11 +128,6 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
           )}
           {data?.dna_change && <div className="font-mono">{data?.dna_change}</div>}
-          {data?.rsnumber && (
-            <AnchorLink href={getDbSnpUrl(data.rsnumber)} mono size="sm" target="_blank" rel="noreferrer">
-              {data?.rsnumber}
-            </AnchorLink>
-          )}
         </div>
       </CardContent>
     </Card>

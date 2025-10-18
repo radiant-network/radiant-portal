@@ -1,23 +1,26 @@
-import { useState } from 'react';
-
 import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-
-import OccurencePreviewSheet from '@/components/feature/preview/occurence-preview-sheet';
+import { useSearchParams } from 'react-router';
+import { SELECTED_VARIANT_PARAM } from '../../../constants';
 
 type HgvsgCellProps = {
   occurrence: GermlineSNVOccurrence;
 };
 
 function HgvsgCell({ occurrence }: HgvsgCellProps) {
-  const [open, setOpen] = useState(false);
+  const [_, setSearchParams] = useSearchParams();
+
+  const handleClick = () => {
+    setSearchParams(prev => {
+      prev.set(SELECTED_VARIANT_PARAM, occurrence.hgvsg);
+      return prev;
+    });
+  };
 
   return (
-    <OccurencePreviewSheet occurrence={occurrence} open={open} setOpen={setOpen}>
-      <AnchorLink size="sm" variant="secondary" className="overflow-hidden text-ellipsis block">
-        {occurrence.hgvsg}
-      </AnchorLink>
-    </OccurencePreviewSheet>
+    <AnchorLink size="sm" variant="secondary" className="overflow-hidden text-ellipsis block" onClick={handleClick}>
+      {occurrence.hgvsg}
+    </AnchorLink>
   );
 }
 

@@ -1,30 +1,33 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
-import CasePreviewSheet from '@/components/feature/preview/case-preview-sheet';
+import { SELECTED_CASE_PARAM } from './constants';
 
 type CasePreviewCellProps = {
-  seqId: number;
-  locusId: string;
-  caseId: string;
+  caseId: number;
   relationshipToProband: string | undefined;
 };
 
-function CasePreviewCell({ seqId, locusId, caseId, relationshipToProband }: CasePreviewCellProps) {
-  const [open, setOpen] = useState(false);
+function CasePreviewCell({ caseId, relationshipToProband }: CasePreviewCellProps) {
+  const [, setSearchParams] = useSearchParams();
+
+  const handleClick = () => {
+    setSearchParams(prev => {
+      prev.set(SELECTED_CASE_PARAM, caseId.toString());
+      return prev;
+    });
+  };
 
   return (
-    <CasePreviewSheet seqId={seqId} locusId={locusId} open={open} setOpen={setOpen}>
-      <span>
-        <RelationshipToProbandCell relationship={relationshipToProband}>
-          <AnchorLink mono size="xs" variant="secondary">
-            {caseId}
-          </AnchorLink>
-        </RelationshipToProbandCell>
-      </span>
-    </CasePreviewSheet>
+    <span>
+      <RelationshipToProbandCell relationship={relationshipToProband}>
+        <AnchorLink mono size="xs" variant="secondary" onClick={handleClick}>
+          {caseId}
+        </AnchorLink>
+      </RelationshipToProbandCell>
+    </span>
   );
 }
 
