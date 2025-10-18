@@ -1,4 +1,3 @@
-import { CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Column,
   ColumnDef,
@@ -24,6 +23,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
+import { CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
@@ -43,9 +43,9 @@ import {
   PaginationFirst,
   PaginationItem,
   PaginationNext,
+  PaginationPageSize,
   PaginationPrevious,
 } from '@/components/base/ui/pagination';
-import { PaginationPageSize } from '@/components/base/ui/pagination';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
@@ -94,6 +94,8 @@ export type TableProps<TData> = {
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
+  rowSelection?: Record<string, boolean>;
+  onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
 } & (
   | {
       paginationHidden?: false;
@@ -476,6 +478,8 @@ function TranstackTable<T>({
   enableColumnOrdering = false,
   enableFullscreen = false,
   tableIndexResultPosition = 'top',
+  rowSelection,
+  onRowSelectionChange,
 }: TableProps<T>) {
   const { t } = useI18n();
 
@@ -515,6 +519,7 @@ function TranstackTable<T>({
       desc: serverSorting.order === SortBodyOrderEnum.Desc,
     })) as SortingState,
   );
+  const [internalRowSelection, setInternalRowSelection] = useState<Record<string, boolean>>(rowSelection ?? {});
 
   // Key Input Map
   const handleEscEventListener = () => {
@@ -537,6 +542,7 @@ function TranstackTable<T>({
     columnResizeDirection: 'ltr',
     data,
     enableColumnResizing: true,
+    enableRowSelection: true,
     getSortedRowModel: onServerSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -554,6 +560,7 @@ function TranstackTable<T>({
     onGroupingChange: setGrouping,
     onPaginationChange: paginationHidden ? undefined : onPaginationChange,
     onRowPinningChange: setRowPinning,
+    onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
     onSortingChange: setSorting,
     pageCount: pagination && !paginationHidden ? getPageCount(pagination, total) : undefined,
     state: {
@@ -564,6 +571,7 @@ function TranstackTable<T>({
       pagination: paginationHidden ? undefined : pagination,
       expanded,
       rowPinning,
+      rowSelection: onRowSelectionChange ? rowSelection : internalRowSelection,
       sorting,
     },
   });
@@ -699,6 +707,15 @@ function TranstackTable<T>({
       setExpanded({});
     }
   }, [pagination, paginationHidden]);
+
+  /**
+   * Sync internal row selection with prop when it changes
+   */
+  useEffect(() => {
+    if (rowSelection && !onRowSelectionChange) {
+      setInternalRowSelection(rowSelection);
+    }
+  }, [rowSelection, onRowSelectionChange]);
 
   return (
     <div

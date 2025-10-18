@@ -140,14 +140,12 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
   ] as TableColumnDef<VariantInterpretedCase, any>[]; // todo replace with correct type when api is updated
 }
 
-function getOtherCasesColumns(t: TFunction<string, undefined>, locusId: string) {
+function getOtherCasesColumns(t: TFunction<string, undefined>) {
   return [
     otherCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
         <CasePreviewCell
-          locusId={locusId}
-          seqId={info.row.original.seq_id}
           caseId={info.row.original.case_id}
           relationshipToProband={info.row.original.relationship_to_proband}
         />

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
 import { ApiError, VariantHeader } from '@/api/api';
@@ -18,6 +18,8 @@ import OverviewTab from './components/overview/overview-tab';
 import TranscriptsTab from './components/transcripts/transcripts-tab';
 import { VariantEntityTabs } from './types';
 
+const TAB_SEARCH_PARAM = 'tab';
+
 type VariantHeaderInput = {
   key: string;
   locusId: string;
@@ -30,9 +32,11 @@ async function fetchVariantHeader(input: VariantHeaderInput) {
 
 export default function App() {
   const { t } = useI18n();
-  const location = useLocation();
   const params = useParams<{ locusId: string }>();
-  const [activeTab, setActiveTab] = useState<VariantEntityTabs>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<VariantEntityTabs>(
+    (searchParams.get(TAB_SEARCH_PARAM) as VariantEntityTabs) ?? VariantEntityTabs.Overview,
+  );
 
   const { data, error, isLoading } = useSWR<VariantHeader, ApiError, VariantHeaderInput>(
     {
@@ -46,22 +50,20 @@ export default function App() {
     },
   );
 
+  /**
+   * Set active tab by searchParams (from urls)
+   */
   useEffect(() => {
-    // To handle initial load
-    if (location.hash) {
-      const tab = location.hash.replace('#', '') as VariantEntityTabs;
-      if (Object.values(VariantEntityTabs).includes(tab)) {
-        setActiveTab(tab);
-      }
-    } else {
-      setActiveTab(VariantEntityTabs.Overview);
-    }
-  }, [location]);
+    setActiveTab((searchParams.get(TAB_SEARCH_PARAM) as VariantEntityTabs) ?? VariantEntityTabs.Overview);
+  }, [searchParams]);
 
-  const handleOnTabChange = useCallback((value: VariantEntityTabs) => {
-    window.history.pushState({}, '', `#${value}`);
-    setActiveTab(value);
-  }, []);
+  const handleOnTabChange = useCallback(
+    (value: VariantEntityTabs) => {
+      setSearchParams({ tab: value });
+      setActiveTab(value);
+    },
+    [setSearchParams],
+  );
 
   if (!isLoading && error?.status === 404) {
     return (
@@ -84,7 +86,7 @@ export default function App() {
   }
   pageHeaderBadges.push({ children: t('variant_entity.header.germline') });
 
-  // To avoid hydration mismatch with hash in ssr
+  // To avoid hydration mismatch with search params in ssr
   if (!activeTab) {
     return null;
   }

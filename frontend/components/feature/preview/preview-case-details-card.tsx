@@ -52,9 +52,9 @@ function FamilyMemberCard({ member }: { member: CasePatientClinicalInformation }
 
         <div className="flex gap-3">
           <div className="flex flex-col gap-2">
-            <span className="text-muted-foreground">Sex</span>
-            <span className="text-muted-foreground">DOB</span>
-            <span className="text-muted-foreground">Ethnicity</span>
+            <span className="text-muted-foreground">{t('preview_sheet.case.details.sex')}</span>
+            <span className="text-muted-foreground">{t('preview_sheet.case.details.dob')}</span>
+            <span className="text-muted-foreground">{t('preview_sheet.case.details.ethnicity')}</span>
           </div>
           <div className="flex flex-col gap-2 grow">
             <Badge variant="secondary" className="self-start">
@@ -66,12 +66,12 @@ function FamilyMemberCard({ member }: { member: CasePatientClinicalInformation }
         </div>
         {isProband && (
           <div className="space-y-1">
-            <h4 className="font-semibold">Primary Condition</h4>
-            <p className="text-muted-foreground text-xs">No primary condition reported</p>
+            <h4 className="font-semibold">{t('preview_sheet.case.details.primary_condition')}</h4>
+            <p className="text-muted-foreground text-xs">{t('preview_sheet.case.details.no_primary_condition')}</p>
           </div>
         )}
         <div className="space-y-1">
-          <h4 className="font-semibold">Phenotypes (HPO)</h4>
+          <h4 className="font-semibold">{t('preview_sheet.case.details.phenotypes')}</h4>
           {member.observed_phenotypes ? (
             <ExpandableList
               className="space-y-1"
@@ -82,12 +82,12 @@ function FamilyMemberCard({ member }: { member: CasePatientClinicalInformation }
               visibleCount={PHENOTYPES_VISIBLE_COUNT}
             />
           ) : (
-            <p className="text-muted-foreground text-xs">No phenotype reported</p>
+            <p className="text-muted-foreground text-xs">{t('preview_sheet.case.details.no_phenotype')}</p>
           )}
         </div>
         {isProband && (
           <div className="space-y-1">
-            <h4 className="font-semibold">Non-observed Phenotypes (HPO)</h4>
+            <h4 className="font-semibold">{t('preview_sheet.case.details.non_observed_phenotypes')}</h4>
             {member.non_observed_phenotypes ? (
               <ExpandableList
                 items={member.non_observed_phenotypes ?? []}
@@ -103,7 +103,9 @@ function FamilyMemberCard({ member }: { member: CasePatientClinicalInformation }
                 visibleCount={PHENOTYPES_VISIBLE_COUNT}
               />
             ) : (
-              <p className="text-muted-foreground text-xs">No non-observed phenotype reported</p>
+              <p className="text-muted-foreground text-xs">
+                {t('preview_sheet.case.details.no_non_observed_phenotype')}
+              </p>
             )}
           </div>
         )}

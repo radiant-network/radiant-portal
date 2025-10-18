@@ -1002,7 +1002,57 @@
     "actions": {
       "download_report": "Download report",
       "open_igv": "Open IGV",
-      "interpret": "Interpret"
+      "interpret": "Interpret",
+      "interpretation": "Interpretation",
+      "view_all_variants": "View all variants",
+      "view_in_case": "View in case"
+    },
+    "variant_details": {
+      "title": "Variant Details",
+      "actions": {
+        "ucsc": "UCSC",
+        "litvar": "LitVar",
+        "ensembl": "Ensembl"
+      },
+      "sections": {
+        "gene": {
+          "title": "Gene",
+          "pli": "pLI",
+          "loeuf": "LOEUF",
+          "splice_ai": "SpliceAI",
+          "no_data": "No gene data reported"
+        },
+        "interpretations": {
+          "title": "Interpretations",
+          "my_network": "My Network",
+          "no_data": "No interpretation data reported"
+        },
+        "classification": {
+          "title": "Classification",
+          "exomiser": "Exomiser",
+          "no_data": "No classification data reported"
+        },
+        "frequencies": {
+          "title": "Frequencies",
+          "affected": "Affected",
+          "revel": "REVEL"
+        },
+        "functional_scores": {
+          "title": "Functional Scores",
+          "no_data": "No functional scores data reported"
+        },
+        "clinical_associations": {
+          "title": "Clinical Associations (OMIM)",
+          "no_data": "No clinical associations data reported"
+        },
+        "gene_card": {
+          "occurence": "Occurence",
+          "cdna_change": "cDNA change",
+          "transcript_id": "Transcript ID",
+          "exon": "Exon",
+          "dbsnp_id": "dbSNP ID"
+        }
+      }
     },
     "occurence_details": {
       "title": "Occurence Details",
@@ -1041,6 +1091,17 @@
       "title": "Case {{id}}",
       "actions": {
         "open_case": "Open Case"
+      },
+      "details": {
+        "sex": "Sex",
+        "dob": "DOB",
+        "ethnicity": "Ethnicity",
+        "primary_condition": "Primary Condition",
+        "no_primary_condition": "No primary condition reported",
+        "phenotypes": "Phenotypes (HPO)",
+        "no_phenotype": "No phenotype reported",
+        "non_observed_phenotypes": "Non-observed Phenotypes (HPO)",
+        "no_non_observed_phenotype": "No non-observed phenotype reported"
       }
     }
   },
@@ -1053,6 +1114,14 @@
       "title": "Predictions",
       "franklin": "Franklin",
       "exomiser": "Exomiser"
+    },
+    "zygosity": {
+      "title": "Zygosity",
+      "zygosity": "Zygosity",
+      "compound_het": "Compound Het.",
+      "potential_compound_het": "Potential Compound Het.",
+      "inheritance": "Inheritance",
+      "parental_origin": "Parental Origin"
     },
     "gene": {
       "title": "Gene",
