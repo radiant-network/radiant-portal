@@ -10,9 +10,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
+import AssayInformationsDialog from '@/components/feature/assays/assay-information-dialog';
 import { useI18n } from '@/components/hooks/i18n';
 import { CaseEntityTabs } from '@/types';
-import AssayInformationsDialog from '../../../../../components/feature/assays/assay-information-dialog';
 
 function ActionsMenuCell({ row }: CellContext<any, any>) {
   const { t } = useI18n();
