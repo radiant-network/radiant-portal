@@ -1,10 +1,11 @@
 import { PaginationState } from '@tanstack/table-core';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
 import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
+import { usePreviewCaseNavigation } from '@/components/feature/preview/use-preview-case-navigation';
 import { useI18n } from '@/components/hooks/i18n';
 import { variantsApi } from '@/utils/api';
 
@@ -95,88 +96,15 @@ function UninterpretedCasesTable() {
   );
 
   const casesData = useMemo(() => data?.list || [], [data?.list]);
-  const selectedCaseId = searchParams.get(SELECTED_CASE_PARAM);
-  const selectedCase = casesData.find(caseItem => caseItem.case_id.toString() === selectedCaseId);
 
-  const selectedCaseIndex = selectedCaseId
-    ? casesData.findIndex(caseItem => caseItem.case_id.toString() === selectedCaseId)
-    : -1;
-
-  const handleClosePreview = () => {
-    setSearchParams(prev => {
-      prev.delete(SELECTED_CASE_PARAM);
-      return prev;
+  const { selectedCase, hasPrevious, hasNext, handleClosePreview, handlePreviousCase, handleNextCase } =
+    usePreviewCaseNavigation({
+      casesData,
+      searchParams,
+      setSearchParams,
+      selectedCaseParamKey: SELECTED_CASE_PARAM,
+      setRowSelection,
     });
-  };
-
-  const handlePreviousCase = () => {
-    if (selectedCaseIndex > 0 && selectedCase) {
-      const currentCaseId = selectedCase.case_id;
-      // Find the first previous case with a different case_id
-      for (let i = selectedCaseIndex - 1; i >= 0; i--) {
-        if (casesData[i].case_id !== currentCaseId) {
-          setSearchParams(prev => {
-            prev.set(SELECTED_CASE_PARAM, casesData[i].case_id.toString());
-            return prev;
-          });
-          return;
-        }
-      }
-    }
-  };
-
-  const handleNextCase = () => {
-    if (selectedCaseIndex >= 0 && selectedCaseIndex < casesData.length - 1 && selectedCase) {
-      const currentCaseId = selectedCase.case_id;
-      // Find the first next case with a different case_id
-      for (let i = selectedCaseIndex + 1; i < casesData.length; i++) {
-        if (casesData[i].case_id !== currentCaseId) {
-          setSearchParams(prev => {
-            prev.set(SELECTED_CASE_PARAM, casesData[i].case_id.toString());
-            return prev;
-          });
-          return;
-        }
-      }
-    }
-  };
-
-  // Check if there's a previous case with a different case_id
-  const hasPrevious = useMemo(() => {
-    if (selectedCaseIndex <= 0 || !selectedCase) return false;
-    const currentCaseId = selectedCase.case_id;
-    for (let i = selectedCaseIndex - 1; i >= 0; i--) {
-      if (casesData[i].case_id !== currentCaseId) {
-        return true;
-      }
-    }
-    return false;
-  }, [selectedCaseIndex, selectedCase, casesData]);
-
-  // Check if there's a next case with a different case_id
-  const hasNext = useMemo(() => {
-    if (selectedCaseIndex < 0 || selectedCaseIndex >= casesData.length - 1 || !selectedCase) return false;
-    const currentCaseId = selectedCase.case_id;
-    for (let i = selectedCaseIndex + 1; i < casesData.length; i++) {
-      if (casesData[i].case_id !== currentCaseId) {
-        return true;
-      }
-    }
-    return false;
-  }, [selectedCaseIndex, selectedCase, casesData]);
-
-  useEffect(() => {
-    if (selectedCaseId && casesData.length > 0) {
-      const rowIndex = casesData.findIndex(caseItem => caseItem.case_id.toString() === selectedCaseId);
-      if (rowIndex !== -1) {
-        setRowSelection({ [rowIndex]: true });
-      } else {
-        setRowSelection({});
-      }
-    } else {
-      setRowSelection({});
-    }
-  }, [selectedCaseId, casesData]);
 
   return (
     <div className="space-y-6 mt-2">
