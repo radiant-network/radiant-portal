@@ -1,19 +1,24 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
+import type { Meta, StoryObj } from '@storybook/react';
+
 import AnalysisTypeCodeBadge, { AnalysisTypeCode } from '@/components/base/badges/analysis-type-code-badge';
-import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 
 const config: PortalConfig = {
   variant_entity: {
-    app_id: 'variant_entity',
+    app_id: ApplicationId.variant_entity,
   },
-  variant_exploration: {
-    app_id: 'variant_exploration_multi_select_filter',
+  snv_occurrence: {
+    app_id: ApplicationId.snv_occurrence,
+    aggregations: [] as any,
+  },
+  cnv_occurrence: {
+    app_id: ApplicationId.cnv_occurrence,
     aggregations: [] as any,
   },
   admin: {
     admin_code: 'admin',
-    app_id: 'admin',
+    app_id: ApplicationId.admin,
   },
   portal: {
     name: '',

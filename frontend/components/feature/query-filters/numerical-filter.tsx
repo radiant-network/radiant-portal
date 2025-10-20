@@ -88,7 +88,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
 import { useI18n } from '@/components/hooks/i18n';
-import { IFilterRangeConfig, useConfig } from '@/components/model/applications-config';
+import { ApplicationId, IFilterRangeConfig } from '@/components/model/applications-config';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 import { DEFAULT_EMPTY_QUERY, queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import {
@@ -100,6 +100,8 @@ import {
 } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
 
+import { useFilterConfig } from './filter-list';
+
 const API_DEFAULT_TYPE = 'integer';
 
 type OccurrenceStatisticsInput = {
@@ -107,8 +109,20 @@ type OccurrenceStatisticsInput = {
   statisticsBody: StatisticsBodyWithSqon;
 };
 
-const statisticsFetcher = (input: OccurrenceStatisticsInput): Promise<Statistics> =>
-  occurrencesApi.statisticsGermlineSNVOccurrences(input.seqId, input.statisticsBody).then(response => response.data);
+const statisticsFetcher = (appId: ApplicationId) => {
+  switch (appId) {
+    case ApplicationId.cnv_occurrence:
+      return (input: OccurrenceStatisticsInput): Promise<Statistics> =>
+        occurrencesApi
+          .statisticsGermlineCNVOccurrences(input.seqId, input.statisticsBody)
+          .then(response => response.data);
+    default:
+      return (input: OccurrenceStatisticsInput): Promise<Statistics> =>
+        occurrencesApi
+          .statisticsGermlineSNVOccurrences(input.seqId, input.statisticsBody)
+          .then(response => response.data);
+  }
+};
 
 function useStatisticsBuilder(field: string, appId: string, seqId: string, useEmptyQuery = false) {
   const data: OccurrenceStatisticsInput = {
@@ -126,7 +140,7 @@ function useStatisticsBuilder(field: string, appId: string, seqId: string, useEm
     };
   }
 
-  return useSWR<Statistics, any, OccurrenceStatisticsInput>(data, statisticsFetcher, {
+  return useSWR<Statistics, any, OccurrenceStatisticsInput>(data, statisticsFetcher(appId), {
     revalidateOnFocus: false,
   });
 }
@@ -243,9 +257,8 @@ interface IProps {
 // eslint-disable-next-line complexity
 export function NumericalFilter({ field }: IProps) {
   const { t } = useI18n();
-  const config = useConfig();
+  const { appId, aggregations } = useFilterConfig();
   const { seqId } = useContext(AggregateContext);
-  const appId = config.variant_exploration.app_id;
   const fieldKey = field.key;
   const RANGE_OPERATOR_LABELS: Record<
     RangeOperators,
@@ -296,7 +309,6 @@ export function NumericalFilter({ field }: IProps) {
 
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
 
-  const aggregations = config.variant_exploration.aggregations;
   const aggConfig = Object.values(aggregations)
     .flatMap(f => f.items)
     .find(agg => agg.key === fieldKey)?.defaults as IFilterRangeConfig;

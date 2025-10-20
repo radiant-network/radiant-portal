@@ -21,10 +21,10 @@ interface AccordionContainerProps extends FilterContainerProps {
 }
 
 export function AccordionContainer({ field, children }: AccordionContainerProps) {
-  const { t, sanitize } = useI18n();
+  const { t } = useI18n();
 
-  const label = t(`common.filters.labels.${sanitize(field.key)}`, { defaultValue: field.key });
-  const tooltipKey = `common.filters.labels.${sanitize(field.key)}_tooltip`;
+  const label = t(`common.filters.labels.${field.translation_key}`, { defaultValue: field.key });
+  const tooltipKey = `common.filters.labels.${field.translation_key}_tooltip`;
   const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
 
   function renderTrigger() {

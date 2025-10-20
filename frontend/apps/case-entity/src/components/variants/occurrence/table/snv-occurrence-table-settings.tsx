@@ -24,7 +24,7 @@ import OccurenceActionsMenu from './cells/occurence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
-function getVariantColumns(t: TFunction<string, undefined>) {
+function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
   return [
     // TODO: To be enabled when row selection function are implemented
     // {
@@ -84,7 +84,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
       id: 'variant_class',
       cell: info => (
         <TextTooltipCell tooltipText={info.getValue()}>
-          {t(`variant.classes.${info.getValue().toLowerCase()}`)}
+          {t(`variant.classes.${info.getValue()?.toLowerCase()}`)}
         </TextTooltipCell>
       ),
       header: t('variant.headers.variant_class'),
@@ -250,7 +250,7 @@ function getVariantColumns(t: TFunction<string, undefined>) {
   ] as TableColumnDef<GermlineSNVOccurrence, any>[];
 }
 
-const defaultSettings = createColumnSettings([
+const defaultSNVSettings = createColumnSettings([
   {
     id: 'row_expand',
     visible: true,
@@ -360,4 +360,4 @@ const defaultSettings = createColumnSettings([
   },
 ]);
 
-export { getVariantColumns, defaultSettings };
+export { getSNVOccurrenceColumns, defaultSNVSettings };
