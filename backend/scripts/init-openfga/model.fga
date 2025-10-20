@@ -12,6 +12,43 @@ model
       define parent: [application]
       define geneticist: [user]
       define requester: [user]
-      define assignee: geneticist or requester
 
-	  define post__cases_search: assignee
+      # Internal role to simplify permissions
+      define member: geneticist or requester
+
+      # ---------------------------- API Authorization ----------------------------
+
+      define assays_reader: member
+
+      define cases_reader: member
+      define cases_writer: geneticist
+
+      define genes_reader: member
+
+      define hpo_reader: member
+
+	  define igv_reader: member
+
+      define interpretations_reader: member
+      define interpretations_writer: geneticist
+
+	  define occurrences_reader: member
+	  define occurrences_writer: geneticist
+
+	  define mondo_reader: member
+
+	  define cnv_writer: geneticist
+
+	  define snv_reader: member
+	  define snv_writer: geneticist
+
+	  define sequencing_reader: member
+
+	  define users_reader: member
+	  define users_writer: geneticist
+
+	  define variants_reader: member
+	  define variants_writer: geneticist
+
+	  define documents_reader: member
+	  define documents_writer: geneticist

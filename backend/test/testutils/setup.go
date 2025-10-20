@@ -16,12 +16,14 @@ import (
 
 const (
 	testResources            = "../../test/data"
+	OpenFGAContainerName     = "openfga_radiant"
 	StarrocksContainerName   = "starrocks_radiant"
 	PostgresContainerName    = "postgres_radiant"
 	ObjectStoreContainerName = "minio_radiant"
 )
 
 var (
+	OpenFGAContainerSetup     *ContainerConf
 	PostgresContainerSetup    *ContainerConf
 	StarrocksContainerSetup   *ContainerConf
 	ObjectStoreContainerSetup *ContainerConf
@@ -29,9 +31,20 @@ var (
 )
 
 func StartAllContainers() {
+	StartOpenFGAContainer()
 	StartPostgresContainer()
 	StartStarrocksContainer()
 	StartObjectStoreContainer()
+}
+
+func StartOpenFGAContainer() {
+	if Network == nil {
+		Network = createNetwork()
+	}
+	if OpenFGAContainerSetup == nil {
+		OpenFGAContainerSetup = newContainerSetup(OpenFGAContainerName, startOpenFGAContainer)
+		OpenFGAContainerSetup.setupContainer()
+	}
 }
 
 func StartPostgresContainer() {
@@ -65,6 +78,9 @@ func StartObjectStoreContainer() {
 }
 
 func StopAllContainers() {
+	if OpenFGAContainerSetup != nil {
+		OpenFGAContainerSetup.stopContainer()
+	}
 	if PostgresContainerSetup != nil {
 		PostgresContainerSetup.stopContainer()
 	}
@@ -109,6 +125,39 @@ func deleteNetwork() {
 		log.Fatal("Failed to delete network: ", err)
 	}
 	Network = nil
+}
+
+func startOpenFGAContainer() (testcontainers.Container, error) {
+	ctx := context.Background()
+	networkName := Network.Name
+	aliases := []string{OpenFGAContainerName}
+
+	req := testcontainers.ContainerRequest{
+		Image:        "openfga/openfga",
+		Cmd:          []string{"run"},
+		ExposedPorts: []string{"8080/tcp", "8081/tcp"},
+		WaitingFor: wait.ForAll(
+			wait.ForListeningPort("8080/tcp"),
+			wait.ForListeningPort("8081/tcp"),
+			wait.ForLog("starting HTTP server on '0.0.0.0:8080'").WithPollInterval(1*time.Second),
+		),
+		Networks: []string{
+			networkName,
+		},
+		NetworkAliases: map[string][]string{
+			networkName: aliases,
+		},
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return container, nil
 }
 
 func startStarRocksContainer() (testcontainers.Container, error) {

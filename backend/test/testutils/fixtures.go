@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/radiant-network/radiant-api/internal/authorization"
 	"gorm.io/gorm"
 )
 
@@ -62,6 +63,28 @@ func ParallelTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFunc 
 
 	}
 	testFunc(t, starrocks, postgres)
+	//Drop database
+	starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
+}
+
+func ParallelTestWithOpenFGAAndPostgresAndStarrocks(t *testing.T, dbName string, testFunc func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB)) {
+	t.Parallel()
+	storeID, err := initOpenFGA()
+	if err != nil {
+		log.Fatal("Failed to init OpenFGA store")
+	}
+
+	starrocks, dbName, err := initDb(dbName)
+	if err != nil {
+		log.Fatal("Failed to init db connection:", err)
+
+	}
+	postgres, err := initPostgresDb()
+	if err != nil {
+		log.Fatal("Failed to init PostgreSQL db connection:", err)
+
+	}
+	testFunc(t, storeID, starrocks, postgres)
 	//Drop database
 	starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 }

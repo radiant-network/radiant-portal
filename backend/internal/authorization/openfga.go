@@ -11,10 +11,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	openfga "github.com/openfga/go-sdk"
 	. "github.com/openfga/go-sdk/client"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
+
+const AllowedContextKey = "allowed"
+const ProjectRelationType = "project"
 
 type OpenFGAModelConfiguration struct {
 	Endpoint             string
@@ -24,14 +28,19 @@ type OpenFGAModelConfiguration struct {
 
 type OpenFGAAuthorizer struct {
 	Client *OpenFgaClient
+	Auth   *utils.KeycloakAuth
 }
 
-func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
+func NewOpenFGAAuthorizer(auth *utils.KeycloakAuth) (gin.HandlerFunc, error) {
 	endpoint := os.Getenv("RADIANT_AUTHORIZATION_OPENFGA_ENDPOINT")
+	modelPath := os.Getenv("RADIANT_AUTHORIZATION_OPENFGA_MODEL_PATH")
 	storeId := os.Getenv("RADIANT_AUTHORIZATION_OPENFGA_STORE_ID")
 
 	if endpoint == "" {
 		return nil, fmt.Errorf("openfga: invalid endpoint: %s", endpoint)
+	}
+	if modelPath == "" && storeId == "" {
+		return nil, fmt.Errorf("openfga: either model path or store id must be specified")
 	}
 
 	var openfgaAuthModel *OpenFGAModelConfiguration
@@ -45,9 +54,9 @@ func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 		}
 	} else {
 		log.Print("openfga: no store id specified, initializing new store and model")
-		openfgaAuthModel, err = initStore(endpoint)
+		openfgaAuthModel, err = InitOpenFGAStore(endpoint, modelPath)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("openfga: error initializing store model: %v", err)
 		}
 	}
 
@@ -57,45 +66,45 @@ func NewOpenFGAAuthorizer() (gin.HandlerFunc, error) {
 		AuthorizationModelId: openfgaAuthModel.AuthorizationModelID,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("openfga: error initializing openfga client: %w", err)
 	}
 
 	o := OpenFGAAuthorizer{
 		Client: client,
+		Auth:   auth,
 	}
 
 	return o.Authorize, nil
 }
 
 func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
-	token := c.GetHeader("Authorization")
-	if token == "" {
+
+	user, err := o.Auth.RetrieveUserIdFromToken(c)
+	if err != nil || user == nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
 		return
 	}
 
-	parsedToken, err := parseJWT(token)
+	azp, err := o.Auth.RetrieveAzpFromToken(c)
+	if err != nil || azp == nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	res, err := o.Auth.RetrieveResourceAccessFromToken(c)
+	if err != nil || res == nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	contextualTuples := extractContextualTuples(*user, *azp, *res)
+	relation, err := extractRelation(c.Request, c.FullPath())
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
+		c.AbortWithStatusJSON(http.StatusForbidden, nil)
 		return
 	}
 
-	user, err := parsedToken.GetSubject()
-	if user == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
-		return
-	}
-
-	azp, ok := parsedToken["azp"].(string)
-	if !ok || azp == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
-		return
-	}
-
-	contextualTuples := extractContextualTuplesFromToken(user, azp, parsedToken)
-	relation := extractRelation(c.Request, c.FullPath())
-
-	allowed, err := o.listRelations(user, "project", relation, contextualTuples)
+	allowed, err := o.listRelations(*user, ProjectRelationType, relation, contextualTuples)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, nil)
 		return
@@ -105,6 +114,7 @@ func (o *OpenFGAAuthorizer) Authorize(c *gin.Context) {
 		return
 	}
 
+	c.Set(AllowedContextKey, allowed)
 	c.Next()
 }
 
@@ -132,26 +142,31 @@ func (o *OpenFGAAuthorizer) listRelations(user, relType, relation string, contex
 	}
 	data, err := o.Client.ListObjects(context.Background()).Body(body).Options(options).Execute()
 	if err != nil {
-		return nil, nil
+		return nil, fmt.Errorf("openfga: error listing objects: %w", err)
 	}
 
 	return data.Objects, nil
 }
 
-func extractRelation(r *http.Request, fullPath string) string {
-	method := strings.ToLower(r.Method)
-	path := strings.ReplaceAll(strings.ReplaceAll(fullPath, "/", "_"), ":", "")
-	return fmt.Sprintf("%s_%s", method, path)
+func extractRelation(r *http.Request, fullPath string) (string, error) {
+	role := map[string]string{
+		"GET":    "reader",
+		"POST":   "writer",
+		"PUT":    "writer",
+		"PATCH":  "writer",
+		"DELETE": "writer",
+	}[strings.ToUpper(r.Method)]
+
+	if role == "" {
+		return "", fmt.Errorf("openfga: unsupported method: %s", r.Method)
+	}
+
+	scope := strings.Split(strings.TrimPrefix(fullPath, "/"), "/")[0]
+	return fmt.Sprintf("%s_%s", scope, role), nil
 }
 
-func extractContextualTuplesFromToken(user, azp string, jwtClaims jwt.MapClaims) []ClientContextualTupleKey {
+func extractContextualTuples(user, azp string, resourceAccess map[string]ginkeycloak.ServiceRole) []ClientContextualTupleKey {
 	var contextualTuples []ClientContextualTupleKey
-
-	resourceAccess, ok := jwtClaims["resource_access"].(map[string]interface{})
-	if !ok {
-		log.Printf("openfga: missing resource_access claim")
-		return contextualTuples
-	}
 
 	for resource, access := range resourceAccess {
 		if resource == "account" {
@@ -159,30 +174,19 @@ func extractContextualTuplesFromToken(user, azp string, jwtClaims jwt.MapClaims)
 			continue
 		}
 
-		roles, ok := access.(map[string]interface{})
-		if !ok {
-			log.Printf("openfga: invalid resource %s", resource)
-			continue
-		}
-		roleList, ok := roles["roles"].([]interface{})
-		if !ok {
-			log.Printf("openfga: no roles for resource %s", resource)
-			continue
-		}
-
-		for _, role := range roleList {
+		for _, role := range access.Roles {
 			if azp == resource {
 				// Application (client) level role
 				contextualTuples = append(contextualTuples, ClientContextualTupleKey{
 					Object:   fmt.Sprintf("application:%s", resource),
-					Relation: role.(string),
+					Relation: role,
 					User:     fmt.Sprintf("user:%s", user),
 				})
 			} else {
 				// Project level role
 				contextualTuples = append(contextualTuples, ClientContextualTupleKey{
 					Object:   fmt.Sprintf("project:%s", resource),
-					Relation: role.(string),
+					Relation: role,
 					User:     fmt.Sprintf("user:%s", user),
 				})
 			}
@@ -192,8 +196,7 @@ func extractContextualTuplesFromToken(user, azp string, jwtClaims jwt.MapClaims)
 	return contextualTuples
 }
 
-func initStore(endpoint string) (*OpenFGAModelConfiguration, error) {
-	modelPath := os.Getenv("RADIANT_AUTHORIZATION_OPENFGA_MODEL_PATH")
+func InitOpenFGAStore(endpoint, modelPath string) (*OpenFGAModelConfiguration, error) {
 	modelBytes, err := os.ReadFile(modelPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read model file: %w", err)
@@ -238,11 +241,4 @@ func initStore(endpoint string) (*OpenFGAModelConfiguration, error) {
 		StoreID:              storeID,
 		AuthorizationModelID: data.AuthorizationModelId,
 	}, nil
-}
-
-func parseJWT(tokenString string) (jwt.MapClaims, error) {
-	token := strings.TrimPrefix(strings.TrimSpace(tokenString), "Bearer ")
-	claims := jwt.MapClaims{}
-	_, _, err := new(jwt.Parser).ParseUnverified(token, claims)
-	return claims, err
 }

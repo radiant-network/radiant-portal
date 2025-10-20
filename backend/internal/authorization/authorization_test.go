@@ -24,26 +24,26 @@ func extractMethodName(fn interface{}) string {
 func Test_InitAuthorizer_FromEnvVarConfiguration(t *testing.T) {
 	err := os.Setenv("RADIANT_AUTHORIZATION_PROVIDER", "keycloak")
 	assert.Nil(t, err)
-	auth, err := InitAuthorizer()
+	auth, err := InitAuthorizer(nil)
 	assert.Nil(t, err)
 	assert.Contains(t, extractMethodName(auth), "github.com/tbaehler/gin-keycloak/pkg/ginkeycloak")
 
 	err = os.Setenv("RADIANT_AUTHORIZATION_PROVIDER", "openfga")
 	assert.Nil(t, err)
-	auth, err = InitAuthorizer()
+	auth, err = InitAuthorizer(nil)
 	// We are only testing that NewOpenFGAAuthorizer was called, not that it succeeded
 	assert.Equal(t, "openfga: invalid endpoint: ", err.Error())
 
 	err = os.Setenv("RADIANT_AUTHORIZATION_PROVIDER", "unknown")
 	assert.Nil(t, err)
-	auth, err = InitAuthorizer()
+	auth, err = InitAuthorizer(nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, auth)
 	assert.Contains(t, extractMethodName(auth), "github.com/tbaehler/gin-keycloak/pkg/ginkeycloak")
 
 	err = os.Unsetenv("RADIANT_AUTHORIZATION_PROVIDER")
 	assert.Nil(t, err)
-	auth, err = InitAuthorizer()
+	auth, err = InitAuthorizer(nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, auth)
 	assert.Contains(t, extractMethodName(auth), "github.com/tbaehler/gin-keycloak/pkg/ginkeycloak")

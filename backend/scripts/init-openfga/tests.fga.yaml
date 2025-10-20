@@ -43,15 +43,13 @@ tests:
         assertions:
           geneticist: true
           requester: false
-          assignee: true
-          post__cases_search: true
+          member: true
 
       - user: user:charlie
         object: project:p1
         assertions:
           geneticist: false
           requester: true
-          post__cases_search: true
 
   - name: List users assigned as assignee to project proj1
     list_users:
@@ -59,7 +57,7 @@ tests:
         user_filter:
           - type: user
         assertions:
-          assignee:
+          member:
             users:
               - user:bob
               - user:charlie
