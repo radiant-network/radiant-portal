@@ -201,7 +201,7 @@ func OccurrencesGermlineCNVStatisticsHandler(repo repository.GermlineCNVOccurren
 	}
 }
 
-// OccurrencesGermlineCNVGenesOverlapHandler handles statistics of germline CNV occurrences
+// OccurrencesGermlineCNVGenesOverlapHandler handles list genes overlapping a CNV with a given ID
 // @Summary List genes overlapping a CNV with a given ID
 // @Id listGermlineCNVGenesOverlap
 // @Description List genes overlapping a CNV with a given ID
