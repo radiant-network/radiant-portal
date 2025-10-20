@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
@@ -96,86 +97,86 @@ func Test_SecureRoutes(t *testing.T) {
 }
 
 func Test_OpenFGA_Authorization(t *testing.T) {
-	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple", func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
-
-		token, err := testutils.GenerateJWT()
-
-		for key, value := range map[string]string{
-			"CORS_ALLOWED_ORIGINS":                   "*",
-			"RADIANT_AUTHORIZATION_PROVIDER":         "openfga",
-			"RADIANT_AUTHORIZATION_OPENFGA_ENDPOINT": openfga.Endpoint,
-			"RADIANT_AUTHORIZATION_OPENFGA_STORE_ID": openfga.StoreID,
-		} {
-			os.Setenv(key, value)
-			defer os.Unsetenv(key)
-		}
-
-		router := setupRouter(starrocks, postgres)
-		randomPort := 10000 + rand.Intn(50000)
-
-		srv := &http.Server{
-			Addr:    fmt.Sprintf(":%d", randomPort),
-			Handler: router,
-		}
-		go func() {
-			_ = srv.ListenAndServe()
-		}()
-		defer srv.Close()
-
-		time.Sleep(500 * time.Millisecond)
-
-		// Run your HTTP request tests
-		resp, err := http.Get(fmt.Sprintf("http://localhost:%d/status", randomPort))
-		assert.NoError(t, err)
-		assert.Equal(t, 200, resp.StatusCode)
-
-		// GET requests
-		// For some routes we expect 500 since we don't have all the mechanism in place
-		// to return real data, but at least we want to verify that authorization passed
-		for _, tc := range []struct {
-			route          string
-			expectedStatus int
-		}{
-			{"assays/1", 200},
-			{"cases/1", 200},
-			{"genes/autocomplete", 200},
-			{"hpo/autocomplete", 200},
-			{"igv/1", 500},
-			{"interpretations/pubmed/1", 500},
-			{"mondo/autocomplete", 200},
-			{"occurrences/germline/snv/1/1000/expanded", 200},
-			{"sequencing/1", 200},
-			{"users/sets/1", 500},
-			{"variants/germline/1000/header", 200},
-		} {
-			req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d/%s", randomPort, tc.route), nil)
+	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
+		func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
+			token, err := testutils.GenerateJWT()
 			assert.NoError(t, err)
 
-			req.Header.Set("Authorization", "Bearer "+token)
-			resp, err = http.DefaultClient.Do(req)
-			assert.Equal(t, tc.expectedStatus, resp.StatusCode)
-		}
+			// We can't use t.Setenv because we need OpenFGA context during the setup of the environment
+			for key, value := range map[string]string{
+				"CORS_ALLOWED_ORIGINS":                   "*",
+				"RADIANT_AUTHORIZATION_PROVIDER":         "openfga",
+				"RADIANT_AUTHORIZATION_OPENFGA_ENDPOINT": openfga.Endpoint,
+				"RADIANT_AUTHORIZATION_OPENFGA_STORE_ID": openfga.StoreID,
+			} {
+				os.Setenv(key, value)
+				defer os.Unsetenv(key)
+			}
 
-		// POST requests
-		// We expect 400 in these cases since we test only the authorization layer
-		for _, tc := range []struct {
-			route          string
-			expectedStatus int
-		}{
-			{"cases/search", 400},
-			{"cases/filters", 400},
-			{"interpretations/germline/1/1000/T001", 400},
-			{"occurrences/germline/snv/1/count", 400},
-			{"variants/germline/1000/cases/interpreted", 400},
-		} {
-			req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/%s", randomPort, tc.route), nil)
+			router := setupRouter(starrocks, postgres)
+			server := httptest.NewServer(router)
+			t.Cleanup(server.Close)
+
+			resp, err := http.Get(server.URL + "/status")
 			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-			req.Header.Set("Authorization", "Bearer "+token)
-			resp, err = http.DefaultClient.Do(req)
-			assert.Equal(t, tc.expectedStatus, resp.StatusCode)
-		}
-	})
+			client := server.Client()
+
+			getTests := []struct {
+				route string
+				code  int
+			}{
+				{"assays/1", 200},
+				{"cases/1", 200},
+				{"genes/autocomplete", 200},
+				{"hpo/autocomplete", 200},
+				{"igv/1", 500},
+				{"interpretations/pubmed/1", 500},
+				{"mondo/autocomplete", 200},
+				{"occurrences/germline/snv/1/1000/expanded", 200},
+				{"sequencing/1", 200},
+				{"users/sets/1", 500},
+				{"variants/germline/1000/header", 200},
+			}
+
+			for _, tc := range getTests {
+				t.Run("GET_"+tc.route, func(t *testing.T) {
+					req, err := http.NewRequest(http.MethodGet, server.URL+"/"+tc.route, nil)
+					assert.NoError(t, err)
+					req.Header.Set("Authorization", "Bearer "+token)
+
+					res, err := client.Do(req)
+					assert.NoError(t, err)
+					defer res.Body.Close()
+					assert.Equal(t, tc.code, res.StatusCode)
+				})
+			}
+
+			postTests := []struct {
+				route string
+				code  int
+			}{
+				{"cases/search", 400},
+				{"cases/filters", 400},
+				{"interpretations/germline/1/1000/T001", 400},
+				{"occurrences/germline/snv/1/count", 400},
+				{"variants/germline/1000/cases/interpreted", 400},
+			}
+
+			for _, tc := range postTests {
+				t.Run("POST_"+tc.route, func(t *testing.T) {
+					req, err := http.NewRequest(http.MethodPost, server.URL+"/"+tc.route, nil)
+					assert.NoError(t, err)
+					req.Header.Set("Authorization", "Bearer "+token)
+
+					res, err := client.Do(req)
+					assert.NoError(t, err)
+					defer res.Body.Close()
+					assert.Equal(t, tc.code, res.StatusCode)
+				})
+			}
+		})
 }
 
 func TestMain(m *testing.M) {
