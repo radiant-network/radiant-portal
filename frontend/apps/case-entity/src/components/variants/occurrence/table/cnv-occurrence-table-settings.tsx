@@ -142,7 +142,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
       ),
       size: 124,
       minSize: 40,
-      enableSorting: false,
+      enableSorting: true,
     }),
     // GT
     columnHelper.accessor(row => row.calls, {
