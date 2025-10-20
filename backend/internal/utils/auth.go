@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,6 +13,8 @@ import (
 
 type Auth interface {
 	RetrieveUserIdFromToken(c *gin.Context) (*string, error)
+	RetrieveAzpFromToken(c *gin.Context) (*string, error)
+	RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error)
 }
 
 type KeycloakAuth struct{}
@@ -20,13 +23,19 @@ func NewKeycloakAuth() *KeycloakAuth {
 	return &KeycloakAuth{}
 }
 
-func (auth KeycloakAuth) RetrieveUserIdFromToken(c *gin.Context) (*string, error) {
-	if ginToken, exist := c.Get("token"); exist {
-		sub := ginToken.(ginkeycloak.KeyCloakToken).Sub
-		return &sub, nil
+// getOrParseToken retrieves the KeyCloakToken from the context or decodes it from the Authorization header.
+func getOrParseToken(c *gin.Context) (*ginkeycloak.KeyCloakToken, error) {
+	if t, exists := c.Get("token"); exists {
+		if keycloakToken, ok := t.(ginkeycloak.KeyCloakToken); ok {
+			return &keycloakToken, nil
+		}
+		return nil, errors.New("context token type assertion failed")
 	}
+	return parseJWTFromHeader(c)
+}
 
-	token, err := retrieveTokenFromJWT(c)
+func (auth KeycloakAuth) RetrieveUserIdFromToken(c *gin.Context) (*string, error) {
+	token, err := getOrParseToken(c)
 	if err != nil {
 		return nil, err
 	}
@@ -34,12 +43,7 @@ func (auth KeycloakAuth) RetrieveUserIdFromToken(c *gin.Context) (*string, error
 }
 
 func (auth KeycloakAuth) RetrieveAzpFromToken(c *gin.Context) (*string, error) {
-	if ginToken, exist := c.Get("token"); exist {
-		sub := ginToken.(ginkeycloak.KeyCloakToken).Azp
-		return &sub, nil
-	}
-
-	token, err := retrieveTokenFromJWT(c)
+	token, err := getOrParseToken(c)
 	if err != nil {
 		return nil, err
 	}
@@ -47,19 +51,14 @@ func (auth KeycloakAuth) RetrieveAzpFromToken(c *gin.Context) (*string, error) {
 }
 
 func (auth KeycloakAuth) RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error) {
-	if ginToken, exist := c.Get("token"); exist {
-		sub := ginToken.(ginkeycloak.KeyCloakToken).ResourceAccess
-		return &sub, nil
-	}
-
-	token, err := retrieveTokenFromJWT(c)
+	token, err := getOrParseToken(c)
 	if err != nil {
 		return nil, err
 	}
 	return &token.ResourceAccess, nil
 }
 
-func retrieveTokenFromJWT(c *gin.Context) (*ginkeycloak.KeyCloakToken, error) {
+func parseJWTFromHeader(c *gin.Context) (*ginkeycloak.KeyCloakToken, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
 		return nil, fmt.Errorf("authorization header missing")
