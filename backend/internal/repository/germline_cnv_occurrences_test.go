@@ -257,3 +257,47 @@ func Test_GermlineCNV_GetStatisticsOccurrences_Pe(t *testing.T) {
 		assert.EqualValues(t, types.IntegerType, statistics.Type)
 	})
 }
+
+func Test_GermlineCNV_GetGenesOverlap(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+		overlaps, err := repo.GetGenesOverlap(1, 1)
+		if assert.NoError(t, err) {
+			if assert.Len(t, overlaps, 3) {
+				fullGeneOverlap := overlaps[0]
+				assert.Equal(t, "TSPAN6", fullGeneOverlap.Symbol)
+				assert.EqualValues(t, 200, fullGeneOverlap.GeneLength)
+				assert.EqualValues(t, 200, fullGeneOverlap.NbOverlapBases)
+				assert.EqualValues(t, 40, fullGeneOverlap.OverlappingCNVPercent)
+				assert.EqualValues(t, 100, fullGeneOverlap.OverlappingGenePercent)
+				assert.EqualValues(t, "full_gene", fullGeneOverlap.OverlapType)
+				assert.EqualValues(t, 1, fullGeneOverlap.NbExons)
+				assert.EqualValues(t, "ENSG00000000003", fullGeneOverlap.GeneId)
+				assert.EqualValues(t, types.JsonArray[string]{"p1.1"}, fullGeneOverlap.Cytoband)
+
+				partialGeneOverlap := overlaps[1]
+				assert.Equal(t, "DPM1", partialGeneOverlap.Symbol)
+				assert.EqualValues(t, 500, partialGeneOverlap.GeneLength)
+				assert.EqualValues(t, 250, partialGeneOverlap.NbOverlapBases)
+				assert.EqualValues(t, 50, partialGeneOverlap.OverlappingCNVPercent)
+				assert.EqualValues(t, 50, partialGeneOverlap.OverlappingGenePercent)
+				assert.EqualValues(t, "partial", partialGeneOverlap.OverlapType)
+				assert.EqualValues(t, 0, partialGeneOverlap.NbExons)
+				assert.EqualValues(t, "ENSG00000000419", partialGeneOverlap.GeneId)
+				assert.EqualValues(t, types.JsonArray[string]{"p1.2"}, partialGeneOverlap.Cytoband)
+
+				fullCnvOverlap := overlaps[2]
+				assert.Equal(t, "TNMD", fullCnvOverlap.Symbol)
+				assert.EqualValues(t, 10000, fullCnvOverlap.GeneLength)
+				assert.EqualValues(t, 500, fullCnvOverlap.NbOverlapBases)
+				assert.EqualValues(t, 100, fullCnvOverlap.OverlappingCNVPercent)
+				assert.EqualValues(t, 5, fullCnvOverlap.OverlappingGenePercent)
+				assert.EqualValues(t, "full_cnv", fullCnvOverlap.OverlapType)
+				assert.EqualValues(t, 3, fullCnvOverlap.NbExons)
+				assert.EqualValues(t, "ENSG00000000005", fullCnvOverlap.GeneId)
+				assert.ElementsMatch(t, types.JsonArray[string]{"p1.1", "p1.2"}, fullCnvOverlap.Cytoband)
+
+			}
+		}
+	})
+}

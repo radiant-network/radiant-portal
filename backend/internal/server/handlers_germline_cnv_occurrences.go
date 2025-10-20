@@ -200,3 +200,39 @@ func OccurrencesGermlineCNVStatisticsHandler(repo repository.GermlineCNVOccurren
 		c.JSON(http.StatusOK, statistics)
 	}
 }
+
+// OccurrencesGermlineCNVGenesOverlapHandler handles statistics of germline CNV occurrences
+// @Summary List genes overlapping a CNV with a given ID
+// @Id listGermlineCNVGenesOverlap
+// @Description List genes overlapping a CNV with a given ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param seq_id path string true "Sequence ID"
+// @Param cnv_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {array} types.CNVGeneOverlap
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /occurrences/germline/cnv/{seq_id}/{cnv_id}/genes_overlap [get]
+func OccurrencesGermlineCNVGenesOverlapHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
+		if errSeq != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		cnvId, errLocus := strconv.Atoi(c.Param("cnv_id"))
+		if errLocus != nil {
+			HandleNotFoundError(c, "cnv_id")
+			return
+		}
+
+		genesOverlap, err := repo.GetGenesOverlap(seqId, cnvId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, genesOverlap)
+	}
+}

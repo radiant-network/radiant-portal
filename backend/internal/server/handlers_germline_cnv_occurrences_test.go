@@ -63,6 +63,22 @@ func (m *MockCNVRepository) CountOccurrences(int, types.CountQuery) (int64, erro
 	return 15, nil
 }
 
+func (m *MockCNVRepository) GetGenesOverlap(seqId int, cnvId int) ([]types.CNVGeneOverlap, error) {
+	return []types.CNVGeneOverlap{
+		{
+			Symbol:                 "GENE1",
+			GeneId:                 "ENSG000001",
+			GeneLength:             100,
+			NbOverlapBases:         10,
+			Cytoband:               []string{"p1.1", "p1.2"},
+			NbExons:                1,
+			OverlappingGenePercent: 10,
+			OverlappingCNVPercent:  5,
+			OverlapType:            "partial",
+		},
+	}, nil
+}
+
 func Test_CNVOccurrencesListHandler(t *testing.T) {
 	repo := &MockCNVRepository{}
 	router := gin.Default()
@@ -157,6 +173,32 @@ func Test_CNVOccurrencesStatisticsHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	expected := `{"min": 0, "max": 100, "type": "integer"}`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_CNVOccurrencesGenesOverlapHandler(t *testing.T) {
+	repo := &MockCNVRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/germline/cnv/:seq_id/:cnv_id/genes_overlap", OccurrencesGermlineCNVGenesOverlapHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/germline/cnv/1/1/genes_overlap", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `[
+		{
+			"symbol": "GENE1",
+			"gene_id": "ENSG000001",
+			"gene_length": 100,	
+			"nb_overlap_bases": 10,
+			"cytoband": ["p1.1", "p1.2"],
+			"nb_exons": 1,
+			"overlapping_gene_percent": 10,
+			"overlapping_cnv_percent": 5,
+			"overlap_type": "partial"
+		}
+	]`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }
