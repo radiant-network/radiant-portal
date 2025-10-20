@@ -135,6 +135,16 @@ components:
           type: number
         symbol:
           type: string
+      required:
+      - cytoband
+      - gene_id
+      - gene_length
+      - nb_exons
+      - nb_overlap_bases
+      - overlap_type
+      - overlapping_cnv_percent
+      - overlapping_gene_percent
+      - symbol
       type: object
     CaseAssay:
       description: Assay to display in a Case

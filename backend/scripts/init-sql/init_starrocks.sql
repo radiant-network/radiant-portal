@@ -496,6 +496,64 @@ INSERT INTO test_db.ensembl_gene(gene_id, name, alias) VALUES
                                                        ('ENSG00000001167', 'NFYA', ['CBF-B','HAP2','NF-YA']),
                                                        ('ENSG00000143420', 'ENSA', ['ARPP-19E','MGC4319','MGC78563','MGC8394']);
 
+CREATE TABLE IF NOT EXISTS `ensembl_exon_by_gene` (
+                                        `gene_id` varchar(128) NULL COMMENT "",
+                                        `exon_id` varchar(128) NULL COMMENT "",
+                                        `chromosome` varchar(10) NULL COMMENT "",
+                                        `start` bigint(20) NULL COMMENT "",
+                                        `end` bigint(20) NULL COMMENT "",
+                                        `transcript_ids` array<varchar(128)> NULL COMMENT "",
+                                        `version` tinyint(4) NULL COMMENT "",
+                                        `type` varchar(128) NULL COMMENT "",
+                                        `strand` char(1) NULL COMMENT "",
+                                        `phase` tinyint(4) NULL COMMENT "",
+                                        `name` varchar(128) NULL COMMENT "",
+                                        `alias` array<varchar(128)> NULL COMMENT "",
+                                        `constitutive` varchar(128) NULL COMMENT "",
+                                        `description` varchar(500) NULL COMMENT "",
+                                        `ensembl_end_phase` varchar(10) NULL COMMENT "",
+                                        `ensembl_phase` varchar(10) NULL COMMENT "",
+                                        `external_name` varchar(128) NULL COMMENT "",
+                                        `logic_name` varchar(500) NULL COMMENT "",
+                                        `length` bigint(20) NULL COMMENT ""
+) ENGINE=OLAP
+DUPLICATE KEY(`gene_id`, `exon_id`, `chromosome`);
+
+
+INSERT INTO test_db.ensembl_exon_by_gene (gene_id, exon_id, chromosome, start, end) VALUES
+      ('ENSG00000000003', 'ENSE00000000001', '1', 1000, 1100),
+      ('ENSG00000000003', 'ENSE00000000002', '1', 1200, 1300),
+      ('ENSG00000000005', 'ENSE00000000003', '2', 2000, 2100),
+      ('ENSG00000000419', 'ENSE00000000004', '3', 3000, 3100),
+      ('ENSG00000000457', 'ENSE00000000005', '4', 4000, 4100),
+      ('ENSG00000000460', 'ENSE00000000006', '5', 5000, 5100),
+      ('ENSG00000000938', 'ENSE00000000007', '6', 6000, 6100),
+      ('ENSG00000000971', 'ENSE00000000008', '7', 7000, 7100),
+      ('ENSG00000001036', 'ENSE00000000009', '8', 8000, 8100),
+      ('ENSG00000001084', 'ENSE00000000010', '9', 9000, 9100);
+
+
+CREATE TABLE IF NOT EXISTS `cytoband` (
+                            `chromosome` char(2) NOT NULL COMMENT "",
+                            `cytoband` varchar(20) NOT NULL COMMENT "",
+                            `start` bigint(20) NOT NULL COMMENT "",
+                            `end` bigint(20) NOT NULL COMMENT "",
+                            `gie_stain` varchar(20) NULL COMMENT ""
+) ENGINE=OLAP
+DUPLICATE KEY(`chromosome`, `cytoband`);
+
+INSERT INTO test_db.cytoband (chromosome, cytoband, start, end, gie_stain) VALUES
+('1', 'p36.33', 0, 2300000, 'gneg'),
+('1', 'p36.32', 2300000, 5300000, 'gpos25'),
+('1', 'p36.31', 5300000, 7100000, 'gneg'),
+('1', 'p36.23', 7100000, 9200000, 'gpos50'),
+('1', 'p36.22', 9200000, 12600000, 'gneg'),
+('1', 'p36.21', 12600000, 16100000, 'gpos75'),
+('1', 'p36.13', 16100000, 20300000, 'gneg'),
+('1', 'p36.12', 20300000, 23900000, 'gpos100'),
+('1', 'p36.11', 23900000, 28000000, 'gneg'),
+('1', 'p35.3', 28000000, 30200000, 'gpos75');
+
 CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
 		PROPERTIES
 		(

@@ -317,55 +317,55 @@ export interface CNVGeneOverlap {
      * @type {Array<string>}
      * @memberof CNVGeneOverlap
      */
-    'cytoband'?: Array<string>;
+    'cytoband': Array<string>;
     /**
      * 
      * @type {string}
      * @memberof CNVGeneOverlap
      */
-    'gene_id'?: string;
+    'gene_id': string;
     /**
      * 
      * @type {number}
      * @memberof CNVGeneOverlap
      */
-    'gene_length'?: number;
+    'gene_length': number;
     /**
      * 
      * @type {number}
      * @memberof CNVGeneOverlap
      */
-    'nb_exons'?: number;
+    'nb_exons': number;
     /**
      * 
      * @type {number}
      * @memberof CNVGeneOverlap
      */
-    'nb_overlap_bases'?: number;
+    'nb_overlap_bases': number;
     /**
      * 
      * @type {string}
      * @memberof CNVGeneOverlap
      */
-    'overlap_type'?: string;
+    'overlap_type': string;
     /**
      * 
      * @type {number}
      * @memberof CNVGeneOverlap
      */
-    'overlapping_cnv_percent'?: number;
+    'overlapping_cnv_percent': number;
     /**
      * 
      * @type {number}
      * @memberof CNVGeneOverlap
      */
-    'overlapping_gene_percent'?: number;
+    'overlapping_gene_percent': number;
     /**
      * 
      * @type {string}
      * @memberof CNVGeneOverlap
      */
-    'symbol'?: string;
+    'symbol': string;
 }
 /**
  * Assay to display in a Case
