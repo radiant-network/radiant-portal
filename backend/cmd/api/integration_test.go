@@ -11,6 +11,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/authorization"
 	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/radiant-network/radiant-api/test/testutils/jwt"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
@@ -99,7 +100,7 @@ func Test_SecureRoutes(t *testing.T) {
 func Test_OpenFGA_Authorization(t *testing.T) {
 	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
 		func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
-			token, err := testutils.GenerateJWT()
+			token, err := jwt.GenerateMockJWT()
 			assert.NoError(t, err)
 
 			// We can't use t.Setenv because we need OpenFGA context during the setup of the environment

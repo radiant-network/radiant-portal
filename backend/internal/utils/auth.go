@@ -23,7 +23,6 @@ func NewKeycloakAuth() *KeycloakAuth {
 	return &KeycloakAuth{}
 }
 
-// getOrParseToken retrieves the KeyCloakToken from the context or decodes it from the Authorization header.
 func getOrParseToken(c *gin.Context) (*ginkeycloak.KeyCloakToken, error) {
 	if t, exists := c.Get("token"); exists {
 		if keycloakToken, ok := t.(ginkeycloak.KeyCloakToken); ok {
