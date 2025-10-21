@@ -207,8 +207,8 @@ func OccurrencesGermlineCNVStatisticsHandler(repo repository.GermlineCNVOccurren
 // @Description List genes overlapping a CNV with a given ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param seq_id path string true "Sequence ID"
-// @Param cnv_id path string true "Locus ID"
+// @Param seq_id path int true "Sequence ID"
+// @Param cnv_id path int true "Locus ID"
 // @Produce json
 // @Success 200 {array} types.CNVGeneOverlap
 // @Failure 404 {object} types.ApiError

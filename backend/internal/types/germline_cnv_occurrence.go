@@ -3,15 +3,15 @@ package types
 // GermlineCNVOccurrence represents a germline CNV occurrence
 // @Description GermlineCNVOccurrence represents a germline CNV occurrence
 type GermlineCNVOccurrence struct {
-	SeqID      int               `json:"seq_id"`
-	CnvID      int               `json:"cnv_id"`
+	SeqID      int               `json:"seq_id" validate:"required"`
+	CnvID      int               `json:"cnv_id" validate:"required"`
 	Aliquot    string            `json:"aliquot,omitempty"`
-	Chromosome string            `json:"chromosome"`
-	Start      int               `json:"start"`
-	End        int               `json:"end"`
-	Type       string            `json:"type"`
-	Length     int               `json:"length"`
-	Name       string            `json:"name"`
+	Chromosome string            `json:"chromosome" validate:"required"`
+	Start      int               `json:"start" validate:"required"`
+	End        int               `json:"end" validate:"required"`
+	Type       string            `json:"type" validate:"required"`
+	Length     int               `json:"length" validate:"required"`
+	Name       string            `json:"name" validate:"required"`
 	Quality    float32           `json:"quality,omitempty"`
 	Calls      JsonArray[int]    `json:"calls,omitempty"`
 	Cytoband   JsonArray[string] `json:"cytoband,omitempty"`
