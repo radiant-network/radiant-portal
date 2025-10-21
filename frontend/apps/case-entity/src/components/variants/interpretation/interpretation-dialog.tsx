@@ -18,11 +18,11 @@ import {
 import { useI18n } from '@/components/hooks/i18n';
 
 import InterpretationVariantHeader from './header';
-import { useInterpretationHelper, useOccurenceExpandHelper } from './hook';
+import { useInterpretationHelper, useOccurrenceExpandHelper } from './hook';
 import InterpretationFormGermline from './interpretation-form-germline';
 import InterpretationFormSomatic from './interpretation-form-somatic';
 import InterpretationLastUpdatedBanner from './last-updated-banner';
-import OccurrenceDetails from './occurence-details';
+import OccurrenceDetails from './occurrence-details';
 import InterpretationTranscript from './transcript';
 import { Interpretation, InterpretationFormRef } from './types';
 
@@ -46,7 +46,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
     occurrence,
     isSomatic,
   );
-  const { fetch: fetchOccurrenceExpandHelper } = useOccurenceExpandHelper(occurrence);
+  const { fetch: fetchOccurrenceExpandHelper } = useOccurrenceExpandHelper(occurrence);
 
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
   const occurrenceUniqueKey = `occurrence-${occurrence.seq_id}-${occurrence.locus_id}`;

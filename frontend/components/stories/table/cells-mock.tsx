@@ -5,7 +5,7 @@ import ClingenCell from '@/apps/case-entity/src/components/variants/occurrence/t
 import CNVNameCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/cnv-name-cell';
 import HgvsgCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/hgvsg-cell';
 import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/interpretation-cell';
-import OccurenceActionsMenu from '@/apps/case-entity/src/components/variants/occurrence/table/cells/occurence-actions-cell';
+import OccurrenceActionsMenu from '@/apps/case-entity/src/components/variants/occurrence/table/cells/occurrence-actions-cell';
 import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
@@ -850,9 +850,9 @@ export const applicationFirstSetCellColumns = [
     enablePinning: false,
   },
   {
-    id: 'occurence-actions-menu',
-    cell: OccurenceActionsMenu,
-    header: 'OccurenceActionsMenu (Case-Entity#variant)',
+    id: 'occurrence-actions-menu',
+    cell: OccurrenceActionsMenu,
+    header: 'OccurrenceActionsMenu (Case-Entity#variant)',
     size: 64,
     maxSize: 64,
     enableResizing: false,

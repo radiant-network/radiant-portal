@@ -348,7 +348,7 @@
       "es": "Spanish"
     },
     "filters": {
-     "labels": {
+      "labels": {
         "[fieldKey]": "Field: {{fieldKey}}",
         "actual_interval": "Actual interval",
         "ad_alt": "ALT Allele Depth",
@@ -628,8 +628,8 @@
       "gene_divider": "Gene Panels",
       "pathogenicity_exomiser_divider": "Exomiser",
       "pathogenicity_predictions_divider": "Predictions",
-      "occurence_metrics_divider": "Metrics",
-      "occurence_parental_divider": "Parental Analysis",
+      "occurrence_metrics_divider": "Metrics",
+      "occurrence_parental_divider": "Parental Analysis",
       "frequency_divider_my_organization": "My Organization",
       "frequency_divider_pulic_cohorts": "Public Cohorts",
       "zygosity_divider_parental_analysis": "Parental Analysis"
@@ -1407,7 +1407,7 @@
       "contact": "Contact"
     }
   },
-  "occurence": {
+  "occurrence": {
     "canonical": "Canonical",
     "mane_select": "Mane Select",
     "mane_plus": "Mane Plus"

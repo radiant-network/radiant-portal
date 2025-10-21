@@ -1,9 +1,9 @@
 import { HttpResponse } from 'msw';
 
-export const occurenceApi = '/api/occurrences/germline/snv/1/aggregate';
+export const occurrenceApi = '/api/occurrences/germline/snv/1/aggregate';
 export const statisticApi = '/api/occurrences/germline/snv/1/statistics';
 
-export function httpOccurenceApiResponse() {
+export function httpOccurrenceApiResponse() {
   return HttpResponse.json([
     {
       key: 'lorem_ipsum',

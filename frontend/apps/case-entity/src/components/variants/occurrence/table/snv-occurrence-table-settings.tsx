@@ -20,7 +20,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 
 import HgvsgCell from './cells/hgvsg-cell';
 import InterpretationCell from './cells/interpretation-cell';
-import OccurenceActionsMenu from './cells/occurence-actions-cell';
+import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
@@ -242,7 +242,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Actions Buttons
     {
       id: 'actions',
-      cell: OccurenceActionsMenu,
+      cell: OccurrenceActionsMenu,
       size: 74,
       enableResizing: false,
       enablePinning: true,

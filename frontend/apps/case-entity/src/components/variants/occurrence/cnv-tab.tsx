@@ -21,7 +21,7 @@ import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/quer
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { occurrencesApi } from '@/utils/api';
 
-import { OccurrenceCountInput, useCNVOccurencesCountHelper, useCNVOccurencesListHelper } from '../hook';
+import { OccurrenceCountInput, useCNVOccurrencesCountHelper, useCNVOccurrencesListHelper } from '../hook';
 
 import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/cnv-occurrence-table-settings';
 
@@ -66,7 +66,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   const aggregations = config.cnv_occurrence.aggregations;
 
   // Variant list request
-  const { fetch: fetchOccurrencesListHelper } = useCNVOccurencesListHelper({
+  const { fetch: fetchOccurrencesListHelper } = useCNVOccurrencesListHelper({
     seqId,
     listBody: {
       limit: pagination.pageSize,
@@ -76,18 +76,18 @@ function CNVTab({ seqId }: CNVTabProps) {
     },
   });
 
-  const { fetch: fetchOccurrencesCountHelper } = useCNVOccurencesCountHelper({
+  const { fetch: fetchOccurrencesCountHelper } = useCNVOccurrencesCountHelper({
     seqId,
     countBody: { sqon: activeSqon },
   });
 
-  const fetchOccurrencesList = useSWR<GermlineCNVOccurrence[]>('fetch-occurences-list', fetchOccurrencesListHelper, {
+  const fetchOccurrencesList = useSWR<GermlineCNVOccurrence[]>('fetch-occurrences-list', fetchOccurrencesListHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,
   });
 
-  const fetchOccurrencesCount = useSWR<Count>('fetch-occurences-count', fetchOccurrencesCountHelper, {
+  const fetchOccurrencesCount = useSWR<Count>('fetch-occurrences-count', fetchOccurrencesCountHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,

@@ -13,7 +13,7 @@ export type OccurrenceCountInput = {
   countBody: CountBodyWithSqon;
 };
 
-export function useSNVOccurencesListHelper(input: OccurrencesListInput) {
+export function useSNVOccurrencesListHelper(input: OccurrencesListInput) {
   const fetch = useCallback(
     async () => occurrencesApi.listGermlineSNVOccurrences(input.seqId, input.listBody).then(response => response.data),
     [input],
@@ -24,7 +24,7 @@ export function useSNVOccurencesListHelper(input: OccurrencesListInput) {
   };
 }
 
-export function useSNVOccurencesCountHelper(input: OccurrenceCountInput) {
+export function useSNVOccurrencesCountHelper(input: OccurrenceCountInput) {
   const fetch = useCallback(
     async () =>
       occurrencesApi.countGermlineSNVOccurrences(input.seqId, input.countBody).then(response => response.data),
@@ -36,7 +36,7 @@ export function useSNVOccurencesCountHelper(input: OccurrenceCountInput) {
   };
 }
 
-export function useCNVOccurencesListHelper(input: OccurrencesListInput) {
+export function useCNVOccurrencesListHelper(input: OccurrencesListInput) {
   const fetch = useCallback(
     async () => occurrencesApi.listGermlineCNVOccurrences(input.seqId, input.listBody).then(response => response.data),
     [input],
@@ -47,7 +47,7 @@ export function useCNVOccurencesListHelper(input: OccurrencesListInput) {
   };
 }
 
-export function useCNVOccurencesCountHelper(input: OccurrenceCountInput) {
+export function useCNVOccurrencesCountHelper(input: OccurrenceCountInput) {
   const fetch = useCallback(
     async () =>
       occurrencesApi.countGermlineCNVOccurrences(input.seqId, input.countBody).then(response => response.data),

@@ -21,7 +21,7 @@ import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/quer
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { occurrencesApi } from '@/utils/api';
 
-import { OccurrenceCountInput, useSNVOccurencesCountHelper, useSNVOccurencesListHelper } from '../hook';
+import { OccurrenceCountInput, useSNVOccurrencesCountHelper, useSNVOccurrencesListHelper } from '../hook';
 
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
 
@@ -74,7 +74,7 @@ function SNVTab({ seqId }: SNVTabProps) {
   const aggregations = config.snv_occurrence.aggregations;
 
   // Variant list request
-  const { fetch: fetchOccurrencesListHelper } = useSNVOccurencesListHelper({
+  const { fetch: fetchOccurrencesListHelper } = useSNVOccurrencesListHelper({
     seqId,
     listBody: {
       additional_fields: [
@@ -98,18 +98,18 @@ function SNVTab({ seqId }: SNVTabProps) {
     },
   });
 
-  const { fetch: fetchOccurrencesCountHelper } = useSNVOccurencesCountHelper({
+  const { fetch: fetchOccurrencesCountHelper } = useSNVOccurrencesCountHelper({
     seqId,
     countBody: { sqon: activeSqon },
   });
 
-  const fetchOccurrencesList = useSWR<GermlineSNVOccurrence[]>('fetch-occurences-list', fetchOccurrencesListHelper, {
+  const fetchOccurrencesList = useSWR<GermlineSNVOccurrence[]>('fetch-occurrences-list', fetchOccurrencesListHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,
   });
 
-  const fetchOccurrencesCount = useSWR<Count>('fetch-occurences-count', fetchOccurrencesCountHelper, {
+  const fetchOccurrencesCount = useSWR<Count>('fetch-occurrences-count', fetchOccurrencesCountHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,

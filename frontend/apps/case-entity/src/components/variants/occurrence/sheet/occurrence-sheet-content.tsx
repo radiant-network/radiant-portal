@@ -15,7 +15,7 @@ import InterpretationDialog from '../../interpretation/interpretation-dialog';
 import OccurrenceExpandDetails from '../occurrence-expand-details';
 import OccurrenceExpandTranscript from '../occurrence-expand-transcript';
 
-type OccurenceSheetContentProps = {
+type OccurrenceSheetContentProps = {
   occurrence: GermlineSNVOccurrence;
 };
 
@@ -29,7 +29,7 @@ async function fetchOccurrenceExpand(input: OccurrenceExpandInput) {
   return response.data;
 }
 
-function OccurenceSheetContent({ occurrence }: OccurenceSheetContentProps) {
+function OccurrenceSheetContent({ occurrence }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
 
@@ -136,4 +136,4 @@ function OccurrenceExpandSkeleton() {
   );
 }
 
-export default OccurenceSheetContent;
+export default OccurrenceSheetContent;
