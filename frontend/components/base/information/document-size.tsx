@@ -6,9 +6,13 @@ export type DocumentSizeProps = {
   value?: number;
 };
 
+export function valueToFileSize(value: number) {
+  return filesize(value, { standard: 'jedec' });
+}
+
 function DocumentSize({ value }: DocumentSizeProps) {
   if (!value) return <EmptyField />;
 
-  return <div>{filesize(value, { standard: 'jedec' })}</div>;
+  return <div>{valueToFileSize(value)}</div>;
 }
 export default DocumentSize;

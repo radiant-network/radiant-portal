@@ -2,6 +2,8 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
 import { GermlineCNVOccurrence } from '@/api/api';
+import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
+import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
@@ -9,6 +11,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 
 import ClingenCell from './cells/clingen-cell';
 import CNVNameCell from './cells/cnv-name-cell';
+import OverlappingGeneLinkCell from './cells/overlapping-gene-link-cell';
 
 const columnHelper = createColumnHelper<GermlineCNVOccurrence>();
 
@@ -17,6 +20,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Genes
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
+      cell: info => <OverlappingGeneLinkCell occurrence={info.row.original}>{info.getValue()}</OverlappingGeneLinkCell>,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbol')}</TooltipHeader>
       ),
@@ -25,9 +29,9 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
       enableSorting: false,
     }),
     // Cytoband
-    // TODO: Opens Modal for Overlapping Genes with CNV variant ID CNV Size
     columnHelper.accessor(row => row.cytoband, {
       id: 'cytoband',
+      cell: info => <OverlappingGeneLinkCell occurrence={info.row.original}>{info.getValue()}</OverlappingGeneLinkCell>,
       header: t('variant.headers.cytoband'),
       size: 124,
       minSize: 40,
@@ -105,7 +109,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Length
     columnHelper.accessor(row => row.length, {
       id: 'length',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <DocumentSizeCell value={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.length_tooltip')}>{t('variant.headers.length')}</TooltipHeader>
       ),

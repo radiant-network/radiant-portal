@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
-import { ArrowDown, ArrowDownUp, ArrowUp, BeanIcon, BeanOffIcon, Pin, PinIcon, PinOff } from 'lucide-react';
+import { ArrowDown, ArrowDownUp, ArrowUp, Pin, PinIcon, PinOff } from 'lucide-react';
 
 import { Button } from '@/components/base/ui/button';
 import {
@@ -20,22 +20,22 @@ const PIN_COLUMN_ACTIONS: {
   position: ColumnPinningPosition;
   icon: React.ReactNode;
 }[] = [
-  {
-    key: 'common.table.pin.left',
-    position: 'left',
-    icon: <PinIcon className="rotate-90" />,
-  },
-  {
-    key: 'common.table.pin.right',
-    position: 'right',
-    icon: <PinIcon className="ransform -rotate-90" />,
-  },
-  {
-    key: 'common.table.pin.unpin',
-    position: false,
-    icon: <PinOff />,
-  },
-];
+    {
+      key: 'common.table.pin.left',
+      position: 'left',
+      icon: <PinIcon className="rotate-90" />,
+    },
+    {
+      key: 'common.table.pin.right',
+      position: 'right',
+      icon: <PinIcon className="ransform -rotate-90" />,
+    },
+    {
+      key: 'common.table.pin.unpin',
+      position: false,
+      icon: <PinOff />,
+    },
+  ];
 
 /**
  * Use header.column.getNextSortingOrder() to display the next action on sort
@@ -69,13 +69,16 @@ type TableHeaderActionsProps<TData> = {
 function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
   const { t } = useI18n();
 
+  // Header group contains subgroup, they shouldn't have actions
+  const isHeaderGroup = header.subHeaders.length > 0;
+
   // use to keep DropdownMenuTrigger visible when used
   const [isPinningDropdownActive, setIsPinningDropdownActive] = useState<boolean>(false);
 
   const hasActions = header.column.getCanPin() || header.column.getCanSort();
   const isSorted = header.column.getIsSorted();
 
-  if (!hasActions) return null;
+  if (!hasActions || isHeaderGroup) return null;
 
   /**
    * If you add a tooltip, dropdown or any menu, you need to add data-[state=closed]:animate-none! to the content
