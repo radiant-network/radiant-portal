@@ -459,8 +459,8 @@
       "gene_divider": "Panels de gènes",
       "pathogenicity_exomiser_divider": "Exomiser",
       "pathogenicity_predictions_divider": "Prédictions",
-      "occurence_metrics_divider": "Métriques",
-      "occurence_parental_divider": "Analyse parentale",
+      "occurrence_metrics_divider": "Métriques",
+      "occurrence_parental_divider": "Analyse parentale",
       "frequency_divider_my_organization": "Mon Organisation",
       "frequency_divider_pulic_cohorts": "Cohortes Publiques",
       "zygosity_divider_parental_analysis": "Analyse Parentale"
@@ -1045,21 +1045,21 @@
     }
   },
   "file_entity": {
-      "title": "Fichiers",
-      "search_by_id_placeholder": "Fichier, échantillon, patient, cas, lot ou essai",
-      "name": "Nom du fichier",
-      "format_code": "Format",
-      "data_type_code": "Type",
-      "size": "Taille",
-      "case_id": "Cas",
-      "performer_lab": "Lab. de diagnostic",
-      "patient_id": "Patient",
-      "relationship_to_proband_code": "Parenté",
-      "submitter_sample_id": "Échantillon",
-      "task_id": "Tâche",
-      "seq_id": "Essai",
-      "hash": "Hash",
-      "run_alias": "Lot"
+    "title": "Fichiers",
+    "search_by_id_placeholder": "Fichier, échantillon, patient, cas, lot ou essai",
+    "name": "Nom du fichier",
+    "format_code": "Format",
+    "data_type_code": "Type",
+    "size": "Taille",
+    "case_id": "Cas",
+    "performer_lab": "Lab. de diagnostic",
+    "patient_id": "Patient",
+    "relationship_to_proband_code": "Parenté",
+    "submitter_sample_id": "Échantillon",
+    "task_id": "Tâche",
+    "seq_id": "Essai",
+    "hash": "Hash",
+    "run_alias": "Lot"
   },
   "variant_entity": {
     "not_found": "Variante introuvable",
@@ -1272,7 +1272,7 @@
       "contact": "Contact"
     }
   },
-  "occurence": {
+  "occurrence": {
     "canonical": "Canonical",
     "mane_select": "Mane Select",
     "mane_plus": "Mane Plus"

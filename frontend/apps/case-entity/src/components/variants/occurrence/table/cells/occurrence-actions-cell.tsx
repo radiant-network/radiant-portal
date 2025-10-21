@@ -7,9 +7,9 @@ import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
 
 import IGVDialog from '../../../igv/igv-dialog';
-import OccurenceSheet from '../../sheet/occurence-sheet';
+import OccurenceSheet from '../../sheet/occurrence-sheet';
 
-function OccurenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
+function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
   const { t } = useI18n();
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
@@ -75,4 +75,4 @@ function OccurenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) 
     </>
   );
 }
-export default OccurenceActionsMenu;
+export default OccurrenceActionsMenu;

@@ -2,16 +2,16 @@ import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/base/ui/sheet';
 
-import OccurrenceSheetContent from './occurence-sheet-content';
+import OccurrenceSheetContent from './occurrence-sheet-content';
 
-type OccurenceSheetProps = {
+type OccurrenceSheetProps = {
   setOpen: (value: boolean) => void;
   open: boolean;
   occurrence: GermlineSNVOccurrence;
   children?: React.ReactElement;
 };
 
-function OccurenceSheet({ children, open, occurrence, setOpen }: OccurenceSheetProps) {
+function OccurrenceSheet({ children, open, occurrence, setOpen }: OccurrenceSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
@@ -29,4 +29,4 @@ function OccurenceSheet({ children, open, occurrence, setOpen }: OccurenceSheetP
   );
 }
 
-export default OccurenceSheet;
+export default OccurrenceSheet;

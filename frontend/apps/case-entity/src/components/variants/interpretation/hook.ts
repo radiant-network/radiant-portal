@@ -1,7 +1,9 @@
-import { InterpretationGermline, InterpretationSomatic, GermlineSNVOccurrence } from '@/api/api';
-import { interpretationApi, occurrencesApi } from '@/utils/api';
 import { useCallback } from 'react';
 import { MutationFetcher } from 'swr/mutation';
+
+import { GermlineSNVOccurrence, InterpretationGermline, InterpretationSomatic } from '@/api/api';
+import { interpretationApi, occurrencesApi } from '@/utils/api';
+
 import { Interpretation } from './types';
 
 export function useInterpretationHelper(occurrence: GermlineSNVOccurrence, isSomatic: boolean) {
@@ -62,15 +64,14 @@ export function useInterpretationHelper(occurrence: GermlineSNVOccurrence, isSom
   };
 }
 
-
-export function useOccurenceExpandHelper(occurrence: GermlineSNVOccurrence) {
-  const fetch = useCallback(async () => {
-    return occurrencesApi.getExpandedGermlineSNVOccurrence(
-      occurrence.seq_id!.toString(),
-      occurrence.locus_id!.toString(),
-    )
-      .then(response => response.data);
-  }, [occurrence.seq_id, occurrence.locus_id]);
+export function useOccurrenceExpandHelper(occurrence: GermlineSNVOccurrence) {
+  const fetch = useCallback(
+    async () =>
+      occurrencesApi
+        .getExpandedGermlineSNVOccurrence(occurrence.seq_id!.toString(), occurrence.locus_id!.toString())
+        .then(response => response.data),
+    [occurrence.seq_id, occurrence.locus_id],
+  );
 
   return {
     fetch,

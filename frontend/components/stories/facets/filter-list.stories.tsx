@@ -8,7 +8,12 @@ import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
 import { RangeOperators } from '@/components/model/sqon';
 
-import { httpOccurenceApiResponse, httpStatisticsApiResponse, occurenceApi, statisticApi } from '../api/api-occurence';
+import {
+  httpOccurrenceApiResponse,
+  httpStatisticsApiResponse,
+  occurrenceApi,
+  statisticApi,
+} from '../api/api-occurrence';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -147,7 +152,10 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   parameters: {
     msw: {
-      handlers: [http.post(occurenceApi, httpOccurenceApiResponse), http.post(statisticApi, httpStatisticsApiResponse)],
+      handlers: [
+        http.post(occurrenceApi, httpOccurrenceApiResponse),
+        http.post(statisticApi, httpStatisticsApiResponse),
+      ],
     },
   },
 };
@@ -156,7 +164,7 @@ export const Error: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(occurenceApi, async () => {
+        http.post(occurrenceApi, async () => {
           await delay(800);
           return new HttpResponse(null, {
             status: 403,
