@@ -842,6 +842,15 @@ components:
           uniqueItems: false
         type:
           type: string
+      required:
+      - chromosome
+      - cnv_id
+      - end
+      - length
+      - name
+      - seq_id
+      - start
+      - type
       type: object
     GermlineSNVOccurrence:
       description: GermlineSNVOccurrence represents a germline SNV occurrence
@@ -2659,13 +2668,13 @@ paths:
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Locus ID
         in: path
         name: cnv_id
         required: true
         schema:
-          type: string
+          type: integer
       responses:
         "200":
           content:
