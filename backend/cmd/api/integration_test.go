@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/authorization"
 	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/radiant-network/radiant-api/test/testutils/jwt"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
@@ -92,6 +95,89 @@ func Test_SecureRoutes(t *testing.T) {
 			assert.Equal(t, 401, resp.StatusCode)
 		}
 	})
+}
+
+func Test_OpenFGA_Authorization(t *testing.T) {
+	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
+		func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
+			token, err := jwt.GenerateMockJWT()
+			assert.NoError(t, err)
+
+			// We can't use t.Setenv because we need OpenFGA context during the setup of the environment
+			for key, value := range map[string]string{
+				"CORS_ALLOWED_ORIGINS":                   "*",
+				"RADIANT_AUTHORIZATION_PROVIDER":         "openfga",
+				"RADIANT_AUTHORIZATION_OPENFGA_ENDPOINT": openfga.Endpoint,
+				"RADIANT_AUTHORIZATION_OPENFGA_STORE_ID": openfga.StoreID,
+			} {
+				os.Setenv(key, value)
+				defer os.Unsetenv(key)
+			}
+
+			router := setupRouter(starrocks, postgres)
+			server := httptest.NewServer(router)
+			t.Cleanup(server.Close)
+
+			resp, err := http.Get(server.URL + "/status")
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+			client := server.Client()
+
+			getTests := []struct {
+				route string
+				code  int
+			}{
+				{"assays/1", 200},
+				{"cases/1", 200},
+				{"genes/autocomplete", 200},
+				{"hpo/autocomplete", 200},
+				{"igv/1", 500},
+				{"interpretations/pubmed/1", 500},
+				{"mondo/autocomplete", 200},
+				{"occurrences/germline/snv/1/1000/expanded", 200},
+				{"sequencing/1", 200},
+				{"users/sets/1", 500},
+				{"variants/germline/1000/header", 200},
+			}
+
+			for _, tc := range getTests {
+				t.Run("GET_"+tc.route, func(t *testing.T) {
+					req, err := http.NewRequest(http.MethodGet, server.URL+"/"+tc.route, nil)
+					assert.NoError(t, err)
+					req.Header.Set("Authorization", "Bearer "+token)
+
+					res, err := client.Do(req)
+					assert.NoError(t, err)
+					defer res.Body.Close()
+					assert.Equal(t, tc.code, res.StatusCode)
+				})
+			}
+
+			postTests := []struct {
+				route string
+				code  int
+			}{
+				{"cases/search", 400},
+				{"cases/filters", 400},
+				{"interpretations/germline/1/1000/T001", 400},
+				{"occurrences/germline/snv/1/count", 400},
+				{"variants/germline/1000/cases/interpreted", 400},
+			}
+
+			for _, tc := range postTests {
+				t.Run("POST_"+tc.route, func(t *testing.T) {
+					req, err := http.NewRequest(http.MethodPost, server.URL+"/"+tc.route, nil)
+					assert.NoError(t, err)
+					req.Header.Set("Authorization", "Bearer "+token)
+
+					res, err := client.Do(req)
+					assert.NoError(t, err)
+					defer res.Body.Close()
+					assert.Equal(t, tc.code, res.StatusCode)
+				})
+			}
+		})
 }
 
 func TestMain(m *testing.M) {
