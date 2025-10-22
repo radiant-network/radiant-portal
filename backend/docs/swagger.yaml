@@ -792,7 +792,7 @@ components:
         cn:
           type: integer
         cnv_id:
-          type: integer
+          type: string
         cytoband:
           items:
             type: string
@@ -2674,7 +2674,7 @@ paths:
         name: cnv_id
         required: true
         schema:
-          type: integer
+          type: string
       responses:
         "200":
           content:
