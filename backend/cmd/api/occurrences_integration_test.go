@@ -360,10 +360,13 @@ func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
 }
 
 func assertGetExpandedOccurrence(t *testing.T, data string, seqId int, locusId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineSNVOccurrencesRepository(db)
+	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+		repo := repository.NewGermlineSNVOccurrencesRepository(starrocks)
+		exomiserRepo := repository.NewExomiserRepository(starrocks)
+		pubmedClient := &MockExternalClient{}
+		interpretationRepo := repository.NewInterpretationsRepository(postgres, pubmedClient)
 		router := gin.Default()
-		router.GET("/occurrences/germline/snv/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo))
+		router.GET("/occurrences/germline/snv/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/snv/%d/%d/expanded", seqId, locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -375,7 +378,7 @@ func assertGetExpandedOccurrence(t *testing.T, data string, seqId int, locusId i
 }
 
 func Test_GetExpandedOccurrence(t *testing.T) {
-	expected := `{"aa_change":"p.Arg19His", "case_id": 1, "cadd_phred":0.1, "cadd_score":0.1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "is_canonical":true, "is_mane_plus":false, "is_mane_select":true, "locus":"locus1", "locus_id":"1000", "is_mane_select":true, "omim_conditions":[{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, {"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}], "pc_wgs_affected":3, "pf_wgs":0.99, "pf_wgs_affected":1, "picked_consequences":["splice acceptor"], "pn_wgs_affected":3, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "start":1111, "symbol":"BRAF", "vep_impact":"impact1", "zygosity":"HET"}`
+	expected := `{"aa_change":"p.Arg19His", "case_id": 1, "cadd_phred":0.1, "cadd_score":0.1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "fathmm_pred":"T", "fathmm_score":0.1, "filter":"PASS", "genotype_quality":100, "gnomad_loeuf":0.1, "gnomad_pli":0.1, "gnomad_v3_af":0.001, "hgvsg":"hgvsg1", "interpretation_classification_counts":{"benign":1, "likelyPathogenic":1, "pathogenic":1}, "is_canonical":true, "is_mane_plus":false, "is_mane_select":true, "locus":"locus1", "locus_id":"1000", "is_mane_select":true, "omim_conditions":[{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, {"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}], "pc_wgs_affected":3, "pf_wgs":0.99, "pf_wgs_affected":1, "picked_consequences":["splice acceptor"], "pn_wgs_affected":3, "revel_score":0.1, "sift_pred":"T", "sift_score":0.1, "spliceai_ds":0.1, "spliceai_type":["AG"], "start":1111, "symbol":"BRAF", "vep_impact":"impact1", "zygosity":"HET"}`
 	assertGetExpandedOccurrence(t, "simple", 1, 1000, expected)
 }
 func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {

@@ -82,6 +82,13 @@ func (m *MockRepository) SearchSomatic(analysisId []string, patientId []string, 
 	return nil, nil
 }
 
+func (m *MockRepository) RetrieveGermlineInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+	return types.JsonMap[string, int]{
+		"benign":     2,
+		"pathogenic": 1,
+	}, nil
+}
+
 func assertGetInterpretationGermline(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()

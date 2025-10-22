@@ -137,7 +137,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.POST("/:seq_id/list", server.OccurrencesGermlineSNVListHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
-	occurrencesGermlineSNVGroup.GET("/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.GET("/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoPostgres.Interpretations))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoSeqExp))
@@ -155,7 +155,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	variantsGroup := privateRoutes.Group("/variants")
 	variantsGermlineGroup := variantsGroup.Group("/germline")
 	variantsGermlineGroup.GET("/:locus_id/header", server.GetGermlineVariantHeader(repoVariants))
-	variantsGermlineGroup.GET("/:locus_id/overview", server.GetGermlineVariantOverview(repoVariants, repoExomiser))
+	variantsGermlineGroup.GET("/:locus_id/overview", server.GetGermlineVariantOverview(repoVariants, repoExomiser, repoPostgres.Interpretations))
 	variantsGermlineGroup.GET("/:locus_id/consequences", server.GetGermlineVariantConsequences(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/interpreted", server.GetGermlineVariantInterpretedCases(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/uninterpreted", server.GetGermlineVariantUninterpretedCases(repoVariants))

@@ -1271,6 +1271,12 @@ export interface ExpandedGermlineSNVOccurrence {
     'exomiser_acmg_classification'?: string;
     /**
      * 
+     * @type {{ [key: string]: number; }}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'exomiser_acmg_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
      * @type {Array<string>}
      * @memberof ExpandedGermlineSNVOccurrence
      */
@@ -1347,6 +1353,12 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'hgvsg': string;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'interpretation_classification_counts'?: { [key: string]: number; };
     /**
      * 
      * @type {boolean}

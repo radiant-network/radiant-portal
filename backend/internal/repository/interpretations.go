@@ -27,6 +27,7 @@ type InterpretationsDAO interface {
 	FirstSomatic(sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error)
 	CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error
 	SearchSomatic(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error)
+	RetrieveGermlineInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error)
 }
 
 func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *InterpretationsRepository {
@@ -308,4 +309,34 @@ func (r *InterpretationsRepository) SearchSomatic(analysisId []string, patientId
 	}
 
 	return interpretations, nil
+}
+
+func (r *InterpretationsRepository) RetrieveGermlineInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+	var classificationCounts []types.ClassificationCounts
+	tx := r.db.Table("interpretation_germline")
+	tx = tx.Select("classification, COUNT(1) as classification_count")
+	tx = tx.Where("locus_id = ?", fmt.Sprintf("%d", locusId))
+	tx = tx.Group("classification")
+	tx = tx.Order("classification_count DESC")
+
+	if err := tx.Find(&classificationCounts).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		} else {
+			return nil, fmt.Errorf("error while fetching Germline Interpretation Classification Counts: %w", err)
+		}
+	} else if len(classificationCounts) == 0 {
+		return nil, nil
+	}
+
+	results := make(map[string]int)
+	for _, record := range classificationCounts {
+		classification, err := types.GetLabelFromCode(record.Classification)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching Germline Interpretation Classification Counts: %w", err)
+		}
+		results[classification] = record.ClassificationCount
+	}
+
+	return results, nil
 }

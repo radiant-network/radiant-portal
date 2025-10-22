@@ -36,11 +36,13 @@ func Test_GetVariantHeader(t *testing.T) {
 }
 
 func assertGetVariantOverview(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewVariantsRepository(db)
-		exomiserRepository := repository.NewExomiserRepository(db)
+	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+		repo := repository.NewVariantsRepository(starrocks)
+		exomiserRepository := repository.NewExomiserRepository(starrocks)
+		pubmedClient := &MockExternalClient{}
+		interpretationRepository := repository.NewInterpretationsRepository(postgres, pubmedClient)
 		router := gin.Default()
-		router.GET("/variants/germline/:locus_id/overview", server.GetGermlineVariantOverview(repo, exomiserRepository))
+		router.GET("/variants/germline/:locus_id/overview", server.GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/overview", locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
