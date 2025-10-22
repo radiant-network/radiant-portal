@@ -7,6 +7,7 @@ import HgvsgCell from '@/apps/case-entity/src/components/variants/occurrence/tab
 import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/interpretation-cell';
 import OccurrenceActionsMenu from '@/apps/case-entity/src/components/variants/occurrence/table/cells/occurrence-actions-cell';
 import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
+import CasePreviewCell from '@/apps/variant-entity/src/components/cases/case-preview-cell';
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import AnalysisTypeCodeCell, {
@@ -594,6 +595,13 @@ export const thirdSetCellColumns = [
     size: 120,
     minSize: 120,
     enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row.sample_id, {
+    id: 'casePreviewCell',
+    cell: info => (
+      <CasePreviewCell caseId={info.getValue()} relationshipToProband={info.row.original.relationship_to_proband} />
+    ),
+    header: 'CasePreviewCell',
   }),
   baseCellColumnHelper.accessor(row => row.sample_id, {
     id: 'sample_id',

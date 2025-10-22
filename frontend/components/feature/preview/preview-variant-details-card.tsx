@@ -170,6 +170,7 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
           {Object.keys({}).length ? (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.interpretations.my_network')}>
               {/**
+               * TODO: Add interpretation classification counts
                * data.interpretation_classification_counts
                 Object.entries(counts).map(([key, count]) => (
                 <ClassificationBadge key={key} value={key} count={count > 1 ? count : undefined} />
@@ -186,6 +187,7 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
           {Object.keys({}).length ? (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.exomiser')}>
               {/**
+               * TODO: Add exomiser acmg classification counts
                * data.exomiser_acmg_classification_counts
                 Object.entries(counts).map(([key, count]) => (
                 <ClassificationBadge key={key} value={key} count={count > 1 ? count : undefined} />
@@ -320,7 +322,7 @@ const GeneCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
         )}
         <div className={cn('flex flex-col gap-2', { 'flex-1 grow': hasGene })}>
           {data.vep_impact && pickedConsequence && (
-            <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.occurence')}>
+            <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.occurrence')}>
               <ConsequenceIndicator vepImpact={data.vep_impact} consequence={pickedConsequence} size="sm" />
             </DescriptionRow>
           )}

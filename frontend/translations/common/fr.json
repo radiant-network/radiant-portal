@@ -923,7 +923,7 @@
           "no_data": "Aucune donnée d'associations cliniques rapportée"
         },
         "gene_card": {
-          "occurence": "Occurrence",
+          "occurrence": "Occurrence",
           "cdna_change": "Changement cDNA",
           "transcript_id": "ID Transcrit",
           "exon": "Exon",
@@ -931,8 +931,8 @@
         }
       }
     },
-    "occurence_details": {
-      "title": "Détails de l'occurence",
+    "occurrence_details": {
+      "title": "Détails de l'occurrence",
       "actions": {
         "view_in_igv": "Ouvrir dans IGV"
       },
@@ -979,6 +979,10 @@
         "no_phenotype": "Aucun phénotype rapporté",
         "non_observed_phenotypes": "Phénotypes non observés (HPO)",
         "no_non_observed_phenotype": "Aucun phénotype non observé rapporté"
+      },
+      "empty": {
+        "title": "Aucun cas trouvé",
+        "description": "Aucun cas trouvé"
       }
     }
   },

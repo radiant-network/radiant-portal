@@ -7,7 +7,7 @@ import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
 
 import IGVDialog from '@/components/feature/igv/igv-dialog';
-import OccurencePreviewSheet from '@/components/feature/preview/occurence-preview-sheet';
+import OccurrencePreviewSheet from '@/components/feature/preview/occurrence-preview-sheet';
 
 function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
   const { t } = useI18n();
@@ -22,7 +22,7 @@ function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>)
 
   return (
     <>
-      <OccurencePreviewSheet
+      <OccurrencePreviewSheet
         open={sheetOpen}
         setOpen={setSheetOpen}
         occurrence={row.original as GermlineSNVOccurrence}

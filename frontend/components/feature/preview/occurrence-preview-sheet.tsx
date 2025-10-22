@@ -4,7 +4,7 @@ import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
 import { ClipboardPen } from 'lucide-react';
-import OccurrenceSheetDetailsCard from './preview-occurence-details-card';
+import PreviewOccurrenceDetailsCard from './preview-occurrence-details-card';
 import PreviewSheet from './preview-sheet';
 import PreviewSheetHeader from './preview-sheet-header';
 import PreviewSheetSkeleton from './preview-sheet-skeleton';
@@ -12,7 +12,7 @@ import PreviewSheetSubHeader from './preview-sheet-sub-header';
 import { useOccurrenceAndCase } from './preview-sheet-utils';
 import PreviewVariantDetailsCard from './preview-variant-details-card';
 
-type OccurencePreviewSheetProps = {
+type OccurrencePreviewSheetProps = {
   occurrence?: GermlineSNVOccurrence;
   children?: React.ReactElement;
   open: boolean;
@@ -23,7 +23,7 @@ type OccurencePreviewSheetProps = {
   hasNext?: boolean;
 };
 
-function OccurencePreviewSheet({
+function OccurrencePreviewSheet({
   occurrence,
   children,
   open,
@@ -32,11 +32,11 @@ function OccurencePreviewSheet({
   onNext,
   hasPrevious,
   hasNext,
-}: OccurencePreviewSheetProps) {
+}: OccurrencePreviewSheetProps) {
   return (
     <PreviewSheet trigger={children} open={open} setOpen={setOpen}>
       {occurrence && (
-        <OccurenceSheetContent
+        <OccurrenceSheetContent
           occurrence={occurrence}
           onPrevious={onPrevious}
           onNext={onNext}
@@ -48,7 +48,7 @@ function OccurencePreviewSheet({
   );
 }
 
-type OccurenceSheetContentProps = {
+type OccurrenceSheetContentProps = {
   occurrence: GermlineSNVOccurrence;
   onPrevious?: () => void;
   onNext?: () => void;
@@ -56,7 +56,7 @@ type OccurenceSheetContentProps = {
   hasNext?: boolean;
 };
 
-function OccurenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, hasNext }: OccurenceSheetContentProps) {
+function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, hasNext }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
   const { expandResult, proband, assay, isLoading } = useOccurrenceAndCase(
     occurrence.seq_id.toString(),
@@ -92,7 +92,7 @@ function OccurenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, ha
           />
         }
       />
-      <OccurrenceSheetDetailsCard
+      <PreviewOccurrenceDetailsCard
         seqId={occurrence.seq_id}
         locus={occurrence.locus}
         start={occurrence.start}
@@ -112,4 +112,4 @@ function OccurenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, ha
   );
 }
 
-export default OccurencePreviewSheet;
+export default OccurrencePreviewSheet;

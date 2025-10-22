@@ -21,7 +21,7 @@ function PreviewSheetHeader({
   return (
     <div className="flex flex-row items-center size-full pr-8">
       <div className="flex flex-wrap gap-4 items-center pr-4 w-full min-w-0">
-        <p className="text-slate-500">Occurence</p>
+        <p className="text-slate-500">Occurrence</p>
         <AnchorLink size="default" mono variant="secondary" className="min-w-0" external>
           <span className="overflow-hidden text-ellipsis max-w-52">{hgvsg}</span>
         </AnchorLink>

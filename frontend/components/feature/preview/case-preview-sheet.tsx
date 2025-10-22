@@ -1,11 +1,12 @@
 import { VariantUninterpretedCase } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
+import Empty from '@/components/base/empty';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
 import { ArrowUpRight } from 'lucide-react';
 import { useParams } from 'react-router';
 import PreviewCaseDetailsCard from './preview-case-details-card';
-import OccurrenceSheetDetailsCard from './preview-occurence-details-card';
+import OccurrenceSheetDetailsCard from './preview-occurrence-details-card';
 import PreviewSheet from './preview-sheet';
 import PreviewSheetHeader from './preview-sheet-header';
 import PreviewSheetSkeleton from './preview-sheet-skeleton';
@@ -33,9 +34,11 @@ function CasePreviewSheet({
   hasPrevious,
   hasNext,
 }: CasePreviewSheetProps) {
+  const { t } = useI18n();
+
   return (
     <PreviewSheet trigger={children} open={open} setOpen={setOpen}>
-      {caseData && (
+      {caseData ? (
         <CaseSheetContent
           caseData={caseData}
           onPrevious={onPrevious}
@@ -43,6 +46,8 @@ function CasePreviewSheet({
           hasPrevious={hasPrevious}
           hasNext={hasNext}
         />
+      ) : (
+        <Empty title={t('case.empty.title')} description={t('case.empty.description')} showIcon={false} />
       )}
     </PreviewSheet>
   );
