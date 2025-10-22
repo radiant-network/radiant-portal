@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -40,20 +41,13 @@ func Test_GetIGVBySeqIdHandler(t *testing.T) {
 		if err := json.Unmarshal(w.Body.Bytes(), &actual); err != nil {
 			assert.NoError(t, err)
 		}
+
+		slices.SortFunc(actual.Alignment, func(a, b types.IGVTrackEnriched) int {
+			return a.PatientId - b.PatientId
+		})
+
 		expected := types.IGVTracks{
 			Alignment: []types.IGVTrackEnriched{
-				{
-					PatientId:        3,
-					FamilyRole:       "proband",
-					Sex:              "male",
-					Type:             "alignment",
-					Format:           "cram",
-					URL:              fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.cram", endpoint),
-					URLExpireAt:      0,
-					IndexURL:         fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", endpoint),
-					IndexURLExpireAt: 0,
-					Name:             "Reads: S13224 proband",
-				},
 				{
 					PatientId:        1,
 					FamilyRole:       "mother",
@@ -77,6 +71,18 @@ func Test_GetIGVBySeqIdHandler(t *testing.T) {
 					IndexURL:         fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", endpoint),
 					IndexURLExpireAt: 0,
 					Name:             "Reads: S13226 father",
+				},
+				{
+					PatientId:        3,
+					FamilyRole:       "proband",
+					Sex:              "male",
+					Type:             "alignment",
+					Format:           "cram",
+					URL:              fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.cram", endpoint),
+					URLExpireAt:      0,
+					IndexURL:         fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", endpoint),
+					IndexURLExpireAt: 0,
+					Name:             "Reads: S13224 proband",
 				},
 			},
 		}
