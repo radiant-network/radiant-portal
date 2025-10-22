@@ -4,7 +4,7 @@ package types
 // @Description GermlineCNVOccurrence represents a germline CNV occurrence
 type GermlineCNVOccurrence struct {
 	SeqID      int               `json:"seq_id" validate:"required"`
-	CnvID      int               `json:"cnv_id" validate:"required"`
+	CnvID      int64             `json:"cnv_id" validate:"required"`
 	Aliquot    string            `json:"aliquot,omitempty"`
 	Chromosome string            `json:"chromosome" validate:"required"`
 	Start      int               `json:"start" validate:"required"`
