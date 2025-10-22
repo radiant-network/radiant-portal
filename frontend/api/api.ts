@@ -1643,10 +1643,10 @@ export interface GermlineCNVOccurrence {
     'cn'?: number;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof GermlineCNVOccurrence
      */
-    'cnv_id': number;
+    'cnv_id': string;
     /**
      * 
      * @type {Array<string>}
@@ -6084,11 +6084,11 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {number} seqId Sequence ID
-         * @param {number} cnvId Locus ID
+         * @param {string} cnvId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineCNVGenesOverlap: async (seqId: number, cnvId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listGermlineCNVGenesOverlap: async (seqId: number, cnvId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
             assertParamExists('listGermlineCNVGenesOverlap', 'seqId', seqId)
             // verify required parameter 'cnvId' is not null or undefined
@@ -6382,11 +6382,11 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {number} seqId Sequence ID
-         * @param {number} cnvId Locus ID
+         * @param {string} cnvId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listGermlineCNVGenesOverlap(seqId: number, cnvId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CNVGeneOverlap>>> {
+        async listGermlineCNVGenesOverlap(seqId: number, cnvId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CNVGeneOverlap>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineCNVGenesOverlap(seqId, cnvId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineCNVGenesOverlap']?.[localVarOperationServerIndex]?.url;
@@ -6517,11 +6517,11 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {number} seqId Sequence ID
-         * @param {number} cnvId Locus ID
+         * @param {string} cnvId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineCNVGenesOverlap(seqId: number, cnvId: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<CNVGeneOverlap>> {
+        listGermlineCNVGenesOverlap(seqId: number, cnvId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CNVGeneOverlap>> {
             return localVarFp.listGermlineCNVGenesOverlap(seqId, cnvId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6647,12 +6647,12 @@ export class OccurrencesApi extends BaseAPI {
      * List genes overlapping a CNV with a given ID
      * @summary List genes overlapping a CNV with a given ID
      * @param {number} seqId Sequence ID
-     * @param {number} cnvId Locus ID
+     * @param {string} cnvId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listGermlineCNVGenesOverlap(seqId: number, cnvId: number, options?: RawAxiosRequestConfig) {
+    public listGermlineCNVGenesOverlap(seqId: number, cnvId: string, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listGermlineCNVGenesOverlap(seqId, cnvId, options).then((request) => request(this.axios, this.basePath));
     }
 
