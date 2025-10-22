@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import { Count, GermlineSNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
@@ -23,6 +23,11 @@ import { occurrencesApi } from '@/utils/api';
 
 import { OccurrenceCountInput, useSNVOccurrencesCountHelper, useSNVOccurrencesListHelper } from '../hook';
 
+import OccurrencePreviewSheet from '@/components/feature/preview/occurrence-preview-sheet';
+import { usePreviewOccurrenceNavigation } from '@/components/feature/preview/use-preview-occurrence-navigation';
+import { ISyntheticSqon } from '@/components/model/sqon';
+import { useSearchParams } from 'react-router';
+import { SELECTED_VARIANT_PARAM } from '../constants';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
 
 const DEFAULT_SORTING = [
@@ -52,8 +57,10 @@ type SNVTabProps = {
 function SNVTab({ seqId }: SNVTabProps) {
   const { t } = useI18n();
   const config = useConfig();
+  const [rowSelection, setRowSelection] = useState({});
   const [isQBLoading, setQbLoading] = useState<boolean>(true);
   const [isQBInitialized, setQBInitialized] = useState<boolean>(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
@@ -113,6 +120,23 @@ function SNVTab({ seqId }: SNVTabProps) {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,
+  });
+
+  const occurrencesData = useMemo(() => fetchOccurrencesList.data ?? [], [fetchOccurrencesList.data]);
+
+  const {
+    selectedOccurrence,
+    hasPrevious,
+    hasNext,
+    handleClosePreview,
+    handlePreviousOccurrence,
+    handleNextOccurrence,
+  } = usePreviewOccurrenceNavigation({
+    occurrencesData,
+    searchParams,
+    setSearchParams,
+    selectedOccurrenceParamKey: SELECTED_VARIANT_PARAM,
+    setRowSelection,
   });
 
   /**
@@ -228,7 +252,9 @@ function SNVTab({ seqId }: SNVTabProps) {
                 }).then(res => res.count || 0);
               }}
               resolveSyntheticSqon={resolveSyntheticSqon}
-              onActiveQueryChange={sqon => setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)}
+              onActiveQueryChange={sqon =>
+                setActiveSqon(resolveSyntheticSqon(sqon, (qbState?.queries || []) as ISyntheticSqon[]) as Sqon)
+              }
               onStateChange={state => {
                 setQbState(state);
               }}
@@ -265,9 +291,20 @@ function SNVTab({ seqId }: SNVTabProps) {
                 total={fetchOccurrencesCount.data?.count ?? 0}
                 enableColumnOrdering
                 enableFullscreen
+                rowSelection={rowSelection}
+                onRowSelectionChange={setRowSelection}
               />
             </CardContent>
           </Card>
+          <OccurrencePreviewSheet
+            open={!!selectedOccurrence}
+            setOpen={() => handleClosePreview()}
+            occurrence={selectedOccurrence!}
+            onPrevious={handlePreviousOccurrence}
+            onNext={handleNextOccurrence}
+            hasPrevious={hasPrevious}
+            hasNext={hasNext}
+          />
         </main>
       </div>
     </div>

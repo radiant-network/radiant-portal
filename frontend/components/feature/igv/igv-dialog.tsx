@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from 'react';
 import useSWR from 'swr';
 
-import { GermlineSNVOccurrence, IGVTracks } from '@/api/api';
+import { IGVTracks } from '@/api/api';
 import { Spinner } from '@/components/base/spinner';
 import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/components/base/ui/dialog';
 import { useI18n } from '@/components/hooks/i18n';
@@ -12,19 +12,22 @@ import IgvContainer from './igv-container';
 type IGVDialogProps = {
   open: boolean;
   setOpen: (value: boolean) => void;
-  occurrence: GermlineSNVOccurrence;
+  seqId: number;
+  locus: string;
+  start: number;
+  chromosome: string;
   renderTrigger?: (handleOpen: () => void) => ReactNode;
 };
 
 const fetchIGVForSeqId = async ({ seqId }: { seqId: number }) =>
   igvApi.getIGV(seqId.toString()).then(response => response.data);
 
-const IGVDialog = ({ occurrence, open, setOpen, renderTrigger }: IGVDialogProps) => {
+const IGVDialog = ({ seqId, locus, start, chromosome, open, setOpen, renderTrigger }: IGVDialogProps) => {
   const { t } = useI18n();
   const fetchIGV = useSWR<IGVTracks>(
     {
-      key: `igv-${occurrence.seq_id}-${occurrence.locus}`,
-      seqId: occurrence.seq_id,
+      key: `igv-${seqId}-${locus}`,
+      seqId: seqId,
     },
     fetchIGVForSeqId,
     {
@@ -54,10 +57,7 @@ const IGVDialog = ({ occurrence, open, setOpen, renderTrigger }: IGVDialogProps)
               <DialogTitle>{t('variant.igv.title')}</DialogTitle>
             </DialogHeader>
             <DialogBody className="relative">
-              <IgvContainer
-                tracks={fetchIGV.data?.alignment || []}
-                locus={formatLocus(occurrence.start, occurrence.chromosome, 100)}
-              />
+              <IgvContainer tracks={fetchIGV.data?.alignment || []} locus={formatLocus(start, chromosome, 100)} />
             </DialogBody>
           </div>
         )}

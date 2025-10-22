@@ -19,6 +19,11 @@
         "h6": "Titre 6"
       }
     },
+    "sex": {
+      "male": "Masculin",
+      "female": "Féminin",
+      "other": "Autre"
+    },
     "classification": {
       "other": "Autre",
       "other.abbrev": "O",
@@ -870,12 +875,118 @@
       }
     }
   },
-  "occurrence_expand": {
+  "preview_sheet": {
     "actions": {
       "download_report": "Télécharger le rapport",
       "open_igv": "Ouvrir IGV",
-      "interpret": "Interpréter"
+      "interpret": "Interpréter",
+      "interpretation": "Interprétation",
+      "view_all_variants": "Voir tous les variants",
+      "view_in_case": "Voir dans le cas"
     },
+    "variant_details": {
+      "title": "Détails du Variant",
+      "actions": {
+        "ucsc": "UCSC",
+        "litvar": "LitVar",
+        "ensembl": "Ensembl"
+      },
+      "sections": {
+        "gene": {
+          "title": "Gène",
+          "pli": "pLI",
+          "loeuf": "LOEUF",
+          "splice_ai": "SpliceAI",
+          "no_data": "Aucune donnée sur le gène rapportée"
+        },
+        "interpretations": {
+          "title": "Interprétations",
+          "my_network": "Mon Réseau",
+          "no_data": "Aucune donnée d'interprétation rapportée"
+        },
+        "classification": {
+          "title": "Classification",
+          "exomiser": "Exomiser",
+          "no_data": "Aucune donnée de classification rapportée"
+        },
+        "frequencies": {
+          "title": "Fréquences",
+          "affected": "Affectés",
+          "revel": "REVEL"
+        },
+        "functional_scores": {
+          "title": "Scores Fonctionnels",
+          "no_data": "Aucune donnée de scores fonctionnels rapportée"
+        },
+        "clinical_associations": {
+          "title": "Associations Cliniques (OMIM)",
+          "no_data": "Aucune donnée d'associations cliniques rapportée"
+        },
+        "gene_card": {
+          "occurrence": "Occurrence",
+          "cdna_change": "Changement cDNA",
+          "transcript_id": "ID Transcrit",
+          "exon": "Exon",
+          "dbsnp_id": "ID dbSNP"
+        }
+      }
+    },
+    "occurrence_details": {
+      "title": "Détails de l'occurrence",
+      "actions": {
+        "view_in_igv": "Ouvrir dans IGV"
+      },
+      "sections": {
+        "inheritance": {
+          "title": "Héritabilité",
+          "zygosity": "Zygosité",
+          "compound_het": "Hétérozygote Composite",
+          "potential_compound_het": "Hétérozygote Composite Potentiel",
+          "inheritance": "Héritabilité",
+          "parental_origin": "Origine Parentale"
+        },
+        "family": {
+          "title": "Famille",
+          "mother_genotype": "Génotype de la Mère",
+          "father_genotype": "Génotype du Père",
+          "affected_tooltip": "Affecté",
+          "not_affected_tooltip": "Non affecté"
+        },
+        "metrics": {
+          "title": "Métriques",
+          "quality_depth": "Profondeur Qualité",
+          "allele_depth_alt": "Profondeur Aléle ALT",
+          "total_depth_alt_ref": "Profondeur Total ALT + REF",
+          "genotype_quality": "Qualité de Génotype",
+          "filter": "Filtre",
+          "pass": "Pass",
+          "fail": "Fail"
+        }
+      }
+    },
+    "case": {
+      "title": "Cas {{id}}",
+      "actions": {
+        "open_case": "Ouvrir le cas"
+      },
+      "details": {
+        "sex": "Sexe",
+        "dob": "Date de naissance",
+        "ethnicity": "Ethnicité",
+        "primary_condition": "Condition principale",
+        "no_primary_condition": "Aucune condition principale rapportée",
+        "phenotypes": "Phénotypes (HPO)",
+        "no_phenotype": "Aucun phénotype rapporté",
+        "non_observed_phenotypes": "Phénotypes non observés (HPO)",
+        "no_non_observed_phenotype": "Aucun phénotype non observé rapporté"
+      },
+      "empty": {
+        "title": "Aucun cas trouvé",
+        "description": "Aucun cas trouvé"
+      }
+    }
+  },
+  "occurrence_expand": {
     "classifications": {
       "title": "Classifications",
       "clinvar": "ClinVar"

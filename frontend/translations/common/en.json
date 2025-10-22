@@ -19,6 +19,11 @@
         "h6": "Heading 6"
       }
     },
+    "sex": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
     "classification": {
       "other": "Other",
       "other.abbrev": "O",
@@ -993,12 +998,118 @@
       }
     }
   },
-  "occurrence_expand": {
+  "preview_sheet": {
     "actions": {
       "download_report": "Download report",
       "open_igv": "Open IGV",
-      "interpret": "Interpret"
+      "interpret": "Interpret",
+      "interpretation": "Interpretation",
+      "view_all_variants": "View all variants",
+      "view_in_case": "View in case"
     },
+    "variant_details": {
+      "title": "Variant Details",
+      "actions": {
+        "ucsc": "UCSC",
+        "litvar": "LitVar",
+        "ensembl": "Ensembl"
+      },
+      "sections": {
+        "gene": {
+          "title": "Gene",
+          "pli": "pLI",
+          "loeuf": "LOEUF",
+          "splice_ai": "SpliceAI",
+          "no_data": "No gene data reported"
+        },
+        "interpretations": {
+          "title": "Interpretations",
+          "my_network": "My Network",
+          "no_data": "No interpretation data reported"
+        },
+        "classification": {
+          "title": "Classification",
+          "exomiser": "Exomiser",
+          "no_data": "No classification data reported"
+        },
+        "frequencies": {
+          "title": "Frequencies",
+          "affected": "Affected",
+          "revel": "REVEL"
+        },
+        "functional_scores": {
+          "title": "Functional Scores",
+          "no_data": "No functional scores data reported"
+        },
+        "clinical_associations": {
+          "title": "Clinical Associations (OMIM)",
+          "no_data": "No clinical associations data reported"
+        },
+        "gene_card": {
+          "occurrence": "Occurrence",
+          "cdna_change": "cDNA change",
+          "transcript_id": "Transcript ID",
+          "exon": "Exon",
+          "dbsnp_id": "dbSNP ID"
+        }
+      }
+    },
+    "occurrence_details": {
+      "title": "Occurrence Details",
+      "actions": {
+        "view_in_igv": "View in IGV"
+      },
+      "sections": {
+        "inheritance": {
+          "title": "Inheritance",
+          "zygosity": "Zygosity",
+          "compound_het": "Compound Het.",
+          "potential_compound_het": "Potential Compound Het.",
+          "inheritance": "Inheritance",
+          "parental_origin": "Parental Origin"
+        },
+        "family": {
+          "title": "Family",
+          "mother_genotype": "Mother's Genotype",
+          "father_genotype": "Father's Genotype",
+          "affected_tooltip": "Affected",
+          "not_affected_tooltip": "Not affected"
+        },
+        "metrics": {
+          "title": "Metrics",
+          "quality_depth": "Quality Depth",
+          "allele_depth_alt": "Allele Depth ALT",
+          "total_depth_alt_ref": "Total Depth ALT + REF",
+          "genotype_quality": "Genotype Quality",
+          "filter": "Filter",
+          "pass": "Pass",
+          "fail": "Fail"
+        }
+      }
+    },
+    "case": {
+      "title": "Case {{id}}",
+      "actions": {
+        "open_case": "Open Case"
+      },
+      "details": {
+        "sex": "Sex",
+        "dob": "DOB",
+        "ethnicity": "Ethnicity",
+        "primary_condition": "Primary Condition",
+        "no_primary_condition": "No primary condition reported",
+        "phenotypes": "Phenotypes (HPO)",
+        "no_phenotype": "No phenotype reported",
+        "non_observed_phenotypes": "Non-observed Phenotypes (HPO)",
+        "no_non_observed_phenotype": "No non-observed phenotype reported"
+      },
+      "empty": {
+        "title": "No case data found",
+        "description": "No case data found"
+      }
+    }
+  },
+  "occurrence_expand": {
     "classifications": {
       "title": "Classifications",
       "clinvar": "ClinVar"
@@ -1007,6 +1118,14 @@
       "title": "Predictions",
       "franklin": "Franklin",
       "exomiser": "Exomiser"
+    },
+    "zygosity": {
+      "title": "Zygosity",
+      "zygosity": "Zygosity",
+      "compound_het": "Compound Het.",
+      "potential_compound_het": "Potential Compound Het.",
+      "inheritance": "Inheritance",
+      "parental_origin": "Parental Origin"
     },
     "gene": {
       "title": "Gene",
@@ -1031,8 +1150,8 @@
       "cadd_raw": "CADD (Raw)",
       "cadd_phred": "CADD (Phred)"
     },
-    "zygosity": {
-      "title": "Zygosity",
+    "inheritance": {
+      "title": "Inheritance",
       "zygosity": "Zygosity",
       "compound_het": "Compound Het.",
       "potential_compound_het": "Potential Compound Het.",
