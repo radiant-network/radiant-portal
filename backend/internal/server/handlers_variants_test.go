@@ -246,8 +246,9 @@ func Test_GetVariantHeaderHandler(t *testing.T) {
 func Test_GetVariantOverviewHandler(t *testing.T) {
 	repo := &MockRepository{}
 	exomiserRepository := &MockEmptyExomiserRepository{}
+	interpretationRepository := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository))
+	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
 
 	req, _ := http.NewRequest("GET", "/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -280,8 +281,9 @@ func Test_GetVariantOverviewHandler(t *testing.T) {
 func Test_GetVariantOverviewHandler_With_ExomiserACMGClassificationCounts(t *testing.T) {
 	repo := &MockRepository{}
 	exomiserRepository := &MockExomiserRepository{}
+	interpretationRepository := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository))
+	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
 
 	req, _ := http.NewRequest("GET", "/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()

@@ -93,14 +93,6 @@ func (r *VariantsRepository) GetVariantOverview(locusId int) (*VariantOverview, 
 	}
 	variantOverview.OmimConditions = omimConditions
 
-	interpretationClassificationCounts, err := r.retrieveInterpretationClassificationCounts(locusId)
-	if err != nil {
-		return nil, fmt.Errorf("error while fetching interpretations: %w", err)
-	}
-
-	if interpretationClassificationCounts != nil {
-		variantOverview.InterpretationClassificationCounts = interpretationClassificationCounts
-	}
 	return &variantOverview, nil
 }
 
@@ -327,34 +319,4 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 		CaseAnalysis:   caseAnalysis,
 		PerformerLab:   performerLab,
 	}, nil
-}
-
-func (r *VariantsRepository) retrieveInterpretationClassificationCounts(locusId int) (map[string]int, error) {
-	var classificationCounts []types.ClassificationCounts
-	tx := r.db.Table("radiant_jdbc.public.interpretation_germline")
-	tx = tx.Select("classification, COUNT(1) as classification_count")
-	tx = tx.Where("locus_id = ?", fmt.Sprintf("%d", locusId))
-	tx = tx.Group("classification")
-	tx = tx.Order("classification_count DESC")
-
-	if err := tx.Find(&classificationCounts).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		} else {
-			return nil, fmt.Errorf("error while fetching Germline Interpretation Classification Counts: %w", err)
-		}
-	} else if len(classificationCounts) == 0 {
-		return nil, nil
-	}
-
-	results := make(map[string]int)
-	for _, record := range classificationCounts {
-		classification, err := types.GetLabelFromCode(record.Classification)
-		if err != nil {
-			return nil, fmt.Errorf("error while fetching Germline Interpretation Classification Counts: %w", err)
-		}
-		results[classification] = record.ClassificationCount
-	}
-
-	return results, nil
 }

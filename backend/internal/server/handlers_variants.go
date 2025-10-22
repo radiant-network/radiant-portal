@@ -53,7 +53,7 @@ func GetGermlineVariantHeader(repo repository.VariantsDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/overview [get]
-func GetGermlineVariantOverview(repo repository.VariantsDAO, exomiserRepository repository.ExomiserDAO) gin.HandlerFunc {
+func GetGermlineVariantOverview(repo repository.VariantsDAO, exomiserRepository repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
 		if err != nil {
@@ -78,6 +78,16 @@ func GetGermlineVariantOverview(repo repository.VariantsDAO, exomiserRepository 
 
 		if exomiserACMGClassificationCounts != nil {
 			variantOverview.ExomiserACMGClassificationCounts = exomiserACMGClassificationCounts
+		}
+
+		interpretationClassificationCounts, err := interpretationRepo.RetrieveGermlineInterpretationClassificationCounts(locusID)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		if interpretationClassificationCounts != nil {
+			variantOverview.InterpretationClassificationCounts = interpretationClassificationCounts
 		}
 
 		c.JSON(http.StatusOK, variantOverview)

@@ -40,61 +40,63 @@ type GermlineSNVOccurrence struct {
 } // @name GermlineSNVOccurrence
 
 type ExpandedGermlineSNVOccurrence = struct {
-	LocusId                    string                   `json:"locus_id" validate:"required"`
-	Hgvsg                      string                   `json:"hgvsg" validate:"required"`
-	Locus                      string                   `json:"locus" validate:"required"`
-	Chromosome                 string                   `json:"chromosome"`
-	Start                      int64                    `json:"start,omitempty"`
-	End                        int64                    `json:"end,omitempty"`
-	Symbol                     string                   `json:"symbol,omitempty"`
-	TranscriptId               string                   `json:"transcript_id,omitempty"`
-	IsCanonical                bool                     `json:"is_canonical"`
-	IsManeSelect               bool                     `json:"is_mane_select"`
-	IsManePlus                 bool                     `json:"is_mane_plus"`
-	ExonRank                   int                      `json:"exon_rank,omitempty"`
-	ExonTotal                  int                      `json:"exon_total,omitempty"`
-	DnaChange                  string                   `json:"dna_change,omitempty"`
-	VepImpact                  VepImpact                `json:"vep_impact,omitempty" enums:"MODIFIER,LOW,MODERATE,HIGH"`
-	Consequences               JsonArray[string]        `gorm:"type:json" json:"picked_consequences" validate:"required"`
-	AaChange                   string                   `json:"aa_change,omitempty"`
-	Rsnumber                   string                   `json:"rsnumber,omitempty"`
-	ClinvarInterpretation      JsonArray[string]        `gorm:"type:json" json:"clinvar,omitempty"`
-	GnomadPli                  float32                  `json:"gnomad_pli,omitempty"`
-	GnomadLoeuf                float32                  `json:"gnomad_loeuf,omitempty"`
-	SpliceaiType               JsonArray[string]        `gorm:"type:json" json:"spliceai_type,omitempty"`
-	SpliceaiDs                 float32                  `json:"spliceai_ds,omitempty"`
-	Af                         float64                  `json:"af,omitempty"` // TODO
-	PfWgs                      float64                  `json:"pf_wgs,omitempty"`
-	PcWgsAffected              int                      `json:"pc_wgs_affected,omitempty"`
-	PnWgsAffected              int                      `json:"pn_wgs_affected,omitempty"`
-	PfWgsAffected              float64                  `json:"pf_wgs_affected,omitempty"`
-	PcWgsNotAffected           int                      `json:"pc_wgs_not_affected,omitempty"`
-	PnWgsNotAffected           int                      `json:"pn_wgs_not_affected,omitempty"`
-	PfWgsNotAffected           float64                  `json:"pf_wgs_not_affected,omitempty"`
-	GnomadV3Af                 float64                  `json:"gnomad_v3_af" validate:"required"`
-	SiftPred                   string                   `json:"sift_pred,omitempty"`
-	SiftScore                  float32                  `json:"sift_score,omitempty"`
-	RevelScore                 float32                  `json:"revel_score,omitempty"`
-	FathmmPred                 string                   `json:"fathmm_pred,omitempty"`
-	FathmmScore                float32                  `json:"fathmm_score,omitempty"`
-	CaddPhred                  float32                  `json:"cadd_phred,omitempty"`
-	CaddScore                  float32                  `json:"cadd_score,omitempty"`
-	DannScore                  float32                  `json:"dann_score,omitempty"`
-	Zygosity                   string                   `json:"zygosity,omitempty"`
-	TransmissionMode           string                   `json:"transmission,omitempty"`
-	ParentalOrigin             string                   `json:"parental_origin,omitempty"`
-	OmimConditions             JsonArray[OmimGenePanel] `gorm:"type:json" json:"omim_conditions,omitempty"`
-	FatherCalls                JsonArray[int]           `gorm:"type:json" json:"father_calls,omitempty"`
-	MotherCalls                JsonArray[int]           `gorm:"type:json" json:"mother_calls,omitempty"`
-	InfoQd                     float32                  `json:"qd,omitempty"`
-	AdAlt                      int32                    `json:"ad_alt,omitempty"`
-	AdTotal                    int32                    `json:"ad_total,omitempty"`
-	Gq                         int32                    `json:"genotype_quality" validate:"required"`
-	Filter                     string                   `json:"filter,omitempty"`
-	ExomiserAcmgEvidence       JsonArray[string]        `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
-	ExomiserGeneCombinedScore  float64                  `json:"exomiser_gene_combined_score" validate:"required"`
-	ExomiserAcmgClassification string                   `json:"exomiser_acmg_classification,omitempty"`
-	CaseId                     int                      `json:"case_id" validate:"required"`
+	LocusId                            string                   `json:"locus_id" validate:"required"`
+	Hgvsg                              string                   `json:"hgvsg" validate:"required"`
+	Locus                              string                   `json:"locus" validate:"required"`
+	Chromosome                         string                   `json:"chromosome"`
+	Start                              int64                    `json:"start,omitempty"`
+	End                                int64                    `json:"end,omitempty"`
+	Symbol                             string                   `json:"symbol,omitempty"`
+	TranscriptId                       string                   `json:"transcript_id,omitempty"`
+	IsCanonical                        bool                     `json:"is_canonical"`
+	IsManeSelect                       bool                     `json:"is_mane_select"`
+	IsManePlus                         bool                     `json:"is_mane_plus"`
+	ExonRank                           int                      `json:"exon_rank,omitempty"`
+	ExonTotal                          int                      `json:"exon_total,omitempty"`
+	DnaChange                          string                   `json:"dna_change,omitempty"`
+	VepImpact                          VepImpact                `json:"vep_impact,omitempty" enums:"MODIFIER,LOW,MODERATE,HIGH"`
+	Consequences                       JsonArray[string]        `gorm:"type:json" json:"picked_consequences" validate:"required"`
+	AaChange                           string                   `json:"aa_change,omitempty"`
+	Rsnumber                           string                   `json:"rsnumber,omitempty"`
+	ClinvarInterpretation              JsonArray[string]        `gorm:"type:json" json:"clinvar,omitempty"`
+	GnomadPli                          float32                  `json:"gnomad_pli,omitempty"`
+	GnomadLoeuf                        float32                  `json:"gnomad_loeuf,omitempty"`
+	SpliceaiType                       JsonArray[string]        `gorm:"type:json" json:"spliceai_type,omitempty"`
+	SpliceaiDs                         float32                  `json:"spliceai_ds,omitempty"`
+	Af                                 float64                  `json:"af,omitempty"` // TODO
+	PfWgs                              float64                  `json:"pf_wgs,omitempty"`
+	PcWgsAffected                      int                      `json:"pc_wgs_affected,omitempty"`
+	PnWgsAffected                      int                      `json:"pn_wgs_affected,omitempty"`
+	PfWgsAffected                      float64                  `json:"pf_wgs_affected,omitempty"`
+	PcWgsNotAffected                   int                      `json:"pc_wgs_not_affected,omitempty"`
+	PnWgsNotAffected                   int                      `json:"pn_wgs_not_affected,omitempty"`
+	PfWgsNotAffected                   float64                  `json:"pf_wgs_not_affected,omitempty"`
+	GnomadV3Af                         float64                  `json:"gnomad_v3_af" validate:"required"`
+	SiftPred                           string                   `json:"sift_pred,omitempty"`
+	SiftScore                          float32                  `json:"sift_score,omitempty"`
+	RevelScore                         float32                  `json:"revel_score,omitempty"`
+	FathmmPred                         string                   `json:"fathmm_pred,omitempty"`
+	FathmmScore                        float32                  `json:"fathmm_score,omitempty"`
+	CaddPhred                          float32                  `json:"cadd_phred,omitempty"`
+	CaddScore                          float32                  `json:"cadd_score,omitempty"`
+	DannScore                          float32                  `json:"dann_score,omitempty"`
+	Zygosity                           string                   `json:"zygosity,omitempty"`
+	TransmissionMode                   string                   `json:"transmission,omitempty"`
+	ParentalOrigin                     string                   `json:"parental_origin,omitempty"`
+	OmimConditions                     JsonArray[OmimGenePanel] `gorm:"type:json" json:"omim_conditions,omitempty"`
+	FatherCalls                        JsonArray[int]           `gorm:"type:json" json:"father_calls,omitempty"`
+	MotherCalls                        JsonArray[int]           `gorm:"type:json" json:"mother_calls,omitempty"`
+	InfoQd                             float32                  `json:"qd,omitempty"`
+	AdAlt                              int32                    `json:"ad_alt,omitempty"`
+	AdTotal                            int32                    `json:"ad_total,omitempty"`
+	Gq                                 int32                    `json:"genotype_quality" validate:"required"`
+	Filter                             string                   `json:"filter,omitempty"`
+	ExomiserAcmgEvidence               JsonArray[string]        `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
+	ExomiserGeneCombinedScore          float64                  `json:"exomiser_gene_combined_score" validate:"required"`
+	ExomiserAcmgClassification         string                   `json:"exomiser_acmg_classification,omitempty"`
+	ExomiserACMGClassificationCounts   JsonMap[string, int]     `gorm:"type:json" json:"exomiser_acmg_classification_counts,omitempty"`
+	InterpretationClassificationCounts JsonMap[string, int]     `gorm:"type:json" json:"interpretation_classification_counts,omitempty"`
+	CaseId                             int                      `json:"case_id" validate:"required"`
 } // @name ExpandedGermlineSNVOccurrence
 
 var GermlineSNVOccurrenceTable = Table{

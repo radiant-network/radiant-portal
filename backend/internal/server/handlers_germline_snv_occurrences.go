@@ -215,7 +215,7 @@ func OccurrencesGermlineSNVStatisticsHandler(repo repository.GermlineSNVOccurren
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/snv/{seq_id}/{locus_id}/expanded [get]
-func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
+func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO, exomiserRepo repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {
@@ -236,6 +236,27 @@ func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO)
 			HandleNotFoundError(c, "occurrence")
 			return
 		}
+
+		exomiserACMGClassificationCounts, err := exomiserRepo.GetExomiserACMGClassificationCounts(locusId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		if exomiserACMGClassificationCounts != nil {
+			expandedOccurrence.ExomiserACMGClassificationCounts = exomiserACMGClassificationCounts
+		}
+
+		interpretationClassificationCounts, err := interpretationRepo.RetrieveGermlineInterpretationClassificationCounts(locusId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		if interpretationClassificationCounts != nil {
+			expandedOccurrence.InterpretationClassificationCounts = interpretationClassificationCounts
+		}
+
 		c.JSON(http.StatusOK, expandedOccurrence)
 	}
 }
