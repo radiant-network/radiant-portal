@@ -12,7 +12,7 @@ function HgvsgCell({ occurrence }: HgvsgCellProps) {
 
   const handleClick = () => {
     setSearchParams(prev => {
-      prev.set(SELECTED_VARIANT_PARAM, occurrence.hgvsg);
+      prev.set(SELECTED_VARIANT_PARAM, occurrence.locus_id);
       return prev;
     });
   };

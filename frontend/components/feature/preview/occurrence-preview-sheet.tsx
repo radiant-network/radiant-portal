@@ -67,6 +67,8 @@ function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, h
     return <PreviewSheetSkeleton />;
   }
 
+  console.log(expandResult.data.clinvar);
+
   return (
     <div className="flex flex-col gap-4">
       <PreviewSheetHeader

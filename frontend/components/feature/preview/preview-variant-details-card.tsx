@@ -1,4 +1,5 @@
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
+import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import EmptyField from '@/components/base/information/empty-field';
@@ -30,8 +31,15 @@ const PreviewVariantDetailsCard = ({ data }: PreviewVariantDetailsCardProps) => 
       title={t('preview_sheet.variant_details.title')}
       actions={
         <div className="flex gap-2">
-          <Button variant="outline" size="xs">
-            {t('preview_sheet.variant_details.actions.ucsc')} <ArrowUpRight />
+          <Button variant="outline" size="xs" asChild>
+            <a
+              href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${data.chromosome}%3A${data.start}-${data.start}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t('preview_sheet.variant_details.actions.ucsc')}
+              <ArrowUpRight />
+            </a>
           </Button>
           <Button variant="outline" size="xs" asChild>
             <a
@@ -167,15 +175,11 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
     <div className="flex flex-wrap gap-4 rounded-md border border-border p-3 sm:gap-20 w-full">
       <div className="flex flex-1 flex-col gap-4">
         <DescriptionSection title={t('preview_sheet.variant_details.sections.interpretations.title')}>
-          {Object.keys({}).length ? (
+          {Object.keys(data.interpretation_classification_counts ?? {}).length ? (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.interpretations.my_network')}>
-              {/**
-               * TODO: Add interpretation classification counts
-               * data.interpretation_classification_counts
-                Object.entries(counts).map(([key, count]) => (
-                <ClassificationBadge key={key} value={key} count={count > 1 ? count : undefined} />
-              )) */}
-              <></>
+              {Object.entries(data.interpretation_classification_counts ?? {}).map(([key, count]) => (
+                <ClassificationBadge key={key} value={key} count={count} abbreviated />
+              ))}
             </DescriptionRow>
           ) : (
             <span className="text-muted-foreground text-xs">
@@ -184,15 +188,11 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
           )}
         </DescriptionSection>
         <DescriptionSection title={t('preview_sheet.variant_details.sections.classification.title')}>
-          {Object.keys({}).length ? (
+          {Object.keys(data.exomiser_acmg_classification_counts ?? {}).length ? (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.exomiser')}>
-              {/**
-               * TODO: Add exomiser acmg classification counts
-               * data.exomiser_acmg_classification_counts
-                Object.entries(counts).map(([key, count]) => (
-                <ClassificationBadge key={key} value={key} count={count > 1 ? count : undefined} />
-              )) */}
-              <></>
+              {Object.entries(data.exomiser_acmg_classification_counts ?? {}).map(([key, count]) => (
+                <ClassificationBadge key={key} value={key} count={count} abbreviated />
+              ))}
             </DescriptionRow>
           ) : (
             <span className="text-muted-foreground text-xs">

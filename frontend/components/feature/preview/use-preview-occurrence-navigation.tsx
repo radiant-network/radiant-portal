@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { SetURLSearchParams } from 'react-router';
 
 interface OccurrenceItem {
-  hgvsg: string;
+  locus_id: string;
 }
 
 interface UsePreviewOccurrenceNavigationParams<T extends OccurrenceItem> {
@@ -33,10 +33,10 @@ export function usePreviewOccurrenceNavigation<T extends OccurrenceItem>({
   setRowSelection,
 }: UsePreviewOccurrenceNavigationParams<T>): UsePreviewOccurrenceNavigationReturn<T> {
   const selectedVariant = searchParams.get(selectedOccurrenceParamKey);
-  const selectedOccurrence = occurrencesData.find(occurrence => occurrence.hgvsg === selectedVariant);
+  const selectedOccurrence = occurrencesData.find(occurrence => occurrence.locus_id === selectedVariant);
 
   const selectedOccurrenceIndex = selectedVariant
-    ? occurrencesData.findIndex(occurrence => occurrence.hgvsg === selectedVariant)
+    ? occurrencesData.findIndex(occurrence => occurrence.locus_id === selectedVariant)
     : -1;
 
   const handleClosePreview = () => {
@@ -50,7 +50,7 @@ export function usePreviewOccurrenceNavigation<T extends OccurrenceItem>({
     if (selectedOccurrenceIndex > 0) {
       const previousOccurrence = occurrencesData[selectedOccurrenceIndex - 1];
       setSearchParams(prev => {
-        prev.set(selectedOccurrenceParamKey, previousOccurrence.hgvsg);
+        prev.set(selectedOccurrenceParamKey, previousOccurrence.locus_id);
         return prev;
       });
     }
@@ -60,7 +60,7 @@ export function usePreviewOccurrenceNavigation<T extends OccurrenceItem>({
     if (selectedOccurrenceIndex >= 0 && selectedOccurrenceIndex < occurrencesData.length - 1) {
       const nextOccurrence = occurrencesData[selectedOccurrenceIndex + 1];
       setSearchParams(prev => {
-        prev.set(selectedOccurrenceParamKey, nextOccurrence.hgvsg);
+        prev.set(selectedOccurrenceParamKey, nextOccurrence.locus_id);
         return prev;
       });
     }
@@ -75,7 +75,7 @@ export function usePreviewOccurrenceNavigation<T extends OccurrenceItem>({
 
   useEffect(() => {
     if (selectedVariant && occurrencesData.length > 0) {
-      const rowIndex = occurrencesData.findIndex(occurrence => occurrence.hgvsg === selectedVariant);
+      const rowIndex = occurrencesData.findIndex(occurrence => occurrence.locus_id === selectedVariant);
       if (rowIndex !== -1) {
         setRowSelection({ [rowIndex]: true });
       } else {
