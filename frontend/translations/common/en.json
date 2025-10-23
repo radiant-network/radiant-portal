@@ -819,12 +819,23 @@
       "length": "Length",
       "length_tooltip": "CNV bases length",
       "name": "Variant",
+      "nb_exons": "# Exons",
+      "nb_exons_tooltip": "Overlapped exon number",
       "nb_genes": "# Genes",
       "nb_genes_tooltip": "Number of genes overlapped by CNV",
+      "nb_overlap_bases": "# Bases",
+      "nb_overlap_bases_tooltip": "Number of SNVs included in the CNV",
       "nb_snv": "# SNVs",
       "nb_snv_tooltip": "Number of SNVs included in the CNV",
       "omim_inheritance_code": "OMIM",
       "omim_inheritance_code_tooltip": "MIM inheritance modes",
+      "overlapping_gene_percent": "% Gene",
+      "overlapping_gene_percent_tooltip": "% overlapped gene length",
+      "overlapping_cnv_percent": "% CNV",
+      "overlapping_cnv_percent_tooltip": "% overlapped CNV length",
+      "overlap_type": "Type",
+      "overlap_type_tooltip": "Gene and CNV overlapping type",
+      "panels": "Panels",
       "pe": "PE",
       "pe_tooltip": "Number of improperly paired end reads at start and stop breakpoints",
       "pf_wgs": "Freq.",
@@ -1281,6 +1292,9 @@
         },
         "snv": "SNV",
         "cnv": "CNV"
+      },
+      "dialog": {
+        "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}}({{length}})"
       }
     },
     "files": {

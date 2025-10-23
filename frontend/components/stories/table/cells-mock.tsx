@@ -6,6 +6,8 @@ import CNVNameCell from '@/apps/case-entity/src/components/variants/occurrence/t
 import HgvsgCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/hgvsg-cell';
 import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/interpretation-cell';
 import OccurrenceActionsMenu from '@/apps/case-entity/src/components/variants/occurrence/table/cells/occurrence-actions-cell';
+import OverlapTypeGeneCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/overlap-type-gene-cell';
+import OverlappingGeneLinkCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/overlapping-gene-link-cell';
 import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
 import CasePreviewCell from '@/apps/variant-entity/src/components/cases/case-preview-cell';
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
@@ -812,8 +814,10 @@ export const thirdSetCellData = [
 
 /**
  * First set of application cell components
- *   - InterpretationCell (Variant-Entity)
+ *   - InterpretationCell (Variant-Entity/SNV)
  *   - CaseActionsMenuCell (Case-Exploration)
+ *   - CNVNameCell (Variant-Entity/CNV)
+ *   - ClingenCell (Variant-Entity/CNV)
  */
 export const applicationFirstSetCellColumns = [
   baseCellColumnHelper.accessor(row => row, {
@@ -842,6 +846,26 @@ export const applicationFirstSetCellColumns = [
   baseCellColumnHelper.accessor(row => row, {
     id: 'clingen',
     cell: info => <ClingenCell occurrence={info.getValue()} />,
+    header: 'Clingen (Variant-Tab/CNV)',
+    size: 40,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row.type, {
+    id: 'overlap_type_gene_cell',
+    cell: info => <OverlapTypeGeneCell type={info.getValue()} />,
+    header: 'Clingen (Variant-Tab/CNV)',
+    size: 40,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'overlap_type_link_cell',
+    cell: info => (
+      <OverlappingGeneLinkCell occurrence={info.getValue()}>{info.getValue().symbol}</OverlappingGeneLinkCell>
+    ),
     header: 'Clingen (Variant-Tab/CNV)',
     size: 40,
     enablePinning: false,
@@ -888,6 +912,37 @@ export const applicationCellData = [
     observed_phenotypes,
     size: 8,
     name: 'DRAGEN:GAIN:chr10:38526737-38528684',
+    length: 1,
+    symbol: [
+      'MIR650',
+      'IGLV3-16',
+      'IGLV3-9',
+      'IGLV4-3',
+      'IGLV2-5',
+      'IGLVVI-22-1',
+      'IGLV2-18',
+      'IGLV2-11',
+      'IGLJ1',
+      'IGLV3-13',
+      'IGLV3-7',
+      'IGLVI-20',
+      'MIR5571',
+      'IGLV3-19',
+      'IGLV3-12',
+      'IGLV3-21',
+      'IGLV2-14',
+      'IGLV3-1',
+      'IGLV3-22',
+      'IGLV3-17',
+      'IGLV3-6',
+      'IGLL5',
+      'IGLV3-15',
+      'IGLV3-2',
+      'IGLV2-8',
+      'IGLV3-10',
+      'IGLC1',
+      'IGLV3-4',
+    ],
   },
   {
     locus_id: '-7485572602358923261',
@@ -907,6 +962,9 @@ export const applicationCellData = [
     observed_phenotypes: observed_phenotypes.slice(0, 5),
     size: 12345,
     name: 'DRAGEN:GAIN:chr10:46514860-46560711',
+    type: 'full_gene',
+    length: 10,
+    symbol: ['MIR650', 'IGLV3-2', 'IGLV2-8', 'IGLV3-10', 'IGLC1', 'IGLV3-4'],
   },
   {
     locus_id: '-7485572602358923261',
@@ -926,6 +984,9 @@ export const applicationCellData = [
     observed_phenotypes: observed_phenotypes.slice(0, 2),
     size: 25000000,
     name: 'DRAGEN:GAIN:chr10:89035066-89041642',
+    length: 100,
+    type: 'full_gene',
+    symbol: ['IGLV2-8', 'IGLV3-10', 'IGLC1', 'IGLV3-4'],
   },
   {
     locus_id: '-7485572602358923261',
@@ -945,6 +1006,9 @@ export const applicationCellData = [
     observed_phenotypes: observed_phenotypes.slice(0, 1),
     size: 5678000000,
     name: 'DRAGEN:GAIN:chr10:38526737-38528684',
+    length: 1000,
+    type: 'partial',
+    symbol: ['IGLV3-10', 'IGLC1', 'IGLV3-4'],
   },
   {
     locus_id: '-7485572602358923261',
@@ -964,6 +1028,9 @@ export const applicationCellData = [
     observed_phenotypes: observed_phenotypes.slice(0, 1),
     size: 9000000000000,
     name: 'DRAGEN:GAIN:chr11:50136017-50165606',
+    length: 10000,
+    type: 'partial',
+    symbol: ['IGLC1', 'IGLV3-4'],
   },
   {
     locus_id: '-7485572602358923261',
@@ -983,6 +1050,9 @@ export const applicationCellData = [
     observed_phenotypes: observed_phenotypes.slice(0, 1),
     size: 90000000000000,
     name: 'DRAGEN:GAIN:chr11:54543136-54548754',
+    length: 100000,
+    type: 'full_cnv',
+    symbol: ['IGLV3-4'],
   },
   {
     locus_id: '-7485572602358923261',
@@ -1001,5 +1071,8 @@ export const applicationCellData = [
     observed_phenotypes: undefined,
     size: undefined,
     name: undefined,
+    length: 100000,
+    symbol: undefined,
+    type: 'full_cnv',
   },
 ];

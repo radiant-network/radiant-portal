@@ -2,21 +2,19 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import ElementOperatorIcon from '@/components/base/icons/element-operator-icon';
 import EqualOperatorIcon from '@/components/base/icons/equal-operator-icon';
+import GeneOverlapFullCNVIcon from '@/components/base/icons/gene-overlap-full-cnv-icon';
+import GeneOverlapFullGeneIcon from '@/components/base/icons/gene-overlap-full-gene-icon';
+import GeneOverlapPartialIcon from '@/components/base/icons/gene-overlap-partial-icon';
 import GreaterThanOperatorIcon from '@/components/base/icons/greater-than-operator-icon';
 import GreaterThanOrEqualOperatorIcon from '@/components/base/icons/greater-than-or-equal-operator-icon';
 import LessThanOperatorIcon from '@/components/base/icons/less-than-operator-icon';
 import LessThanOrEqualOperatorIcon from '@/components/base/icons/less-than-or-equal-operator-icon';
 import NotInOperatorIcon from '@/components/base/icons/not-in-operator-icon';
-
-import { IconType } from '@/components/base/icons/types';
-import TranscriptCanonicalIcon from '@/components/base/icons/transcript-canonical-icon';
-import TranscriptManePlusIcon from '@/components/base/icons/transcript-mane-plus-icon';
-import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
-import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
-import ShapeTriangleDownIcon from '@/components/base/icons/shape-triangle-down-icon';
-import ShapeCircleIcon from '@/components/base/icons/shape-circle-icon';
-import ShapeDonutIcon from '@/components/base/icons/shape-donut-icon';
-import ShapeSquareIcon from '@/components/base/icons/shape-square-icon';
+import PedigreeFemaleAffectedIcon from '@/components/base/icons/pedigree-female-affected-icon';
+import PedigreeFemaleCarrierIcon from '@/components/base/icons/pedigree-female-carrier-icon';
+import PedigreeFemaleDeceasedIcon from '@/components/base/icons/pedigree-female-deceased-icon';
+import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-female-not-affected-icon';
+import PedigreeFemaleProbandIcon from '@/components/base/icons/pedigree-female-proband-icon';
 import PedigreeMaleAffectedIcon from '@/components/base/icons/pedigree-male-affected-icon';
 import PedigreeMaleCarrierIcon from '@/components/base/icons/pedigree-male-carrier-icon';
 import PedigreeMaleDeceasedIcon from '@/components/base/icons/pedigree-male-deceased-icon';
@@ -27,11 +25,15 @@ import PedigreeUnknownCarrierIcon from '@/components/base/icons/pedigree-unknown
 import PedigreeUnknownDeceasedIcon from '@/components/base/icons/pedigree-unknown-deceased-icon';
 import PedigreeUnknownNotAffectedIcon from '@/components/base/icons/pedigree-unknown-not-affected-icon';
 import PedigreeUnknownProbandIcon from '@/components/base/icons/pedigree-unknown-proband-icon';
-import PedigreeFemaleAffectedIcon from '@/components/base/icons/pedigree-female-affected-icon';
-import PedigreeFemaleCarrierIcon from '@/components/base/icons/pedigree-female-carrier-icon';
-import PedigreeFemaleDeceasedIcon from '@/components/base/icons/pedigree-female-deceased-icon';
-import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-female-not-affected-icon';
-import PedigreeFemaleProbandIcon from '@/components/base/icons/pedigree-female-proband-icon';
+import ShapeCircleIcon from '@/components/base/icons/shape-circle-icon';
+import ShapeDonutIcon from '@/components/base/icons/shape-donut-icon';
+import ShapeSquareIcon from '@/components/base/icons/shape-square-icon';
+import ShapeTriangleDownIcon from '@/components/base/icons/shape-triangle-down-icon';
+import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
+import TranscriptCanonicalIcon from '@/components/base/icons/transcript-canonical-icon';
+import TranscriptManePlusIcon from '@/components/base/icons/transcript-mane-plus-icon';
+import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
+import { IconType } from '@/components/base/icons/types';
 
 const meta = {
   title: 'Icons/Lucide',
@@ -55,7 +57,12 @@ export const Default: Story = {
         <h1 className="font-bold text-xl">Icons:</h1>
         <div>
           We use Lucide Icons:{' '}
-          <a href="https://lucide.dev/icons/" target="_blank" className="text-primary underline hover:no-underline">
+          <a
+            href="https://lucide.dev/icons/"
+            target="_blank"
+            className="text-primary underline hover:no-underline"
+            rel="noreferrer"
+          >
             https://lucide.dev/icons/
           </a>
         </div>
@@ -106,15 +113,19 @@ export const Default: Story = {
         <IconDisplay icon={PedigreeUnknownDeceasedIcon} title="Unknown Deceased" args={args} />
         <IconDisplay icon={PedigreeUnknownProbandIcon} title="Unknown Proband" args={args} />
       </div>
+      <h1 className="font-bold text-xl">Gene Overlap:</h1>
+      <div className="grid grid-cols-12 gap-2">
+        <IconDisplay icon={GeneOverlapFullGeneIcon} title="Full Gene" args={args} />
+        <IconDisplay icon={GeneOverlapPartialIcon} title="Partial" args={args} />
+        <IconDisplay icon={GeneOverlapFullCNVIcon} title="Full CNV" args={args} />
+      </div>
     </div>
   ),
 };
 
-const IconDisplay = ({ icon: Icon, title, args }: { icon: any; title: string; args: IconType }) => {
-  return (
-    <div className="flex flex-col gap-1 items-center">
-      <Icon {...args} />
-      <div className="text-xs text-center">{title}</div>
-    </div>
-  );
-};
+const IconDisplay = ({ icon: Icon, title, args }: { icon: any; title: string; args: IconType }) => (
+  <div className="flex flex-col gap-1 items-center">
+    <Icon {...args} />
+    <div className="text-xs text-center">{title}</div>
+  </div>
+);

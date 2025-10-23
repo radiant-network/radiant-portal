@@ -97,17 +97,17 @@ export type TableProps<TData> = {
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
 } & (
-  | {
+    | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-  | {
+    | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-);
+  );
 
 export interface BaseColumnSettings {
   id: string;
@@ -310,7 +310,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
+  return function(row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -388,8 +388,6 @@ function getRowFlexRender<T>({
  *
  * @DESCRIPTION: `columns` define the mapping between the column and the cell component
  * @LINK: https://tanstack.com/table/latest/docs/guide/column-defs#creating-accessor-columns
- *
- *
  * @EXAMPLE:
  *  [
  *   columnHelper.accessor((row) => row.hgvsg, {
@@ -455,6 +453,17 @@ function getRowFlexRender<T>({
  *   }),
  *  }]*
  *
+ * @DESCRIPTION: enable column group.
+ *               Use columnHelper.group
+ *               @see: https://tanstack.com/table/latest/docs/framework/react/examples/column-groups
+ * @EXAMPLE:
+    columnHelper.group({
+      id: 'group',
+      columns: [
+        // Row 1
+        columnHelper.accessor(row => row.value, { ... }),
+      ],
+    }),
  */
 // eslint-disable-next-line complexity
 function TranstackTable<T>({
