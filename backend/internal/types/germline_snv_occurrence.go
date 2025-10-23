@@ -96,6 +96,8 @@ type ExpandedGermlineSNVOccurrence = struct {
 	ExomiserAcmgClassification         string                   `json:"exomiser_acmg_classification,omitempty"`
 	ExomiserACMGClassificationCounts   JsonMap[string, int]     `gorm:"type:json" json:"exomiser_acmg_classification_counts,omitempty"`
 	InterpretationClassificationCounts JsonMap[string, int]     `gorm:"type:json" json:"interpretation_classification_counts,omitempty"`
+	InterpretationClassificationCode   string                   `json:"-"`
+	InterpretationClassification       string                   `json:"interpretation_classification,omitempty"`
 	CaseId                             int                      `json:"case_id" validate:"required"`
 } // @name ExpandedGermlineSNVOccurrence
 

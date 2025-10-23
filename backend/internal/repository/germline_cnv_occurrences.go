@@ -2,8 +2,9 @@ package repository
 
 import (
 	"fmt"
-	"github.com/radiant-network/radiant-api/internal/utils"
 	"log"
+
+	"github.com/radiant-network/radiant-api/internal/utils"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -212,7 +213,7 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(seqId int, cnvId int)
      gene_overlap_cytoband AS (
          SELECT
              go.gene_id,
-             array_agg(distinct cb.cytoband) AS cytoband
+             array_agg(distinct cb.cytoband order by cb.cytoband asc) AS cytoband
          FROM gene_overlap go
                   JOIN cytoband cb
                        ON cb.chromosome = @cnv_chromosome
