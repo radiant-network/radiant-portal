@@ -74,35 +74,39 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
     <Dialog onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="md:min-w-[1050px] lg:min-w-[1250px] max-h-[calc(100vh-60px)] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>
-            {t('case_entity.variants.dialog.overlapping_gene', {
-              type: occurrence.type,
-              chromosome: occurrence.chromosome,
-              start: occurrence.start,
-              end: occurrence.end,
-              length: valueToFileSize(occurrence.length),
-            })}
-          </DialogTitle>
-        </DialogHeader>
-        <DialogBody className="min-w-full overflow-auto h-full">
-          <DataTable
-            id="overlapping-genes-table"
-            columns={getCNVOverlappingGenesColumns(t)}
-            defaultColumnSettings={defaultCNVOverlappingGenesSettings}
-            defaultServerSorting={DEFAULT_SORTING}
-            loadingStates={{
-              total: fetchList.isLoading,
-              list: fetchList.isLoading,
-            }}
-            pagination={{ pageIndex: 0, pageSize: 100 }}
-            onPaginationChange={() => { }}
-            data={fetchList?.data ?? []}
-            hasError={!!fetchList.error}
-            total={fetchList?.data?.length ?? 0}
-            tableIndexResultPosition="top"
-          />
-        </DialogBody>
+        {open && (
+          <>
+            <DialogHeader>
+              <DialogTitle>
+                {t('case_entity.variants.dialog.overlapping_gene', {
+                  type: occurrence.type,
+                  chromosome: occurrence.chromosome,
+                  start: occurrence.start,
+                  end: occurrence.end,
+                  length: valueToFileSize(occurrence.length),
+                })}
+              </DialogTitle>
+            </DialogHeader>
+            <DialogBody className="min-w-full overflow-auto h-full">
+              <DataTable
+                id="overlapping-genes-table"
+                columns={getCNVOverlappingGenesColumns(t)}
+                defaultColumnSettings={defaultCNVOverlappingGenesSettings}
+                defaultServerSorting={DEFAULT_SORTING}
+                loadingStates={{
+                  total: fetchList.isLoading,
+                  list: fetchList.isLoading,
+                }}
+                pagination={{ pageIndex: 0, pageSize: 100 }}
+                onPaginationChange={() => {}}
+                data={fetchList?.data ?? []}
+                hasError={!!fetchList.error}
+                total={fetchList?.data?.length ?? 0}
+                tableIndexResultPosition="top"
+              />
+            </DialogBody>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
