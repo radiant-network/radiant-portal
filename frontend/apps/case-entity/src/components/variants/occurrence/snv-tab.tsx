@@ -1,6 +1,7 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import { Count, GermlineSNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
@@ -8,6 +9,8 @@ import DataTable from '@/components/base/data-table/data-table';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Card, CardContent } from '@/components/base/ui/card';
 import { SidebarProvider } from '@/components/base/ui/sidebar';
+import OccurrencePreviewSheet from '@/components/feature/preview/occurrence-preview-sheet';
+import { usePreviewOccurrenceNavigation } from '@/components/feature/preview/use-preview-occurrence-navigation';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
 import UserSavedFiltersProps, { getUserSavedFilters } from '@/components/feature/query-builder/user-saved-filters';
 import { FilterComponent } from '@/components/feature/query-filters/filter-container';
@@ -19,15 +22,12 @@ import { cn } from '@/components/lib/utils';
 import { useConfig } from '@/components/model/applications-config';
 import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { ISyntheticSqon } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
 
+import { SELECTED_VARIANT_PARAM } from '../constants';
 import { OccurrenceCountInput, useSNVOccurrencesCountHelper, useSNVOccurrencesListHelper } from '../hook';
 
-import OccurrencePreviewSheet from '@/components/feature/preview/occurrence-preview-sheet';
-import { usePreviewOccurrenceNavigation } from '@/components/feature/preview/use-preview-occurrence-navigation';
-import { ISyntheticSqon } from '@/components/model/sqon';
-import { useSearchParams } from 'react-router';
-import { SELECTED_VARIANT_PARAM } from '../constants';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
 
 const DEFAULT_SORTING = [
@@ -110,13 +110,17 @@ function SNVTab({ seqId }: SNVTabProps) {
     countBody: { sqon: activeSqon },
   });
 
-  const fetchOccurrencesList = useSWR<GermlineSNVOccurrence[]>('fetch-occurrences-list', fetchOccurrencesListHelper, {
-    revalidateOnFocus: false,
-    revalidateOnMount: false,
-    shouldRetryOnError: false,
-  });
+  const fetchOccurrencesList = useSWR<GermlineSNVOccurrence[]>(
+    'fetch-snv-occurrences-list',
+    fetchOccurrencesListHelper,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
 
-  const fetchOccurrencesCount = useSWR<Count>('fetch-occurrences-count', fetchOccurrencesCountHelper, {
+  const fetchOccurrencesCount = useSWR<Count>('fetch-snv-occurrences-count', fetchOccurrencesCountHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,
@@ -276,7 +280,7 @@ function SNVTab({ seqId }: SNVTabProps) {
           <Card>
             <CardContent>
               <DataTable
-                id="variant-occurrence"
+                id="snv-occurrence"
                 columns={getSNVOccurrenceColumns(t)}
                 data={fetchOccurrencesList.data ?? []}
                 defaultColumnSettings={defaultSNVSettings}

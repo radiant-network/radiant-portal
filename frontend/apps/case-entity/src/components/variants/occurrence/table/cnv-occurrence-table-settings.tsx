@@ -2,7 +2,6 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
 import { GermlineCNVOccurrence } from '@/api/api';
-import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
@@ -20,7 +19,11 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Genes
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
-      cell: info => <OverlappingGeneLinkCell occurrence={info.row.original}>{info.getValue()}</OverlappingGeneLinkCell>,
+      cell: info => (
+        <OverlappingGeneLinkCell occurrence={info.row.original}>
+          {info.getValue() && info.getValue().join(', ')}
+        </OverlappingGeneLinkCell>
+      ),
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbol')}</TooltipHeader>
       ),
@@ -31,7 +34,11 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Cytoband
     columnHelper.accessor(row => row.cytoband, {
       id: 'cytoband',
-      cell: info => <OverlappingGeneLinkCell occurrence={info.row.original}>{info.getValue()}</OverlappingGeneLinkCell>,
+      cell: info => (
+        <OverlappingGeneLinkCell occurrence={info.row.original}>
+          {info.getValue() && info.getValue().join(', ')}
+        </OverlappingGeneLinkCell>
+      ),
       header: t('variant.headers.cytoband'),
       size: 124,
       minSize: 40,

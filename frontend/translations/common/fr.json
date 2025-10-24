@@ -1338,6 +1338,11 @@
           "non_affected": "Non-affecté",
           "unknown": "Inconnu"
         },
+        "cnv_type": {
+          "full_gene": "Gène entièrement contenu dans CNV",
+          "partial": "Gène recoupe le CNV à une de ses extrémités",
+          "full_cnv": "Gène contient entièrement le CNV"
+        },
         "snv": "SNV",
         "cnv": "CNV"
       }

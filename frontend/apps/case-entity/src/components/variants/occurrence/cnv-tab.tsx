@@ -1,6 +1,6 @@
+import { useEffect, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 import { Count, GermlineCNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
@@ -81,13 +81,17 @@ function CNVTab({ seqId }: CNVTabProps) {
     countBody: { sqon: activeSqon },
   });
 
-  const fetchOccurrencesList = useSWR<GermlineCNVOccurrence[]>('fetch-occurrences-list', fetchOccurrencesListHelper, {
-    revalidateOnFocus: false,
-    revalidateOnMount: false,
-    shouldRetryOnError: false,
-  });
+  const fetchOccurrencesList = useSWR<GermlineCNVOccurrence[]>(
+    'fetch-cnv-occurrences-list',
+    fetchOccurrencesListHelper,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
 
-  const fetchOccurrencesCount = useSWR<Count>('fetch-occurrences-count', fetchOccurrencesCountHelper, {
+  const fetchOccurrencesCount = useSWR<Count>('fetch-occurrences-cnv-count', fetchOccurrencesCountHelper, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,
@@ -228,7 +232,7 @@ function CNVTab({ seqId }: CNVTabProps) {
           <Card>
             <CardContent>
               <DataTable
-                id="variant-occurrence"
+                id="cnv-occurrence"
                 columns={getCNVOccurrenceColumns(t)}
                 data={fetchOccurrencesList.data ?? []}
                 defaultColumnSettings={defaultCNVSettings}

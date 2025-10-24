@@ -8,6 +8,7 @@ type OverlappingGeneLinkCellProps = {
   occurrence: GermlineCNVOccurrence;
   children: React.ReactElement;
 };
+
 function OverlappingGeneLinkCell({ occurrence, children }: OverlappingGeneLinkCellProps) {
   if (!occurrence.symbol) return <EmptyCell />;
   return (
