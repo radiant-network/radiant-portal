@@ -1292,6 +1292,11 @@
           "non_affected": "Unaffected",
           "unknown": "Unknown"
         },
+        "cnv_type": {
+          "full_gene": "Gene falls entirely within the CNV",
+          "partial": "Gene overlaps the CNV",
+          "full_cnv": "Gene contains the CNV entirely"
+        },
         "snv": "SNV",
         "cnv": "CNV"
       },
