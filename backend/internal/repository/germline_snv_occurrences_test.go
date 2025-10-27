@@ -683,3 +683,14 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "pathogenic", expandedOccurrence.InterpretationClassification)
 	})
 }
+
+func Test_GetExpandedOccurrence_NoInterpretation(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineSNVOccurrencesRepository(db)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(10, 1000)
+		assert.NoError(t, err)
+		assert.Equal(t, "1000", expandedOccurrence.LocusId)
+		assert.Equal(t, "", expandedOccurrence.InterpretationClassificationCode)
+		assert.Equal(t, "", expandedOccurrence.InterpretationClassification)
+	})
+}
