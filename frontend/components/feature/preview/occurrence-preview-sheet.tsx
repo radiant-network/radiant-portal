@@ -1,5 +1,6 @@
 import { GermlineSNVOccurrence } from '@/api/api';
 import InterpretationDialog from '@/apps/case-entity/src/components/variants/interpretation/interpretation-dialog';
+import ClassificationBadge from '@/components/base/badges/classification-badge';
 import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
@@ -67,11 +68,10 @@ function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, h
     return <PreviewSheetSkeleton />;
   }
 
-  console.log(expandResult.data.clinvar);
-
   return (
     <div className="flex flex-col gap-4">
       <PreviewSheetHeader
+        locusId={occurrence.locus_id}
         hgvsg={occurrence.hgvsg}
         onPrevious={onPrevious}
         onNext={onNext}
@@ -89,6 +89,11 @@ function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, h
               <Button size="sm" onClick={handleOpen}>
                 <ClipboardPen />
                 {t('preview_sheet.actions.interpretation')}
+                {expandResult.data?.interpretation_classification && (
+                  <div className="bg-background rounded-md">
+                    <ClassificationBadge value={expandResult.data.interpretation_classification} abbreviated />
+                  </div>
+                )}
               </Button>
             )}
           />
