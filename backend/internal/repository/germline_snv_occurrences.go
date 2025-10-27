@@ -278,11 +278,13 @@ func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(seqId int, locu
 		}
 	}
 
-	classification, err := types.GetLabelFromCode(expandedOccurrence.InterpretationClassificationCode)
-	if err != nil {
-		return nil, fmt.Errorf("error while fetching occurrence interpretation: %w", err)
+	if len(expandedOccurrence.InterpretationClassificationCode) > 0 {
+		classification, err := types.GetLabelFromCode(expandedOccurrence.InterpretationClassificationCode)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching occurrence interpretation: %w", err)
+		}
+		expandedOccurrence.InterpretationClassification = classification
 	}
-	expandedOccurrence.InterpretationClassification = classification
 
 	txOmim := r.db.Table("omim_gene_panel omim")
 	txOmim = txOmim.Select("omim.omim_phenotype_id, omim.panel, omim.inheritance_code")
