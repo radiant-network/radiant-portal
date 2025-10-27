@@ -432,6 +432,7 @@
         "revel_score": "REVEL",
         "revel_score_tooltip": "Rare Exome Variant Ensemble Learner",
         "requested_by": "Prescribing Institution",
+        "search_by_gene": "Search by gene",
         "select_unit": "Select unit",
         "sift_pred": "SIFT",
         "sift_pred_tooltip": "Sorting Intolerant From Tolerant",

@@ -9,6 +9,9 @@ import { ToggleFilter } from '@/components/feature/query-filters/toggle-filter';
 import { useI18n } from '@/components/hooks/i18n';
 import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
 
+import AutoSuggestFilter from './auto-suggest-filter';
+import UploadFilter from './upload-filter';
+
 interface FilterContainerProps {
   field: AggregationConfig;
   isOpen: boolean;
@@ -68,6 +71,12 @@ export function FilterComponent({ field }: FilterContainerProps) {
   let filterElement;
 
   switch (field.type) {
+    case 'auto-suggest':
+      filterElement = <AutoSuggestFilter field={field} />;
+      break;
+    case 'upload':
+      filterElement = <UploadFilter field={field} />;
+      break;
     case 'multiple':
       filterElement = <MultiSelectFilter field={field} />;
       break;
@@ -98,6 +107,12 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
   let filterElement;
 
   switch (fieldType) {
+    case 'auto-suggest':
+      filterElement = <AutoSuggestFilter field={field} />;
+      break;
+    case 'upload':
+      filterElement = <UploadFilter field={field} />;
+      break;
     case 'multiple':
       filterElement = (
         <AccordionContainer field={field} isOpen={isOpen}>

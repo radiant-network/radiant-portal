@@ -1,9 +1,12 @@
+/* eslint-disable */
 import { useState } from 'react';
+import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { action } from '@storybook/addon-actions';
 
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
+
+import { sizes } from './utils';
 
 const FRAMEWORKS: Option[] = [
   {
@@ -105,6 +108,31 @@ export const Async: Story = {
         className="max-w-[300px]"
         placeholder="Placeholder"
       />
+    );
+  },
+};
+
+export const Size: Story = {
+  render: () => {
+    const [value, setValue] = useState<string | undefined>('nest.js');
+
+    return (
+      <div className="flex flex-col gap-2">
+        {sizes.map(size => (
+          <AutoComplete
+            key={size}
+            size={size}
+            value={value}
+            onChange={value => {
+              setValue(value);
+              action('onChange')(value);
+            }}
+            className="max-w-[300px]"
+            placeholder="Placeholder"
+            options={FRAMEWORKS}
+          />
+        ))}
+      </div>
     );
   },
 };

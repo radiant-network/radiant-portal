@@ -346,6 +346,8 @@
       },
       "gene": {
         "items": [
+          { "key": "search_by_gene", "translation_key": "search_by_gene", "type": "auto-suggest" },
+          { "key": "upload_gene_list", "translation_key": "upload_gene_list", "type": "upload" },
           { "key": "cytoband", "translation_key": "cytoband", "type": "multiple" },
           { "key": "gene_divider", "translation_key": "gene_divider", "type": "divider" },
           { "key": "hpo_gene_panel", "translation_key": "hpo_gene_panel", "type": "multiple" },

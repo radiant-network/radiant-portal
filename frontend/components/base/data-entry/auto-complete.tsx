@@ -1,8 +1,16 @@
 import { type KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, XIcon } from 'lucide-react';
+import { VariantProps } from 'tailwind-variants';
 
-import { CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/base/ui/command';
+import {
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandInputVariants,
+  CommandItem,
+  CommandList,
+} from '@/components/base/ui/command';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
@@ -13,7 +21,7 @@ export type Option = {
   [name: string]: any;
 };
 
-export type AutoCompleteProps<T extends Option> = {
+export type AutoCompleteProps<T extends Option> = VariantProps<typeof CommandInputVariants> & {
   options?: T[];
   emptyIndicator?: ReactNode;
   value?: string;
@@ -38,6 +46,8 @@ export const AutoComplete = <T extends Option>({
   placeholder,
   emptyIndicator,
   value,
+  size = 'default',
+  variant,
   onChange,
   disabled,
   debounceDelay = 500,
@@ -153,7 +163,8 @@ export const AutoComplete = <T extends Option>({
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
           disabled={disabled}
-          className="text-sm"
+          variant={variant}
+          size={size}
           leftAddon={leftAddon}
           rightAddon={
             <button

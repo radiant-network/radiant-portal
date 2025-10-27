@@ -33,7 +33,7 @@ const CommandDialog = ({ children, ...props }: DialogProps) => (
   </Dialog>
 );
 
-const CommandInputVariants = tv({
+export const CommandInputVariants = tv({
   slots: {
     base: 'flex h-9 items-center px-3 bg-background rounded-md border',
   },
@@ -43,9 +43,16 @@ const CommandInputVariants = tv({
       search:
         'focus-within:ring-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-0 [&:has(:focus-visible)]:ring-1',
     },
+    size: {
+      default: 'h-9 px-3 py-2 text-sm',
+      sm: 'h-8 px-3 py-2 text-sm',
+      xs: 'h-7 px-3 py-2 text-sm',
+      xxs: 'h-6 px-3 py-2 text-sm',
+    },
   },
   defaultVariants: {
     variant: 'default',
+    size: 'default',
   },
 });
 
@@ -62,12 +69,13 @@ function CommandInput({
   rightAddon,
   disabled,
   variant,
+  size,
   ...props
 }: CommandInputProps) {
-  const styles = CommandInputVariants({ variant });
+  const styles = CommandInputVariants({ variant, size });
   return (
     <div
-      className={cn(styles.base({ variant }), wrapperClassName, {
+      className={cn(styles.base({ variant, size }), wrapperClassName, {
         'cursor-not-allowed opacity-50': disabled,
       })}
       cmdk-input-wrapper=""
