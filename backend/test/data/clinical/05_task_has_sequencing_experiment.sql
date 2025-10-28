@@ -62,5 +62,8 @@ VALUES (1, 1),
        (21, 60),
        (21, 61),
        (62, 2),
-       (63, 2)
+       (63, 2),
+       (70, 70),
+       (71, 71),
+       (72, 72)
 ON CONFLICT(task_id, sequencing_experiment_id) DO NOTHING;
