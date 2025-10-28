@@ -33,7 +33,7 @@ func Test_GetIGVBySeqIdHandler(t *testing.T) {
 		router := gin.Default()
 		router.GET("/igv/:seq_id", server.GetIGVHandler(repo, nil))
 
-		req, _ := http.NewRequest("GET", "/igv/1", bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", "/igv/70", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -66,9 +66,9 @@ func Test_GetIGVBySeqIdHandler(t *testing.T) {
 					Sex:              "male",
 					Type:             "alignment",
 					Format:           "cram",
-					URL:              fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram", endpoint),
+					URL:              fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.cram", endpoint),
 					URLExpireAt:      0,
-					IndexURL:         fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", endpoint),
+					IndexURL:         fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", endpoint),
 					IndexURLExpireAt: 0,
 					Name:             "Reads: S13226 father",
 				},
@@ -78,9 +78,9 @@ func Test_GetIGVBySeqIdHandler(t *testing.T) {
 					Sex:              "male",
 					Type:             "alignment",
 					Format:           "cram",
-					URL:              fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.cram", endpoint),
+					URL:              fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram", endpoint),
 					URLExpireAt:      0,
-					IndexURL:         fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", endpoint),
+					IndexURL:         fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", endpoint),
 					IndexURLExpireAt: 0,
 					Name:             "Reads: S13224 proband",
 				},

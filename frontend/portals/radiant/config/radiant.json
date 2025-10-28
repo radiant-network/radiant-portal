@@ -334,13 +334,13 @@
             "key": "end",
             "translation_key": "cnv_end",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "Between" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" }
           },
           {
             "key": "nb_snv",
             "translation_key": "nb_snv",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "Between" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" }
           }
         ]
       },

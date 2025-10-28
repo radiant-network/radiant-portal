@@ -28,9 +28,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
               {info.getValue()}
             </AnchorLinkCell>
           ),
-          header: () => (
-            <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbol')}</TooltipHeader>
-          ),
+          header: t('variant.headers.symbol_overlapping'),
           size: 124,
           minSize: 40,
           enableSorting: false,
@@ -62,7 +60,12 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
         columnHelper.accessor(row => row.gene_length, {
           id: 'gene_length',
           cell: info => <DocumentSizeCell value={info.getValue()} />,
-          header: t('variant.headers.length'),
+
+          header: () => (
+            <TooltipHeader tooltip={t('variant.headers.gene_length_tooltip')}>
+              {t('variant.headers.gene_length')}
+            </TooltipHeader>
+          ),
           size: 124,
           minSize: 40,
           enableSorting: true,

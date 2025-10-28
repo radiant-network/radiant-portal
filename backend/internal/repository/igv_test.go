@@ -23,29 +23,29 @@ func (m *MockS3PreSigner) GenerateS3PreSignedURL(url string) (*utils.PreSignedUR
 func Test_IGVInternal_GetIGV(t *testing.T) {
 	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		repo := NewIGVRepository(starrocks)
-		igvInternal, err := repo.GetIGV(1)
+		igvInternal, err := repo.GetIGV(70)
 		assert.NoError(t, err)
 		assert.Len(t, igvInternal, 6)
 		assert.Equal(t, IGVTrack{
-			SequencingExperimentId: 1,
+			SequencingExperimentId: 70,
 			SampleId:               "S13224",
 			PatientId:              3,
 			FamilyRole:             "proband",
 			SexCode:                "male",
 			DataTypeCode:           "alignment",
 			FormatCode:             "crai",
-			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai",
+			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai",
 		}, igvInternal[0])
 		assert.Equal(t, IGVTrack{
-			SequencingExperimentId: 3,
-			SampleId:               "S13226",
-			PatientId:              2,
-			FamilyRole:             "father",
+			SequencingExperimentId: 70,
+			SampleId:               "S13224",
+			PatientId:              3,
+			FamilyRole:             "proband",
 			SexCode:                "male",
 			DataTypeCode:           "alignment",
 			FormatCode:             "cram",
 			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
-		}, igvInternal[5])
+		}, igvInternal[1])
 	})
 }
 

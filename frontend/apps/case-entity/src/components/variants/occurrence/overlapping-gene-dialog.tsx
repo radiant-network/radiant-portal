@@ -3,7 +3,6 @@ import useSWR from 'swr';
 
 import { CNVGeneOverlap, GermlineCNVOccurrence, SortBodyOrderEnum } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
-import { valueToFileSize } from '@/components/base/information/document-size';
 import {
   Dialog,
   DialogBody,
@@ -13,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/base/ui/dialog';
 import { useI18n } from '@/components/hooks/i18n';
+import { toKiloBases } from '@/components/lib/number-format';
 import { occurrencesApi } from '@/utils/api';
 
 import { SeqIDContext } from '../variants-tab';
@@ -83,14 +83,15 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
                   chromosome: occurrence.chromosome,
                   start: occurrence.start,
                   end: occurrence.end,
-                  length: valueToFileSize(occurrence.length),
+                  length: toKiloBases(occurrence.length),
                 })}
               </DialogTitle>
             </DialogHeader>
-            <DialogBody className="min-w-full overflow-auto h-full max-h-[600px]">
+            <DialogBody className="min-w-full overflow-auto h-full">
               <DataTable
                 id="overlapping-genes-table"
                 columns={getCNVOverlappingGenesColumns(t)}
+                className="overflow-auto max-h-[600px]"
                 defaultColumnSettings={defaultCNVOverlappingGenesSettings}
                 defaultServerSorting={DEFAULT_SORTING}
                 loadingStates={{

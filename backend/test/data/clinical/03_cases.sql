@@ -41,5 +41,7 @@ VALUES (1, 3, 1, 1, 'in_progress', 1, 6, 'MONDO:0700092', 'Administrative commen
        (20, 58, 2, 2, 'completed', 20, 6, 'MONDO:0700092', 'Administrative comment',
         '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00'),
        (21, 60, 2, 2, 'in_progress', 21, 6, 'MONDO:0700092', 'Administrative comment',
-        '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00')
+        '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00'),
+       (70, 3, 1, 1, 'in_progress', 1, 6, 'MONDO:0700092', 'Administrative comment',
+        '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00')
 ON CONFLICT (id) DO NOTHING;

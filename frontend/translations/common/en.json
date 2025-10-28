@@ -380,7 +380,7 @@
         "cnv_transmission_mode_tooltip": "Indicator of the possible relationship between the genetics dominance of the variant and its parental origin",
         "consequence": "Consequence",
         "cosmic_gene_panel": "COSMIC",
-        "cosmic_gene_panel_tooltip": "Catalogue of Somatic Mutations in Cancer",
+        "cosmic_gene_panel_tooltip": "Catalogue Of Somatic Mutations In Cancer",
         "cytoband": "Cytoband",
         "dann_score": "DANN",
         "dann_score_tooltip": "Deleterious Annotation of genetic variants using Neural Networks",
@@ -399,7 +399,6 @@
         "gnomad_pli": "gnomAD pLI",
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
-        "gnomad_sc_tooltip": "The number of individuals that carry this variant",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -810,6 +809,8 @@
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltip": "Exomiser score based on variant properties and patient phenotypes",
       "filter": "Filter",
+      "gene_length": "Length",
+      "gene_length_tooltip": "Gene base length",
       "genotype_quality": "GQ",
       "genotype_quality_tooltip": "Genotype quality. Only occurrences with GQ ≥ 20 are taken into account for frequency calculation.",
       "gnomad_sf": "gnomAD",
@@ -826,7 +827,7 @@
       "nb_genes": "# Genes",
       "nb_genes_tooltip": "Number of genes overlapped by CNV",
       "nb_overlap_bases": "# Bases",
-      "nb_overlap_bases_tooltip": "Number of SNVs included in the CNV",
+      "nb_overlap_bases_tooltip": "Overlap in bases",
       "nb_snv": "# SNVs",
       "nb_snv_tooltip": "Number of SNVs included in the CNV",
       "omim_inheritance_code": "OMIM",
@@ -848,6 +849,7 @@
       "quality_tooltip": "CNV Quality",
       "start": "Start",
       "symbol": "Genes",
+      "symbol_overlapping": "Gene",
       "symbol_tooltip": "List of genes overlapped by CNV",
       "type": "Type",
       "variant_class": "Type",
@@ -1301,7 +1303,7 @@
         "cnv": "CNV"
       },
       "dialog": {
-        "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}}({{length}})"
+        "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
       }
     },
     "files": {
