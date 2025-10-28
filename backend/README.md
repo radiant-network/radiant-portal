@@ -87,11 +87,9 @@ make clean
 
 ## Generate the CLI
     
-    ```bash 
-
-    openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axios -o ./frontend/api
-
-    ```
+```bash 
+openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axios -o ./frontend/api
+```
 
 # Dev local
 
@@ -129,7 +127,7 @@ In the example below, `radiant` is `application` scope (because it's client used
 Then use this .env in front-end
 ```
 KEYCLOAK_REALM=CQDG
-KEYCLOAK_HOST=http:localhost:8080
+KEYCLOAK_HOST=http://localhost:8080
 KEYCLOAK_CLIENT=radiant
 KEYCLOAK_CLIENT_SECRET=ShutThisIsASecret!
 SESSION_SECRET=secret_session

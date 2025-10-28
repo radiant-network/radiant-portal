@@ -58,6 +58,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
 	repoSavedFilters := repository.NewSavedFiltersRepository(dbPostgres)
 	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
+	repoFacets := repository.NewFacetsRepository()
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -138,6 +139,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.POST("/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.POST("/:seq_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.GET("/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoPostgres.Interpretations))
+	occurrencesGermlineSNVGroup.GET("/dictionary", server.GetGermlineSNVDictionary(repoFacets))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoSeqExp))

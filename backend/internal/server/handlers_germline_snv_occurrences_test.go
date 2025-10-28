@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -282,4 +283,78 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 		"exomiser_acmg_evidence": null,
 		"exomiser_gene_combined_score": 0
 	}`, w.Body.String())
+}
+
+type MockFacetsRepository struct{}
+
+func (m *MockFacetsRepository) GetFacet(facetName string) (types.Facet, error) {
+	if facetName == "variant_class" {
+		return types.Facet{
+			Name: "variant_class",
+			Values: []string{
+				"insertion",
+				"deletion",
+				"SNV",
+				"indel",
+				"substitution",
+				"sequence_alteration",
+			},
+		}, nil
+	}
+	return types.Facet{}, fmt.Errorf("invalid facet")
+}
+
+func (m *MockFacetsRepository) GetFacets() ([]types.Facet, error) {
+	return []types.Facet{
+		{
+			Name: "variant_class",
+			Values: []string{
+				"insertion",
+				"deletion",
+				"SNV",
+				"indel",
+				"substitution",
+				"sequence_alteration",
+			},
+		},
+	}, nil
+}
+
+func Test_GetGermlineSNVDictionaryHandler_withFacet(t *testing.T) {
+	repo := &MockFacetsRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary?facet=variant_class", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+			"name": "variant_class",
+			"values": [
+				"insertion", 
+				"deletion", 
+				"SNV", 
+				"indel", 
+				"substitution",
+				"sequence_alteration"
+			]
+		}`, w.Body.String())
+}
+
+func Test_GetGermlineSNVDictionaryHandler_facetNotFound(t *testing.T) {
+	repo := &MockFacetsRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary?facet=invalid", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{
+    			"status": 404,
+    			"message": "facet not found"
+		}`, w.Body.String())
 }

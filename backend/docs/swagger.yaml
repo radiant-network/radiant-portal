@@ -729,6 +729,16 @@ components:
       - locus_id
       - picked_consequences
       type: object
+    Facet:
+      properties:
+        name:
+          type: string
+        values:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
     FiltersBodyWithCriteria:
       properties:
         search_criteria:
@@ -3138,6 +3148,44 @@ paths:
       security:
       - bearerauth: []
       summary: Statistics of germline SNV occurrences
+      tags:
+      - occurrences
+  /occurrences/germline/snv/dictionary:
+    get:
+      description: Retrieve germline SNV facets dictionary or specific facet values
+      operationId: getGermlineSNVDictionary
+      parameters:
+      - description: Facet name to retrieve specific values
+        in: query
+        name: facet
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - items:
+                    $ref: '#/components/schemas/Facet'
+                  type: array
+                - $ref: '#/components/schemas/Facet'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get germline SNV facets dictionary
       tags:
       - occurrences
   /sequencing/{seq_id}:
