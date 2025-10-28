@@ -3152,24 +3152,24 @@ paths:
       - occurrences
   /occurrences/germline/snv/dictionary:
     get:
-      description: Retrieve germline SNV facets dictionary or specific facet values
+      description: Retrieve germline SNV facets
       operationId: getGermlineSNVDictionary
       parameters:
-      - description: Facet name to retrieve specific values
+      - description: Facet names to retrieve specific values
         in: query
-        name: facet
+        name: facets
         schema:
-          type: string
+          items:
+            type: string
+          type: array
       responses:
         "200":
           content:
             application/json:
               schema:
-                oneOf:
-                - items:
-                    $ref: '#/components/schemas/Facet'
-                  type: array
-                - $ref: '#/components/schemas/Facet'
+                items:
+                  $ref: '#/components/schemas/Facet'
+                type: array
           description: OK
         "404":
           content:

@@ -287,24 +287,13 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 
 type MockFacetsRepository struct{}
 
-func (m *MockFacetsRepository) GetFacet(facetName string) (types.Facet, error) {
-	if facetName == "variant_class" {
-		return types.Facet{
-			Name: "variant_class",
-			Values: []string{
-				"insertion",
-				"deletion",
-				"SNV",
-				"indel",
-				"substitution",
-				"sequence_alteration",
-			},
-		}, nil
+func (m *MockFacetsRepository) GetFacets(facetNames []string) ([]types.Facet, error) {
+	for _, name := range facetNames {
+		if name != "variant_class" && name != "lrt_pred" {
+			return nil, fmt.Errorf("error")
+		}
 	}
-	return types.Facet{}, fmt.Errorf("invalid facet")
-}
 
-func (m *MockFacetsRepository) GetFacets() ([]types.Facet, error) {
 	return []types.Facet{
 		{
 			Name: "variant_class",
@@ -317,20 +306,29 @@ func (m *MockFacetsRepository) GetFacets() ([]types.Facet, error) {
 				"sequence_alteration",
 			},
 		},
+		{
+			Name: "lrt_pred",
+			Values: []string{
+				"D",
+				"N",
+				"U",
+			},
+		},
 	}, nil
 }
 
-func Test_GetGermlineSNVDictionaryHandler_withFacet(t *testing.T) {
+func Test_GetGermlineSNVDictionaryHandler_withFacets(t *testing.T) {
 	repo := &MockFacetsRepository{}
 	router := gin.Default()
 	router.GET("/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary?facet=variant_class", nil)
+	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary?facets=variant_class&facets=lrt_pred", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{
+	assert.JSONEq(t, `[
+		{
 			"name": "variant_class",
 			"values": [
 				"insertion", 
@@ -340,7 +338,16 @@ func Test_GetGermlineSNVDictionaryHandler_withFacet(t *testing.T) {
 				"substitution",
 				"sequence_alteration"
 			]
-		}`, w.Body.String())
+		},
+		{
+			"name": "lrt_pred",
+			"values": [
+				"D", 
+				"N", 
+				"U"
+			]
+		}
+	]`, w.Body.String())
 }
 
 func Test_GetGermlineSNVDictionaryHandler_facetNotFound(t *testing.T) {
@@ -348,7 +355,7 @@ func Test_GetGermlineSNVDictionaryHandler_facetNotFound(t *testing.T) {
 	router := gin.Default()
 	router.GET("/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary?facet=invalid", nil)
+	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary?facets=invalid", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

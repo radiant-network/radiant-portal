@@ -13,8 +13,7 @@ type FacetsRepository struct {
 }
 
 type FacetsRepositoryDAO interface {
-	GetFacets() ([]Facet, error)
-	GetFacet(facetName string) (Facet, error)
+	GetFacets(facetNames []string) ([]Facet, error)
 }
 
 func NewFacetsRepository() *FacetsRepository {
@@ -89,27 +88,29 @@ func NewFacetsRepository() *FacetsRepository {
 	}
 }
 
-func (r *FacetsRepository) GetFacets() ([]Facet, error) {
+func (r *FacetsRepository) GetFacets(facetNames []string) ([]Facet, error) {
 	var facets []Facet
-	for name, values := range r.facetDictionary {
-		facets = append(facets, Facet{
-			Name:   name,
-			Values: values,
-		})
+
+	if len(facetNames) == 0 {
+		for name, values := range r.facetDictionary {
+			facets = append(facets, Facet{
+				Name:   name,
+				Values: values,
+			})
+		}
+		return facets, nil
 	}
 
-	// TODO: Remove error from return values if not needed
+	for _, name := range facetNames {
+		if values, exists := r.facetDictionary[name]; exists {
+			facets = append(facets, Facet{
+				Name:   name,
+				Values: values,
+			})
+		} else {
+			return nil, fmt.Errorf("facet \"%s\" not found", name)
+		}
+	}
+
 	return facets, nil
-}
-
-func (r *FacetsRepository) GetFacet(facetName string) (Facet, error) {
-	values, exists := r.facetDictionary[facetName]
-	if !exists {
-		return Facet{}, fmt.Errorf("facet \"%q\" does not exist", facetName)
-	}
-
-	return Facet{
-		Name:   facetName,
-		Values: values,
-	}, nil
 }

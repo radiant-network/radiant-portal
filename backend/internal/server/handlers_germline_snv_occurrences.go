@@ -264,37 +264,25 @@ func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO,
 // GetGermlineSNVDictionary handles retrieving germline SNV facets dictionary
 // @Summary Get germline SNV facets dictionary
 // @Id getGermlineSNVDictionary
-// @Description Retrieve germline SNV facets dictionary or specific facet values
+// @Description Retrieve germline SNV facets
 // @Tags occurrences
 // @Security bearerauth
-// @Param facet query string false "Facet name to retrieve specific values"
+// @Param facets query []string false "Facet names to retrieve specific values"
 // @Produce json
 // @Success 200 {array} types.Facet
-// @Success 200 {object} types.Facet
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/snv/dictionary [get]
 func GetGermlineSNVDictionary(repo repository.FacetsRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		facetName := c.Query("facet")
+		facetNames := c.QueryArray("facets")
 
-		if facetName != "" {
-			facetValues, err := repo.GetFacet(facetName)
-			if err != nil {
-				HandleNotFoundError(c, "facet")
-				return
-			}
-
-			c.JSON(http.StatusOK, facetValues)
-			return
-		}
-
-		facetValues, err := repo.GetFacets()
+		facets, err := repo.GetFacets(facetNames)
 		if err != nil {
-			HandleError(c, err)
+			HandleNotFoundError(c, "facet")
 			return
 		}
 
-		c.JSON(http.StatusOK, facetValues)
+		c.JSON(http.StatusOK, facets)
 	}
 }
