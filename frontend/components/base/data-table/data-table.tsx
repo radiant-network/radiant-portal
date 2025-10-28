@@ -1,3 +1,4 @@
+import { CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Column,
   ColumnDef,
@@ -23,7 +24,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
-import { CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
@@ -78,6 +78,7 @@ type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
 export type TableProps<TData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
+  className?: string;
   data: TData[];
   hasError?: boolean;
   defaultColumnSettings: ColumnSettings[];
@@ -97,17 +98,17 @@ export type TableProps<TData> = {
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
 } & (
-    | {
+  | {
       paginationHidden?: false;
       pagination: PaginationState;
       onPaginationChange: OnChangeFn<PaginationState>;
     }
-    | {
+  | {
       paginationHidden: true;
       pagination?: PaginationState;
       onPaginationChange?: OnChangeFn<PaginationState>;
     }
-  );
+);
 
 export interface BaseColumnSettings {
   id: string;
@@ -310,7 +311,7 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function(row: Row<any>) {
+  return function (row: Row<any>) {
     return (
       <Fragment key={row.id}>
         <TableRow
@@ -469,6 +470,7 @@ function getRowFlexRender<T>({
 function TranstackTable<T>({
   id,
   columns,
+  className,
   data,
   defaultColumnSettings,
   defaultServerSorting,
@@ -728,7 +730,7 @@ function TranstackTable<T>({
 
   return (
     <div
-      className={cn('w-full', {
+      className={cn('w-full', className, {
         'absolute top-0 right-0 bottom-0 left-0 bg-background z-50 p-4 overflow-y-scroll': isFullscreen,
       })}
     >
