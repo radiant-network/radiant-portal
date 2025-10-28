@@ -147,7 +147,8 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // # Genes
     columnHelper.accessor(row => row.nb_genes, {
       id: 'nb_genes',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <OverlappingGeneLinkCell occurrence={info.row.original}>{info.getValue()}</OverlappingGeneLinkCell>,
+
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.nb_genes_tooltip')}>{t('variant.headers.nb_genes')}</TooltipHeader>
       ),
@@ -162,6 +163,15 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.calls_tooltip')}>{t('variant.headers.calls')}</TooltipHeader>
       ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Filter
+    columnHelper.accessor(row => row.filter, {
+      id: 'filter',
+      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      header: t('variant.headers.filter'),
       size: 124,
       minSize: 40,
       enableSorting: false,
@@ -181,9 +191,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.bc, {
       id: 'bc',
       cell: info => <TextCell>{info.getValue()}</TextCell>,
-      header: () => (
-        <TooltipHeader tooltip={t('variant.headers.quality_tooltip')}>{t('variant.headers.quality')}</TooltipHeader>
-      ),
+      header: () => <TooltipHeader tooltip={t('variant.headers.bc_tooltip')}>{t('variant.headers.bc')}</TooltipHeader>,
       size: 124,
       minSize: 40,
       enableSorting: true,
@@ -195,7 +203,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
       header: () => <TooltipHeader tooltip={t('variant.headers.pe_tooltip')}>{t('variant.headers.pe')}</TooltipHeader>,
       size: 124,
       minSize: 40,
-      enableSorting: true,
+      enableSorting: false,
     }),
   ] as TableColumnDef<GermlineCNVOccurrence, any>[];
 }
@@ -270,6 +278,11 @@ const defaultCNVSettings = createColumnSettings([
     id: 'calls',
     visible: false,
     label: 'variant.headers.calls',
+  },
+  {
+    id: 'filter',
+    visible: false,
+    label: 'variant.headers.filter',
   },
   {
     id: 'quality',

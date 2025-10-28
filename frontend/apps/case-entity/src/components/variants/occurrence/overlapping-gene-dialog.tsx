@@ -87,10 +87,11 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
                 })}
               </DialogTitle>
             </DialogHeader>
-            <DialogBody className="min-w-full overflow-auto h-full max-h-[600px]">
+            <DialogBody className="min-w-full overflow-auto h-full">
               <DataTable
                 id="overlapping-genes-table"
                 columns={getCNVOverlappingGenesColumns(t)}
+                className="overflow-auto max-h-[600px]"
                 defaultColumnSettings={defaultCNVOverlappingGenesSettings}
                 defaultServerSorting={DEFAULT_SORTING}
                 loadingStates={{
