@@ -399,7 +399,6 @@
         "gnomad_pli": "gnomAD pLI",
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
-        "gnomad_sc_tooltip": "The number of individuals that carry this variant",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -1304,7 +1303,7 @@
         "cnv": "CNV"
       },
       "dialog": {
-        "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}}({{length}})"
+        "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
       }
     },
     "files": {

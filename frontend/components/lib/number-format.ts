@@ -53,8 +53,14 @@ export function toExponentialNotation(numberCandidate?: number, fractionDigits =
   return numberCandidate ? numberCandidate.toExponential(fractionDigits) : '';
 }
 
-export function toExponentialNotationAtThreshold(numberCandidate: number, threshold = 0.001, fractionDigits = 2): string {
-  return (numberCandidate < threshold) ? toExponentialNotation(numberCandidate, fractionDigits) : numberCandidate.toString();
+export function toExponentialNotationAtThreshold(
+  numberCandidate: number,
+  threshold = 0.001,
+  fractionDigits = 2,
+): string {
+  return numberCandidate < threshold
+    ? toExponentialNotation(numberCandidate, fractionDigits)
+    : numberCandidate.toString();
 }
 
 export function canQuotientBeComputed(num: number, denum: number): boolean {
@@ -68,4 +74,23 @@ export function formatQuotientToExponentialOrElse(num: number, denum: number, de
 
 export function formatQuotientOrElse(num: number, denum: number, defaultValue = ''): string {
   return canQuotientBeComputed(num, denum) ? `${num} / ${denum}` : defaultValue;
+}
+
+/* < 1,000 bp display bp after the number, no decimals
+ * e.g. 857 bp
+ * ≥ 1,000 bp and < 1,000,000 bp display kb after the number with Two decimal places.
+ * e.g. 2.45 kb
+ * ≥ 1,000,000 bp and < 1,000,000,000 bp display mb after the number with Two decimal places.
+ * e.g. 1.25 mb
+ */
+export function toKiloBases(num: number): string {
+  if (num < 1000) {
+    return `${num} bp`;
+  }
+
+  if (num < 1000000) {
+    return `${num.toFixed(1)} kb`;
+  }
+
+  return `${num.toFixed(1)} mb`;
 }
