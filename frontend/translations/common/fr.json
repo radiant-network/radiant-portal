@@ -377,6 +377,8 @@
         "genotype_quality": "Qualité du Génotype",
         "gnomad_loeuf": "gnomAD LOEUF",
         "gnomad_pli": "gnomAD pLI",
+        "gnomad_sf": "gnomAD 4.1.0",
+        "gnomad_sc": "gnomAD 4.1.0 ALT",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -614,9 +616,9 @@
       "pathogenicity_predictions_divider": "Prédictions",
       "occurrence_metrics_divider": "Métriques",
       "occurrence_parental_divider": "Analyse parentale",
-      "frequency_divider_my_organization": "Mon Organisation",
-      "frequency_divider_pulic_cohorts": "Cohortes Publiques",
-      "zygosity_divider_parental_analysis": "Analyse Parentale"
+      "frequency_divider_my_organization": "Mon organisation",
+      "frequency_divider_pulic_cohorts": "Cohortes publiques",
+      "zygosity_divider_parental_analysis": "Analyse parentale"
     },
     "upload_id": {
       "upload_a_file": "Téléverser un fichier",
@@ -1350,7 +1352,7 @@
         "cnv": "CNV"
       },
       "dialog": {
-        "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}}({{length}})"
+        "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
       }
     }
   },
