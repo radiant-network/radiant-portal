@@ -34,18 +34,18 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 			SexCode:                "male",
 			DataTypeCode:           "alignment",
 			FormatCode:             "crai",
-			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai",
+			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai",
 		}, igvInternal[0])
 		assert.Equal(t, IGVTrack{
-			SequencingExperimentId: 3,
-			SampleId:               "S13226",
-			PatientId:              2,
-			FamilyRole:             "father",
+			SequencingExperimentId: 1,
+			SampleId:               "S13224",
+			PatientId:              3,
+			FamilyRole:             "proband",
 			SexCode:                "male",
 			DataTypeCode:           "alignment",
 			FormatCode:             "cram",
-			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
-		}, igvInternal[5])
+			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/",
+		}, igvInternal[1])
 	})
 }
 
