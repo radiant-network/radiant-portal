@@ -1,38 +1,134 @@
 import * as React from 'react';
+import { X } from 'lucide-react';
 import { tv, VariantProps } from 'tailwind-variants';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/components/lib/utils';
+
+import { Button } from './button';
+
+const AlertContext = React.createContext<VariantProps<typeof alertVariants>>({
+  variant: 'info',
+});
 
 const alertVariants = tv({
-  base: 'relative w-full rounded-lg border p-2.5 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground',
+  slots: {
+    base: 'flex items-start gap-3 self-stretch relative w-full p-3',
+    border: 'border border-solid rounded-lg',
+    icon: '[&>svg]:w-5 [&>svg]:h-5',
+    content: 'flex flex-col items-start gap-3 flex-1',
+    title: 'text-sm font-semibold leading-5',
+    description: 'text-sm font-normal leading-5',
+    actions: 'flex items-center gap-2',
+    close: 'w-4 h-4 p-1',
+  },
   variants: {
     variant: {
-      default: 'bg-background text-foreground',
-      destructive: 'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
+      info: {
+        base: 'bg-alert-info/20 text-alert-info-foreground',
+        border: 'border-alert-info-foreground/30',
+        actions:
+          '[&>button[data-variant="default"]]:bg-alert-info-foreground [&>button[data-variant="default"]]:hover:bg-alert-info-foreground/90 [&>button[data-variant="ghost"]]:hover:bg-alert-info/30 [&>button[data-variant="ghost"]]:hover:text-alert-info-foreground',
+        close: 'hover:bg-alert-info/30',
+      },
+      warning: {
+        base: 'bg-alert-warning/20 text-alert-warning-foreground',
+        border: 'border-alert-warning-foreground/30',
+        actions:
+          '[&>button[data-variant="default"]]:bg-alert-warning-foreground [&>button[data-variant="default"]]:hover:bg-alert-warning-foreground/90 [&>button[data-variant="ghost"]]:hover:bg-alert-warning/30 [&>button[data-variant="ghost"]]:hover:text-alert-warning-foreground',
+        close: 'hover:bg-alert-warning/30',
+      },
+      error: {
+        base: 'bg-alert-error/20 text-alert-error-foreground',
+        border: 'border-alert-error-foreground/30',
+        actions:
+          '[&>button[data-variant="default"]]:bg-alert-error-foreground [&>button[data-variant="default"]]:hover:bg-alert-error-foreground/90 [&>button[data-variant="ghost"]]:hover:bg-alert-error/30 [&>button[data-variant="ghost"]]:hover:text-alert-error-foreground',
+        close: 'hover:bg-alert-error/30',
+      },
+      success: {
+        base: 'bg-alert-success/20 text-alert-success-foreground',
+        border: 'border-alert-success-foreground/30',
+        actions:
+          '[&>button[data-variant="default"]]:bg-alert-success-foreground [&>button[data-variant="default"]]:hover:bg-alert-success-foreground/90 [&>button[data-variant="ghost"]]:hover:bg-alert-success/30 [&>button[data-variant="ghost"]]:hover:text-alert-success-foreground',
+        close: 'hover:bg-alert-success/30',
+      },
     },
   },
   defaultVariants: {
-    variant: 'default',
+    variant: 'info',
   },
 });
 
-function Alert({
-  className,
-  variant,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>) {
-  return <div role="alert" className={cn(alertVariants({ variant }), className)} {...props} />;
+type AlertProps = React.HTMLAttributes<HTMLDivElement> &
+  VariantProps<typeof alertVariants> & {
+    bordered?: boolean;
+  };
+
+function Alert({ bordered, className, variant, ...props }: AlertProps) {
+  const styles = alertVariants({ variant });
+  return (
+    <AlertContext.Provider value={{ variant }}>
+      <div role="alert" className={cn(styles.base({ className }), bordered && styles.border())} {...props} />
+    </AlertContext.Provider>
+  );
 }
 Alert.displayName = 'Alert';
 
+function AlertIcon({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
+  const { variant } = React.useContext(AlertContext);
+  const styles = alertVariants({ variant });
+  return (
+    <span className={styles.icon({ className })} {...props}>
+      {props.children}
+    </span>
+  );
+}
+AlertIcon.displayName = 'AlertIcon';
+
+function AlertContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  const { variant } = React.useContext(AlertContext);
+  const styles = alertVariants({ variant });
+  return (
+    <div className={styles.content({ className })} {...props}>
+      {props.children}
+    </div>
+  );
+}
+AlertContent.displayName = 'AlertContent';
+
 function AlertTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h5 className={cn('mb-1 font-medium leading-none tracking-tight', className)} {...props} />;
+  const { variant } = React.useContext(AlertContext);
+  const styles = alertVariants({ variant });
+  return <h5 className={styles.title({ className })} {...props} />;
 }
 AlertTitle.displayName = 'AlertTitle';
 
 function AlertDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <div className={cn('text-sm [&_p]:leading-relaxed', className)} {...props} />;
+  const { variant } = React.useContext(AlertContext);
+  const styles = alertVariants({ variant });
+  return <div className={styles.description({ className })} {...props} />;
 }
 AlertDescription.displayName = 'AlertDescription';
 
-export { Alert, AlertTitle, AlertDescription };
+function AlertActions({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  const { variant } = React.useContext(AlertContext);
+  const styles = alertVariants({ variant });
+  return (
+    <div className={styles.actions({ className })} {...props}>
+      {props.children}
+    </div>
+  );
+}
+AlertActions.displayName = 'AlertActions';
+
+function AlertClosableIcon({ className, onClick, ...props }: React.HTMLAttributes<HTMLButtonElement>) {
+  const { variant } = React.useContext(AlertContext);
+  const styles = alertVariants({ variant });
+  return (
+    <Button variant="ghost" size="sm" className={styles.close({ className })} onClick={onClick} {...props}>
+      <X />
+    </Button>
+  );
+}
+AlertClosableIcon.displayName = 'AlertClosableIcon';
+
+export { Alert, AlertIcon, AlertContent, AlertTitle, AlertDescription, AlertActions, AlertClosableIcon };
