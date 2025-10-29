@@ -92,13 +92,7 @@ func (r *FacetsRepository) GetFacets(facetNames []string) ([]Facet, error) {
 	var facets []Facet
 
 	if len(facetNames) == 0 {
-		for name, values := range r.facetDictionary {
-			facets = append(facets, Facet{
-				Name:   name,
-				Values: values,
-			})
-		}
-		return facets, nil
+		return nil, fmt.Errorf("no facet names provided")
 	}
 
 	for _, name := range facetNames {

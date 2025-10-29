@@ -350,6 +350,22 @@ func Test_GetGermlineSNVDictionaryHandler_withFacets(t *testing.T) {
 	]`, w.Body.String())
 }
 
+func Test_GetGermlineSNVDictionaryHandler_noFacets(t *testing.T) {
+	repo := &MockFacetsRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{
+				"status": 400,
+				"message": "Key: 'FacetsQueryParam.Facets' Error:Field validation for 'Facets' failed on the 'required' tag"
+		}`, w.Body.String())
+}
+
 func Test_GetGermlineSNVDictionaryHandler_facetNotFound(t *testing.T) {
 	repo := &MockFacetsRepository{}
 	router := gin.Default()

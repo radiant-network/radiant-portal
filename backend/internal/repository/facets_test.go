@@ -30,8 +30,8 @@ func Test_GetFacets_WithValidNames(t *testing.T) {
 func Test_GetFacets_WithNoNames(t *testing.T) {
 	repo := NewFacetsRepository()
 	facets, err := repo.GetFacets([]string{})
-	assert.NoError(t, err)
-	assert.Greater(t, len(facets), 0)
+	assert.Error(t, err)
+	assert.Nil(t, facets)
 }
 
 func Test_GetFacet_FacetNotFound(t *testing.T) {
