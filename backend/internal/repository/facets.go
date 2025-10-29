@@ -121,10 +121,7 @@ func (r *FacetsRepository) GetFacets(facetNames []string) ([]Facet, error) {
 
 	for _, name := range facetNames {
 		if facet, exists := r.facetsDictionary[name]; exists {
-			facets = append(facets, Facet{
-				Name:   facet.Name,
-				Values: facet.Values,
-			})
+			facets = append(facets, facet)
 		} else {
 			return nil, fmt.Errorf("facet \"%s\" not found", name)
 		}
