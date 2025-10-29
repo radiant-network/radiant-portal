@@ -40,6 +40,19 @@ gap: var(--spacing-2, 8px);
 <div className="flex items-center gap-2">
 ```
 
+**Map figma color with Tailwind**
+
+In figma, select your component and you can see colors in Inspect column. For each part of the component (background, foreground, button) you can see the Figma generic color name and an alpha number to define the opacity.
+If you click on the three points you can see variable details and hover value to see View variable in collection icon button to map this figma color with tailwind color.
+In this variable in collection table, you can see light and dark color to set your new css variables if it is necessary in `themes/tailwind.base.css` (see Shadcn/Tailwind Stacks section).
+For alpha value, it's just needed to add the alpha value where the css variable is used.
+
+Example: 
+  - Figma `alert/warning` and `alpha/20`
+  - Variable in collection `alert/warning` => `tailwind colors/yellow/400`
+  - CSS variable `--color-alert-warning: var(--color-yellow-400);`
+  - Component code `bg-alert-warning/20`
+
 ---
 
 ## Shadcn/Tailwind Stacks
