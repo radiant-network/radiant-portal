@@ -69,6 +69,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   const { fetch: fetchOccurrencesListHelper } = useCNVOccurrencesListHelper({
     seqId,
     listBody: {
+      additional_fields: ['calls', 'filter', 'quality', 'bc', 'pe'],
       limit: pagination.pageSize,
       page_index: pagination.pageIndex,
       sort: sorting,
