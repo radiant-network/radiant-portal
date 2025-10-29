@@ -60,11 +60,15 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
     cnvId: occurrence.cnv_id,
   });
 
-  const fetchList = useSWR<CNVGeneOverlap[]>('fetch-overlapping-genes-list', fetchCNVOverlappingListHelper, {
-    revalidateOnFocus: false,
-    revalidateOnMount: false,
-    shouldRetryOnError: false,
-  });
+  const fetchList = useSWR<CNVGeneOverlap[]>(
+    `fetch-overlapping-genes-list-${seqId}-${occurrence.cnv_id}`,
+    fetchCNVOverlappingListHelper,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
 
   useEffect(() => {
     if (open) fetchList.mutate();
