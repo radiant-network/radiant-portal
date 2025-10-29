@@ -2,11 +2,11 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
 import { GermlineCNVOccurrence } from '@/api/api';
-import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { toKiloBases } from '@/components/lib/number-format';
 
 import ClingenCell from './cells/clingen-cell';
 import CNVNameCell from './cells/cnv-name-cell';
@@ -116,7 +116,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Length
     columnHelper.accessor(row => row.length, {
       id: 'length',
-      cell: info => <DocumentSizeCell value={info.getValue()} />,
+      cell: info => toKiloBases(info.getValue()),
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.length_tooltip')}>{t('variant.headers.length')}</TooltipHeader>
       ),
