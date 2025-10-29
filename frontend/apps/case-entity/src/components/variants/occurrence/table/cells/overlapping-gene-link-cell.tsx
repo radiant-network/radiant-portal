@@ -10,7 +10,7 @@ type OverlappingGeneLinkCellProps = {
 };
 
 function OverlappingGeneLinkCell({ occurrence, children }: OverlappingGeneLinkCellProps) {
-  if (!occurrence.symbol) return <EmptyCell />;
+  if (!children) return <EmptyCell />;
   return (
     <OverlappingGeneDialog occurrence={occurrence}>
       <AnchorLink size="xs">{children}</AnchorLink>
