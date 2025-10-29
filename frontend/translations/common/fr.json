@@ -354,7 +354,7 @@
         "cnv_exomiser_acmg_classification": "ACMG de Exomiser",
         "cnv_exomiser_acmg_classification_tooltip": "La fonctionnalité CNV d’Exomiser est uniquement destinée à la priorisation des variants germinaux et n’est pas conçue pour l’analyse des variants somatique",
         "cnv_length": "Longueur du CNV",
-        "cnv_quality": "Quality du CNV",
+        "cnv_quality": "Qualité du CNV",
         "cnv_start": "Début du CNV",
         "cnv_transmission_mode": "Transmission",
         "cnv_transmission_mode_tooltip": " Interprétation potentielle de la dominance génique d’un variant en fonction de son origine parentale et du statut pathologique du patient",
