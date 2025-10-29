@@ -3155,7 +3155,7 @@ paths:
       description: Retrieve germline SNV facets
       operationId: getGermlineSNVDictionary
       parameters:
-      - description: Facet names to retrieve specific values
+      - description: One or more facets to retrieve
         in: query
         name: facets
         schema:
@@ -3171,6 +3171,12 @@ paths:
                   $ref: '#/components/schemas/Facet'
                 type: array
           description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
         "404":
           content:
             application/json:
