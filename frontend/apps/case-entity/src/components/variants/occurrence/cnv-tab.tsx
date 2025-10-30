@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 import { Count, GermlineCNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
@@ -64,6 +64,12 @@ function CNVTab({ seqId }: CNVTabProps) {
 
   const appId = config.cnv_occurrence.app_id;
   const aggregations = config.cnv_occurrence.aggregations;
+
+  function getAggregationFromConfig(key: string) {
+    return Object.values(config.cnv_occurrence.aggregations)
+      .flatMap(f => f.items)
+      .find(f => f.key === key)!;
+  }
 
   // Variant list request
   const { fetch: fetchOccurrencesListHelper } = useCNVOccurrencesListHelper({
@@ -218,15 +224,19 @@ function CNVTab({ seqId }: CNVTabProps) {
               queryPillFacetFilterConfig={{
                 enable: true,
                 blacklistedFacets: ['locus_id'],
-                onFacetClick: filter => {
-                  const fields = Object.values(config.cnv_occurrence.aggregations)
-                    .flatMap(f => f.items)
-                    .find(f => f.key === filter.content.field)!;
-
-                  return <FilterComponent field={fields} isOpen={true} />;
-                },
+                onFacetClick: filter => (
+                  <FilterComponent field={getAggregationFromConfig(filter.content.field)} isOpen={true} />
+                ),
               }}
               savedFilterType={SavedFilterType.GERMLINE_CNV_OCCURRENCE}
+              dictionary={{
+                queryPill: {
+                  facet: (key: string) =>
+                    t(`common.filters.labels.${getAggregationFromConfig(key).translation_key}`, {
+                      defaultValue: key,
+                    }),
+                },
+              }}
               {...UserSavedFiltersProps}
             />
           </div>

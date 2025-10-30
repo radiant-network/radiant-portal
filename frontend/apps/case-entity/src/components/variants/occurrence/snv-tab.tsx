@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
 import { Count, GermlineSNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
@@ -79,6 +79,12 @@ function SNVTab({ seqId }: SNVTabProps) {
 
   const appId = config.snv_occurrence.app_id;
   const aggregations = config.snv_occurrence.aggregations;
+
+  function getAggregationFromConfig(key: string) {
+    return Object.values(config.snv_occurrence.aggregations)
+      .flatMap(f => f.items)
+      .find(f => f.key === key)!;
+  }
 
   // Variant list request
   const { fetch: fetchOccurrencesListHelper } = useSNVOccurrencesListHelper({
@@ -265,15 +271,19 @@ function SNVTab({ seqId }: SNVTabProps) {
               queryPillFacetFilterConfig={{
                 enable: true,
                 blacklistedFacets: ['locus_id'],
-                onFacetClick: filter => {
-                  const fields = Object.values(config.snv_occurrence.aggregations)
-                    .flatMap(f => f.items)
-                    .find(f => f.key === filter.content.field)!;
-
-                  return <FilterComponent field={fields} isOpen={true} />;
-                },
+                onFacetClick: filter => (
+                  <FilterComponent field={getAggregationFromConfig(filter.content.field)} isOpen={true} />
+                ),
               }}
               savedFilterType={SavedFilterType.GERMLINE_SNV_OCCURRENCE}
+              dictionary={{
+                queryPill: {
+                  facet: (key: string) =>
+                    t(`common.filters.labels.${getAggregationFromConfig(key).translation_key}`, {
+                      defaultValue: key,
+                    }),
+                },
+              }}
               {...UserSavedFiltersProps}
             />
           </div>
