@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -43,13 +44,17 @@ func testCount(t *testing.T, data string, body string, expected int) {
 		assert.JSONEq(t, fmt.Sprintf(`{"count":%d}`, expected), w.Body.String())
 	})
 }
-func testAggregation(t *testing.T, data string, body string, expected string) {
+func testAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
+		facetsRepo := repository.NewFacetsRepository()
 		router := gin.Default()
-		router.POST("/occurrences/germline/snv/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo))
-
-		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/aggregate", bytes.NewBufferString(body))
+		router.POST("/occurrences/germline/snv/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
+		path := "/occurrences/germline/snv/1/aggregate"
+		if len(queryParams) > 0 {
+			path += "?" + strings.Join(queryParams, "&")
+		}
+		req, _ := http.NewRequest("POST", path, bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -167,7 +172,20 @@ func Test_SNVOccurrence_Aggregation(t *testing.T) {
 			"size": 10
 		}`
 	expected := `[{"key": "HOM", "count": 1}, {"key": "HET", "count": 2}]`
-	testAggregation(t, "aggregation", body, expected)
+	testAggregation(t, "aggregation", body, []string{}, expected)
+}
+
+func Test_SNVOccurrence_Aggregation_With_Dictionary(t *testing.T) {
+	body := `{
+			"field": "variant_class",
+			"sqon": {
+				"op": "and",
+				"content": []
+			},
+			"size": 10
+		}`
+	expected := `[{"key": "class1", "count": 4}, {"key": "insertion", "count": 0}, {"key": "deletion", "count": 0}, {"key": "SNV", "count": 0}, {"key": "indel", "count": 0}, {"key": "substitution", "count": 0}, {"key": "sequence_alteration", "count": 0}]`
+	testAggregation(t, "aggregation", body, []string{"with_dictionary=true"}, expected)
 }
 
 func Test_SNVOccurrence_Statistics(t *testing.T) {

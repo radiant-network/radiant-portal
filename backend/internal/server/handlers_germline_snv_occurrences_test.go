@@ -45,8 +45,8 @@ func (m *MockRepository) CountOccurrences(int, types.CountQuery) (int64, error) 
 
 func (m *MockRepository) AggregateOccurrences(int, types.AggQuery) ([]types.Aggregation, error) {
 	return []types.Aggregation{
-			{Bucket: "HET", Count: 2},
-			{Bucket: "HOM", Count: 1},
+			{Bucket: "insertion", Count: 479564},
+			{Bucket: "deletion", Count: 495942},
 		},
 		nil
 }
@@ -149,17 +149,15 @@ func Test_OccurrencesCountHandler(t *testing.T) {
 
 func Test_OccurrencesAggregateHandler(t *testing.T) {
 	repo := &MockRepository{}
+	facetsRepo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:seq_id/aggregate", OccurrencesGermlineSNVAggregateHandler(repo))
+	router.POST("/occurrences/germline/snv/:seq_id/aggregate", OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
 
 	body := `{
-			"field": "zygosity",
+			"field": "variant_class",
 			"sqon":{
-				"op":"in",
-				"content":{
-					"field": "filter",
-					"value": ["PASS"]
-				}
+				"op":"and",
+				"content":[]
 		    },
 			"size": 10
 	}`
@@ -167,7 +165,30 @@ func Test_OccurrencesAggregateHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	expected := `[{"key": "HET", "count": 2}, {"key": "HOM", "count": 1}]`
+	expected := `[{"key": "insertion", "count": 479564}, {"key": "deletion", "count": 495942}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_OccurrencesAggregateHandler_withDictionary(t *testing.T) {
+	repo := &MockRepository{}
+	facetsRepo := &MockFacetsRepository{}
+	router := gin.Default()
+	router.POST("/occurrences/germline/snv/:seq_id/aggregate", OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
+
+	body := `{
+			"field": "variant_class",
+			"sqon":{
+				"op":"and",
+				"content":[]
+		    },
+			"size": 10
+	}`
+	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/aggregate?with_dictionary=true", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `[{"key": "insertion", "count": 479564}, {"key": "deletion", "count": 495942}, {"key": "SNV", "count": 0}, {"key": "indel", "count": 0}, {"key": "substitution", "count": 0}, {"key": "sequence_alteration", "count": 0}]`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }
@@ -288,33 +309,40 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 type MockFacetsRepository struct{}
 
 func (m *MockFacetsRepository) GetFacets(facetNames []string) ([]types.Facet, error) {
-	for _, name := range facetNames {
-		if name != "variant_class" && name != "lrt_pred" {
-			return nil, fmt.Errorf("error")
-		}
+	var variantClassFacet = types.Facet{
+		Name: "variant_class",
+		Values: []string{
+			"insertion",
+			"deletion",
+			"SNV",
+			"indel",
+			"substitution",
+			"sequence_alteration",
+		},
 	}
 
-	return []types.Facet{
-		{
-			Name: "variant_class",
-			Values: []string{
-				"insertion",
-				"deletion",
-				"SNV",
-				"indel",
-				"substitution",
-				"sequence_alteration",
-			},
+	var lrtPredFacet = types.Facet{
+		Name: "lrt_pred",
+		Values: []string{
+			"D",
+			"N",
+			"U",
 		},
-		{
-			Name: "lrt_pred",
-			Values: []string{
-				"D",
-				"N",
-				"U",
-			},
-		},
-	}, nil
+	}
+
+	if len(facetNames) == 2 {
+		return []types.Facet{variantClassFacet, lrtPredFacet}, nil
+	}
+
+	if len(facetNames) == 1 && facetNames[0] == "variant_class" {
+		return []types.Facet{variantClassFacet}, nil
+	}
+
+	if len(facetNames) == 1 && facetNames[0] == "lrt_pred" {
+		return []types.Facet{lrtPredFacet}, nil
+	}
+
+	return nil, fmt.Errorf("error")
 }
 
 func Test_GetGermlineSNVDictionaryHandler_withFacets(t *testing.T) {

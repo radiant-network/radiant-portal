@@ -7,3 +7,9 @@ type Aggregation struct {
 	Label  string `json:"label,omitempty"` // Label corresponding to the key
 	Count  int64  `json:"count"`           // Count in the bucket
 } // @Name Aggregation
+
+// AggregationQueryParam represents the query parameters for an aggregation
+// @Description AggregationQueryParam represents the query parameters for an aggregation
+type AggregationQueryParam struct {
+	WithDictionary bool `form:"with_dictionary"` // Whether to include all possible facet values
+} // @Name AggregationQueryParam

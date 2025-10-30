@@ -114,6 +114,7 @@ func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDA
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
 // @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
+// @Param			message	query		types.AggregationQueryParam	false	"Aggregation Query Param"
 // @Accept json
 // @Produce json
 // @Success 200 {array} types.Aggregation
@@ -121,11 +122,12 @@ func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDA
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/snv/{seq_id}/aggregate [post]
-func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrencesDAO, facetsRepo repository.FacetsRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body  types.AggregationBodyWithSqon
-			query types.AggQuery
+			body       types.AggregationBodyWithSqon
+			query      types.AggQuery
+			queryParam types.AggregationQueryParam
 		)
 
 		// Bind JSON to the struct
@@ -150,6 +152,40 @@ func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrenc
 			HandleError(c, err)
 			return
 		}
+
+		if err := c.ShouldBindQuery(&queryParam); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		if queryParam.WithDictionary {
+			facets, err := facetsRepo.GetFacets([]string{body.Field})
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
+			if len(facets) == 0 {
+				HandleNotFoundError(c, "facet")
+				return
+			}
+
+			existingBuckets := make(map[string]struct{}, len(aggregation))
+			for _, agg := range aggregation {
+				existingBuckets[agg.Bucket] = struct{}{}
+			}
+
+			for _, facet := range facets { // Should be only one facet for now
+				for _, facetValue := range facet.Values {
+					if _, found := existingBuckets[facetValue]; !found {
+						aggregation = append(aggregation, types.Aggregation{
+							Bucket: facetValue,
+							Count:  0,
+						})
+					}
+				}
+			}
+		}
+
 		c.JSON(http.StatusOK, aggregation)
 	}
 }
