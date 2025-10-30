@@ -27,35 +27,35 @@ const alertVariants = tv({
         base: 'bg-alert-default text-alert-default-foreground',
         border: 'border-alert-default-foreground/30',
         actions: '',
-        close: 'hover:bg-alert-default/30',
+        close: 'hover:bg-alert-default/30 hover:text-alert-default-foreground',
       },
       info: {
         base: 'bg-alert-info/20 text-alert-info-foreground',
         border: 'border-alert-info-foreground/30',
         actions:
           '[&>button[data-variant="default"]]:bg-alert-info-foreground [&>button[data-variant="default"]]:hover:bg-alert-info-foreground/90 [&>button[data-variant="ghost"]]:hover:bg-alert-info/30 [&>button[data-variant="ghost"]]:hover:text-alert-info-foreground',
-        close: 'hover:bg-alert-info/30',
+        close: 'hover:bg-alert-info/30 hover:text-alert-info-foreground',
       },
       warning: {
         base: 'bg-alert-warning/20 text-alert-warning-foreground',
         border: 'border-alert-warning-foreground/30',
         actions:
           '[&>button[data-variant="default"]]:bg-alert-warning-foreground [&>button[data-variant="default"]]:hover:bg-alert-warning-foreground/90 [&>button[data-variant="ghost"]]:hover:bg-alert-warning/30 [&>button[data-variant="ghost"]]:hover:text-alert-warning-foreground',
-        close: 'hover:bg-alert-warning/30',
+        close: 'hover:bg-alert-warning/30 hover:text-alert-warning-foreground',
       },
       error: {
         base: 'bg-alert-error/20 text-alert-error-foreground',
         border: 'border-alert-error-foreground/30',
         actions:
           '[&>button[data-variant="default"]]:bg-alert-error-foreground [&>button[data-variant="default"]]:hover:bg-alert-error-foreground/90 [&>button[data-variant="ghost"]]:hover:bg-alert-error/30 [&>button[data-variant="ghost"]]:hover:text-alert-error-foreground',
-        close: 'hover:bg-alert-error/30',
+        close: 'hover:bg-alert-error/30 hover:text-alert-error-foreground',
       },
       success: {
         base: 'bg-alert-success/20 text-alert-success-foreground',
         border: 'border-alert-success-foreground/30',
         actions:
           '[&>button[data-variant="default"]]:bg-alert-success-foreground [&>button[data-variant="default"]]:hover:bg-alert-success-foreground/90 [&>button[data-variant="ghost"]]:hover:bg-alert-success/30 [&>button[data-variant="ghost"]]:hover:text-alert-success-foreground',
-        close: 'hover:bg-alert-success/30',
+        close: 'hover:bg-alert-success/30 hover:text-alert-success-foreground',
       },
     },
   },
