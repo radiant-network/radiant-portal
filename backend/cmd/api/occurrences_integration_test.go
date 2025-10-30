@@ -46,8 +46,9 @@ func testCount(t *testing.T, data string, body string, expected int) {
 func testAggregation(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
+		facetsRepo := repository.NewFacetsRepository()
 		router := gin.Default()
-		router.POST("/occurrences/germline/snv/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo))
+		router.POST("/occurrences/germline/snv/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
 
 		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/aggregate", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
