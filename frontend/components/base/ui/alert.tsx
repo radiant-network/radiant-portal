@@ -23,6 +23,12 @@ const alertVariants = tv({
   },
   variants: {
     variant: {
+      default: {
+        base: 'bg-alert-default text-alert-default-foreground',
+        border: 'border-alert-default-foreground/30',
+        actions: '',
+        close: 'hover:bg-alert-default/30',
+      },
       info: {
         base: 'bg-alert-info/20 text-alert-info-foreground',
         border: 'border-alert-info-foreground/30',
@@ -54,7 +60,7 @@ const alertVariants = tv({
     },
   },
   defaultVariants: {
-    variant: 'info',
+    variant: 'default',
   },
 });
 

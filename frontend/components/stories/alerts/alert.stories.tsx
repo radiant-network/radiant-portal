@@ -20,6 +20,46 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+export const Default: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <Alert variant="default" bordered>
+        <AlertIcon>
+          <CircleAlert />
+        </AlertIcon>
+        <AlertContent>
+          <AlertTitle>Default Alert</AlertTitle>
+          <AlertDescription>This is a default alert message.</AlertDescription>
+          <AlertActions>
+            <Button variant="default" size="sm" onClick={() => alert('Main action clicked')}>
+              Main Action
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => alert('Other action clicked')}>
+              Action
+            </Button>
+          </AlertActions>
+        </AlertContent>
+        <AlertClosableIcon onClick={() => alert('Alert closed')} />
+      </Alert>
+      <Alert variant="default">
+        <AlertContent>
+          <AlertTitle>Default Alert</AlertTitle>
+          <AlertDescription>This is a default alert message.</AlertDescription>
+        </AlertContent>
+      </Alert>
+      <Alert variant="default">
+        <AlertIcon>
+          <CircleAlert />
+        </AlertIcon>
+        <AlertContent>
+          <AlertDescription>This is a default alert message.</AlertDescription>
+        </AlertContent>
+        <AlertClosableIcon onClick={() => alert('Alert closed')} />
+      </Alert>
+    </div>
+  ),
+};
+
 export const Info: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
