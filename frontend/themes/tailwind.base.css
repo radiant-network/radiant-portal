@@ -55,10 +55,12 @@
 
   --radiant-emerald-600: var(--color-emerald-600);
 
-  --info-foreground: var(--color-blue-700);
-  --warning-foreground: var(--color-yellow-800);
-  --error-foreground: var(--color-red-700);
-  --success-foreground: var(--color-green-800);
+  --color-alert-default: var(--color-slate-50);
+  --color-alert-default-foreground: var(--color-radiant-950);
+  --color-alert-info-foreground: var(--color-blue-700);
+  --color-alert-warning-foreground: var(--color-yellow-800);
+  --color-alert-error-foreground: var(--color-red-700);
+  --color-alert-success-foreground: var(--color-green-800);
 }
 
 .dark {
@@ -110,10 +112,12 @@
 
   --radiant-emerald-600: var(--color-emerald-600);
 
-  --info-foreground: var(--color-blue-400);
-  --warning-foreground: var(--color-yellow-400);
-  --error-foreground: var(--color-red-400);
-  --success-foreground: var(--color-green-300);
+  --color-alert-default: var(--color-slate-500);
+  --color-alert-default-foreground: var(--color-slate-50);
+  --color-alert-info-foreground: var(--color-blue-400);
+  --color-alert-warning-foreground: var(--color-yellow-400);
+  --color-alert-error-foreground: var(--color-red-400);
+  --color-alert-success-foreground: var(--color-green-300);
 }
 
 @theme inline {
@@ -216,14 +220,16 @@
   --color-table-active: var(--table-active);
 
   /* Alert Colors */
+  --color-alert-default: var(--color-alert-default);
+  --color-alert-default-foreground: var(--color-alert-default-foreground);
   --color-alert-info: var(--color-blue-400);
-  --color-alert-info-foreground: var(--info-foreground);
+  --color-alert-info-foreground: var(--color-alert-info-foreground);
   --color-alert-warning: var(--color-yellow-400);
-  --color-alert-warning-foreground: var(--warning-foreground);
+  --color-alert-warning-foreground: var(--color-alert-warning-foreground);
   --color-alert-error: var(--color-red-400);
-  --color-alert-error-foreground: var(--error-foreground);
+  --color-alert-error-foreground: var(--color-alert-error-foreground);
   --color-alert-success: var(--color-green-400);
-  --color-alert-success-foreground: var(--success-foreground);
+  --color-alert-success-foreground: var(--color-alert-success-foreground);
 }
 
 @layer base {
