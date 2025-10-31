@@ -75,6 +75,12 @@ export const ROW_HEIGHT = 41;
  */
 type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
 
+type PaginationSettings = {
+  type: 'server' | 'locale' | 'hidden';
+  state?: PaginationState;
+  onPaginationChange?: OnChangeFn<PaginationState>;
+};
+
 export type TableProps<TData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
@@ -87,7 +93,6 @@ export type TableProps<TData> = {
     total?: boolean;
     list?: boolean;
   };
-  paginationHidden?: boolean;
   onServerSortingChange?: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProps<TData>;
   TableFilters?: React.JSX.Element;
@@ -97,18 +102,8 @@ export type TableProps<TData> = {
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
-} & (
-  | {
-      paginationHidden?: false;
-      pagination: PaginationState;
-      onPaginationChange: OnChangeFn<PaginationState>;
-    }
-  | {
-      paginationHidden: true;
-      pagination?: PaginationState;
-      onPaginationChange?: OnChangeFn<PaginationState>;
-    }
-);
+  pagination: PaginationSettings;
+};
 
 export interface BaseColumnSettings {
   id: string;
@@ -466,6 +461,7 @@ function getRowFlexRender<T>({
       ],
     }),
  */
+// TODO add doc for pagination prop
 // eslint-disable-next-line complexity
 function TranstackTable<T>({
   id,
@@ -481,8 +477,6 @@ function TranstackTable<T>({
   },
   hasError = false,
   pagination,
-  paginationHidden = false,
-  onPaginationChange,
   onServerSortingChange,
   subComponent,
   total = 0,
@@ -532,6 +526,19 @@ function TranstackTable<T>({
   );
   const [internalRowSelection, setInternalRowSelection] = useState<Record<string, boolean>>(rowSelection ?? {});
 
+  // État interne pour la pagination locale si aucun callback n'est fourni
+  const [internalPagination, setInternalPagination] = useState<PaginationState>(() => ({
+    pageIndex: pagination.state?.pageIndex || 0,
+    pageSize: pagination.state?.pageSize || 10,
+  }));
+
+  // Synchroniser l'état interne avec les props pour la pagination locale
+  useEffect(() => {
+    if (pagination.type === 'locale' && pagination.state) {
+      setInternalPagination(pagination.state);
+    }
+  }, [pagination.state, pagination.type]);
+
   // Key Input Map
   const handleEscEventListener = () => {
     setIsFullscreen(false);
@@ -559,27 +566,36 @@ function TranstackTable<T>({
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getGroupedRowModel: getGroupedRowModel(),
-    getPaginationRowModel: paginationHidden ? undefined : getPaginationRowModel(),
+    getPaginationRowModel: pagination.type === 'hidden' ? undefined : getPaginationRowModel(),
     getRowCanExpand: () => true,
     isMultiSortEvent: () => true,
     keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
-    manualPagination: !paginationHidden,
+    manualPagination: pagination.type === 'server', // true pour server, false pour locale
     onColumnPinningChange: setColumnPinning,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
     onExpandedChange: setExpanded,
     onGroupingChange: setGrouping,
-    onPaginationChange: paginationHidden ? undefined : onPaginationChange,
+    onPaginationChange: (() => {
+      if (pagination.type === 'hidden') return undefined;
+      if (pagination.type === 'locale') return setInternalPagination;
+      return pagination.onPaginationChange;
+    })(),
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
     onSortingChange: setSorting,
-    pageCount: pagination && !paginationHidden ? getPageCount(pagination, total) : undefined,
+    // TODO extraire dans une fonction tout les check sur pagination et faire un ...props
+    pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, total) : undefined, // Pour la pagination locale, TanStack Table calcule automatiquement
     state: {
       columnOrder,
       columnVisibility,
       columnPinning,
       grouping,
-      pagination: paginationHidden ? undefined : pagination,
+      pagination: (() => {
+        if (pagination.type === 'hidden') return undefined;
+        if (pagination.type === 'locale') return internalPagination;
+        return pagination.state;
+      })(),
       expanded,
       rowPinning,
       rowSelection: onRowSelectionChange ? rowSelection : internalRowSelection,
@@ -633,11 +649,18 @@ function TranstackTable<T>({
 
   // Determine if pagination should be hidden based on data size vs total
   const shouldHidePagination = useMemo(() => {
-    if (paginationHidden) return true;
+    if (pagination.type === 'hidden') return true;
 
-    // Hide pagination if data rows are fewer than total records
-    return total < (pagination?.pageSize || 20);
-  }, [paginationHidden, pagination, total]);
+    const pageSize = pagination.state?.pageSize || 20;
+
+    // Pour la pagination server, on se base sur le total du serveur
+    if (pagination.type === 'server') {
+      return total <= pageSize;
+    }
+
+    // Pour la pagination locale, on se base sur les données locales
+    return data.length <= pageSize;
+  }, [pagination.type, pagination.state?.pageSize, total, data.length]);
 
   /**
    * Add 'Esc' keyboard shortcut for fullscreen mode
@@ -702,10 +725,10 @@ function TranstackTable<T>({
 
     setExpanded({});
 
-    if (!paginationHidden && onPaginationChange) {
-      onPaginationChange({
+    if (pagination.type !== 'hidden' && pagination.onPaginationChange) {
+      pagination.onPaginationChange({
         pageIndex: 0,
-        pageSize: pagination?.pageSize || 20,
+        pageSize: pagination.state?.pageSize || 20,
       });
     }
   }, [sorting]);
@@ -714,10 +737,10 @@ function TranstackTable<T>({
    * Reset expanded sub-component on pagination change
    */
   useEffect(() => {
-    if (!paginationHidden) {
+    if (pagination.type !== 'hidden') {
       setExpanded({});
     }
-  }, [pagination, paginationHidden]);
+  }, [pagination.state, pagination.type]);
 
   /**
    * Sync internal row selection with prop when it changes
@@ -811,7 +834,7 @@ function TranstackTable<T>({
       {loadingStates?.list === true && (
         <DataTableSkeletonLoading
           headerGroups={table.getHeaderGroups()}
-          pagination={pagination || { pageIndex: 0, pageSize: 20 }}
+          pagination={pagination.state || { pageIndex: 0, pageSize: 20 }}
           columnSettings={defaultColumnSettings}
         />
       )}

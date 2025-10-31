@@ -1,7 +1,7 @@
-import { PaginationState } from '@tanstack/react-table';
-import { X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { PaginationState } from '@tanstack/react-table';
+import { X } from 'lucide-react';
 import useSWR from 'swr';
 
 import { Count, GermlineSNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
@@ -104,7 +104,7 @@ function SNVTab({ seqId }: SNVTabProps) {
         'transcript_id',
         'has_interpretation',
       ],
-      limit: pagination.pageSize,
+      limit: 100, // pagination.pageSize,
       page_index: pagination.pageIndex,
       sort: sorting,
       sqon: activeSqon,
@@ -299,8 +299,8 @@ function SNVTab({ seqId }: SNVTabProps) {
                   total: fetchOccurrencesCount.isLoading,
                   list: fetchOccurrencesList.isLoading,
                 }}
-                pagination={pagination}
-                onPaginationChange={setPagination}
+                pagination={{ state: pagination, type: 'locale' }} // prends pas la limite a 10 mais celle a 100 comme si on etait server checker la doc tanstack pour passer les bonnes props
+                // onPaginationChange={setPagination}
                 onServerSortingChange={setSorting}
                 total={fetchOccurrencesCount.data?.count ?? 0}
                 enableColumnOrdering
