@@ -113,7 +113,7 @@ func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDA
 // @Tags occurrences
 // @Security bearerauth
 // @Param seq_id path string true "Sequence ID"
-// @Param with_dictionary query bool false "Whether to include all possible facet values"
+// @Param with_dictionary query bool false "Whether to include all possible facet values" default(false)
 // @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
 // @Accept json
 // @Produce json

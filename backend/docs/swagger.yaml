@@ -2969,6 +2969,7 @@ paths:
         in: query
         name: with_dictionary
         schema:
+          default: false
           type: boolean
       requestBody:
         content:
