@@ -453,15 +453,27 @@ function getRowFlexRender<T>({
  *               Use columnHelper.group
  *               @see: https://tanstack.com/table/latest/docs/framework/react/examples/column-groups
  * @EXAMPLE:
-    columnHelper.group({
-      id: 'group',
-      columns: [
-        // Row 1
-        columnHelper.accessor(row => row.value, { ... }),
-      ],
-    }),
+ *  columnHelper.group({
+ *      id: 'group',
+ *      columns: [
+ *        // Row 1
+ *        columnHelper.accessor(row => row.value, { ... }),
+ *      ],
+ *    }),
+ *  }]
+ *
+ * @DESCRIPTION : pagination prop manage the pagination mode and state
+ *                For client side pagination, set type to 'locale' and provide state if override is needed
+ *                For server side pagination, set type to 'server' and provide state and onPaginationChange handler
+ * @EXAMPLE: {
+ *   type: 'server',
+ *   state: {
+  *     pageIndex: 0,
+  *     pageSize: 10,
+  *   },
+  *  onPaginationChange: (newPagination) => { ... },
+  * } 
  */
-// TODO add doc for pagination prop
 // eslint-disable-next-line complexity
 function TranstackTable<T>({
   id,
@@ -526,15 +538,15 @@ function TranstackTable<T>({
   );
   const [internalRowSelection, setInternalRowSelection] = useState<Record<string, boolean>>(rowSelection ?? {});
 
-  // État interne pour la pagination locale si aucun callback n'est fourni
+  // Default internal pagination state for locale and server pagination
   const [internalPagination, setInternalPagination] = useState<PaginationState>(() => ({
     pageIndex: pagination.state?.pageIndex || 0,
     pageSize: pagination.state?.pageSize || 10,
   }));
 
-  // Synchroniser l'état interne avec les props pour la pagination locale
+  // Synchronyze internal pagination with props state
   useEffect(() => {
-    if (pagination.type === 'locale' && pagination.state) {
+    if (pagination.type !== 'hidden' && pagination.state) {
       setInternalPagination(pagination.state);
     }
   }, [pagination.state, pagination.type]);
@@ -570,7 +582,7 @@ function TranstackTable<T>({
     getRowCanExpand: () => true,
     isMultiSortEvent: () => true,
     keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
-    manualPagination: pagination.type === 'server', // true pour server, false pour locale
+    manualPagination: pagination.type === 'server',
     onColumnPinningChange: setColumnPinning,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
@@ -584,18 +596,13 @@ function TranstackTable<T>({
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
     onSortingChange: setSorting,
-    // TODO extraire dans une fonction tout les check sur pagination et faire un ...props
-    pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, total) : undefined, // Pour la pagination locale, TanStack Table calcule automatiquement
+    pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, total) : undefined,
     state: {
       columnOrder,
       columnVisibility,
       columnPinning,
       grouping,
-      pagination: (() => {
-        if (pagination.type === 'hidden') return undefined;
-        if (pagination.type === 'locale') return internalPagination;
-        return pagination.state;
-      })(),
+      pagination: (() => (pagination.type !== 'hidden' ? internalPagination : undefined))(),
       expanded,
       rowPinning,
       rowSelection: onRowSelectionChange ? rowSelection : internalRowSelection,
@@ -653,13 +660,13 @@ function TranstackTable<T>({
 
     const pageSize = pagination.state?.pageSize || 20;
 
-    // Pour la pagination server, on se base sur le total du serveur
-    if (pagination.type === 'server') {
-      return total <= pageSize;
+    // For client side pagination, we base it on the local data
+    if (pagination.type === 'locale') {
+      return data.length <= pageSize;
     }
 
-    // Pour la pagination locale, on se base sur les données locales
-    return data.length <= pageSize;
+    // Hide pagination if data rows are fewer than total records
+    return total < (pageSize || 20);
   }, [pagination.type, pagination.state?.pageSize, total, data.length]);
 
   /**

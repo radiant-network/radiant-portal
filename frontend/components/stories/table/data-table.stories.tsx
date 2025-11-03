@@ -106,13 +106,16 @@ const meta = {
       total: false,
       list: false,
     },
+
     pagination: {
-      pageIndex: 0,
-      pageSize: 10,
+      type: 'locale',
+      state: {
+        pageIndex: 0,
+        pageSize: 10,
+      },
     },
-    onPaginationChange: () => { },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onServerSortingChange: sorting => { },
+    onServerSortingChange: sorting => {},
     total: 10,
   },
   decorators: [
@@ -165,7 +168,7 @@ export const Error: Story = {
 
 export const Default: Story = {
   args: {
-    data: data.slice(0, 10),
+    data: data,
     enableFullscreen: true,
     enableColumnOrdering: true,
   },
@@ -182,7 +185,7 @@ export const DefaultTableFilters: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
   },
   render: args => <DataTable {...args} />,
 };
@@ -215,7 +218,7 @@ export const DataTableFiltersAndLessThan10Results: Story = {
   args: {
     data: data.slice(0, 1),
     total: 1,
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
     enableFullscreen: true,
     enableColumnOrdering: true,
     tableIndexResultPosition: 'bottom',
@@ -225,14 +228,14 @@ export const DataTableFiltersAndLessThan10Results: Story = {
 
 export const PaginationHidden: Story = {
   args: {
-    paginationHidden: true,
+    pagination: { type: 'hidden' },
   },
   render: args => <DataTable {...args} />,
 };
 
 export const GroupBy: Story = {
   args: {
-    data: data.slice(0, 10),
+    data: data,
     enableFullscreen: true,
     enableColumnOrdering: true,
     columns: [
@@ -286,7 +289,7 @@ export const GroupBy: Story = {
 
 export const HeaderGroups: Story = {
   args: {
-    data: data.slice(0, 10),
+    data: data,
     enableFullscreen: true,
     enableColumnOrdering: true,
     columns: [

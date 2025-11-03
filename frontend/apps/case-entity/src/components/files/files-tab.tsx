@@ -84,8 +84,7 @@ function FilesTab() {
               total: isLoading,
               list: isLoading,
             }}
-            pagination={pagination}
-            onPaginationChange={setPagination}
+            pagination={{ type: 'server', state: pagination, onPaginationChange: setPagination }}
             onServerSortingChange={setSorting}
             total={data?.count ?? 0}
             enableColumnOrdering

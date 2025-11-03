@@ -104,7 +104,7 @@ function SNVTab({ seqId }: SNVTabProps) {
         'transcript_id',
         'has_interpretation',
       ],
-      limit: 100, // pagination.pageSize,
+      limit: pagination.pageSize,
       page_index: pagination.pageIndex,
       sort: sorting,
       sqon: activeSqon,
@@ -299,8 +299,7 @@ function SNVTab({ seqId }: SNVTabProps) {
                   total: fetchOccurrencesCount.isLoading,
                   list: fetchOccurrencesList.isLoading,
                 }}
-                pagination={{ state: pagination, type: 'locale' }} // prends pas la limite a 10 mais celle a 100 comme si on etait server checker la doc tanstack pour passer les bonnes props
-                // onPaginationChange={setPagination}
+                pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
                 onServerSortingChange={setSorting}
                 total={fetchOccurrencesCount.data?.count ?? 0}
                 enableColumnOrdering

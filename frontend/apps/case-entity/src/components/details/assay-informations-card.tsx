@@ -1,5 +1,4 @@
-import { ComponentProps, useState } from 'react';
-import { PaginationState } from '@tanstack/react-table';
+import { ComponentProps } from 'react';
 
 import { CaseEntity, SortBodyOrderEnum } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
@@ -20,11 +19,6 @@ type AssayInformationsCardProps = ComponentProps<'div'> & {
 function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
   const { t } = useI18n();
 
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
   return (
     <Card {...props}>
       <CardHeader className="border-b [.border-b]:pb-4">
@@ -41,11 +35,9 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
             list: false,
           }}
           total={data.assays.length}
-          pagination={pagination}
+          pagination={{ type: 'hidden' }}
           defaultServerSorting={DEFAULT_SORTING}
-          onPaginationChange={setPagination}
           tableIndexResultPosition="hidden"
-          paginationHidden
         />
       </CardContent>
     </Card>
