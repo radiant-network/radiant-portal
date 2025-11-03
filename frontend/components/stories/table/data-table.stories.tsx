@@ -168,7 +168,7 @@ export const Error: Story = {
 
 export const Default: Story = {
   args: {
-    data: data,
+    data: data.slice(0, 10),
     enableFullscreen: true,
     enableColumnOrdering: true,
   },
@@ -233,9 +233,16 @@ export const PaginationHidden: Story = {
   render: args => <DataTable {...args} />,
 };
 
+export const PaginationLocale: Story = {
+  args: {
+    pagination: { type: 'locale', state: { pageIndex: 0, pageSize: 5 } },
+  },
+  render: args => <DataTable {...args} />,
+};
+
 export const GroupBy: Story = {
   args: {
-    data: data,
+    data: data.slice(0, 10),
     enableFullscreen: true,
     enableColumnOrdering: true,
     columns: [
@@ -289,7 +296,7 @@ export const GroupBy: Story = {
 
 export const HeaderGroups: Story = {
   args: {
-    data: data,
+    data: data.slice(0, 10),
     enableFullscreen: true,
     enableColumnOrdering: true,
     columns: [
