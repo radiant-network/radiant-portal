@@ -117,11 +117,12 @@ const meta = {
       list: false,
     },
     pagination: {
-      type: 'locale',
+      type: 'server',
       state: {
         pageIndex: 0,
         pageSize: 10,
       },
+      onPaginationChange: () => {},
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onServerSortingChange: sorting => {},
