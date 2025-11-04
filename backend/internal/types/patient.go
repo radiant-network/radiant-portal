@@ -10,7 +10,6 @@ type Patient struct {
 	SexCode               string
 	Sex                   Sex       `gorm:"foreignKey:Code;references:SexCode"`
 	DateOfBirth           time.Time `gorm:"type:DATE"`
-	LifeStatusCode        string    `gorm:"foreignKey:Code;references:LifeStatusCode"`
 }
 
 var PatientTable = Table{
