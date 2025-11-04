@@ -21,7 +21,7 @@ var (
 	dbPgUser     = os.Getenv("PGUSER")
 	dbPgPassword = os.Getenv("PGPASSWORD")
 	dbPgPort     = os.Getenv("PGPORT")
-	dbPgHost 	 = os.Getenv("PGHOST")
+	dbPgHost     = os.Getenv("PGHOST")
 	dbPgDatabase = os.Getenv("PGDATABASE")
 	dbPgSSLMode  = os.Getenv("PGSSLMODE")
 	dbPgSSLCert  = os.Getenv("PGSSLROOTCERT")
@@ -67,19 +67,19 @@ func MigrateWithParams(path string, host string, port string, database string, u
 		conn += fmt.Sprintf("&sslrootcert=%s", url.QueryEscape(sslcert))
 	}
 	m, err := migrate.New(
-        path,
-        conn,
-    )
-    if err != nil {
-        log.Fatal(err)
-    }
-    if err := m.Up(); err != nil {
+		path,
+		conn,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := m.Up(); err != nil {
 		if "no change" == err.Error() {
 			log.Print(err)
 		} else {
-        	log.Fatal(err)
+			log.Fatal(err)
 		}
-    }
+	}
 }
 
 func MigrateWithEnvDefault() {

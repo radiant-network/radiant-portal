@@ -82,7 +82,7 @@ func Test_SearchCases_OnProbandMRN(t *testing.T) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
-				FieldName: types.PatientMrnField.GetAlias(),
+				FieldName: types.PatientOrganizationIDField.GetAlias(),
 				Value:     []interface{}{"MRN-283775"},
 			},
 		}
@@ -92,7 +92,7 @@ func Test_SearchCases_OnProbandMRN(t *testing.T) {
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
 		assert.Equal(t, 3, (*cases)[0].ProbandID)
-		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandMRN)
+		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandOrganizationID)
 	})
 }
 
@@ -101,7 +101,7 @@ func Test_SearchCases_OnPatientMRN(t *testing.T) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
-				FieldName: types.PatientMrnField.GetAlias(),
+				FieldName: types.PatientOrganizationIDField.GetAlias(),
 				Value:     []interface{}{"MRN-283773"},
 			},
 		}
@@ -111,7 +111,7 @@ func Test_SearchCases_OnPatientMRN(t *testing.T) {
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
 		assert.Equal(t, 3, (*cases)[0].ProbandID)
-		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandMRN)
+		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandOrganizationID)
 	})
 }
 
@@ -130,7 +130,7 @@ func Test_SearchCases_OnProbandID(t *testing.T) {
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
 		assert.Equal(t, 3, (*cases)[0].ProbandID)
-		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandMRN)
+		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandOrganizationID)
 	})
 }
 
@@ -149,7 +149,7 @@ func Test_SearchCases_OnPatientID(t *testing.T) {
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
 		assert.Equal(t, 3, (*cases)[0].ProbandID)
-		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandMRN)
+		assert.Equal(t, "MRN-283775", (*cases)[0].ProbandOrganizationID)
 	})
 }
 
@@ -301,10 +301,10 @@ func Test_RetrieveCasePatients(t *testing.T) {
 		assert.Equal(t, 3, (*members)[0].PatientID)
 		assert.Equal(t, "affected", (*members)[0].AffectedStatusCode)
 		assert.Equal(t, "1973-03-23 00:00:00 +0000 UTC", (*members)[0].DateOfBirth.String())
-		assert.Equal(t, "MRN-283775", (*members)[0].Mrn)
+		assert.Equal(t, "MRN-283775", (*members)[0].OrganizationPatientID)
 		assert.Equal(t, "male", (*members)[0].SexCode)
-		assert.Equal(t, "CHUSJ", (*members)[0].ManagingOrganizationCode)
-		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[0].ManagingOrganizationName)
+		assert.Equal(t, "CHUSJ", (*members)[0].OrganizationCode)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[0].OrganizationName)
 		assert.Len(t, (*members)[0].ObservedPhenotypes, 0)
 		assert.Len(t, (*members)[0].NonObservedPhenotypes, 2)
 		assert.Equal(t, "HP:0000717", (*members)[0].NonObservedPhenotypes[0].ID)
@@ -319,10 +319,10 @@ func Test_RetrieveCasePatients(t *testing.T) {
 		assert.Equal(t, 1, (*members)[1].PatientID)
 		assert.Equal(t, "affected", (*members)[1].AffectedStatusCode)
 		assert.Equal(t, "2012-02-03 00:00:00 +0000 UTC", (*members)[1].DateOfBirth.String())
-		assert.Equal(t, "MRN-283773", (*members)[1].Mrn)
+		assert.Equal(t, "MRN-283773", (*members)[1].OrganizationPatientID)
 		assert.Equal(t, "female", (*members)[1].SexCode)
-		assert.Equal(t, "CHUSJ", (*members)[1].ManagingOrganizationCode)
-		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[1].ManagingOrganizationName)
+		assert.Equal(t, "CHUSJ", (*members)[1].OrganizationCode)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[1].OrganizationName)
 		assert.Len(t, (*members)[1].ObservedPhenotypes, 0)
 		assert.Len(t, (*members)[1].NonObservedPhenotypes, 0)
 
@@ -330,10 +330,10 @@ func Test_RetrieveCasePatients(t *testing.T) {
 		assert.Equal(t, 2, (*members)[2].PatientID)
 		assert.Equal(t, "non_affected", (*members)[2].AffectedStatusCode)
 		assert.Equal(t, "1970-01-30 00:00:00 +0000 UTC", (*members)[2].DateOfBirth.String())
-		assert.Equal(t, "MRN-283774", (*members)[2].Mrn)
+		assert.Equal(t, "MRN-283774", (*members)[2].OrganizationPatientID)
 		assert.Equal(t, "male", (*members)[2].SexCode)
-		assert.Equal(t, "CHUSJ", (*members)[2].ManagingOrganizationCode)
-		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[2].ManagingOrganizationName)
+		assert.Equal(t, "CHUSJ", (*members)[2].OrganizationCode)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[2].OrganizationName)
 		assert.Len(t, (*members)[2].ObservedPhenotypes, 0)
 		assert.Len(t, (*members)[2].NonObservedPhenotypes, 0)
 	})
