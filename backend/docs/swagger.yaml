@@ -40,8 +40,6 @@ components:
           type: string
         capture_kit:
           type: string
-        category_code:
-          type: string
         created_on:
           type: string
         experiment_description:
