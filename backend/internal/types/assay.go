@@ -22,7 +22,6 @@ type Assay = struct {
 	ReadLength               int       `json:"read_length,omitempty"`
 	ExperimentDescription    string    `json:"experiment_description,omitempty"`
 	SampleID                 int       `json:"sample_id,omitempty"`
-	CategoryCode             string    `json:"category_code,omitempty"`
 	SampleTypeCode           string    `json:"sample_type_code,omitempty"`
 	TissueSite               string    `json:"tissue_site,omitempty"`
 	HistologyCode            string    `json:"histology_code,omitempty"`

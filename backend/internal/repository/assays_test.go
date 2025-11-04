@@ -1,10 +1,11 @@
 package repository
 
 import (
+	"testing"
+
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-	"testing"
 )
 
 func Test_GetAssayBySeqId(t *testing.T) {
@@ -31,7 +32,6 @@ func Test_GetAssayBySeqId(t *testing.T) {
 		assert.Equal(t, 151, assay.ReadLength)
 		assert.Equal(t, "A description", assay.ExperimentDescription)
 		assert.Equal(t, 1, assay.SampleID)
-		assert.Equal(t, "sample", assay.CategoryCode)
 		assert.Equal(t, "dna", assay.SampleTypeCode)
 		assert.Equal(t, "", assay.TissueSite)
 		assert.Equal(t, "normal", assay.HistologyCode)

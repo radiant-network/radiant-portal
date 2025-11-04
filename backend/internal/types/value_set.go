@@ -116,18 +116,6 @@ func (ObservationInterpretation) TableName() string {
 	return ObservationInterpretationTable.Name
 }
 
-var SampleCategoryTable = Table{
-	Name: "radiant_jdbc.public.sample_category",
-}
-
-type SampleCategory struct {
-	ValueSet
-} // @name SampleCategory
-
-func (SampleCategory) TableName() string {
-	return SampleCategoryTable.Name
-}
-
 var SampleTypeTable = Table{
 	Name: "radiant_jdbc.public.sample_type",
 }

@@ -2,13 +2,14 @@ package server
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func (m *MockRepository) GetAssayBySeqId(seqId int) (*types.Assay, error) {
@@ -35,7 +36,6 @@ func (m *MockRepository) GetAssayBySeqId(seqId int) (*types.Assay, error) {
 		ReadLength:               151,
 		ExperimentDescription:    "A description",
 		SampleID:                 1,
-		CategoryCode:             "sample",
 		SampleTypeCode:           "dna",
 		TissueSite:               "",
 		HistologyCode:            "normal",
@@ -56,7 +56,6 @@ func Test_GetAssayBySeqIdHandler(t *testing.T) {
 	assert.JSONEq(t, `{
 		"aliquot":"NA12892", 
 		"capture_kit":"SureSelect Custom DNA Target", 
-		"category_code":"sample", 
 		"created_on":"2021-09-12T13:08:00Z", 
 		"experiment_description":"A description", 
 		"experimental_strategy_code":"wxs", 

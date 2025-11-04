@@ -121,12 +121,6 @@ export interface Assay {
      * @type {string}
      * @memberof Assay
      */
-    'category_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
     'created_on'?: string;
     /**
      * 
