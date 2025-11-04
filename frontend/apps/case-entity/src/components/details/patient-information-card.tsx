@@ -48,9 +48,9 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
         <InformationField
           label={t('case_entity.patient_information.managing_org')}
           labelTooltipText={t('case_entity.patient_information.managing_org_tooltip')}
-          tooltipText={member.managing_organization_name}
+          tooltipText={member.organization_name}
         >
-          {member.managing_organization_code}
+          {member.organization_code}
         </InformationField>
       </div>
     </div>

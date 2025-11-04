@@ -304,12 +304,6 @@ components:
             type: string
           type: array
           uniqueItems: false
-        managing_organization_code:
-          type: string
-        managing_organization_name:
-          type: string
-        mrn:
-          type: string
         non_observed_phenotypes:
           items:
             $ref: '#/components/schemas/Term'
@@ -320,6 +314,12 @@ components:
             $ref: '#/components/schemas/Term'
           type: array
           uniqueItems: false
+        organization_code:
+          type: string
+        organization_name:
+          type: string
+        organization_patient_id:
+          type: string
         patient_id:
           type: integer
         relationship_to_proband:
@@ -347,9 +347,9 @@ components:
           type: string
         has_variants:
           type: boolean
-        managing_organization_code:
+        organization_code:
           type: string
-        managing_organization_name:
+        organization_name:
           type: string
         performer_lab_code:
           type: string
@@ -365,7 +365,7 @@ components:
           type: string
         proband_id:
           type: integer
-        proband_mrn:
+        proband_organization_id:
           type: string
         project_code:
           type: string

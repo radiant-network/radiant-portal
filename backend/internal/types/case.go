@@ -26,30 +26,30 @@ type Case struct {
 // @Description Line represented a case in case list
 // @Name CaseResult
 type CaseResult struct {
-	CaseID                   int       `json:"case_id" validate:"required"`
-	ProbandID                int       `json:"proband_id,omitempty"`
-	ProbandMRN               string    `json:"proband_mrn,omitempty"`
-	PriorityCode             string    `json:"priority_code,omitempty"`
-	StatusCode               string    `json:"status_code" validate:"required"`
-	CaseAnalysisTypeCode     string    `json:"-"`
-	CaseAnalysisCode         string    `json:"case_analysis_code,omitempty"`
-	CaseAnalysisName         string    `json:"case_analysis_name,omitempty"`
-	CaseType                 string    `json:"case_type,omitempty"`
-	PrimaryConditionID       string    `json:"primary_condition_id,omitempty"`
-	PrimaryConditionName     string    `json:"primary_condition_name,omitempty"`
-	RequestedByCode          string    `json:"requested_by_code,omitempty"`
-	RequestedByName          string    `json:"requested_by_name,omitempty"`
-	ProjectCode              string    `json:"project_code,omitempty"`
-	ProjectName              string    `json:"project_name,omitempty"`
-	CreatedOn                time.Time `json:"created_on" validate:"required"`
-	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
-	Prescriber               string    `json:"prescriber,omitempty"`
-	PerformerLabCode         string    `json:"performer_lab_code,omitempty"`
-	PerformerLabName         string    `json:"performer_lab_name,omitempty"`
-	RequestID                int       `json:"request_id,omitempty"`
-	ManagingOrganizationCode string    `json:"managing_organization_code,omitempty"`
-	ManagingOrganizationName string    `json:"managing_organization_name,omitempty"`
-	HasVariants              bool      `json:"has_variants" validate:"required"`
+	CaseID                int       `json:"case_id" validate:"required"`
+	ProbandID             int       `json:"proband_id,omitempty"`
+	ProbandOrganizationID string    `json:"proband_organization_id,omitempty"`
+	PriorityCode          string    `json:"priority_code,omitempty"`
+	StatusCode            string    `json:"status_code" validate:"required"`
+	CaseAnalysisTypeCode  string    `json:"-"`
+	CaseAnalysisCode      string    `json:"case_analysis_code,omitempty"`
+	CaseAnalysisName      string    `json:"case_analysis_name,omitempty"`
+	CaseType              string    `json:"case_type,omitempty"`
+	PrimaryConditionID    string    `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName  string    `json:"primary_condition_name,omitempty"`
+	RequestedByCode       string    `json:"requested_by_code,omitempty"`
+	RequestedByName       string    `json:"requested_by_name,omitempty"`
+	ProjectCode           string    `json:"project_code,omitempty"`
+	ProjectName           string    `json:"project_name,omitempty"`
+	CreatedOn             time.Time `json:"created_on" validate:"required"`
+	UpdatedOn             time.Time `json:"updated_on" validate:"required"`
+	Prescriber            string    `json:"prescriber,omitempty"`
+	PerformerLabCode      string    `json:"performer_lab_code,omitempty"`
+	PerformerLabName      string    `json:"performer_lab_name,omitempty"`
+	RequestID             int       `json:"request_id,omitempty"`
+	OrganizationCode      string    `json:"organization_code,omitempty"`
+	OrganizationName      string    `json:"organization_name,omitempty"`
+	HasVariants           bool      `json:"has_variants" validate:"required"`
 }
 
 // CaseEntity - Case Entity data
@@ -105,17 +105,17 @@ type CaseAssay struct {
 // @Description Patient clinical information to display in Case Entity
 // @Name CasePatientClinicalInformation
 type CasePatientClinicalInformation struct {
-	RelationshipToProband    string            `json:"relationship_to_proband" validate:"required"`
-	AffectedStatusCode       string            `json:"affected_status_code" validate:"required"`
-	PatientID                int               `json:"patient_id" validate:"required"`
-	DateOfBirth              time.Time         `json:"date_of_birth"`
-	SexCode                  string            `json:"sex_code" validate:"required"`
-	Mrn                      string            `json:"mrn,omitempty"`
-	ManagingOrganizationCode string            `json:"managing_organization_code,omitempty"`
-	ManagingOrganizationName string            `json:"managing_organization_name,omitempty"`
-	EthnicityCodes           JsonArray[string] `json:"ethnicity_codes,omitempty"` // TODO
-	ObservedPhenotypes       JsonArray[Term]   `json:"observed_phenotypes,omitempty"`
-	NonObservedPhenotypes    JsonArray[Term]   `json:"non_observed_phenotypes,omitempty"`
+	RelationshipToProband string            `json:"relationship_to_proband" validate:"required"`
+	AffectedStatusCode    string            `json:"affected_status_code" validate:"required"`
+	PatientID             int               `json:"patient_id" validate:"required"`
+	DateOfBirth           time.Time         `json:"date_of_birth"`
+	SexCode               string            `json:"sex_code" validate:"required"`
+	OrganizationPatientID string            `json:"organization_patient_id,omitempty"`
+	OrganizationCode      string            `json:"organization_code,omitempty"`
+	OrganizationName      string            `json:"organization_name,omitempty"`
+	EthnicityCodes        JsonArray[string] `json:"ethnicity_codes,omitempty"` // TODO
+	ObservedPhenotypes    JsonArray[Term]   `json:"observed_phenotypes,omitempty"`
+	NonObservedPhenotypes JsonArray[Term]   `json:"non_observed_phenotypes,omitempty"`
 }
 
 type CaseTask struct {
@@ -141,8 +141,8 @@ var CasesFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
 	PatientIdField,
-	PatientMrnField,
-	ProbandMrnField,
+	PatientOrganizationIDField,
+	ProbandOrganizationIDField,
 	RequestPriorityCodeField,
 	CaseStatusCodeField,
 	CaseAnalysisTypeCodeField,
@@ -160,14 +160,14 @@ var CasesFields = []Field{
 	CasePerformerLabCodeField,
 	CasePerformerLabNameField,
 	CaseRequestIdField,
-	PatientManagingOrganizationCodeField,
-	PatientManagingOrganizationNameField,
+	PatientOrganizationCodeField,
+	PatientOrganizationNameField,
 }
 
 var CasesDefaultFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
-	ProbandMrnField,
+	ProbandOrganizationIDField,
 	RequestPriorityCodeField,
 	CaseStatusCodeField,
 	CaseAnalysisTypeCodeField,
