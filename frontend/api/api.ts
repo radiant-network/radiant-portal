@@ -1545,6 +1545,25 @@ export interface ExpandedGermlineSNVOccurrence {
 /**
  * 
  * @export
+ * @interface Facet
+ */
+export interface Facet {
+    /**
+     * 
+     * @type {string}
+     * @memberof Facet
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Facet
+     */
+    'values'?: Array<string>;
+}
+/**
+ * 
+ * @export
  * @interface FiltersBodyWithCriteria
  */
 export interface FiltersBodyWithCriteria {
@@ -5929,10 +5948,11 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @summary Aggregate germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineSNVOccurrences: async (seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateGermlineSNVOccurrences: async (seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'seqId' is not null or undefined
             assertParamExists('aggregateGermlineSNVOccurrences', 'seqId', seqId)
             // verify required parameter 'aggregationBodyWithSqon' is not null or undefined
@@ -5953,6 +5973,10 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             // authentication bearerauth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (withDictionary !== undefined) {
+                localVarQueryParameter['with_dictionary'] = withDictionary;
+            }
 
 
     
@@ -6086,6 +6110,45 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             // authentication bearerauth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve germline SNV facets
+         * @summary Get germline SNV facets dictionary
+         * @param {Array<string>} [facets] One or more facets to retrieve
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineSNVDictionary: async (facets?: Array<string>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/occurrences/germline/snv/dictionary`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (facets) {
+                localVarQueryParameter['facets'] = facets;
+            }
 
 
     
@@ -6345,11 +6408,12 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @summary Aggregate germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, options);
+        async aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, withDictionary, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6394,6 +6458,19 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineSNVOccurrence(seqId, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedGermlineSNVOccurrence']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve germline SNV facets
+         * @summary Get germline SNV facets dictionary
+         * @param {Array<string>} [facets] One or more facets to retrieve
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGermlineSNVDictionary(facets?: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Facet>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineSNVDictionary(facets, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getGermlineSNVDictionary']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -6492,11 +6569,12 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @summary Aggregate germline SNV occurrences
          * @param {string} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
-            return localVarFp.aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, options).then((request) => request(axios, basePath));
+        aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+            return localVarFp.aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
         },
         /**
          * Counts germline CNV occurrences for a given sequence ID
@@ -6530,6 +6608,16 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          */
         getExpandedGermlineSNVOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedGermlineSNVOccurrence> {
             return localVarFp.getExpandedGermlineSNVOccurrence(seqId, locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve germline SNV facets
+         * @summary Get germline SNV facets dictionary
+         * @param {Array<string>} [facets] One or more facets to retrieve
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineSNVDictionary(facets?: Array<string>, options?: RawAxiosRequestConfig): AxiosPromise<Array<Facet>> {
+            return localVarFp.getGermlineSNVDictionary(facets, options).then((request) => request(axios, basePath));
         },
         /**
          * List genes overlapping a CNV with a given ID
@@ -6614,12 +6702,13 @@ export class OccurrencesApi extends BaseAPI {
      * @summary Aggregate germline SNV occurrences
      * @param {string} seqId Sequence ID
      * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+     * @param {boolean} [withDictionary] Whether to include all possible facet values
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -6659,6 +6748,18 @@ export class OccurrencesApi extends BaseAPI {
      */
     public getExpandedGermlineSNVOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve germline SNV facets
+     * @summary Get germline SNV facets dictionary
+     * @param {Array<string>} [facets] One or more facets to retrieve
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getGermlineSNVDictionary(facets?: Array<string>, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getGermlineSNVDictionary(facets, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

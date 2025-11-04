@@ -272,7 +272,7 @@ func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 
 func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinicalInformation, error) {
 	var members []CasePatientClinicalInformation
-	var phenotypeObservationCodings []types.PhenotypeObservationCoding
+	var phenotypeObsCategoricals []types.PhenotypeObsCategorical
 
 	txMembers := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
 	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = f.family_member_id")
@@ -284,16 +284,16 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 		return nil, fmt.Errorf("error retrieving case members: %w", err)
 	}
 
-	txObservations := r.db.Table(fmt.Sprintf("%s %s", types.ObservationCodingTable.Name, types.ObservationCodingTable.Alias))
+	txObservations := r.db.Table(fmt.Sprintf("%s %s", types.ObsCategoricalTable.Name, types.ObsCategoricalTable.Alias))
 	txObservations = txObservations.Joins("LEFT JOIN hpo_term hpo ON obs.observation_code = 'phenotype' AND hpo.id = obs.code_value")
 	txObservations = txObservations.Where("obs.observation_code = 'phenotype' AND obs.case_id = ?", caseId)
 	txObservations = txObservations.Order("phenotype_name asc")
 	txObservations = txObservations.Select("obs.patient_id, hpo.id as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
-	if err := txObservations.Find(&phenotypeObservationCodings).Error; err != nil {
+	if err := txObservations.Find(&phenotypeObsCategoricals).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case phenotypes: %w", err)
 	}
 
-	phenotypesPerPatient := utils.GroupByProperty(phenotypeObservationCodings, func(p types.PhenotypeObservationCoding) int {
+	phenotypesPerPatient := utils.GroupByProperty(phenotypeObsCategoricals, func(p types.PhenotypeObsCategorical) int {
 		return p.PatientID
 	})
 

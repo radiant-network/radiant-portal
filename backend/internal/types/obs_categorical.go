@@ -1,6 +1,6 @@
 package types
 
-type ObservationCoding struct {
+type ObsCategorical struct {
 	ID                 int
 	CaseID             int
 	Case               Case `gorm:"foreignKey:ID;references:CaseID"`
@@ -8,8 +8,8 @@ type ObservationCoding struct {
 	Patient            Patient `gorm:"foreignKey:ID;references:PatientID"`
 	ObservationCode    string
 	Observation        Observation `gorm:"foreignKey:code;references:ObservationCode"`
-	CodingSystem       string
-	CodingValue        string
+	CodeSystem         string
+	CodeValue          string
 	OnsetCode          string
 	Onset              Onset `gorm:"foreignKey:code;references:OnsetCode"`
 	InterpretationCode string
@@ -17,7 +17,7 @@ type ObservationCoding struct {
 	Note               string
 }
 
-type PhenotypeObservationCoding struct {
+type PhenotypeObsCategorical struct {
 	PatientID          int
 	OnsetCode          string
 	InterpretationCode string
@@ -25,12 +25,12 @@ type PhenotypeObservationCoding struct {
 	PhenotypeName      string
 }
 
-var ObservationCodingTable = Table{
-	Name:  "radiant_jdbc.public.observation_coding",
+var ObsCategoricalTable = Table{
+	Name:  "radiant_jdbc.public.obs_categorical",
 	Alias: "obs",
 }
 
-var ObservationCodingAggregatedTmpTable = Table{
+var ObsCategoricalAggregatedTmpTable = Table{
 	Name:  "agg_phenotypes",
 	Alias: "agg_phenotypes",
 }
@@ -39,9 +39,9 @@ var AggregatedPhenotypeTermField = Field{
 	Name:          "phenotypes_term",
 	Alias:         "phenotypes_term",
 	CanBeFiltered: true,
-	Table:         ObservationCodingAggregatedTmpTable,
+	Table:         ObsCategoricalAggregatedTmpTable,
 }
 
-func (ObservationCoding) TableName() string {
-	return ObservationCodingTable.Name
+func (ObsCategorical) TableName() string {
+	return ObsCategoricalTable.Name
 }
