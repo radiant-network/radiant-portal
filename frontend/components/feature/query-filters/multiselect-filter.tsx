@@ -221,14 +221,15 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
             {t('common.filters.buttons.none')}
           </Button>
           <div className="flex-grow" />
-          <Switch
-            id="with-dictionary-switch"
-            checked={withDictionary}
-            onCheckedChange={() => setWithDictionary(!withDictionary)}
-          />
           <Label htmlFor="with-dictionary-switch" className="text-xs">
             {t('common.filters.with_dictionary')}
           </Label>
+          <Switch
+            id="with-dictionary-switch"
+            checked={withDictionary}
+            size="xs"
+            onCheckedChange={() => setWithDictionary(!withDictionary)}
+          />
         </div>
 
         <div className="max-h-[250px] overflow-auto">
