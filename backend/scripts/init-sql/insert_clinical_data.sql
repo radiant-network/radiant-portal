@@ -586,7 +586,7 @@ VALUES (1, 'MRN-283773','mrn',3,'female', '2012-02-03', 'alive', 'Juliette', 'Ga
        (58, 'MRN-283830','mrn',3,'female', '1994-06-26', 'alive', 'Simon', 'Côté', 'CÔT9406263607'),
        (59, 'MRN-283831','mrn',3,'male', '1984-02-09', 'alive', 'Camille', 'Bélanger', 'BÉL8402099104'),
        (60, 'MRN-283832','mrn',3,'female', '1979-07-01', 'alive', 'Gabriel', 'Fortin', 'FOR7907010876'),
-       (61, 'MRN-283833','mrn',3,'female', '1971-07-25', 'alive', 'Camille', 'Bergeron', 'BER7107256143')
+       (61, 'MRN-283833','mrn',3,'female', '1971-07-25', 'alive', 'Camille', 'Bergeron', 'BER7107256143');
 
 INSERT INTO "sample" (id, type_code, parent_sample_id, tissue_site, histology_code, submitter_sample_id, patient_id, submitter_organization_id)
 VALUES (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 6),
