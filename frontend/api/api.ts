@@ -25,537 +25,2605 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 
 /**
  * Aggregation represents an aggregation result
+ * @export
+ * @interface Aggregation
  */
 export interface Aggregation {
     /**
      * Count in the bucket
+     * @type {number}
+     * @memberof Aggregation
      */
     'count'?: number;
     /**
      * Bucket key
+     * @type {string}
+     * @memberof Aggregation
      */
     'key'?: string;
     /**
      * Label corresponding to the key
+     * @type {string}
+     * @memberof Aggregation
      */
     'label'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface AggregationBodyWithSqon
+ */
 export interface AggregationBodyWithSqon {
+    /**
+     * 
+     * @type {string}
+     * @memberof AggregationBodyWithSqon
+     */
     'field'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AggregationBodyWithSqon
+     */
     'size'?: number;
+    /**
+     * 
+     * @type {Sqon}
+     * @memberof AggregationBodyWithSqon
+     */
     'sqon'?: Sqon;
 }
 /**
  * ApiError represents an error
+ * @export
+ * @interface ApiError
  */
 export interface ApiError {
+    /**
+     * 
+     * @type {any}
+     * @memberof ApiError
+     */
     'detail'?: any;
+    /**
+     * 
+     * @type {string}
+     * @memberof ApiError
+     */
     'message': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ApiError
+     */
     'status': number;
 }
+/**
+ * 
+ * @export
+ * @interface Assay
+ */
 export interface Assay {
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'aliquot'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'capture_kit'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'category_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'created_on'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'experiment_description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'experimental_strategy_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'experimental_strategy_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'histology_code'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Assay
+     */
     'is_paired_end': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'performer_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'performer_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'platform_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Assay
+     */
     'read_length'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Assay
+     */
     'request_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'run_alias'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'run_date'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'run_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Assay
+     */
     'sample_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'sample_type_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Assay
+     */
     'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'status_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'submitter_sample_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'tissue_site'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'updated_on'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface AutoCompleteGene
+ */
 export interface AutoCompleteGene {
+    /**
+     * 
+     * @type {Term}
+     * @memberof AutoCompleteGene
+     */
     'highlight'?: Term;
+    /**
+     * 
+     * @type {Term}
+     * @memberof AutoCompleteGene
+     */
     'source'?: Term;
 }
+/**
+ * 
+ * @export
+ * @interface AutoCompleteTerm
+ */
 export interface AutoCompleteTerm {
+    /**
+     * 
+     * @type {Term}
+     * @memberof AutoCompleteTerm
+     */
     'highlight'?: Term;
+    /**
+     * 
+     * @type {Term}
+     * @memberof AutoCompleteTerm
+     */
     'source'?: Term;
 }
+/**
+ * 
+ * @export
+ * @interface AutocompleteResult
+ */
 export interface AutocompleteResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof AutocompleteResult
+     */
     'type': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AutocompleteResult
+     */
     'value': string;
 }
 /**
  * CNVGeneOverlap represents a gene overlap with a CNV
+ * @export
+ * @interface CNVGeneOverlap
  */
 export interface CNVGeneOverlap {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CNVGeneOverlap
+     */
     'cytoband': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CNVGeneOverlap
+     */
     'gene_id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
     'gene_length': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
     'nb_exons': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
     'nb_overlap_bases': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CNVGeneOverlap
+     */
     'overlap_type': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
     'overlapping_cnv_percent': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
     'overlapping_gene_percent': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CNVGeneOverlap
+     */
     'symbol': string;
 }
 /**
  * Assay to display in a Case
+ * @export
+ * @interface CaseAssay
  */
 export interface CaseAssay {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
     'affected_status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
     'experimental_strategy_code': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CaseAssay
+     */
     'has_variants': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
     'histology_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAssay
+     */
     'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
     'relationship_to_proband': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAssay
+     */
     'request_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAssay
+     */
     'sample_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
     'sample_submitter_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
     'sample_type_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseAssay
+     */
     'seq_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssay
+     */
     'updated_on': string;
 }
 /**
  * Data for Case Entity Page
+ * @export
+ * @interface CaseEntity
  */
 export interface CaseEntity {
+    /**
+     * 
+     * @type {Array<CaseAssay>}
+     * @memberof CaseEntity
+     */
     'assays': Array<CaseAssay>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'case_analysis_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'case_analysis_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseEntity
+     */
     'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'case_type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'created_on': string;
+    /**
+     * 
+     * @type {Array<CasePatientClinicalInformation>}
+     * @memberof CaseEntity
+     */
     'members': Array<CasePatientClinicalInformation>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'note'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'performer_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'performer_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'prescriber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'primary_condition_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'priority_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'project_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'project_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseEntity
+     */
     'request_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'requested_by_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'requested_by_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'status_code': string;
+    /**
+     * 
+     * @type {Array<CaseTask>}
+     * @memberof CaseEntity
+     */
     'tasks': Array<CaseTask>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'updated_on': string;
 }
+/**
+ * 
+ * @export
+ * @interface CaseFilters
+ */
 export interface CaseFilters {
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
     'case_analysis': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
     'performer_lab': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
     'priority': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
     'project': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
     'requested_by': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
     'status': Array<Aggregation>;
 }
 /**
  * Patient clinical information to display in Case Entity
+ * @export
+ * @interface CasePatientClinicalInformation
  */
 export interface CasePatientClinicalInformation {
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
     'affected_status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
     'date_of_birth'?: string;
     /**
      * TODO
+     * @type {Array<string>}
+     * @memberof CasePatientClinicalInformation
      */
     'ethnicity_codes'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
     'managing_organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
     'managing_organization_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
     'mrn'?: string;
+    /**
+     * 
+     * @type {Array<Term>}
+     * @memberof CasePatientClinicalInformation
+     */
     'non_observed_phenotypes'?: Array<Term>;
+    /**
+     * 
+     * @type {Array<Term>}
+     * @memberof CasePatientClinicalInformation
+     */
     'observed_phenotypes'?: Array<Term>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CasePatientClinicalInformation
+     */
     'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
     'relationship_to_proband': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
     'sex_code': string;
 }
 /**
  * Line represented a case in case list
+ * @export
+ * @interface CaseResult
  */
 export interface CaseResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'case_analysis_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'case_analysis_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseResult
+     */
     'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'case_type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'created_on': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CaseResult
+     */
     'has_variants': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'managing_organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'managing_organization_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'performer_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'performer_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'prescriber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'primary_condition_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'priority_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseResult
+     */
     'proband_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'proband_mrn'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'project_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'project_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseResult
+     */
     'request_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'requested_by_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'requested_by_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
     'updated_on': string;
 }
+/**
+ * 
+ * @export
+ * @interface CaseTask
+ */
 export interface CaseTask {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTask
+     */
     'created_on': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseTask
+     */
     'id': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CaseTask
+     */
     'patients': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTask
+     */
     'type_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTask
+     */
     'type_name': string;
 }
+/**
+ * 
+ * @export
+ * @interface CasesSearchResponse
+ */
 export interface CasesSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof CasesSearchResponse
+     */
     'count': number;
+    /**
+     * 
+     * @type {Array<CaseResult>}
+     * @memberof CasesSearchResponse
+     */
     'list': Array<CaseResult>;
 }
 /**
  * ClinvarRCV represents a Reference ClinVar record - data aggregated by variant-condition pair
+ * @export
+ * @interface ClinvarRCV
  */
 export interface ClinvarRCV {
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
     'accession'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ClinvarRCV
+     */
     'clinical_significance'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
     'clinvar_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
     'date_last_evaluated'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
     'locus_id': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ClinvarRCV
+     */
     'origins'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
     'review_status'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ClinvarRCV
+     */
     'review_status_stars'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ClinvarRCV
+     */
     'submission_count'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ClinvarRCV
+     */
     'traits'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ClinvarRCV
+     */
     'version'?: number;
 }
+/**
+ * 
+ * @export
+ * @interface ColumnPinningConfig
+ */
 export interface ColumnPinningConfig {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ColumnPinningConfig
+     */
     'left'?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ColumnPinningConfig
+     */
     'right'?: Array<string>;
 }
 /**
  * Count represents count result
+ * @export
+ * @interface Count
  */
 export interface Count {
     /**
      * Number of results
+     * @type {number}
+     * @memberof Count
      */
     'count'?: number;
 }
+/**
+ * 
+ * @export
+ * @interface CountBodyWithSqon
+ */
 export interface CountBodyWithSqon {
+    /**
+     * 
+     * @type {Sqon}
+     * @memberof CountBodyWithSqon
+     */
     'sqon'?: Sqon;
 }
+/**
+ * 
+ * @export
+ * @interface DocumentFilters
+ */
 export interface DocumentFilters {
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof DocumentFilters
+     */
     'data_type': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof DocumentFilters
+     */
     'format': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof DocumentFilters
+     */
     'performer_lab'?: Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof DocumentFilters
+     */
     'project'?: Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof DocumentFilters
+     */
     'relationship_to_proband': Array<Aggregation>;
 }
+/**
+ * 
+ * @export
+ * @interface DocumentResult
+ */
 export interface DocumentResult {
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
     'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'data_type_code': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
     'document_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'format_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'hash'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
     'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'performer_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'performer_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'relationship_to_proband_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'run_alias'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
     'seq_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
     'size': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
     'submitter_sample_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentResult
+     */
     'task_id': number;
 }
+/**
+ * 
+ * @export
+ * @interface DocumentsSearchResponse
+ */
 export interface DocumentsSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof DocumentsSearchResponse
+     */
     'count': number;
+    /**
+     * 
+     * @type {Array<DocumentResult>}
+     * @memberof DocumentsSearchResponse
+     */
     'list': Array<DocumentResult>;
 }
+/**
+ * 
+ * @export
+ * @interface ExpandedGermlineSNVOccurrence
+ */
 export interface ExpandedGermlineSNVOccurrence {
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'ad_alt'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'ad_total'?: number;
     /**
      * TODO
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
      */
     'af'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'cadd_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'chromosome'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'dann_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'dna_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'end'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'exomiser_acmg_classification'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'exomiser_acmg_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'exomiser_acmg_evidence': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'exomiser_gene_combined_score': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'exon_rank'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'exon_total'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'father_calls'?: Array<number>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'fathmm_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'filter'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'genotype_quality': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'gnomad_v3_af': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'hgvsg': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'interpretation_classification'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'interpretation_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'is_canonical'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'is_mane_select'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'locus_id': string;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'mother_calls'?: Array<number>;
+    /**
+     * 
+     * @type {Array<OmimGenePanel>}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'omim_conditions'?: Array<OmimGenePanel>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'parental_origin'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'pf_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'picked_consequences': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'qd'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'rsnumber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'sift_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'start'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'transmission'?: string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'vep_impact'?: VepImpact;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'zygosity'?: string;
 }
 
 
+/**
+ * 
+ * @export
+ * @interface Facet
+ */
 export interface Facet {
+    /**
+     * 
+     * @type {string}
+     * @memberof Facet
+     */
     'name'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Facet
+     */
     'values'?: Array<string>;
 }
+/**
+ * 
+ * @export
+ * @interface FiltersBodyWithCriteria
+ */
 export interface FiltersBodyWithCriteria {
+    /**
+     * 
+     * @type {Array<SearchCriterion>}
+     * @memberof FiltersBodyWithCriteria
+     */
     'search_criteria'?: Array<SearchCriterion>;
 }
+/**
+ * 
+ * @export
+ * @interface GenePanelCondition
+ */
 export interface GenePanelCondition {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GenePanelCondition
+     */
     'inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GenePanelCondition
+     */
     'panel_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GenePanelCondition
+     */
     'panel_name': string;
 }
+/**
+ * 
+ * @export
+ * @interface GenePanelConditions
+ */
 export interface GenePanelConditions {
+    /**
+     * 
+     * @type {{ [key: string]: Array<GenePanelCondition>; }}
+     * @memberof GenePanelConditions
+     */
     'conditions': { [key: string]: Array<GenePanelCondition>; };
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelConditions
+     */
     'count_hpo': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelConditions
+     */
     'count_omim': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelConditions
+     */
     'count_orphanet': number;
 }
 /**
  * GermlineCNVOccurrence represents a germline CNV occurrence
+ * @export
+ * @interface GermlineCNVOccurrence
  */
 export interface GermlineCNVOccurrence {
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
     'aliquot'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'bc'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
     'calls'?: Array<number>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
     'chromosome': string;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
     'ciend'?: Array<number>;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
     'cipos'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'cn'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
     'cnv_id': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineCNVOccurrence
+     */
     'cytoband'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'end': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
     'filter'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'gnomad_sc'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'gnomad_sf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'gnomad_sn'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'length': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
     'name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'nb_genes'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'nb_snv'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
     'pe'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'quality'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'reflen'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'seq_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'sm'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'start': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'svlen'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
     'svtype'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineCNVOccurrence
+     */
     'symbol'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
     'type': string;
 }
 /**
  * GermlineSNVOccurrence represents a germline SNV occurrence
+ * @export
+ * @interface GermlineSNVOccurrence
  */
 export interface GermlineSNVOccurrence {
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'ad_ratio': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'chromosome': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineSNVOccurrence
+     */
     'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'exomiser_acmg_classification': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineSNVOccurrence
+     */
     'exomiser_acmg_evidence': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'exomiser_gene_combined_score': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'exomiser_moi': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'exomiser_variant_score': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'filter'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'genotype_quality': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'gnomad_v3_af': number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
     'has_interpretation': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'hgvsg': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
     'is_canonical'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
     'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
     'is_mane_select'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'locus_id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'max_impact_score': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineSNVOccurrence
+     */
     'omim_inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'pf_wgs': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineSNVOccurrence
+     */
     'picked_consequences': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'pn_wgs'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'rsnumber'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'seq_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'start': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'symbol'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'task_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'variant_class': string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof GermlineSNVOccurrence
+     */
     'vep_impact'?: VepImpact;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
     'zygosity': string;
 }
 
 
+/**
+ * 
+ * @export
+ * @interface IGVTrackEnriched
+ */
 export interface IGVTrackEnriched {
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'family_role'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'format'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'indexURL'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
     'indexURLExpireAt'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
     'patient_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'sex'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'url'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
     'urlExpireAt'?: number;
 }
+/**
+ * 
+ * @export
+ * @interface IGVTracks
+ */
 export interface IGVTracks {
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
     'alignment'?: Array<IGVTrackEnriched>;
 }
+/**
+ * 
+ * @export
+ * @interface InterpretationGermline
+ */
 export interface InterpretationGermline {
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'classification'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof InterpretationGermline
+     */
     'classification_criterias'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'condition'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'created_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'created_by'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'created_by_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'interpretation'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'locus_id'?: string;
+    /**
+     * 
+     * @type {InterpretationMetadata}
+     * @memberof InterpretationGermline
+     */
     'metadata'?: InterpretationMetadata;
+    /**
+     * 
+     * @type {Array<InterpretationPubmed>}
+     * @memberof InterpretationGermline
+     */
     'pubmed'?: Array<InterpretationPubmed>;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'sequencing_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof InterpretationGermline
+     */
     'transmission_modes'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'updated_by'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'updated_by_name'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface InterpretationMetadata
+ */
 export interface InterpretationMetadata {
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
     'analysis_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
     'patient_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationMetadata
+     */
     'variant_hash'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface InterpretationPubmed
+ */
 export interface InterpretationPubmed {
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationPubmed
+     */
     'citation'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationPubmed
+     */
     'citation_id'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface InterpretationSomatic
+ */
 export interface InterpretationSomatic {
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'clinical_utility'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'created_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'created_by'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'created_by_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'interpretation'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'locus_id'?: string;
+    /**
+     * 
+     * @type {InterpretationMetadata}
+     * @memberof InterpretationSomatic
+     */
     'metadata'?: InterpretationMetadata;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'oncogenicity'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof InterpretationSomatic
+     */
     'oncogenicity_classification_criterias'?: Array<string>;
+    /**
+     * 
+     * @type {Array<InterpretationPubmed>}
+     * @memberof InterpretationSomatic
+     */
     'pubmed'?: Array<InterpretationPubmed>;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'sequencing_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'tumoral_type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'updated_by'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'updated_by_name'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface LeafContent
+ */
 export interface LeafContent {
+    /**
+     * 
+     * @type {string}
+     * @memberof LeafContent
+     */
     'field'?: string;
+    /**
+     * 
+     * @type {Array<any>}
+     * @memberof LeafContent
+     */
     'value'?: Array<any>;
 }
 /**
  * Body of a list request with search criteria
+ * @export
+ * @interface ListBodyWithCriteria
  */
 export interface ListBodyWithCriteria {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ListBodyWithCriteria
+     */
     'additional_fields'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListBodyWithCriteria
+     */
     'limit'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListBodyWithCriteria
+     */
     'offset'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListBodyWithCriteria
+     */
     'page_index'?: number;
+    /**
+     * 
+     * @type {Array<SearchCriterion>}
+     * @memberof ListBodyWithCriteria
+     */
     'search_criteria'?: Array<SearchCriterion>;
+    /**
+     * 
+     * @type {Array<SortBody>}
+     * @memberof ListBodyWithCriteria
+     */
     'sort'?: Array<SortBody>;
 }
 /**
  * Body of a list request
+ * @export
+ * @interface ListBodyWithSqon
  */
 export interface ListBodyWithSqon {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ListBodyWithSqon
+     */
     'additional_fields'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListBodyWithSqon
+     */
     'limit'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListBodyWithSqon
+     */
     'offset'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListBodyWithSqon
+     */
     'page_index'?: number;
+    /**
+     * 
+     * @type {Array<SortBody>}
+     * @memberof ListBodyWithSqon
+     */
     'sort'?: Array<SortBody>;
+    /**
+     * 
+     * @type {Sqon}
+     * @memberof ListBodyWithSqon
+     */
     'sqon'?: Sqon;
 }
+/**
+ * 
+ * @export
+ * @interface OmimGenePanel
+ */
 export interface OmimGenePanel {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof OmimGenePanel
+     */
     'inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof OmimGenePanel
+     */
     'omim_phenotype_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OmimGenePanel
+     */
     'panel'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface PaginationConfig
+ */
 export interface PaginationConfig {
+    /**
+     * 
+     * @type {number}
+     * @memberof PaginationConfig
+     */
     'pageSize'?: number;
 }
+/**
+ * 
+ * @export
+ * @interface PubmedCitation
+ */
 export interface PubmedCitation {
+    /**
+     * 
+     * @type {string}
+     * @memberof PubmedCitation
+     */
     'id'?: string;
+    /**
+     * 
+     * @type {PubmedCitationDetails}
+     * @memberof PubmedCitation
+     */
     'nlm'?: PubmedCitationDetails;
 }
+/**
+ * 
+ * @export
+ * @interface PubmedCitationDetails
+ */
 export interface PubmedCitationDetails {
+    /**
+     * 
+     * @type {string}
+     * @memberof PubmedCitationDetails
+     */
     'format'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface SavedFilter
+ */
 export interface SavedFilter {
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
     'created_on': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SavedFilter
+     */
     'favorite': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
     'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
     'name': string;
+    /**
+     * 
+     * @type {Array<Sqon>}
+     * @memberof SavedFilter
+     */
     'queries': Array<Sqon>;
+    /**
+     * 
+     * @type {SavedFilterType}
+     * @memberof SavedFilter
+     */
     'type': SavedFilterType;
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
     'updated_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilter
+     */
     'user_id': string;
 }
 
 
+/**
+ * 
+ * @export
+ * @interface SavedFilterCreationInput
+ */
 export interface SavedFilterCreationInput {
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilterCreationInput
+     */
     'name': string;
+    /**
+     * 
+     * @type {Array<Sqon>}
+     * @memberof SavedFilterCreationInput
+     */
     'queries': Array<Sqon>;
+    /**
+     * 
+     * @type {SavedFilterType}
+     * @memberof SavedFilterCreationInput
+     */
     'type': SavedFilterType;
 }
 
 
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
 
 export const SavedFilterType = {
     GERMLINE_SNV_OCCURRENCE: 'germline_snv_occurrence',
@@ -571,39 +2639,176 @@ export const SavedFilterType = {
 export type SavedFilterType = typeof SavedFilterType[keyof typeof SavedFilterType];
 
 
+/**
+ * 
+ * @export
+ * @interface SavedFilterUpdateInput
+ */
 export interface SavedFilterUpdateInput {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SavedFilterUpdateInput
+     */
     'favorite': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof SavedFilterUpdateInput
+     */
     'name': string;
+    /**
+     * 
+     * @type {Array<Sqon>}
+     * @memberof SavedFilterUpdateInput
+     */
     'queries': Array<Sqon>;
 }
+/**
+ * 
+ * @export
+ * @interface SearchCriterion
+ */
 export interface SearchCriterion {
+    /**
+     * 
+     * @type {string}
+     * @memberof SearchCriterion
+     */
     'field'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SearchCriterion
+     */
     'operator'?: string;
+    /**
+     * 
+     * @type {Array<any>}
+     * @memberof SearchCriterion
+     */
     'value'?: Array<any>;
 }
 /**
  * Sequencing represents a sequencing
+ * @export
+ * @interface Sequencing
  */
 export interface Sequencing {
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'affected_status'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'analysis_type'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
     'case_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'created_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'experimental_strategy'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'family_role'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
     'part'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
     'patient_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
     'request_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'request_priority'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
     'sample_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
     'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'sex'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Sequencing
+     */
     'task_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sequencing
+     */
     'vcf_filepath'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface SortBody
+ */
 export interface SortBody {
+    /**
+     * 
+     * @type {string}
+     * @memberof SortBody
+     */
     'field'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SortBody
+     */
     'order'?: SortBodyOrderEnum;
 }
 
@@ -614,9 +2819,29 @@ export const SortBodyOrderEnum = {
 
 export type SortBodyOrderEnum = typeof SortBodyOrderEnum[keyof typeof SortBodyOrderEnum];
 
+/**
+ * 
+ * @export
+ * @interface Sqon
+ */
 export interface Sqon {
+    /**
+     * 
+     * @type {SqonContent}
+     * @memberof Sqon
+     */
     'content'?: SqonContent;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sqon
+     */
     'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Sqon
+     */
     'op'?: SqonOpEnum;
 }
 
@@ -638,211 +2863,1037 @@ export type SqonOpEnum = typeof SqonOpEnum[keyof typeof SqonOpEnum];
 
 /**
  * @type SqonContent
+ * @export
  */
 export type SqonContent = Array<Sqon> | LeafContent;
 
 /**
  * Statistics represents statistics about a column
+ * @export
+ * @interface Statistics
  */
 export interface Statistics {
     /**
      * Max for numeric facet
+     * @type {number}
+     * @memberof Statistics
      */
     'max'?: number;
     /**
      * Min for numeric facet
+     * @type {number}
+     * @memberof Statistics
      */
     'min'?: number;
     /**
      * To tell UI if it\'s an integer or a decimal
+     * @type {string}
+     * @memberof Statistics
      */
     'type'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface StatisticsBodyWithSqon
+ */
 export interface StatisticsBodyWithSqon {
+    /**
+     * 
+     * @type {string}
+     * @memberof StatisticsBodyWithSqon
+     */
     'field'?: string;
+    /**
+     * 
+     * @type {Sqon}
+     * @memberof StatisticsBodyWithSqon
+     */
     'sqon'?: Sqon;
 }
+/**
+ * 
+ * @export
+ * @interface TableConfig
+ */
 export interface TableConfig {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof TableConfig
+     */
     'columnOrder'?: Array<string>;
+    /**
+     * 
+     * @type {ColumnPinningConfig}
+     * @memberof TableConfig
+     */
     'columnPinning'?: ColumnPinningConfig;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof TableConfig
+     */
     'columnSizing'?: { [key: string]: number; };
+    /**
+     * 
+     * @type {{ [key: string]: boolean; }}
+     * @memberof TableConfig
+     */
     'columnVisibility'?: { [key: string]: boolean; };
+    /**
+     * 
+     * @type {PaginationConfig}
+     * @memberof TableConfig
+     */
     'pagination'?: PaginationConfig;
 }
+/**
+ * 
+ * @export
+ * @interface Term
+ */
 export interface Term {
+    /**
+     * 
+     * @type {string}
+     * @memberof Term
+     */
     'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Term
+     */
     'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Term
+     */
     'onset_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Term
+     */
     'term'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface Transcript
+ */
 export interface Transcript {
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
     'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'cadd_score'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Transcript
+     */
     'consequences'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'dann_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
     'dna_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'exon_rank'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'exon_total'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
     'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'fathmm_score'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Transcript
+     */
     'is_canonical'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Transcript
+     */
     'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Transcript
+     */
     'is_mane_select'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
     'lrt_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'lrt_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'phyloP17way_primate'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
     'polyphen2_hvar_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'polyphen2_hvar_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
     'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Transcript
+     */
     'sift_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Transcript
+     */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof Transcript
+     */
     'vep_impact'?: VepImpact;
 }
 
 
+/**
+ * 
+ * @export
+ * @interface UserPreference
+ */
 export interface UserPreference {
+    /**
+     * 
+     * @type {{ [key: string]: TableConfig; }}
+     * @memberof UserPreference
+     */
     'table_display': { [key: string]: TableConfig; };
+    /**
+     * 
+     * @type {string}
+     * @memberof UserPreference
+     */
     'user_id': string;
 }
+/**
+ * 
+ * @export
+ * @interface UserSet
+ */
 export interface UserSet {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UserSet
+     */
     'active'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserSet
+     */
     'id'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserSet
+     */
     'ids'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserSet
+     */
     'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserSet
+     */
     'type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserSet
+     */
     'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserSet
+     */
     'user_id'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface VariantCasesCount
+ */
 export interface VariantCasesCount {
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
     'count_interpreted': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantCasesCount
+     */
     'count_uninterpreted': number;
 }
+/**
+ * 
+ * @export
+ * @interface VariantCasesFilters
+ */
 export interface VariantCasesFilters {
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof VariantCasesFilters
+     */
     'case_analysis': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof VariantCasesFilters
+     */
     'classification': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof VariantCasesFilters
+     */
     'performer_lab': Array<Aggregation>;
 }
+/**
+ * 
+ * @export
+ * @interface VariantConsequence
+ */
 export interface VariantConsequence {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantConsequence
+     */
     'biotype'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantConsequence
+     */
     'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantConsequence
+     */
     'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VariantConsequence
+     */
     'is_picked'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantConsequence
+     */
     'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantConsequence
+     */
     'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantConsequence
+     */
     'symbol'?: string;
+    /**
+     * 
+     * @type {Array<Transcript>}
+     * @memberof VariantConsequence
+     */
     'transcripts'?: Array<Transcript>;
 }
+/**
+ * 
+ * @export
+ * @interface VariantExpandedInterpretedCase
+ */
 export interface VariantExpandedInterpretedCase {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantExpandedInterpretedCase
+     */
     'classification_criterias': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpandedInterpretedCase
+     */
     'gene_symbol': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantExpandedInterpretedCase
+     */
     'inheritances': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpandedInterpretedCase
+     */
     'interpretation': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpandedInterpretedCase
+     */
     'interpreter_name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantExpandedInterpretedCase
+     */
     'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantExpandedInterpretedCase
+     */
     'patient_sex_code': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantExpandedInterpretedCase
+     */
     'pubmed_ids': Array<string>;
 }
+/**
+ * 
+ * @export
+ * @interface VariantHeader
+ */
 export interface VariantHeader {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantHeader
+     */
     'assembly_version'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantHeader
+     */
     'hgvsg': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantHeader
+     */
     'source'?: Array<string>;
 }
+/**
+ * 
+ * @export
+ * @interface VariantInterpretedCase
+ */
 export interface VariantInterpretedCase {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'affected_status'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'case_analysis_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'case_analysis_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantInterpretedCase
+     */
     'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'classification': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'condition_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'condition_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'interpretation_updated_on': string;
+    /**
+     * 
+     * @type {Array<Term>}
+     * @memberof VariantInterpretedCase
+     */
     'observed_phenotypes'?: Array<Term>;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantInterpretedCase
+     */
     'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'performer_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'performer_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'relationship_to_proband'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantInterpretedCase
+     */
     'seq_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'submitter_sample_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'transcript_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'zygosity': string;
 }
+/**
+ * 
+ * @export
+ * @interface VariantInterpretedCasesSearchResponse
+ */
 export interface VariantInterpretedCasesSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantInterpretedCasesSearchResponse
+     */
     'count': number;
+    /**
+     * 
+     * @type {Array<VariantInterpretedCase>}
+     * @memberof VariantInterpretedCasesSearchResponse
+     */
     'list': Array<VariantInterpretedCase>;
 }
+/**
+ * 
+ * @export
+ * @interface VariantOverview
+ */
 export interface VariantOverview {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'cadd_score'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantOverview
+     */
     'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'clinvar_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'dann_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'dna_change'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof VariantOverview
+     */
     'exomiser_acmg_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'exon_rank'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'exon_total'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'fathmm_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'gnomad_v3_af': number;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof VariantOverview
+     */
     'interpretation_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VariantOverview
+     */
     'is_canonical': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VariantOverview
+     */
     'is_mane_plus': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof VariantOverview
+     */
     'is_mane_select': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'lrt_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'lrt_score'?: number;
+    /**
+     * 
+     * @type {Array<OmimGenePanel>}
+     * @memberof VariantOverview
+     */
     'omim_conditions'?: Array<OmimGenePanel>;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'pf_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'phyloP17way_primate'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantOverview
+     */
     'picked_consequences': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'pn_wgs'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'polyphen2_hvar_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'polyphen2_hvar_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'rsnumber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'sift_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantOverview
+     */
     'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantOverview
+     */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof VariantOverview
+     */
     'vep_impact'?: VepImpact;
 }
 
 
+/**
+ * 
+ * @export
+ * @interface VariantUninterpretedCase
+ */
 export interface VariantUninterpretedCase {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'affected_status'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'case_analysis_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'case_analysis_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantUninterpretedCase
+     */
     'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'exomiser_acmg_classification'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VariantUninterpretedCase
+     */
     'exomiser_acmg_evidence'?: Array<string>;
+    /**
+     * 
+     * @type {Array<Term>}
+     * @memberof VariantUninterpretedCase
+     */
     'observed_phenotypes'?: Array<Term>;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantUninterpretedCase
+     */
     'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'performer_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'performer_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'primary_condition_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'relationship_to_proband'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantUninterpretedCase
+     */
     'seq_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'submitter_sample_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'updated_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
     'zygosity': string;
 }
+/**
+ * 
+ * @export
+ * @interface VariantUninterpretedCasesSearchResponse
+ */
 export interface VariantUninterpretedCasesSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantUninterpretedCasesSearchResponse
+     */
     'count': number;
+    /**
+     * 
+     * @type {Array<VariantUninterpretedCase>}
+     * @memberof VariantUninterpretedCasesSearchResponse
+     */
     'list': Array<VariantUninterpretedCase>;
 }
 /**
  * TODO
+ * @export
+ * @enum {string}
  */
 
 export const VepImpact = {
@@ -858,6 +3909,7 @@ export type VepImpact = typeof VepImpact[keyof typeof VepImpact];
 
 /**
  * AssaysApi - axios parameter creator
+ * @export
  */
 export const AssaysApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -904,6 +3956,7 @@ export const AssaysApiAxiosParamCreator = function (configuration?: Configuratio
 
 /**
  * AssaysApi - functional programming interface
+ * @export
  */
 export const AssaysApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AssaysApiAxiosParamCreator(configuration)
@@ -926,6 +3979,7 @@ export const AssaysApiFp = function(configuration?: Configuration) {
 
 /**
  * AssaysApi - factory interface
+ * @export
  */
 export const AssaysApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = AssaysApiFp(configuration)
@@ -945,6 +3999,9 @@ export const AssaysApiFactory = function (configuration?: Configuration, basePat
 
 /**
  * AssaysApi - object-oriented interface
+ * @export
+ * @class AssaysApi
+ * @extends {BaseAPI}
  */
 export class AssaysApi extends BaseAPI {
     /**
@@ -953,6 +4010,7 @@ export class AssaysApi extends BaseAPI {
      * @param {string} seqId Seq ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AssaysApi
      */
     public getAssayBySeqId(seqId: string, options?: RawAxiosRequestConfig) {
         return AssaysApiFp(this.configuration).getAssayBySeqId(seqId, options).then((request) => request(this.axios, this.basePath));
@@ -963,6 +4021,7 @@ export class AssaysApi extends BaseAPI {
 
 /**
  * CasesApi - axios parameter creator
+ * @export
  */
 export const CasesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -1223,6 +4282,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
 
 /**
  * CasesApi - functional programming interface
+ * @export
  */
 export const CasesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = CasesApiAxiosParamCreator(configuration)
@@ -1313,6 +4373,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
 
 /**
  * CasesApi - factory interface
+ * @export
  */
 export const CasesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = CasesApiFp(configuration)
@@ -1385,6 +4446,9 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
 
 /**
  * CasesApi - object-oriented interface
+ * @export
+ * @class CasesApi
+ * @extends {BaseAPI}
  */
 export class CasesApi extends BaseAPI {
     /**
@@ -1394,6 +4458,7 @@ export class CasesApi extends BaseAPI {
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof CasesApi
      */
     public autocompleteCases(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).autocompleteCases(prefix, limit, options).then((request) => request(this.axios, this.basePath));
@@ -1405,6 +4470,7 @@ export class CasesApi extends BaseAPI {
      * @param {number} caseId Case ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof CasesApi
      */
     public caseEntity(caseId: number, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).caseEntity(caseId, options).then((request) => request(this.axios, this.basePath));
@@ -1417,6 +4483,7 @@ export class CasesApi extends BaseAPI {
      * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof CasesApi
      */
     public caseEntityDocumentsFilters(caseId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).caseEntityDocumentsFilters(caseId, filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
@@ -1429,6 +4496,7 @@ export class CasesApi extends BaseAPI {
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof CasesApi
      */
     public caseEntityDocumentsSearch(caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
@@ -1440,6 +4508,7 @@ export class CasesApi extends BaseAPI {
      * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof CasesApi
      */
     public casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).casesFilters(filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
@@ -1451,6 +4520,7 @@ export class CasesApi extends BaseAPI {
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof CasesApi
      */
     public searchCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).searchCases(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
@@ -1461,6 +4531,7 @@ export class CasesApi extends BaseAPI {
 
 /**
  * DocumentsApi - axios parameter creator
+ * @export
  */
 export const DocumentsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -1595,6 +4666,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
 
 /**
  * DocumentsApi - functional programming interface
+ * @export
  */
 export const DocumentsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DocumentsApiAxiosParamCreator(configuration)
@@ -1644,6 +4716,7 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
 
 /**
  * DocumentsApi - factory interface
+ * @export
  */
 export const DocumentsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = DocumentsApiFp(configuration)
@@ -1684,6 +4757,9 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
 
 /**
  * DocumentsApi - object-oriented interface
+ * @export
+ * @class DocumentsApi
+ * @extends {BaseAPI}
  */
 export class DocumentsApi extends BaseAPI {
     /**
@@ -1693,6 +4769,7 @@ export class DocumentsApi extends BaseAPI {
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof DocumentsApi
      */
     public autocompleteDocuments(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return DocumentsApiFp(this.configuration).autocompleteDocuments(prefix, limit, options).then((request) => request(this.axios, this.basePath));
@@ -1704,6 +4781,7 @@ export class DocumentsApi extends BaseAPI {
      * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof DocumentsApi
      */
     public documentsFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return DocumentsApiFp(this.configuration).documentsFilters(filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
@@ -1715,6 +4793,7 @@ export class DocumentsApi extends BaseAPI {
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof DocumentsApi
      */
     public searchDocuments(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return DocumentsApiFp(this.configuration).searchDocuments(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
@@ -1725,6 +4804,7 @@ export class DocumentsApi extends BaseAPI {
 
 /**
  * GenesApi - axios parameter creator
+ * @export
  */
 export const GenesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -1779,6 +4859,7 @@ export const GenesApiAxiosParamCreator = function (configuration?: Configuration
 
 /**
  * GenesApi - functional programming interface
+ * @export
  */
 export const GenesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = GenesApiAxiosParamCreator(configuration)
@@ -1802,6 +4883,7 @@ export const GenesApiFp = function(configuration?: Configuration) {
 
 /**
  * GenesApi - factory interface
+ * @export
  */
 export const GenesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = GenesApiFp(configuration)
@@ -1822,6 +4904,9 @@ export const GenesApiFactory = function (configuration?: Configuration, basePath
 
 /**
  * GenesApi - object-oriented interface
+ * @export
+ * @class GenesApi
+ * @extends {BaseAPI}
  */
 export class GenesApi extends BaseAPI {
     /**
@@ -1831,6 +4916,7 @@ export class GenesApi extends BaseAPI {
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof GenesApi
      */
     public geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return GenesApiFp(this.configuration).geneAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
@@ -1841,6 +4927,7 @@ export class GenesApi extends BaseAPI {
 
 /**
  * HpoApi - axios parameter creator
+ * @export
  */
 export const HpoApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -1895,6 +4982,7 @@ export const HpoApiAxiosParamCreator = function (configuration?: Configuration) 
 
 /**
  * HpoApi - functional programming interface
+ * @export
  */
 export const HpoApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = HpoApiAxiosParamCreator(configuration)
@@ -1918,6 +5006,7 @@ export const HpoApiFp = function(configuration?: Configuration) {
 
 /**
  * HpoApi - factory interface
+ * @export
  */
 export const HpoApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = HpoApiFp(configuration)
@@ -1938,6 +5027,9 @@ export const HpoApiFactory = function (configuration?: Configuration, basePath?:
 
 /**
  * HpoApi - object-oriented interface
+ * @export
+ * @class HpoApi
+ * @extends {BaseAPI}
  */
 export class HpoApi extends BaseAPI {
     /**
@@ -1947,6 +5039,7 @@ export class HpoApi extends BaseAPI {
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof HpoApi
      */
     public hpoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return HpoApiFp(this.configuration).hpoTermAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
@@ -1957,6 +5050,7 @@ export class HpoApi extends BaseAPI {
 
 /**
  * IgvApi - axios parameter creator
+ * @export
  */
 export const IgvApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -2003,6 +5097,7 @@ export const IgvApiAxiosParamCreator = function (configuration?: Configuration) 
 
 /**
  * IgvApi - functional programming interface
+ * @export
  */
 export const IgvApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = IgvApiAxiosParamCreator(configuration)
@@ -2025,6 +5120,7 @@ export const IgvApiFp = function(configuration?: Configuration) {
 
 /**
  * IgvApi - factory interface
+ * @export
  */
 export const IgvApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = IgvApiFp(configuration)
@@ -2044,6 +5140,9 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
 
 /**
  * IgvApi - object-oriented interface
+ * @export
+ * @class IgvApi
+ * @extends {BaseAPI}
  */
 export class IgvApi extends BaseAPI {
     /**
@@ -2052,6 +5151,7 @@ export class IgvApi extends BaseAPI {
      * @param {string} seqId Sequencing ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof IgvApi
      */
     public getIGV(seqId: string, options?: RawAxiosRequestConfig) {
         return IgvApiFp(this.configuration).getIGV(seqId, options).then((request) => request(this.axios, this.basePath));
@@ -2062,6 +5162,7 @@ export class IgvApi extends BaseAPI {
 
 /**
  * InterpretationsApi - axios parameter creator
+ * @export
  */
 export const InterpretationsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -2372,6 +5473,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
 
 /**
  * InterpretationsApi - functional programming interface
+ * @export
  */
 export const InterpretationsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = InterpretationsApiAxiosParamCreator(configuration)
@@ -2480,6 +5582,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
 
 /**
  * InterpretationsApi - factory interface
+ * @export
  */
 export const InterpretationsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = InterpretationsApiFp(configuration)
@@ -2567,6 +5670,9 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
 
 /**
  * InterpretationsApi - object-oriented interface
+ * @export
+ * @class InterpretationsApi
+ * @extends {BaseAPI}
  */
 export class InterpretationsApi extends BaseAPI {
     /**
@@ -2577,6 +5683,7 @@ export class InterpretationsApi extends BaseAPI {
      * @param {string} transcriptId Transcript ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof InterpretationsApi
      */
     public getInterpretationGermline(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).getInterpretationGermline(sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
@@ -2590,6 +5697,7 @@ export class InterpretationsApi extends BaseAPI {
      * @param {string} transcriptId Transcript ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof InterpretationsApi
      */
     public getInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).getInterpretationSomatic(sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
@@ -2601,6 +5709,7 @@ export class InterpretationsApi extends BaseAPI {
      * @param {string} citationId Citation ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof InterpretationsApi
      */
     public getPubmedCitation(citationId: string, options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).getPubmedCitation(citationId, options).then((request) => request(this.axios, this.basePath));
@@ -2615,6 +5724,7 @@ export class InterpretationsApi extends BaseAPI {
      * @param {InterpretationGermline} interpretationGermline Interpretation Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof InterpretationsApi
      */
     public postInterpretationGermline(sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).postInterpretationGermline(sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(this.axios, this.basePath));
@@ -2629,6 +5739,7 @@ export class InterpretationsApi extends BaseAPI {
      * @param {InterpretationSomatic} interpretationSomatic Interpretation Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof InterpretationsApi
      */
     public postInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).postInterpretationSomatic(sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
@@ -2639,6 +5750,7 @@ export class InterpretationsApi extends BaseAPI {
      * @summary Search interpretation germline
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof InterpretationsApi
      */
     public searchInterpretationGermline(options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).searchInterpretationGermline(options).then((request) => request(this.axios, this.basePath));
@@ -2649,6 +5761,7 @@ export class InterpretationsApi extends BaseAPI {
      * @summary Search interpretation somatic
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof InterpretationsApi
      */
     public searchInterpretationSomatic(options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).searchInterpretationSomatic(options).then((request) => request(this.axios, this.basePath));
@@ -2659,6 +5772,7 @@ export class InterpretationsApi extends BaseAPI {
 
 /**
  * MondoApi - axios parameter creator
+ * @export
  */
 export const MondoApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -2713,6 +5827,7 @@ export const MondoApiAxiosParamCreator = function (configuration?: Configuration
 
 /**
  * MondoApi - functional programming interface
+ * @export
  */
 export const MondoApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = MondoApiAxiosParamCreator(configuration)
@@ -2736,6 +5851,7 @@ export const MondoApiFp = function(configuration?: Configuration) {
 
 /**
  * MondoApi - factory interface
+ * @export
  */
 export const MondoApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = MondoApiFp(configuration)
@@ -2756,6 +5872,9 @@ export const MondoApiFactory = function (configuration?: Configuration, basePath
 
 /**
  * MondoApi - object-oriented interface
+ * @export
+ * @class MondoApi
+ * @extends {BaseAPI}
  */
 export class MondoApi extends BaseAPI {
     /**
@@ -2765,6 +5884,7 @@ export class MondoApi extends BaseAPI {
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof MondoApi
      */
     public mondoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return MondoApiFp(this.configuration).mondoTermAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
@@ -2775,6 +5895,7 @@ export class MondoApi extends BaseAPI {
 
 /**
  * OccurrencesApi - axios parameter creator
+ * @export
  */
 export const OccurrencesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -3263,6 +6384,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
 
 /**
  * OccurrencesApi - functional programming interface
+ * @export
  */
 export const OccurrencesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = OccurrencesApiAxiosParamCreator(configuration)
@@ -3426,6 +6548,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
 
 /**
  * OccurrencesApi - factory interface
+ * @export
  */
 export const OccurrencesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = OccurrencesApiFp(configuration)
@@ -3556,6 +6679,9 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
 
 /**
  * OccurrencesApi - object-oriented interface
+ * @export
+ * @class OccurrencesApi
+ * @extends {BaseAPI}
  */
 export class OccurrencesApi extends BaseAPI {
     /**
@@ -3565,6 +6691,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public aggregateGermlineCNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).aggregateGermlineCNVOccurrences(seqId, aggregationBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
@@ -3578,6 +6705,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {boolean} [withDictionary] Whether to include all possible facet values
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public aggregateGermlineSNVOccurrences(seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).aggregateGermlineSNVOccurrences(seqId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
@@ -3590,6 +6718,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {CountBodyWithSqon} countBodyWithSqon Count Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public countGermlineCNVOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).countGermlineCNVOccurrences(seqId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
@@ -3602,6 +6731,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {CountBodyWithSqon} countBodyWithSqon Count Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public countGermlineSNVOccurrences(seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).countGermlineSNVOccurrences(seqId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
@@ -3614,6 +6744,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public getExpandedGermlineSNVOccurrence(seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(seqId, locusId, options).then((request) => request(this.axios, this.basePath));
@@ -3625,6 +6756,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {Array<string>} [facets] One or more facets to retrieve
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public getGermlineSNVDictionary(facets?: Array<string>, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getGermlineSNVDictionary(facets, options).then((request) => request(this.axios, this.basePath));
@@ -3637,6 +6769,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {string} cnvId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public listGermlineCNVGenesOverlap(seqId: number, cnvId: string, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listGermlineCNVGenesOverlap(seqId, cnvId, options).then((request) => request(this.axios, this.basePath));
@@ -3649,6 +6782,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {ListBodyWithSqon} listBodyWithSqon List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public listGermlineCNVOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listGermlineCNVOccurrences(seqId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
@@ -3661,6 +6795,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {ListBodyWithSqon} listBodyWithSqon List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public listGermlineSNVOccurrences(seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listGermlineSNVOccurrences(seqId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
@@ -3673,6 +6808,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public statisticsGermlineCNVOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).statisticsGermlineCNVOccurrences(seqId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
@@ -3685,6 +6821,7 @@ export class OccurrencesApi extends BaseAPI {
      * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof OccurrencesApi
      */
     public statisticsGermlineSNVOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).statisticsGermlineSNVOccurrences(seqId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
@@ -3695,6 +6832,7 @@ export class OccurrencesApi extends BaseAPI {
 
 /**
  * SavedFiltersApi - axios parameter creator
+ * @export
  */
 export const SavedFiltersApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -3902,6 +7040,7 @@ export const SavedFiltersApiAxiosParamCreator = function (configuration?: Config
 
 /**
  * SavedFiltersApi - functional programming interface
+ * @export
  */
 export const SavedFiltersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SavedFiltersApiAxiosParamCreator(configuration)
@@ -3977,6 +7116,7 @@ export const SavedFiltersApiFp = function(configuration?: Configuration) {
 
 /**
  * SavedFiltersApi - factory interface
+ * @export
  */
 export const SavedFiltersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = SavedFiltersApiFp(configuration)
@@ -4037,6 +7177,9 @@ export const SavedFiltersApiFactory = function (configuration?: Configuration, b
 
 /**
  * SavedFiltersApi - object-oriented interface
+ * @export
+ * @class SavedFiltersApi
+ * @extends {BaseAPI}
  */
 export class SavedFiltersApi extends BaseAPI {
     /**
@@ -4045,6 +7188,7 @@ export class SavedFiltersApi extends BaseAPI {
      * @param {string} savedFilterId Saved Filter ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SavedFiltersApi
      */
     public deleteSavedFilter(savedFilterId: string, options?: RawAxiosRequestConfig) {
         return SavedFiltersApiFp(this.configuration).deleteSavedFilter(savedFilterId, options).then((request) => request(this.axios, this.basePath));
@@ -4056,6 +7200,7 @@ export class SavedFiltersApi extends BaseAPI {
      * @param {string} savedFilterId Saved Filter ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SavedFiltersApi
      */
     public getSavedFilterById(savedFilterId: string, options?: RawAxiosRequestConfig) {
         return SavedFiltersApiFp(this.configuration).getSavedFilterById(savedFilterId, options).then((request) => request(this.axios, this.basePath));
@@ -4067,6 +7212,7 @@ export class SavedFiltersApi extends BaseAPI {
      * @param {string} [type] Saved Filter Type
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SavedFiltersApi
      */
     public getSavedFilters(type?: string, options?: RawAxiosRequestConfig) {
         return SavedFiltersApiFp(this.configuration).getSavedFilters(type, options).then((request) => request(this.axios, this.basePath));
@@ -4078,6 +7224,7 @@ export class SavedFiltersApi extends BaseAPI {
      * @param {SavedFilterCreationInput} savedFilterCreationInput New Saved Filter to create
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SavedFiltersApi
      */
     public postSavedFilter(savedFilterCreationInput: SavedFilterCreationInput, options?: RawAxiosRequestConfig) {
         return SavedFiltersApiFp(this.configuration).postSavedFilter(savedFilterCreationInput, options).then((request) => request(this.axios, this.basePath));
@@ -4090,6 +7237,7 @@ export class SavedFiltersApi extends BaseAPI {
      * @param {SavedFilterUpdateInput} savedFilterUpdateInput Saved Filter to update
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SavedFiltersApi
      */
     public putSavedFilter(savedFilterId: string, savedFilterUpdateInput: SavedFilterUpdateInput, options?: RawAxiosRequestConfig) {
         return SavedFiltersApiFp(this.configuration).putSavedFilter(savedFilterId, savedFilterUpdateInput, options).then((request) => request(this.axios, this.basePath));
@@ -4100,6 +7248,7 @@ export class SavedFiltersApi extends BaseAPI {
 
 /**
  * SequencingApi - axios parameter creator
+ * @export
  */
 export const SequencingApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -4146,6 +7295,7 @@ export const SequencingApiAxiosParamCreator = function (configuration?: Configur
 
 /**
  * SequencingApi - functional programming interface
+ * @export
  */
 export const SequencingApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SequencingApiAxiosParamCreator(configuration)
@@ -4168,6 +7318,7 @@ export const SequencingApiFp = function(configuration?: Configuration) {
 
 /**
  * SequencingApi - factory interface
+ * @export
  */
 export const SequencingApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = SequencingApiFp(configuration)
@@ -4187,6 +7338,9 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
 
 /**
  * SequencingApi - object-oriented interface
+ * @export
+ * @class SequencingApi
+ * @extends {BaseAPI}
  */
 export class SequencingApi extends BaseAPI {
     /**
@@ -4195,6 +7349,7 @@ export class SequencingApi extends BaseAPI {
      * @param {string} seqId Sequence ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SequencingApi
      */
     public getSequencing(seqId: string, options?: RawAxiosRequestConfig) {
         return SequencingApiFp(this.configuration).getSequencing(seqId, options).then((request) => request(this.axios, this.basePath));
@@ -4205,6 +7360,7 @@ export class SequencingApi extends BaseAPI {
 
 /**
  * StatusApi - axios parameter creator
+ * @export
  */
 export const StatusApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -4243,6 +7399,7 @@ export const StatusApiAxiosParamCreator = function (configuration?: Configuratio
 
 /**
  * StatusApi - functional programming interface
+ * @export
  */
 export const StatusApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = StatusApiAxiosParamCreator(configuration)
@@ -4264,6 +7421,7 @@ export const StatusApiFp = function(configuration?: Configuration) {
 
 /**
  * StatusApi - factory interface
+ * @export
  */
 export const StatusApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = StatusApiFp(configuration)
@@ -4282,6 +7440,9 @@ export const StatusApiFactory = function (configuration?: Configuration, basePat
 
 /**
  * StatusApi - object-oriented interface
+ * @export
+ * @class StatusApi
+ * @extends {BaseAPI}
  */
 export class StatusApi extends BaseAPI {
     /**
@@ -4289,6 +7450,7 @@ export class StatusApi extends BaseAPI {
      * @summary Get API status
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof StatusApi
      */
     public statusGet(options?: RawAxiosRequestConfig) {
         return StatusApiFp(this.configuration).statusGet(options).then((request) => request(this.axios, this.basePath));
@@ -4299,6 +7461,7 @@ export class StatusApi extends BaseAPI {
 
 /**
  * UserPreferencesApi - axios parameter creator
+ * @export
  */
 export const UserPreferencesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -4381,6 +7544,7 @@ export const UserPreferencesApiAxiosParamCreator = function (configuration?: Con
 
 /**
  * UserPreferencesApi - functional programming interface
+ * @export
  */
 export const UserPreferencesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = UserPreferencesApiAxiosParamCreator(configuration)
@@ -4415,6 +7579,7 @@ export const UserPreferencesApiFp = function(configuration?: Configuration) {
 
 /**
  * UserPreferencesApi - factory interface
+ * @export
  */
 export const UserPreferencesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = UserPreferencesApiFp(configuration)
@@ -4443,6 +7608,9 @@ export const UserPreferencesApiFactory = function (configuration?: Configuration
 
 /**
  * UserPreferencesApi - object-oriented interface
+ * @export
+ * @class UserPreferencesApi
+ * @extends {BaseAPI}
  */
 export class UserPreferencesApi extends BaseAPI {
     /**
@@ -4450,6 +7618,7 @@ export class UserPreferencesApi extends BaseAPI {
      * @summary Get user preferences
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof UserPreferencesApi
      */
     public getUserPreferences(options?: RawAxiosRequestConfig) {
         return UserPreferencesApiFp(this.configuration).getUserPreferences(options).then((request) => request(this.axios, this.basePath));
@@ -4461,6 +7630,7 @@ export class UserPreferencesApi extends BaseAPI {
      * @param {UserPreference} userPreference User Preference to create or update
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof UserPreferencesApi
      */
     public postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig) {
         return UserPreferencesApiFp(this.configuration).postUserPreferences(userPreference, options).then((request) => request(this.axios, this.basePath));
@@ -4471,6 +7641,7 @@ export class UserPreferencesApi extends BaseAPI {
 
 /**
  * UserSetsApi - axios parameter creator
+ * @export
  */
 export const UserSetsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -4517,6 +7688,7 @@ export const UserSetsApiAxiosParamCreator = function (configuration?: Configurat
 
 /**
  * UserSetsApi - functional programming interface
+ * @export
  */
 export const UserSetsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = UserSetsApiAxiosParamCreator(configuration)
@@ -4539,6 +7711,7 @@ export const UserSetsApiFp = function(configuration?: Configuration) {
 
 /**
  * UserSetsApi - factory interface
+ * @export
  */
 export const UserSetsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = UserSetsApiFp(configuration)
@@ -4558,6 +7731,9 @@ export const UserSetsApiFactory = function (configuration?: Configuration, baseP
 
 /**
  * UserSetsApi - object-oriented interface
+ * @export
+ * @class UserSetsApi
+ * @extends {BaseAPI}
  */
 export class UserSetsApi extends BaseAPI {
     /**
@@ -4566,6 +7742,7 @@ export class UserSetsApi extends BaseAPI {
      * @param {string} userSetId UserSet ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof UserSetsApi
      */
     public getUserSet(userSetId: string, options?: RawAxiosRequestConfig) {
         return UserSetsApiFp(this.configuration).getUserSet(userSetId, options).then((request) => request(this.axios, this.basePath));
@@ -4576,6 +7753,7 @@ export class UserSetsApi extends BaseAPI {
 
 /**
  * VariantApi - axios parameter creator
+ * @export
  */
 export const VariantApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -4989,6 +8167,7 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * VariantApi - functional programming interface
+ * @export
  */
 export const VariantApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VariantApiAxiosParamCreator(configuration)
@@ -5133,6 +8312,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
 
 /**
  * VariantApi - factory interface
+ * @export
  */
 export const VariantApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = VariantApiFp(configuration)
@@ -5247,6 +8427,9 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * VariantApi - object-oriented interface
+ * @export
+ * @class VariantApi
+ * @extends {BaseAPI}
  */
 export class VariantApi extends BaseAPI {
     /**
@@ -5257,6 +8440,7 @@ export class VariantApi extends BaseAPI {
      * @param {string} transcriptId Transcript ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getExpandedGermlineVariantInterpretedCase(locusId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getExpandedGermlineVariantInterpretedCase(locusId, seqId, transcriptId, options).then((request) => request(this.axios, this.basePath));
@@ -5268,6 +8452,7 @@ export class VariantApi extends BaseAPI {
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantCasesCount(locusId, options).then((request) => request(this.axios, this.basePath));
@@ -5278,6 +8463,7 @@ export class VariantApi extends BaseAPI {
      * @summary Get cases filters for germline variant entity
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantCasesFilters(options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantCasesFilters(options).then((request) => request(this.axios, this.basePath));
@@ -5291,6 +8477,7 @@ export class VariantApi extends BaseAPI {
      * @param {string} [filter] Condition filter
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantConditions(locusId, panelType, filter, options).then((request) => request(this.axios, this.basePath));
@@ -5302,6 +8489,7 @@ export class VariantApi extends BaseAPI {
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantConditionsClinvar(locusId, options).then((request) => request(this.axios, this.basePath));
@@ -5313,6 +8501,7 @@ export class VariantApi extends BaseAPI {
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantConsequences(locusId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantConsequences(locusId, options).then((request) => request(this.axios, this.basePath));
@@ -5324,6 +8513,7 @@ export class VariantApi extends BaseAPI {
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantHeader(locusId, options).then((request) => request(this.axios, this.basePath));
@@ -5336,6 +8526,7 @@ export class VariantApi extends BaseAPI {
      * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantInterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
@@ -5347,6 +8538,7 @@ export class VariantApi extends BaseAPI {
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantOverview(locusId, options).then((request) => request(this.axios, this.basePath));
@@ -5359,12 +8551,16 @@ export class VariantApi extends BaseAPI {
      * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VariantApi
      */
     public getGermlineVariantUninterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantUninterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
+/**
+ * @export
+ */
 export const GetGermlineVariantConditionsPanelTypeEnum = {
     Omim: 'omim',
     Hpo: 'hpo',
