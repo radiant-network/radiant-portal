@@ -117,12 +117,15 @@ const meta = {
       list: false,
     },
     pagination: {
-      pageIndex: 0,
-      pageSize: 10,
+      type: 'server',
+      state: {
+        pageIndex: 0,
+        pageSize: 10,
+      },
+      onPaginationChange: () => {},
     },
-    onPaginationChange: () => { },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onServerSortingChange: sorting => { },
+    onServerSortingChange: sorting => {},
     total: 10,
   },
   decorators: [
@@ -149,7 +152,7 @@ export const Loading: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: <TableFilters loading={true} setSearchCriteria={() => { }} />,
+    TableFilters: <TableFilters loading={true} setSearchCriteria={() => {}} />,
   },
   render: args => <DataTable {...args} />,
 };
@@ -173,7 +176,7 @@ export const Default: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: <TableFilters loading={false} setSearchCriteria={() => { }} />,
+    TableFilters: <TableFilters loading={false} setSearchCriteria={() => {}} />,
   },
   render: args => <DataTable {...args} />,
 };

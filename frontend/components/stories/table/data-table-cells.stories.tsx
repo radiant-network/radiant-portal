@@ -117,12 +117,15 @@ const meta = {
       list: false,
     },
     pagination: {
-      pageIndex: 0,
-      pageSize: 10,
+      type: 'server',
+      state: {
+        pageIndex: 0,
+        pageSize: 10,
+      },
+      onPaginationChange: () => {},
     },
-    onPaginationChange: () => { },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onServerSortingChange: sorting => { },
+    onServerSortingChange: sorting => {},
     total: 10,
   },
   decorators: [
@@ -142,7 +145,7 @@ type Story = StoryObj<typeof meta>;
 
 export const BaseCell: Story = {
   args: {
-    paginationHidden: true,
+    pagination: { type: 'hidden' },
   },
   render: args => (
     <>
@@ -170,7 +173,7 @@ export const BaseCell: Story = {
 
 export const ApplicationFeatureCell: Story = {
   args: {
-    paginationHidden: true,
+    pagination: { type: 'hidden' },
   },
   render: args => (
     <DataTable

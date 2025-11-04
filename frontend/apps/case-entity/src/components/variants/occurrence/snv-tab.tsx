@@ -1,7 +1,7 @@
-import { PaginationState } from '@tanstack/react-table';
-import { X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { PaginationState } from '@tanstack/react-table';
+import { X } from 'lucide-react';
 import useSWR from 'swr';
 
 import { Count, GermlineSNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
@@ -299,8 +299,7 @@ function SNVTab({ seqId }: SNVTabProps) {
                   total: fetchOccurrencesCount.isLoading,
                   list: fetchOccurrencesList.isLoading,
                 }}
-                pagination={pagination}
-                onPaginationChange={setPagination}
+                pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
                 onServerSortingChange={setSorting}
                 total={fetchOccurrencesCount.data?.count ?? 0}
                 enableColumnOrdering

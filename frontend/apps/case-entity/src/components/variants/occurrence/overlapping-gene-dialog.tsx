@@ -102,8 +102,7 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
                   total: fetchList.isLoading,
                   list: fetchList.isLoading,
                 }}
-                pagination={{ pageIndex: 0, pageSize: 100 }}
-                onPaginationChange={() => {}}
+                pagination={{ type: 'locale', state: { pageIndex: 0, pageSize: 100 } }}
                 data={fetchList?.data ?? []}
                 hasError={!!fetchList.error}
                 total={fetchList?.data?.length ?? 0}
