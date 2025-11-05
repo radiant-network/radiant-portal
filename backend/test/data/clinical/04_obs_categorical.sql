@@ -1,4 +1,4 @@
-INSERT INTO "observation_coding" (id,
+INSERT INTO "obs_categorical" (id,
                                   case_id,
                                   patient_id,
                                   observation_code,
