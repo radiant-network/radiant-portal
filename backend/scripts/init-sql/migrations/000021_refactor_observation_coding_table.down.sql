@@ -1,5 +1,5 @@
-INSERT INTO observation (code, name_en, category)
-VALUES ('ethnicity', 'Ethnicity', 'social_history')
+INSERT INTO observation (code, name_en)
+VALUES ('ethnicity', 'Ethnicity')
 ON CONFLICT (code) DO NOTHING;
 
 ALTER TABLE obs_categorical RENAME TO observation_coding;
@@ -8,6 +8,4 @@ UPDATE observation_coding SET observation_code = 'ethnicity' WHERE observation_c
 
 ALTER TABLE observation_coding ALTER COLUMN onset_code SET NOT NULL;
 
-DELETE FROM observation WHERE code = 'note';
-DELETE FROM observation WHERE code = 'ancestry';
-DELETE FROM observation WHERE code = 'consanguinity';
+DELETE FROM observation WHERE code IN ('note', 'ancestry', 'consanguinity');

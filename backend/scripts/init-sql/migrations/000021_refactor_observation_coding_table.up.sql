@@ -1,7 +1,7 @@
-INSERT INTO observation (code, name_en, category)
-VALUES ('note', 'Clinical Note', 'activity'), --- replace ??? with appropriate category
-       ('ancestry', 'Ancestry', 'social_history'),
-       ('consanguinity', 'Consanguinity', 'activity') --- replace ??? with appropriate category
+INSERT INTO observation (code, name_en)
+VALUES ('note', 'Clinical Note'),
+       ('ancestry', 'Ancestry'),
+       ('consanguinity', 'Consanguinity')
 ON CONFLICT (code) DO NOTHING;
 
 ALTER TABLE observation_coding RENAME TO obs_categorical;
