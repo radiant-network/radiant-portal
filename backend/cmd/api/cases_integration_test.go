@@ -31,7 +31,7 @@ func assertSearchCasesHandler(t *testing.T, data string, body string, expected s
 }
 
 func Test_SearchCasesHandler_WithCriteria(t *testing.T) {
-	expected := `{"list": [{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "proband_id":20, "proband_mrn":"MRN-283792", "priority_code":"routine", "project_code":"N1", "project_name":"NeuroDev Phase I", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"revoke", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
+	expected := `{"list": [{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "proband_id":20, "proband_organization_id":"MRN-283792", "priority_code":"routine", "project_code":"N1", "project_name":"NeuroDev Phase I", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"revoke", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
 	body := `{
 			"additional_fields":[],
 			"search_criteria":[{"field": "status_code", "value": ["revoke"]}]
@@ -40,16 +40,16 @@ func Test_SearchCasesHandler_WithCriteria(t *testing.T) {
 }
 
 func Test_SearchCasesHandler_WithAdditionalFields(t *testing.T) {
-	expected := `{"list": [{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "managing_organization_code":"CHUSJ", "proband_id":20, "proband_mrn":"MRN-283792", "primary_condition_id":"MONDO:0700092", "primary_condition_name":"neurodevelopmental disorder", "priority_code":"routine", "project_code":"N1", "project_name":"NeuroDev Phase I", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"revoke", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
+	expected := `{"list": [{"case_analysis_code":"WGA", "case_analysis_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "organization_code":"CHUSJ", "proband_id":20, "proband_organization_id":"MRN-283792", "primary_condition_id":"MONDO:0700092", "primary_condition_name":"neurodevelopmental disorder", "priority_code":"routine", "project_code":"N1", "project_name":"NeuroDev Phase I", "requested_by_code":"CHOP", "requested_by_name":"Children Hospital of Philadelphia", "status_code":"revoke", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
 	body := `{
-			"additional_fields":["primary_condition_id", "primary_condition_name", "managing_organization_code"],
+			"additional_fields":["primary_condition_id", "primary_condition_name", "organization_code"],
 			"search_criteria":[{"field": "status_code", "value": ["revoke"]}]
 		}`
 	assertSearchCasesHandler(t, "simple", body, expected)
 }
 
 func Test_SearchCasesHandler_WithSortAndLimit(t *testing.T) {
-	expected := `{"list": [{"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_type":"germline_family", "case_id":21, "created_on":"2020-09-12T13:08:00Z", "proband_id":60, "proband_mrn":"MRN-283832", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2020-09-12T13:08:00Z", "has_variants":false}, {"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_type":"germline_family", "case_id":20, "created_on":"2020-09-12T13:08:00Z", "proband_id":58, "proband_mrn":"MRN-283830", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"completed", "updated_on":"2020-09-12T13:08:00Z", "has_variants":false}], "count": 22}`
+	expected := `{"list": [{"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_type":"germline_family", "case_id":21, "created_on":"2020-09-12T13:08:00Z", "proband_id":60, "proband_organization_id":"MRN-283832", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2020-09-12T13:08:00Z", "has_variants":false}, {"case_analysis_code":"IDGD", "case_analysis_name":"Intellectual Deficiency and Global Developmental Delay", "case_type":"germline_family", "case_id":20, "created_on":"2020-09-12T13:08:00Z", "proband_id":58, "proband_organization_id":"MRN-283830", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "requested_by_code":"CHUSJ", "requested_by_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"completed", "updated_on":"2020-09-12T13:08:00Z", "has_variants":false}], "count": 22}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "proband_id", "order": "desc"}],
@@ -59,7 +59,7 @@ func Test_SearchCasesHandler_WithSortAndLimit(t *testing.T) {
 }
 
 func Test_SearchCasesHandler_WithVariants(t *testing.T) {
-	expected := `{"list":[{"case_id":1,"proband_id":3, "proband_mrn":"MRN-283775","priority_code":"routine","status_code":"in_progress","case_analysis_code":"WGA","case_analysis_name":"Whole Genome Analysis","case_type":"germline_family","requested_by_code":"CHUSJ","requested_by_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I","created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":true},{"case_id":2, "proband_id":4, "proband_mrn":"MRN-283776","priority_code":"routine","status_code":"in_progress","case_analysis_code":"WGA","case_analysis_name":"Whole Genome Analysis","case_type":"germline_family","requested_by_code":"CHUSJ","requested_by_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I", "created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":false}],"count":22}`
+	expected := `{"list":[{"case_id":1,"proband_id":3, "proband_organization_id":"MRN-283775","priority_code":"routine","status_code":"in_progress","case_analysis_code":"WGA","case_analysis_name":"Whole Genome Analysis","case_type":"germline_family","requested_by_code":"CHUSJ","requested_by_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I","created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":true},{"case_id":2, "proband_id":4, "proband_organization_id":"MRN-283776","priority_code":"routine","status_code":"in_progress","case_analysis_code":"WGA","case_analysis_name":"Whole Genome Analysis","case_type":"germline_family","requested_by_code":"CHUSJ","requested_by_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I", "created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":false}],"count":22}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "case_id", "order": "asc"}],
@@ -175,9 +175,9 @@ func Test_CaseEntityHandler(t *testing.T) {
 			{
 				"affected_status_code":"affected", 
 				"date_of_birth":"1973-03-23T00:00:00Z",
-				"managing_organization_code":"CHUSJ", 
-				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"mrn":"MRN-283775", 
+				"organization_code":"CHUSJ", 
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"organization_patient_id":"MRN-283775", 
 				"patient_id":3, 
 				"relationship_to_proband":"proband",
 				"sex_code":"male", 
@@ -186,18 +186,18 @@ func Test_CaseEntityHandler(t *testing.T) {
 			{
 				"affected_status_code":"affected", 
 				"date_of_birth":"2012-02-03T00:00:00Z", 
-				"managing_organization_code":"CHUSJ", 
-				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"mrn":"MRN-283773", 
+				"organization_code":"CHUSJ", 
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"organization_patient_id":"MRN-283773", 
 				"patient_id":1, 
 				"relationship_to_proband":"mother", "sex_code":"female"
 			},
 			{
 				"affected_status_code":"non_affected", 
 				"date_of_birth":"1970-01-30T00:00:00Z", 
-				"managing_organization_code":"CHUSJ", 
-				"managing_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"mrn":"MRN-283774", 
+				"organization_code":"CHUSJ", 
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
+				"organization_patient_id":"MRN-283774", 
 				"patient_id":2, 
 				"relationship_to_proband":"father", 
 				"sex_code":"male"

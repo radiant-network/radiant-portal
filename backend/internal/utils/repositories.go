@@ -90,7 +90,7 @@ func JoinWithRequest(tx *gorm.DB) *gorm.DB {
 
 func JoinWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
 	joinWithProbandSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.ProbandTable.Name, types.ProbandTable.Alias, types.CaseTable.Alias, types.ProbandTable.Alias)
-	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.managing_organization_id=%s.id", types.ManagingOrganizationTable.Name, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
+	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.Name, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
 	if userQuery != nil && userQuery.HasFieldFromTables(types.ManagingOrganizationTable) {
 		return tx.Joins(joinWithProbandSql).Joins(joinWithProbandManagingOrganizationSql)
 	}

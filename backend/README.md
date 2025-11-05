@@ -86,7 +86,11 @@ make clean
 # Frontend
 
 ## Generate the CLI
-    
+
+To install the CLI: https://github.com/OpenAPITools/openapi-generator?tab=readme-ov-file#1---installation    
+
+(If the `openapi-generator-cli version` doesn't match the current version used by the repo, you can set it manually using `openapi-generator-cli version-manager set <version>`.)
+
 ```bash 
 openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axios -o ./frontend/api
 ```

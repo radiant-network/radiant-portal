@@ -39,8 +39,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       minSize: 40,
     }),
     // MRN
-    columnHelper.accessor(row => row.proband_mrn, {
-      id: 'proband_mrn',
+    columnHelper.accessor(row => row.proband_organization_id, {
+      id: 'proband_organization_id',
       cell: info => <>{info.getValue()}</>,
       header: () => (
         <TooltipHeader tooltip={t('case_exploration.case.headers.mrn_tooltip')}>
@@ -180,10 +180,10 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       minSize: 40,
     }),
     // Patient managing organization
-    columnHelper.accessor(row => row.managing_organization_code, {
+    columnHelper.accessor(row => row.organization_code, {
       id: 'managing_organization',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.managing_organization_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.organization_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: () => (
         <TooltipHeader tooltip={t('case_exploration.case.headers.managing_organization_tooltip')}>
@@ -217,7 +217,7 @@ const defaultSettings = createColumnSettings([
     label: 'case_exploration.case.headers.patient_id',
   },
   {
-    id: 'proband_mrn',
+    id: 'proband_organization_id',
     visible: true,
     label: 'case_exploration.case.headers.mrn',
   },

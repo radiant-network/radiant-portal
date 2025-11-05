@@ -34,7 +34,6 @@ func Test_GetAssayBySeqIdHandler(t *testing.T) {
 	expected := `{
 		"aliquot":"NA12892", 
 		"capture_kit":"SureSelect Custom DNA Target", 
-		"category_code":"sample", 
 		"created_on":"2021-09-12T13:08:00Z", 
 		"experiment_description":"A description", 
 		"experimental_strategy_code":"wxs", 
