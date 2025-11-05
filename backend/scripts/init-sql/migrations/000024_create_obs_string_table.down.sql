@@ -1,1 +1,0 @@
-DROP TABLE IF EXISTS "obs_string";

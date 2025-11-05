@@ -1,3 +1,21 @@
+DROP TABLE IF EXISTS "consanguinity";
+
+DROP TABLE IF EXISTS "family_history";
+
+DROP TABLE IF EXISTS "obs_string";
+
+INSERT INTO observation (code, name_en)
+VALUES ('ethnicity', 'Ethnicity')
+ON CONFLICT (code) DO NOTHING;
+
+ALTER TABLE obs_categorical RENAME TO observation_coding;
+
+UPDATE observation_coding SET observation_code = 'ethnicity' WHERE observation_code = 'ancestry';
+
+ALTER TABLE observation_coding ALTER COLUMN onset_code SET NOT NULL;
+
+DELETE FROM observation WHERE code IN ('note', 'ancestry', 'consanguinity');
+
 CREATE TABLE IF NOT EXISTS "observation_category"
 (
     "code"    TEXT PRIMARY KEY,
