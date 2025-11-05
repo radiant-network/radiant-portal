@@ -155,9 +155,6 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
               {t('case_entity.details.sample')} {data?.sample_id ?? '-'}
             </h2>
 
-            {/* Category */}
-            <InformationField label={t('case_entity.details.category')}>{data?.category_code}</InformationField>
-
             {/* Type */}
             <InformationField label={t('case_entity.details.type')}>{data?.sample_type_code}</InformationField>
 

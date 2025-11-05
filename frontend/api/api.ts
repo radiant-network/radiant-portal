@@ -121,12 +121,6 @@ export interface Assay {
      * @type {string}
      * @memberof Assay
      */
-    'category_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
     'created_on'?: string;
     /**
      * 
@@ -660,24 +654,6 @@ export interface CasePatientClinicalInformation {
     'ethnicity_codes'?: Array<string>;
     /**
      * 
-     * @type {string}
-     * @memberof CasePatientClinicalInformation
-     */
-    'managing_organization_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CasePatientClinicalInformation
-     */
-    'managing_organization_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CasePatientClinicalInformation
-     */
-    'mrn'?: string;
-    /**
-     * 
      * @type {Array<Term>}
      * @memberof CasePatientClinicalInformation
      */
@@ -688,6 +664,24 @@ export interface CasePatientClinicalInformation {
      * @memberof CasePatientClinicalInformation
      */
     'observed_phenotypes'?: Array<Term>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'organization_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'organization_patient_id'?: string;
     /**
      * 
      * @type {number}
@@ -754,13 +748,13 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'managing_organization_code'?: string;
+    'organization_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof CaseResult
      */
-    'managing_organization_name'?: string;
+    'organization_name'?: string;
     /**
      * 
      * @type {string}
@@ -808,7 +802,7 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'proband_mrn'?: string;
+    'proband_organization_id'?: string;
     /**
      * 
      * @type {string}

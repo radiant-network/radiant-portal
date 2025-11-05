@@ -1,6 +1,6 @@
+import { useEffect, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 import { Count, GermlineCNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
@@ -252,8 +252,7 @@ function CNVTab({ seqId }: CNVTabProps) {
                   total: fetchOccurrencesCount.isLoading,
                   list: fetchOccurrencesList.isLoading,
                 }}
-                pagination={pagination}
-                onPaginationChange={setPagination}
+                pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
                 onServerSortingChange={setSorting}
                 total={fetchOccurrencesCount.data?.count ?? 0}
                 enableColumnOrdering

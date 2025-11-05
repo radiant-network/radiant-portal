@@ -3,13 +3,13 @@ package types
 import "time"
 
 type Patient struct {
-	ID                     int
-	Mrn                    string
-	ManagingOrganizationID int
-	Organization           Organization `gorm:"foreignKey:ID;references:ManagingOrganizationID"`
-	SexCode                string
-	Sex                    Sex       `gorm:"foreignKey:Code;references:SexCode"`
-	DateOfBirth            time.Time `gorm:"type:DATE"`
+	ID                    int
+	OrganizationPatientId string
+	OrganizationID        int
+	Organization          Organization `gorm:"foreignKey:ID;references:OrganizationID"`
+	SexCode               string
+	Sex                   Sex       `gorm:"foreignKey:Code;references:SexCode"`
+	DateOfBirth           time.Time `gorm:"type:DATE"`
 }
 
 var PatientTable = Table{
@@ -26,9 +26,9 @@ func (Patient) TableName() string {
 	return PatientTable.Name
 }
 
-var ProbandMrnField = Field{
-	Name:          "mrn",
-	Alias:         "proband_mrn",
+var ProbandOrganizationIDField = Field{
+	Name:          "organization_patient_id",
+	Alias:         "proband_organization_id",
 	CanBeSelected: true,
 	CanBeSorted:   true,
 	Table:         ProbandTable,
@@ -41,24 +41,24 @@ var PatientIdField = Field{
 	Table:         PatientTable,
 }
 
-var PatientMrnField = Field{
-	Name:          "mrn",
+var PatientOrganizationIDField = Field{
+	Name:          "organization_patient_id",
 	CanBeFiltered: true,
 	Table:         PatientTable,
 }
 
-var PatientManagingOrganizationCodeField = Field{
+var PatientOrganizationCodeField = Field{
 	Name:          "code",
-	Alias:         "managing_organization_code",
+	Alias:         "organization_code",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Table:         ManagingOrganizationTable,
 }
 
-var PatientManagingOrganizationNameField = Field{
+var PatientOrganizationNameField = Field{
 	Name:          "name",
-	Alias:         "managing_organization_name",
+	Alias:         "organization_name",
 	CanBeSelected: true,
 	Table:         ManagingOrganizationTable,
 }
