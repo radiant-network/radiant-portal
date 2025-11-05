@@ -1,15 +1,15 @@
-import { PaginationState } from '@tanstack/table-core';
 import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
+import { PaginationState } from '@tanstack/table-core';
 import useSWR from 'swr';
 
 import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
+import CasePreviewSheet from '@/components/feature/preview/case-preview-sheet';
 import { usePreviewCaseNavigation } from '@/components/feature/preview/use-preview-case-navigation';
 import { useI18n } from '@/components/hooks/i18n';
 import { variantsApi } from '@/utils/api';
 
-import CasePreviewSheet from '@/components/feature/preview/case-preview-sheet';
 import { SELECTED_CASE_PARAM } from './constants';
 import { getOtherCasesColumns, otherCasesDefaultSettings } from './table-settings';
 import OtherCasesFilters, { UninterpretedCasesFiltersState } from './uninterpreted-cases-filters';
@@ -120,8 +120,7 @@ function UninterpretedCasesTable() {
           list: isLoading,
         }}
         total={data?.count || 0}
-        pagination={pagination}
-        onPaginationChange={setPagination}
+        pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
         onServerSortingChange={() => {}}
         tableIndexResultPosition="bottom"
         rowSelection={rowSelection}

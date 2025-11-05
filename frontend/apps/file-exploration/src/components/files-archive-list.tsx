@@ -70,8 +70,7 @@ function FilesArchiveList() {
         total: isLoading,
         list: isLoading,
       }}
-      pagination={pagination}
-      onPaginationChange={setPagination}
+      pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
       onServerSortingChange={setSorting}
       total={data?.count ?? 0}
       enableColumnOrdering
