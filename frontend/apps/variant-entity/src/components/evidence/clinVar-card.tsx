@@ -77,7 +77,7 @@ function ClinVarCard() {
             total: isLoading,
             list: isLoading,
           }}
-          paginationHidden
+          pagination={{ type: 'hidden' }}
           total={filteredData.length}
           tableIndexResultPosition="bottom"
         />
