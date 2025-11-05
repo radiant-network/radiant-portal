@@ -80,12 +80,12 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       enableSorting: false,
     }),
     // Analysis
-    columnHelper.accessor(row => row.case_analysis_code, {
-      id: 'case_analysis_code',
+    columnHelper.accessor(row => row.analysis_catalog_code, {
+      id: 'analysis_catalog_code',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.analysis_catalog_name}>{info.getValue()}</TextTooltipCell>
       ),
-      header: t('case_exploration.case.headers.case_analysis_code'),
+      header: t('case_exploration.case.headers.analysis_catalog_code'),
       size: 48,
       minSize: 40,
     }),
@@ -100,14 +100,14 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       minSize: 40,
     }),
     // Req. by
-    columnHelper.accessor(row => row.requested_by_code, {
-      id: 'requested_by_code',
+    columnHelper.accessor(row => row.ordering_organization_code, {
+      id: 'ordering_organization_code',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.requested_by_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.ordering_organization_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: () => (
-        <TooltipHeader tooltip={t('case_exploration.case.headers.requested_by_code_tooltip')}>
-          {t('case_exploration.case.headers.requested_by_code')}
+        <TooltipHeader tooltip={t('case_exploration.case.headers.ordering_organization_code_tooltip')}>
+          {t('case_exploration.case.headers.ordering_organization_code')}
         </TooltipHeader>
       ),
       size: 48,
@@ -158,10 +158,10 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       minSize: 40,
     }),
     // Diagnostic lab
-    columnHelper.accessor(row => row.performer_lab_code, {
+    columnHelper.accessor(row => row.diagnosis_lab_code, {
       id: 'diagnostic_lab',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.diagnosis_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: () => (
         <TooltipHeader tooltip={t('case_exploration.case.headers.diagnostic_lab_tooltip')}>
@@ -237,9 +237,9 @@ const defaultSettings = createColumnSettings([
     label: 'case_exploration.case.headers.case_type',
   },
   {
-    id: 'case_analysis_code',
+    id: 'analysis_catalog_code',
     visible: true,
-    label: 'case_exploration.case.headers.case_analysis_code',
+    label: 'case_exploration.case.headers.analysis_catalog_code',
   },
   {
     id: 'primary_condition',
@@ -247,9 +247,9 @@ const defaultSettings = createColumnSettings([
     label: 'case_exploration.case.headers.primary_condition',
   },
   {
-    id: 'requested_by_code',
+    id: 'ordering_organization_code',
     visible: true,
-    label: 'case_exploration.case.headers.requested_by_code',
+    label: 'case_exploration.case.headers.ordering_organization_code',
   },
   {
     id: 'project_code',

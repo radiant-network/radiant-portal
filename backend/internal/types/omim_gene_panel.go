@@ -2,7 +2,7 @@ package types
 
 /*
 +-----------------+------------------+----+-----+-------+-----+
-|Field            |Type              |Null|Key  |Default|Extra|
+|Field            |CaseCategoryCode              |Null|Key  |Default|Extra|
 +-----------------+------------------+----+-----+-------+-----+
 |symbol           |varchar(30)       |NO  |true |null   |     |
 |panel            |varchar(200)      |NO  |true |null   |     |

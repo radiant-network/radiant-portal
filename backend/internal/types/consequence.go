@@ -2,7 +2,7 @@ package types
 
 /*
 +-----------------------+------------------+----+-----+-------+-----+
-|Field                  |Type              |Null|Key  |Default|Extra|
+|Field                  |CaseCategoryCode              |Null|Key  |Default|Extra|
 +-----------------------+------------------+----+-----+-------+-----+
 |locus_id               |bigint            |NO  |true |null   |     |
 |symbol                 |varchar(30)       |NO  |true |null   |     |

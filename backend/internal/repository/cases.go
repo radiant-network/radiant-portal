@@ -52,7 +52,7 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 
-	columns = append(columns, "CASE WHEN ca.type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN ca.type_code ELSE CONCAT(ca.type_code, '_family') END AS case_type")
+	columns = append(columns, "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END AS case_type")
 	columns = append(columns, "se.case_id IS NOT NULL AS has_variants")
 	if err = tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
@@ -82,8 +82,6 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	    (SELECT "patient_id" as type, proband_id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(proband_id AS TEXT) LIKE '1%')
 	    UNION
 	    (SELECT "mrn" as type, mrn as value from `radiant_jdbc`.`public`.`patient` WHERE mrn LIKE '1%')
-	    UNION
-	    (SELECT "request_id" as type, id as value from `radiant_jdbc`.`public`.`request` WHERE CAST(id AS TEXT) LIKE '1%')
 	    ORDER BY value asc;
 	*/
 	var autocompleteResult []AutocompleteResult
@@ -116,13 +114,13 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 	var caseAnalysis []Aggregation
 	var project []Aggregation
 	var requestedBy []Aggregation
-	var performerLab []Aggregation
+	var diagnosisLab []Aggregation
 
 	txCases, err := prepareQuery(query, r)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
-	txCases = txCases.Select("c.id, c.status_code, r.priority_code, c.case_analysis_id, c.project_id, c.performer_lab_id, r.ordering_organization_id")
+	txCases = txCases.Select("c.id, c.status_code, c.priority_code, c.analysis_catalog_id, c.project_id, c.diagnosis_lab_id, c.ordering_organization_id")
 
 	if err := r.getCasesFilter(txCases, &status, types.StatusTable, "status_code", "code", "name_en", nil); err != nil {
 		return nil, err
@@ -132,7 +130,7 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &caseAnalysis, types.CaseAnalysisTable, "case_analysis_id", "id", "name", nil); err != nil {
+	if err := r.getCasesFilter(txCases, &caseAnalysis, types.AnalysisCatalogTable, "analysis_catalog_id", "id", "name", nil); err != nil {
 		return nil, err
 	}
 
@@ -140,8 +138,8 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 		return nil, err
 	}
 
-	isDiagnosticLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.PerformerLabTable.Alias)
-	if err := r.getCasesFilter(txCases, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name", &isDiagnosticLabCondition); err != nil {
+	isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.OrganizationTable.Alias)
+	if err := r.getCasesFilter(txCases, &diagnosisLab, types.OrganizationTable, "diagnosis_lab_id", "id", "name", &isDiagnosisLabCondition); err != nil {
 		return nil, err
 	}
 
@@ -150,12 +148,12 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 	}
 
 	return &CaseFilters{
-		Status:       status,
-		Priority:     priority,
-		CaseAnalysis: caseAnalysis,
-		Project:      project,
-		PerformerLab: performerLab,
-		RequestedBy:  requestedBy,
+		Status:               status,
+		Priority:             priority,
+		CaseAnalysis:         caseAnalysis,
+		Project:              project,
+		DiagnosisLab:         diagnosisLab,
+		OrderingOrganization: requestedBy,
 	}, nil
 }
 
@@ -207,15 +205,18 @@ func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggreg
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
-	tx = utils.JoinWithRequest(tx)
 	tx = utils.JoinWithProband(tx, userQuery)
-	tx = utils.JoinWithCaseAnalysis(tx)
+	tx = utils.JoinWithAnalysisCatalog(tx)
 	tx = utils.JoinWithProject(tx)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
-		if userQuery.HasFieldFromTables(types.PerformerLabTable) {
-			tx = utils.JoinWithPerformerLab(tx)
+		if userQuery.HasFieldFromTables(types.OrderingOrganizationTable) {
+			tx = utils.JoinWithOrderingOrganization(tx)
+		}
+
+		if userQuery.HasFieldFromTables(types.DiagnosisLabTable) {
+			tx = utils.JoinWithDiagnosisLab(tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.MondoTable) {
@@ -233,12 +234,12 @@ func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error)
 	var caseEntity CaseEntity
 
 	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
-	txCase = utils.JoinWithCaseAnalysis(txCase)
+	txCase = utils.JoinWithAnalysisCatalog(txCase)
 	txCase = utils.JoinWithMondoTerm(txCase)
-	txCase = utils.JoinWithPerformerLab(txCase)
-	txCase = utils.JoinWithRequest(txCase)
+	txCase = utils.JoinWithDiagnosisLab(txCase)
+	txCase = utils.JoinWithOrderingOrganization(txCase)
 	txCase = utils.JoinWithProject(txCase)
-	txCase = txCase.Select("c.id as case_id, c.proband_id, ca.code as case_analysis_code, ca.name as case_analysis_name, ca.type_code as case_analysis_type, c.created_on, c.updated_on, c.note, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as performer_lab_code, lab.name as performer_lab_name, c.status_code, order_org.code as requested_by_code, order_org.name as requested_by_name, r.priority_code, r.ordering_physician as prescriber, c.request_id, prj.code as project_code, prj.name as project_name")
+	txCase = txCase.Select("c.id as case_id, c.proband_id, c.case_type_code as case_type_code, ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.created_on, c.updated_on, c.note, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, c.status_code, order_org.code as ordering_organization_code, order_org.name as ordering_organization_name, c.priority_code, c.ordering_physician as prescriber, prj.code as project_code, prj.name as project_name")
 	txCase = txCase.Where("c.id = ?", caseId)
 	if err := txCase.Find(&caseEntity).Error; err != nil {
 		return nil, fmt.Errorf("error fetching case entity: %w", err)
@@ -251,12 +252,11 @@ func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 	var assays []CaseAssay
 
 	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.request r ON r.id = s.request_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON s.patient_id = f.family_member_id AND s.case_id = f.case_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.experiment exp ON exp.id = s.experiment_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null")
-	txSeqExp = txSeqExp.Select("s.id as seq_id, r.id as request_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, exp.experimental_strategy_code, se.seq_id is not null as has_variants")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, exp.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("s.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc")
 	if err := txSeqExp.Find(&assays).Error; err != nil {
@@ -356,9 +356,9 @@ func (r *CasesRepository) retrieveCasesFamilyMembersIds(caseId int) ([]int, erro
 }
 
 func calculateCaseType(caseEntity CaseEntity) string {
-	if caseEntity.CaseAnalysisType == "somatic" || len(caseEntity.Members) == 1 {
-		return caseEntity.CaseAnalysisType
+	if caseEntity.CaseTypeCode == "somatic" || len(caseEntity.Members) == 1 {
+		return caseEntity.CaseTypeCode
 	} else {
-		return fmt.Sprintf("%s_family", caseEntity.CaseAnalysisType)
+		return fmt.Sprintf("%s_family", caseEntity.CaseTypeCode)
 	}
 }

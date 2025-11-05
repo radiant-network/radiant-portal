@@ -3,83 +3,91 @@ package types
 import "time"
 
 type Case struct {
-	ID               int
-	ProbandID        int
-	Proband          Patient `gorm:"foreignKey:ID;references:ProbandID"`
-	ProjectID        int
-	Project          Project `gorm:"foreignKey:ID;references:ProjectID"`
-	CaseAnalysisID   int
-	CaseAnalysis     CaseAnalysis `gorm:"foreignKey:ID;references:CaseAnalysisID"`
-	StatusCode       string
-	Status           Status `gorm:"foreignKey:Code;references:StatusCode"`
-	PrimaryCondition string
-	RequestID        int
-	Request          Request `gorm:"foreignKey:ID;references:RequestID"`
-	PerformerLabID   int
-	PerformerLab     Organization `gorm:"foreignKey:ID;references:PerformerLabID"`
-	Note             string
-	CreatedOn        time.Time
-	UpdatedOn        time.Time
+	ID                     int
+	ProbandID              int
+	Proband                Patient `gorm:"foreignKey:ID;references:ProbandID"`
+	ProjectID              int
+	Project                Project `gorm:"foreignKey:ID;references:ProjectID"`
+	AnalysisCatalogID      int
+	AnalysisCatalog        AnalysisCatalog `gorm:"foreignKey:ID;references:AnalysisCatalogID"`
+	CaseTypeCode           string
+	CaseType               CaseType `gorm:"foreignKey:Code;references:CaseTypeCode"`
+	CaseCategoryCode       string
+	CaseCategory           CaseCategory `gorm:"foreignKey:Code;references:CaseCategoryCode"`
+	PriorityCode           string
+	Priority               Priority `gorm:"foreignKey:Code;references:PriorityCode"`
+	StatusCode             string
+	Status                 Status `gorm:"foreignKey:Code;references:StatusCode"`
+	ResolutionStatusCode   string
+	ResolutionStatus       ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
+	PrimaryCondition       string
+	ConditionCodeSystem    string
+	OrderingPhysician      string
+	OrderingOrganizationID int
+	OrderingOrganization   Organization `gorm:"foreignKey:ID;references:OrderingOrganizationID"`
+	DiagnosisLabID         int
+	DiagnosisLab           Organization `gorm:"foreignKey:ID;references:diagnosisLabID"`
+	Note                   string
+	CreatedOn              time.Time
+	UpdatedOn              time.Time
 }
 
 // CaseResult - Search cases result
 // @Description Line represented a case in case list
 // @Name CaseResult
 type CaseResult struct {
-	CaseID                int       `json:"case_id" validate:"required"`
-	ProbandID             int       `json:"proband_id,omitempty"`
-	ProbandOrganizationID string    `json:"proband_organization_id,omitempty"`
-	PriorityCode          string    `json:"priority_code,omitempty"`
-	StatusCode            string    `json:"status_code" validate:"required"`
-	CaseAnalysisTypeCode  string    `json:"-"`
-	CaseAnalysisCode      string    `json:"case_analysis_code,omitempty"`
-	CaseAnalysisName      string    `json:"case_analysis_name,omitempty"`
-	CaseType              string    `json:"case_type,omitempty"`
-	PrimaryConditionID    string    `json:"primary_condition_id,omitempty"`
-	PrimaryConditionName  string    `json:"primary_condition_name,omitempty"`
-	RequestedByCode       string    `json:"requested_by_code,omitempty"`
-	RequestedByName       string    `json:"requested_by_name,omitempty"`
-	ProjectCode           string    `json:"project_code,omitempty"`
-	ProjectName           string    `json:"project_name,omitempty"`
-	CreatedOn             time.Time `json:"created_on" validate:"required"`
-	UpdatedOn             time.Time `json:"updated_on" validate:"required"`
-	Prescriber            string    `json:"prescriber,omitempty"`
-	PerformerLabCode      string    `json:"performer_lab_code,omitempty"`
-	PerformerLabName      string    `json:"performer_lab_name,omitempty"`
-	RequestID             int       `json:"request_id,omitempty"`
-	OrganizationCode      string    `json:"organization_code,omitempty"`
-	OrganizationName      string    `json:"organization_name,omitempty"`
-	HasVariants           bool      `json:"has_variants" validate:"required"`
+	CaseID                   int       `json:"case_id" validate:"required"`
+	ProbandID                int       `json:"proband_id,omitempty"`
+	ProbandOrganizationID    string    `json:"proband_organization_id,omitempty"`
+	PriorityCode             string    `json:"priority_code,omitempty"`
+	StatusCode               string    `json:"status_code" validate:"required"`
+	CaseTypeCode             string    `json:"-"`
+	AnalysisCatalogCode      string    `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName      string    `json:"analysis_catalog_name,omitempty"`
+	CaseType                 string    `json:"case_type,omitempty"`
+	PrimaryConditionID       string    `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName     string    `json:"primary_condition_name,omitempty"`
+	OrderingOrganizationCode string    `json:"ordering_organization_code,omitempty"`
+	OrderingOrganizationName string    `json:"ordering_organization_name,omitempty"`
+	ProjectCode              string    `json:"project_code,omitempty"`
+	ProjectName              string    `json:"project_name,omitempty"`
+	CreatedOn                time.Time `json:"created_on" validate:"required"`
+	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
+	Prescriber               string    `json:"prescriber,omitempty"`
+	DiagnosisLabCode         string    `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabName         string    `json:"diagnosis_lab_name,omitempty"`
+	OrganizationCode         string    `json:"organization_code,omitempty"`
+	OrganizationName         string    `json:"organization_name,omitempty"`
+	HasVariants              bool      `json:"has_variants" validate:"required"`
 }
 
 // CaseEntity - Case Entity data
 // @Description Data for Case Entity Page
 // @Name CaseEntity
 type CaseEntity struct {
-	CaseID               int                                       `json:"case_id" validate:"required"`
-	ProbandID            int                                       `json:"-"`
-	CaseAnalysisCode     string                                    `json:"case_analysis_code,omitempty"`
-	CaseAnalysisName     string                                    `json:"case_analysis_name,omitempty"`
-	CaseAnalysisType     string                                    `json:"-"`
-	CaseType             string                                    `json:"case_type,omitempty"`
-	CreatedOn            time.Time                                 `json:"created_on" validate:"required"`
-	UpdatedOn            time.Time                                 `json:"updated_on" validate:"required"`
-	Prescriber           string                                    `json:"prescriber,omitempty"`
-	RequestedByCode      string                                    `json:"requested_by_code,omitempty"`
-	RequestedByName      string                                    `json:"requested_by_name,omitempty"`
-	PerformerLabCode     string                                    `json:"performer_lab_code,omitempty"`
-	PerformerLabName     string                                    `json:"performer_lab_name,omitempty"`
-	RequestID            int                                       `json:"request_id,omitempty"`
-	PriorityCode         string                                    `json:"priority_code,omitempty"`
-	StatusCode           string                                    `json:"status_code" validate:"required"`
-	PrimaryConditionID   string                                    `json:"primary_condition_id,omitempty"`
-	PrimaryConditionName string                                    `json:"primary_condition_name,omitempty"`
-	Note                 string                                    `json:"note,omitempty"`
-	ProjectCode          string                                    `json:"project_code,omitempty"`
-	ProjectName          string                                    `json:"project_name,omitempty"`
-	Assays               JsonArray[CaseAssay]                      `json:"assays" validate:"required"`
-	Members              JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
-	Tasks                JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
+	CaseID                   int                                       `json:"case_id" validate:"required"`
+	ProbandID                int                                       `json:"-"`
+	CaseType                 string                                    `json:"case_type,omitempty"`
+	AnalysisCatalogCode      string                                    `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName      string                                    `json:"analysis_catalog_name,omitempty"`
+	CaseTypeCode             string                                    `json:"-"`
+	CreatedOn                time.Time                                 `json:"created_on" validate:"required"`
+	UpdatedOn                time.Time                                 `json:"updated_on" validate:"required"`
+	Prescriber               string                                    `json:"prescriber,omitempty"`
+	OrderingOrganizationCode string                                    `json:"ordering_organization_code,omitempty"`
+	OrderingOrganizationName string                                    `json:"ordering_organization_name,omitempty"`
+	DiagnosisLabCode         string                                    `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabName         string                                    `json:"diagnosis_lab_name,omitempty"`
+	PriorityCode             string                                    `json:"priority_code,omitempty"`
+	StatusCode               string                                    `json:"status_code" validate:"required"`
+	PrimaryConditionID       string                                    `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName     string                                    `json:"primary_condition_name,omitempty"`
+	Note                     string                                    `json:"note,omitempty"`
+	ProjectCode              string                                    `json:"project_code,omitempty"`
+	ProjectName              string                                    `json:"project_name,omitempty"`
+	Assays                   JsonArray[CaseAssay]                      `json:"assays" validate:"required"`
+	Members                  JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
+	Tasks                    JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
 }
 
 // CaseAssay - Assay to display in a Case
@@ -87,7 +95,6 @@ type CaseEntity struct {
 // @Name CaseAssay
 type CaseAssay struct {
 	SeqID                    int       `json:"seq_id" validate:"required"`
-	RequestID                int       `json:"request_id,omitempty"`
 	PatientID                int       `json:"patient_id" validate:"required"`
 	RelationshipToProband    string    `json:"relationship_to_proband" validate:"required"`
 	SampleID                 int       `json:"sample_id" validate:"required"`
@@ -143,23 +150,22 @@ var CasesFields = []Field{
 	PatientIdField,
 	PatientOrganizationIDField,
 	ProbandOrganizationIDField,
-	RequestPriorityCodeField,
+	CasePriorityCodeField,
 	CaseStatusCodeField,
-	CaseAnalysisTypeCodeField,
-	CaseAnalysisCodeField,
-	CaseAnalysisNameField,
+	CaseTypeCodeField,
+	AnalysisCatalogCodeField,
+	AnalysisCatalogNameField,
 	CasePrimaryConditionIdField,
 	CasePrimaryConditionNameField,
-	RequestOrderingOrganizationCodeField,
-	RequestOrderingOrganizationNameField,
 	ProjectCodeField,
 	ProjectNameField,
 	CaseCreatedOnField,
 	CaseUpdatedOnField,
-	RequestOrderingPhysicianField,
-	CasePerformerLabCodeField,
-	CasePerformerLabNameField,
-	CaseRequestIdField,
+	CaseOrderingPhysicianField,
+	CaseOrderingOrganizationNameField,
+	CaseOrderingOrganizationCodeField,
+	CaseDiagnosisLabCodeField,
+	CaseDiagnosisLabNameField,
 	PatientOrganizationCodeField,
 	PatientOrganizationNameField,
 }
@@ -168,11 +174,11 @@ var CasesDefaultFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
 	ProbandOrganizationIDField,
-	RequestPriorityCodeField,
+	CasePriorityCodeField,
 	CaseStatusCodeField,
-	CaseAnalysisTypeCodeField,
-	CaseAnalysisCodeField,
-	CaseAnalysisNameField,
+	CaseTypeCodeField,
+	AnalysisCatalogCodeField,
+	AnalysisCatalogNameField,
 	RequestOrderingOrganizationCodeField,
 	RequestOrderingOrganizationNameField,
 	ProjectCodeField,
@@ -182,6 +188,15 @@ var CasesDefaultFields = []Field{
 }
 
 var CasesDefaultSort = []SortField{{Field: CaseUpdatedOnField, Order: "desc"}}
+
+var CasePriorityCodeField = Field{
+	Name:            "priority_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           CaseTable,
+}
 
 var CasesQueryConfig = QueryConfig{
 	AllFields:     CasesFields,
@@ -231,29 +246,21 @@ var CaseUpdatedOnField = Field{
 	Table:         CaseTable,
 }
 
-var CaseRequestIdField = Field{
-	Name:          "request_id",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         CaseTable,
-}
-
-var CasePerformerLabCodeField = Field{
+var CaseDiagnosisLabCodeField = Field{
 	Name:            "code",
-	Alias:           "performer_lab_code",
+	Alias:           "diagnosis_lab_code",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Table:           PerformerLabTable,
+	Table:           DiagnosisLabTable,
 }
 
-var CasePerformerLabNameField = Field{
+var CaseDiagnosisLabNameField = Field{
 	Name:          "name",
-	Alias:         "performer_lab_name",
+	Alias:         "diagnosis_lab_name",
 	CanBeSelected: true,
-	Table:         PerformerLabTable,
+	Table:         DiagnosisLabTable,
 }
 
 var CasePrimaryConditionIdField = Field{
@@ -274,17 +281,46 @@ var CasePrimaryConditionNameField = Field{
 	Table:         MondoTable,
 }
 
-var CaseProjectIdField = Field{
-	Name:          "project_id",
+var CaseTypeCodeField = Field{
+	Name:          "case_type_code",
+	Alias:         "case_type_code",
+	CanBeSelected: true,
 	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Table:         CaseTable,
 }
 
+var CaseOrderingPhysicianField = Field{
+	Name:          "ordering_physician",
+	Alias:         "prescriber",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseOrderingOrganizationCodeField = Field{
+	Name:            "code",
+	Alias:           "ordering_organization_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           OrderingOrganizationTable,
+}
+
+var CaseOrderingOrganizationNameField = Field{
+	Name:          "name",
+	Alias:         "ordering_organization_name",
+	CanBeSelected: true,
+	Table:         OrderingOrganizationTable,
+}
+
 type CaseFilters struct {
-	Status       []Aggregation `json:"status" validate:"required"`
-	Priority     []Aggregation `json:"priority" validate:"required"`
-	CaseAnalysis []Aggregation `json:"case_analysis" validate:"required"`
-	Project      []Aggregation `json:"project" validate:"required"`
-	PerformerLab []Aggregation `json:"performer_lab" validate:"required"`
-	RequestedBy  []Aggregation `json:"requested_by" validate:"required"`
+	Status               []Aggregation `json:"status" validate:"required"`
+	Priority             []Aggregation `json:"priority" validate:"required"`
+	CaseAnalysis         []Aggregation `json:"case_analysis" validate:"required"`
+	Project              []Aggregation `json:"project" validate:"required"`
+	DiagnosisLab         []Aggregation `json:"diagnosis_lab" validate:"required"`
+	OrderingOrganization []Aggregation `json:"ordering_organization" validate:"required"`
 }

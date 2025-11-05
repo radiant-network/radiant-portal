@@ -130,14 +130,14 @@ In the example below, `radiant` is `application` scope (because it's client used
 
 Then use this .env in front-end
 ```
-KEYCLOAK_REALM=CQDG
-KEYCLOAK_HOST=http://localhost:8080
-KEYCLOAK_CLIENT=radiant
-KEYCLOAK_CLIENT_SECRET=ShutThisIsASecret!
-SESSION_SECRET=secret_session
-PORTAL_HOST=http://localhost:3000
-API_HOST=http://localhost:8090
-PORT=3000
+export KEYCLOAK_REALM=CQDG;
+export KEYCLOAK_HOST=http://localhost:8080;
+export KEYCLOAK_CLIENT=radiant;
+export KEYCLOAK_CLIENT_SECRET=ShutThisIsASecret!;
+export SESSION_SECRET=secret_session;
+export PORTAL_HOST=http://localhost:3000;
+export API_HOST=http://localhost:8090;
+export PORT=3000;
 ```
 
 ## Play 

@@ -52,9 +52,9 @@ components:
           type: string
         is_paired_end:
           type: boolean
-        performer_lab_code:
+        diagnosis_lab_code:
           type: string
-        performer_lab_name:
+        diagnosis_lab_name:
           type: string
         platform_code:
           type: string
@@ -192,9 +192,9 @@ components:
             $ref: '#/components/schemas/CaseAssay'
           type: array
           uniqueItems: false
-        case_analysis_code:
+        analysis_catalog_code:
           type: string
-        case_analysis_name:
+        analysis_catalog_name:
           type: string
         case_id:
           type: integer
@@ -209,9 +209,9 @@ components:
           uniqueItems: false
         note:
           type: string
-        performer_lab_code:
+        diagnosis_lab_code:
           type: string
-        performer_lab_name:
+        diagnosis_lab_name:
           type: string
         prescriber:
           type: string
@@ -227,9 +227,9 @@ components:
           type: string
         request_id:
           type: integer
-        requested_by_code:
+        ordering_organization_code:
           type: string
-        requested_by_name:
+        ordering_organization_name:
           type: string
         status_code:
           type: string
@@ -256,7 +256,7 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        performer_lab:
+        diagnosis_lab:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
@@ -283,7 +283,7 @@ components:
           uniqueItems: false
       required:
       - case_analysis
-      - performer_lab
+      - diagnosis_lab
       - priority
       - project
       - requested_by
@@ -333,9 +333,9 @@ components:
     CaseResult:
       description: Line represented a case in case list
       properties:
-        case_analysis_code:
+        analysis_catalog_code:
           type: string
-        case_analysis_name:
+        analysis_catalog_name:
           type: string
         case_id:
           type: integer
@@ -349,9 +349,9 @@ components:
           type: string
         organization_name:
           type: string
-        performer_lab_code:
+        diagnosis_lab_code:
           type: string
-        performer_lab_name:
+        diagnosis_lab_name:
           type: string
         prescriber:
           type: string
@@ -371,9 +371,9 @@ components:
           type: string
         request_id:
           type: integer
-        requested_by_code:
+        ordering_organization_code:
           type: string
-        requested_by_name:
+        ordering_organization_name:
           type: string
         status_code:
           type: string
@@ -497,7 +497,7 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        performer_lab:
+        diagnosis_lab:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
@@ -535,9 +535,9 @@ components:
           type: string
         patient_id:
           type: integer
-        performer_lab_code:
+        diagnosis_lab_code:
           type: string
-        performer_lab_name:
+        diagnosis_lab_name:
           type: string
         relationship_to_proband_code:
           type: string
@@ -1521,7 +1521,7 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        performer_lab:
+        diagnosis_lab:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
@@ -1529,7 +1529,7 @@ components:
       required:
       - case_analysis
       - classification
-      - performer_lab
+      - diagnosis_lab
       type: object
     VariantConsequence:
       properties:
@@ -1611,9 +1611,9 @@ components:
       properties:
         affected_status:
           type: string
-        case_analysis_code:
+        analysis_catalog_code:
           type: string
-        case_analysis_name:
+        analysis_catalog_name:
           type: string
         case_id:
           type: integer
@@ -1632,9 +1632,9 @@ components:
           uniqueItems: false
         patient_id:
           type: integer
-        performer_lab_code:
+        diagnosis_lab_code:
           type: string
-        performer_lab_name:
+        diagnosis_lab_name:
           type: string
         relationship_to_proband:
           type: string
@@ -1782,9 +1782,9 @@ components:
       properties:
         affected_status:
           type: string
-        case_analysis_code:
+        analysis_catalog_code:
           type: string
-        case_analysis_name:
+        analysis_catalog_name:
           type: string
         case_id:
           type: integer
@@ -1804,9 +1804,9 @@ components:
           uniqueItems: false
         patient_id:
           type: integer
-        performer_lab_code:
+        diagnosis_lab_code:
           type: string
-        performer_lab_name:
+        diagnosis_lab_name:
           type: string
         primary_condition_id:
           type: string

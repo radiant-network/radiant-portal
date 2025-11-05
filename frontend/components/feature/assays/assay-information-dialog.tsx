@@ -91,8 +91,8 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             </InformationField>
 
             {/* Diag. Lab. */}
-            <InformationField label={t('case_entity.details.diag_lab')} tooltipText={data?.performer_lab_name}>
-              {data?.performer_lab_code}
+            <InformationField label={t('case_entity.details.diag_lab')} tooltipText={data?.diagnosis_lab_name}>
+              {data?.diagnosis_lab_code}
             </InformationField>
 
             {/* Aliquot */}

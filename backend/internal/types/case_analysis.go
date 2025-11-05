@@ -1,48 +1,37 @@
 package types
 
-type CaseAnalysis struct {
-	ID       int
-	Code     string
-	Name     string
-	TypeCode string
-	Type     CaseAnalysisType `gorm:"foreignKey:Code;references:TypeCode"`
-	PanelID  int
-	Panel    Panel `gorm:"foreignKey:ID;references:PanelID"`
+type AnalysisCatalog struct {
+	ID      int
+	Code    string
+	Name    string
+	PanelID int
+	Panel   Panel `gorm:"foreignKey:ID;references:PanelID"`
 
 	Description string
 }
 
-var CaseAnalysisTable = Table{
-	Name:  "radiant_jdbc.public.case_analysis",
+var AnalysisCatalogTable = Table{
+	Name:  "radiant_jdbc.public.analysis_catalog",
 	Alias: "ca",
 }
 
-func (CaseAnalysis) TableName() string {
-	return CaseAnalysisTable.Name
+func (AnalysisCatalog) TableName() string {
+	return AnalysisCatalogTable.Name
 }
 
-var CaseAnalysisTypeCodeField = Field{
-	Name:          "type_code",
-	Alias:         "case_analysis_type_code",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         CaseAnalysisTable,
-}
-
-var CaseAnalysisCodeField = Field{
+var AnalysisCatalogCodeField = Field{
 	Name:            "code",
-	Alias:           "case_analysis_code",
+	Alias:           "analysis_catalog_code",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Table:           CaseAnalysisTable,
+	Table:           AnalysisCatalogTable,
 }
 
-var CaseAnalysisNameField = Field{
+var AnalysisCatalogNameField = Field{
 	Name:          "name",
-	Alias:         "case_analysis_name",
+	Alias:         "analysis_catalog_name",
 	CanBeSelected: true,
-	Table:         CaseAnalysisTable,
+	Table:         AnalysisCatalogTable,
 }

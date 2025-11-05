@@ -41,8 +41,8 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		assert.Equal(t, "snv", document203.DataTypeCode)
 		assert.Equal(t, 325362647, document203.Size)
 		assert.Equal(t, 20, document203.CaseID)
-		assert.Equal(t, "CQGC", document203.PerformerLabCode)
-		assert.Equal(t, "Quebec Clinical Genomic Center", document203.PerformerLabName)
+		assert.Equal(t, "CQGC", document203.DiagnosisLabCode)
+		assert.Equal(t, "Quebec Clinical Genomic Center", document203.DiagnosisLabName)
 		assert.Equal(t, "proband", document203.RelationshipToProbandCode)
 		assert.Equal(t, 58, document203.PatientID)
 		assert.Equal(t, "S14786", document203.SubmitterSampleID)
@@ -248,12 +248,12 @@ func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
 	})
 }
 
-func Test_SearchDocumentsFilterOnPerformerLabCode(t *testing.T) {
+func Test_SearchDocumentsFilterOnDiagnosisLabCode(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
-				FieldName: types.CasePerformerLabCodeField.GetAlias(),
+				FieldName: types.CaseDiagnosisLabCodeField.GetAlias(),
 				Value:     []interface{}{"CQGC"},
 			},
 		}
@@ -410,7 +410,7 @@ func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 		filters, err := repo.GetDocumentsFilters(query, true)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len((*filters).Project))
-		assert.Equal(t, 2, len((*filters).PerformerLab))
+		assert.Equal(t, 2, len((*filters).DiagnosisLab))
 		assert.Equal(t, 6, len((*filters).RelationshipToProband))
 		assert.Equal(t, 13, len((*filters).Format))
 		assert.Equal(t, 15, len((*filters).DataType))
@@ -430,7 +430,7 @@ func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
 		filters, err := repo.GetDocumentsFilters(query, false)
 		assert.NoError(t, err)
 		assert.Nil(t, (*filters).Project)
-		assert.Nil(t, (*filters).PerformerLab)
+		assert.Nil(t, (*filters).DiagnosisLab)
 		assert.Equal(t, 6, len((*filters).RelationshipToProband))
 		assert.Equal(t, 13, len((*filters).Format))
 		assert.Equal(t, 15, len((*filters).DataType))

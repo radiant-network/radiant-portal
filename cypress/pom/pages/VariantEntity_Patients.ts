@@ -96,7 +96,7 @@ const tableColumns = {
     {
       id: 'diag_lab',
       name: 'Diagnostic Lab',
-      apiField: 'performer_lab_code',
+      apiField: 'diagnosis_lab_code',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: false,
@@ -107,7 +107,7 @@ const tableColumns = {
     {
       id: 'analysis',
       name: 'Analysis',
-      apiField: 'case_analysis_code',
+      apiField: 'analysis_catalog_code',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: false,
@@ -208,7 +208,7 @@ const tableColumns = {
     {
       id: 'diag_lab',
       name: 'Diagnostic Lab',
-      apiField: 'performer_lab_code',
+      apiField: 'diagnosis_lab_code',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: false,
@@ -219,7 +219,7 @@ const tableColumns = {
     {
       id: 'analysis',
       name: 'Analysis',
-      apiField: 'case_analysis_code',
+      apiField: 'analysis_catalog_code',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: false,

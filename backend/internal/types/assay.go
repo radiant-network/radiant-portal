@@ -3,12 +3,11 @@ package types
 import "time"
 
 type Assay = struct {
-	RequestID                int       `json:"request_id,omitempty"`
 	StatusCode               string    `json:"status_code,omitempty"`
 	CreatedOn                time.Time `json:"created_on,omitempty"`
 	UpdatedOn                time.Time `json:"updated_on,omitempty"`
-	PerformerLabCode         string    `json:"performer_lab_code,omitempty"`
-	PerformerLabName         string    `json:"performer_lab_name,omitempty"`
+	DiagnosisLabCode         string    `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabName         string    `json:"diagnosis_lab_name,omitempty"`
 	Aliquot                  string    `json:"aliquot,omitempty"`
 	RunName                  string    `json:"run_name,omitempty"`
 	RunAlias                 string    `json:"run_alias,omitempty"`

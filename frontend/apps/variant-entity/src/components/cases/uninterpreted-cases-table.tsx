@@ -54,7 +54,7 @@ function UninterpretedCasesTable() {
 
     if (initialFilters.institution && initialFilters.institution !== 'all') {
       criteria.push({
-        field: 'performer_lab_code',
+        field: 'diagnosis_lab_code',
         value: [initialFilters.institution],
         operator: 'contains',
       });
@@ -62,7 +62,7 @@ function UninterpretedCasesTable() {
 
     if (initialFilters.test && initialFilters.test !== 'all') {
       criteria.push({
-        field: 'case_analysis_code',
+        field: 'analysis_catalog_code',
         value: [initialFilters.test],
         operator: 'contains',
       });

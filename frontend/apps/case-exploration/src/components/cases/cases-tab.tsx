@@ -39,8 +39,8 @@ function CasesTab() {
     {
       listBodyWithCriteria: {
         additional_fields: [
-          'case_analysis_code',
-          'case_analysis_name',
+          'analysis_catalog_code',
+          'analysis_catalog_name',
           'case_type',
           'case_id',
           'created_on',
@@ -48,8 +48,8 @@ function CasesTab() {
           'organization_name',
           'mrn',
           'patient_id',
-          'performer_lab_code',
-          'performer_lab_name',
+          'diagnosis_lab_code',
+          'diagnosis_lab_name',
           'prescriber',
           'primary_condition_id',
           'primary_condition_name',
@@ -57,8 +57,8 @@ function CasesTab() {
           'project_code',
           'project_name',
           'request_id',
-          'requested_by_code',
-          'requested_by_name',
+          'ordering_organization_code',
+          'ordering_organization_name',
           'status_code',
           'updated_on',
         ],

@@ -125,21 +125,21 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProjectAndLab bool) (*DocumentFilters, error) {
 
 	var project []Aggregation
-	var performerLab []Aggregation
+	var diagnosisLab []Aggregation
 	var relationship []Aggregation
 	var format []Aggregation
 	var dataType []Aggregation
 
 	txDocuments := prepareDocumentsQuery(query, r)
-	txDocuments = txDocuments.Select("doc.id, c.project_id, c.performer_lab_id, f.relationship_to_proband_code, doc.format_code, doc.data_type_code")
+	txDocuments = txDocuments.Select("doc.id, c.project_id, c.diagnosis_lab_id, f.relationship_to_proband_code, doc.format_code, doc.data_type_code")
 
 	if withProjectAndLab {
 		if err := r.getDocumentsFilter(txDocuments, &project, types.ProjectTable, "project_id", "id", "name", nil); err != nil {
 			return nil, err
 		}
 
-		isDiagnosticLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.PerformerLabTable.Alias)
-		if err := r.getDocumentsFilter(txDocuments, &performerLab, types.PerformerLabTable, "performer_lab_id", "id", "name", &isDiagnosticLabCondition); err != nil {
+		isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.OrganizationTable.Alias)
+		if err := r.getDocumentsFilter(txDocuments, &diagnosisLab, types.OrganizationTable, "diagnosis_lab_id", "id", "name", &isDiagnosisLabCondition); err != nil {
 			return nil, err
 		}
 	}
@@ -159,7 +159,7 @@ func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProj
 
 	return &DocumentFilters{
 		Project:               project,
-		PerformerLab:          performerLab,
+		DiagnosisLab:          diagnosisLab,
 		RelationshipToProband: relationship,
 		Format:                format,
 		DataType:              dataType,
@@ -188,7 +188,7 @@ func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.
 	tx = utils.JoinWithTaskHasSequencingExperiment(tx)
 	tx = utils.JoinWithSequencingExperiment(tx)
 	tx = utils.JoinWithCase(tx)
-	tx = utils.JoinWithPerformerLab(tx)
+	tx = utils.JoinWithDiagnosisLab(tx)
 
 	if userQuery.HasFieldFromTables(types.SampleTable) {
 		tx = utils.JoinWithSample(tx)

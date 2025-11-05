@@ -2,8 +2,6 @@ package types
 
 type Request struct {
 	ID                     int
-	PriorityCode           string
-	Priority               Priority `gorm:"foreignKey:Code;references:PriorityCode"`
 	OrderingPhysician      string
 	OrderingOrganizationID int
 	Organization           Organization `gorm:"foreignKey:ID;references:OrderingOrganizationID"`
@@ -19,27 +17,9 @@ func (Request) TableName() string {
 	return RequestTable.Name
 }
 
-var RequestOrderingPhysicianField = Field{
-	Name:          "ordering_physician",
-	Alias:         "prescriber",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         RequestTable,
-}
-
-var RequestPriorityCodeField = Field{
-	Name:            "priority_code",
-	CanBeSelected:   true,
-	CanBeFiltered:   true,
-	CanBeSorted:     true,
-	CanBeAggregated: true,
-	Table:           RequestTable,
-}
-
 var RequestOrderingOrganizationCodeField = Field{
 	Name:            "code",
-	Alias:           "requested_by_code",
+	Alias:           "ordering_organization_code",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
@@ -49,7 +29,7 @@ var RequestOrderingOrganizationCodeField = Field{
 
 var RequestOrderingOrganizationNameField = Field{
 	Name:          "name",
-	Alias:         "requested_by_name",
+	Alias:         "ordering_organization_name",
 	CanBeSelected: true,
 	Table:         OrderingOrganizationTable,
 }

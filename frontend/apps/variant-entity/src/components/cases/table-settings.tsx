@@ -20,6 +20,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import { Button } from '@/components/base/ui/button';
+
 import CasePreviewCell from './case-preview-cell';
 
 const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>();
@@ -94,10 +95,10 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       maxSize: 250,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.performer_lab_code, {
-      id: 'performer_lab_code',
+    interpretedCasesColumnHelper.accessor(row => row.diagnosis_lab_code, {
+      id: 'diagnosis_lab_code',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.diagnosis_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('variant_entity.cases.interpreted_table.headers.institution'),
       minSize: 100,
@@ -105,10 +106,10 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    interpretedCasesColumnHelper.accessor(row => row.case_analysis_code, {
-      id: 'case_analysis_code',
+    interpretedCasesColumnHelper.accessor(row => row.analysis_catalog_code, {
+      id: 'analysis_catalog_code',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.analysis_catalog_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('variant_entity.cases.interpreted_table.headers.test'),
       minSize: 80,
@@ -236,10 +237,10 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       maxSize: 150,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.performer_lab_code, {
-      id: 'performer_lab_code',
+    otherCasesColumnHelper.accessor(row => row.diagnosis_lab_code, {
+      id: 'diagnosis_lab_code',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.diagnosis_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('variant_entity.cases.other_table.headers.institution'),
       minSize: 100,
@@ -247,10 +248,10 @@ function getOtherCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
-    otherCasesColumnHelper.accessor(row => row.case_analysis_code, {
-      id: 'case_analysis_code',
+    otherCasesColumnHelper.accessor(row => row.analysis_catalog_code, {
+      id: 'analysis_catalog_code',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.case_analysis_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.analysis_catalog_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('variant_entity.cases.other_table.headers.test'),
       minSize: 80,
@@ -315,12 +316,12 @@ const interpretedCasesDefaultSettings = createColumnSettings([
     label: 'variant.headers.inheritance',
   },
   {
-    id: 'performer_lab_code',
+    id: 'diagnosis_lab_code',
     visible: true,
     label: 'variant.headers.institution',
   },
   {
-    id: 'case_analysis_code',
+    id: 'analysis_catalog_code',
     visible: true,
     label: 'variant.headers.test',
   },
@@ -373,12 +374,12 @@ const otherCasesDefaultSettings = createColumnSettings([
     label: 'variant.headers.zygosity',
   },
   {
-    id: 'performer_lab_code',
+    id: 'diagnosis_lab_code',
     visible: true,
     label: 'variant.headers.institution',
   },
   {
-    id: 'case_analysis_code',
+    id: 'analysis_catalog_code',
     visible: true,
     label: 'variant.headers.test',
   },

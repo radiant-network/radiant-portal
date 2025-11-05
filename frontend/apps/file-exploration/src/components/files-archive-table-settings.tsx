@@ -70,13 +70,13 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       minSize: 40,
       maxSize: 164,
     }),
-    // Performer Lab.
-    columnHelper.accessor(row => row.performer_lab_code, {
-      id: 'performer_lab_code',
+    // Diagnosis Lab.
+    columnHelper.accessor(row => row.diagnosis_lab_code, {
+      id: 'diagnosis_lab_code',
       cell: info => (
-        <TextTooltipCell tooltipText={info.row.original.performer_lab_name}>{info.getValue()}</TextTooltipCell>
+        <TextTooltipCell tooltipText={info.row.original.diagnosis_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
-      header: t('file_entity.performer_lab'),
+      header: t('file_entity.diagnosis_lab'),
       minSize: 40,
       maxSize: 150,
       size: 120,
@@ -183,9 +183,9 @@ export const defaultSettings = createColumnSettings([
     label: 'file_entity.case_id',
   },
   {
-    id: 'performer_lab_code',
+    id: 'diagnosis_lab_code',
     visible: true,
-    label: 'file_entity.performer_lab',
+    label: 'file_entity.diagnosis_lab',
   },
   {
     id: 'relationship_to_proband_code',

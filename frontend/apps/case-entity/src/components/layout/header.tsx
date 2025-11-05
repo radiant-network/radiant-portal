@@ -25,8 +25,8 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
         {
           variant: 'outline',
           className: 'h-5',
-          children: data?.case_analysis_code,
-          tooltipText: data?.case_analysis_name,
+          children: data?.analysis_catalog_code,
+          tooltipText: data?.analysis_catalog_name,
         },
       ]}
     />

@@ -13,7 +13,7 @@ var OrganizationTable = Table{
 	Alias: "org",
 }
 
-var PerformerLabTable = Table{
+var DiagnosisLabTable = Table{
 	Name:  OrganizationTable.Name,
 	Alias: "lab",
 }

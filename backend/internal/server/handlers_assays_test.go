@@ -14,14 +14,13 @@ import (
 
 func (m *MockRepository) GetAssayBySeqId(seqId int) (*types.Assay, error) {
 	return &types.Assay{
-		RequestID:  22,
 		StatusCode: "completed",
 		CreatedOn: time.Date(
 			2021, 9, 12, 13, 8, 0, 0, time.UTC),
 		UpdatedOn: time.Date(
 			2021, 9, 12, 13, 8, 0, 0, time.UTC),
-		PerformerLabCode: "CQGC",
-		PerformerLabName: "Quebec Clinical Genomic Center",
+		DiagnosisLabCode: "CQGC",
+		DiagnosisLabName: "Quebec Clinical Genomic Center",
 		Aliquot:          "NA12892",
 		RunName:          "1617",
 		RunAlias:         "A00516_0169",
@@ -62,11 +61,10 @@ func Test_GetAssayBySeqIdHandler(t *testing.T) {
 		"experimental_strategy_name":"Whole Exome Sequencing", 
 		"histology_code":"normal", 
 		"is_paired_end":true, 
-		"performer_lab_code":"CQGC", 
-		"performer_lab_name":"Quebec Clinical Genomic Center", 
+		"diagnosis_lab_code":"CQGC", 
+		"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 		"platform_code":"illumina", 
-		"read_length":151, 
-		"request_id":22, 
+		"read_length":151,
 		"run_alias":"A00516_0169", 
 		"run_date":"2021-08-17T00:00:00Z", 
 		"run_name":"1617", 
