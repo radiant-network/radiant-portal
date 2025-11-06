@@ -64,7 +64,7 @@ func GetDistinctTablesFromFields(fields []types.Field) []types.Table {
 }
 
 func GetAggregatedPhenotypes(db *gorm.DB) *gorm.DB {
-	tx := db.Table("`radiant_jdbc`.`public`.`observation_coding` obs")
+	tx := db.Table("`radiant_jdbc`.`public`.`obs_categorical` obs")
 	tx = tx.Joins("LEFT JOIN hpo_term hpo ON hpo.id = obs.code_value")
 	tx = tx.Where("obs.observation_code = 'phenotype' AND obs.interpretation_code = 'positive'")
 	tx = tx.Group("case_id, patient_id")

@@ -1466,7 +1466,7 @@ VALUES (1, 1, 1, 'mother', 'affected'),
        (61, 21, 60, 'proband', 'affected')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO "observation_coding" (id,
+INSERT INTO "obs_categorical" (id,
                                   case_id,
                                   patient_id,
                                   observation_code,

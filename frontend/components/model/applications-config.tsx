@@ -58,6 +58,7 @@ export interface Aggregation {
   tooltips?: string[];
   intervalDecimal?: { [key: string]: number };
   withDictionary?: boolean;
+  facetHidden?: boolean;
 }
 
 export interface AggregationGroup {

@@ -1,11 +1,13 @@
 import { reactRouter } from '@react-router/dev/vite';
+import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import path from 'path';
-import tailwindcss from '@tailwindcss/vite';
+
 import { type PortalConfig } from '../../components/model/applications-config';
-import radiantConfig from './config/radiant.json';
+
 import kfConfig from './config/kf.json';
+import radiantConfig from './config/radiant.json';
 import { createMergeTranslationsPlugin } from './merge-translations';
 
 const configs: Record<string, PortalConfig> = {
@@ -30,10 +32,5 @@ export default defineConfig({
       '@translations-merged': path.resolve(__dirname, `../../translations/merged/${project}`),
     },
   },
-  plugins: [
-    reactRouter() as any, 
-    tsconfigPaths(), 
-    tailwindcss(), 
-    createMergeTranslationsPlugin(project, __dirname)
-  ],
+  plugins: [reactRouter() as any, tsconfigPaths(), tailwindcss(), createMergeTranslationsPlugin(project, __dirname)],
 });

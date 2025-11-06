@@ -27,6 +27,7 @@ import { occurrencesApi } from '@/utils/api';
 
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { OccurrenceCountInput, useSNVOccurrencesCountHelper, useSNVOccurrencesListHelper } from '../hook';
+import { getVisibleAggregations } from '../utils';
 
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
 
@@ -79,6 +80,7 @@ function SNVTab({ seqId }: SNVTabProps) {
 
   const appId = config.snv_occurrence.app_id;
   const aggregations = config.snv_occurrence.aggregations;
+  const visibleAggregations = getVisibleAggregations(aggregations);
 
   function getAggregationFromConfig(key: string) {
     return Object.values(config.snv_occurrence.aggregations)
@@ -213,7 +215,7 @@ function SNVTab({ seqId }: SNVTabProps) {
             <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
               <div className="z-10">
                 <SidebarGroups
-                  aggregationGroups={aggregations}
+                  aggregationGroups={visibleAggregations}
                   selectedItemId={selectedSidebarItem}
                   onItemSelect={setSelectedSidebarItem}
                 />
@@ -233,7 +235,7 @@ function SNVTab({ seqId }: SNVTabProps) {
                       <X size={16} />
                     </button>
                   </div>
-                  <FilterList appId={appId} aggregations={aggregations} groupKey={selectedSidebarItem} />
+                  <FilterList appId={appId} aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
                 </div>
               </div>
             </SidebarProvider>

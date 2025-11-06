@@ -111,8 +111,7 @@ function InterpretedCasesTable() {
           list: isLoading,
         }}
         total={data?.count || 0}
-        pagination={pagination}
-        onPaginationChange={setPagination}
+        pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
         onServerSortingChange={() => {}}
         subComponent={data => <InterpretedCasesExpand locusId={params.locusId!} data={data} />}
         tableIndexResultPosition="bottom"
