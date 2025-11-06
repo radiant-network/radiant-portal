@@ -238,3 +238,39 @@ type PanelType struct {
 func (PanelType) TableName() string {
 	return PanelTypeTable.Name
 }
+
+var CaseCategoryTable = Table{
+	Name: "radiant_jdbc.public.case_category",
+}
+
+type CaseCategory struct {
+	ValueSet
+} // @name CaseCategory
+
+func (CaseCategory) TableName() string {
+	return CaseCategoryTable.Name
+}
+
+var ResolutionStatusTable = Table{
+	Name: "radiant_jdbc.public.resolution_status",
+}
+
+type ResolutionStatus struct {
+	ValueSet
+} // @name ResolutionStatus
+
+func (ResolutionStatus) TableName() string {
+	return ResolutionStatusTable.Name
+}
+
+var CaseTypeTable = Table{
+	Name: "radiant_jdbc.public.case_type",
+}
+
+type CaseType struct {
+	ValueSet
+} // @name CaseType
+
+func (CaseType) TableName() string {
+	return CaseTypeTable.Name
+}

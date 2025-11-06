@@ -36,7 +36,7 @@ func (r *AssaysRepository) GetAssayBySeqId(seqId int) (*Assay, error) {
 	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.organization org ON s.performer_lab_id = org.id")
 	tx = tx.Where("s.id = ?", seqId)
 
-	tx = tx.Select("s.status_code, s.created_on, s.updated_on, org.code as diagnosis_lab_code, org.name as diagnosis_lab_name, s.aliquot, s.run_name, s.run_alias, s.run_date, s.id as seq_id, exp.experimental_strategy_code, expstr.name_en as experimental_strategy_name, s.is_paired_end, exp.platform_code, s.capture_kit, s.read_length, exp.description as experiment_description, s.sample_id, spl.category_code, spl.type_code as sample_type_code, spl.tissue_site, spl.histology_code, spl.submitter_sample_id")
+	tx = tx.Select("s.status_code, s.created_on, s.updated_on, org.code as diagnosis_lab_code, org.name as diagnosis_lab_name, s.aliquot, s.run_name, s.run_alias, s.run_date, s.id as seq_id, exp.experimental_strategy_code, expstr.name_en as experimental_strategy_name, s.is_paired_end, exp.platform_code, s.capture_kit, s.read_length, exp.description as experiment_description, s.sample_id, spl.type_code as sample_type_code, spl.tissue_site, spl.histology_code, spl.submitter_sample_id")
 
 	if err := tx.Find(&assay).Error; err != nil {
 		return nil, fmt.Errorf("error fetching assay: %w", err)
