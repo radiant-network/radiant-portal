@@ -17,7 +17,6 @@ import { FilterComponent } from '@/components/feature/query-filters/filter-conta
 import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { SidebarGroups } from '@/components/feature/query-filters/sidebar-groups';
 import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
-import { getVisibleAggregations } from '@/components/feature/query-filters/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 import { useConfig } from '@/components/model/applications-config';
@@ -28,6 +27,7 @@ import { occurrencesApi } from '@/utils/api';
 
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { OccurrenceCountInput, useSNVOccurrencesCountHelper, useSNVOccurrencesListHelper } from '../hook';
+import { getVisibleAggregations } from '../utils';
 
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
 
