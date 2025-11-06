@@ -17,9 +17,27 @@ func (Request) TableName() string {
 	return RequestTable.Name
 }
 
+var RequestOrderingPhysicianField = Field{
+	Name:          "ordering_physician",
+	Alias:         "prescriber",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         RequestTable,
+}
+
+var RequestPriorityCodeField = Field{
+	Name:            "priority_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           RequestTable,
+}
+
 var RequestOrderingOrganizationCodeField = Field{
 	Name:            "code",
-	Alias:           "ordering_organization_code",
+	Alias:           "requested_by_code",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
 	CanBeSorted:     true,

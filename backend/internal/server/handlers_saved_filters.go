@@ -43,7 +43,7 @@ func GetSavedFilterByIDHandler(repo repository.SavedFiltersDAO) gin.HandlerFunc 
 // @Description Get user saved filters
 // @Tags saved_filters
 // @Security bearerauth
-// @Param type query string false "Saved Filter CaseCategoryCode"
+// @Param type query string false "Saved Filter Type"
 // @Produce json
 // @Success 200 {array} types.SavedFilter
 // @Failure 401 {object} types.ApiError

@@ -71,7 +71,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     corsAllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-		AllowHeaders:     []string{"Accept", "Authorization", "Content-CaseCategoryCode"},
+		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true, // Enable cookies/auth
 	}))
 
