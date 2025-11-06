@@ -12,7 +12,7 @@ import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { Switch } from '@/components/base/ui/switch';
 import { useI18n } from '@/components/hooks/i18n';
-import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
+import { type Aggregation as AggregationConfig, ApplicationId } from '@/components/model/applications-config';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/model/sqon';
 
@@ -47,12 +47,25 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
+function isWithDictionaryEnabled(appId: ApplicationId, field: AggregationConfig): boolean {
+  const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+    .getResolvedActiveQuery(appId)
+    // @ts-ignore
+    .content.find((x: IValueFilter) => x.content.field === field.key);
+
+  if (prevSelectedItems && field.withDictionary) {
+    return true;
+  }
+
+  return false;
+}
+
 export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
   const { appId } = useFilterConfig();
 
   // State to manage the dictionary switch value
-  const [withDictionaryToggle, setWithDictionaryToggle] = useState(false);
+  const [withDictionaryToggle, setWithDictionaryToggle] = useState(isWithDictionaryEnabled(appId, field));
 
   // Use the hook directly instead of receiving data as a prop
   const { data: aggregationData, isLoading } = useAggregationBuilder(
