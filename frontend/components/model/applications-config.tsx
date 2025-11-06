@@ -57,6 +57,7 @@ export interface Aggregation {
   defaults?: TFilterGroupConfig;
   tooltips?: string[];
   intervalDecimal?: { [key: string]: number };
+  facetHidden?: boolean;
 }
 
 export interface AggregationGroup {
