@@ -8,9 +8,9 @@
     "aggregations": {
       "variant": {
         "items": [
-          { "key": "variant_class", "translation_key": "variant_class", "type": "multiple" },
-          { "key": "consequence", "translation_key": "consequence", "type": "multiple" },
-          { "key": "chromosome", "translation_key": "chromosome", "type": "multiple" },
+          { "key": "variant_class", "translation_key": "variant_class", "type": "multiple", "withDictionary": true },
+          { "key": "consequence", "translation_key": "consequence", "type": "multiple", "withDictionary": true },
+          { "key": "chromosome", "translation_key": "chromosome", "type": "multiple", "withDictionary": true },
           {
             "key": "start",
             "translation_key": "start",
@@ -21,7 +21,7 @@
       },
       "gene": {
         "items": [
-          { "key": "biotype", "translation_key": "biotype", "type": "multiple" },
+          { "key": "biotype", "translation_key": "biotype", "type": "multiple", "withDictionary": true },
           {
             "key": "gnomad_pli",
             "translation_key": "gnomad_pli",
@@ -34,7 +34,7 @@
             "type": "numerical",
             "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" }
           },
-          { "key": "omim_inheritance", "translation_key": "omim_inheritance", "type": "multiple" },
+          { "key": "omim_inheritance", "translation_key": "omim_inheritance", "type": "multiple", "withDictionary": true },
           { "key": "gene_divider", "translation_key": "gene_divider", "type": "divider" },
           { "key": "hpo_gene_panel", "translation_key": "hpo_gene_panel", "type": "multiple" },
           { "key": "orphanet_gene_panel", "translation_key": "orphanet_gene_panel", "type": "multiple" },
@@ -45,8 +45,8 @@
       },
       "pathogenicity": {
         "items": [
-          { "key": "clinvar", "translation_key": "clinvar", "type": "multiple" },
-          { "key": "vep_impact", "translation_key": "vep_impact", "type": "multiple" },
+          { "key": "clinvar", "translation_key": "clinvar", "type": "multiple", "withDictionary": true },
+          { "key": "vep_impact", "translation_key": "vep_impact", "type": "multiple", "withDictionary": true },
           {
             "key": "pathogenicity_exomiser_divider",
             "translation_key": "pathogenicity_exomiser_divider",
@@ -112,7 +112,7 @@
             }
           },
           { "key": "fathmm_pred", "translation_key": "fathmm_pred", "type": "multiple" },
-          { "key": "lrt_pred", "translation_key": "lrt_pred", "type": "multiple" },
+          { "key": "lrt_pred", "translation_key": "lrt_pred", "type": "multiple", "withDictionary": true },
           { "key": "polyphen2_hvar_pred", "translation_key": "polyphen2_hvar_pred", "type": "multiple" },
           {
             "key": "revel_score",
@@ -238,7 +238,7 @@
           { "key": "mother_zygosity", "translation_key": "mother_zygosity", "type": "multiple" },
           { "key": "father_zygosity", "translation_key": "father_zygosity", "type": "multiple" },
           { "key": "parental_origin", "translation_key": "parental_origin", "type": "multiple" },
-          { "key": "transmission_mode", "translation_key": "transmission_mode", "type": "multiple" },
+          { "key": "transmission_mode", "translation_key": "transmission_mode", "type": "multiple", "withDictionary": true },
           { "key": "occurrence_metrics_divider", "translation_key": "occurrence_metrics_divider", "type": "divider" },
           { "key": "filter", "translation_key": "filter", "type": "multiple" },
           {

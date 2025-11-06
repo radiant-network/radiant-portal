@@ -51,11 +51,17 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
   const { appId } = useFilterConfig();
 
-  // State to manage the "withDictionary" switch
-  const [withDictionary, setWithDictionary] = useState(false);
+  // State to manage the dictionary switch value
+  const [withDictionaryToggle, setWithDictionaryToggle] = useState(false);
 
   // Use the hook directly instead of receiving data as a prop
-  const { data: aggregationData, isLoading } = useAggregationBuilder(field.key, undefined, true, withDictionary, appId);
+  const { data: aggregationData, isLoading } = useAggregationBuilder(
+    field.key,
+    undefined,
+    true,
+    withDictionaryToggle,
+    appId,
+  );
 
   const [items, setItems] = useState<Aggregation[]>(aggregationData || []);
   // items that are include in the search
@@ -220,16 +226,21 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
           <Button size="xs" onClick={() => unSelectAll()} variant="link" className="px-0">
             {t('common.filters.buttons.none')}
           </Button>
-          <div className="flex-grow" />
-          <Label htmlFor="with-dictionary-switch" className="text-xs">
-            {t('common.filters.with_dictionary')}
-          </Label>
-          <Switch
-            id="with-dictionary-switch"
-            checked={withDictionary}
-            size="xs"
-            onCheckedChange={() => setWithDictionary(!withDictionary)}
-          />
+
+          {field.withDictionary && (
+            <>
+              <div className="flex-grow" />
+              <Label htmlFor="with-dictionary-switch" className="text-xs">
+                {t('common.filters.with_dictionary')}
+              </Label>
+              <Switch
+                id="with-dictionary-switch"
+                checked={withDictionaryToggle}
+                size="xs"
+                onCheckedChange={() => setWithDictionaryToggle(!withDictionaryToggle)}
+              />
+            </>
+          )}
         </div>
 
         <div className="max-h-[250px] overflow-auto">
