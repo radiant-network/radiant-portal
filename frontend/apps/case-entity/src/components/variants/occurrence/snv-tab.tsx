@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
@@ -76,9 +76,14 @@ function SNVTab({ seqId }: SNVTabProps) {
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
   const [open, setOpen] = useState(false);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
+  const [filteredAggregations, setFilteredAggregations] = useState(config.snv_occurrence.aggregations);
 
   const appId = config.snv_occurrence.app_id;
   const aggregations = config.snv_occurrence.aggregations;
+
+  const handleFilteredGroupsChange = useCallback((filtered: typeof aggregations) => {
+    setFilteredAggregations(filtered);
+  }, []);
 
   function getAggregationFromConfig(key: string) {
     return Object.values(config.snv_occurrence.aggregations)
@@ -216,6 +221,7 @@ function SNVTab({ seqId }: SNVTabProps) {
                   aggregationGroups={aggregations}
                   selectedItemId={selectedSidebarItem}
                   onItemSelect={setSelectedSidebarItem}
+                  onFilteredGroupsChange={handleFilteredGroupsChange}
                 />
               </div>
               <div
@@ -233,7 +239,7 @@ function SNVTab({ seqId }: SNVTabProps) {
                       <X size={16} />
                     </button>
                   </div>
-                  <FilterList appId={appId} aggregations={aggregations} groupKey={selectedSidebarItem} />
+                  <FilterList appId={appId} aggregations={filteredAggregations} groupKey={selectedSidebarItem} />
                 </div>
               </div>
             </SidebarProvider>
