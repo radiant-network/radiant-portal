@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
@@ -17,6 +17,7 @@ import { FilterComponent } from '@/components/feature/query-filters/filter-conta
 import { FilterList } from '@/components/feature/query-filters/filter-list';
 import { SidebarGroups } from '@/components/feature/query-filters/sidebar-groups';
 import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
+import { getVisibleAggregations } from '@/components/feature/query-filters/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 import { useConfig } from '@/components/model/applications-config';
@@ -76,14 +77,10 @@ function SNVTab({ seqId }: SNVTabProps) {
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
   const [open, setOpen] = useState(false);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
-  const [filteredAggregations, setFilteredAggregations] = useState(config.snv_occurrence.aggregations);
 
   const appId = config.snv_occurrence.app_id;
   const aggregations = config.snv_occurrence.aggregations;
-
-  const handleFilteredGroupsChange = useCallback((filtered: typeof aggregations) => {
-    setFilteredAggregations(filtered);
-  }, []);
+  const visibleAggregations = getVisibleAggregations(aggregations);
 
   function getAggregationFromConfig(key: string) {
     return Object.values(config.snv_occurrence.aggregations)
@@ -218,10 +215,9 @@ function SNVTab({ seqId }: SNVTabProps) {
             <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
               <div className="z-10">
                 <SidebarGroups
-                  aggregationGroups={aggregations}
+                  aggregationGroups={visibleAggregations}
                   selectedItemId={selectedSidebarItem}
                   onItemSelect={setSelectedSidebarItem}
-                  onFilteredGroupsChange={handleFilteredGroupsChange}
                 />
               </div>
               <div
@@ -239,7 +235,7 @@ function SNVTab({ seqId }: SNVTabProps) {
                       <X size={16} />
                     </button>
                   </div>
-                  <FilterList appId={appId} aggregations={filteredAggregations} groupKey={selectedSidebarItem} />
+                  <FilterList appId={appId} aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
                 </div>
               </div>
             </SidebarProvider>

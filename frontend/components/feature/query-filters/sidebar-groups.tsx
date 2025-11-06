@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { BadgeCheckIcon, Droplet, PanelLeftClose, PanelLeftOpen, UserRoundIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 
@@ -48,14 +48,12 @@ interface SidebarGroupsProps {
   onItemSelect?: (itemId: string | null) => void;
   selectedItemId?: string | null;
   aggregationGroups: AggregationConfig;
-  onFilteredGroupsChange?: (filteredGroups: AggregationConfig) => void;
 }
 
 export function SidebarGroups({
   onItemSelect,
   aggregationGroups,
   selectedItemId: externalSelectedItemId,
-  onFilteredGroupsChange,
 }: SidebarGroupsProps) {
   const { t } = useI18n();
   const { open, toggleSidebar } = useSidebar();
@@ -71,36 +69,6 @@ export function SidebarGroups({
       onItemSelect(newSelectedId);
     }
   };
-
-  // Filter out hidden facets
-  const aggregationGroupsFiltered = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.entries(aggregationGroups)
-          .map(([key, group]) => {
-            const filteredGroup = {
-              ...group,
-              items: group.items.filter(item => item.facetHidden !== true),
-            };
-            return [key, filteredGroup];
-          })
-          .filter(([_, group]) => (group as any).items.length > 0), // Remove groups with no visible items
-      ) as AggregationConfig,
-    [aggregationGroups],
-  );
-
-  // Stabilize the callback to prevent infinite loops
-  const notifyFilteredGroups = useCallback(
-    (filteredGroups: AggregationConfig) => {
-      onFilteredGroupsChange?.(filteredGroups);
-    },
-    [onFilteredGroupsChange],
-  );
-
-  // Notify parent of filtered groups
-  useEffect(() => {
-    notifyFilteredGroups(aggregationGroupsFiltered);
-  }, [aggregationGroupsFiltered, notifyFilteredGroups]);
 
   return (
     <Sidebar
@@ -127,7 +95,7 @@ export function SidebarGroups({
             </TooltipContent>
           </Tooltip>
           <SidebarMenu>
-            {Object.entries(aggregationGroupsFiltered).map(([id]) => {
+            {Object.entries(aggregationGroups).map(([id]) => {
               const Icon = iconMap[id as keyof typeof iconMap];
               const label = t(`query_filters.sidebar_panel.filters.${id}`);
               return (
