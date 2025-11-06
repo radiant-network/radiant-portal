@@ -4,7 +4,7 @@ import "time"
 
 /*
 +----------------------+-------------------+----+-----+-------+-----+
-|Field                 |CaseCategoryCode               |Null|Key  |Default|Extra|
+|Field                 |Type               |Null|Key  |Default|Extra|
 +----------------------+-------------------+----+-----+-------+-----+
 |locus_id              |bigint             |NO  |true |null   |     |
 |pf_wgs                |double             |YES |false|null   |     |
