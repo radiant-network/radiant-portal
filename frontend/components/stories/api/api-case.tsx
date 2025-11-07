@@ -639,7 +639,7 @@ export async function httpCaseFiltersApiResponse() {
         count: 0,
       },
     ],
-    requested_by: [
+    ordering_organization: [
       {
         key: 'CHUSJ',
         label: 'Centre hospitalier universitaire Sainte-Justine',

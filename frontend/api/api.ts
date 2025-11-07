@@ -6879,7 +6879,7 @@ export const SavedFiltersApiAxiosParamCreator = function (configuration?: Config
         /**
          * Get user saved filters
          * @summary Get user saved filters
-         * @param {string} [type] Saved Filter CaseCategoryCode
+         * @param {string} [type] Saved Filter Type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7038,7 +7038,7 @@ export const SavedFiltersApiFp = function(configuration?: Configuration) {
         /**
          * Get user saved filters
          * @summary Get user saved filters
-         * @param {string} [type] Saved Filter CaseCategoryCode
+         * @param {string} [type] Saved Filter Type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7108,7 +7108,7 @@ export const SavedFiltersApiFactory = function (configuration?: Configuration, b
         /**
          * Get user saved filters
          * @summary Get user saved filters
-         * @param {string} [type] Saved Filter CaseCategoryCode
+         * @param {string} [type] Saved Filter Type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7173,7 +7173,7 @@ export class SavedFiltersApi extends BaseAPI {
     /**
      * Get user saved filters
      * @summary Get user saved filters
-     * @param {string} [type] Saved Filter CaseCategoryCode
+     * @param {string} [type] Saved Filter Type
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SavedFiltersApi

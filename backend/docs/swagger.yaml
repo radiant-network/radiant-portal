@@ -3312,7 +3312,7 @@ paths:
       description: Get user saved filters
       operationId: getSavedFilters
       parameters:
-      - description: Saved Filter CaseCategoryCode
+      - description: Saved Filter Type
         in: query
         name: type
         schema:

@@ -301,7 +301,7 @@
         "search": {
           "case_id": "Case",
           "patient_id": "Patient",
-          "mrn": "MRN",
+          "organization_patient_id": "MRN",
           "request_id": "Assay",
           "run_name": "Run Name",
           "sample_id": "Sample ID",
@@ -430,7 +430,7 @@
         "project_code": "Project",
         "revel_score": "REVEL",
         "revel_score_tooltip": "Rare Exome Variant Ensemble Learner",
-        "requested_by": "Prescribing Institution",
+        "ordering_organization": "Prescribing Institution",
         "select_unit": "Select unit",
         "sift_pred": "SIFT",
         "sift_pred_tooltip": "Sorting Intolerant From Tolerant",
@@ -684,7 +684,7 @@
       "search_placeholder": "Case, assay, patient, or MRN",
       "project_code": "Project",
       "diagnosis_lab": "Diagnostic Lab",
-      "requested_by": "Prescribing Institution"
+      "ordering_organization": "Prescribing Institution"
     },
     "priority": {
       "asap": "ASAP",
@@ -724,13 +724,13 @@
         "case_analysis": "Analysis",
         "project": "Project",
         "diagnosis_lab": "Diagnostic Lab",
-        "requested_by": "Prescribing Institution"
+        "ordering_organization": "Prescribing Institution"
       },
       "headers": {
         "case_id": "Case",
         "patient_id": "Patient",
-        "mrn": "MRN",
-        "mrn_tooltip": "Patient's medical record number",
+        "organization_patient_id": "MRN",
+        "organization_patient_id_tooltip": "Patient's medical record number",
         "priority_code": "Priority",
         "status_code": "Status",
         "case_type": "Type",
@@ -1211,7 +1211,7 @@
       "dob": "DOB",
       "sex": "Sex",
       "jhn": "JHN",
-      "mrn": "MRN",
+      "organization_patient_id": "MRN",
       "managing_org": "Managing Org.",
       "managing_org_tooltip": "Organization managing the patient’s file"
     },

@@ -7,7 +7,7 @@ import (
 type Task struct {
 	ID                    int
 	TypeCode              string
-	Type                  TaskType `gorm:"foreignKey:code;references:CaseTypeCode"`
+	Type                  TaskType `gorm:"foreignKey:code;references:TypeCode"`
 	PipelineID            int
 	Pipeline              Pipeline `gorm:"foreignKey:ID;references:PipelineID"`
 	CreatedOn             time.Time

@@ -43,8 +43,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'proband_organization_id',
       cell: info => <>{info.getValue()}</>,
       header: () => (
-        <TooltipHeader tooltip={t('case_exploration.case.headers.mrn_tooltip')}>
-          {t('case_exploration.case.headers.mrn')}
+        <TooltipHeader tooltip={t('case_exploration.case.headers.organization_patient_id_tooltip')}>
+          {t('case_exploration.case.headers.organization_patient_id')}
         </TooltipHeader>
       ),
       size: 124,
@@ -219,7 +219,7 @@ const defaultSettings = createColumnSettings([
   {
     id: 'proband_organization_id',
     visible: true,
-    label: 'case_exploration.case.headers.mrn',
+    label: 'case_exploration.case.headers.organization_patient_id',
   },
   {
     id: 'priority_code',

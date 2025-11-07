@@ -17,18 +17,6 @@ func (Sex) TableName() string {
 	return SexTable.Name
 }
 
-var CaseAnalysisTypeTable = Table{
-	Name: "radiant_jdbc.public.case_analysis_type",
-}
-
-type CaseAnalysisType struct {
-	ValueSet
-} // @name CaseAnalysisType
-
-func (CaseAnalysisType) TableName() string {
-	return CaseAnalysisTypeTable.Name
-}
-
 var StatusTable = Table{
 	Name:  "radiant_jdbc.public.status",
 	Alias: "status",

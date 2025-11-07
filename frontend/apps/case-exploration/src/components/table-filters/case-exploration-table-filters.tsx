@@ -28,7 +28,7 @@ const CRITERIAS = {
   case_analysis: { key: 'analysis_catalog_code', weight: 3, visible: true },
   project: { key: 'project_code', visible: false },
   diagnosis_lab: { key: 'diagnosis_lab_code', visible: false },
-  requested_by: { key: 'ordering_organization_code', visible: false },
+  ordering_organization: { key: 'ordering_organization_code', visible: false },
 };
 
 export const FILTER_DEFAULTS = {
@@ -37,7 +37,7 @@ export const FILTER_DEFAULTS = {
   case_analysis: [],
   project: [],
   diagnosis_lab: [],
-  requested_by: [],
+  ordering_organization: [],
 };
 
 async function fetchFilters(searchCriteria: CaseFiltersInput) {
@@ -82,7 +82,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           };
         case 'project':
         case 'diagnosis_lab':
-        case 'requested_by':
+        case 'ordering_organization':
           return {
             ...baseOption,
             popoverSize: 'lg' as PopoverSize,

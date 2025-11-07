@@ -113,7 +113,7 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 	var priority []Aggregation
 	var caseAnalysis []Aggregation
 	var project []Aggregation
-	var requestedBy []Aggregation
+	var orderingOrg []Aggregation
 	var diagnosisLab []Aggregation
 
 	txCases, err := prepareQuery(query, r)
@@ -143,7 +143,7 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &requestedBy, types.OrderingOrganizationTable, "ordering_organization_id", "id", "name", nil); err != nil {
+	if err := r.getCasesFilter(txCases, &orderingOrg, types.OrderingOrganizationTable, "ordering_organization_id", "id", "name", nil); err != nil {
 		return nil, err
 	}
 
@@ -153,7 +153,7 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 		CaseAnalysis:         caseAnalysis,
 		Project:              project,
 		DiagnosisLab:         diagnosisLab,
-		OrderingOrganization: requestedBy,
+		OrderingOrganization: orderingOrg,
 	}, nil
 }
 
