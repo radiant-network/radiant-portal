@@ -59,6 +59,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoSavedFilters := repository.NewSavedFiltersRepository(dbPostgres)
 	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
 	repoFacets := repository.NewFacetsRepository()
+	repoBatches := repository.NewBatchRepository(dbPostgres)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -171,6 +172,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.POST("/search", server.SearchDocumentsHandler(repoDocuments))
 	documentsGroup.GET("/autocomplete", server.DocumentsAutocompleteHandler(repoDocuments))
 	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
+
+	patientsGroup := privateRoutes.Group("/patients")
+	patientsGroup.POST("/batch", server.PostPatientBatchHandler(repoBatches))
 
 	r.Use(gin.Recovery())
 	return r
