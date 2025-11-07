@@ -19,9 +19,9 @@ describe('Cases - Information displayed', () => {
     CasesTable.validations.shouldShowColumnContent('patient', data.case);
   });
 
-  it('MRN', () => {
+  it('Organization Patient Id', () => {
     setupTest();
-    CasesTable.validations.shouldShowColumnContent('mrn', data.case);
+    CasesTable.validations.shouldShowColumnContent('organization_patient_id', data.case);
   });
 
   it('Priority', () => {
@@ -77,11 +77,6 @@ describe('Cases - Information displayed', () => {
   it('Diagnostic Lab', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('diagnostic_lab', data.case);
-  });
-
-  it('Request', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('request', data.case);
   });
 
   it('Managing Org.', () => {

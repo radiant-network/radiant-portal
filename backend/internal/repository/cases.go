@@ -81,7 +81,7 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	    UNION
 	    (SELECT "patient_id" as type, proband_id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(proband_id AS TEXT) LIKE '1%')
 	    UNION
-	    (SELECT "mrn" as type, mrn as value from `radiant_jdbc`.`public`.`patient` WHERE mrn LIKE '1%')
+	    (SELECT "mrn" as type, organization_patient_id as value from `radiant_jdbc`.`public`.`patient` WHERE organization_patient_id LIKE '1%')
 	    ORDER BY value asc;
 	*/
 	var autocompleteResult []AutocompleteResult
@@ -94,11 +94,11 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	subQueryProbandId = subQueryProbandId.Select("\"patient_id\" as type, id as value")
 	subQueryProbandId = subQueryProbandId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryMrn := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
-	subQueryMrn = subQueryMrn.Select("organization_patient_id_type as type, organization_patient_id as value")
-	subQueryMrn = subQueryMrn.Where("LOWER(organization_patient_id) LIKE ?", strings.ToLower(searchInput))
+	subQueryOrgPatID := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
+	subQueryOrgPatID = subQueryOrgPatID.Select("organization_patient_id_type as type, organization_patient_id as value")
+	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(organization_patient_id) LIKE ?", strings.ToLower(searchInput))
 
-	tx := r.db.Table("(? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryMrn)
+	tx := r.db.Table("(? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID)
 	tx = tx.Order("value asc, type asc")
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {
