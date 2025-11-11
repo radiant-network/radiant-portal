@@ -638,7 +638,8 @@
       "occurrence_parental_divider": "Parental Analysis",
       "frequency_divider_my_organization": "My Organization",
       "frequency_divider_pulic_cohorts": "Public Cohorts",
-      "zygosity_divider_parental_analysis": "Parental Analysis"
+      "zygosity_divider_parental_analysis": "Parental Analysis",
+      "with_dictionary": "Dictionary"
     },
     "upload_id": {
       "upload_a_file": "Upload a file",

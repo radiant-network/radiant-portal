@@ -7,10 +7,12 @@ import CheckboxFilter from '@/components/base/checkboxes/checkbox-filter';
 import { Button } from '@/components/base/ui/button';
 import { CardContent, CardFooter } from '@/components/base/ui/card';
 import { Input } from '@/components/base/ui/input';
+import { Label } from '@/components/base/ui/label';
 import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
+import { Switch } from '@/components/base/ui/switch';
 import { useI18n } from '@/components/hooks/i18n';
-import { type Aggregation as AggregationConfig } from '@/components/model/applications-config';
+import { type Aggregation as AggregationConfig, ApplicationId } from '@/components/model/applications-config';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/model/sqon';
 
@@ -45,12 +47,34 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
+function isWithDictionaryEnabled(appId: ApplicationId, field: AggregationConfig): boolean {
+  const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+    .getResolvedActiveQuery(appId)
+    // @ts-ignore
+    .content.find((x: IValueFilter) => x.content.field === field.key);
+
+  if (prevSelectedItems && field.withDictionary) {
+    return true;
+  }
+
+  return false;
+}
+
 export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
   const { appId } = useFilterConfig();
 
+  // State to manage the dictionary switch value
+  const [withDictionaryToggle, setWithDictionaryToggle] = useState(isWithDictionaryEnabled(appId, field));
+
   // Use the hook directly instead of receiving data as a prop
-  const { data: aggregationData, isLoading } = useAggregationBuilder(field.key, undefined, true, appId);
+  const { data: aggregationData, isLoading } = useAggregationBuilder(
+    field.key,
+    undefined,
+    true,
+    withDictionaryToggle,
+    appId,
+  );
 
   const [items, setItems] = useState<Aggregation[]>(aggregationData || []);
   // items that are include in the search
@@ -215,6 +239,21 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
           <Button size="xs" onClick={() => unSelectAll()} variant="link" className="px-0">
             {t('common.filters.buttons.none')}
           </Button>
+
+          {field.withDictionary && (
+            <>
+              <div className="flex-grow" />
+              <Label htmlFor="with-dictionary-switch" className="text-xs">
+                {t('common.filters.with_dictionary')}
+              </Label>
+              <Switch
+                id="with-dictionary-switch"
+                checked={withDictionaryToggle}
+                size="xs"
+                onCheckedChange={() => setWithDictionaryToggle(!withDictionaryToggle)}
+              />
+            </>
+          )}
         </div>
 
         <div className="max-h-[250px] overflow-auto">

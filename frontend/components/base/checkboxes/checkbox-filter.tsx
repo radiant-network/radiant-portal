@@ -87,7 +87,7 @@ function CheckboxFilter({
         <div className={cn('text-muted-foreground', styles.label({ size }), styles.description())}>{description}</div>
       </Label>
 
-      {count && (
+      {count != undefined && (
         <span className={cn('text-muted-foreground font-mono text-right min-w-12', styles.label({ size }))}>
           {numberFormat(count)}
         </span>

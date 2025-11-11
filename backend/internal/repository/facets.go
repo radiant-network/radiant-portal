@@ -22,8 +22,8 @@ func NewFacetsRepository() *FacetsRepository {
 			Name:   "variant_class",
 			Values: []string{"insertion", "deletion", "SNV", "indel", "substitution", "sequence_alteration"},
 		},
-		"consequences": {
-			Name: "consequences",
+		"consequence": {
+			Name: "consequence",
 			Values: []string{
 				"transcript_ablation", "splice_acceptor_variant", "splice_donor_variant", "stop_gained", "frameshift_variant",
 				"stop_lost", "start_lost", "transcript_amplification", "inframe_insertion", "inframe_deletion",
@@ -64,8 +64,8 @@ func NewFacetsRepository() *FacetsRepository {
 				"vault_RNA", "bidirectional_promoter_lncRNA",
 			},
 		},
-		"inheritance": {
-			Name: "inheritance",
+		"omim_inheritance": {
+			Name: "omim_inheritance",
 			Values: []string{
 				"?AD", "?AR", "?DD", "?DR", "?IC",
 				"?Mi", "?Mu", "?SMo", "?Smu", "?XL",
@@ -75,8 +75,8 @@ func NewFacetsRepository() *FacetsRepository {
 				"XL", "XLD", "XLR", "YL",
 			},
 		},
-		"clinvar_interpretation": {
-			Name: "clinvar_interpretation",
+		"clinvar": {
+			Name: "clinvar",
 			Values: []string{
 				"Affects", "association", "association_not_found", "Benign", "confers_sensitivity",
 				"Conflicting_classifications_of_pathogenicity", "conflicting_data_from_submitters", "Conflicting_interpretations_of_pathogenicity", "drug_response", "established_risk_allele",

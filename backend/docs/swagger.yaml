@@ -2957,8 +2957,7 @@ paths:
         in: query
         name: with_dictionary
         schema:
-          description: Whether to include all possible facet values
-          form: with_dictionary
+          default: false
           type: boolean
       requestBody:
         content:
