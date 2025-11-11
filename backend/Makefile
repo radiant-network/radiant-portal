@@ -10,14 +10,26 @@ install:
 	@go mod tidy
 
 build:
-	@echo "Building..."
+	@echo "Building API..."
 	
 	
-	@go build -o bin/main cmd/api/main.go
+	@go build -o bin/api/main cmd/api/main.go
 
 # Run the application
 run:
 	@go run cmd/api/main.go
+
+build-worker:
+	@echo "Building Worker..."
+
+
+	@go build -o bin/worker/main cmd/worker/main.go
+
+# Run the worker
+run-worker:
+	@go run cmd/worker/main.go
+
+
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
