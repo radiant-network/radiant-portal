@@ -270,6 +270,7 @@ const defaultSNVSettings = createColumnSettings([
     fixed: true,
     pinningPosition: 'left',
     label: 'variant.headers.clinical_interpretation',
+    additionalFieldIds: ['transcript_id', 'has_interpretation'],
   },
   {
     id: 'hgvsg',
@@ -281,6 +282,7 @@ const defaultSNVSettings = createColumnSettings([
     id: 'symbol',
     visible: true,
     label: 'variant.headers.symbol',
+    additionalFieldIds: ['symbol'],
   },
   {
     id: 'aa_change',
@@ -296,36 +298,43 @@ const defaultSNVSettings = createColumnSettings([
     id: 'picked_consequences',
     visible: true,
     label: 'variant.headers.picked_consequences',
+    additionalFieldIds: ['vep_impact'],
   },
   {
     id: 'is_mane_select',
     visible: true,
     label: 'variant.headers.is_mane_select',
+    additionalFieldIds: ['is_mane_select', 'is_canonical'],
   },
   {
     id: 'dbSNP',
     visible: true,
     label: 'variant.headers.dbSNP',
+    additionalFieldIds: ['rsnumber'],
   },
   {
     id: 'omim_inheritance_code',
     visible: true,
     label: 'variant.headers.omim_inheritance_code',
+    additionalFieldIds: ['omim_inheritance_code'],
   },
   {
     id: 'clinvar',
     visible: true,
     label: 'variant.headers.clinvar',
+    additionalFieldIds: ['clinvar'],
   },
   {
     id: 'exomiser_gene_combined_score',
     visible: true,
     label: 'variant.headers.exomiser_gene_combined_score',
+    additionalFieldIds: ['exomiser_gene_combined_score'],
   },
   {
     id: 'exomiser_acmg_classification',
     visible: true,
     label: 'variant.headers.exomiser_acmg_classification',
+    additionalFieldIds: ['exomiser_acmg_classification'],
   },
   {
     id: 'gnomad_v3_af',
@@ -336,6 +345,7 @@ const defaultSNVSettings = createColumnSettings([
     id: 'pf_wgs',
     visible: true,
     label: 'variant.headers.pf_wgs',
+    additionalFieldIds: ['pf_wgs'],
   },
   {
     id: 'genotype_quality',
