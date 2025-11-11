@@ -16,29 +16,28 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 	var count = int64(1)
 	return &[]types.CaseResult{
 		{
-			CaseID:                1,
-			ProbandID:             3,
-			ProbandOrganizationID: "MRN-283775",
-			PriorityCode:          "routine",
-			StatusCode:            "in_progress",
-			CaseAnalysisTypeCode:  "germline",
-			CaseType:              "germline_family",
-			CaseAnalysisCode:      "WGA",
-			CaseAnalysisName:      "Whole Genome Analysis",
-			PrimaryConditionID:    "MONDO:0700092",
-			PrimaryConditionName:  "neurodevelopmental disorder",
-			RequestedByCode:       "CHUSJ",
-			RequestedByName:       "Centre hospitalier universitaire Sainte-Justine",
-			ProjectCode:           "N1",
-			ProjectName:           "NeuroDev Phase I",
+			CaseID:                   1,
+			ProbandID:                3,
+			ProbandOrganizationID:    "MRN-283775",
+			PriorityCode:             "routine",
+			StatusCode:               "in_progress",
+			CaseTypeCode:             "germline",
+			CaseType:                 "germline_family",
+			AnalysisCatalogCode:      "WGA",
+			AnalysisCatalogName:      "Whole Genome Analysis",
+			PrimaryConditionID:       "MONDO:0700092",
+			PrimaryConditionName:     "neurodevelopmental disorder",
+			OrderingOrganizationCode: "CHUSJ",
+			OrderingOrganizationName: "Centre hospitalier universitaire Sainte-Justine",
+			ProjectCode:              "N1",
+			ProjectName:              "NeuroDev Phase I",
 			CreatedOn: time.Date(
 				2000, 1, 1, 0, 0, 0, 0, time.UTC),
 			UpdatedOn: time.Date(
 				2000, 2, 2, 0, 0, 0, 0, time.UTC),
 			Prescriber:       "Felix Laflamme",
-			PerformerLabCode: "CQGC",
-			PerformerLabName: "Quebec Clinical Genomic Center",
-			RequestID:        1,
+			DiagnosisLabCode: "CQGC",
+			DiagnosisLabName: "Quebec Clinical Genomic Center",
 			OrganizationCode: "CHUSJ",
 			OrganizationName: "Centre hospitalier universitaire Sainte-Justine",
 			HasVariants:      true,
@@ -49,9 +48,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error) {
 	var result = []types.AutocompleteResult{
 		{Type: "case_id", Value: "1"},
-		//{Type: "request_id", Value: "1"},
 		{Type: "patient_id", Value: "10"},
-		//{Type: "request_id", Value: "10"},
 		{Type: "case_id", Value: "10"},
 	}
 	return &result, nil
@@ -77,11 +74,11 @@ func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilte
 			{Bucket: "N1", Label: "NeuroDev Phase I"},
 			{Bucket: "N2", Label: "NeuroDev Phase II"},
 		},
-		PerformerLab: []types.Aggregation{
+		DiagnosisLab: []types.Aggregation{
 			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
 			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
 		},
-		RequestedBy: []types.Aggregation{
+		OrderingOrganization: []types.Aggregation{
 			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
 			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
 		},
@@ -91,28 +88,27 @@ func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilte
 
 func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 	return &types.CaseEntity{
-		CaseID:           1,
-		CaseAnalysisCode: "WGA",
-		CaseAnalysisName: "Whole Genome Analysis",
-		CaseType:         "germline_family",
+		CaseID:              1,
+		AnalysisCatalogCode: "WGA",
+		AnalysisCatalogName: "Whole Genome Analysis",
+		CaseType:            "germline_family",
 		CreatedOn: time.Date(
 			2000, 1, 1, 0, 0, 0, 0, time.UTC),
 		UpdatedOn: time.Date(
 			2000, 2, 2, 0, 0, 0, 0, time.UTC),
-		Prescriber:           "Felix Laflamme",
-		PerformerLabCode:     "CQGC",
-		PerformerLabName:     "Quebec Clinical Genomic Center",
-		RequestID:            1,
-		PrimaryConditionID:   "MONDO:0700092",
-		PrimaryConditionName: "neurodevelopmental disorder",
-		RequestedByCode:      "CHUSJ",
-		RequestedByName:      "Centre hospitalier universitaire Sainte-Justine",
-		ProjectCode:          "N1",
-		ProjectName:          "NeuroDev Phase I",
+		Prescriber:               "Felix Laflamme",
+		DiagnosisLabCode:         "CQGC",
+		DiagnosisLabName:         "Quebec Clinical Genomic Center",
+		PrimaryConditionID:       "MONDO:0700092",
+		PrimaryConditionName:     "neurodevelopmental disorder",
+		OrderingOrganizationCode: "CHUSJ",
+		OrderingOrganizationName: "Centre hospitalier universitaire Sainte-Justine",
+		ProjectCode:              "N1",
+		ProjectName:              "NeuroDev Phase I",
 		Assays: types.JsonArray[types.CaseAssay]{
-			{SeqID: 1, RequestID: 22, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
-			{SeqID: 2, RequestID: 23, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
-			{SeqID: 3, RequestID: 24, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: false},
+			{SeqID: 1, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 2, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 3, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: false},
 		},
 		Tasks: types.JsonArray[types.CaseTask]{
 			{ID: 1, TypeCode: "ngba", TypeName: "Normal Germline Bioinformatics Analysis", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
@@ -139,26 +135,25 @@ func Test_SearchCasesHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"list": [{
-			"case_analysis_code":"WGA",
-			"case_analysis_name":"Whole Genome Analysis",
+			"analysis_catalog_code":"WGA",
+			"analysis_catalog_name":"Whole Genome Analysis",
 			"case_type": "germline_family",
 			"case_id":1,
 			"created_on":"2000-01-01T00:00:00Z",
-			"organization_code":"CHUSJ",
-			"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+			"ordering_organization_code":"CHUSJ",
+			"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine",
 			"proband_organization_id":"MRN-283775",
 			"proband_id":3,
-			"performer_lab_code":"CQGC",
-			"performer_lab_name":"Quebec Clinical Genomic Center",
+			"diagnosis_lab_code":"CQGC",
+			"diagnosis_lab_name":"Quebec Clinical Genomic Center",
 			"prescriber":"Felix Laflamme",
 			"primary_condition_id":"MONDO:0700092",
 			"primary_condition_name":"neurodevelopmental disorder",
 			"priority_code":"routine",
 			"project_code":"N1",
 			"project_name":"NeuroDev Phase I",
-			"request_id":1,
-			"requested_by_code":"CHUSJ",
-			"requested_by_name":"Centre hospitalier universitaire Sainte-Justine",
+			"organization_code":"CHUSJ",
+			"organization_name":"Centre hospitalier universitaire Sainte-Justine",
 			"status_code":"in_progress",
 			"updated_on":"2000-02-02T00:00:00Z",
 			"has_variants": true
@@ -182,13 +177,6 @@ func Test_CasesAutocompleteHandler(t *testing.T) {
 		{"type":"patient_id", "value":"10"},
 		{"type":"case_id", "value":"10"}
 	]`, w.Body.String())
-	//assert.JSONEq(t, `[
-	//	{"type":"case_id", "value":"1"},
-	//	{"type":"request_id", "value":"1"},
-	//	{"type":"patient_id", "value":"10"},
-	//	{"type":"request_id", "value":"10"},
-	//	{"type":"case_id", "value":"10"}
-	//]`, w.Body.String())
 }
 
 func Test_CasesFiltersHandler(t *testing.T) {
@@ -205,7 +193,7 @@ func Test_CasesFiltersHandler(t *testing.T) {
 		"case_analysis":[
 			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}, 
 			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
-		], "performer_lab":[
+		], "diagnosis_lab":[
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], "priority":[
@@ -215,7 +203,7 @@ func Test_CasesFiltersHandler(t *testing.T) {
 		], "project":[
 			{"count":0, "key":"N1", "label":"NeuroDev Phase I"},
 			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
-		], "requested_by":[
+		], "ordering_organization":[
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], "status":[
@@ -238,12 +226,12 @@ func Test_CaseEntityHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"assays":[
-			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "request_id":22, "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true}, 
-			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "request_id":23, "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
-			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "request_id":24, "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false}
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
+			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false}
 		],
-		"case_analysis_code":"WGA",
-		"case_analysis_name":"Whole Genome Analysis",
+		"analysis_catalog_code":"WGA",
+		"analysis_catalog_name":"Whole Genome Analysis",
 		"case_id":1,
 		"case_type":"germline_family", 
 		"created_on":"2000-01-01T00:00:00Z", 
@@ -279,16 +267,15 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"sex_code":"male"
 			}
 		], 
-		"performer_lab_code":"CQGC", 
-		"performer_lab_name":"Quebec Clinical Genomic Center", 
+		"diagnosis_lab_code":"CQGC", 
+		"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 		"prescriber":"Felix Laflamme", 
 		"primary_condition_id":"MONDO:0700092", 
 		"primary_condition_name":"neurodevelopmental disorder", 
 		"project_code": "N1",
-		"project_name": "NeuroDev Phase I",
-		"request_id":1, 
-		"requested_by_code":"CHUSJ", 
-		"requested_by_name":"Centre hospitalier universitaire Sainte-Justine", 
+		"project_name": "NeuroDev Phase I", 
+		"ordering_organization_code":"CHUSJ", 
+		"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
 		"status_code":"", 
 		"tasks":[
 			{"id": 1, "type_code": "ngba", "type_name": "Normal Germline Bioinformatics Analysis", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
@@ -319,8 +306,8 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 			"hash":"5d41402abc4b2a76b9719d911017c794", 
 			"name":"FI0037905.S14786.vcf.gz", 
 			"patient_id":58, 
-			"performer_lab_code":"CQGC", 
-			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"diagnosis_lab_code":"CQGC", 
+			"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 			"relationship_to_proband_code":"proband", 
 			"run_alias":"A00516_0224", 
 			"submitter_sample_id":"S14786", 
@@ -352,7 +339,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
 			{"count":0, "key":"vcf", "label":"VCF File"}
 		], 
-		"performer_lab":[
+		"diagnosis_lab":[
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], 

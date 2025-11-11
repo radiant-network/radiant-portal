@@ -22,8 +22,8 @@ func (m *MockRepository) SearchDocuments(userQuery types.ListQuery) (*[]types.Do
 			DataTypeCode:              "snv",
 			Size:                      325362647,
 			CaseID:                    20,
-			PerformerLabCode:          "CQGC",
-			PerformerLabName:          "Quebec Clinical Genomic Center",
+			DiagnosisLabCode:          "CQGC",
+			DiagnosisLabName:          "Quebec Clinical Genomic Center",
 			RelationshipToProbandCode: "proband",
 			PatientID:                 58,
 			SubmitterSampleID:         "S14786",
@@ -43,7 +43,7 @@ func (m *MockRepository) GetDocumentsFilters(query types.AggQuery, withLabAndPro
 			{Bucket: "N1", Label: "NeuroDev Phase I"},
 			{Bucket: "N2", Label: "NeuroDev Phase II"},
 		},
-		PerformerLab: []types.Aggregation{
+		DiagnosisLab: []types.Aggregation{
 			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
 			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
 		},
@@ -87,8 +87,8 @@ func Test_SearchDocumentsHandler(t *testing.T) {
 			"hash":"5d41402abc4b2a76b9719d911017c794", 
 			"name":"FI0037905.S14786.vcf.gz", 
 			"patient_id":58, 
-			"performer_lab_code":"CQGC", 
-			"performer_lab_name":"Quebec Clinical Genomic Center", 
+			"diagnosis_lab_code":"CQGC", 
+			"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 			"relationship_to_proband_code":"proband", 
 			"run_alias":"A00516_0224", 
 			"submitter_sample_id":"S14786", 
@@ -137,7 +137,7 @@ func Test_DocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
 			{"count":0, "key":"vcf", "label":"VCF File"}
 		], 
-		"performer_lab":[
+		"diagnosis_lab":[
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], 

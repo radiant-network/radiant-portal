@@ -25,8 +25,8 @@ type DocumentResult struct {
 	DataTypeCode              string    `json:"data_type_code" validate:"required"`
 	Size                      int       `json:"size" validate:"required"`
 	CaseID                    int       `json:"case_id" validate:"required"`
-	PerformerLabCode          string    `json:"performer_lab_code,omitempty"`
-	PerformerLabName          string    `json:"performer_lab_name,omitempty"`
+	DiagnosisLabCode          string    `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabName          string    `json:"diagnosis_lab_name,omitempty"`
 	RelationshipToProbandCode string    `json:"relationship_to_proband_code" validate:"required"`
 	PatientID                 int       `json:"patient_id" validate:"required"`
 	SubmitterSampleID         string    `json:"submitter_sample_id,omitempty"`
@@ -39,8 +39,8 @@ type DocumentResult struct {
 
 var DocumentFields = []Field{
 	CaseIdField,
-	CasePerformerLabCodeField,
-	CasePerformerLabNameField,
+	CaseDiagnosisLabCodeField,
+	CaseDiagnosisLabNameField,
 	DocumentIdField,
 	DocumentNameField,
 	DocumentDataTypeCodeField,
@@ -68,8 +68,8 @@ var DocumentDefaultFields = []Field{
 	DocumentCreatedOnField,
 	FamilyRelationshipToProbandCodeField,
 	CaseIdField,
-	CasePerformerLabCodeField,
-	CasePerformerLabNameField,
+	CaseDiagnosisLabCodeField,
+	CaseDiagnosisLabNameField,
 	SampleSubmitterSampleIdField,
 	SequencingExperimentPatientIdField,
 	TaskHasDocumentTaskIdField,
@@ -154,7 +154,7 @@ func (Document) TableName() string {
 
 type DocumentFilters struct {
 	Project               []Aggregation `json:"project,omitempty"`
-	PerformerLab          []Aggregation `json:"performer_lab,omitempty"`
+	DiagnosisLab          []Aggregation `json:"diagnosis_lab,omitempty"`
 	RelationshipToProband []Aggregation `json:"relationship_to_proband" validate:"required"`
 	Format                []Aggregation `json:"format" validate:"required"`
 	DataType              []Aggregation `json:"data_type" validate:"required"`

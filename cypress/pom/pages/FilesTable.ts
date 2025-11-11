@@ -66,7 +66,7 @@ const tableColumns = [
   {
     id: 'diag_lab',
     name: 'Diag. Lab',
-    apiField: 'performer_lab_code',
+    apiField: 'diagnosis_lab_code',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: false,

@@ -26,13 +26,13 @@ const FILTER_DEFAULTS = {
   data_type: [],
   format: [],
   project: [],
-  performer_lab: [],
+  diagnosis_lab: [],
   relationship_to_proband: [],
 };
 
 const CRITERIAS = {
   project: { key: 'project_code', weight: 1, visible: true },
-  performer_lab: { key: 'performer_lab_code', weight: 2, visible: true },
+  diagnosis_lab: { key: 'diagnosis_lab_code', weight: 2, visible: true },
   relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3, visible: true },
   format: { key: 'format_code', weight: 4, visible: true },
   data_type: { key: 'data_type_code', weight: 5, visible: true },
@@ -75,7 +75,7 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
       };
 
       switch (key) {
-        case 'performer_lab':
+        case 'diagnosis_lab':
           return {
             ...baseOption,
             popoverSize: 'lg' as PopoverSize,

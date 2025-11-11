@@ -10,7 +10,7 @@ export const data = {
   case: {
     case: CASE_VALUE,
     patient: PATIENT_VALUE,
-    mrn: 'MRN-283775',
+    organization_patient_id: 'MRN-283775',
     priority: 'Routine',
     status: 'In Progress',
     type: CommonSelectors.familyIcon,
@@ -23,10 +23,9 @@ export const data = {
     updated_on: '2021-09-12',
     prescriber: 'Felix Laflamme',
     diagnostic_lab: DIAGLAB_VALUE,
-    request: '1',
     managing_org: 'CHUSJ',
     has_variants: true,
-    search_criteria: '[{"field": "mrn","value": ["MRN-283775"]}]',
+    search_criteria: '[{"field": "organization_patient_id","value": ["MRN-283775"]}]',
     assay: {
       assay_id: '1',
       sample_id: '1',

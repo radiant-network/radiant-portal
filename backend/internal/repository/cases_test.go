@@ -35,11 +35,13 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
 		assert.Equal(t, int64(22), *count)
-		assert.Equal(t, "germline", (*cases)[0].CaseAnalysisTypeCode)
+		assert.Equal(t, "germline", (*cases)[0].CaseTypeCode)
 		assert.Equal(t, "MONDO:0700092", (*cases)[0].PrimaryConditionID)
 		assert.Equal(t, "neurodevelopmental disorder", (*cases)[0].PrimaryConditionName)
 		assert.Equal(t, "germline_family", (*cases)[0].CaseType)
 		assert.Equal(t, true, (*cases)[0].HasVariants)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*cases)[0].OrganizationName)
+		assert.Equal(t, "CHUSJ", (*cases)[0].OrganizationCode)
 	})
 }
 
@@ -48,7 +50,7 @@ func Test_SearchCasesNoResult(t *testing.T) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
-				FieldName: types.RequestPriorityCodeField.GetAlias(),
+				FieldName: types.CasePriorityCodeField.GetAlias(),
 				Value:     []interface{}{"stat", "urgent"},
 			},
 		}
@@ -77,7 +79,7 @@ func Test_SearchCases(t *testing.T) {
 	})
 }
 
-func Test_SearchCases_OnProbandMRN(t *testing.T) {
+func Test_SearchCases_OnProbandOrganizationID(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
@@ -188,7 +190,7 @@ func Test_GetCasesFilters(t *testing.T) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
-				FieldName: types.RequestPriorityCodeField.GetAlias(),
+				FieldName: types.CasePriorityCodeField.GetAlias(),
 				Value:     []interface{}{"routine"},
 			},
 		}
@@ -199,8 +201,8 @@ func Test_GetCasesFilters(t *testing.T) {
 		assert.Equal(t, len((*filters).Priority), 4)
 		assert.Equal(t, len((*filters).CaseAnalysis), 4)
 		assert.Equal(t, len((*filters).Project), 2)
-		assert.Equal(t, len((*filters).PerformerLab), 2)
-		assert.Equal(t, len((*filters).RequestedBy), 6)
+		assert.Equal(t, len((*filters).DiagnosisLab), 2)
+		assert.Equal(t, len((*filters).OrderingOrganization), 6)
 	})
 }
 
@@ -224,17 +226,16 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, (*caseEntity).CaseID)
 		assert.Equal(t, 3, (*caseEntity).ProbandID)
-		assert.Equal(t, "WGA", (*caseEntity).CaseAnalysisCode)
-		assert.Equal(t, "Whole Genome Analysis", (*caseEntity).CaseAnalysisName)
-		assert.Equal(t, "germline", (*caseEntity).CaseAnalysisType)
+		assert.Equal(t, "WGA", (*caseEntity).AnalysisCatalogCode)
+		assert.Equal(t, "Whole Genome Analysis", (*caseEntity).AnalysisCatalogName)
+		assert.Equal(t, "germline", (*caseEntity).CaseTypeCode)
 		assert.Equal(t, "2021-09-12 13:08:00 +0000 UTC", (*caseEntity).CreatedOn.String())
 		assert.Equal(t, "2021-09-12 13:08:00 +0000 UTC", (*caseEntity).UpdatedOn.String())
 		assert.Equal(t, "Felix Laflamme", (*caseEntity).Prescriber)
-		assert.Equal(t, "CHUSJ", (*caseEntity).RequestedByCode)
-		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*caseEntity).RequestedByName)
-		assert.Equal(t, "CQGC", (*caseEntity).PerformerLabCode)
-		assert.Equal(t, "Quebec Clinical Genomic Center", (*caseEntity).PerformerLabName)
-		assert.Equal(t, 1, (*caseEntity).RequestID)
+		assert.Equal(t, "CHUSJ", (*caseEntity).OrderingOrganizationCode)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*caseEntity).OrderingOrganizationName)
+		assert.Equal(t, "CQGC", (*caseEntity).DiagnosisLabCode)
+		assert.Equal(t, "Quebec Clinical Genomic Center", (*caseEntity).DiagnosisLabName)
 		assert.Equal(t, "routine", (*caseEntity).PriorityCode)
 		assert.Equal(t, "in_progress", (*caseEntity).StatusCode)
 		assert.Equal(t, "MONDO:0700092", (*caseEntity).PrimaryConditionID)
@@ -255,7 +256,6 @@ func Test_RetrieveCaseAssays(t *testing.T) {
 		// Proband first
 		assert.Equal(t, "proband", (*assays)[0].RelationshipToProband)
 		assert.Equal(t, 1, (*assays)[0].SeqID)
-		assert.Equal(t, 22, (*assays)[0].RequestID)
 		assert.Equal(t, 3, (*assays)[0].PatientID)
 		assert.Equal(t, "affected", (*assays)[0].AffectedStatusCode)
 		assert.Equal(t, 1, (*assays)[0].SampleID)
@@ -267,7 +267,6 @@ func Test_RetrieveCaseAssays(t *testing.T) {
 		// Affected then non_affected
 		assert.Equal(t, "mother", (*assays)[1].RelationshipToProband)
 		assert.Equal(t, 2, (*assays)[1].SeqID)
-		assert.Equal(t, 23, (*assays)[1].RequestID)
 		assert.Equal(t, 1, (*assays)[1].PatientID)
 		assert.Equal(t, "affected", (*assays)[1].AffectedStatusCode)
 		assert.Equal(t, 2, (*assays)[1].SampleID)
@@ -278,7 +277,6 @@ func Test_RetrieveCaseAssays(t *testing.T) {
 
 		assert.Equal(t, "father", (*assays)[2].RelationshipToProband)
 		assert.Equal(t, 3, (*assays)[2].SeqID)
-		assert.Equal(t, 24, (*assays)[2].RequestID)
 		assert.Equal(t, 2, (*assays)[2].PatientID)
 		assert.Equal(t, "non_affected", (*assays)[2].AffectedStatusCode)
 		assert.Equal(t, 3, (*assays)[2].SampleID)

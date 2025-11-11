@@ -62,7 +62,7 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
       <CardContent className="flex flex-col gap-6">
         {/* Title with codes */}
         <div className="text-base font-semibold">
-          {`${caseData.case_analysis_code} - ${caseData.case_analysis_name}`}
+          {`${caseData.analysis_catalog_code} - ${caseData.analysis_catalog_name}`}
         </div>
 
         {/* Main content grid */}
@@ -89,17 +89,17 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
               <InformationField
                 label={t('case_entity.details.prescribing_inst')}
                 labelTooltipText={t('case_entity.details.prescribing_inst_tooltip')}
-                tooltipText={caseData.requested_by_name}
+                tooltipText={caseData.ordering_organization_name}
               >
-                {caseData.requested_by_code}
+                {caseData.ordering_organization_code}
               </InformationField>
 
               <InformationField
                 label={t('case_entity.details.diag_lab')}
-                tooltipText={caseData.performer_lab_name}
+                tooltipText={caseData.diagnosis_lab_name}
                 labelTooltipText={t('case_entity.details.diag_lab_tooltip')}
               >
-                {caseData.performer_lab_code}
+                {caseData.diagnosis_lab_code}
               </InformationField>
 
               <InformationField label={t('case_entity.details.project_code')} tooltipText={caseData.project_name}>

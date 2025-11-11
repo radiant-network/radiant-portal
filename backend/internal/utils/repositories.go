@@ -103,16 +103,16 @@ func JoinWithPatients(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(joinWithSeqExp).Joins(joinWithPatientSql)
 }
 
-func JoinWithCaseAnalysis(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.case_analysis_id=%s.id", types.CaseAnalysisTable.Name, types.CaseAnalysisTable.Alias, types.CaseTable.Alias, types.CaseAnalysisTable.Alias))
+func JoinWithAnalysisCatalog(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.analysis_catalog_id=%s.id", types.AnalysisCatalogTable.Name, types.AnalysisCatalogTable.Alias, types.CaseTable.Alias, types.AnalysisCatalogTable.Alias))
 }
 
 func JoinWithProject(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.project_id=%s.id", types.ProjectTable.Name, types.ProjectTable.Alias, types.CaseTable.Alias, types.ProjectTable.Alias))
 }
 
-func JoinWithPerformerLab(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.performer_lab_id=%s.id", types.PerformerLabTable.Name, types.PerformerLabTable.Alias, types.CaseTable.Alias, types.PerformerLabTable.Alias))
+func JoinWithDiagnosisLab(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.diagnosis_lab_id=%s.id", types.DiagnosisLabTable.Name, types.DiagnosisLabTable.Alias, types.CaseTable.Alias, types.DiagnosisLabTable.Alias))
 }
 
 func JoinWithMondoTerm(tx *gorm.DB) *gorm.DB {
@@ -141,4 +141,8 @@ func JoinWithSample(tx *gorm.DB) *gorm.DB {
 
 func JoinWithFamilyRelationship(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.Name, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SequencingExperimentTable.Alias, types.FamilyTable.Alias, types.SequencingExperimentTable.Alias))
+}
+
+func JoinWithOrderingOrganization(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_id=%s.id", types.OrderingOrganizationTable.Name, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias))
 }

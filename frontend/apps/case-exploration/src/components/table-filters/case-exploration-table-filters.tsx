@@ -25,10 +25,10 @@ type FiltersGroupFormProps = {
 const CRITERIAS = {
   priority: { key: 'priority_code', weight: 1, visible: true },
   status: { key: 'status_code', weight: 2, visible: true },
-  case_analysis: { key: 'case_analysis_code', weight: 3, visible: true },
+  case_analysis: { key: 'analysis_catalog_code', weight: 3, visible: true },
   project: { key: 'project_code', visible: false },
-  performer_lab: { key: 'performer_lab_code', visible: false },
-  requested_by: { key: 'requested_by_code', visible: false },
+  diagnosis_lab: { key: 'diagnosis_lab_code', visible: false },
+  ordering_organization: { key: 'ordering_organization_code', visible: false },
 };
 
 export const FILTER_DEFAULTS = {
@@ -36,8 +36,8 @@ export const FILTER_DEFAULTS = {
   status: [],
   case_analysis: [],
   project: [],
-  performer_lab: [],
-  requested_by: [],
+  diagnosis_lab: [],
+  ordering_organization: [],
 };
 
 async function fetchFilters(searchCriteria: CaseFiltersInput) {
@@ -81,8 +81,8 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
             options: sortOptions(getItemStatus(apiFilters[key] || [], t)),
           };
         case 'project':
-        case 'performer_lab':
-        case 'requested_by':
+        case 'diagnosis_lab':
+        case 'ordering_organization':
           return {
             ...baseOption,
             popoverSize: 'lg' as PopoverSize,

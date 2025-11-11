@@ -300,6 +300,6 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 5, len((*filters).Classification))
 		assert.Equal(t, 4, len((*filters).CaseAnalysis))
-		assert.Equal(t, 2, len((*filters).PerformerLab))
+		assert.Equal(t, 2, len((*filters).DiagnosisLab))
 	})
 }
