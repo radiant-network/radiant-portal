@@ -22,11 +22,12 @@ var (
 func cleanUp(gormDb *gorm.DB) {
 	var db *sql.DB
 	db, _ = gormDb.DB()
-	//db.Exec("TRUNCATE TABLE interpretation_germline")
+
 	db.Exec("TRUNCATE TABLE interpretation_germline_history")
 	db.Exec("TRUNCATE TABLE interpretation_somatic")
 	db.Exec("TRUNCATE TABLE interpretation_somatic_history")
 	db.Exec("DELETE FROM saved_filter WHERE user_id != '1' AND user_id != '2'")
+	db.Exec("DELETE FROM batch WHERE created_on > '2025-01-01'")
 }
 
 func initPostgresDb() (*gorm.DB, error) {

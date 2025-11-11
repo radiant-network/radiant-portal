@@ -2,7 +2,8 @@
 name: Build and Push Docker Image
 
 env:
-  BACKEND_IMAGE_NAME: radiant-api
+  BACKEND_API_IMAGE_NAME: radiant-api
+  BACKEND_WORKER_IMAGE_NAME: radiant-worker
   FRONTEND_IMAGE_NAME: radiant-portal
   NAMESPACE: radiant-network
   REGISTRY: ghcr.io
@@ -35,11 +36,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker image backend
-        id: meta_backend
+      - name: Extract metadata (tags, labels) for Docker image backend API
+        id: meta_backend_api
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_API_IMAGE_NAME }}
           tags: |
             type=semver,pattern={{raw}} 
             type=semver,pattern={{version}}
@@ -50,21 +51,53 @@ jobs:
           flavor: |
             latest=auto
 
-      - name: Build and push Docker image backend
-        id: push_backend
+      - name: Build and push Docker image backend API
+        id: push_backend_api
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: ./backend
-          file: ./backend/Dockerfile
+          file: ./backend/api.Dockerfile
           push: true
-          tags: ${{ steps.meta_backend.outputs.tags }}
-          labels: ${{ steps.meta_backend.outputs.labels }}
+          tags: ${{ steps.meta_backend_api.outputs.tags }}
+          labels: ${{ steps.meta_backend_api.outputs.labels }}
 
-      - name: Generate artifact attestation backend
+      - name: Generate artifact attestation backend API
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_IMAGE_NAME }}
-          subject-digest: ${{ steps.push_backend.outputs.digest }}
+          subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_API_IMAGE_NAME }}
+          subject-digest: ${{ steps.push_backend_api.outputs.digest }}
+          push-to-registry: true
+
+      - name: Extract metadata (tags, labels) for Docker image backend WORKER
+        id: meta_backend_worker
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_WORKER_IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{raw}} 
+            type=semver,pattern={{version}}
+            type=sha,format=short
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=raw,value={{sha}}-{{date 'X'}},enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+
+          flavor: |
+            latest=auto
+
+      - name: Build and push Docker image backend WORKER
+        id: push_backend_worker
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: ./backend
+          file: ./backend/worker.Dockerfile
+          push: true
+          tags: ${{ steps.meta_backend_worker.outputs.tags }}
+          labels: ${{ steps.meta_backend_worker.outputs.labels }}
+
+      - name: Generate artifact attestation backend WORKER
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_WORKER_IMAGE_NAME }}
+          subject-digest: ${{ steps.push_backend_worker.outputs.digest }}
           push-to-registry: true
 
       - name: Extract metadata (tags, labels) for Docker image frontend

@@ -2,8 +2,6 @@ package types
 
 type Request struct {
 	ID                     int
-	PriorityCode           string
-	Priority               Priority `gorm:"foreignKey:Code;references:PriorityCode"`
 	OrderingPhysician      string
 	OrderingOrganizationID int
 	Organization           Organization `gorm:"foreignKey:ID;references:OrderingOrganizationID"`
@@ -49,7 +47,7 @@ var RequestOrderingOrganizationCodeField = Field{
 
 var RequestOrderingOrganizationNameField = Field{
 	Name:          "name",
-	Alias:         "requested_by_name",
+	Alias:         "ordering_organization_name",
 	CanBeSelected: true,
 	Table:         OrderingOrganizationTable,
 }

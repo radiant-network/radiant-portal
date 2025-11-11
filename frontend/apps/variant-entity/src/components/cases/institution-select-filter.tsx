@@ -18,7 +18,7 @@ function InstitutionSelectFilter({ value = 'all', onChange }: InstitutionSelectF
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">{t('variant_entity.cases.common_filters.institutions.all_institutions')}</SelectItem>
-        {filters?.performer_lab.map(lab => (
+        {filters?.diagnosis_lab.map(lab => (
           <SelectItem key={lab.key} value={lab.key!}>
             {lab.label}
           </SelectItem>

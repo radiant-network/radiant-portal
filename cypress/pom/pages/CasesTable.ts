@@ -31,8 +31,8 @@ const tableColumns = [
     tooltip: null,
   },
   {
-    id: 'mrn',
-    name: 'MRN',
+    id: 'organization_patient_id',
+    name: 'Organization Patient Id',
     apiField: 'proband_organization_id',
     isVisibleByDefault: true,
     pinByDefault: null,
@@ -77,7 +77,7 @@ const tableColumns = [
   {
     id: 'analysis',
     name: 'Analysis',
-    apiField: 'case_analysis_code',
+    apiField: 'analysis_catalog_code',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,
@@ -99,7 +99,7 @@ const tableColumns = [
   {
     id: 'req_by',
     name: 'Req. By',
-    apiField: 'requested_by_code',
+    apiField: 'ordering_organization_code',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,
@@ -154,7 +154,7 @@ const tableColumns = [
   {
     id: 'diagnostic_lab',
     name: 'Diagnostic Lab',
-    apiField: 'performer_lab_code',
+    apiField: 'diagnosis_lab_code',
     isVisibleByDefault: false,
     pinByDefault: null,
     isSortable: true,
