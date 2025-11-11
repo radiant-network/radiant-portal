@@ -138,8 +138,8 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 		return nil, err
 	}
 
-	isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.OrganizationTable.Alias)
-	if err := r.getCasesFilter(txCases, &diagnosisLab, types.OrganizationTable, "diagnosis_lab_id", "id", "name", &isDiagnosisLabCondition); err != nil {
+	isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.DiagnosisLabTable.Alias)
+	if err := r.getCasesFilter(txCases, &diagnosisLab, types.DiagnosisLabTable, "diagnosis_lab_id", "id", "name", &isDiagnosisLabCondition); err != nil {
 		return nil, err
 	}
 
