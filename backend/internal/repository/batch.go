@@ -11,7 +11,7 @@ import (
 )
 
 type Batch = types.Batch
-type IBatch = types.Batcheable
+type IBatch = types.Batchable
 
 type BatchRepository struct {
 	db *gorm.DB

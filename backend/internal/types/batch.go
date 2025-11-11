@@ -28,8 +28,8 @@ type Batch struct {
 	Errors     []ErrorBatch
 }
 
-// Batcheable represents an interface for types that can be used as batch payloads
-type Batcheable interface {
+// Batchable represents an interface for types that can be used as batch payloads
+type Batchable interface {
 	// BatchType returns the type of the batch as a string
 	BatchType() string
 	// ToPayload converts the batch to its JSON string representation
