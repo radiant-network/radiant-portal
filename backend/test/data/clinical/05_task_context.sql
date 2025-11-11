@@ -148,4 +148,4 @@ VALUES (1, 1, NULL),
        (125, 60, NULL),
        (126, 61, NULL),
        (127, 61, NULL)
-ON CONFLICT(task_id, sequencing_experiment_id) DO NOTHING;
+ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;

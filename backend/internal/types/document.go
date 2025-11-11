@@ -53,7 +53,7 @@ var DocumentFields = []Field{
 	SampleSubmitterSampleIdField,
 	SampleIdField,
 	SequencingExperimentIdField,
-	SequencingExperimentPatientIdField,
+	SamplePatientIdField,
 	SequencingExperimentRunAliasField,
 	SequencingExperimentRunNameField,
 	TaskHasDocumentTaskIdField,
@@ -71,7 +71,7 @@ var DocumentDefaultFields = []Field{
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	SampleSubmitterSampleIdField,
-	SequencingExperimentPatientIdField,
+	SamplePatientIdField,
 	TaskHasDocumentTaskIdField,
 }
 

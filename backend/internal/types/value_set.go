@@ -262,3 +262,15 @@ type CaseType struct {
 func (CaseType) TableName() string {
 	return CaseTypeTable.Name
 }
+
+var SequencingReadTechnologyTable = Table{
+	Name: "radiant_jdbc.public.sequencing_read_technology",
+}
+
+type SequencingReadTechnology struct {
+	ValueSet
+} // @name SequencingReadTechnology
+
+func (SequencingReadTechnology) TableName() string {
+	return SequencingReadTechnologyTable.Name
+}

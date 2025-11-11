@@ -417,4 +417,4 @@ VALUES (1, 27, 'output'),
        (127, 84, 'input'),
        (127, 231, 'output'),
        (127, 232, 'output')
-ON CONFLICT(task_id, document_id) DO NOTHING;
+ON CONFLICT(task_id, document_id, type) DO NOTHING;

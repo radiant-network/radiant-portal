@@ -82,12 +82,6 @@ func GetSequencingPart(seqId int, db *gorm.DB) (int, error) {
 	return part, nil
 }
 
-func JoinWithRequest(tx *gorm.DB) *gorm.DB {
-	joinWithRequestSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.request_id=%s.id", types.RequestTable.Name, types.RequestTable.Alias, types.CaseTable.Alias, types.RequestTable.Alias)
-	joinWithOrderingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_id=%s.id", types.OrderingOrganizationTable.Name, types.OrderingOrganizationTable.Alias, types.RequestTable.Alias, types.OrderingOrganizationTable.Alias)
-	return tx.Joins(joinWithRequestSql).Joins(joinWithOrderingOrganizationSql)
-}
-
 func JoinWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
 	joinWithProbandSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.ProbandTable.Name, types.ProbandTable.Alias, types.CaseTable.Alias, types.ProbandTable.Alias)
 	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.Name, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
@@ -121,14 +115,6 @@ func JoinWithMondoTerm(tx *gorm.DB) *gorm.DB {
 
 func JoinWithTaskHasDocument(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.document_id=%s.id", types.TaskHasDocumentTable.Name, types.TaskHasDocumentTable.Alias, types.TaskHasDocumentTable.Alias, types.DocumentTable.Alias))
-}
-
-func JoinWithTaskHasSequencingExperiment(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.task_id=%s.task_id", types.TaskHasSequencingExperimentTable.Name, types.TaskHasSequencingExperimentTable.Alias, types.TaskHasDocumentTable.Alias, types.TaskHasSequencingExperimentTable.Alias))
-}
-
-func JoinWithSequencingExperiment(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias, types.TaskHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
 }
 
 func JoinWithCase(tx *gorm.DB) *gorm.DB {
