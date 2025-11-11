@@ -12,7 +12,6 @@ package types
 | sample_id              | varchar(255)        | YES  |     | null    |       |
 | patient_id             | varchar(255)        | YES  |     | null    |       |
 | experimental_strategy  | varchar(50)         | YES  |     | null    |       |
-| request_id             | int                 | YES  |     | null    |       |
 | request_priority       | varchar(20)         | YES  |     | null    |       |
 | vcf_filepath           | varchar(1024)       | YES  |     | null    |       |
 | sex                    | varchar(10)         | YES  |     | null    |       |
@@ -36,7 +35,6 @@ type Sequencing struct {
 	SampleId             int    `json:"sample_id,omitempty"`
 	PatientId            int    `json:"patient_id,omitempty"`
 	ExperimentalStrategy string `json:"experimental_strategy,omitempty"`
-	RequestId            int    `json:"request_id,omitempty"`
 	RequestPriority      string `json:"request_priority,omitempty"`
 	VcfFilepath          string `json:"vcf_filepath,omitempty"`
 	Sex                  string `json:"sex,omitempty"`

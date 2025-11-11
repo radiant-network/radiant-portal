@@ -14,6 +14,7 @@ declare namespace Cypress {
     shouldBePinnable(isPinnable: boolean): Chainable<Element>;
     shouldBePinned(position: 'left' | 'right' | null): Chainable<JQuery<HTMLElement>>;
     shouldBeSortable(isSortable: boolean): Chainable<Element>;
+    shouldBeTagPatternLevel(level: string): Chainable<JQuery<HTMLElement>>;
     shouldHaveTooltip(column: any): cy & CyEventEmitter;
     showColumn(column: string): cy & CyEventEmitter;
     sortTableAndIntercept(position: number, routeMatcher: string, nbCalls: number, tableId: string = ''): cy & CyEventEmitter;
@@ -28,7 +29,7 @@ declare namespace Cypress {
     visitFilesPage(search_criteria?: string): cy & CyEventEmitter;
     visitCaseDetailsPage(caseID: string): cy & CyEventEmitter;
     visitCaseFilesPage(caseID: string, searchCriteria?: string): cy & CyEventEmitter;
-    visitCaseVariantsPage(caseID: string, sqon?: string): cy & CyEventEmitter;
+    visitCaseVariantsPage(caseID: string, type: string, sqon?: string): cy & CyEventEmitter;
     visitVariantEvidCondPage(locusID: string): cy & CyEventEmitter;
     visitVariantPatientsPage(locusID: string): cy & CyEventEmitter;
     waitWhileLoad(ms: number): cy & CyEventEmitter;

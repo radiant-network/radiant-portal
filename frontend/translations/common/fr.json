@@ -276,7 +276,7 @@
         "search": {
           "case_id": "Cas",
           "patient_id": "Patient",
-          "mrn": "MRN",
+          "organization_patient_id": "MRN",
           "request_id": "Analyse",
           "run_name": "Nom du lot",
           "sample_id": "Sample ID",
@@ -398,7 +398,7 @@
         "pathogenicity_exomiser_divider": "Exomiser",
         "pe": "PE",
         "pe_tooltip": "Nombre de fragments incorrectement appariés au début et à la fin des points de cassure",
-        "performer_lab": "Laboratoire de diagnostic",
+        "diagnosis_lab": "Laboratoire de diagnostic",
         "pf_wgs": "Fréq. tous les patients",
         "pf_wgs_affected": "Fréq. patients atteints",
         "pf_wgs_affected_tooltip": "Fréq. patients atteints (WGS)",
@@ -410,7 +410,7 @@
         "project_code": "Projet",
         "revel_score": "REVEL",
         "revel_score_tooltip": "Rare Exome Variant Ensemble Learner",
-        "requested_by": "Établissement prescripteur",
+        "ordering_organization": "Établissement prescripteur",
         "select_unit": "Sélectionner une unité",
         "sift_pred": "SIFT",
         "sift_pred_tooltip": "Sorting Intolerant From Tolerant",
@@ -618,7 +618,8 @@
       "occurrence_parental_divider": "Analyse parentale",
       "frequency_divider_my_organization": "Mon organisation",
       "frequency_divider_pulic_cohorts": "Cohortes publiques",
-      "zygosity_divider_parental_analysis": "Analyse parentale"
+      "zygosity_divider_parental_analysis": "Analyse parentale",
+      "with_dictionary": "Dictionnaire"
     },
     "upload_id": {
       "upload_a_file": "Téléverser un fichier",
@@ -660,11 +661,11 @@
       "search_by_id": "Recherche par ID",
       "priority_code": "Priorité",
       "status_code": "Statut",
-      "case_analysis_code": "Analyse",
+      "analysis_catalog_code": "Analyse",
       "search_placeholder": "Cas, analyse, patient, analyse ou MRN",
       "project_code": "Projet",
-      "performer_lab": "Laboratoire de diagnostic",
-      "requested_by": "Établissement prescripteur"
+      "diagnosis_lab": "Laboratoire de diagnostic",
+      "ordering_organization": "Établissement prescripteur"
     },
     "priority": {
       "asap": "ASAP",
@@ -703,21 +704,21 @@
         "status": "Statut",
         "case_analysis": "Analyse",
         "project": "Projet",
-        "performer_lab": "Laboratoire de diagnostic",
-        "requested_by": "Établissement prescripteur"
+        "diagnosis_lab": "Laboratoire de diagnostic",
+        "ordering_organization": "Établissement prescripteur"
       },
       "headers": {
         "case_id": "Cas",
         "patient_id": "Patient",
-        "mrn": "Dossier",
-        "mrn_tooltip": "Numéro de dossier médicale du patient",
+        "organization_patient_id": "Dossier",
+        "organization_patient_id_tooltip": "Numéro de dossier médicale du patient",
         "priority_code": "Priorité",
         "status_code": "Statut",
         "case_type": "Type de cas",
         "primary_condition": "Condition principale",
-        "case_analysis_code": "Analyse",
-        "requested_by_code": "Req. par",
-        "requested_by_code_tooltip": "Requête faite par",
+        "analysis_catalog_code": "Analyse",
+        "ordering_organization_code": "Req. par",
+        "ordering_organization_code_tooltip": "Requête faite par",
         "project_code": "Projet",
         "updated_on": "Dernière modification",
         "updated_on_tooltip": "Date de la dernière modification du cas (aaaa-mm-jj)",
@@ -741,7 +742,7 @@
       "data_type": "Type",
       "format": "Format",
       "project": "Projet",
-      "performer_lab": "Laboratoire de diagnostic",
+      "diagnosis_lab": "Laboratoire de diagnostic",
       "relationship_to_proband": "Parenté"
     }
   },
@@ -1260,7 +1261,7 @@
       "dob": "Date de naissance",
       "sex": "Sexe",
       "jhn": "JHN",
-      "mrn": "Dossier",
+      "organization_patient_id": "Dossier",
       "managing_org": "Organisation resp.",
       "managing_org_tooltip": "Organisation responsable du dossier du patient"
     },
@@ -1363,7 +1364,7 @@
     "data_type_code": "Type",
     "size": "Taille",
     "case_id": "Cas",
-    "performer_lab": "Lab. de diagnostic",
+    "diagnosis_lab": "Lab. de diagnostic",
     "patient_id": "Patient",
     "relationship_to_proband_code": "Parenté",
     "submitter_sample_id": "Échantillon",

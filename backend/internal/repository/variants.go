@@ -129,8 +129,8 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = s.case_id and f.family_member_id= s.patient_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`sample` sa ON sa.id = s.sample_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
+	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`analysis_catalog` ca ON ca.id = c.analysis_catalog_id")
+	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.diagnosis_lab_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = ig.condition")
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = s.patient_id", txAggPhenotypes)
 
@@ -149,8 +149,8 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 
 	tx = tx.Select("s.id as seq_id, c.id as case_id, s.patient_id as patient_id, ig.transcript_id as transcript_id, " +
 		"ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, " +
-		"ig.classification as classification_code, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, " +
-		"ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code, " +
+		"ig.classification as classification_code, o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, " +
+		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, " +
 		"agg_phenotypes.phenotypes_term as phenotypes_unparsed, " +
 		"sa.submitter_sample_id as submitter_sample_id, " +
 		"f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code as affected_status")
@@ -193,8 +193,8 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	tx := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`case_analysis` ca ON ca.id = c.case_analysis_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.performer_lab_id")
+	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`analysis_catalog` ca ON ca.id = c.analysis_catalog_id")
+	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.diagnosis_lab_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = s.case_id and f.family_member_id= s.patient_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`sample` sa ON sa.id = s.sample_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
@@ -216,8 +216,8 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 
 	tx = tx.Select("c.id as case_id, s.id as seq_id, s.patient_id as patient_id, "+
 		"sa.submitter_sample_id as submitter_sample_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, "+
-		"mondo.name as primary_condition_name, o.zygosity, lab.code as performer_lab_code, lab.name as performer_lab_name, "+
-		"ca.code as case_analysis_code, ca.name as case_analysis_name, c.status_code, "+
+		"mondo.name as primary_condition_name, o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, "+
+		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, "+
 		"agg_phenotypes.phenotypes_term as phenotypes_unparsed, o.exomiser_acmg_classification, o.exomiser_acmg_evidence",
 		"f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code as affected_status")
 
@@ -299,24 +299,24 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 
 func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, error) {
 	var caseAnalysis []Aggregation
-	var performerLab []Aggregation
+	var diagnosisLab []Aggregation
 
-	txCaseAnalysis := r.db.Table(fmt.Sprintf("%s %s", types.CaseAnalysisTable.Name, types.CaseAnalysisTable.Alias))
-	txCaseAnalysis = txCaseAnalysis.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.CaseAnalysisTable.Alias, types.CaseAnalysisTable.Alias))
+	txCaseAnalysis := r.db.Table(fmt.Sprintf("%s %s", types.AnalysisCatalogTable.Name, types.AnalysisCatalogTable.Alias))
+	txCaseAnalysis = txCaseAnalysis.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.AnalysisCatalogTable.Alias, types.AnalysisCatalogTable.Alias))
 	if err := txCaseAnalysis.Find(&caseAnalysis).Error; err != nil {
 		return nil, fmt.Errorf("error fetching case_analysis: %w", err)
 	}
 
-	txPerformerLab := r.db.Table(fmt.Sprintf("%s %s", types.PerformerLabTable.Name, types.PerformerLabTable.Alias))
-	txPerformerLab = txPerformerLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.PerformerLabTable.Alias, types.PerformerLabTable.Alias))
-	txPerformerLab = txPerformerLab.Where(fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.PerformerLabTable.Alias))
-	if err := txPerformerLab.Find(&performerLab).Error; err != nil {
-		return nil, fmt.Errorf("error fetching performer lab: %w", err)
+	txDiagnosisLab := r.db.Table(fmt.Sprintf("%s %s", types.OrganizationTable.Name, types.OrganizationTable.Alias))
+	txDiagnosisLab = txDiagnosisLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.OrganizationTable.Alias, types.OrganizationTable.Alias))
+	txDiagnosisLab = txDiagnosisLab.Where(fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.OrganizationTable.Alias))
+	if err := txDiagnosisLab.Find(&diagnosisLab).Error; err != nil {
+		return nil, fmt.Errorf("error fetching diagnosis lab: %w", err)
 	}
 
 	return &VariantCasesFilters{
 		Classification: types.MapToAggregationArray(),
 		CaseAnalysis:   caseAnalysis,
-		PerformerLab:   performerLab,
+		DiagnosisLab:   diagnosisLab,
 	}, nil
 }

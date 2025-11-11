@@ -14,6 +14,7 @@ export const AggregateContext = React.createContext<AggregateContextProps>({ seq
 type OccurrenceAggregationInput = {
   seqId: string;
   aggregationBody: AggregationBodyWithSqon;
+  withDictionary?: boolean;
 };
 
 const fetcher = (appId: ApplicationId) => {
@@ -26,12 +27,18 @@ const fetcher = (appId: ApplicationId) => {
     default:
       return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
         occurrencesApi
-          .aggregateGermlineSNVOccurrences(input.seqId, input.aggregationBody)
+          .aggregateGermlineSNVOccurrences(input.seqId, input.aggregationBody, input.withDictionary)
           .then(response => response.data);
   }
 };
 
-export function useAggregationBuilder(field: string, size: number = 30, shouldFetch: boolean = false, appId: string) {
+export function useAggregationBuilder(
+  field: string,
+  size: number = 30,
+  shouldFetch: boolean = false,
+  withDictionary: boolean = false,
+  appId: string,
+) {
   let data: OccurrenceAggregationInput | null;
 
   const { seqId } = React.useContext(AggregateContext);
@@ -45,6 +52,7 @@ export function useAggregationBuilder(field: string, size: number = 30, shouldFe
         field: field,
         size: size,
       },
+      withDictionary,
     };
   }
 

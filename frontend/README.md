@@ -47,7 +47,6 @@ Go to the root of the repo in the backend folder and run the following command:
 
 ```bash
 openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axios -o ./frontend/api
-
 ```
 
 # Documentations

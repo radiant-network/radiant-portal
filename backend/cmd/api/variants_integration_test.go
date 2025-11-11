@@ -106,8 +106,8 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 		"list":[
 			{
 				"affected_status":"affected",
-				"case_analysis_code":"WGA", 
-				"case_analysis_name":"Whole Genome Analysis", 
+				"analysis_catalog_code":"WGA", 
+				"analysis_catalog_name":"Whole Genome Analysis", 
 				"case_id":1, 
 				"classification":"benign", 
 				"condition_id":"MONDO:0000002", 
@@ -115,8 +115,8 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 				"interpretation_updated_on":"2025-06-30T15:51:29Z", 
 				"observed_phenotypes":[],
 				"patient_id":3,
-				"performer_lab_code":"CQGC", 
-				"performer_lab_name":"Quebec Clinical Genomic Center", 
+				"diagnosis_lab_code":"CQGC", 
+				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband":"proband",
 				"seq_id":1, 
 				"status_code":"in_progress", 
@@ -151,14 +151,14 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 		"list": [
 			{
 				"affected_status":"affected", 
-				"case_analysis_code":"WGA", 
-				"case_analysis_name":"Whole Genome Analysis", 
+				"analysis_catalog_code":"WGA", 
+				"analysis_catalog_name":"Whole Genome Analysis", 
 				"case_id":5, 
 				"created_on":"2021-09-12T13:08:00Z", 
 				"observed_phenotypes":[{"id":"HP:0009800", "name":"Maternal diabetes"}, {"id":"HP:0100622", "name":"Maternal seizure"}],
 				"patient_id":15, 
-				"performer_lab_code":"CQGC", 
-				"performer_lab_name":"Quebec Clinical Genomic Center", 
+				"diagnosis_lab_code":"CQGC", 
+				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"primary_condition_id":"MONDO:0700092", 
 				"primary_condition_name":"neurodevelopmental disorder", 
 				"relationship_to_proband":"proband",
@@ -254,7 +254,7 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 			{"count": 0, "key":"LA26334-5", "label":"likelyBenign"}, 
 			{"count": 0, "key":"LA6675-8", "label":"benign"} 
 		],
-		"performer_lab":[
+		"diagnosis_lab":[
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 			
 			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}]
 	}`

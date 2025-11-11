@@ -103,10 +103,10 @@ type VariantInterpretedCase = struct {
 	AffectedStatus          string          `json:"affected_status,omitempty"`
 	ClassificationCode      string          `json:"-"`
 	Zygosity                string          `json:"zygosity" validate:"required"`
-	PerformerLabCode        string          `json:"performer_lab_code,omitempty"`
-	PerformerLabName        string          `json:"performer_lab_name,omitempty"`
-	CaseAnalysisCode        string          `json:"case_analysis_code,omitempty"`
-	CaseAnalysisName        string          `json:"case_analysis_name,omitempty"`
+	DiagnosisLabCode        string          `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabName        string          `json:"diagnosis_lab_name,omitempty"`
+	AnalysisCatalogCode     string          `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName     string          `json:"analysis_catalog_name,omitempty"`
 	StatusCode              string          `json:"status_code" validate:"required"`
 	PhenotypesUnparsed      string          `json:"-"`
 	Phenotypes              JsonArray[Term] `json:"observed_phenotypes"`
@@ -124,10 +124,10 @@ type VariantUninterpretedCase = struct {
 	PrimaryConditionId         string            `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName       string            `json:"primary_condition_name,omitempty"`
 	Zygosity                   string            `json:"zygosity" validate:"required"`
-	PerformerLabCode           string            `json:"performer_lab_code,omitempty"`
-	PerformerLabName           string            `json:"performer_lab_name,omitempty"`
-	CaseAnalysisCode           string            `json:"case_analysis_code,omitempty"`
-	CaseAnalysisName           string            `json:"case_analysis_name,omitempty"`
+	DiagnosisLabCode           string            `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabName           string            `json:"diagnosis_lab_name,omitempty"`
+	AnalysisCatalogCode        string            `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName        string            `json:"analysis_catalog_name,omitempty"`
 	StatusCode                 string            `json:"status_code" validate:"required"`
 	PhenotypesUnparsed         string            `json:"-"`
 	Phenotypes                 JsonArray[Term]   `json:"observed_phenotypes"`
@@ -152,7 +152,7 @@ type VariantExpandedInterpretedCase = struct {
 type VariantCasesFilters = struct {
 	Classification []Aggregation `json:"classification" validate:"required"`
 	CaseAnalysis   []Aggregation `json:"case_analysis" validate:"required"`
-	PerformerLab   []Aggregation `json:"performer_lab" validate:"required"`
+	DiagnosisLab   []Aggregation `json:"diagnosis_lab" validate:"required"`
 } // @name VariantCasesFilters
 
 type VariantCasesCount struct {

@@ -2,7 +2,7 @@
 import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { CasesTable } from 'pom/pages/CasesTable';
-import { CaseEntity_Variants } from 'pom/pages/CaseEntity_Variants';
+import { CaseEntity_Variants_SNV } from 'pom/pages/CaseEntity_Variants_SNV';
 import { CaseEntity_Details } from 'pom/pages/CaseEntity_Details';
 
 describe('Cases - Action Buttons', () => {
@@ -21,7 +21,7 @@ describe('Cases - Action Buttons', () => {
   it('View Variants', () => {
     setupTest();
     CasesTable.actions.selectAction(data.case, 'Variants');
-    CaseEntity_Variants.validations.shouldHaveTitle(data.case);
-    CaseEntity_Variants.validations.shouldHaveActiveTab();
+    CaseEntity_Variants_SNV.validations.shouldHaveTitle(data.case);
+    CaseEntity_Variants_SNV.validations.shouldHaveActiveTabAndToggle();
   });
 });

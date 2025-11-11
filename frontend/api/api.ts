@@ -127,6 +127,18 @@ export interface Assay {
      * @type {string}
      * @memberof Assay
      */
+    'diagnosis_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'diagnosis_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
     'experiment_description'?: string;
     /**
      * 
@@ -157,18 +169,6 @@ export interface Assay {
      * @type {string}
      * @memberof Assay
      */
-    'performer_lab_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'performer_lab_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
     'platform_code'?: string;
     /**
      * 
@@ -176,12 +176,6 @@ export interface Assay {
      * @memberof Assay
      */
     'read_length'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Assay
-     */
-    'request_id'?: number;
     /**
      * 
      * @type {string}
@@ -408,12 +402,6 @@ export interface CaseAssay {
      * @type {number}
      * @memberof CaseAssay
      */
-    'request_id'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseAssay
-     */
     'sample_id': number;
     /**
      * 
@@ -454,22 +442,22 @@ export interface CaseAssay {
 export interface CaseEntity {
     /**
      * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'analysis_catalog_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'analysis_catalog_name'?: string;
+    /**
+     * 
      * @type {Array<CaseAssay>}
      * @memberof CaseEntity
      */
     'assays': Array<CaseAssay>;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseEntity
-     */
-    'case_analysis_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseEntity
-     */
-    'case_analysis_name'?: string;
     /**
      * 
      * @type {number}
@@ -490,6 +478,18 @@ export interface CaseEntity {
     'created_on': string;
     /**
      * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'diagnosis_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'diagnosis_lab_name'?: string;
+    /**
+     * 
      * @type {Array<CasePatientClinicalInformation>}
      * @memberof CaseEntity
      */
@@ -505,13 +505,13 @@ export interface CaseEntity {
      * @type {string}
      * @memberof CaseEntity
      */
-    'performer_lab_code'?: string;
+    'ordering_organization_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof CaseEntity
      */
-    'performer_lab_name'?: string;
+    'ordering_organization_name'?: string;
     /**
      * 
      * @type {string}
@@ -550,24 +550,6 @@ export interface CaseEntity {
     'project_name'?: string;
     /**
      * 
-     * @type {number}
-     * @memberof CaseEntity
-     */
-    'request_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseEntity
-     */
-    'requested_by_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseEntity
-     */
-    'requested_by_name'?: string;
-    /**
-     * 
      * @type {string}
      * @memberof CaseEntity
      */
@@ -602,7 +584,13 @@ export interface CaseFilters {
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'performer_lab': Array<Aggregation>;
+    'diagnosis_lab': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
+    'ordering_organization': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
@@ -615,12 +603,6 @@ export interface CaseFilters {
      * @memberof CaseFilters
      */
     'project': Array<Aggregation>;
-    /**
-     * 
-     * @type {Array<Aggregation>}
-     * @memberof CaseFilters
-     */
-    'requested_by': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
@@ -712,13 +694,13 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'case_analysis_code'?: string;
+    'analysis_catalog_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof CaseResult
      */
-    'case_analysis_name'?: string;
+    'analysis_catalog_name'?: string;
     /**
      * 
      * @type {number}
@@ -739,10 +721,34 @@ export interface CaseResult {
     'created_on': string;
     /**
      * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'diagnosis_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'diagnosis_lab_name'?: string;
+    /**
+     * 
      * @type {boolean}
      * @memberof CaseResult
      */
     'has_variants': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'ordering_organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'ordering_organization_name'?: string;
     /**
      * 
      * @type {string}
@@ -755,18 +761,6 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'organization_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseResult
-     */
-    'performer_lab_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseResult
-     */
-    'performer_lab_name'?: string;
     /**
      * 
      * @type {string}
@@ -815,24 +809,6 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'project_name'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseResult
-     */
-    'request_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseResult
-     */
-    'requested_by_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseResult
-     */
-    'requested_by_name'?: string;
     /**
      * 
      * @type {string}
@@ -1037,13 +1013,13 @@ export interface DocumentFilters {
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'format': Array<Aggregation>;
+    'diagnosis_lab'?: Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'performer_lab'?: Array<Aggregation>;
+    'format': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
@@ -1083,6 +1059,18 @@ export interface DocumentResult {
     'data_type_code': string;
     /**
      * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
+    'diagnosis_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
+    'diagnosis_lab_name'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof DocumentResult
      */
@@ -1111,18 +1099,6 @@ export interface DocumentResult {
      * @memberof DocumentResult
      */
     'patient_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentResult
-     */
-    'performer_lab_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentResult
-     */
-    'performer_lab_name'?: string;
     /**
      * 
      * @type {string}
@@ -2739,12 +2715,6 @@ export interface Sequencing {
     'patient_id'?: number;
     /**
      * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'request_id'?: number;
-    /**
-     * 
      * @type {string}
      * @memberof Sequencing
      */
@@ -3230,7 +3200,7 @@ export interface VariantCasesFilters {
      * @type {Array<Aggregation>}
      * @memberof VariantCasesFilters
      */
-    'performer_lab': Array<Aggregation>;
+    'diagnosis_lab': Array<Aggregation>;
 }
 /**
  * 
@@ -3384,13 +3354,13 @@ export interface VariantInterpretedCase {
      * @type {string}
      * @memberof VariantInterpretedCase
      */
-    'case_analysis_code'?: string;
+    'analysis_catalog_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof VariantInterpretedCase
      */
-    'case_analysis_name'?: string;
+    'analysis_catalog_name'?: string;
     /**
      * 
      * @type {number}
@@ -3420,6 +3390,18 @@ export interface VariantInterpretedCase {
      * @type {string}
      * @memberof VariantInterpretedCase
      */
+    'diagnosis_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
+    'diagnosis_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantInterpretedCase
+     */
     'interpretation_updated_on': string;
     /**
      * 
@@ -3433,18 +3415,6 @@ export interface VariantInterpretedCase {
      * @memberof VariantInterpretedCase
      */
     'patient_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantInterpretedCase
-     */
-    'performer_lab_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantInterpretedCase
-     */
-    'performer_lab_name'?: string;
     /**
      * 
      * @type {string}
@@ -3761,13 +3731,13 @@ export interface VariantUninterpretedCase {
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'case_analysis_code'?: string;
+    'analysis_catalog_code'?: string;
     /**
      * 
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'case_analysis_name'?: string;
+    'analysis_catalog_name'?: string;
     /**
      * 
      * @type {number}
@@ -3780,6 +3750,18 @@ export interface VariantUninterpretedCase {
      * @memberof VariantUninterpretedCase
      */
     'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'diagnosis_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantUninterpretedCase
+     */
+    'diagnosis_lab_name'?: string;
     /**
      * 
      * @type {string}
@@ -3804,18 +3786,6 @@ export interface VariantUninterpretedCase {
      * @memberof VariantUninterpretedCase
      */
     'patient_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantUninterpretedCase
-     */
-    'performer_lab_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantUninterpretedCase
-     */
-    'performer_lab_name'?: string;
     /**
      * 
      * @type {string}

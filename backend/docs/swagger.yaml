@@ -42,6 +42,10 @@ components:
           type: string
         created_on:
           type: string
+        diagnosis_lab_code:
+          type: string
+        diagnosis_lab_name:
+          type: string
         experiment_description:
           type: string
         experimental_strategy_code:
@@ -52,15 +56,9 @@ components:
           type: string
         is_paired_end:
           type: boolean
-        performer_lab_code:
-          type: string
-        performer_lab_name:
-          type: string
         platform_code:
           type: string
         read_length:
-          type: integer
-        request_id:
           type: integer
         run_alias:
           type: string
@@ -159,8 +157,6 @@ components:
           type: integer
         relationship_to_proband:
           type: string
-        request_id:
-          type: integer
         sample_id:
           type: integer
         sample_submitter_id:
@@ -187,20 +183,24 @@ components:
     CaseEntity:
       description: Data for Case Entity Page
       properties:
+        analysis_catalog_code:
+          type: string
+        analysis_catalog_name:
+          type: string
         assays:
           items:
             $ref: '#/components/schemas/CaseAssay'
           type: array
           uniqueItems: false
-        case_analysis_code:
-          type: string
-        case_analysis_name:
-          type: string
         case_id:
           type: integer
         case_type:
           type: string
         created_on:
+          type: string
+        diagnosis_lab_code:
+          type: string
+        diagnosis_lab_name:
           type: string
         members:
           items:
@@ -209,9 +209,9 @@ components:
           uniqueItems: false
         note:
           type: string
-        performer_lab_code:
+        ordering_organization_code:
           type: string
-        performer_lab_name:
+        ordering_organization_name:
           type: string
         prescriber:
           type: string
@@ -224,12 +224,6 @@ components:
         project_code:
           type: string
         project_name:
-          type: string
-        request_id:
-          type: integer
-        requested_by_code:
-          type: string
-        requested_by_name:
           type: string
         status_code:
           type: string
@@ -256,7 +250,12 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        performer_lab:
+        diagnosis_lab:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        ordering_organization:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
@@ -271,11 +270,6 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        requested_by:
-          items:
-            $ref: '#/components/schemas/Aggregation'
-          type: array
-          uniqueItems: false
         status:
           items:
             $ref: '#/components/schemas/Aggregation'
@@ -283,10 +277,10 @@ components:
           uniqueItems: false
       required:
       - case_analysis
-      - performer_lab
+      - diagnosis_lab
+      - ordering_organization
       - priority
       - project
-      - requested_by
       - status
       type: object
     CasePatientClinicalInformation:
@@ -333,9 +327,9 @@ components:
     CaseResult:
       description: Line represented a case in case list
       properties:
-        case_analysis_code:
+        analysis_catalog_code:
           type: string
-        case_analysis_name:
+        analysis_catalog_name:
           type: string
         case_id:
           type: integer
@@ -343,15 +337,19 @@ components:
           type: string
         created_on:
           type: string
+        diagnosis_lab_code:
+          type: string
+        diagnosis_lab_name:
+          type: string
         has_variants:
           type: boolean
+        ordering_organization_code:
+          type: string
+        ordering_organization_name:
+          type: string
         organization_code:
           type: string
         organization_name:
-          type: string
-        performer_lab_code:
-          type: string
-        performer_lab_name:
           type: string
         prescriber:
           type: string
@@ -368,12 +366,6 @@ components:
         project_code:
           type: string
         project_name:
-          type: string
-        request_id:
-          type: integer
-        requested_by_code:
-          type: string
-        requested_by_name:
           type: string
         status_code:
           type: string
@@ -492,12 +484,12 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        format:
+        diagnosis_lab:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        performer_lab:
+        format:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
@@ -525,6 +517,10 @@ components:
           type: string
         data_type_code:
           type: string
+        diagnosis_lab_code:
+          type: string
+        diagnosis_lab_name:
+          type: string
         document_id:
           type: integer
         format_code:
@@ -535,10 +531,6 @@ components:
           type: string
         patient_id:
           type: integer
-        performer_lab_code:
-          type: string
-        performer_lab_name:
-          type: string
         relationship_to_proband_code:
           type: string
         run_alias:
@@ -1318,8 +1310,6 @@ components:
           type: integer
         patient_id:
           type: integer
-        request_id:
-          type: integer
         request_priority:
           type: string
         sample_id:
@@ -1521,7 +1511,7 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        performer_lab:
+        diagnosis_lab:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
@@ -1529,7 +1519,7 @@ components:
       required:
       - case_analysis
       - classification
-      - performer_lab
+      - diagnosis_lab
       type: object
     VariantConsequence:
       properties:
@@ -1611,9 +1601,9 @@ components:
       properties:
         affected_status:
           type: string
-        case_analysis_code:
+        analysis_catalog_code:
           type: string
-        case_analysis_name:
+        analysis_catalog_name:
           type: string
         case_id:
           type: integer
@@ -1622,6 +1612,10 @@ components:
         condition_id:
           type: string
         condition_name:
+          type: string
+        diagnosis_lab_code:
+          type: string
+        diagnosis_lab_name:
           type: string
         interpretation_updated_on:
           type: string
@@ -1632,10 +1626,6 @@ components:
           uniqueItems: false
         patient_id:
           type: integer
-        performer_lab_code:
-          type: string
-        performer_lab_name:
-          type: string
         relationship_to_proband:
           type: string
         seq_id:
@@ -1782,13 +1772,17 @@ components:
       properties:
         affected_status:
           type: string
-        case_analysis_code:
+        analysis_catalog_code:
           type: string
-        case_analysis_name:
+        analysis_catalog_name:
           type: string
         case_id:
           type: integer
         created_on:
+          type: string
+        diagnosis_lab_code:
+          type: string
+        diagnosis_lab_name:
           type: string
         exomiser_acmg_classification:
           type: string
@@ -1804,10 +1798,6 @@ components:
           uniqueItems: false
         patient_id:
           type: integer
-        performer_lab_code:
-          type: string
-        performer_lab_name:
-          type: string
         primary_condition_id:
           type: string
         primary_condition_name:
@@ -2967,8 +2957,7 @@ paths:
         in: query
         name: with_dictionary
         schema:
-          description: Whether to include all possible facet values
-          form: with_dictionary
+          default: false
           type: boolean
       requestBody:
         content:

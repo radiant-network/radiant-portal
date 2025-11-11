@@ -20,7 +20,7 @@ type BatchRepository struct {
 type BatchRepositoryDAO interface {
 	CreateBatch(batch IBatch, username string, dryRun bool) (*Batch, error)
 	GetBatchByID(batchId string) (*Batch, error)
-	GetNextBatch() (*Batch, error)
+	ClaimNextBatch() (*Batch, error)
 }
 
 func NewBatchRepository(db *gorm.DB) *BatchRepository {
@@ -62,7 +62,9 @@ func (r *BatchRepository) GetBatchByID(batchId string) (*Batch, error) {
 	var batch Batch
 
 	tx := r.db.
-		Table(types.BatchTable.Name).Where("id = ?", batchId)
+		Table(types.BatchTable.Name).
+		Omit("payload").
+		Where("id = ?", batchId)
 
 	if err := tx.First(&batch).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -75,7 +77,28 @@ func (r *BatchRepository) GetBatchByID(batchId string) (*Batch, error) {
 	return &batch, nil
 }
 
-func (r *BatchRepository) GetNextBatch() (*Batch, error) {
+func (r *BatchRepository) ClaimNextBatch() (*Batch, error) {
 	var batch Batch
+
+	query := `
+		UPDATE batch
+		SET status = 'RUNNING', started_on = now()
+		WHERE id = (
+			SELECT id FROM batch
+			WHERE status = 'PENDING'
+			ORDER BY created_on ASC
+			FOR UPDATE SKIP LOCKED
+			LIMIT 1
+		)
+		RETURNING id, payload, status, batch_type, dry_run, started_on, created_on;
+	`
+
+	err := r.db.Raw(query).Scan(&batch).Error
+	if err != nil {
+		return nil, err
+	}
+	if batch.ID == "" {
+		return nil, nil // no available job
+	}
 	return &batch, nil
 }

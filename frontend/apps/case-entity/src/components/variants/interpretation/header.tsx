@@ -35,9 +35,9 @@ function InterpretationVariantHeader({ occurrence }: InterpretationVariantHeader
       </span>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge variant="blue">{caseEntity?.case_analysis_code}</Badge>
+          <Badge variant="blue">{caseEntity?.analysis_catalog_code}</Badge>
         </TooltipTrigger>
-        <TooltipContent>{caseEntity?.case_analysis_name}</TooltipContent>
+        <TooltipContent>{caseEntity?.analysis_catalog_name}</TooltipContent>
       </Tooltip>
     </div>
   );

@@ -113,6 +113,10 @@ export const CaseEntity_Details = {
     shouldHaveActiveTab() {
       cy.get(selectors.tab).shouldBeActiveTab();
     },
+    /**
+     * Validates the title of the page.
+     * @param dataAssay The assay object.
+     */
     shouldHaveAssayDetailsModal(dataAssay: any) {
       cy.get(CommonSelectors.modal).contains(`Assay ${dataAssay.assay_id}`).should('exist');
     },

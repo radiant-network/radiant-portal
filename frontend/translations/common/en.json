@@ -301,7 +301,7 @@
         "search": {
           "case_id": "Case",
           "patient_id": "Patient",
-          "mrn": "MRN",
+          "organization_patient_id": "MRN",
           "request_id": "Assay",
           "run_name": "Run Name",
           "sample_id": "Sample ID",
@@ -418,7 +418,7 @@
         "pathogenicity_exomiser_divider": "Exomiser",
         "pe": "PE",
         "pe_tooltip": "Number of improperly paired end reads at start and stop breakpoints",
-        "performer_lab": "Diagnostic Lab",
+        "diagnosis_lab": "Diagnostic Lab",
         "pf_wgs": "All Patient Freq.",
         "pf_wgs_affected": "Affected Patient Freq.",
         "pf_wgs_affected_tooltip": "Affected Patient Frequency (WGS)",
@@ -430,7 +430,7 @@
         "project_code": "Project",
         "revel_score": "REVEL",
         "revel_score_tooltip": "Rare Exome Variant Ensemble Learner",
-        "requested_by": "Prescribing Institution",
+        "ordering_organization": "Prescribing Institution",
         "select_unit": "Select unit",
         "sift_pred": "SIFT",
         "sift_pred_tooltip": "Sorting Intolerant From Tolerant",
@@ -638,7 +638,8 @@
       "occurrence_parental_divider": "Parental Analysis",
       "frequency_divider_my_organization": "My Organization",
       "frequency_divider_pulic_cohorts": "Public Cohorts",
-      "zygosity_divider_parental_analysis": "Parental Analysis"
+      "zygosity_divider_parental_analysis": "Parental Analysis",
+      "with_dictionary": "Dictionary"
     },
     "upload_id": {
       "upload_a_file": "Upload a file",
@@ -680,11 +681,11 @@
       "search_by_id": "Search by ID",
       "priority_code": "Priority",
       "status_code": "Status",
-      "case_analysis_code": "Analysis",
+      "analysis_catalog_code": "Analysis",
       "search_placeholder": "Case, assay, patient, or MRN",
       "project_code": "Project",
-      "performer_lab": "Diagnostic Lab",
-      "requested_by": "Prescribing Institution"
+      "diagnosis_lab": "Diagnostic Lab",
+      "ordering_organization": "Prescribing Institution"
     },
     "priority": {
       "asap": "ASAP",
@@ -723,21 +724,21 @@
         "status": "Status",
         "case_analysis": "Analysis",
         "project": "Project",
-        "performer_lab": "Diagnostic Lab",
-        "requested_by": "Prescribing Institution"
+        "diagnosis_lab": "Diagnostic Lab",
+        "ordering_organization": "Prescribing Institution"
       },
       "headers": {
         "case_id": "Case",
         "patient_id": "Patient",
-        "mrn": "MRN",
-        "mrn_tooltip": "Patient's medical record number",
+        "organization_patient_id": "MRN",
+        "organization_patient_id_tooltip": "Patient's medical record number",
         "priority_code": "Priority",
         "status_code": "Status",
         "case_type": "Type",
-        "case_analysis_code": "Analysis",
+        "analysis_catalog_code": "Analysis",
         "primary_condition": "Primary Condition",
-        "requested_by_code": "Req. By",
-        "requested_by_code_tooltip": "Requested by",
+        "ordering_organization_code": "Req. By",
+        "ordering_organization_code_tooltip": "Requested by",
         "project_code": "Project",
         "updated_on": "Updated",
         "updated_on_tooltip": "Date of last case modification (yyyy-mm-dd)",
@@ -761,7 +762,7 @@
       "data_type": "Type",
       "format": "Format",
       "project": "Project",
-      "performer_lab": "Diagnostic Lab",
+      "diagnosis_lab": "Diagnostic Lab",
       "relationship_to_proband": "Relationship"
     }
   },
@@ -1211,7 +1212,7 @@
       "dob": "DOB",
       "sex": "Sex",
       "jhn": "JHN",
-      "mrn": "MRN",
+      "organization_patient_id": "MRN",
       "managing_org": "Managing Org.",
       "managing_org_tooltip": "Organization managing the patient’s file"
     },
@@ -1328,7 +1329,7 @@
     "data_type_code": "Type",
     "size": "Size",
     "case_id": "Case",
-    "performer_lab": "Diag. Lab",
+    "diagnosis_lab": "Diag. Lab",
     "patient_id": "Patient",
     "relationship_to_proband_code": "Relationship",
     "submitter_sample_id": "Sample",
