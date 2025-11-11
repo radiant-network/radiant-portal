@@ -23,10 +23,10 @@ type PatientsBatch struct {
 }
 
 func (p *PatientsBatch) BatchType() string {
-	return "patients"
+	return "patient"
 }
 
-// ToPayload converts the PatientsBatch to its JSON string representation
+// PatientsToBatchString converts the PatientsBatch to its JSON string representation
 // to be a valid payload for the patient batch creation API
 func (p *PatientsBatch) ToPayload() (string, error) {
 	jsonBytes, err := json.Marshal(p)
@@ -46,5 +46,5 @@ type CreatePatientBatchQueryParam struct {
 // CreatePatientBatchBody represents the body required to create a patient batch
 // @Description CreatePatientBatchBody represents the body required to create a patient batch
 type CreatePatientBatchBody struct {
-	Patients *PatientsBatch `json:"patients" validate:"dive,required"`
+	Patients []*PatientBatch `json:"patients" validate:"dive,required"`
 } //@Name CreatePatientBatchBody

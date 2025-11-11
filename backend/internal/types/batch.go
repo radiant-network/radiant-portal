@@ -53,7 +53,7 @@ func (e *BatchErrorList) Scan(value interface{}) error {
 }
 
 type Batch struct {
-	ID         string
+	ID         string `json:"id" validate:"required" gorm:"primary_key; unique; type:uuid; column:id; default:uuid_generate_v4()"`
 	DryRun     bool
 	BatchType  string
 	Status     string
@@ -86,25 +86,25 @@ func (Batch) TableName() string {
 // CreateBatchResponse represents the response returned when creating a new batch
 // @Description CreateBatchResponse represents the response returned when creating a new batch
 type CreateBatchResponse struct {
-	ID        string
-	BatchType string
-	Status    string
-	CreatedOn time.Time
-	Username  string
-	DryRun    bool
+	ID        string    `json:"id"`
+	BatchType string    `json:"batch_type"`
+	Status    string    `json:"status"`
+	CreatedOn time.Time `json:"created_on"`
+	Username  string    `json:"username"`
+	DryRun    bool      `json:"dry_run"`
 } //@Name CreateBatchResponse
 
 // GetBatchResponse represents the response returned when retrieving a batch
 // @Description GetBatchResponse represents the response returned when retrieving a batch
 type GetBatchResponse struct {
-	ID         string
-	DryRun     bool
-	BatchType  string
-	Status     string
-	CreatedOn  time.Time
-	StartedOn  time.Time
-	FinishedOn time.Time
-	Username   string
-	Summary    BatchSummary
-	Errors     BatchErrorList
+	ID         string         `json:"id"`
+	DryRun     bool           `json:"dry_run"`
+	BatchType  string         `json:"batch_type"`
+	Status     string         `json:"status"`
+	CreatedOn  time.Time      `json:"created_on"`
+	StartedOn  *time.Time     `json:"started_on,omitempty"`
+	FinishedOn *time.Time     `json:"finished_on,omitempty"`
+	Username   string         `json:"username"`
+	Summary    BatchSummary   `json:"summary"`
+	Errors     BatchErrorList `json:"errors,omitempty"`
 } //@Name GetBatchResponse
