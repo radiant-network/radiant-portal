@@ -295,6 +295,56 @@ export interface AutocompleteResult {
     'value': string;
 }
 /**
+ * 
+ * @export
+ * @interface BatchError
+ */
+export interface BatchError {
+    /**
+     * 
+     * @type {string}
+     * @memberof BatchError
+     */
+    'error_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BatchError
+     */
+    'message'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BatchSummary
+ */
+export interface BatchSummary {
+    /**
+     * 
+     * @type {number}
+     * @memberof BatchSummary
+     */
+    'created'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof BatchSummary
+     */
+    'errors'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof BatchSummary
+     */
+    'skipped'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof BatchSummary
+     */
+    'updated'?: number;
+}
+/**
  * CNVGeneOverlap represents a gene overlap with a CNV
  * @export
  * @interface CNVGeneOverlap
@@ -995,6 +1045,49 @@ export interface CountBodyWithSqon {
      * @memberof CountBodyWithSqon
      */
     'sqon'?: Sqon;
+}
+/**
+ * CreateBatchResponse represents the response returned when creating a new batch
+ * @export
+ * @interface CreateBatchResponse
+ */
+export interface CreateBatchResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateBatchResponse
+     */
+    'batch_type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateBatchResponse
+     */
+    'created_on'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateBatchResponse
+     */
+    'dry_run'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateBatchResponse
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateBatchResponse
+     */
+    'status'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateBatchResponse
+     */
+    'username'?: string;
 }
 /**
  * 
@@ -1988,6 +2081,73 @@ export interface GermlineSNVOccurrence {
 }
 
 
+/**
+ * GetBatchResponse represents the response returned when retrieving a batch
+ * @export
+ * @interface GetBatchResponse
+ */
+export interface GetBatchResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof GetBatchResponse
+     */
+    'batch_type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GetBatchResponse
+     */
+    'created_on'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GetBatchResponse
+     */
+    'dry_run'?: boolean;
+    /**
+     * 
+     * @type {Array<BatchError>}
+     * @memberof GetBatchResponse
+     */
+    'errors'?: Array<BatchError>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GetBatchResponse
+     */
+    'finished_on'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GetBatchResponse
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GetBatchResponse
+     */
+    'started_on'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GetBatchResponse
+     */
+    'status'?: string;
+    /**
+     * 
+     * @type {BatchSummary}
+     * @memberof GetBatchResponse
+     */
+    'summary'?: BatchSummary;
+    /**
+     * 
+     * @type {string}
+     * @memberof GetBatchResponse
+     */
+    'username'?: string;
+}
 /**
  * 
  * @export
@@ -3978,6 +4138,125 @@ export class AssaysApi extends BaseAPI {
      */
     public getAssayBySeqId(seqId: string, options?: RawAxiosRequestConfig) {
         return AssaysApiFp(this.configuration).getAssayBySeqId(seqId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * BatchesApi - axios parameter creator
+ * @export
+ */
+export const BatchesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Retrieve a batch by ID
+         * @summary Retrieve a batch by ID
+         * @param {string} batchId Batch ID
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getBatch: async (batchId: string, body?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'batchId' is not null or undefined
+            assertParamExists('getBatch', 'batchId', batchId)
+            const localVarPath = `/batches/{batchId}`
+                .replace(`{${"batchId"}}`, encodeURIComponent(String(batchId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * BatchesApi - functional programming interface
+ * @export
+ */
+export const BatchesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = BatchesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Retrieve a batch by ID
+         * @summary Retrieve a batch by ID
+         * @param {string} batchId Batch ID
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getBatch(batchId: string, body?: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getBatch(batchId, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BatchesApi.getBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * BatchesApi - factory interface
+ * @export
+ */
+export const BatchesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = BatchesApiFp(configuration)
+    return {
+        /**
+         * Retrieve a batch by ID
+         * @summary Retrieve a batch by ID
+         * @param {string} batchId Batch ID
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getBatch(batchId: string, body?: object, options?: RawAxiosRequestConfig): AxiosPromise<GetBatchResponse> {
+            return localVarFp.getBatch(batchId, body, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * BatchesApi - object-oriented interface
+ * @export
+ * @class BatchesApi
+ * @extends {BaseAPI}
+ */
+export class BatchesApi extends BaseAPI {
+    /**
+     * Retrieve a batch by ID
+     * @summary Retrieve a batch by ID
+     * @param {string} batchId Batch ID
+     * @param {object} [body] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BatchesApi
+     */
+    public getBatch(batchId: string, body?: object, options?: RawAxiosRequestConfig) {
+        return BatchesApiFp(this.configuration).getBatch(batchId, body, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -6789,6 +7068,118 @@ export class OccurrencesApi extends BaseAPI {
      */
     public statisticsGermlineSNVOccurrences(seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).statisticsGermlineSNVOccurrences(seqId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * PatientsApi - axios parameter creator
+ * @export
+ */
+export const PatientsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a new patient batch
+         * @summary Create a new patient batch
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postPatientBatch: async (body?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/patients/batch`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * PatientsApi - functional programming interface
+ * @export
+ */
+export const PatientsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = PatientsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create a new patient batch
+         * @summary Create a new patient batch
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async postPatientBatch(body?: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postPatientBatch(body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.postPatientBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * PatientsApi - factory interface
+ * @export
+ */
+export const PatientsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = PatientsApiFp(configuration)
+    return {
+        /**
+         * Create a new patient batch
+         * @summary Create a new patient batch
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postPatientBatch(body?: object, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postPatientBatch(body, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * PatientsApi - object-oriented interface
+ * @export
+ * @class PatientsApi
+ * @extends {BaseAPI}
+ */
+export class PatientsApi extends BaseAPI {
+    /**
+     * Create a new patient batch
+     * @summary Create a new patient batch
+     * @param {object} [body] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public postPatientBatch(body?: object, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).postPatientBatch(body, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
