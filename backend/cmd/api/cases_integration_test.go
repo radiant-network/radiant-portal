@@ -161,9 +161,9 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 func Test_CaseEntityHandler(t *testing.T) {
 	expected := `{
 		"assays":[
-			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true}, 
-			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true},
-			{"affected_status_code":"non_affected", "experimental_strategy_code":"wxs", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": false}
+			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true},
+			{"affected_status_code":"non_affected", "experimental_strategy_code":"wgs", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": false}
 		],
 		"analysis_catalog_code":"WGA",
 		"analysis_catalog_name":"Whole Genome Analysis",
@@ -215,9 +215,16 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"ordering_organization_name": "Centre hospitalier universitaire Sainte-Justine",
 		"status_code":"in_progress", 
 		"tasks":[
-			{"id": 1, "type_code": "ngba", "type_name": "Normal Germline Bioinformatics Analysis", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]},
-			{"id" : 62, "type_code" : "ngba", "type_name": "Normal Germline Bioinformatics Analysis", "created_on" : "2021-10-12T13:08:00Z", "patients" : [ "mother" ]},
- 			{"id" : 63, "type_code" : "ngba", "type_name": "Normal Germline Bioinformatics Analysis", "created_on" : "2021-10-12T13:08:00Z", "patients" : [ "mother" ]} 
+			{"id": 1, "type_code": "alignment", "type_name": "Alignment", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
+			{"id": 2, "type_code": "variant_calling", "type_name": "Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
+			{"id": 3, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
+			{"id": 4, "type_code": "alignment", "type_name": "Alignment", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
+			{"id": 5, "type_code": "variant_calling", "type_name": "Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
+			{"id": 6, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
+			{"id": 7, "type_code": "alignment", "type_name": "Alignment", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
+			{"id": 8, "type_code": "variant_calling", "type_name": "Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
+			{"id": 9, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
+			{"id": 10, "type_code": "genotyping", "type_name": "Genotyping", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
 		],
 		"updated_on":"2021-09-12T13:08:00Z"
 	}`

@@ -92,9 +92,9 @@ func JoinWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
 }
 
 func JoinWithPatients(tx *gorm.DB) *gorm.DB {
-	joinWithSeqExp := fmt.Sprintf("LEFT JOIN %s %s ON %s.case_id=%s.id", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias, types.CaseTable.Alias)
-	joinWithPatientSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.patient_id=%s.id", types.PatientTable.Name, types.PatientTable.Alias, types.SequencingExperimentTable.Alias, types.PatientTable.Alias)
-	return tx.Joins(joinWithSeqExp).Joins(joinWithPatientSql)
+	joinWithFamily := fmt.Sprintf("LEFT JOIN %s %s ON %s.case_id=%s.id", types.FamilyTable.Name, types.FamilyTable.Alias, types.FamilyTable.Alias, types.CaseTable.Alias)
+	joinWithPatientSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.id", types.PatientTable.Name, types.PatientTable.Alias, types.FamilyTable.Alias, types.PatientTable.Alias)
+	return tx.Joins(joinWithFamily).Joins(joinWithPatientSql)
 }
 
 func JoinWithAnalysisCatalog(tx *gorm.DB) *gorm.DB {
@@ -114,11 +114,11 @@ func JoinWithMondoTerm(tx *gorm.DB) *gorm.DB {
 }
 
 func JoinWithTaskHasDocument(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.document_id=%s.id", types.TaskHasDocumentTable.Name, types.TaskHasDocumentTable.Alias, types.TaskHasDocumentTable.Alias, types.DocumentTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.document_id=%s.id AND %s.type = 'output'", types.TaskHasDocumentTable.Name, types.TaskHasDocumentTable.Alias, types.TaskHasDocumentTable.Alias, types.DocumentTable.Alias, types.TaskHasDocumentTable.Alias))
 }
 
 func JoinWithCase(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.case_id=%s.id", types.CaseTable.Name, types.CaseTable.Alias, types.SequencingExperimentTable.Alias, types.CaseTable.Alias))
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.case_id=%s.id", types.CaseTable.Name, types.CaseTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.CaseTable.Alias))
 }
 
 func JoinWithSample(tx *gorm.DB) *gorm.DB {
@@ -126,9 +126,21 @@ func JoinWithSample(tx *gorm.DB) *gorm.DB {
 }
 
 func JoinWithFamilyRelationship(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.Name, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SequencingExperimentTable.Alias, types.FamilyTable.Alias, types.SequencingExperimentTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.Name, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
 }
 
 func JoinWithOrderingOrganization(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_id=%s.id", types.OrderingOrganizationTable.Name, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias))
+}
+
+func JoinWithTaskContext(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id=%s.task_id", types.TaskContextTable.Name, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.TaskHasDocumentTable.Alias))
+}
+
+func JoinWithCaseHasSequencingExperiment(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.sequencing_experiment_id", types.CaseHasSequencingExperimentTable.Name, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.TaskContextTable.Alias))
+}
+
+func JoinWithSequencingExperiment(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
 }

@@ -37,8 +37,8 @@ func (r *IGVRepository) GetIGV(seqId int) ([]IGVTrack, error) {
 	alignmentFilter := "(d.data_type_code='alignment' AND d.format_code in ('cram', 'crai'))"
 
 	tx := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s thse ON thse.sequencing_experiment_id=se.id", types.TaskHasSequencingExperimentTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s thd ON thd.task_id=thse.task_id", types.TaskHasDocumentTable.Name))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s tctx ON tctx.sequencing_experiment_id=se.id", types.TaskContextTable.Name))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s thd ON thd.task_id=tctx.task_id", types.TaskHasDocumentTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id=se.sample_id", types.SampleTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s d ON thd.document_id=d.id", types.DocumentTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON se.patient_id=f.family_member_id", types.FamilyTable.Name))

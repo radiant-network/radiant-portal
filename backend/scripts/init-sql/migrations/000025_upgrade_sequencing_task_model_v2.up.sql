@@ -17,12 +17,6 @@ ALTER TABLE sequencing_experiment
 ALTER TABLE sequencing_experiment
     RENAME COLUMN "performer_lab_id" TO "sequencing_lab_id";
 
-INSERT INTO experimental_strategy(code, name_en)
-VALUES ('rnaseq', 'RNA-Seq'),
-       ('targeted_dna', 'Targeted DNA Sequencing');
-
-DELETE FROM experimental_strategy WHERE code = 'wts';
-
 UPDATE sequencing_experiment
 SET experimental_strategy_code = (SELECT experimental_strategy_code
                                   FROM experiment
@@ -56,11 +50,21 @@ ALTER TABLE sequencing_experiment
 -- Drop experiment table
 DROP TABLE experiment;
 
+-- Update experimental strategy
+INSERT INTO experimental_strategy(code, name_en)
+VALUES ('rnaseq', 'RNA-Seq'),
+       ('targeted_dna', 'Targeted DNA Sequencing');
+DELETE FROM experimental_strategy WHERE code = 'wts';
+
 ---- Case has sequencing experiment ----
 CREATE TABLE IF NOT EXISTS "case_has_sequencing_experiment"
 (
     "case_id"                  INTEGER NOT NULL REFERENCES "cases" ("id"),
-    "sequencing_experiment_id" INTEGER NOT NULL REFERENCES "sequencing_experiment" ("id")
+    "sequencing_experiment_id" INTEGER NOT NULL REFERENCES "sequencing_experiment" ("id"),
+    CONSTRAINT unique_case_has_seq_exp UNIQUE (
+                                      "case_id",
+                                      "sequencing_experiment_id"
+        )
 );
 
 INSERT INTO case_has_sequencing_experiment (case_id, sequencing_experiment_id)
@@ -77,7 +81,8 @@ CREATE TABLE IF NOT EXISTS "task_context"
     "case_id"                  INTEGER,
     "sequencing_experiment_id" INTEGER NOT NULL,
     FOREIGN KEY (case_id, sequencing_experiment_id)
-        REFERENCES case_has_sequencing_experiment (case_id, sequencing_experiment_id)
+        REFERENCES case_has_sequencing_experiment (case_id, sequencing_experiment_id),
+    CONSTRAINT unique_task_context UNIQUE ("task_id", "sequencing_experiment_id", "case_id")
 );
 
 ---- Task ----
@@ -88,11 +93,11 @@ DROP TABLE task_has_sequencing_experiment;
 
 -- Empty existing task_has_document and task
 TRUNCATE TABLE task_has_document;
-TRUNCATE TABLE task;
+TRUNCATE TABLE task CASCADE;
 
 -- Update task table
 ALTER TABLE task
-    ADD COLUMN pipeline_name TEXT NOT NULL;
+    ADD COLUMN pipeline_name TEXT;
 ALTER TABLE task
     ADD COLUMN pipeline_version TEXT NOT NULL;
 ALTER TABLE task
@@ -103,9 +108,10 @@ ALTER TABLE task
     DROP COLUMN pipeline_id;
 
 -- Update task_has_document
-CREATE TYPE task_has_document_type AS ENUM ('input', 'output');
 ALTER TABLE task_has_document
-    ADD COLUMN type task_has_document_type NOT NULL;
+    ADD COLUMN type TEXT NOT NULL;
+ALTER TABLE task_has_document DROP CONSTRAINT task_has_documents_pkey;
+ALTER TABLE task_has_document ADD PRIMARY KEY (task_id, document_id, type);
 
 -- Drop pipeline table
 DROP TABLE pipeline;
@@ -114,7 +120,7 @@ DROP TABLE pipeline;
 DROP TABLE request;
 
 -- Update task_type content
-TRUNCATE TABLE task_type;
+TRUNCATE TABLE task_type CASCADE;
 INSERT INTO task_type(code, name_en)
 VALUES ('alignment', 'Alignment'),
        ('variant_calling', 'Variant Calling'),
