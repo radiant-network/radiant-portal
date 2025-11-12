@@ -32,6 +32,8 @@ const DEFAULT_SORTING = [
   },
 ];
 
+const ADDITIONAL_FIELDS = ['calls', 'filter', 'quality', 'bc', 'pe'];
+
 async function fetchQueryCount(input: OccurrenceCountInput) {
   const response = await occurrencesApi.countGermlineCNVOccurrences(input.seqId, input.countBody);
   return response.data;
@@ -83,8 +85,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   }
 
   // Variant list request
-  const allAdditionalFields = ['calls', 'filter', 'quality', 'bc', 'pe'];
-  const [additionalFields, setAdditionalFields] = useState<string[]>(allAdditionalFields);
+  const [additionalFields, setAdditionalFields] = useState<string[]>(ADDITIONAL_FIELDS);
 
   const { fetch: fetchOccurrencesCountHelper } = useCNVOccurrencesCountHelper({
     seqId,

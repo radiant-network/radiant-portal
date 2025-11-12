@@ -21,6 +21,17 @@ const DEFAULT_SORTING = [
   },
 ];
 
+const ADDITIONAL_FIELDS = [
+  'case_type',
+  'organization_code',
+  'organization_name',
+  'diagnosis_lab_code',
+  'diagnosis_lab_name',
+  'prescriber',
+  'primary_condition_id',
+  'primary_condition_name',
+];
+
 async function fetchCasesList(input: CaseListInput) {
   const response = await caseApi.searchCases(input.listBodyWithCriteria);
   return response.data;
@@ -35,17 +46,7 @@ function CasesTab() {
   });
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
 
-  const allAdditionalFields = [
-    'case_type',
-    'organization_code',
-    'organization_name',
-    'diagnosis_lab_code',
-    'diagnosis_lab_name',
-    'prescriber',
-    'primary_condition_id',
-    'primary_condition_name',
-  ];
-  const [additionalFields, setAdditionalFields] = useState<string[]>(allAdditionalFields);
+  const [additionalFields, setAdditionalFields] = useState<string[]>(ADDITIONAL_FIELDS);
 
   const { data, isLoading, isValidating } = useSWR<CasesSearchResponse, any, CaseListInput>(
     {
