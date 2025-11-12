@@ -4,10 +4,82 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
+
+func Test_CreateBatch_Valid(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewBatchRepository(db)
+		type samplePayload struct {
+			Message string `json:"message"`
+		}
+		payload := make([]samplePayload, 0)
+		payload = append(payload, samplePayload{Message: "hello world"})
+		payload = append(payload, samplePayload{Message: "bye world"})
+		batchType := "test_type"
+		username := "test_user"
+		dryRun := true
+		createdBatch, err := repo.CreateBatch(payload, batchType, username, dryRun)
+		assert.NoError(t, err)
+		assert.NotNil(t, createdBatch)
+		assert.NotEqual(t, uuid.Nil, createdBatch.ID)
+		assert.Empty(t, createdBatch.Payload)
+		assert.Equal(t, batchType, createdBatch.BatchType)
+		assert.Equal(t, username, createdBatch.Username)
+		assert.Equal(t, dryRun, createdBatch.DryRun)
+		assert.Equal(t, "PENDING", createdBatch.Status)
+		var dbBatch types.Batch
+		err = db.First(&dbBatch, "id = ?", createdBatch.ID).Error
+		assert.NoError(t, err)
+		assert.Equal(t, `[{"message": "hello world"}, {"message": "bye world"}]`, dbBatch.Payload)
+	})
+}
+
+func Test_GetBatchByID_Success(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewBatchRepository(db)
+		batchId := uuid.NewString()
+		initErr := db.Exec(`
+            INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on) VALUES
+            (?, '{}', 'COMPLETED', 'patient', true, 'user1', now())
+        `, batchId).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+		batch, err := repo.GetBatchByID(batchId)
+		assert.NoError(t, err)
+		assert.NotNil(t, batch)
+		assert.Equal(t, batchId, batch.ID)
+		assert.Equal(t, "patient", batch.BatchType)
+		assert.Equal(t, "user1", batch.Username)
+		assert.Equal(t, "COMPLETED", batch.Status)
+		assert.Empty(t, batch.Payload)
+	})
+}
+
+func Test_GetBatchByID_NotFound(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewBatchRepository(db)
+		nonExistentId := uuid.NewString()
+		batch, err := repo.GetBatchByID(nonExistentId)
+		assert.NoError(t, err)
+		assert.Nil(t, batch)
+	})
+}
+
+func Test_GetBatchByID_InvalidUUID(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewBatchRepository(db)
+		invalidId := "not-a-valid-uuid"
+		batch, err := repo.GetBatchByID(invalidId)
+		assert.Error(t, err)
+		assert.Nil(t, batch)
+	})
+}
 
 func Test_ClaimNextBatch_Without_Pending(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
