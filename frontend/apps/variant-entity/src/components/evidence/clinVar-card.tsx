@@ -72,7 +72,6 @@ function ClinVarCard() {
           columns={getPathogenicEvidenceColumns(t)}
           data={filteredData}
           defaultColumnSettings={pathogenicEvidenceDefaultSettings}
-          defaultServerSorting={[]}
           loadingStates={{
             total: isLoading,
             list: isLoading,
@@ -80,6 +79,9 @@ function ClinVarCard() {
           pagination={{ type: 'hidden' }}
           total={filteredData.length}
           tableIndexResultPosition="bottom"
+          serverOptions={{
+            defaultSorting: [],
+          }}
         />
       </CardContent>
     </Card>

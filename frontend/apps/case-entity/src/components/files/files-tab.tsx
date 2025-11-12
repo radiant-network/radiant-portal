@@ -76,7 +76,6 @@ function FilesTab() {
             TableFilters={
               <FilesTableFilters caseId={params.caseId!} setSearchCriteria={setSearchCriteria} loading={isLoading} />
             }
-            defaultServerSorting={DEFAULT_SORTING}
             data={data?.list ?? []}
             defaultColumnSettings={defaultSettings}
             hasError={!!error}
@@ -85,11 +84,14 @@ function FilesTab() {
               list: isLoading,
             }}
             pagination={{ type: 'server', state: pagination, onPaginationChange: setPagination }}
-            onServerSortingChange={setSorting}
             total={data?.count ?? 0}
             enableColumnOrdering
             enableFullscreen
             tableIndexResultPosition="bottom"
+            serverOptions={{
+              defaultSorting: DEFAULT_SORTING,
+              onSortingChange: setSorting,
+            }}
           />
         </div>
       </CardContent>

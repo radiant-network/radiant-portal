@@ -114,17 +114,19 @@ function UninterpretedCasesTable() {
         columns={getOtherCasesColumns(t)}
         data={casesData}
         defaultColumnSettings={otherCasesDefaultSettings}
-        defaultServerSorting={[]}
         loadingStates={{
           total: isLoading,
           list: isLoading,
         }}
         total={data?.count || 0}
         pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-        onServerSortingChange={() => {}}
         tableIndexResultPosition="bottom"
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
+        serverOptions={{
+          defaultSorting: [],
+          onSortingChange: () => [],
+        }}
       />
       <CasePreviewSheet
         open={!!selectedCase}

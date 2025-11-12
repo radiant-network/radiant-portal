@@ -97,7 +97,6 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
                 columns={getCNVOverlappingGenesColumns(t)}
                 className="overflow-auto max-h-[600px]"
                 defaultColumnSettings={defaultCNVOverlappingGenesSettings}
-                defaultServerSorting={DEFAULT_SORTING}
                 loadingStates={{
                   total: fetchList.isLoading,
                   list: fetchList.isLoading,
@@ -107,6 +106,9 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
                 hasError={!!fetchList.error}
                 total={fetchList?.data?.length ?? 0}
                 tableIndexResultPosition="top"
+                serverOptions={{
+                  defaultSorting: DEFAULT_SORTING,
+                }}
               />
             </DialogBody>
           </>

@@ -25,17 +25,6 @@ export function useSNVOccurrencesCountHelper(input: OccurrenceCountInput) {
   };
 }
 
-export function useCNVOccurrencesListHelper(input: OccurrencesListInput) {
-  const fetch = useCallback(
-    async () => occurrencesApi.listGermlineCNVOccurrences(input.seqId, input.listBody).then(response => response.data),
-    [input],
-  );
-
-  return {
-    fetch,
-  };
-}
-
 export function useCNVOccurrencesCountHelper(input: OccurrenceCountInput) {
   const fetch = useCallback(
     async () =>

@@ -36,8 +36,10 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
           }}
           total={data.assays.length}
           pagination={{ type: 'hidden' }}
-          defaultServerSorting={DEFAULT_SORTING}
           tableIndexResultPosition="hidden"
+          serverOptions={{
+            defaultSorting: DEFAULT_SORTING,
+          }}
         />
       </CardContent>
     </Card>

@@ -74,12 +74,16 @@ const meta = {
       }),
     ] as TableColumnDef<MockData, any>[],
     data,
-    defaultServerSorting: [
-      {
-        field: 'pf_wgs',
-        order: SortBodyOrderEnum.Asc,
-      },
-    ],
+    serverOptions: {
+      defaultSorting: [
+        {
+          field: 'pf_wgs',
+          order: SortBodyOrderEnum.Asc,
+        },
+      ],
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      onSortingChange: sorting => {},
+    },
     defaultColumnSettings: createColumnSettings([
       {
         id: 'firstName',
@@ -124,8 +128,6 @@ const meta = {
       },
       onPaginationChange: () => {},
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onServerSortingChange: sorting => {},
     total: 10,
   },
   decorators: [
