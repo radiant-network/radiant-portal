@@ -15,7 +15,7 @@ type Auth interface {
 	RetrieveUserIdFromToken(c *gin.Context) (*string, error)
 	RetrieveAzpFromToken(c *gin.Context) (*string, error)
 	RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error)
-	// RetrieveUsernameFromToken(c *gin.Context) (*string, error)
+	RetrieveUsernameFromToken(c *gin.Context) (*string, error)
 }
 
 type KeycloakAuth struct{}

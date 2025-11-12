@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -26,7 +27,7 @@ func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth
 	return func(c *gin.Context) {
 		var (
 			body       types.CreatePatientBatchBody
-			queryParam types.CreatePatientBatchQueryParam
+			queryParam types.CreateBatchQueryParam
 		)
 		if err := c.ShouldBindJSON(&body); err != nil {
 			HandleValidationError(c, err)
@@ -37,22 +38,30 @@ func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth
 			return
 		}
 
-		// resourceAccess, err := auth.RetrieveResourceAccessFromToken(c)
-		// if err != nil {
-		// 	HandleError(c, err)
-		// 	return
-		// }
-
-		// username, err := auth.RetrieveUsernameFromToken(c)
-		// if err != nil {
-		// 	HandleError(c, err)
-		// 	return
-		// }
-
-		patientsBatch := &types.PatientsBatch{
-			Patients: body.Patients,
+		// Check if user has data_manager role
+		azp, err := auth.RetrieveAzpFromToken(c)
+		if err != nil || azp == nil {
+			HandleError(c, err)
+			return
 		}
-		batch, err := repo.CreateBatch(patientsBatch, "", queryParam.DryRun)
+		resourceAccess, err := auth.RetrieveResourceAccessFromToken(c)
+		if err != nil || resourceAccess == nil {
+			HandleError(c, err)
+			return
+		}
+		roles, ok := (*resourceAccess)[*azp]
+		if !ok || !slices.Contains(roles.Roles, "data_manager") {
+			HandleUnauthorizedError(c)
+			return
+		}
+
+		username, err := auth.RetrieveUsernameFromToken(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		batch, err := repo.CreateBatch(body.Patients, "patient", *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return
