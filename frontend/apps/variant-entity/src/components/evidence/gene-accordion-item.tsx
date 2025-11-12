@@ -51,14 +51,16 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
             columns={getConditionPhenotypeColumns(t, panelType)}
             data={conditions || []}
             defaultColumnSettings={conditionPhenotypeDefaultSettings}
-            defaultServerSorting={[]}
             loadingStates={{
               total: false,
               list: false,
             }}
             pagination={{ type: 'hidden' }}
-            onServerSortingChange={() => {}}
             tableIndexResultPosition="bottom"
+            serverOptions={{
+              defaultSorting: [],
+              onSortingChange: () => {},
+            }}
           />
         )}
       </AccordionContent>

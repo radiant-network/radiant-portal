@@ -55,6 +55,7 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 
 import DataTableGroupBy from './data-table-group-by';
+import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
 
 export const IS_SERVER = typeof window === 'undefined';
 
@@ -81,6 +82,12 @@ type PaginationSettings = {
   onPaginationChange?: OnChangeFn<PaginationState>;
 };
 
+type ServerOptions = {
+  setAdditionalFields?: (fields: string[]) => void;
+  defaultSorting: SortBody[];
+  onSortingChange?: (sorting: SortBody[]) => void;
+};
+
 export type TableProps<TData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
@@ -88,12 +95,10 @@ export type TableProps<TData> = {
   data: TData[];
   hasError?: boolean;
   defaultColumnSettings: ColumnSettings[];
-  defaultServerSorting: SortBody[];
   loadingStates?: {
     total?: boolean;
     list?: boolean;
   };
-  onServerSortingChange?: (sorting: SortBody[]) => void;
   subComponent?: SubComponentProps<TData>;
   TableFilters?: React.JSX.Element;
   total?: number;
@@ -103,6 +108,7 @@ export type TableProps<TData> = {
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
   pagination: PaginationSettings;
+  serverOptions: ServerOptions;
 };
 
 export interface BaseColumnSettings {
@@ -113,6 +119,7 @@ export interface BaseColumnSettings {
   pinningPosition?: ColumnPinningPosition;
   header?: string;
   label?: string;
+  additionalFieldIds?: string[];
 }
 
 export interface ColumnSettings extends BaseColumnSettings {
@@ -462,17 +469,23 @@ function getRowFlexRender<T>({
  *    }),
  *  }]
  *
- * @DESCRIPTION : pagination prop manage the pagination mode and state
+ * @DESCRIPTION: pagination prop manage the pagination mode and state
  *                For client side pagination, set type to 'locale' and provide state if override is needed
  *                For server side pagination, set type to 'server' and provide state and onPaginationChange handler
  * @EXAMPLE: {
  *   type: 'server',
  *   state: {
-  *     pageIndex: 0,
-  *     pageSize: 10,
-  *   },
-  *  onPaginationChange: (newPagination) => { ... },
-  * } 
+ *     pageIndex: 0,
+ *     pageSize: 10,
+ *   },
+ *  onPaginationChange: (newPagination) => { ... },
+ * } 
+ * 
+ * @DESCRIPTION: additional fields are managed by the table to be able to request extra data from server
+ *              based on the column visibility.
+ * @EXAMPLE: {
+ *   additional_fields: ['field1', 'field2'],
+ * }
  */
 // eslint-disable-next-line complexity
 function TranstackTable<T>({
@@ -481,7 +494,6 @@ function TranstackTable<T>({
   className,
   data,
   defaultColumnSettings,
-  defaultServerSorting,
   TableFilters,
   loadingStates = {
     total: true,
@@ -489,7 +501,6 @@ function TranstackTable<T>({
   },
   hasError = false,
   pagination,
-  onServerSortingChange,
   subComponent,
   total = 0,
   enableColumnOrdering = false,
@@ -497,6 +508,7 @@ function TranstackTable<T>({
   tableIndexResultPosition = 'top',
   rowSelection,
   onRowSelectionChange,
+  serverOptions,
 }: TableProps<T>) {
   const { t } = useI18n();
 
@@ -531,7 +543,7 @@ function TranstackTable<T>({
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [sorting, setSorting] = useState<SortingState>(
-    defaultServerSorting.map(serverSorting => ({
+    serverOptions.defaultSorting.map(serverSorting => ({
       id: serverSorting.field,
       desc: serverSorting.order === SortBodyOrderEnum.Desc,
     })) as SortingState,
@@ -556,6 +568,27 @@ function TranstackTable<T>({
     setIsFullscreen(false);
   };
 
+  // Set only additional fields displayed in the table
+  const filteredAdditionalFields = useMemo(
+    () =>
+      getFilteredAdditionalFields({
+        columnVisibility,
+        defaultColumnSettings,
+      }),
+    [columnVisibility],
+  );
+
+  // Ref to update only if additional fields change
+  const lastFilteredAdditionalFields = useRef<string[]>([]);
+
+  useEffect(() => {
+    updateAdditionalField({
+      newAddFields: filteredAdditionalFields,
+      prevAddFields: lastFilteredAdditionalFields,
+      setAdditionalFields: serverOptions.setAdditionalFields,
+    });
+  }, []);
+
   // Initialize tanstack table
   const table = useReactTable({
     columns: columns.map(column => {
@@ -573,7 +606,7 @@ function TranstackTable<T>({
     data,
     enableColumnResizing: true,
     enableRowSelection: true,
-    getSortedRowModel: onServerSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
+    getSortedRowModel: serverOptions.onSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -716,11 +749,11 @@ function TranstackTable<T>({
    * Reset pagination at the same time
    */
   useEffect(() => {
-    if (!onServerSortingChange) return;
+    if (!serverOptions.onSortingChange) return;
     if (sorting.length === 0) {
-      onServerSortingChange(defaultServerSorting);
+      serverOptions.onSortingChange(serverOptions.defaultSorting);
     } else {
-      onServerSortingChange(
+      serverOptions.onSortingChange(
         sorting
           .map(s => ({
             field: s.id,
@@ -803,6 +836,15 @@ function TranstackTable<T>({
                 visiblitySettings={columnVisibility}
                 handleVisiblityChange={(target: string, checked: boolean) => {
                   setColumnVisibility({ ...columnVisibility, [target]: checked });
+                  const newAdditionalFields = getFilteredAdditionalFields({
+                    columnVisibility: { ...columnVisibility, [target]: checked },
+                    defaultColumnSettings,
+                  });
+                  updateAdditionalField({
+                    newAddFields: newAdditionalFields,
+                    prevAddFields: lastFilteredAdditionalFields,
+                    setAdditionalFields: serverOptions.setAdditionalFields,
+                  });
                 }}
                 handleOrderChange={setColumnOrder}
                 pristine={
@@ -821,6 +863,11 @@ function TranstackTable<T>({
                   setColumnPinning(defaultColumnTableState.columnPinning);
                   table.resetColumnSizing();
                   table.resetHeaderSizeInfo();
+                  const allAdditionalFields = getFilteredAdditionalFields({
+                    columnVisibility: defaultColumnTableState.columnVisibility,
+                    defaultColumnSettings,
+                  });
+                  serverOptions.setAdditionalFields?.(allAdditionalFields);
                 }}
               />
             </>

@@ -105,16 +105,18 @@ function InterpretedCasesTable() {
         columns={getInterpretedCasesColumns(t)}
         data={data?.list || []}
         defaultColumnSettings={interpretedCasesDefaultSettings}
-        defaultServerSorting={[]}
         loadingStates={{
           total: isLoading,
           list: isLoading,
         }}
         total={data?.count || 0}
         pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-        onServerSortingChange={() => {}}
         subComponent={data => <InterpretedCasesExpand locusId={params.locusId!} data={data} />}
         tableIndexResultPosition="bottom"
+        serverOptions={{
+          defaultSorting: [],
+          onSortingChange: () => {},
+        }}
       />
     </div>
   );

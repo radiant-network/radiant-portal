@@ -62,7 +62,6 @@ function FilesArchiveList() {
       id="files-archive-list"
       columns={getFilesArchiveColumns(t)}
       TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} loading={isLoading} />}
-      defaultServerSorting={DEFAULT_SORTING}
       data={data?.list ?? []}
       defaultColumnSettings={defaultSettings}
       hasError={!!error}
@@ -71,11 +70,14 @@ function FilesArchiveList() {
         list: isLoading,
       }}
       pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-      onServerSortingChange={setSorting}
       total={data?.count ?? 0}
       enableColumnOrdering
       enableFullscreen
       tableIndexResultPosition="bottom"
+      serverOptions={{
+        defaultSorting: DEFAULT_SORTING,
+        onSortingChange: setSorting,
+      }}
     />
   );
 }

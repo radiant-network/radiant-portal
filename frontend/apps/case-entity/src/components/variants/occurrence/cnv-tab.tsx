@@ -21,7 +21,7 @@ import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/quer
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { occurrencesApi } from '@/utils/api';
 
-import { OccurrenceCountInput, useCNVOccurrencesCountHelper, useCNVOccurrencesListHelper } from '../hook';
+import { OccurrenceCountInput, useCNVOccurrencesCountHelper } from '../hook';
 
 import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/cnv-occurrence-table-settings';
 
@@ -32,10 +32,23 @@ const DEFAULT_SORTING = [
   },
 ];
 
+const ADDITIONAL_FIELDS = ['calls', 'filter', 'quality', 'bc', 'pe'];
+
 async function fetchQueryCount(input: OccurrenceCountInput) {
   const response = await occurrencesApi.countGermlineCNVOccurrences(input.seqId, input.countBody);
   return response.data;
 }
+
+type CnvOccurrenceType = {
+  seqId: string;
+  listBody: {
+    additional_fields?: string[];
+    limit: number;
+    page_index: number;
+    sort: SortBody[];
+    sqon: Sqon;
+  };
+};
 
 type CNVTabProps = {
   seqId: string;
@@ -72,16 +85,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   }
 
   // Variant list request
-  const { fetch: fetchOccurrencesListHelper } = useCNVOccurrencesListHelper({
-    seqId,
-    listBody: {
-      additional_fields: ['calls', 'filter', 'quality', 'bc', 'pe'],
-      limit: pagination.pageSize,
-      page_index: pagination.pageIndex,
-      sort: sorting,
-      sqon: activeSqon,
-    },
-  });
+  const [additionalFields, setAdditionalFields] = useState<string[]>(ADDITIONAL_FIELDS);
 
   const { fetch: fetchOccurrencesCountHelper } = useCNVOccurrencesCountHelper({
     seqId,
@@ -89,8 +93,18 @@ function CNVTab({ seqId }: CNVTabProps) {
   });
 
   const fetchOccurrencesList = useSWR<GermlineCNVOccurrence[]>(
-    'fetch-cnv-occurrences-list',
-    fetchOccurrencesListHelper,
+    {
+      seqId,
+      listBody: {
+        additional_fields: additionalFields,
+        limit: pagination.pageSize,
+        page_index: pagination.pageIndex,
+        sort: sorting,
+        sqon: activeSqon,
+      },
+    },
+    async (params: CnvOccurrenceType) =>
+      seqId ? occurrencesApi.listGermlineCNVOccurrences(seqId, params.listBody).then(response => response.data) : [],
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,
@@ -141,14 +155,6 @@ function CNVTab({ seqId }: CNVTabProps) {
     if (seqId === '') return;
     fetchOccurrencesCount.mutate();
   }, [seqId, activeSqon]);
-
-  /**
-   * Re-fetch list
-   */
-  useEffect(() => {
-    if (seqId === '') return;
-    fetchOccurrencesList.mutate();
-  }, [seqId, sorting, pagination]);
 
   /**
    * Reset pagination on sqon change
@@ -247,16 +253,19 @@ function CNVTab({ seqId }: CNVTabProps) {
                 columns={getCNVOccurrenceColumns(t)}
                 data={fetchOccurrencesList.data ?? []}
                 defaultColumnSettings={defaultCNVSettings}
-                defaultServerSorting={DEFAULT_SORTING}
                 loadingStates={{
                   total: fetchOccurrencesCount.isLoading,
                   list: fetchOccurrencesList.isLoading,
                 }}
                 pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-                onServerSortingChange={setSorting}
                 total={fetchOccurrencesCount.data?.count ?? 0}
                 enableColumnOrdering
                 enableFullscreen
+                serverOptions={{
+                  setAdditionalFields,
+                  defaultSorting: DEFAULT_SORTING,
+                  onSortingChange: setSorting,
+                }}
               />
             </CardContent>
           </Card>

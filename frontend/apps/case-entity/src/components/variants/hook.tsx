@@ -13,32 +13,10 @@ export type OccurrenceCountInput = {
   countBody: CountBodyWithSqon;
 };
 
-export function useSNVOccurrencesListHelper(input: OccurrencesListInput) {
-  const fetch = useCallback(
-    async () => occurrencesApi.listGermlineSNVOccurrences(input.seqId, input.listBody).then(response => response.data),
-    [input],
-  );
-
-  return {
-    fetch,
-  };
-}
-
 export function useSNVOccurrencesCountHelper(input: OccurrenceCountInput) {
   const fetch = useCallback(
     async () =>
       occurrencesApi.countGermlineSNVOccurrences(input.seqId, input.countBody).then(response => response.data),
-    [input],
-  );
-
-  return {
-    fetch,
-  };
-}
-
-export function useCNVOccurrencesListHelper(input: OccurrencesListInput) {
-  const fetch = useCallback(
-    async () => occurrencesApi.listGermlineCNVOccurrences(input.seqId, input.listBody).then(response => response.data),
     [input],
   );
 

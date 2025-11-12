@@ -26,7 +26,7 @@ import { ISyntheticSqon } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
 
 import { SELECTED_VARIANT_PARAM } from '../constants';
-import { OccurrenceCountInput, useSNVOccurrencesCountHelper, useSNVOccurrencesListHelper } from '../hook';
+import { OccurrenceCountInput, useSNVOccurrencesCountHelper } from '../hook';
 import { getVisibleAggregations } from '../utils';
 
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
@@ -46,10 +46,36 @@ const DEFAULT_SORTING = [
   },
 ];
 
+const ADDITIONAL_FIELDS = [
+  'rsnumber',
+  'symbol',
+  'vep_impact',
+  'is_mane_select',
+  'is_canonical',
+  'omim_inheritance_code',
+  'clinvar',
+  'exomiser_gene_combined_score',
+  'exomiser_acmg_classification',
+  'pf_wgs',
+  'transcript_id',
+  'has_interpretation',
+];
+
 async function fetchQueryCount(input: OccurrenceCountInput) {
   const response = await occurrencesApi.countGermlineSNVOccurrences(input.seqId, input.countBody);
   return response.data;
 }
+
+type SnvOccurrenceType = {
+  seqId: string;
+  listBody: {
+    additional_fields?: string[];
+    limit: number;
+    page_index: number;
+    sort: SortBody[];
+    sqon: Sqon;
+  };
+};
 
 type SNVTabProps = {
   seqId: string;
@@ -62,6 +88,7 @@ function SNVTab({ seqId }: SNVTabProps) {
   const [isQBLoading, setQbLoading] = useState<boolean>(true);
   const [isQBInitialized, setQBInitialized] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [additionalFields, setAdditionalFields] = useState<string[]>(ADDITIONAL_FIELDS);
 
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({
@@ -89,38 +116,26 @@ function SNVTab({ seqId }: SNVTabProps) {
   }
 
   // Variant list request
-  const { fetch: fetchOccurrencesListHelper } = useSNVOccurrencesListHelper({
-    seqId,
-    listBody: {
-      additional_fields: [
-        'rsnumber',
-        'symbol',
-        'vep_impact',
-        'is_mane_select',
-        'is_canonical',
-        'omim_inheritance_code',
-        'clinvar',
-        'exomiser_gene_combined_score',
-        'exomiser_acmg_classification',
-        'pf_wgs',
-        'transcript_id',
-        'has_interpretation',
-      ],
-      limit: pagination.pageSize,
-      page_index: pagination.pageIndex,
-      sort: sorting,
-      sqon: activeSqon,
-    },
-  });
-
   const { fetch: fetchOccurrencesCountHelper } = useSNVOccurrencesCountHelper({
     seqId,
     countBody: { sqon: activeSqon },
   });
 
   const fetchOccurrencesList = useSWR<GermlineSNVOccurrence[]>(
-    'fetch-snv-occurrences-list',
-    fetchOccurrencesListHelper,
+    {
+      seqId,
+      listBody: {
+        additional_fields: additionalFields,
+        limit: pagination.pageSize,
+        page_index: pagination.pageIndex,
+        sort: sorting,
+        sqon: activeSqon,
+      },
+    },
+    async (params: SnvOccurrenceType) =>
+      seqId
+        ? occurrencesApi.listGermlineSNVOccurrences(params.seqId, params.listBody).then(response => response.data)
+        : [],
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,
@@ -188,14 +203,6 @@ function SNVTab({ seqId }: SNVTabProps) {
     if (seqId === '') return;
     fetchOccurrencesCount.mutate();
   }, [seqId, activeSqon]);
-
-  /**
-   * Re-fetch list
-   */
-  useEffect(() => {
-    if (seqId === '') return;
-    fetchOccurrencesList.mutate();
-  }, [seqId, sorting, pagination]);
 
   /**
    * Reset pagination on sqon change
@@ -296,13 +303,16 @@ function SNVTab({ seqId }: SNVTabProps) {
                 columns={getSNVOccurrenceColumns(t)}
                 data={fetchOccurrencesList.data ?? []}
                 defaultColumnSettings={defaultSNVSettings}
-                defaultServerSorting={DEFAULT_SORTING}
                 loadingStates={{
                   total: fetchOccurrencesCount.isLoading,
                   list: fetchOccurrencesList.isLoading,
                 }}
                 pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-                onServerSortingChange={setSorting}
+                serverOptions={{
+                  setAdditionalFields,
+                  defaultSorting: DEFAULT_SORTING,
+                  onSortingChange: setSorting,
+                }}
                 total={fetchOccurrencesCount.data?.count ?? 0}
                 enableColumnOrdering
                 enableFullscreen
