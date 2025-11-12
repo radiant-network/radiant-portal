@@ -125,5 +125,8 @@ VALUES (1, 'alignment', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
        (124, 'alignment', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
        (125, 'variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
        (126, 'alignment', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
-       (127, 'variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00')
+       (127, 'variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
+       (128, 'alignment', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
+       (129, 'alignment', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
+       (130, 'alignment', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00')
 ON CONFLICT (id) DO NOTHING;

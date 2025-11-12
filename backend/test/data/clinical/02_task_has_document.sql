@@ -416,5 +416,12 @@ VALUES (1, 27, 'output'),
        (127, 83, 'input'),
        (127, 84, 'input'),
        (127, 231, 'output'),
-       (127, 232, 'output')
+       (127, 232, 'output'),
+
+       (128, 61, 'output'),
+       (128, 62, 'output'),
+       (129, 85, 'output'),
+       (129, 86, 'output'),
+       (130, 27, 'output'),
+       (130, 28, 'output')
 ON CONFLICT(task_id, document_id, type) DO NOTHING;
