@@ -253,30 +253,30 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"case_id":21, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
-				"document_id":21, 
+				"document_id":47, 
 				"format_code":"cram", 
-				"name":"FI0037702.S13229.cram", 
+				"name":"FI0037732.S14857.cram", 
 				"patient_id":60, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"proband", 
-				"size":9.1235842785e+10, 
+				"size":1.02778567393e+11, 
 				"submitter_sample_id":"S14857", 
-				"task_id":21
+				"task_id":122
 			}, {
 				"case_id":21, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
-				"document_id":21, 
+				"document_id":59, 
 				"format_code":"cram", 
-				"name":"FI0037702.S13229.cram", 
+				"name":"FI0037755.S14858.cram", 
 				"patient_id":61, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"mother", 
-				"size":9.1235842785e+10, 
+				"size":1.03970420817e+11, 
 				"submitter_sample_id":"S14858", 
-				"task_id":21
+				"task_id":124
 			}
 		], 
 		"count": 6}`
@@ -309,7 +309,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 		}`
 	expected := `{
 		"data_type":[
-			{"count":1, "key":"snv", "label":"Germline SNV"}, 
+			{"count":3, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
 			{"count":0, "key":"covgene", "label":"Coverage by Gene Report"}, 
@@ -326,7 +326,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"ssv", "label":"Somatic SV"}
 		], 
 		"format":[
-			{"count":1, "key":"vcf", "label":"VCF File"}, 
+			{"count":3, "key":"vcf", "label":"VCF File"}, 
 			{"count":0, "key":"bed", "label":"BED File"}, 
 			{"count":0, "key":"bw", "label":"BW File"}, 
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
