@@ -150,7 +150,7 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"task_id":6
 			}
 		], 
-		"count": 137}`
+		"count": 140}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "name", "order": "asc"}, {"field": "relationship_to_proband_code", "order": "desc"}],
