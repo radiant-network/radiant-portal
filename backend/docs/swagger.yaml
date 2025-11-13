@@ -107,6 +107,24 @@ components:
       - type
       - value
       type: object
+    BatchError:
+      properties:
+        error_code:
+          type: string
+        message:
+          type: string
+      type: object
+    BatchSummary:
+      properties:
+        created:
+          type: integer
+        errors:
+          type: integer
+        skipped:
+          type: integer
+        updated:
+          type: integer
+      type: object
     CNVGeneOverlap:
       description: CNVGeneOverlap represents a gene overlap with a CNV
       properties:
@@ -476,6 +494,23 @@ components:
       properties:
         sqon:
           $ref: '#/components/schemas/Sqon'
+      type: object
+    CreateBatchResponse:
+      description: CreateBatchResponse represents the response returned when creating
+        a new batch
+      properties:
+        batch_type:
+          type: string
+        created_on:
+          type: string
+        dry_run:
+          type: boolean
+        id:
+          type: string
+        status:
+          type: string
+        username:
+          type: string
       type: object
     DocumentFilters:
       properties:
@@ -963,6 +998,34 @@ components:
       - task_id
       - variant_class
       - zygosity
+      type: object
+    GetBatchResponse:
+      description: GetBatchResponse represents the response returned when retrieving
+        a batch
+      properties:
+        batch_type:
+          type: string
+        created_on:
+          type: string
+        dry_run:
+          type: boolean
+        errors:
+          items:
+            $ref: '#/components/schemas/BatchError'
+          type: array
+          uniqueItems: false
+        finished_on:
+          type: string
+        id:
+          type: string
+        started_on:
+          type: string
+        status:
+          type: string
+        summary:
+          $ref: '#/components/schemas/BatchSummary'
+        username:
+          type: string
       type: object
     IGVTrackEnriched:
       properties:
@@ -1901,6 +1964,58 @@ paths:
       summary: Get Assay by seq_id
       tags:
       - assays
+  /batches/{batchId}:
+    get:
+      description: Retrieve a batch by ID
+      operationId: getBatch
+      parameters:
+      - description: Batch ID
+        in: path
+        name: batchId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetBatchResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Retrieve a batch by ID
+      tags:
+      - batches
   /cases/{case_id}:
     get:
       description: Retrieve CaseEntity by its ID
@@ -3188,6 +3303,45 @@ paths:
       summary: Get germline SNV facets dictionary
       tags:
       - occurrences
+  /patients/batch:
+    post:
+      description: Create a new patient batch
+      operationId: postPatientBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create a new patient batch
+      tags:
+      - patients
   /sequencing/{seq_id}:
     get:
       description: Retrieve Sequencing data for a given sequence ID

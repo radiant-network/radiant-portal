@@ -15,6 +15,7 @@ type Auth interface {
 	RetrieveUserIdFromToken(c *gin.Context) (*string, error)
 	RetrieveAzpFromToken(c *gin.Context) (*string, error)
 	RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error)
+	RetrieveUsernameFromToken(c *gin.Context) (*string, error)
 }
 
 type KeycloakAuth struct{}
@@ -55,6 +56,14 @@ func (auth KeycloakAuth) RetrieveResourceAccessFromToken(c *gin.Context) (*map[s
 		return nil, err
 	}
 	return &token.ResourceAccess, nil
+}
+
+func (auth KeycloakAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, error) {
+	token, err := getOrParseToken(c)
+	if err != nil {
+		return nil, err
+	}
+	return &token.PreferredUsername, nil
 }
 
 func parseJWTFromHeader(c *gin.Context) (*ginkeycloak.KeyCloakToken, error) {

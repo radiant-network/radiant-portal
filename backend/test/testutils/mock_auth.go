@@ -26,6 +26,11 @@ func (mockAut *MockAuth) RetrieveResourceAccessFromToken(_ *gin.Context) (*map[s
 	return &result, nil
 }
 
+func (mockAut *MockAuth) RetrieveUsernameFromToken(_ *gin.Context) (*string, error) {
+	result := "mock-username"
+	return &result, nil
+}
+
 type MockAuthUserPreferences struct{}
 
 func (mockAut *MockAuthUserPreferences) RetrieveUserIdFromToken(c *gin.Context) (*string, error) {
@@ -44,5 +49,10 @@ func (mockAut *MockAuthUserPreferences) RetrieveResourceAccessFromToken(_ *gin.C
 			Roles: []string{"mock-role"},
 		},
 	}
+	return &result, nil
+}
+
+func (mockAut *MockAuthUserPreferences) RetrieveUsernameFromToken(_ *gin.Context) (*string, error) {
+	result := "mock-username"
 	return &result, nil
 }
