@@ -120,4 +120,4 @@ services:
     command:
       - -c
       - |
-        export PGPASSWORD='radiant'; psql -h postgres -U radiant -d radiant -f /docker-entrypoint-initdb.d/insert_clinical_data.sql;
+        export PGPASSWORD='radiant'; sleep 10 && psql -h postgres -U radiant -d radiant -f /docker-entrypoint-initdb.d/insert_clinical_data.sql;

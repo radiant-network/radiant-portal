@@ -302,7 +302,6 @@
           "case_id": "Case",
           "patient_id": "Patient",
           "organization_patient_id": "MRN",
-          "request_id": "Assay",
           "run_name": "Run Name",
           "sample_id": "Sample ID",
           "task_id": "Task"
@@ -746,7 +745,6 @@
         "prescriber_tooltip": "Prescribing doctor",
         "diagnostic_lab": "Diagnostic Lab",
         "diagnostic_lab_tooltip": "Molecular diagnostic laboratory",
-        "request_id": "Request",
         "managing_organization": "Managing Org.",
         "managing_organization_tooltip": "Organization managing the patient’s file",
         "created_on": "Created On",
@@ -1265,7 +1263,6 @@
       "type": "Type",
       "tissue_site": "Tissue Site",
       "submitter_id": "Submitter ID",
-      "request_id": "Request ID",
       "priority": "Priority",
       "status": "Status",
       "assigned_to": "Assigned to",

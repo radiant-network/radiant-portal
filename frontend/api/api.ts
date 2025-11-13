@@ -127,24 +127,6 @@ export interface Assay {
      * @type {string}
      * @memberof Assay
      */
-    'diagnosis_lab_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'diagnosis_lab_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'experiment_description'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
     'experimental_strategy_code'?: string;
     /**
      * 
@@ -160,22 +142,10 @@ export interface Assay {
     'histology_code'?: string;
     /**
      * 
-     * @type {boolean}
-     * @memberof Assay
-     */
-    'is_paired_end': boolean;
-    /**
-     * 
      * @type {string}
      * @memberof Assay
      */
     'platform_code'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Assay
-     */
-    'read_length'?: number;
     /**
      * 
      * @type {string}
@@ -212,6 +182,30 @@ export interface Assay {
      * @memberof Assay
      */
     'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sequencing_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sequencing_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sequencing_read_technology_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sequencing_read_technology_name'?: string;
     /**
      * 
      * @type {string}
@@ -2239,6 +2233,12 @@ export interface InterpretationGermline {
      * @type {string}
      * @memberof InterpretationGermline
      */
+    'case_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'classification'?: string;
     /**
      * 
@@ -2387,6 +2387,12 @@ export interface InterpretationPubmed {
  * @interface InterpretationSomatic
  */
 export interface InterpretationSomatic {
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
+    'case_id'?: string;
     /**
      * 
      * @type {string}

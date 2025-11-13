@@ -273,11 +273,6 @@ const defaultSettings = createColumnSettings([
     additionalFieldIds: ['diagnosis_lab_code', 'diagnosis_lab_name'],
   },
   {
-    id: 'request_id',
-    visible: false,
-    label: 'case_exploration.case.headers.request_id',
-  },
-  {
     id: 'managing_organization',
     visible: false,
     label: 'case_exploration.case.headers.managing_organization',

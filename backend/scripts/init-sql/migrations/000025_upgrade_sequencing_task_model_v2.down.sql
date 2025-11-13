@@ -92,7 +92,6 @@ DROP TABLE task_context;
 -- Task has document
 TRUNCATE TABLE task_has_document;
 ALTER TABLE task_has_document DROP COLUMN type;
-DROP TYPE task_has_document_type;
 
 -- Task
 TRUNCATE TABLE task;

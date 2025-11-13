@@ -277,7 +277,6 @@
           "case_id": "Cas",
           "patient_id": "Patient",
           "organization_patient_id": "MRN",
-          "request_id": "Analyse",
           "run_name": "Nom du lot",
           "sample_id": "Sample ID",
           "task_id": "Tâche"
@@ -726,7 +725,6 @@
         "prescriber_tooltip": "Médecin prescripteur",
         "diagnostic_lab": "Laboratoire de diagnostic",
         "diagnostic_lab_tooltip": "Laboratoire de diagnostic moléculaire",
-        "request_id": "Requête",
         "managing_organization": "Organisation resp.",
         "managing_organization_tooltip": "Organisation responsable du dossier du patient",
         "created_on": "Créé le",
@@ -1314,7 +1312,6 @@
       "type": "Type",
       "tissue_site": "Site tissulaire",
       "submitter_id": "ID soumissionnaire",
-      "request_id": "ID de demande",
       "priority": "Priorité",
       "status": "Statut",
       "assigned_to": "Assigné à",

@@ -12,7 +12,7 @@ import { cn } from '@/components/lib/utils';
 
 import { VariantInterface } from '../variants-tab';
 
-function AssayVariantFiltersSelectValue({ relationship_to_proband, request_id }: CaseAssay) {
+function AssayVariantFiltersSelectValue({ relationship_to_proband }: CaseAssay) {
   const { t } = useI18n();
 
   return (
@@ -20,7 +20,6 @@ function AssayVariantFiltersSelectValue({ relationship_to_proband, request_id }:
       <span className="font-bold capitalize">
         {relationship_to_proband ?? t('case_entity.variants.filters.proband')}
       </span>
-      <span>{request_id}</span>
     </div>
   );
 }
