@@ -131,14 +131,3 @@ VALUES ('alignment', 'Genome Alignment'),
        ('radiant_germline_annotation', 'RADIANT Germline Annotation'), -- input vcf output vcf
        ('exomiser', 'Exomiser'), -- input gvcf output vcf
        ('rnaseq_analysis', 'RNAseq Analysis of Transcriptome Profiling and Gene Fusion Calling');
-
-
--- case 8: alignment_germline_variant_calling (cram, gvcf, vcf, csv) -> (vcf) radiant_germline_annotation (vcf)
---                                                              -> (gvcf) exomiser (vcf)
--- 6 documents (3 vcf, 1 gvcf, 1 cram, 1 metric)
-
--- case 1: alignment_germline_variant_calling 3 (cram, gvcf, csv) -> (3 gvcf) family_variant_calling (1 vcf, 1 csv) -> (vcf) radiant_germline_annotation (vcf)
---                                                           -> (gvcf) exomiser (vcf) pour chaque patient
--- 3 cram, 3 gvcf, 3 csv output alignment_variant_calling, 3 vcf exomiser, 1 vcf output family, 1 csv output family, 1 vcf output annotation
-
--- radiant_germline_annotation -> pas de pipeline_name, pas de genome_build et pipeline_version = 1.0.0
