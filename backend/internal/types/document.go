@@ -14,7 +14,6 @@ type Document struct {
 	Size             int
 	Url              string
 	Hash             string
-	Patients         []Patient `gorm:"many2many:radiant_jdbc.public.document_has_patient;"`
 	CreatedOn        time.Time
 }
 
@@ -141,11 +140,6 @@ var DocumentCreatedOnField = Field{
 var DocumentTable = Table{
 	Name:  "radiant_jdbc.public.document",
 	Alias: "doc",
-}
-
-var DocumentHasPatientTable = Table{
-	Name:  "radiant_jdbc.public.document_has_patient",
-	Alias: "dhp",
 }
 
 func (Document) TableName() string {

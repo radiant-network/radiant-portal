@@ -119,6 +119,9 @@ DROP TABLE pipeline;
 -- Drop request table
 DROP TABLE request;
 
+-- Drop document_has_patient table
+DROP TABLE document_has_patient;
+
 -- Update task_type content
 TRUNCATE TABLE task_type CASCADE;
 INSERT INTO task_type(code, name_en)
