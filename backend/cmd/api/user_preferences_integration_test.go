@@ -12,7 +12,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 	"gorm.io/gorm"
 )
 
@@ -40,14 +39,7 @@ func Test_GetUserPreferencesHandler_Found(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewUserPreferencesRepository(db)
 		auth := &testutils.MockAuth{
-			Id:  "b3a74785-b0a9-4a45-879e-f13c476976f7",
-			Azp: "mock-azp",
-			ResourceAccess: map[string]ginkeycloak.ServiceRole{
-				"mock-azp": {
-					Roles: []string{"mock-role"},
-				},
-			},
-			Username: "mock-username",
+			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
 		}
 		expected := `{
 			"table_display":{
@@ -80,14 +72,7 @@ func Test_UpdateUserPreferencesHandler(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewUserPreferencesRepository(db)
 		auth := &testutils.MockAuth{
-			Id:  "b3a74785-b0a9-4a45-879e-f13c476976f7",
-			Azp: "mock-azp",
-			ResourceAccess: map[string]ginkeycloak.ServiceRole{
-				"mock-azp": {
-					Roles: []string{"mock-role"},
-				},
-			},
-			Username: "mock-username",
+			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
 		}
 		body := `{
 			"table_display":{
