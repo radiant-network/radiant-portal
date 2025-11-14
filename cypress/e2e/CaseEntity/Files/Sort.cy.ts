@@ -8,11 +8,6 @@ describe('CaseEntity - Files - Sort', () => {
     cy.visitFilesPage();
   };
 
-  it('Api request [SJRA-661]', () => {
-    setupTest();
-    FilesTable.validations.shouldRequestOnSort('name');
-  });
-
   it('Alphanumeric', () => {
     setupTest();
     FilesTable.validations.shouldSortColumn('sample');

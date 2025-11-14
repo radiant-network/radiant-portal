@@ -19,7 +19,7 @@ describe('Cases - Information displayed', () => {
     CasesTable.validations.shouldShowColumnContent('patient', data.case);
   });
 
-  it('Organization Patient Id', () => {
+  it('MRN', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('mrn', data.case);
   });

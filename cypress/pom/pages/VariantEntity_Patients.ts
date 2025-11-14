@@ -274,7 +274,7 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
         if (position !== -1) {
           cy.sortTableAndWait(position, tableId);
         } else {
-          cy.log(`Warning: Column ${columnID} not found`);
+          cy.handleColumnNotFound(columnID);
         }
       })
     );
@@ -330,7 +330,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
               .eq(position)
               .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
           } else {
-            cy.log(`Warning: Column ${column.id} not found`);
+            cy.handleColumnNotFound(column.id);
           }
         })
       );
@@ -363,7 +363,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
           cy.validateTableFirstRowContent(data[columnID], position, tableId);
         }
       } else {
-        cy.log(`Warning: Column ${columnID} not found`);
+        cy.handleColumnNotFound(columnID);
       }
     });
   },
@@ -377,7 +377,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
           if (position !== -1) {
             cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldHaveTooltip(column);
           } else {
-            cy.log(`Warning: Column ${column.id} not found`);
+            cy.handleColumnNotFound(column.id);
           }
         })
       );
@@ -393,7 +393,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
           if (position !== -1) {
             cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinnable(column.isPinnable);
           } else {
-            cy.log(`Warning: Column ${column.id} not found`);
+            cy.handleColumnNotFound(column.id);
           }
         })
       );
@@ -420,7 +420,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
           if (position !== -1) {
             cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBeSortable(column.isSortable);
           } else {
-            cy.log(`Warning: Column ${column.id} not found`);
+            cy.handleColumnNotFound(column.id);
           }
         })
       );
