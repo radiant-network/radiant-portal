@@ -12,34 +12,34 @@ import (
 // GetIGVHandler
 // @Summary Get IGV
 // @Id getIGV
-// @Description Get IGV tracks for a sequencing experiment
+// @Description Get IGV tracks for a case
 // @Tags igv
 // @Security bearerauth
-// @Param seq_id path string true "Sequencing ID"
+// @Param case_id path string true "Case ID"
 // @Produce json
 // @Success 200 {object} types.IGVTracks
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /igv/{seq_id} [get]
+// @Router /igv/{case_id} [get]
 func GetIGVHandler(repo repository.IGVRepositoryDAO, presigner utils.S3PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = &utils.DefaultS3PreSigner{}
 	}
 
 	return func(c *gin.Context) {
-		sequencingId, err := strconv.Atoi(c.Param("seq_id"))
+		caseID, err := strconv.Atoi(c.Param("case_id"))
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		internalIgvTracks, err := repo.GetIGV(sequencingId)
+		internalIgvTracks, err := repo.GetIGV(caseID)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
 
 		if len(internalIgvTracks) == 0 {
-			HandleNotFoundError(c, "seq_id")
+			HandleNotFoundError(c, "case_id")
 			return
 		}
 

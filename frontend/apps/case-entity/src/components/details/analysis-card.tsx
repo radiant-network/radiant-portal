@@ -105,8 +105,6 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
               <InformationField label={t('case_entity.details.project_code')} tooltipText={caseData.project_name}>
                 {caseData.project_code}
               </InformationField>
-
-              <InformationField label={t('case_entity.details.request_id')}>{caseData.request_id}</InformationField>
             </div>
           </div>
 

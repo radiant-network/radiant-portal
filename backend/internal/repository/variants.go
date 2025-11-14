@@ -126,13 +126,13 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	tx := r.db.Table("`radiant_jdbc`.`public`.`interpretation_germline` ig")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON ig.sequencing_id = o.seq_id and ig.locus_id = o.locus_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = s.case_id and f.family_member_id= s.patient_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON ig.case_id = c.id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`sample` sa ON sa.id = s.sample_id")
+	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = c.id and f.family_member_id= sa.patient_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`analysis_catalog` ca ON ca.id = c.analysis_catalog_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.diagnosis_lab_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = ig.condition")
-	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = s.patient_id", txAggPhenotypes)
+	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = sa.patient_id", txAggPhenotypes)
 
 	tx = tx.Where("o.locus_id = ?", locusId)
 	if userQuery != nil {
@@ -147,7 +147,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 		}
 	}
 
-	tx = tx.Select("s.id as seq_id, c.id as case_id, s.patient_id as patient_id, ig.transcript_id as transcript_id, " +
+	tx = tx.Select("s.id as seq_id, c.id as case_id, sa.patient_id as patient_id, ig.transcript_id as transcript_id, " +
 		"ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, " +
 		"ig.classification as classification_code, o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, " +
 		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, " +
@@ -192,14 +192,15 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 
 	tx := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.case_has_sequencing_experiment chseq ON chseq.sequencing_experiment_id = o.seq_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = chseq.case_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`analysis_catalog` ca ON ca.id = c.analysis_catalog_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.diagnosis_lab_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = s.case_id and f.family_member_id= s.patient_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`sample` sa ON sa.id = s.sample_id")
+	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = c.id and f.family_member_id= sa.patient_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
 	tx = tx.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id = ? and i.sequencing_id = s.id", locusIdString)
-	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = s.patient_id", txAggPhenotypes)
+	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = sa.patient_id", txAggPhenotypes)
 	tx = tx.Where("o.locus_id = ?", locusId)
 
 	if userQuery != nil {
@@ -214,7 +215,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		}
 	}
 
-	tx = tx.Select("c.id as case_id, s.id as seq_id, s.patient_id as patient_id, "+
+	tx = tx.Select("c.id as case_id, s.id as seq_id, sa.patient_id as patient_id, "+
 		"sa.submitter_sample_id as submitter_sample_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, "+
 		"mondo.name as primary_condition_name, o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, "+
 		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, "+
@@ -247,10 +248,12 @@ func (r *VariantsRepository) GetVariantExpandedInterpretedCase(locusId int, seqI
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON i.sequencing_id = o.seq_id and o.locus_id = i.locus_id")
 	tx = tx.Joins("INNER JOIN germline__snv__variant v ON i.locus_id = v.locus_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = s.case_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sample` sa ON s.sample_id = sa.id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq ON chseq.sequencing_experiment_id = o.seq_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON chseq.case_id = c.id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = c.proband_id")
 	tx = tx.Where("i.locus_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusIdAsString, SeqIdAsString, transcriptId)
-	tx = tx.Select("s.patient_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias_string, i.transmission_modes as inheritances_string, i.pubmed as pubmed_ids_string, p.sex_code as patient_sex_code")
+	tx = tx.Select("sa.patient_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias_string, i.transmission_modes as inheritances_string, i.pubmed as pubmed_ids_string, p.sex_code as patient_sex_code")
 
 	var variantExpandedInterpretedCase VariantExpandedInterpretedCase
 	if err := tx.Find(&variantExpandedInterpretedCase).Error; err != nil {

@@ -5,15 +5,13 @@ import (
 )
 
 type Task struct {
-	ID                    int
-	TypeCode              string
-	Type                  TaskType `gorm:"foreignKey:code;references:TypeCode"`
-	PipelineID            int
-	Pipeline              Pipeline `gorm:"foreignKey:ID;references:PipelineID"`
-	CreatedOn             time.Time
-	SequencingExperiments []SequencingExperiment `gorm:"many2many:radiant_jdbc.public.task_has_sequencing_experiment;"`
-	RelatedTasks          []Task                 `gorm:"many2many:radiant_jdbc.public.task_has_related_task;foreignKey:ID;joinForeignKey:TaskID;References:ID;joinReferences:RelatedTaskID"`
-	Documents             []Document             `gorm:"many2many:radiant_jdbc.public.task_has_document;"`
+	ID              int
+	TaskTypeCode    string
+	TaskType        TaskType `gorm:"foreignKey:code;references:TaskTypeCode"`
+	PipelineName    string
+	PipelineVersion string
+	GenomeBuild     string
+	CreatedOn       time.Time
 }
 
 var TaskHasDocumentTaskIdField = Field{
@@ -34,9 +32,9 @@ var TaskHasDocumentTable = Table{
 	Alias: "thd",
 }
 
-var TaskHasSequencingExperimentTable = Table{
-	Name:  "radiant_jdbc.public.task_has_sequencing_experiment",
-	Alias: "thseq",
+var TaskContextTable = Table{
+	Name:  "radiant_jdbc.public.task_context",
+	Alias: "tctx",
 }
 
 func (Task) TableName() string {

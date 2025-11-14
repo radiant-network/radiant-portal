@@ -91,8 +91,8 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             </InformationField>
 
             {/* Diag. Lab. */}
-            <InformationField label={t('case_entity.details.diag_lab')} tooltipText={data?.diagnosis_lab_name}>
-              {data?.diagnosis_lab_code}
+            <InformationField label={t('case_entity.details.diag_lab')} tooltipText={data?.sequencing_lab_name}>
+              {data?.sequencing_lab_code}
             </InformationField>
 
             {/* Aliquot */}
@@ -127,11 +127,6 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
               )}
             </InformationField>
 
-            {/* Paired End */}
-            <InformationField label={t('case_entity.details.paired_end')}>
-              <Badge variant="outline">{t(`case_entity.details.paired_end_${data?.is_paired_end ?? 'false'}`)}</Badge>
-            </InformationField>
-
             {/* Platform */}
             <InformationField label={t('case_entity.details.platform')}>{data?.platform_code}</InformationField>
 
@@ -139,13 +134,8 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             <InformationField label={t('case_entity.details.capture_kit')}>{data?.capture_kit}</InformationField>
 
             {/* Read Lenght */}
-            <InformationField label={t('case_entity.details.read_length')}>
-              {data?.read_length?.toString()}
-            </InformationField>
-
-            {/* Description */}
-            <InformationField label={t('case_entity.details.description')}>
-              {data?.experiment_description}
+            <InformationField label={t('case_entity.details.sequencing_read_technology')}>
+              {data?.sequencing_read_technology_name?.toString()}
             </InformationField>
           </div>
           <Separator orientation="vertical" className="hidden mx-8 md:block" />

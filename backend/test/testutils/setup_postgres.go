@@ -102,7 +102,7 @@ func populateData(db *sql.DB) error {
 			// Execute the SQL file to insert data
 			_, err = db.Exec(string(sqlFile))
 			if err != nil {
-				return fmt.Errorf("failed to insert data: %v", err)
+				return fmt.Errorf("failed to insert data: %v for file %s", err, sqlFilePath)
 			}
 		}
 	}

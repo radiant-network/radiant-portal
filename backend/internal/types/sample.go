@@ -29,6 +29,14 @@ var SampleIdField = Field{
 	Table:         SampleTable,
 }
 
+var SamplePatientIdField = Field{
+	Name:          "patient_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         SampleTable,
+}
+
 var SampleTable = Table{
 	Name:  "radiant_jdbc.public.sample",
 	Alias: "spl",

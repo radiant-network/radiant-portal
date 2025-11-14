@@ -251,14 +251,14 @@ func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error)
 func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 	var assays []CaseAssay
 
-	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON s.patient_id = f.family_member_id AND s.case_id = f.case_id")
+	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.Name, types.CaseHasSequencingExperimentTable.Alias))
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.experiment exp ON exp.id = s.experiment_id")
+	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON spl.patient_id = f.family_member_id AND chseq.case_id = f.case_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null")
-	txSeqExp = txSeqExp.Select("s.id as seq_id, s.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, exp.experimental_strategy_code, se.seq_id is not null as has_variants")
-	txSeqExp = txSeqExp.Where("s.case_id = ?", caseId)
-	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
+	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
+	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc")
 	if err := txSeqExp.Find(&assays).Error; err != nil {
 		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
 	}
@@ -320,14 +320,16 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 
 func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	var tasks []CaseTask
-	tx := r.db.Table("radiant_jdbc.public.task_has_sequencing_experiment tse")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task t ON t.id = tse.task_id")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task_type tt ON t.type_code = tt.code")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = tse.sequencing_experiment_id")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.family f ON f.family_member_id = s.patient_id AND f.case_id = ?", caseId)
-	tx = tx.Where("s.case_id = ?", caseId)
-	tx = tx.Select("t.id, t.type_code, t.created_on, tt.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct s.patient_id) as patient_count")
-	tx = tx.Group("t.id, t.type_code, t.created_on, tt.type_name")
+	tx := r.db.Table("radiant_jdbc.public.task_context tctx")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chseq ON tctx.sequencing_experiment_id = chseq.sequencing_experiment_id")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task t ON t.id = tctx.task_id")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task_type tt ON t.task_type_code = tt.code")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = tctx.sequencing_experiment_id")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON s.sample_id = spl.id")
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.family f ON f.family_member_id = spl.patient_id AND f.case_id = ?", caseId)
+	tx = tx.Where("(tctx.case_id = ? OR tctx.case_id IS NULL) AND chseq.case_id = ?", caseId, caseId)
+	tx = tx.Select("t.id, t.task_type_code as type_code, t.created_on, tt.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct spl.patient_id) as patient_count")
+	tx = tx.Group("t.id, t.task_type_code, t.created_on, tt.type_name")
 	tx = tx.Order("t.id asc")
 
 	if err := tx.Find(&tasks).Error; err != nil {

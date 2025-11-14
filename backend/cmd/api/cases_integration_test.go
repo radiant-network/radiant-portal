@@ -161,9 +161,9 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 func Test_CaseEntityHandler(t *testing.T) {
 	expected := `{
 		"assays":[
-			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true}, 
-			{"affected_status_code":"affected", "experimental_strategy_code":"wxs", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true},
-			{"affected_status_code":"non_affected", "experimental_strategy_code":"wxs", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": false}
+			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true},
+			{"affected_status_code":"non_affected", "experimental_strategy_code":"wgs", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": false}
 		],
 		"analysis_catalog_code":"WGA",
 		"analysis_catalog_name":"Whole Genome Analysis",
@@ -215,9 +215,14 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"ordering_organization_name": "Centre hospitalier universitaire Sainte-Justine",
 		"status_code":"in_progress", 
 		"tasks":[
-			{"id": 1, "type_code": "ngba", "type_name": "Normal Germline Bioinformatics Analysis", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]},
-			{"id" : 62, "type_code" : "ngba", "type_name": "Normal Germline Bioinformatics Analysis", "created_on" : "2021-10-12T13:08:00Z", "patients" : [ "mother" ]},
- 			{"id" : 63, "type_code" : "ngba", "type_name": "Normal Germline Bioinformatics Analysis", "created_on" : "2021-10-12T13:08:00Z", "patients" : [ "mother" ]} 
+			{"id": 1, "type_code": "alignment_germline_variant_calling", "type_name": "Genome Alignment and Germline Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
+			{"id": 2, "type_code": "alignment_germline_variant_calling", "type_name": "Genome Alignment and Germline Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
+			{"id": 3, "type_code": "alignment_germline_variant_calling", "type_name": "Genome Alignment and Germline Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
+			{"id": 4, "type_code": "family_variant_calling", "type_name": "Family Joint Genotyping", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]},
+			{"id": 5, "type_code": "radiant_germline_annotation", "type_name": "RADIANT Germline Annotation", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]},
+			{"id": 6, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
+			{"id": 7, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
+			{"id": 8, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]}
 		],
 		"updated_on":"2021-09-12T13:08:00Z"
 	}`
@@ -246,30 +251,30 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"case_id":21, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
-				"document_id":21, 
+				"document_id":47, 
 				"format_code":"cram", 
-				"name":"FI0037702.S13229.cram", 
+				"name":"FI0037732.S14857.cram", 
 				"patient_id":60, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"proband", 
-				"size":9.1235842785e+10, 
+				"size":1.02778567393e+11, 
 				"submitter_sample_id":"S14857", 
-				"task_id":21
+				"task_id":68
 			}, {
 				"case_id":21, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
-				"document_id":21, 
+				"document_id":59, 
 				"format_code":"cram", 
-				"name":"FI0037702.S13229.cram", 
+				"name":"FI0037755.S14858.cram", 
 				"patient_id":61, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"mother", 
-				"size":9.1235842785e+10, 
+				"size":1.03970420817e+11, 
 				"submitter_sample_id":"S14858", 
-				"task_id":21
+				"task_id":69
 			}
 		], 
 		"count": 6}`
@@ -302,7 +307,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 		}`
 	expected := `{
 		"data_type":[
-			{"count":1, "key":"snv", "label":"Germline SNV"}, 
+			{"count":3, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
 			{"count":0, "key":"covgene", "label":"Coverage by Gene Report"}, 
@@ -319,7 +324,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"ssv", "label":"Somatic SV"}
 		], 
 		"format":[
-			{"count":1, "key":"vcf", "label":"VCF File"}, 
+			{"count":3, "key":"vcf", "label":"VCF File"}, 
 			{"count":0, "key":"bed", "label":"BED File"}, 
 			{"count":0, "key":"bw", "label":"BW File"}, 
 			{"count":0, "key":"cram", "label":"CRAM File"}, 

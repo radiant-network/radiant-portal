@@ -13,6 +13,7 @@ type InterpretationMetadata struct {
 
 type InterpretationCommon struct {
 	ID             string                 `json:"id,omitempty"`
+	CaseId         string                 `json:"case_id,omitempty"`
 	SequencingId   string                 `json:"sequencing_id,omitempty"`
 	LocusId        string                 `json:"locus_id,omitempty"`
 	TranscriptId   string                 `json:"transcript_id,omitempty"`
