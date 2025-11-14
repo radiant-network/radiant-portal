@@ -1,5 +1,5 @@
 {
-  "additional_fields": ["analysis_catalog_code", "analysis_catalog_name", "case_type", "case_id", "created_on", "organization_code", "organization_name", "organization_patient_id", "patient_id", "diagnosis_lab_code", "diagnosis_lab_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "ordering_organization_code", "ordering_organization_name", "status_code", "updated_on"],
+  "additional_fields": ["case_type", "primary_condition_id", "primary_condition_name", "prescriber", "diagnosis_lab_code", "diagnosis_lab_name", "organization_code", "organization_name"],
   "search_criteria": [],
   "limit": 2,
   "page_index": 0,

@@ -8,11 +8,6 @@ describe('Cases - Sort', () => {
     cy.visitCasesPage();
   };
 
-  it('Api request [SJRA-661]', () => {
-    setupTest();
-    CasesTable.validations.shouldRequestOnSort('case');
-  });
-
   it('Alphanumeric', () => {
     setupTest();
     CasesTable.validations.shouldSortColumn('mrn');

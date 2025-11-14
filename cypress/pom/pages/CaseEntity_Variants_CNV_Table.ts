@@ -210,7 +210,7 @@ const tableColumns = [
   },
 ];
 
-export const CaseEntity_Variants_CNV = {
+export const CaseEntity_Variants_CNV_Table = {
   actions: {
     /**
      * Clicks the link in a specific table cell for a given cnv and column.
@@ -227,7 +227,7 @@ export const CaseEntity_Variants_CNV = {
                 break;
             }
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -255,7 +255,7 @@ export const CaseEntity_Variants_CNV = {
           if (position !== -1) {
             cy.pinColumn(position);
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -297,7 +297,7 @@ export const CaseEntity_Variants_CNV = {
           if (position !== -1) {
             cy.get(CommonSelectors.tableHeadCell()).eq(position).invoke('css', 'width', '1px');
           } else {
-            cy.log(`Warning: Column ${column.id} not found`);
+            cy.handleColumnNotFound(column.id);
           }
         });
       });
@@ -317,7 +317,7 @@ export const CaseEntity_Variants_CNV = {
               cy.sortTableAndWait(position);
             }
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -326,7 +326,7 @@ export const CaseEntity_Variants_CNV = {
      * Unsort all columns of the table.
      */
     unsortAllColumns() {
-      CaseEntity_Variants_CNV.actions.sortColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.actions.sortColumn('cnv_variant');
     },
   },
 
@@ -396,7 +396,7 @@ export const CaseEntity_Variants_CNV = {
           if (position !== -1) {
             cy.get(selectors.tableCell(dataCNV)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataCNV));
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -425,7 +425,7 @@ export const CaseEntity_Variants_CNV = {
      * Validates the default pin state of each column.
      */
     shouldMatchDefaultPinnedColumns() {
-      CaseEntity_Variants_CNV.actions.showAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -434,7 +434,7 @@ export const CaseEntity_Variants_CNV = {
                 .eq(position)
                 .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
             } else {
-              cy.log(`Warning: Column ${column.id} not found`);
+              cy.handleColumnNotFound(column.id);
             }
           })
         );
@@ -463,7 +463,7 @@ export const CaseEntity_Variants_CNV = {
           if (position !== -1) {
             cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned('left');
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -473,20 +473,20 @@ export const CaseEntity_Variants_CNV = {
      * @param columnID The ID of the column to sort.
      */
     shouldRequestOnSort(columnID: string) {
-      CaseEntity_Variants_CNV.actions.showAllColumns();
-      CaseEntity_Variants_CNV.actions.unsortAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       cy.intercept('POST', '**/list', req => {
         expect(req.body.sort).to.have.length(1);
         expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
       }).as('sortRequest');
-      CaseEntity_Variants_CNV.actions.sortColumn(columnID, false /*needIntercept*/);
+      CaseEntity_Variants_CNV_Table.actions.sortColumn(columnID, false /*needIntercept*/);
       cy.wait('@sortRequest');
     },
     /**
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
-      CaseEntity_Variants_CNV.actions.showAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
@@ -501,7 +501,7 @@ export const CaseEntity_Variants_CNV = {
      * @param dataCNV The cnv object containing the expected values.
      */
     shouldShowColumnContent(columnID: string, dataCNV: any) {
-      CaseEntity_Variants_CNV.actions.showAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {
@@ -517,7 +517,7 @@ export const CaseEntity_Variants_CNV = {
               break;
           }
         } else {
-          cy.log(`Warning: Column ${columnID} not found`);
+          cy.handleColumnNotFound(columnID);
         }
       });
     },
@@ -525,15 +525,15 @@ export const CaseEntity_Variants_CNV = {
      * Validates the tooltips on columns.
      */
     shouldShowColumnTooltips() {
-      CaseEntity_Variants_CNV.actions.showAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              CaseEntity_Variants_CNV.actions.shrinkAllColumns();
+              CaseEntity_Variants_CNV_Table.actions.shrinkAllColumns();
               cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column);
             } else {
-              cy.log(`Warning: Column ${column.id} not found`);
+              cy.handleColumnNotFound(column.id);
             }
           })
         );
@@ -543,15 +543,15 @@ export const CaseEntity_Variants_CNV = {
      * Validates that pinnable columns are correctly marked as pinnable.
      */
     shouldShowPinnableColumns() {
-      CaseEntity_Variants_CNV.actions.showAllColumns();
-      CaseEntity_Variants_CNV.actions.unsortAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
               cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinnable(column.isPinnable);
             } else {
-              cy.log(`Warning: Column ${column.id} not found`);
+              cy.handleColumnNotFound(column.id);
             }
           })
         );
@@ -561,15 +561,15 @@ export const CaseEntity_Variants_CNV = {
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
-      CaseEntity_Variants_CNV.actions.showAllColumns();
-      CaseEntity_Variants_CNV.actions.unsortAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
               cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBeSortable(column.isSortable);
             } else {
-              cy.log(`Warning: Column ${column.id} not found`);
+              cy.handleColumnNotFound(column.id);
             }
           })
         );
@@ -580,8 +580,8 @@ export const CaseEntity_Variants_CNV = {
      * @param columnID The ID of the column to sort.
      */
     shouldSortColumn(columnID: string) {
-      CaseEntity_Variants_CNV.actions.showAllColumns();
-      CaseEntity_Variants_CNV.actions.unsortAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
+      CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
 
       cy.fixture('RequestBody/SortCNV.json').then(mockRequestBody => {
@@ -592,7 +592,7 @@ export const CaseEntity_Variants_CNV = {
           req.alias = 'sortRequestAsc';
           req.body = mockBody;
         });
-        CaseEntity_Variants_CNV.actions.sortColumn(columnID, false /*needIntercept*/);
+        CaseEntity_Variants_CNV_Table.actions.sortColumn(columnID, false /*needIntercept*/);
         cy.wait('@sortRequestAsc').then(interceptionAsc => {
           const smallest = interceptionAsc.response?.body[0][apiField];
 
@@ -604,7 +604,7 @@ export const CaseEntity_Variants_CNV = {
               req.alias = 'sortRequestDesc';
               req.body = mockBody;
             });
-            CaseEntity_Variants_CNV.actions.sortColumn(columnID, false /*needIntercept*/);
+            CaseEntity_Variants_CNV_Table.actions.sortColumn(columnID, false /*needIntercept*/);
             cy.wait('@sortRequestDesc').then(interceptionDesc => {
               const biggest = interceptionDesc.response?.body[0][apiField];
               if (typeof smallest === 'number' ? Number(biggest) - Number(smallest) : String(biggest).localeCompare(String(smallest)) < 0) {

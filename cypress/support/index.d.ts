@@ -4,6 +4,7 @@
 declare namespace Cypress {
   interface Chainable {
     clickAndWait(options?: Partial<ClickOptions>): Chainable<Element>;
+    handleColumnNotFound(column: string): cy & CyEventEmitter;
     hideColumn(column: string): cy & CyEventEmitter;
     login(): cy & CyEventEmitter;
     logout(): cy & CyEventEmitter;

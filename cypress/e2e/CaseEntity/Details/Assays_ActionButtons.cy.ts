@@ -2,7 +2,7 @@
 import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Details } from 'pom/pages/CaseEntity_Details';
-import { CaseEntity_Variants_SNV } from 'pom/pages/CaseEntity_Variants_SNV';
+import { CaseEntity_Variants_SNV_Table } from 'pom/pages/CaseEntity_Variants_SNV_Table';
 
 describe('CaseEntity - Details - Assays - Action Buttons', () => {
   const setupTest = () => {
@@ -13,8 +13,8 @@ describe('CaseEntity - Details - Assays - Action Buttons', () => {
   it('View Variants', () => {
     setupTest();
     CaseEntity_Details.assaysCard.actions.selectAction(data.case.assay, 'Variants');
-    CaseEntity_Variants_SNV.validations.shouldHaveTitle(data.case);
-    CaseEntity_Variants_SNV.validations.shouldHaveActiveTabAndToggle();
+    CaseEntity_Variants_SNV_Table.validations.shouldHaveTitle(data.case);
+    CaseEntity_Variants_SNV_Table.validations.shouldHaveActiveTabAndToggle();
   });
 
   it('Assay Details', () => {
