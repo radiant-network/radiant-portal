@@ -2404,14 +2404,14 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - hpo
-  /igv/{seq_id}:
+  /igv/{case_id}:
     get:
-      description: Get IGV tracks for a sequencing experiment
+      description: Get IGV tracks for a case
       operationId: getIGV
       parameters:
-      - description: Sequencing ID
+      - description: Case ID
         in: path
-        name: seq_id
+        name: case_id
         required: true
         schema:
           type: string

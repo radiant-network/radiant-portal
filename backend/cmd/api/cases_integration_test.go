@@ -215,16 +215,14 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"ordering_organization_name": "Centre hospitalier universitaire Sainte-Justine",
 		"status_code":"in_progress", 
 		"tasks":[
-			{"id": 1, "type_code": "alignment", "type_name": "Alignment", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
-			{"id": 2, "type_code": "variant_calling", "type_name": "Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
-			{"id": 3, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
-			{"id": 4, "type_code": "alignment", "type_name": "Alignment", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
-			{"id": 5, "type_code": "variant_calling", "type_name": "Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
-			{"id": 6, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
-			{"id": 7, "type_code": "alignment", "type_name": "Alignment", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
-			{"id": 8, "type_code": "variant_calling", "type_name": "Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
-			{"id": 9, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
-			{"id": 10, "type_code": "genotyping", "type_name": "Genotyping", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
+			{"id": 1, "type_code": "alignment_germline_variant_calling", "type_name": "Genome Alignment and Germline Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
+			{"id": 2, "type_code": "alignment_germline_variant_calling", "type_name": "Genome Alignment and Germline Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
+			{"id": 3, "type_code": "alignment_germline_variant_calling", "type_name": "Genome Alignment and Germline Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
+			{"id": 4, "type_code": "family_variant_calling", "type_name": "Family Joint Genotyping", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]},
+			{"id": 5, "type_code": "radiant_germline_annotation", "type_name": "RADIANT Germline Annotation", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]},
+			{"id": 6, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
+			{"id": 7, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
+			{"id": 8, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]}
 		],
 		"updated_on":"2021-09-12T13:08:00Z"
 	}`
@@ -262,7 +260,7 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"proband", 
 				"size":1.02778567393e+11, 
 				"submitter_sample_id":"S14857", 
-				"task_id":122
+				"task_id":68
 			}, {
 				"case_id":21, 
 				"created_on":"2021-09-12T13:08:00Z",
@@ -276,7 +274,7 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"size":1.03970420817e+11, 
 				"submitter_sample_id":"S14858", 
-				"task_id":124
+				"task_id":69
 			}
 		], 
 		"count": 6}`

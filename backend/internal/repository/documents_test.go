@@ -32,25 +32,25 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(140), *count)
+		assert.Equal(t, int64(144), *count)
 
-		document262 := (*documents)[0]
-		assert.Equal(t, 262, document262.DocumentID)
-		assert.Equal(t, "HG00513.recal.metrics.csv", document262.Name)
-		assert.Equal(t, "csv", document262.FormatCode)
-		assert.Equal(t, "snv", document262.DataTypeCode)
-		assert.Equal(t, 11724, document262.Size)
-		assert.Equal(t, 8, document262.CaseID)
-		assert.Equal(t, "CQGC", document262.DiagnosisLabCode)
-		assert.Equal(t, "Quebec Clinical Genomic Center", document262.DiagnosisLabName)
-		assert.Equal(t, "proband", document262.RelationshipToProbandCode)
-		assert.Equal(t, 22, document262.PatientID)
-		assert.Equal(t, "S14069", document262.SubmitterSampleID)
-		assert.Equal(t, 47, document262.TaskID)
-		assert.Equal(t, 22, document262.SeqID)
-		assert.Equal(t, "5d41402abc4b2a76b9719d911017c853", document262.Hash)
-		assert.Equal(t, "A00516_0190", document262.RunAlias)
-		assert.NotNil(t, document262.CreatedOn)
+		document264 := (*documents)[0]
+		assert.Equal(t, 264, document264.DocumentID)
+		assert.Equal(t, "FI0005568.S14359.vcf.gz", document264.Name)
+		assert.Equal(t, "vcf", document264.FormatCode)
+		assert.Equal(t, "snv", document264.DataTypeCode)
+		assert.Equal(t, 2411725, document264.Size)
+		assert.Equal(t, 8, document264.CaseID)
+		assert.Equal(t, "CQGC", document264.DiagnosisLabCode)
+		assert.Equal(t, "Quebec Clinical Genomic Center", document264.DiagnosisLabName)
+		assert.Equal(t, "proband", document264.RelationshipToProbandCode)
+		assert.Equal(t, 22, document264.PatientID)
+		assert.Equal(t, "S14069", document264.SubmitterSampleID)
+		assert.Equal(t, 30, document264.TaskID)
+		assert.Equal(t, 22, document264.SeqID)
+		assert.Equal(t, "5d41402abc4b2a76b9719d911017c855", document264.Hash)
+		assert.Equal(t, "A00516_0190", document264.RunAlias)
+		assert.NotNil(t, document264.CreatedOn)
 	})
 }
 
@@ -61,7 +61,7 @@ func Test_SearchDocumentsCustomSort(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(140), *count)
+		assert.Equal(t, int64(144), *count)
 
 		document135 := (*documents)[0]
 		assert.Equal(t, 135, document135.DocumentID)
@@ -180,11 +180,11 @@ func Test_SearchDocumentsFilterOnCaseId(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
-		assert.Len(t, *documents, 5)
-		assert.Equal(t, int64(5), *count)
+		assert.Len(t, *documents, 6)
+		assert.Equal(t, int64(6), *count)
 
-		document262 := (*documents)[0]
-		assert.Equal(t, 262, document262.DocumentID)
+		document264 := (*documents)[0]
+		assert.Equal(t, 264, document264.DocumentID)
 	})
 }
 
@@ -220,11 +220,11 @@ func Test_SearchDocumentsFilterOnTaskId(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
-		assert.Len(t, *documents, 2)
-		assert.Equal(t, int64(2), *count)
+		assert.Len(t, *documents, 3)
+		assert.Equal(t, int64(3), *count)
 
-		document247 := (*documents)[0]
-		assert.Equal(t, 247, document247.DocumentID)
+		document252 := (*documents)[0]
+		assert.Equal(t, 252, document252.DocumentID)
 	})
 }
 
@@ -241,10 +241,10 @@ func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(68), *count)
+		assert.Equal(t, int64(72), *count)
 
-		document262 := (*documents)[0]
-		assert.Equal(t, 262, document262.DocumentID)
+		document264 := (*documents)[0]
+		assert.Equal(t, 264, document264.DocumentID)
 	})
 }
 
@@ -261,10 +261,10 @@ func Test_SearchDocumentsFilterOnDiagnosisLabCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(140), *count)
+		assert.Equal(t, int64(144), *count)
 
-		document262 := (*documents)[0]
-		assert.Equal(t, 262, document262.DocumentID)
+		document264 := (*documents)[0]
+		assert.Equal(t, 264, document264.DocumentID)
 	})
 }
 
@@ -281,7 +281,7 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandMother(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(45), *count)
+		assert.Equal(t, int64(46), *count)
 
 		document257 := (*documents)[0]
 		assert.Equal(t, 257, document257.DocumentID)
@@ -301,7 +301,7 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandFather(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(45), *count)
+		assert.Equal(t, int64(46), *count)
 
 		document257 := (*documents)[0]
 		assert.Equal(t, 257, document257.DocumentID)
@@ -321,10 +321,10 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandProband(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(50), *count)
+		assert.Equal(t, int64(52), *count)
 
-		document262 := (*documents)[0]
-		assert.Equal(t, 262, document262.DocumentID)
+		document264 := (*documents)[0]
+		assert.Equal(t, 264, document264.DocumentID)
 	})
 }
 
@@ -341,10 +341,10 @@ func Test_SearchDocumentsFilterOnFormatCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(64), *count)
+		assert.Equal(t, int64(69), *count)
 
-		document257 := (*documents)[0]
-		assert.Equal(t, 257, document257.DocumentID)
+		document264 := (*documents)[0]
+		assert.Equal(t, 264, document264.DocumentID)
 	})
 }
 
@@ -361,10 +361,10 @@ func Test_SearchDocumentsFilterOnDataTypeCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(76), *count)
+		assert.Equal(t, int64(80), *count)
 
-		document262 := (*documents)[0]
-		assert.Equal(t, 262, document262.DocumentID)
+		document264 := (*documents)[0]
+		assert.Equal(t, 264, document264.DocumentID)
 	})
 }
 

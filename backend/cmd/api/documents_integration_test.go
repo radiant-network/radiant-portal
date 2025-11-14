@@ -46,7 +46,7 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13228", 
 				"size":3.06718965e+08, 
-				"task_id":14
+				"task_id":12
 			}, {
 				"case_id":2, 
 				"created_on":"2021-09-12T13:08:00Z",
@@ -60,7 +60,7 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13228", 
 				"size":1.09940425359e+11, 
-				"task_id":13
+				"task_id":12
 			}
 		], 
 		"count": 2}`
@@ -89,7 +89,7 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"submitter_sample_id":"S13228", 
 				"seq_id": 5,
 				"size":3.06718965e+08, 
-				"task_id":14
+				"task_id":12
 			}, {
 				"case_id":2, 
 				"created_on":"2021-09-12T13:08:00Z",
@@ -105,7 +105,7 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"submitter_sample_id":"S13228", 
 				"seq_id": 5,
 				"size":1.09940425359e+11, 
-				"task_id":13
+				"task_id":12
 			}
 		], 
 		"count": 2}`
@@ -132,7 +132,7 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"proband", 
 				"submitter_sample_id":"S13224",
 				"size":3.03866839e+08, 
-				"task_id":3
+				"task_id":6
 			},
 			{
 				"case_id":1, 
@@ -147,10 +147,10 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13225", 
 				"size":3.03866839e+08, 
-				"task_id":6
+				"task_id":7
 			}
 		], 
-		"count": 140}`
+		"count": 144}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "name", "order": "asc"}, {"field": "relationship_to_proband_code", "order": "desc"}],
@@ -200,7 +200,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 		}`
 	expected := `{
 		"data_type":[
-			{"count":62, "key":"snv", "label":"Germline SNV"}, 
+			{"count":65, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
 			{"count":0, "key":"covgene", "label":"Coverage by Gene Report"}, 
@@ -217,7 +217,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"count":0, "key":"ssv", "label":"Somatic SV"}
 		], 
 		"format":[
-			{"count":62, "key":"vcf", "label":"VCF File"}, 
+			{"count":65, "key":"vcf", "label":"VCF File"}, 
 			{"count":0, "key":"bed", "label":"BED File"}, 
 			{"count":0, "key":"bw", "label":"BW File"}, 
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
@@ -237,12 +237,12 @@ func Test_GetDocumentsFilters(t *testing.T) {
 		], 
 		"project":[
 			{"count":36, "key":"N2", "label":"NeuroDev Phase II"}, 
-			{"count":26, "key":"N1", "label":"NeuroDev Phase I"}
+			{"count":29, "key":"N1", "label":"NeuroDev Phase I"}
 		], 
 		"relationship_to_proband":[
-			{"count":22, "key":"proband", "label":"Proband"}, 
-			{"count":21, "key":"father", "label":"Father"}, 
-			{"count":21, "key":"mother", "label":"Mother"}, 
+			{"count":25, "key":"proband", "label":"Proband"}, 
+			{"count":22, "key":"father", "label":"Father"}, 
+			{"count":22, "key":"mother", "label":"Mother"}, 
 			{"count":0, "key":"brother", "label":"Brother"}, 
 			{"count":0, "key":"sibling", "label":"Sibling"},
 			{"count":0, "key":"sister", "label":"Sister"}
