@@ -1,10 +1,12 @@
+import { useParams } from 'react-router';
+import { ArrowUpRight } from 'lucide-react';
+
 import { VariantUninterpretedCase } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import Empty from '@/components/base/empty';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import { ArrowUpRight } from 'lucide-react';
-import { useParams } from 'react-router';
+
 import PreviewCaseDetailsCard from './preview-case-details-card';
 import OccurrenceSheetDetailsCard from './preview-occurrence-details-card';
 import PreviewSheet from './preview-sheet';
@@ -106,6 +108,7 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
         }
       />
       <OccurrenceSheetDetailsCard
+        caseId={caseData.case_id}
         seqId={caseData.seq_id}
         locus={expandResult.data.locus || locusId}
         start={expandResult.data.start || 0}

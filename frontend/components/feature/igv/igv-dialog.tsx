@@ -12,6 +12,7 @@ import IgvContainer from './igv-container';
 type IGVDialogProps = {
   open: boolean;
   setOpen: (value: boolean) => void;
+  caseId: number;
   seqId: number;
   locus: string;
   start: number;
@@ -19,17 +20,17 @@ type IGVDialogProps = {
   renderTrigger?: (handleOpen: () => void) => ReactNode;
 };
 
-const fetchIGVForSeqId = async ({ seqId }: { seqId: number }) =>
-  igvApi.getIGV(seqId.toString()).then(response => response.data);
+const fetchIGVForCaseId = async ({ caseId }: { caseId: number }) =>
+  igvApi.getIGV(caseId.toString()).then(response => response.data);
 
-const IGVDialog = ({ seqId, locus, start, chromosome, open, setOpen, renderTrigger }: IGVDialogProps) => {
+const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, renderTrigger }: IGVDialogProps) => {
   const { t } = useI18n();
   const fetchIGV = useSWR<IGVTracks>(
     {
-      key: `igv-${seqId}-${locus}`,
-      seqId: seqId,
+      key: `igv-${caseId}-${seqId}-${locus}`,
+      caseId: caseId,
     },
-    fetchIGVForSeqId,
+    fetchIGVForCaseId,
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,

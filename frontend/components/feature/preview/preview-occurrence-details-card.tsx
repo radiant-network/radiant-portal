@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { FlipVertical2, Triangle, Users } from 'lucide-react';
+
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-female-not-affected-icon';
 import PedigreeMaleNotAffectedIcon from '@/components/base/icons/pedigree-male-not-affected-icon';
@@ -8,12 +11,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 import IGVDialog from '@/components/feature/igv/igv-dialog';
 import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
-import { FlipVertical2, Triangle, Users } from 'lucide-react';
-import { useState } from 'react';
+
 import { DescriptionRow, DescriptionSection } from './description';
 import PreviewCard from './preview-card';
 
 type PreviewOccurrenceDetailsCardProps = {
+  caseId: number;
   seqId: number;
   locus: string;
   start: number;
@@ -39,6 +42,7 @@ const getFilterValue = (filter: string | undefined, t: (key: string) => string):
 };
 
 const PreviewOccurrenceDetailsCard = ({
+  caseId,
   seqId,
   locus,
   start,
@@ -81,6 +85,7 @@ const PreviewOccurrenceDetailsCard = ({
         <IGVDialog
           open={igvOpen}
           setOpen={setIGVOpen}
+          caseId={caseId}
           seqId={seqId}
           locus={locus}
           start={start}
