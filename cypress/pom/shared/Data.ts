@@ -49,9 +49,9 @@ export const data = {
     sample: 'NA12878',
     task: '1',
     created_on: '2025-',
-    assay: '-',
-    hash: '-',
-    run: '-',
+    assay: '1',
+    hash: '5d41402abc4b2a76b9719d911017c726',
+    run: 'A00516_0169',
     search_criteria: '[{"field": "data_type_code","value": ["snv"]},{"field": "format_code","value": ["vcf"]},{"field": "patient_id","value": ["3"]}]',
   },
   variantGermline: {

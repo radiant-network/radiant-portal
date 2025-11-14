@@ -3,7 +3,7 @@ import createUUID from './createUUID';
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { oneMinute } from 'pom/shared/Utils';
 import 'cypress-real-events';
-import { CaseEntity_Variants_CNV } from 'pom/pages/CaseEntity_Variants_CNV';
+import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 
 // Simple environment variable getter
 const getEnv = (key: string): string => {
@@ -18,6 +18,14 @@ const getEnv = (key: string): string => {
 Cypress.Commands.add('clickAndWait', { prevSubject: 'element' }, (subject, options) => {
   cy.wrap(subject).click(options);
   cy.waitWhileLoad(oneMinute);
+});
+
+/**
+ * Handle when the column is not found.
+ * @param column The column not found.
+ */
+Cypress.Commands.add('handleColumnNotFound', (column: string) => {
+  cy.log(`Warning: Column ${column} not found`);
 });
 
 /**
@@ -92,7 +100,8 @@ Cypress.Commands.add('logout', () => {
   cy.wait(2000);
 
   cy.get(CommonSelectors.userIcon).eq(0).click();
-  cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.logoutIcon}`).clickAndWait();
+  cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.logoutIcon}`).click();
+  cy.wait(2000);
 });
 
 /**
@@ -187,19 +196,24 @@ Cypress.Commands.add('shouldBeTagPatternLevel', { prevSubject: 'element' }, (sub
 /**
  * Asserts that a given element has a tooltip with the specified content.
  * @param subject The element to check for tooltip.
- * @param column The column object containing the necessary fields.
+ * @param object The object containing the necessary fields (isSortable, isPinnable, tooltip).
  */
-Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, column: any) => {
+Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, object: any) => {
   let scrollIntoSubject;
-  if (column.isSortable || column.isPinnable) {
-    scrollIntoSubject = cy.wrap(subject).invoke('css', 'width', '125px' /*Widen column for tooltip access*/).scrollIntoView().should('be.visible');
+  if (object.isSortable || object.isPinnable) {
+    scrollIntoSubject = cy
+      .wrap(subject)
+      .invoke('css', 'width', '125px' /*Widen column for tooltip access*/)
+      .scrollIntoView({ offset: { top: -300, left: -300 } })
+      .should('be.visible');
   } else {
-    scrollIntoSubject = cy.wrap(subject).scrollIntoView().should('be.visible');
+    scrollIntoSubject = cy.wrap(subject).scrollIntoView().wait(1000).should('be.visible');
   }
-  if (column.tooltip) {
-    scrollIntoSubject.find(CommonSelectors.underlineHeader).realHover();
-    cy.get(CommonSelectors.tooltipPopper).contains(column.tooltip).first().should('exist');
-    cy.get(CommonSelectors.logo).click();
+  if (object.tooltip) {
+    cy.wait(6000);
+    scrollIntoSubject.find(`${CommonSelectors.underlineHeader}, ${CommonSelectors.facetTriggerTooltip}`).realHover();
+    cy.get(CommonSelectors.tooltipPopper).invoke('css', { position: 'fixed', left: '20px' } /*Avoid hiding the logo*/).contains(object.tooltip).first().should('exist');
+    cy.get(CommonSelectors.logo).click(); // Close the popper
     cy.get(CommonSelectors.tooltipPopper).should('not.exist');
   } else {
     scrollIntoSubject.realHover();
@@ -214,8 +228,9 @@ Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, 
 Cypress.Commands.add('showColumn', (column: string) => {
   cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
   cy.get(CommonSelectors.settingsPopper).find(CommonSelectors.settingsCheckbox(column)).click({ force: true });
-  cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
+  cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the popper
   cy.get(CommonSelectors.settingsPopper).should('not.exist');
+  cy.waitWhileLoad(oneMinute);
 });
 
 /**
@@ -236,6 +251,8 @@ Cypress.Commands.add('sortTableAndIntercept', (position: number, routeMatcher: s
   for (let i = 0; i < nbCalls; i++) {
     cy.wait('@routeMatcher', { timeout: oneMinute });
   }
+
+  cy.waitWhileLoad(oneMinute);
 });
 
 /**
@@ -442,7 +459,7 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, type: string, sqo
 
     if (sqon == undefined) {
       cy.intercept('POST', '**/list').as('postListCNV');
-      CaseEntity_Variants_CNV.actions.clickToggle();
+      CaseEntity_Variants_CNV_Table.actions.clickToggle();
       cy.wait('@postListCNV');
     } else {
       cy.intercept('POST', '**/list', interception => {
@@ -451,7 +468,7 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, type: string, sqo
         interception.alias = 'postListCNV';
         interception.body = mockBody;
       });
-      CaseEntity_Variants_CNV.actions.clickToggle();
+      CaseEntity_Variants_CNV_Table.actions.clickToggle();
       cy.wait('@postListCNV');
     }
   }
@@ -486,6 +503,7 @@ Cypress.Commands.add('waitWhileLoad', (ms: number) => {
   const start = new Date().getTime();
 
   function checkForLoadIndicator(): any {
+    cy.wait(500);
     const now = new Date().getTime();
     if (now - start > ms) {
       throw new Error(`Timed out after ${ms}ms waiting for load indicator to disappear`);
@@ -493,7 +511,7 @@ Cypress.Commands.add('waitWhileLoad', (ms: number) => {
 
     return cy.get('body').then($body => {
       if ($body.find(CommonSelectors.loadIndicator).length > 0) {
-        return cy.wait(1000).then(checkForLoadIndicator);
+        return checkForLoadIndicator();
       }
     });
   }

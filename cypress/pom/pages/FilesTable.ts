@@ -181,7 +181,7 @@ export const FilesTable = {
                 break;
             }
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -203,7 +203,7 @@ export const FilesTable = {
           if (position !== -1) {
             cy.pinColumn(position);
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -220,7 +220,7 @@ export const FilesTable = {
             cy.get(selectors.tableCell(dataFile)).eq(position).find('button').clickAndWait({ force: true });
             cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
           } else {
-            cy.log('Warning: Column actions not found');
+            cy.handleColumnNotFound('actions');
           }
         })
       );
@@ -257,7 +257,7 @@ export const FilesTable = {
               cy.sortTableAndWait(position);
             }
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -306,7 +306,7 @@ export const FilesTable = {
           if (position !== -1) {
             cy.get(selectors.tableCell(dataFile)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataFile));
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -337,7 +337,7 @@ export const FilesTable = {
                 .eq(position)
                 .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
             } else {
-              cy.log(`Warning: Column ${column.id} not found`);
+              cy.handleColumnNotFound(column.id);
             }
           })
         );
@@ -360,7 +360,7 @@ export const FilesTable = {
           if (position !== -1) {
             cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned('left');
           } else {
-            cy.log(`Warning: Column ${columnID} not found`);
+            cy.handleColumnNotFound(columnID);
           }
         })
       );
@@ -399,7 +399,7 @@ export const FilesTable = {
               break;
           }
         } else {
-          cy.log(`Warning: Column ${columnID} not found`);
+          cy.handleColumnNotFound(columnID);
         }
       });
     },
@@ -414,7 +414,7 @@ export const FilesTable = {
             if (position !== -1) {
               cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column);
             } else {
-              cy.log(`Warning: Column ${column.id} not found`);
+              cy.handleColumnNotFound(column.id);
             }
           })
         );
@@ -431,7 +431,7 @@ export const FilesTable = {
             if (position !== -1) {
               cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinnable(column.isPinnable);
             } else {
-              cy.log(`Warning: Column ${column.id} not found`);
+              cy.handleColumnNotFound(column.id);
             }
           })
         );
@@ -448,7 +448,7 @@ export const FilesTable = {
             if (position !== -1) {
               cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBeSortable(column.isSortable);
             } else {
-              cy.log(`Warning: Column ${column.id} not found`);
+              cy.handleColumnNotFound(column.id);
             }
           })
         );

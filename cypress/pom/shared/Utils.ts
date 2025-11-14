@@ -40,6 +40,7 @@ export const getColumnName = (columns: any, columnID: string) => {
 export const getColumnPosition = (tableHead: string, columns: any, columnID: string) => {
   const columnName = getColumnName(columns, columnID);
   return cy.get(`${tableHead} ${CommonSelectors.tableCellHead}`).then($cells => {
+    $cells.css('width', '125px'); // Widen columns for full name access
     let position;
     if (columnName.startsWith('[')) {
       position = Array.from($cells).findIndex($cell => {

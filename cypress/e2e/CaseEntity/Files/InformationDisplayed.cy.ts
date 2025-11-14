@@ -54,17 +54,17 @@ describe('CaseEntity - Files - Information displayed', () => {
     FilesTable.validations.shouldShowColumnContent('created_on', data.file);
   });
 
-  it('Assay', () => {
+  it('Assay [SJRA-850]', () => {
     setupTest();
     FilesTable.validations.shouldShowColumnContent('assay', data.file);
   });
 
-  it('Hash', () => {
+  it('Hash [SJRA-850]', () => {
     setupTest();
     FilesTable.validations.shouldShowColumnContent('hash', data.file);
   });
 
-  it('Run', () => {
+  it('Run [SJRA-850]', () => {
     setupTest();
     FilesTable.validations.shouldShowColumnContent('run', data.file);
   });
