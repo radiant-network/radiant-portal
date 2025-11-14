@@ -8,7 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
 type MockBatchRepository struct {
@@ -51,9 +53,15 @@ func Test_GetBatchHandler_Success(t *testing.T) {
 			}, nil
 		},
 	}
+	auth := &testutils.MockAuth{
+		Azp: "mock-azp",
+		ResourceAccess: map[string]ginkeycloak.ServiceRole{
+			"mock-azp": {Roles: []string{"data_manager"}},
+		},
+	}
 
 	router := gin.Default()
-	router.GET("/batches/:batch_id", GetBatchHandler(repo))
+	router.GET("/batches/:batch_id", GetBatchHandler(repo, auth))
 
 	req, _ := http.NewRequest("GET", "/batches/test-batch-id", nil)
 	w := httptest.NewRecorder()
@@ -64,6 +72,32 @@ func Test_GetBatchHandler_Success(t *testing.T) {
 	assert.Contains(t, w.Body.String(), `"username":"test-username"`)
 }
 
+func Test_GetBatchHandler_Unauthorized(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	repo := &MockBatchRepository{
+		GetBatchByIDFunc: func(batchId string) (*types.Batch, error) {
+			return &types.Batch{
+				ID:        batchId,
+				BatchType: "test-batch-type",
+				Username:  "test-username",
+				Status:    "PENDING",
+			}, nil
+		},
+	}
+	auth := &testutils.MockAuth{}
+
+	router := gin.Default()
+	router.GET("/batches/:batch_id", GetBatchHandler(repo, auth))
+
+	req, _ := http.NewRequest("GET", "/batches/test-batch-id", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Contains(t, w.Body.String(), "Unauthorized")
+}
+
 func Test_GetBatchHandler_NotFound(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -72,9 +106,10 @@ func Test_GetBatchHandler_NotFound(t *testing.T) {
 			return nil, nil
 		},
 	}
+	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.GET("/batches/:batch_id", GetBatchHandler(repo))
+	router.GET("/batches/:batch_id", GetBatchHandler(repo, auth))
 
 	req, _ := http.NewRequest("GET", "/batches/non-existent-id", nil)
 	w := httptest.NewRecorder()

@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -39,18 +38,12 @@ func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth
 		}
 
 		// Check if user has data_manager role
-		azp, err := auth.RetrieveAzpFromToken(c)
-		if err != nil || azp == nil {
+		hasRole, err := auth.UserHasRole(c, "data_manager")
+		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		resourceAccess, err := auth.RetrieveResourceAccessFromToken(c)
-		if err != nil || resourceAccess == nil {
-			HandleError(c, err)
-			return
-		}
-		roles, ok := (*resourceAccess)[*azp]
-		if !ok || !slices.Contains(roles.Roles, "data_manager") {
+		if !hasRole {
 			HandleUnauthorizedError(c)
 			return
 		}
