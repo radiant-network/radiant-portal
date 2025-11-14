@@ -30,8 +30,8 @@ func TestDateOfBirthType_UnmarshalJSON_NullValue(t *testing.T) {
 	var container dateOfBirthContainer
 	err := json.Unmarshal([]byte(inputJSON), &container)
 
-	assert.NoError(t, err)
-	assert.True(t, container.DateOfBirth.Time.IsZero())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error parsing date of birth")
 }
 
 func TestDateOfBirthType_UnmarshalJSON_InvalidFormat(t *testing.T) {
@@ -41,7 +41,7 @@ func TestDateOfBirthType_UnmarshalJSON_InvalidFormat(t *testing.T) {
 	err := json.Unmarshal([]byte(inputJSON), &container)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "error parsing date of birth")
+	assert.Contains(t, err.Error(), "invalid date format for date of birth, expected YYYY-MM-DD")
 }
 
 func TestDateOfBirthType_UnmarshalJSON_NotADate(t *testing.T) {
@@ -51,7 +51,7 @@ func TestDateOfBirthType_UnmarshalJSON_NotADate(t *testing.T) {
 	err := json.Unmarshal([]byte(inputJSON), &container)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "error parsing date of birth")
+	assert.Contains(t, err.Error(), "invalid date format for date of birth, expected YYYY-MM-DD")
 }
 
 func TestDateOfBirthType_UnmarshalJSON_EmptyString(t *testing.T) {
