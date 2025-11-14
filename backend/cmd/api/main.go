@@ -174,7 +174,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
 
 	batchesGroup := privateRoutes.Group("/batches")
-	batchesGroup.GET("/:batch_id", server.GetBatchHandler(repoBatches))
+	batchesGroup.GET("/:batch_id", server.GetBatchHandler(repoBatches, auth))
 
 	patientsGroup := privateRoutes.Group("/patients")
 	patientsGroup.POST("/batch", server.PostPatientBatchHandler(repoBatches, auth))

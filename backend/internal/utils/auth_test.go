@@ -158,6 +158,111 @@ func Test_RetrieveResourceAccessFromToken_ValidJWT(t *testing.T) {
 	}, *resAcc)
 }
 
+func Test_RetrieveUsernameFromToken_ValidKeycloakToken(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", ginkeycloak.KeyCloakToken{PreferredUsername: "testuser"})
+
+	auth := KeycloakAuth{}
+	username, err := auth.RetrieveUsernameFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, username)
+	assert.Equal(t, "testuser", *username)
+}
+
+func Test_RetrieveUsernameFromToken_ValidJWT(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT()
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	username, err := auth.RetrieveUsernameFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, username)
+	assert.Equal(t, "superbob", *username)
+}
+
+func Test_RetrieveUsernameFromToken_InvalidKeycloakTokenType(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", 12345)
+
+	auth := KeycloakAuth{}
+	username, err := auth.RetrieveUsernameFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, username)
+}
+
+func Test_RetrieveUsernameFromToken_NoTokenInContext(t *testing.T) {
+	c := gin.Context{
+		Request: &http.Request{},
+	}
+
+	auth := KeycloakAuth{}
+	username, err := auth.RetrieveUsernameFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, username)
+}
+
+func Test_UserHasRole_Success(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT()
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	hasRole, err := auth.UserHasRole(&c, "data_manager")
+
+	assert.NoError(t, err)
+	assert.True(t, hasRole)
+}
+
+func Test_UserHasRole_RoleNotPresent(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT()
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	hasRole, err := auth.UserHasRole(&c, "admin")
+
+	assert.NoError(t, err)
+	assert.False(t, hasRole)
+}
+
+func Test_UserHasRole_NoTokenInContext(t *testing.T) {
+	c := gin.Context{
+		Request: &http.Request{},
+	}
+
+	auth := KeycloakAuth{}
+	hasRole, err := auth.UserHasRole(&c, "data_manager")
+
+	assert.Error(t, err)
+	assert.False(t, hasRole)
+}
+
 func Test_ParseJWTFromHeader_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
