@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 // GetBatchHandler
@@ -23,7 +24,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /batches/{batchId} [get]
-func GetBatchHandler(repo repository.BatchRepositoryDAO) gin.HandlerFunc {
+func GetBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		batchID := c.Param("batch_id")
 		batch, err := repo.GetBatchByID(batchID)
@@ -33,6 +34,17 @@ func GetBatchHandler(repo repository.BatchRepositoryDAO) gin.HandlerFunc {
 		}
 		if batch == nil {
 			HandleNotFoundError(c, "batch_id")
+			return
+		}
+
+		// Check if user has data_manager role
+		hasRole, err := auth.UserHasRole(c, "data_manager")
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if !hasRole {
+			HandleUnauthorizedError(c)
 			return
 		}
 

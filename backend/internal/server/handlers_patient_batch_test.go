@@ -11,45 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
-
-type MockAuth struct {
-	Id             string
-	Username       string
-	Azp            string
-	ResourceAccess map[string]ginkeycloak.ServiceRole
-	Error          error
-}
-
-func (m *MockAuth) RetrieveUserIdFromToken(c *gin.Context) (*string, error) {
-	if m.Error != nil {
-		return nil, m.Error
-	}
-	return &m.Id, nil
-}
-
-func (m *MockAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, error) {
-	if m.Error != nil {
-		return nil, m.Error
-	}
-	return &m.Username, nil
-}
-
-func (m *MockAuth) RetrieveAzpFromToken(c *gin.Context) (*string, error) {
-	if m.Error != nil {
-		return nil, m.Error
-	}
-	return &m.Azp, nil
-}
-
-func (m *MockAuth) RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error) {
-	if m.Error != nil {
-		return nil, m.Error
-	}
-	return &m.ResourceAccess, nil
-}
 
 func TestPostPatientBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -65,12 +30,11 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 			}, nil
 		},
 	}
-	auth := &MockAuth{
-		Id:       "testuser-id",
+	auth := &testutils.MockAuth{
 		Username: "testuser",
-		Azp:      "radiant",
+		Azp:      "mock-azp",
 		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"radiant": {Roles: []string{"data_manager"}},
+			"mock-azp": {Roles: []string{"data_manager"}},
 		},
 	}
 
@@ -94,12 +58,12 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 func TestPostPatientBatchHandler_Unauthorized(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
-	auth := &MockAuth{
+	auth := &testutils.MockAuth{
 		Id:       "testuser-id",
 		Username: "testuser",
-		Azp:      "radiant",
+		Azp:      "mock-azp",
 		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"radiant": {Roles: []string{"some_other_role"}},
+			"mock-azp": {Roles: []string{"some_other_role"}},
 		},
 	}
 
@@ -117,12 +81,12 @@ func TestPostPatientBatchHandler_Unauthorized(t *testing.T) {
 func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
-	auth := &MockAuth{
+	auth := &testutils.MockAuth{
 		Id:       "testuser-id",
 		Username: "testuser",
-		Azp:      "radiant",
+		Azp:      "mock-azp",
 		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"radiant": {Roles: []string{"data_manager"}},
+			"mock-azp": {Roles: []string{"data_manager"}},
 		},
 	}
 

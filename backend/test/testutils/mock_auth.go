@@ -1,58 +1,82 @@
 package testutils
 
 import (
+	"slices"
+
 	"github.com/gin-gonic/gin"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
-type MockAuth struct{}
+const (
+	DefaultMockUserId   = "1"
+	DefaultMockUsername = "mock-username"
+	DefaultMockAzp      = "mock-azp"
+	DefaultMockRole     = "mock-role"
+)
 
-func (mockAut *MockAuth) RetrieveUserIdFromToken(_ *gin.Context) (*string, error) {
-	result := "1"
-	return &result, nil
+type MockAuth struct {
+	Id             string
+	Username       string
+	Azp            string
+	ResourceAccess map[string]ginkeycloak.ServiceRole
+	Error          error
 }
 
-func (mockAut *MockAuth) RetrieveAzpFromToken(_ *gin.Context) (*string, error) {
-	result := "mock-azp"
-	return &result, nil
-}
-
-func (mockAut *MockAuth) RetrieveResourceAccessFromToken(_ *gin.Context) (*map[string]ginkeycloak.ServiceRole, error) {
-	result := map[string]ginkeycloak.ServiceRole{
-		"mock-resource": {
-			Roles: []string{"mock-role"},
-		},
+func (m *MockAuth) RetrieveUserIdFromToken(c *gin.Context) (*string, error) {
+	if m.Error != nil {
+		return nil, m.Error
 	}
-	return &result, nil
-}
-
-func (mockAut *MockAuth) RetrieveUsernameFromToken(_ *gin.Context) (*string, error) {
-	result := "mock-username"
-	return &result, nil
-}
-
-type MockAuthUserPreferences struct{}
-
-func (mockAut *MockAuthUserPreferences) RetrieveUserIdFromToken(c *gin.Context) (*string, error) {
-	result := "b3a74785-b0a9-4a45-879e-f13c476976f7"
-	return &result, nil
-}
-
-func (mockAut *MockAuthUserPreferences) RetrieveAzpFromToken(_ *gin.Context) (*string, error) {
-	result := "mock-azp"
-	return &result, nil
-}
-
-func (mockAut *MockAuthUserPreferences) RetrieveResourceAccessFromToken(_ *gin.Context) (*map[string]ginkeycloak.ServiceRole, error) {
-	result := map[string]ginkeycloak.ServiceRole{
-		"mock-resource": {
-			Roles: []string{"mock-role"},
-		},
+	if m.Id == "" {
+		result := DefaultMockUserId
+		return &result, nil
 	}
-	return &result, nil
+	return &m.Id, nil
 }
 
-func (mockAut *MockAuthUserPreferences) RetrieveUsernameFromToken(_ *gin.Context) (*string, error) {
-	result := "mock-username"
-	return &result, nil
+func (m *MockAuth) RetrieveAzpFromToken(c *gin.Context) (*string, error) {
+	if m.Error != nil {
+		return nil, m.Error
+	}
+	if m.Azp == "" {
+		result := DefaultMockAzp
+		return &result, nil
+	}
+	return &m.Azp, nil
+}
+
+func (m *MockAuth) RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error) {
+	if m.Error != nil {
+		return nil, m.Error
+	}
+	if m.ResourceAccess == nil {
+		result := map[string]ginkeycloak.ServiceRole{
+			DefaultMockAzp: {
+				Roles: []string{DefaultMockRole},
+			},
+		}
+		return &result, nil
+	}
+	return &m.ResourceAccess, nil
+}
+
+func (m *MockAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, error) {
+	if m.Error != nil {
+		return nil, m.Error
+	}
+	if m.Username == "" {
+		result := DefaultMockUsername
+		return &result, nil
+	}
+	return &m.Username, nil
+}
+
+func (m *MockAuth) UserHasRole(c *gin.Context, role string) (bool, error) {
+	if m.Error != nil {
+		return false, m.Error
+	}
+	roles, ok := m.ResourceAccess[m.Azp]
+	if !ok {
+		return false, nil
+	}
+	return slices.Contains(roles.Roles, role), nil
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,7 @@ type Auth interface {
 	RetrieveAzpFromToken(c *gin.Context) (*string, error)
 	RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error)
 	RetrieveUsernameFromToken(c *gin.Context) (*string, error)
+	UserHasRole(c *gin.Context, role string) (bool, error)
 }
 
 type KeycloakAuth struct{}
@@ -64,6 +66,22 @@ func (auth KeycloakAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, err
 		return nil, err
 	}
 	return &token.PreferredUsername, nil
+}
+
+func (auth KeycloakAuth) UserHasRole(c *gin.Context, role string) (bool, error) {
+	azp, err := auth.RetrieveAzpFromToken(c)
+	if err != nil || azp == nil {
+		return false, err
+	}
+	resourceAccess, err := auth.RetrieveResourceAccessFromToken(c)
+	if err != nil || resourceAccess == nil {
+		return false, err
+	}
+	roles, ok := (*resourceAccess)[*azp]
+	if !ok {
+		return false, nil
+	}
+	return slices.Contains(roles.Roles, role), nil
 }
 
 func parseJWTFromHeader(c *gin.Context) (*ginkeycloak.KeyCloakToken, error) {

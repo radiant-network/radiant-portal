@@ -38,7 +38,9 @@ func Test_GetUserPreferencesHandler_NotFound(t *testing.T) {
 func Test_GetUserPreferencesHandler_Found(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewUserPreferencesRepository(db)
-		auth := &testutils.MockAuthUserPreferences{}
+		auth := &testutils.MockAuth{
+			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
+		}
 		expected := `{
 			"table_display":{
 				"table_1":{
@@ -69,7 +71,9 @@ func assertUpdateUserPreferencesHandler(t *testing.T, repo repository.UserPrefer
 func Test_UpdateUserPreferencesHandler(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewUserPreferencesRepository(db)
-		auth := &testutils.MockAuthUserPreferences{}
+		auth := &testutils.MockAuth{
+			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
+		}
 		body := `{
 			"table_display":{
 				"table_1":{
