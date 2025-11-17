@@ -19,6 +19,7 @@ import { cn } from '@/components/lib/utils';
 import { useConfig } from '@/components/model/applications-config';
 import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { ISyntheticSqon } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
 
 import { OccurrenceCountInput, useCNVOccurrencesCountHelper } from '../hook';
@@ -104,7 +105,9 @@ function CNVTab({ seqId }: CNVTabProps) {
       },
     },
     async (params: CnvOccurrenceType) =>
-      seqId ? occurrencesApi.listGermlineCNVOccurrences(seqId, params.listBody).then(response => response.data) : [],
+      seqId
+        ? occurrencesApi.listGermlineCNVOccurrences(params.seqId, params.listBody).then(response => response.data)
+        : [],
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,
@@ -147,6 +150,14 @@ function CNVTab({ seqId }: CNVTabProps) {
       setQbLoading(false);
     }
   }, [isQBInitialized, seqId]);
+
+  /**
+   * Re-fetch list on initial load and sqon change
+   */
+  useEffect(() => {
+    if (seqId === '' || !isQBInitialized) return;
+    fetchOccurrencesList.mutate();
+  }, [seqId, activeSqon, isQBInitialized]);
 
   /**
    * Re-fetch count
@@ -223,7 +234,9 @@ function CNVTab({ seqId }: CNVTabProps) {
                 }).then(res => res.count || 0);
               }}
               resolveSyntheticSqon={resolveSyntheticSqon}
-              onActiveQueryChange={sqon => setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)}
+              onActiveQueryChange={sqon =>
+                setActiveSqon(resolveSyntheticSqon(sqon, (qbState?.queries || []) as ISyntheticSqon[]) as Sqon)
+              }
               onStateChange={state => {
                 setQbState(state);
               }}
