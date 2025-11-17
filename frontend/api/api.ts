@@ -127,24 +127,6 @@ export interface Assay {
      * @type {string}
      * @memberof Assay
      */
-    'diagnosis_lab_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'diagnosis_lab_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'experiment_description'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
     'experimental_strategy_code'?: string;
     /**
      * 
@@ -160,22 +142,10 @@ export interface Assay {
     'histology_code'?: string;
     /**
      * 
-     * @type {boolean}
-     * @memberof Assay
-     */
-    'is_paired_end': boolean;
-    /**
-     * 
      * @type {string}
      * @memberof Assay
      */
     'platform_code'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Assay
-     */
-    'read_length'?: number;
     /**
      * 
      * @type {string}
@@ -212,6 +182,30 @@ export interface Assay {
      * @memberof Assay
      */
     'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sequencing_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sequencing_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sequencing_read_technology_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Assay
+     */
+    'sequencing_read_technology_name'?: string;
     /**
      * 
      * @type {string}
@@ -2239,6 +2233,12 @@ export interface InterpretationGermline {
      * @type {string}
      * @memberof InterpretationGermline
      */
+    'case_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'classification'?: string;
     /**
      * 
@@ -2387,6 +2387,12 @@ export interface InterpretationPubmed {
  * @interface InterpretationSomatic
  */
 export interface InterpretationSomatic {
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
+    'case_id'?: string;
     /**
      * 
      * @type {string}
@@ -5298,17 +5304,17 @@ export class HpoApi extends BaseAPI {
 export const IgvApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Get IGV tracks for a sequencing experiment
+         * Get IGV tracks for a case
          * @summary Get IGV
-         * @param {string} seqId Sequencing ID
+         * @param {string} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getIGV: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getIGV', 'seqId', seqId)
-            const localVarPath = `/igv/{seq_id}`
-                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+        getIGV: async (caseId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getIGV', 'caseId', caseId)
+            const localVarPath = `/igv/{case_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -5346,14 +5352,14 @@ export const IgvApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = IgvApiAxiosParamCreator(configuration)
     return {
         /**
-         * Get IGV tracks for a sequencing experiment
+         * Get IGV tracks for a case
          * @summary Get IGV
-         * @param {string} seqId Sequencing ID
+         * @param {string} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getIGV(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IGVTracks>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getIGV(seqId, options);
+        async getIGV(caseId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IGVTracks>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getIGV(caseId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['IgvApi.getIGV']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5369,14 +5375,14 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
     const localVarFp = IgvApiFp(configuration)
     return {
         /**
-         * Get IGV tracks for a sequencing experiment
+         * Get IGV tracks for a case
          * @summary Get IGV
-         * @param {string} seqId Sequencing ID
+         * @param {string} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getIGV(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<IGVTracks> {
-            return localVarFp.getIGV(seqId, options).then((request) => request(axios, basePath));
+        getIGV(caseId: string, options?: RawAxiosRequestConfig): AxiosPromise<IGVTracks> {
+            return localVarFp.getIGV(caseId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -5389,15 +5395,15 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
  */
 export class IgvApi extends BaseAPI {
     /**
-     * Get IGV tracks for a sequencing experiment
+     * Get IGV tracks for a case
      * @summary Get IGV
-     * @param {string} seqId Sequencing ID
+     * @param {string} caseId Case ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof IgvApi
      */
-    public getIGV(seqId: string, options?: RawAxiosRequestConfig) {
-        return IgvApiFp(this.configuration).getIGV(seqId, options).then((request) => request(this.axios, this.basePath));
+    public getIGV(caseId: string, options?: RawAxiosRequestConfig) {
+        return IgvApiFp(this.configuration).getIGV(caseId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

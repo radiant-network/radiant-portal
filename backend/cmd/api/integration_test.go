@@ -132,7 +132,7 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 				{"cases/1", 200},
 				{"genes/autocomplete", 200},
 				{"hpo/autocomplete", 200},
-				{"igv/1", 500},
+				{"igv/1", 404},
 				{"interpretations/pubmed/1", 500},
 				{"mondo/autocomplete", 200},
 				{"occurrences/germline/snv/1/1000/expanded", 200},

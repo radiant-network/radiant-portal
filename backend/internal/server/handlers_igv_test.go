@@ -21,7 +21,7 @@ func (m *MockS3PreSigner) GenerateS3PreSignedURL(url string) (*utils.PreSignedUR
 	}, nil
 }
 
-func (r *MockRepository) GetIGV(seqId int) ([]types.IGVTrack, error) {
+func (r *MockRepository) GetIGV(caseID int) ([]types.IGVTrack, error) {
 	return []types.IGVTrack{{
 		SequencingExperimentId: 1,
 		SampleId:               "sample_123",
@@ -46,7 +46,7 @@ func (r *MockRepository) GetIGV(seqId int) ([]types.IGVTrack, error) {
 func Test_IGVGetHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/igv/:seq_id", GetIGVHandler(repo, &MockS3PreSigner{}))
+	router.GET("/igv/:case_id", GetIGVHandler(repo, &MockS3PreSigner{}))
 
 	req, _ := http.NewRequest("GET", "/igv/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()

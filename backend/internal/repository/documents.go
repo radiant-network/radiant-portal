@@ -185,14 +185,12 @@ func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destinatio
 func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.DB {
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
 	tx = utils.JoinWithTaskHasDocument(tx)
-	tx = utils.JoinWithTaskHasSequencingExperiment(tx)
+	tx = utils.JoinWithTaskContext(tx)
+	tx = utils.JoinWithCaseHasSequencingExperiment(tx)
 	tx = utils.JoinWithSequencingExperiment(tx)
 	tx = utils.JoinWithCase(tx)
 	tx = utils.JoinWithDiagnosisLab(tx)
-
-	if userQuery.HasFieldFromTables(types.SampleTable) {
-		tx = utils.JoinWithSample(tx)
-	}
+	tx = utils.JoinWithSample(tx)
 
 	if userQuery.HasFieldFromTables(types.ProjectTable) {
 		tx = utils.JoinWithProject(tx)

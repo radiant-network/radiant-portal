@@ -140,6 +140,11 @@ var CaseTable = Table{
 	Alias: "c",
 }
 
+var CaseHasSequencingExperimentTable = Table{
+	Name:  "`radiant_jdbc`.`public`.`case_has_sequencing_experiment`",
+	Alias: "chseq",
+}
+
 func (Case) TableName() string {
 	return CaseTable.Name
 }

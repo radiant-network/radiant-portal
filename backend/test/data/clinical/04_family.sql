@@ -59,5 +59,8 @@ VALUES (1, 1, 1, 'mother', 'affected'),
        (58, 18, 50, 'proband', 'affected'),
        (59, 19, 55, 'proband', 'affected'),
        (60, 20, 58, 'proband', 'affected'),
-       (61, 21, 60, 'proband', 'affected')
+       (61, 21, 60, 'proband', 'affected'),
+       (62, 70, 1, 'mother', 'non_affected'),
+       (63, 70, 2, 'father', 'affected'),
+       (64, 70, 3, 'proband', 'affected')
 ON CONFLICT (id) DO NOTHING;

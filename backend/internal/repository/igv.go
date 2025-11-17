@@ -18,7 +18,7 @@ type IGVRepository struct {
 }
 
 type IGVRepositoryDAO interface {
-	GetIGV(seqId int) ([]IGVTrack, error)
+	GetIGV(caseID int) ([]IGVTrack, error)
 }
 
 func NewIGVRepository(db *gorm.DB) *IGVRepository {
@@ -29,25 +29,23 @@ func NewIGVRepository(db *gorm.DB) *IGVRepository {
 	return &IGVRepository{db: db}
 }
 
-func (r *IGVRepository) GetIGV(seqId int) ([]IGVTrack, error) {
+func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	var igvInternal []IGVTrack
 
-	txInternal := r.db.Table(types.SequencingExperimentTable.Name).Where("id = ?", seqId).Select("case_id")
-
-	alignmentFilter := "(d.data_type_code='alignment' AND d.format_code in ('cram', 'crai'))"
+	alignmentFilter := fmt.Sprintf("tctx.case_id=%d AND thd.type='output' AND (d.data_type_code IN ('alignment', 'alignment_variant_calling') AND d.format_code in ('cram', 'crai'))", caseID)
 
 	tx := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s thse ON thse.sequencing_experiment_id=se.id", types.TaskHasSequencingExperimentTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s thd ON thd.task_id=thse.task_id", types.TaskHasDocumentTable.Name))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s tctx ON tctx.sequencing_experiment_id=se.id AND tctx.case_id=%d", types.TaskContextTable.Name, caseID))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s thd ON thd.task_id=tctx.task_id", types.TaskHasDocumentTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id=se.sample_id", types.SampleTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s d ON thd.document_id=d.id", types.DocumentTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON se.patient_id=f.family_member_id", types.FamilyTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s p ON se.patient_id=p.id", types.PatientTable.Name))
-	tx.Where(fmt.Sprintf("se.case_id = (?) AND %s", alignmentFilter), txInternal)
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON sa.patient_id=f.family_member_id AND f.case_id=tctx.case_id", types.FamilyTable.Name))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s p ON f.family_member_id=p.id", types.PatientTable.Name))
+	tx.Where(alignmentFilter)
 
 	columns := []string{
 		"se.id AS sequencing_experiment_id",
-		"se.patient_id",
+		"p.id as patient_id",
 		"sa.submitter_sample_id AS sample_id",
 		"f.relationship_to_proband_code AS family_role",
 		"p.sex_code",

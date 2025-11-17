@@ -37,30 +37,30 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"case_id":2, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
-				"document_id":185, 
+				"document_id":127, 
 				"format_code":"vcf", 
-				"name":"FI0037896.S14858.vcf.gz", 
+				"name":"FI0037864.S13228.vcf.gz", 
 				"patient_id":6, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13228", 
-				"size":3.04716185e+08, 
-				"task_id":2
+				"size":3.06718965e+08, 
+				"task_id":12
 			}, {
 				"case_id":2, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
-				"document_id":63, 
+				"document_id":3, 
 				"format_code":"cram", 
-				"name":"FI0037766.S14747.cram", 
+				"name":"FI0037665.S13228.cram", 
 				"patient_id":6, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13228", 
-				"size":6.7881958113e+10, 
-				"task_id":2
+				"size":1.09940425359e+11, 
+				"task_id":12
 			}
 		], 
 		"count": 2}`
@@ -78,34 +78,34 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"case_id":2, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
-				"document_id":185, 
+				"document_id":127, 
 				"format_code":"vcf", 
-				"hash": "5d41402abc4b2a76b9719d911017c776",
-				"name":"FI0037896.S14858.vcf.gz", 
+				"hash": "5d41402abc4b2a76b9719d911017c718",
+				"name":"FI0037864.S13228.vcf.gz", 
 				"patient_id":6, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13228", 
 				"seq_id": 5,
-				"size":3.04716185e+08, 
-				"task_id":2
+				"size":3.06718965e+08, 
+				"task_id":12
 			}, {
 				"case_id":2, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"alignment", 
-				"document_id":63, 
+				"document_id":3, 
 				"format_code":"cram", 
-				"hash": "5d41402abc4b2a76b9719d911017c654",
-				"name":"FI0037766.S14747.cram", 
+				"hash": "5d41402abc4b2a76b9719d911017c594",
+				"name":"FI0037665.S13228.cram", 
 				"patient_id":6, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13228", 
 				"seq_id": 5,
-				"size":6.7881958113e+10, 
-				"task_id":2
+				"size":1.09940425359e+11, 
+				"task_id":12
 			}
 		], 
 		"count": 2}`
@@ -120,37 +120,37 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 	expected := `{
 		"list": [
 			{
-				"case_id":13, 
+				"case_id":1, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
 				"document_id":135, 
 				"format_code":"vcf", 
 				"name":"CEPH-1463.exomiser.vcf.gz",
-				"patient_id":37, 
+				"patient_id":3, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"proband", 
-				"submitter_sample_id":"S14711",
+				"submitter_sample_id":"S13224",
 				"size":3.03866839e+08, 
-				"task_id":13
+				"task_id":6
 			},
 			{
-				"case_id":13, 
+				"case_id":1, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
-				"document_id":135, 
+				"document_id":147, 
 				"format_code":"vcf", 
 				"name":"CEPH-1463.exomiser.vcf.gz", 
-				"patient_id":36, 
+				"patient_id":1, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"relationship_to_proband_code":"mother", 
-				"submitter_sample_id":"S14712", 
+				"submitter_sample_id":"S13225", 
 				"size":3.03866839e+08, 
-				"task_id":13
+				"task_id":7
 			}
 		], 
-		"count": 125}`
+		"count": 144}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "name", "order": "asc"}, {"field": "relationship_to_proband_code", "order": "desc"}],
@@ -200,7 +200,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 		}`
 	expected := `{
 		"data_type":[
-			{"count":21, "key":"snv", "label":"Germline SNV"}, 
+			{"count":65, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
 			{"count":0, "key":"covgene", "label":"Coverage by Gene Report"}, 
@@ -217,7 +217,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"count":0, "key":"ssv", "label":"Somatic SV"}
 		], 
 		"format":[
-			{"count":21, "key":"vcf", "label":"VCF File"}, 
+			{"count":65, "key":"vcf", "label":"VCF File"}, 
 			{"count":0, "key":"bed", "label":"BED File"}, 
 			{"count":0, "key":"bw", "label":"BW File"}, 
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
@@ -236,13 +236,13 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}
 		], 
 		"project":[
-			{"count":12, "key":"N2", "label":"NeuroDev Phase II"}, 
-			{"count":9, "key":"N1", "label":"NeuroDev Phase I"}
+			{"count":36, "key":"N2", "label":"NeuroDev Phase II"}, 
+			{"count":29, "key":"N1", "label":"NeuroDev Phase I"}
 		], 
 		"relationship_to_proband":[
-			{"count":21, "key":"proband", "label":"Proband"}, 
-			{"count":20, "key":"father", "label":"Father"}, 
-			{"count":20, "key":"mother", "label":"Mother"}, 
+			{"count":25, "key":"proband", "label":"Proband"}, 
+			{"count":22, "key":"father", "label":"Father"}, 
+			{"count":22, "key":"mother", "label":"Mother"}, 
 			{"count":0, "key":"brother", "label":"Brother"}, 
 			{"count":0, "key":"sibling", "label":"Sibling"},
 			{"count":0, "key":"sister", "label":"Sister"}

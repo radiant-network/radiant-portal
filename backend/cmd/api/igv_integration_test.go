@@ -31,7 +31,7 @@ func Test_GetIGVBySeqIdHandler(t *testing.T) {
 
 		repo := repository.NewIGVRepository(starrocks)
 		router := gin.Default()
-		router.GET("/igv/:seq_id", server.GetIGVHandler(repo, nil))
+		router.GET("/igv/:case_id", server.GetIGVHandler(repo, nil))
 
 		req, _ := http.NewRequest("GET", "/igv/70", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()

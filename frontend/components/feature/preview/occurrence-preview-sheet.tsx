@@ -1,10 +1,12 @@
+import { ClipboardPen } from 'lucide-react';
+
 import { GermlineSNVOccurrence } from '@/api/api';
 import InterpretationDialog from '@/apps/case-entity/src/components/variants/interpretation/interpretation-dialog';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import { ClipboardPen } from 'lucide-react';
+
 import PreviewOccurrenceDetailsCard from './preview-occurrence-details-card';
 import PreviewSheet from './preview-sheet';
 import PreviewSheetHeader from './preview-sheet-header';
@@ -100,6 +102,7 @@ function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, h
         }
       />
       <PreviewOccurrenceDetailsCard
+        caseId={expandResult.data.case_id}
         seqId={occurrence.seq_id}
         locus={occurrence.locus}
         start={occurrence.start}
