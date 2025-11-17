@@ -50,6 +50,7 @@ bin/
 /cypress/screenshots
 /cypress/videos
 /cypress/results
+/cypress/.cached-data.json
 .testquality
 
 test.http
