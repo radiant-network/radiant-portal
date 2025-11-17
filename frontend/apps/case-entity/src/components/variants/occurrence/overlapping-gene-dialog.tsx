@@ -77,7 +77,7 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
   return (
     <Dialog onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="md:min-w-[1050px] lg:min-w-[1250px] max-h-[calc(100vh-60px)] overflow-hidden">
+      <DialogContent size="full" className="flex flex-col">
         {open && (
           <>
             <DialogHeader>
@@ -91,11 +91,11 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
                 })}
               </DialogTitle>
             </DialogHeader>
-            <DialogBody className="min-w-full overflow-auto h-full">
+            <DialogBody className="flex-1 overflow-auto">
               <DataTable
                 id="overlapping-genes-table"
                 columns={getCNVOverlappingGenesColumns(t)}
-                className="overflow-auto max-h-[600px]"
+                className="h-full"
                 defaultColumnSettings={defaultCNVOverlappingGenesSettings}
                 loadingStates={{
                   total: fetchList.isLoading,

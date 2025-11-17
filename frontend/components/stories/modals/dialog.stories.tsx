@@ -52,6 +52,121 @@ export const Default: Story = {
   },
 };
 
+export const Sizes: Story = {
+  args: {},
+  render: args => {
+    const [openSm, setOpenSm] = useState<boolean>(false);
+    const [openMd, setOpenMd] = useState<boolean>(false);
+    const [openLg, setOpenLg] = useState<boolean>(false);
+    const [openXl, setOpenXl] = useState<boolean>(false);
+    const [openFull, setOpenFull] = useState<boolean>(false);
+
+    return (
+      <div className="flex gap-4">
+        <Dialog open={openSm} onOpenChange={setOpenSm}>
+          <DialogTrigger>
+            <Button onClick={() => setOpenSm(true)}>Open SM</Button>
+          </DialogTrigger>
+          <DialogContent size="sm">
+            <DialogHeader>
+              <DialogTitle>Dialog Title SM</DialogTitle>
+              <DialogDescription>Dialog Description</DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-40">
+                Slot (swap it with your content)
+              </div>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={() => setOpenSm(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openMd} onOpenChange={setOpenMd}>
+          <DialogTrigger>
+            <Button onClick={() => setOpenMd(true)}>Open MD / default</Button>
+          </DialogTrigger>
+          <DialogContent size="md">
+            <DialogHeader>
+              <DialogTitle>Dialog Title MD</DialogTitle>
+              <DialogDescription>Dialog Description</DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-40">
+                Slot (swap it with your content)
+              </div>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={() => setOpenMd(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openLg} onOpenChange={setOpenLg}>
+          <DialogTrigger>
+            <Button onClick={() => setOpenLg(true)}>Open LG</Button>
+          </DialogTrigger>
+          <DialogContent size="lg">
+            <DialogHeader>
+              <DialogTitle>Dialog Title LG</DialogTitle>
+              <DialogDescription>Dialog Description</DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-40">
+                Slot (swap it with your content)
+              </div>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={() => setOpenLg(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openXl} onOpenChange={setOpenXl}>
+          <DialogTrigger>
+            <Button onClick={() => setOpenXl(true)}>Open XL</Button>
+          </DialogTrigger>
+          <DialogContent size="xl">
+            <DialogHeader>
+              <DialogTitle>Dialog Title XL</DialogTitle>
+              <DialogDescription>Dialog Description</DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-40">
+                Slot (swap it with your content)
+              </div>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={() => setOpenXl(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openFull} onOpenChange={setOpenFull}>
+          <DialogTrigger>
+            <Button onClick={() => setOpenFull(true)}>Open Full</Button>
+          </DialogTrigger>
+          <DialogContent size="full">
+            <DialogHeader>
+              <DialogTitle>Dialog Title Full</DialogTitle>
+              <DialogDescription>Dialog Description</DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-40">
+                Slot (swap it with your content)
+              </div>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={() => setOpenFull(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  },
+};
+
 export const StickyHeader: Story = {
   args: {},
   render: args => {
