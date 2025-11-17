@@ -32,7 +32,7 @@ func NewIGVRepository(db *gorm.DB) *IGVRepository {
 func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	var igvInternal []IGVTrack
 
-	alignmentFilter := fmt.Sprintf("tctx.case_id=%d AND (d.data_type_code='alignment' AND d.format_code in ('cram', 'crai'))", caseID)
+	alignmentFilter := fmt.Sprintf("tctx.case_id=%d AND thd.type='output' AND (d.data_type_code IN ('alignment', 'alignment_variant_calling') AND d.format_code in ('cram', 'crai'))", caseID)
 
 	tx := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s tctx ON tctx.sequencing_experiment_id=se.id AND tctx.case_id=%d", types.TaskContextTable.Name, caseID))
