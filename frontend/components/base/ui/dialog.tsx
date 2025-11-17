@@ -56,7 +56,7 @@ export const useDialogContext = () => {
   return context;
 };
 
-const Dialog = DialogPrimitive.Root; // trnsformer en fonction pour avoir le size
+const Dialog = DialogPrimitive.Root;
 
 const DialogTrigger = DialogPrimitive.Trigger;
 
@@ -87,7 +87,7 @@ function DialogContent({ className, children, variant, size = 'md', ...props }: 
     <DialogPortal>
       <DialogOverlay />
       <DialogContext.Provider value={{ variant, size }}>
-        <DialogPrimitive.Content className={`${style.base({ className })} `} {...props}>
+        <DialogPrimitive.Content className={style.base({ className })} {...props}>
           {children}
           <DialogPrimitive.Close className={style.close()}>
             <X className="bg-background" />
