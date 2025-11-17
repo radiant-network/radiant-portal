@@ -8,6 +8,10 @@ type Patient struct {
 	OrganizationID        int
 	Organization          Organization `gorm:"foreignKey:ID;references:OrganizationID"`
 	SexCode               string
+	LifeStatusCode        string
+	FirstName             string    `json:"first_name,omitempty"`
+	LastName              string    `json:"last_name,omitempty"`
+	Jhn                   string    `json:"jhn,omitempty"`
 	Sex                   Sex       `gorm:"foreignKey:Code;references:SexCode"`
 	DateOfBirth           time.Time `gorm:"type:DATE"`
 }

@@ -1,0 +1,32 @@
+package repository
+
+import (
+	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
+)
+
+type PatientsRepository struct {
+	db *gorm.DB
+}
+
+type PatientsDAO interface {
+	GetPatientByOrganizationId(organizationCode string, organizationPatientId string) (*types.Patient, error)
+}
+
+func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
+	return &PatientsRepository{db: db}
+}
+
+func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId int, organizationPatientId string) (*types.Patient, error) {
+	var patient types.Patient
+	tx := r.db.
+		Table("patient").
+		Where("organization_patient_id = ? and organization_id = ?", organizationPatientId, organizationId)
+	if err := tx.Scan(&patient).Error; err != nil {
+		return nil, err
+	}
+	if patient.ID == 0 {
+		return nil, nil
+	}
+	return &patient, nil
+}

@@ -116,3 +116,32 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		assert.Equal(t, int64(1), count)
 	})
 }
+
+func Test_UpdateBatch(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewBatchRepository(db)
+
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES ('{}', 'PROCESSING', 'patient', true, 'user999', '2025-10-09')
+    		RETURNING id;
+		`).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		finished := time.Date(2025, 10, 9, 15, 30, 0, 0, time.UTC)
+		rowsUpdated, err := repo.UpdateBatch(Batch{ID: id, Status: "COMPLETED", FinishedOn: &finished})
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, rowsUpdated)
+		resultBatch := Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, "COMPLETED", resultBatch.Status)
+		assert.Equal(t, true, resultBatch.DryRun)
+		assert.Equal(t, "patient", resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.Equal(t, finished, *resultBatch.FinishedOn)
+
+	})
+}

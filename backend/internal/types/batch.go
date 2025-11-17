@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const PatientBatchType = "patient"
+
 type BatchSummary struct {
 	Created int `json:"created"`
 	Updated int `json:"updated"`
@@ -18,7 +20,7 @@ func (s BatchSummary) Value() (driver.Value, error) {
 	return json.Marshal(s)
 }
 
-func (s *BatchSummary) Scan(value any) error {
+func (s *BatchSummary) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
@@ -29,41 +31,45 @@ func (s *BatchSummary) Scan(value any) error {
 	return json.Unmarshal(bytes, s)
 }
 
-type BatchError struct {
-	ErrorCode string `json:"error_code"`
-	Message   string `json:"message"`
+type BatchMessage struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Path    string `json:"path"`
 }
 
-// Slice version, since Errors is []BatchError
-type BatchErrorList []BatchError
+type BatchReport struct {
+	Infos    []BatchMessage `json:"info,omitempty"`
+	Warnings []BatchMessage `json:"warn,omitempty"`
+	Errors   []BatchMessage `json:"error,omitempty"`
+}
 
-func (e BatchErrorList) Value() (driver.Value, error) {
+func (e BatchReport) Value() (driver.Value, error) {
 	return json.Marshal(e)
 }
 
-func (e *BatchErrorList) Scan(value any) error {
+func (e *BatchReport) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 	bytes, ok := value.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to scan BatchErrorList: %v", value)
+		return fmt.Errorf("failed to scan BatchReport: %v", value)
 	}
 	return json.Unmarshal(bytes, e)
 }
 
 type Batch struct {
-	ID         string         `json:"id" validate:"required" gorm:"primary_key; unique; type:uuid; column:id; default:uuid_generate_v4()"`
-	DryRun     bool           `json:"dry_run"`
-	BatchType  string         `json:"batch_type"`
-	Status     string         `json:"status"`
-	CreatedOn  time.Time      `json:"created_on"`
-	StartedOn  *time.Time     `json:"started_on,omitempty"`
-	FinishedOn *time.Time     `json:"finished_on,omitempty"`
-	Username   string         `json:"username"`
-	Payload    string         `json:"payload"`
-	Summary    BatchSummary   `gorm:"column:summary;type:jsonb"`
-	Errors     BatchErrorList `gorm:"column:errors;type:jsonb"`
+	ID         string       `json:"id" validate:"required" gorm:"primary_key; unique; type:uuid; column:id; default:uuid_generate_v4()"`
+	DryRun     bool         `json:"dry_run"`
+	BatchType  string       `json:"batch_type"`
+	Status     string       `json:"status"`
+	CreatedOn  time.Time    `json:"created_on"`
+	StartedOn  *time.Time   `json:"started_on,omitempty"`
+	FinishedOn *time.Time   `json:"finished_on,omitempty"`
+	Username   string       `json:"username"`
+	Payload    string       `json:"payload"`
+	Summary    BatchSummary `gorm:"column:summary;type:jsonb"`
+	Report     BatchReport  `gorm:"column:report;type:jsonb"`
 }
 
 var BatchTable = Table{
@@ -95,14 +101,14 @@ type CreateBatchResponse struct {
 // GetBatchResponse represents the response returned when retrieving a batch
 // @Description GetBatchResponse represents the response returned when retrieving a batch
 type GetBatchResponse struct {
-	ID         string         `json:"id"`
-	DryRun     bool           `json:"dry_run"`
-	BatchType  string         `json:"batch_type"`
-	Status     string         `json:"status"`
-	CreatedOn  time.Time      `json:"created_on"`
-	StartedOn  *time.Time     `json:"started_on,omitempty"`
-	FinishedOn *time.Time     `json:"finished_on,omitempty"`
-	Username   string         `json:"username"`
-	Summary    BatchSummary   `json:"summary"`
-	Errors     BatchErrorList `json:"errors,omitempty"`
+	ID         string       `json:"id"`
+	DryRun     bool         `json:"dry_run"`
+	BatchType  string       `json:"batch_type"`
+	Status     string       `json:"status"`
+	CreatedOn  time.Time    `json:"created_on"`
+	StartedOn  *time.Time   `json:"started_on,omitempty"`
+	FinishedOn *time.Time   `json:"finished_on,omitempty"`
+	Username   string       `json:"username"`
+	Summary    BatchSummary `json:"summary"`
+	Errors     BatchReport  `json:"errors,omitempty"`
 } //@Name GetBatchResponse
