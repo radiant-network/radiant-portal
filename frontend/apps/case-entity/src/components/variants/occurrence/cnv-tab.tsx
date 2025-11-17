@@ -152,12 +152,12 @@ function CNVTab({ seqId }: CNVTabProps) {
   }, [isQBInitialized, seqId]);
 
   /**
-   * Re-fetch list on initial load and sqon change
+   * Re-fetch list on initial load
    */
   useEffect(() => {
-    if (seqId === '' || !isQBInitialized) return;
+    if (!isQBInitialized) return;
     fetchOccurrencesList.mutate();
-  }, [seqId, activeSqon, isQBInitialized]);
+  }, [isQBInitialized]);
 
   /**
    * Re-fetch count
