@@ -105,9 +105,7 @@ function CNVTab({ seqId }: CNVTabProps) {
       },
     },
     async (params: CnvOccurrenceType) =>
-      seqId
-        ? occurrencesApi.listGermlineCNVOccurrences(params.seqId, params.listBody).then(response => response.data)
-        : [],
+      seqId ? occurrencesApi.listGermlineCNVOccurrences(seqId, params.listBody).then(response => response.data) : [],
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,
