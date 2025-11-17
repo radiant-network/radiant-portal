@@ -133,9 +133,7 @@ function SNVTab({ seqId }: SNVTabProps) {
       },
     },
     async (params: SnvOccurrenceType) =>
-      seqId
-        ? occurrencesApi.listGermlineSNVOccurrences(params.seqId, params.listBody).then(response => response.data)
-        : [],
+      seqId ? occurrencesApi.listGermlineSNVOccurrences(seqId, params.listBody).then(response => response.data) : [],
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,

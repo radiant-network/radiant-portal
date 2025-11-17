@@ -19,6 +19,7 @@ import { cn } from '@/components/lib/utils';
 import { useConfig } from '@/components/model/applications-config';
 import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/query-builder-core';
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { ISyntheticSqon } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
 
 import { OccurrenceCountInput, useCNVOccurrencesCountHelper } from '../hook';
@@ -149,6 +150,14 @@ function CNVTab({ seqId }: CNVTabProps) {
   }, [isQBInitialized, seqId]);
 
   /**
+   * Re-fetch list on initial load
+   */
+  useEffect(() => {
+    if (!isQBInitialized) return;
+    fetchOccurrencesList.mutate();
+  }, [isQBInitialized]);
+
+  /**
    * Re-fetch count
    */
   useEffect(() => {
@@ -223,7 +232,9 @@ function CNVTab({ seqId }: CNVTabProps) {
                 }).then(res => res.count || 0);
               }}
               resolveSyntheticSqon={resolveSyntheticSqon}
-              onActiveQueryChange={sqon => setActiveSqon(resolveSyntheticSqon(sqon, qbState?.queries || []) as Sqon)}
+              onActiveQueryChange={sqon =>
+                setActiveSqon(resolveSyntheticSqon(sqon, (qbState?.queries || []) as ISyntheticSqon[]) as Sqon)
+              }
               onStateChange={state => {
                 setQbState(state);
               }}
