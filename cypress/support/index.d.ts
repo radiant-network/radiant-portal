@@ -3,7 +3,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 declare namespace Cypress {
   interface Chainable {
+    apiCall(method: string, query: string, body: string, token: string, retries?: number): cy & CyEventEmitter;
     clickAndWait(options?: Partial<ClickOptions>): Chainable<Element>;
+    getToken(): Chainable<string>;
     handleColumnNotFound(column: string): cy & CyEventEmitter;
     hideColumn(column: string): cy & CyEventEmitter;
     login(): cy & CyEventEmitter;

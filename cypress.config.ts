@@ -1,6 +1,8 @@
 import { defineConfig } from "cypress";
 import { getDateTime } from "./cypress/pom/shared/Utils";
 import * as dotenv from "dotenv";
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
@@ -38,13 +40,32 @@ export default defineConfig({
     keycloak_host: "https://auth.qa.juno.cqdg.ferlab.bio",
     keycloak_realm: "CQDG",
     keycloak_client: "cqdg-client",
+    api_client: 'radiant',
+    apiBaseUrl: "https://radiant-api.qa.juno.cqdg.ferlab.bio/",
   },
 
   e2e: {
     setupNodeEvents(on, config) {
+      const cachedDataPath = path.join(__dirname, 'cypress/.cached-data.json');
       on("task", {
+        checkCachedData() {
+          return fs.existsSync(cachedDataPath);
+        },
+        loadCachedData() {
+          if (fs.existsSync(cachedDataPath)) {
+            const data = JSON.parse(fs.readFileSync(cachedDataPath, 'utf8'));
+            return data;
+          }
+          else {
+            return null;
+          };
+        },
         log(message: string) {
           console.log(message);
+          return null;
+        },
+        saveCachedData(data) {
+          fs.writeFileSync(cachedDataPath, JSON.stringify(data, null, 2));
           return null;
         },
       });
@@ -52,7 +73,7 @@ export default defineConfig({
     },
     baseUrl: "https://radiant.qa.juno.cqdg.ferlab.bio/",
     supportFile: "cypress/support/e2e.js",
-    specPattern: "cypress/e2e/**/*.cy.ts",
+    specPattern: "cypress/**/*.cy.ts",
     slowTestThreshold: 60000,
     defaultCommandTimeout: 15000,
     pageLoadTimeout: 30000,
