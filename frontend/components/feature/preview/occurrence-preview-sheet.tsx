@@ -1,3 +1,4 @@
+import { useParams } from 'react-router';
 import { ClipboardPen } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
@@ -65,6 +66,8 @@ function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, h
     occurrence.seq_id.toString(),
     occurrence.locus_id.toString(),
   );
+  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
+  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
 
   if (isLoading || !expandResult.data) {
     return <PreviewSheetSkeleton />;
@@ -101,22 +104,24 @@ function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, h
           />
         }
       />
-      <PreviewOccurrenceDetailsCard
-        caseId={expandResult.data.case_id}
-        seqId={occurrence.seq_id}
-        locus={occurrence.locus}
-        start={occurrence.start}
-        chromosome={occurrence.chromosome}
-        zygosity={expandResult.data.zygosity}
-        transmission={expandResult.data.transmission}
-        parental_origin={expandResult.data.parental_origin}
-        genotype_quality={expandResult.data.genotype_quality}
-        filter={expandResult.data.filter}
-        father_calls={expandResult.data.father_calls}
-        mother_calls={expandResult.data.mother_calls}
-        ad_alt={expandResult.data.ad_alt}
-        ad_total={expandResult.data.ad_total}
-      />
+      {caseId && (
+        <PreviewOccurrenceDetailsCard
+          caseId={caseId}
+          seqId={occurrence.seq_id}
+          locus={occurrence.locus}
+          start={occurrence.start}
+          chromosome={occurrence.chromosome}
+          zygosity={expandResult.data.zygosity}
+          transmission={expandResult.data.transmission}
+          parental_origin={expandResult.data.parental_origin}
+          genotype_quality={expandResult.data.genotype_quality}
+          filter={expandResult.data.filter}
+          father_calls={expandResult.data.father_calls}
+          mother_calls={expandResult.data.mother_calls}
+          ad_alt={expandResult.data.ad_alt}
+          ad_total={expandResult.data.ad_total}
+        />
+      )}
       <PreviewVariantDetailsCard data={expandResult.data} />
     </div>
   );
