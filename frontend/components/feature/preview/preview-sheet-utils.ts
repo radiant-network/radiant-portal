@@ -1,7 +1,8 @@
+import useSWR from 'swr';
+
 import { CaseEntity, ExpandedGermlineSNVOccurrence } from '@/api/api';
 import { PROBAND } from '@/components/feature/constants';
 import { caseApi, occurrencesApi } from '@/utils/api';
-import useSWR from 'swr';
 
 export type OccurrenceExpandInput = {
   seqId: string;

@@ -1,13 +1,12 @@
+import { useState } from 'react';
 import { CellContext } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
-import { useState } from 'react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
-import { useI18n } from '@/components/hooks/i18n';
-
 import IGVDialog from '@/components/feature/igv/igv-dialog';
 import OccurrencePreviewSheet from '@/components/feature/preview/occurrence-preview-sheet';
+import { useI18n } from '@/components/hooks/i18n';
 
 function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
   const { t } = useI18n();
