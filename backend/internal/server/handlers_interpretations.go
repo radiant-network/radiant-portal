@@ -69,6 +69,38 @@ func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
 	return status
 }
 
+// GetInterpretationGermlineDeprecated
+// @Deprecated
+// @Summary Get interpretation germline
+// @Id GetInterpretationGermlineDeprecated
+// @Description Get interpretation germline
+// @Tags interpretations
+// @Security bearerauth
+// @Param sequencing_id path string true "Sequencing ID"
+// @Param locus_id path string true "Locus ID"
+// @Param transcript_id path string true "Transcript ID"
+// @Produce json
+// @Success 200 {object} types.InterpretationGermline
+// @Success 206 {object} types.InterpretationGermline
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [get]
+func GetInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
+		interpretation, err := repo.FirstGermline(caseId, sequencingId, locusId, transcriptId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if interpretation == nil {
+			HandleNotFoundError(c, "interpretation")
+			return
+		}
+		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
+	}
+}
+
 // GetInterpretationGermline
 // @Summary Get interpretation germline
 // @Id GetInterpretationGermline
@@ -84,7 +116,7 @@ func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
 // @Success 206 {object} types.InterpretationGermline
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
+// @Router /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
@@ -98,6 +130,47 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 			return
 		}
 		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
+	}
+}
+
+// PostInterpretationGermlineDeprecated
+// @Deprecated
+// @Summary Create or Update interpretation germline
+// @Id PostInterpretationGermlineDeprecated
+// @Description Create or Update interpretation germline
+// @Tags interpretations
+// @Security bearerauth
+// @Param sequencing_id path string true "Sequencing ID"
+// @Param locus_id path string true "Locus ID"
+// @Param transcript_id path string true "Transcript ID"
+// @Param message	body		types.InterpretationGermline	true	"Interpretation Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.InterpretationGermline
+// @Failure 400 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [post]
+func PostInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		interpretation := &types.InterpretationGermline{}
+		err := c.BindJSON(interpretation)
+
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon)
+
+		err = repo.CreateOrUpdateGermline(interpretation)
+
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, interpretation)
 	}
 }
 
@@ -117,7 +190,7 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 // @Success 200 {object} types.InterpretationGermline
 // @Failure 400 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
+// @Router /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -142,6 +215,38 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 	}
 }
 
+// GetInterpretationSomaticDeprecated
+// @Deprecated
+// @Summary Get interpretation somatic
+// @Id GetInterpretationSomaticDeprecated
+// @Description Get interpretation somatic
+// @Tags interpretations
+// @Security bearerauth
+// @Param sequencing_id path string true "Sequencing ID"
+// @Param locus_id path string true "Locus ID"
+// @Param transcript_id path string true "Transcript ID"
+// @Produce json
+// @Success 200 {object} types.InterpretationSomatic
+// @Success 206 {object} types.InterpretationSomatic
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [get]
+func GetInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
+		interpretation, err := repo.FirstSomatic(caseId, sequencingId, locusId, transcriptId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if interpretation == nil {
+			HandleNotFoundError(c, "interpretation")
+			return
+		}
+		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
+	}
+}
+
 // GetInterpretationSomatic
 // @Summary Get interpretation somatic
 // @Id GetInterpretationSomatic
@@ -157,7 +262,7 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 // @Success 206 {object} types.InterpretationSomatic
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
+// @Router /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
@@ -171,6 +276,46 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFun
 			return
 		}
 		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
+	}
+}
+
+// PostInterpretationSomaticDeprecated
+// @Deprecated
+// @Summary Create or Update interpretation somatic
+// @Id PostInterpretationSomaticDeprecated
+// @Description Create or Update interpretation somatic
+// @Tags interpretations
+// @Security bearerauth
+// @Param sequencing_id path string true "Sequencing ID"
+// @Param locus_id path string true "Locus ID"
+// @Param transcript_id path string true "Transcript ID"
+// @Param message	body		types.InterpretationSomatic	true	"Interpretation Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.InterpretationSomatic
+// @Failure 400 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [post]
+func PostInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		interpretation := &types.InterpretationSomatic{}
+		err := c.BindJSON(interpretation)
+
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon)
+
+		err = repo.CreateOrUpdateSomatic(interpretation)
+
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, interpretation)
 	}
 }
 
@@ -190,7 +335,7 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFun
 // @Success 200 {object} types.InterpretationSomatic
 // @Failure 400 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
+// @Router /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		interpretation := &types.InterpretationSomatic{}

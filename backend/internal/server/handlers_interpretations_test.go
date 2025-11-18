@@ -94,9 +94,9 @@ func (m *MockRepository) RetrieveGermlineInterpretationClassificationCounts(locu
 func assertGetInterpretationGermline(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/interpretations/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationGermline(repo))
+	router.GET("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationGermline(repo))
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -119,9 +119,9 @@ func Test_GetInterpretationGermline_notFound(t *testing.T) {
 func assertPostInterpretationGermline(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/interpretations/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", PostInterpretationGermline(repo))
+	router.POST("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", PostInterpretationGermline(repo))
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -152,9 +152,9 @@ func Test_PostInterpretationGermline_error(t *testing.T) {
 func assertGetInterpretationSomatic(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/interpretations/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationSomatic(repo))
+	router.GET("/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationSomatic(repo))
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -177,9 +177,9 @@ func Test_GetInterpretationSomatic_notFound(t *testing.T) {
 func assertPostInterpretationSomatic(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/interpretations/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", PostInterpretationSomatic(repo))
+	router.POST("/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", PostInterpretationSomatic(repo))
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

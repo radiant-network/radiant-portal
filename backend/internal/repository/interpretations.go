@@ -42,6 +42,14 @@ func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientS
 	return &InterpretationsRepository{db: db, pubmedClient: pubmedClient}
 }
 
+func addWhere(tx *gorm.DB, caseId string, sequencingId string, locusId string, transcriptId string) {
+	if len(caseId) > 0 {
+		tx.Where("case_id = ? AND sequencing_id = ? AND locus_id = ? AND transcript_id = ?", caseId, sequencingId, locusId, transcriptId)
+	} else {
+		tx.Where("sequencing_id = ? AND locus_id = ? AND transcript_id = ?", sequencingId, locusId, transcriptId)
+	}
+}
+
 // mappers, could be moved to a separate file
 func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
 	pubmeds := utils.SplitRemoveEmptyString(dao.Pubmed, ",")
@@ -171,9 +179,10 @@ func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation
 
 func (r *InterpretationsRepository) FirstGermline(caseId string, sequencingId string, locus string, transcriptId string) (*types.InterpretationGermline, error) {
 	var dao types.InterpretationGermlineDAO
-	if result := r.db.
-		Table(types.InterpretationGermlineTable.Name).
-		Where("case_id = ? AND sequencing_id = ? AND locus_id = ? AND transcript_id = ?", caseId, sequencingId, locus, transcriptId).
+	tx := r.db.
+		Table(types.InterpretationGermlineTable.Name)
+	addWhere(tx, caseId, sequencingId, locus, transcriptId)
+	if result := tx.
 		First(&dao); result.Error != nil {
 		err := result.Error
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -199,8 +208,8 @@ func (r *InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 		return err
 	}
 	query := r.db.
-		Table(types.InterpretationGermlineTable.Name).
-		Where("case_id = ? AND sequencing_id = ? AND locus_id = ? AND transcript_id = ?", interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
+		Table(types.InterpretationGermlineTable.Name)
+	addWhere(query, interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if existing != nil {
 		dao.CreatedBy = existing.CreatedBy
 		dao.CreatedByName = existing.CreatedByName
@@ -225,9 +234,10 @@ func (r *InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 
 func (r *InterpretationsRepository) FirstSomatic(caseId string, sequencingId string, locus string, transcriptId string) (*types.InterpretationSomatic, error) {
 	var dao types.InterpretationSomaticDAO
-	if result := r.db.
-		Table(types.InterpretationSomaticTable.Name).
-		Where("case_id = ? AND sequencing_id = ? AND locus_id = ? AND transcript_id = ?", caseId, sequencingId, locus, transcriptId).
+
+	tx := r.db.Table(types.InterpretationSomaticTable.Name)
+	addWhere(tx, caseId, sequencingId, locus, transcriptId)
+	if result := tx.
 		First(&dao); result.Error != nil {
 		err := result.Error
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -252,8 +262,8 @@ func (r *InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.
 	if err != nil {
 		return err
 	}
-	query := r.db.Table(types.InterpretationSomaticTable.Name).
-		Where("case_id = ? AND sequencing_id = ? AND locus_id = ? AND transcript_id = ?", interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
+	query := r.db.Table(types.InterpretationSomaticTable.Name)
+	addWhere(query, interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if existing != nil {
 		dao.CreatedBy = existing.CreatedBy
 		dao.CreatedByName = existing.CreatedByName

@@ -2480,7 +2480,288 @@ paths:
       summary: Search interpretation germline
       tags:
       - interpretations
-  /interpretations/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
+  /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}:
+    get:
+      deprecated: true
+      description: Get interpretation germline
+      operationId: GetInterpretationGermlineDeprecated
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: sequencing_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationGermline'
+          description: OK
+        "206":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationGermline'
+          description: Partial Content
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get interpretation germline
+      tags:
+      - interpretations
+    post:
+      deprecated: true
+      description: Create or Update interpretation germline
+      operationId: PostInterpretationGermlineDeprecated
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: sequencing_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterpretationGermline'
+        description: Interpretation Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationGermline'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create or Update interpretation germline
+      tags:
+      - interpretations
+  /interpretations/pubmed/{citation_id}:
+    get:
+      description: Get pubmed citation by ID
+      operationId: GetPubmedCitation
+      parameters:
+      - description: Citation ID
+        in: path
+        name: citation_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PubmedCitation'
+          description: OK
+        "206":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PubmedCitation'
+          description: Partial Content
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get pubmed citation by ID
+      tags:
+      - interpretations
+  /interpretations/somatic:
+    get:
+      description: Search interpretation somatic
+      operationId: SearchInterpretationSomatic
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InterpretationSomatic'
+                type: array
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Search interpretation somatic
+      tags:
+      - interpretations
+  /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}:
+    get:
+      deprecated: true
+      description: Get interpretation somatic
+      operationId: GetInterpretationSomaticDeprecated
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: sequencing_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationSomatic'
+          description: OK
+        "206":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationSomatic'
+          description: Partial Content
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get interpretation somatic
+      tags:
+      - interpretations
+    post:
+      deprecated: true
+      description: Create or Update interpretation somatic
+      operationId: PostInterpretationSomaticDeprecated
+      parameters:
+      - description: Sequencing ID
+        in: path
+        name: sequencing_id
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Transcript ID
+        in: path
+        name: transcript_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterpretationSomatic'
+        description: Interpretation Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretationSomatic'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create or Update interpretation somatic
+      tags:
+      - interpretations
+  /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       description: Get interpretation germline
       operationId: GetInterpretationGermline
@@ -2598,72 +2879,7 @@ paths:
       summary: Create or Update interpretation germline
       tags:
       - interpretations
-  /interpretations/pubmed/{citation_id}:
-    get:
-      description: Get pubmed citation by ID
-      operationId: GetPubmedCitation
-      parameters:
-      - description: Citation ID
-        in: path
-        name: citation_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PubmedCitation'
-          description: OK
-        "206":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PubmedCitation'
-          description: Partial Content
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get pubmed citation by ID
-      tags:
-      - interpretations
-  /interpretations/somatic:
-    get:
-      description: Search interpretation somatic
-      operationId: SearchInterpretationSomatic
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/InterpretationSomatic'
-                type: array
-          description: OK
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Search interpretation somatic
-      tags:
-      - interpretations
-  /interpretations/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
+  /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       description: Get interpretation somatic
       operationId: GetInterpretationSomatic
