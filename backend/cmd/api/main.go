@@ -114,10 +114,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	interpretationsGroup.GET("/germline", server.SearchInterpretationGermline(repoPostgres.Interpretations))
 	interpretationsGroup.GET("/somatic", server.SearchInterpretationSomatic(repoPostgres.Interpretations))
 
-	interpretationsGermlineGroup := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsGermlineGroup := interpretationsGroup.Group("/germline/:case_id/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres.Interpretations))
 	interpretationsGermlineGroup.POST("", server.PostInterpretationGermline(repoPostgres.Interpretations))
-	interpretationsSomaticGroup := interpretationsGroup.Group("/somatic/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsSomaticGroup := interpretationsGroup.Group("/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
 
