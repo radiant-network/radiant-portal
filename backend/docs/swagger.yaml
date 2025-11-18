@@ -103,12 +103,32 @@ components:
       - type
       - value
       type: object
-    BatchError:
+    BatchMessage:
       properties:
-        error_code:
+        code:
           type: string
         message:
           type: string
+        path:
+          type: string
+      type: object
+    BatchReport:
+      properties:
+        error:
+          items:
+            $ref: '#/components/schemas/BatchMessage'
+          type: array
+          uniqueItems: false
+        info:
+          items:
+            $ref: '#/components/schemas/BatchMessage'
+          type: array
+          uniqueItems: false
+        warn:
+          items:
+            $ref: '#/components/schemas/BatchMessage'
+          type: array
+          uniqueItems: false
       type: object
     BatchSummary:
       properties:
@@ -1006,10 +1026,7 @@ components:
         dry_run:
           type: boolean
         errors:
-          items:
-            $ref: '#/components/schemas/BatchError'
-          type: array
-          uniqueItems: false
+          $ref: '#/components/schemas/BatchReport'
         finished_on:
           type: string
         id:
@@ -2463,11 +2480,17 @@ paths:
       summary: Search interpretation germline
       tags:
       - interpretations
-  /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}:
+  /interpretations/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       description: Get interpretation germline
       operationId: GetInterpretationGermline
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequencing ID
         in: path
         name: sequencing_id
@@ -2520,6 +2543,12 @@ paths:
       description: Create or Update interpretation germline
       operationId: PostInterpretationGermline
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequencing ID
         in: path
         name: sequencing_id
@@ -2634,11 +2663,17 @@ paths:
       summary: Search interpretation somatic
       tags:
       - interpretations
-  /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}:
+  /interpretations/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       description: Get interpretation somatic
       operationId: GetInterpretationSomatic
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequencing ID
         in: path
         name: sequencing_id
@@ -2691,6 +2726,12 @@ paths:
       description: Create or Update interpretation somatic
       operationId: PostInterpretationSomatic
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequencing ID
         in: path
         name: sequencing_id

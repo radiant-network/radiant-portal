@@ -291,21 +291,52 @@ export interface AutocompleteResult {
 /**
  * 
  * @export
- * @interface BatchError
+ * @interface BatchMessage
  */
-export interface BatchError {
+export interface BatchMessage {
     /**
      * 
      * @type {string}
-     * @memberof BatchError
+     * @memberof BatchMessage
      */
-    'error_code'?: string;
+    'code'?: string;
     /**
      * 
      * @type {string}
-     * @memberof BatchError
+     * @memberof BatchMessage
      */
     'message'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BatchMessage
+     */
+    'path'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BatchReport
+ */
+export interface BatchReport {
+    /**
+     * 
+     * @type {Array<BatchMessage>}
+     * @memberof BatchReport
+     */
+    'error'?: Array<BatchMessage>;
+    /**
+     * 
+     * @type {Array<BatchMessage>}
+     * @memberof BatchReport
+     */
+    'info'?: Array<BatchMessage>;
+    /**
+     * 
+     * @type {Array<BatchMessage>}
+     * @memberof BatchReport
+     */
+    'warn'?: Array<BatchMessage>;
 }
 /**
  * 
@@ -2101,10 +2132,10 @@ export interface GetBatchResponse {
     'dry_run'?: boolean;
     /**
      * 
-     * @type {Array<BatchError>}
+     * @type {BatchReport}
      * @memberof GetBatchResponse
      */
-    'errors'?: Array<BatchError>;
+    'errors'?: BatchReport;
     /**
      * 
      * @type {string}
@@ -5418,20 +5449,24 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInterpretationGermline: async (sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getInterpretationGermline: async (caseId: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getInterpretationGermline', 'caseId', caseId)
             // verify required parameter 'sequencingId' is not null or undefined
             assertParamExists('getInterpretationGermline', 'sequencingId', sequencingId)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getInterpretationGermline', 'locusId', locusId)
             // verify required parameter 'transcriptId' is not null or undefined
             assertParamExists('getInterpretationGermline', 'transcriptId', transcriptId)
-            const localVarPath = `/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/interpretations/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -5464,20 +5499,24 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInterpretationSomatic: async (sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getInterpretationSomatic: async (caseId: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getInterpretationSomatic', 'caseId', caseId)
             // verify required parameter 'sequencingId' is not null or undefined
             assertParamExists('getInterpretationSomatic', 'sequencingId', sequencingId)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getInterpretationSomatic', 'locusId', locusId)
             // verify required parameter 'transcriptId' is not null or undefined
             assertParamExists('getInterpretationSomatic', 'transcriptId', transcriptId)
-            const localVarPath = `/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/interpretations/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -5548,6 +5587,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -5555,7 +5595,9 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postInterpretationGermline: async (sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postInterpretationGermline: async (caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('postInterpretationGermline', 'caseId', caseId)
             // verify required parameter 'sequencingId' is not null or undefined
             assertParamExists('postInterpretationGermline', 'sequencingId', sequencingId)
             // verify required parameter 'locusId' is not null or undefined
@@ -5564,7 +5606,8 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('postInterpretationGermline', 'transcriptId', transcriptId)
             // verify required parameter 'interpretationGermline' is not null or undefined
             assertParamExists('postInterpretationGermline', 'interpretationGermline', interpretationGermline)
-            const localVarPath = `/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/interpretations/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -5600,6 +5643,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -5607,7 +5651,9 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postInterpretationSomatic: async (sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postInterpretationSomatic: async (caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('postInterpretationSomatic', 'caseId', caseId)
             // verify required parameter 'sequencingId' is not null or undefined
             assertParamExists('postInterpretationSomatic', 'sequencingId', sequencingId)
             // verify required parameter 'locusId' is not null or undefined
@@ -5616,7 +5662,8 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('postInterpretationSomatic', 'transcriptId', transcriptId)
             // verify required parameter 'interpretationSomatic' is not null or undefined
             assertParamExists('postInterpretationSomatic', 'interpretationSomatic', interpretationSomatic)
-            const localVarPath = `/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/interpretations/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -5730,14 +5777,15 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getInterpretationGermline(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationGermline(sequencingId, locusId, transcriptId, options);
+        async getInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationGermline(caseId, sequencingId, locusId, transcriptId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationGermline']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5745,14 +5793,15 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationSomatic(sequencingId, locusId, transcriptId, options);
+        async getInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5773,6 +5822,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -5780,8 +5830,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postInterpretationGermline(sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationGermline(sequencingId, locusId, transcriptId, interpretationGermline, options);
+        async postInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationGermline(caseId, sequencingId, locusId, transcriptId, interpretationGermline, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationGermline']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5789,6 +5839,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -5796,8 +5847,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationSomatic(sequencingId, locusId, transcriptId, interpretationSomatic, options);
+        async postInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5839,26 +5890,28 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInterpretationGermline(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
-            return localVarFp.getInterpretationGermline(sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
+        getInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
+            return localVarFp.getInterpretationGermline(caseId, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
-            return localVarFp.getInterpretationSomatic(sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
+        getInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
+            return localVarFp.getInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get pubmed citation by ID
@@ -5873,6 +5926,7 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -5880,12 +5934,13 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postInterpretationGermline(sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
-            return localVarFp.postInterpretationGermline(sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(axios, basePath));
+        postInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
+            return localVarFp.postInterpretationGermline(caseId, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(axios, basePath));
         },
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -5893,8 +5948,8 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
-            return localVarFp.postInterpretationSomatic(sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
+        postInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
+            return localVarFp.postInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
         },
         /**
          * Search interpretation germline
@@ -5927,6 +5982,7 @@ export class InterpretationsApi extends BaseAPI {
     /**
      * Get interpretation germline
      * @summary Get interpretation germline
+     * @param {string} caseId Case ID
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
      * @param {string} transcriptId Transcript ID
@@ -5934,13 +5990,14 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public getInterpretationGermline(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getInterpretationGermline(sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
+    public getInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).getInterpretationGermline(caseId, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get interpretation somatic
      * @summary Get interpretation somatic
+     * @param {string} caseId Case ID
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
      * @param {string} transcriptId Transcript ID
@@ -5948,8 +6005,8 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public getInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getInterpretationSomatic(sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
+    public getInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).getInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5967,6 +6024,7 @@ export class InterpretationsApi extends BaseAPI {
     /**
      * Create or Update interpretation germline
      * @summary Create or Update interpretation germline
+     * @param {string} caseId Case ID
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
      * @param {string} transcriptId Transcript ID
@@ -5975,13 +6033,14 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public postInterpretationGermline(sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).postInterpretationGermline(sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(this.axios, this.basePath));
+    public postInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).postInterpretationGermline(caseId, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create or Update interpretation somatic
      * @summary Create or Update interpretation somatic
+     * @param {string} caseId Case ID
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
      * @param {string} transcriptId Transcript ID
@@ -5990,8 +6049,8 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public postInterpretationSomatic(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).postInterpretationSomatic(sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
+    public postInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).postInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -7186,6 +7245,118 @@ export class PatientsApi extends BaseAPI {
      */
     public postPatientBatch(body?: object, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).postPatientBatch(body, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * SamplesApi - axios parameter creator
+ * @export
+ */
+export const SamplesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a new sample batch
+         * @summary Create a new sample batch
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postSampleBatch: async (body?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/samples/batch`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SamplesApi - functional programming interface
+ * @export
+ */
+export const SamplesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SamplesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create a new sample batch
+         * @summary Create a new sample batch
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async postSampleBatch(body?: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postSampleBatch(body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SamplesApi.postSampleBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * SamplesApi - factory interface
+ * @export
+ */
+export const SamplesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SamplesApiFp(configuration)
+    return {
+        /**
+         * Create a new sample batch
+         * @summary Create a new sample batch
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postSampleBatch(body?: object, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postSampleBatch(body, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SamplesApi - object-oriented interface
+ * @export
+ * @class SamplesApi
+ * @extends {BaseAPI}
+ */
+export class SamplesApi extends BaseAPI {
+    /**
+     * Create a new sample batch
+     * @summary Create a new sample batch
+     * @param {object} [body] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SamplesApi
+     */
+    public postSampleBatch(body?: object, options?: RawAxiosRequestConfig) {
+        return SamplesApiFp(this.configuration).postSampleBatch(body, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
