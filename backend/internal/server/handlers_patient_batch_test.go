@@ -100,3 +100,36 @@ func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
+
+func TestPostPatientBatchHandler_EmptyPatients(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{
+				ID:        uuid.NewString(),
+				BatchType: batchType,
+				Status:    "PENDING",
+				CreatedOn: time.Now(),
+				Username:  username,
+				DryRun:    dryRun,
+			}, nil
+		},
+	}
+	auth := &testutils.MockAuth{
+		Username: "testuser",
+		Azp:      "mock-azp",
+		ResourceAccess: map[string]ginkeycloak.ServiceRole{
+			"mock-azp": {Roles: []string{"data_manager"}},
+		},
+	}
+
+	router := gin.Default()
+	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
+	body := `{"patients": []}`
+	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
