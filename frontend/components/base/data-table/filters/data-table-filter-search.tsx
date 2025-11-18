@@ -118,12 +118,12 @@ function TableFiltersSearch({
 
   return (
     <div className="flex flex-col">
-      <label className="text-sm font-medium text-foreground h-[14px] mb-[8px]">
+      <label className="text-sm font-medium text-foreground h-[14px] mb-2">
         {t('case_exploration.filters_group.search_by_id')}
       </label>
-      <Command className="relative h-8 w-[260px] overflow-visible" shouldFilter={false}>
+      <Command className="relative h-8 w-[340px] overflow-visible" shouldFilter={false}>
         <CommandInput
-          className="px-[6px]"
+          className="px-1.5"
           variant="search"
           placeholder={placeholder}
           leftAddon={<Search size={16} />}
