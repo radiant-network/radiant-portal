@@ -19,7 +19,7 @@ import (
 // @Produce json
 // @Success 202 {object} types.CreateBatchResponse
 // @Failure 400 {object} types.ApiError
-// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /patients/batch [post]
 func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
@@ -44,7 +44,7 @@ func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth
 			return
 		}
 		if !hasRole {
-			HandleUnauthorizedError(c)
+			HandleForbiddenError(c)
 			return
 		}
 

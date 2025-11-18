@@ -55,7 +55,7 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 	assert.Equal(t, "PENDING", response.Status)
 }
 
-func TestPostPatientBatchHandler_Unauthorized(t *testing.T) {
+func TestPostPatientBatchHandler_Forbidden(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{
@@ -75,7 +75,7 @@ func TestPostPatientBatchHandler_Unauthorized(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
