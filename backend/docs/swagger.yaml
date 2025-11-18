@@ -3342,6 +3342,45 @@ paths:
       summary: Create a new patient batch
       tags:
       - patients
+  /samples/batch:
+    post:
+      description: Create a new sample batch
+      operationId: postSampleBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create a new sample batch
+      tags:
+      - samples
   /sequencing/{seq_id}:
     get:
       description: Retrieve Sequencing data for a given sequence ID
