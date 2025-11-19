@@ -2,7 +2,7 @@
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 import 'support/commands';
 
-describe('Case Entity - Variants - CNV - Table - Custom query [SJRA-843]', () => {
+describe('Case Entity - Variants - CNV - Table - Custom query', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseVariantsPage('1', 'CNV');

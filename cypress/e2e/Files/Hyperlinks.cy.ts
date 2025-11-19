@@ -4,7 +4,7 @@ import { data } from 'pom/shared/Data';
 import { FilesTable } from 'pom/pages/FilesTable';
 import { CaseEntity_Details } from 'pom/pages/CaseEntity_Details';
 
-describe('Files - Hyperlinks', () => {
+describe('Files - Hyperlinks [SJRA-853]', () => {
   const setupTest = () => {
     cy.login();
     cy.visitFilesPage(data.file.search_criteria);

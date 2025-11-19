@@ -163,17 +163,6 @@ const tableColumns = [
     tooltip: 'Molecular diagnostic laboratory',
   },
   {
-    id: 'request',
-    name: 'Request',
-    apiField: 'request_id',
-    isVisibleByDefault: false,
-    pinByDefault: null,
-    isSortable: true,
-    isPinnable: true,
-    position: 14,
-    tooltip: null,
-  },
-  {
     id: 'managing_org',
     name: 'Managing Org.',
     apiField: 'organization_code',

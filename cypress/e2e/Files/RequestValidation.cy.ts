@@ -2,7 +2,7 @@
 import 'support/commands';
 import { FilesTable } from 'pom/pages/FilesTable';
 
-describe('Files - Request Validation', () => {
+describe('Files - Request Validation [SJRA-853]', () => {
   const setupTest = () => {
     cy.login();
     cy.visitFilesPage();
