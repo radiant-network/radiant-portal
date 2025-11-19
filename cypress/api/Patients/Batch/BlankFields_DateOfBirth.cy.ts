@@ -1,6 +1,7 @@
 /// <reference types="cypress"/>
+import { apiMessages } from '@/apiMessages';
 
-describe('Patients - Batch - Valid', () => {
+describe('Patients - Batch - Blank fields - Date Of Birth', () => {
   let response: any;
 
   before(() => {
@@ -11,12 +12,9 @@ describe('Patients - Batch - Valid', () => {
           "organization_patient_id": "Cypress0001",
           "organization_patient_id_type": "MR",
           "organization_code": "Cypress",
-          "first_name": "/|(){}[]%?&#$!@*:;,.-_",
-          "last_name": "x",
-          "jhn": "Cypress0001",
           "life_status_code": "alive",
           "sex_code": "male",
-          "date_of_birth": "1979-09-19"
+          "date_of_birth": ""
         }
       ]
     }`;
@@ -27,10 +25,10 @@ describe('Patients - Batch - Valid', () => {
   });
 
   it('Request status', () => {
-    expect(response.status).to.eq(202);
+    expect(response.status).to.eq(400);
   });
 
-  it('Return content', () => {
-    cy.validateAcceptedPatientsBatchResponse(response);
+  it('Message', () => {
+    cy.validateMessage(response, apiMessages.ParsingError('date of birth'));
   });
 });

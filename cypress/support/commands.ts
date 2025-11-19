@@ -11,43 +11,6 @@ const getEnv = (key: string): string => {
 };
 
 /**
- * Makes an authenticated API call with automatic retry logic for 500 errors.
- * Retries up to the specified number of times if a 500 status code is received.
- * @param method The HTTP method (GET, POST, PUT, DELETE, etc.).
- * @param query The API endpoint path (e.g., 'patients/batch', 'analysis/123').
- * @param body The request body as a JSON string.
- * @param token The Bearer authentication token.
- * @param retries The number of retry attempts on 500 errors (default: 3).
- */
-Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3) => {
-  const apiUrl = Cypress.env('api_base_url');
-
-  if (Cypress.env('debug')) {
-    cy.log('with body: ' + body);
-  }
-
-  const makeRequest = (attemptsLeft: number) => {
-    cy.request({
-      method: method,
-      url: `${apiUrl}${query}`,
-      headers: { Authorization: `Bearer ${token}` },
-      body: body,
-      failOnStatusCode: false,
-      timeout: 60000,
-    }).then(res => {
-      if (res.status === 500 && attemptsLeft > 0) {
-        cy.log(`Retrying API call, remaining retries: ${attemptsLeft - 1}`);
-        makeRequest(attemptsLeft - 1);
-      } else {
-        return res;
-      }
-    });
-  };
-
-  makeRequest(retries);
-});
-
-/**
  * Clicks an element and waits for loading to complete.
  * @param subject The element to click.
  * @param options Click options to pass to Cypress.
@@ -55,33 +18,6 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
 Cypress.Commands.add('clickAndWait', { prevSubject: 'element' }, (subject, options) => {
   cy.wrap(subject).click(options);
   cy.waitWhileLoad(oneMinute);
-});
-
-/**
- * Gets an OAuth access token using Keycloak authentication.
- * Uses password grant type with configured credentials from environment variables.
- * @returns A Cypress chain containing the access token string.
- */
-Cypress.Commands.add('getToken', () => {
-  return cy
-    .request({
-      method: 'POST',
-      url: `${getEnv('keycloak_host')}/realms/${getEnv('keycloak_realm')}/protocol/openid-connect/token`,
-      form: true,
-      body: {
-        client_id: getEnv('api_client'),
-        client_role: getEnv('api_client'),
-        client_secret: getEnv('keycloak_client_secret'),
-        username: getEnv('user_username'),
-        password: getEnv('user_password'),
-        grant_type: 'password',
-      },
-    })
-    .then(response => {
-      expect(response.status).to.eq(200);
-      expect(response.body).to.have.property('access_token');
-      return response.body.access_token;
-    });
 });
 
 /**
