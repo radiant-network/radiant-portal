@@ -29,6 +29,6 @@ describe('CaseEntity - Details - Assays - Sort', () => {
     CaseEntity_Details.assaysCard.actions.sortColumn('sample_id');
     CaseEntity_Details.assaysCard.actions.sortColumn('assay_id');
     CaseEntity_Details.assaysCard.actions.sortColumn('assay_id');
-    CaseEntity_Details.assaysCard.validations.shouldHaveFirstRowValue('1', 'assay_id');
+    CaseEntity_Details.assaysCard.validations.shouldHaveFirstRowValue('3', 'assay_id');
   });
 });

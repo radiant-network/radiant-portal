@@ -3,7 +3,7 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 
-describe('Case Entity - Variants - CNV - Table - Information displayed [SJRA-843]', () => {
+describe('Case Entity - Variants - CNV - Table - Information displayed', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseVariantsPage('1', 'CNV', data.cnvGermline.sqon);

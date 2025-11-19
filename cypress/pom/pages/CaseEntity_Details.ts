@@ -195,7 +195,7 @@ export const CaseEntity_Details = {
       shouldHaveFirstRowValue(value: string | RegExp, columnID: string) {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
-            cy.validateTableFirstRowContent(value, position);
+            cy.validateTableFirstRowContent(value, position, selectors.assaysCard.tableId);
           })
         );
       },

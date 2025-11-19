@@ -3,7 +3,7 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { FilesTable } from 'pom/pages/FilesTable';
 
-describe('Files - Information displayed', () => {
+describe('Files - Information displayed [SJRA-853]', () => {
   const setupTest = () => {
     cy.login();
     cy.visitFilesPage(data.file.search_criteria);
