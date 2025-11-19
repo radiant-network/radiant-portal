@@ -20,7 +20,7 @@ const getEnv = (key: string): string => {
  * @param retries The number of retry attempts on 500 errors (default: 3).
  */
 Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3) => {
-  const apiUrl = Cypress.env('apiBaseUrl');
+  const apiUrl = Cypress.env('api_base_url');
 
   if (Cypress.env('debug')) {
     cy.log('with body: ' + body);

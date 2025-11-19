@@ -12,7 +12,7 @@ Cypress.Commands.add('setToken', () => {
 });
 
 Cypress.Commands.add('isValidToken', token => {
-  const apiUrl = Cypress.env('apiBaseUrl');
+  const apiUrl = Cypress.env('api_base_url');
 
   return cy
     .request({
