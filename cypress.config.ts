@@ -41,7 +41,7 @@ export default defineConfig({
     keycloak_realm: "CQDG",
     keycloak_client: "cqdg-client",
     api_client: 'radiant',
-    apiBaseUrl: "https://radiant-api.qa.juno.cqdg.ferlab.bio/",
+    api_base_url: "https://radiant-api.qa.juno.cqdg.ferlab.bio/",
   },
 
   e2e: {
