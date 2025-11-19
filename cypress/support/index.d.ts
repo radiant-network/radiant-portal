@@ -3,9 +3,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 declare namespace Cypress {
   interface Chainable {
+    // apiCommands
     apiCall(method: string, query: string, body: string, token: string, retries?: number): cy & CyEventEmitter;
-    clickAndWait(options?: Partial<ClickOptions>): Chainable<Element>;
     getToken(): Chainable<string>;
+    validateAcceptedPatientsBatchResponse(response: any): cy & CyEventEmitter;
+    validateMessage(response: any, message: string): cy & CyEventEmitter;
+
+    // commands
+    clickAndWait(options?: Partial<ClickOptions>): Chainable<Element>;
     handleColumnNotFound(column: string): cy & CyEventEmitter;
     hideColumn(column: string): cy & CyEventEmitter;
     login(): cy & CyEventEmitter;

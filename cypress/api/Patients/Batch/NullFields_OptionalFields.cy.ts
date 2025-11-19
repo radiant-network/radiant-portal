@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 
-describe('Patients - Batch - Valid', () => {
+describe('Patients - Batch - Null fields - Optional fields', () => {
   let response: any;
 
   before(() => {
@@ -11,9 +11,9 @@ describe('Patients - Batch - Valid', () => {
           "organization_patient_id": "Cypress0001",
           "organization_patient_id_type": "MR",
           "organization_code": "Cypress",
-          "first_name": "/|(){}[]%?&#$!@*:;,.-_",
-          "last_name": "x",
-          "jhn": "Cypress0001",
+          "first_name": null,
+          "last_name": null,
+          "jhn": null,
           "life_status_code": "alive",
           "sex_code": "male",
           "date_of_birth": "1979-09-19"

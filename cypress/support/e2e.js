@@ -1,6 +1,7 @@
 /* eslint-disable */
 /// <reference types="cypress" />
 import './commands';
+import './apiCommands';
 import 'cypress-real-events';
 import { globalData } from './globalData';
 
