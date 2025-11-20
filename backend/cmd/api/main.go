@@ -114,10 +114,17 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	interpretationsGroup.GET("/germline", server.SearchInterpretationGermline(repoPostgres.Interpretations))
 	interpretationsGroup.GET("/somatic", server.SearchInterpretationSomatic(repoPostgres.Interpretations))
 
-	interpretationsGermlineGroup := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsGermlineGroupDeprecated := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsGermlineGroupDeprecated.GET("", server.GetInterpretationGermlineDeprecated(repoPostgres.Interpretations))
+	interpretationsGermlineGroupDeprecated.POST("", server.PostInterpretationGermlineDeprecated(repoPostgres.Interpretations))
+	interpretationsGermlineGroup := interpretationsGroup.Group("/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres.Interpretations))
 	interpretationsGermlineGroup.POST("", server.PostInterpretationGermline(repoPostgres.Interpretations))
-	interpretationsSomaticGroup := interpretationsGroup.Group("/somatic/:sequencing_id/:locus_id/:transcript_id")
+
+	interpretationsSomaticGroupDeprecated := interpretationsGroup.Group("/somatic/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsSomaticGroupDeprecated.GET("", server.GetInterpretationSomaticDeprecated(repoPostgres.Interpretations))
+	interpretationsSomaticGroupDeprecated.POST("", server.PostInterpretationSomaticDeprecated(repoPostgres.Interpretations))
+	interpretationsSomaticGroup := interpretationsGroup.Group("/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
 

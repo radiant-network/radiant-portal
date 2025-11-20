@@ -27,18 +27,19 @@ func (m *MockRepository) GetCitationById(id string) (*types.PubmedCitation, erro
 	return nil, nil
 }
 
-func (m *MockRepository) FirstGermline(sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error) {
-	var uniqueId = fmt.Sprintf("%s-%s-%s", sequencingId, locusId, transcriptId)
-	if uniqueId == "seq1-locus1-trans1" {
+func (m *MockRepository) FirstGermline(caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error) {
+	var uniqueId = fmt.Sprintf("%s-%s-%s-%s", caseId, sequencingId, locusId, transcriptId)
+	if uniqueId == "10-seq1-locus1-trans1" {
 		return &types.InterpretationGermline{
 			InterpretationCommon: types.InterpretationCommon{
 				ID:           uniqueId,
+				CaseId:       caseId,
 				SequencingId: sequencingId,
 				LocusId:      locusId,
 				TranscriptId: transcriptId,
 			},
 		}, nil
-	} else if uniqueId == "seq1-locus1-trans2" {
+	} else if uniqueId == "10-seq1-locus1-trans2" {
 		return nil, fmt.Errorf("error")
 	}
 	return nil, nil
@@ -51,18 +52,19 @@ func (m *MockRepository) CreateOrUpdateGermline(interpretation *types.Interpreta
 	}
 	return nil
 }
-func (m *MockRepository) FirstSomatic(sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error) {
-	var uniqueId = fmt.Sprintf("%s-%s-%s", sequencingId, locusId, transcriptId)
-	if uniqueId == "seq1-locus1-trans1" {
+func (m *MockRepository) FirstSomatic(caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error) {
+	var uniqueId = fmt.Sprintf("%s-%s-%s-%s", caseId, sequencingId, locusId, transcriptId)
+	if uniqueId == "11-seq1-locus1-trans1" {
 		return &types.InterpretationSomatic{
 			InterpretationCommon: types.InterpretationCommon{
 				ID:           uniqueId,
+				CaseId:       caseId,
 				SequencingId: sequencingId,
 				LocusId:      locusId,
 				TranscriptId: transcriptId,
 			},
 		}, nil
-	} else if uniqueId == "seq1-locus1-trans2" {
+	} else if uniqueId == "11-seq1-locus1-trans2" {
 		return nil, fmt.Errorf("error")
 	}
 	return nil, nil
@@ -89,12 +91,12 @@ func (m *MockRepository) RetrieveGermlineInterpretationClassificationCounts(locu
 	}, nil
 }
 
-func assertGetInterpretationGermline(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, expected string) {
+func assertGetInterpretationGermline(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/interpretations/germline/:sequencing_id/:locus_id/:transcript_id", GetInterpretationGermline(repo))
+	router.GET("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationGermline(repo))
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/germline/%s/%s/%s", sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -103,23 +105,23 @@ func assertGetInterpretationGermline(t *testing.T, sequencingId string, locusId 
 }
 
 func Test_GetInterpretationGermline_ok(t *testing.T) {
-	assertGetInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, `{"created_at":"0001-01-01T00:00:00Z", "id":"seq1-locus1-trans1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+	assertGetInterpretationGermline(t, "10", "seq1", "locus1", "trans1", http.StatusOK, `{"case_id":"10", "created_at":"0001-01-01T00:00:00Z", "id":"10-seq1-locus1-trans1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_GetInterpretationGermline_error(t *testing.T) {
-	assertGetInterpretationGermline(t, "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status":500, "message":"Internal Server Error", "detail":"error"}`)
+	assertGetInterpretationGermline(t, "10", "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status":500, "message":"Internal Server Error", "detail":"error"}`)
 }
 
 func Test_GetInterpretationGermline_notFound(t *testing.T) {
-	assertGetInterpretationGermline(t, "seq1", "locus1", "trans3", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
+	assertGetInterpretationGermline(t, "10", "seq1", "locus1", "trans3", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 }
 
-func assertPostInterpretationGermline(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
+func assertPostInterpretationGermline(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/interpretations/germline/:sequencing_id/:locus_id/:transcript_id", PostInterpretationGermline(repo))
+	router.POST("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", PostInterpretationGermline(repo))
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/germline/%s/%s/%s", sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -130,29 +132,29 @@ func assertPostInterpretationGermline(t *testing.T, sequencingId string, locusId
 func Test_PostInterpretationGermline_create_ok(t *testing.T) {
 	body := `{
 			}`
-	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+	assertPostInterpretationGermline(t, "10", "seq1", "locus1", "trans1", http.StatusOK, body, `{"case_id":"10", "created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_PostInterpretationGermline_update_ok(t *testing.T) {
 	body := `{
 				"id":"uuid1"
 			}`
-	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {},  "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+	assertPostInterpretationGermline(t, "10", "seq1", "locus1", "trans1", http.StatusOK, body, `{"case_id":"10", "created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {},  "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_PostInterpretationGermline_error(t *testing.T) {
 	body := `{
 				"id":"uuid2"
 			}`
-	assertPostInterpretationGermline(t, "seq1", "locus1", "trans1", http.StatusBadRequest, body, `{"status": 400, "message":"pubmed citation not found"}`)
+	assertPostInterpretationGermline(t, "10", "seq1", "locus1", "trans1", http.StatusBadRequest, body, `{"status": 400, "message":"pubmed citation not found"}`)
 }
 
-func assertGetInterpretationSomatic(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, expected string) {
+func assertGetInterpretationSomatic(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/interpretations/somatic/:sequencing_id/:locus_id/:transcript_id", GetInterpretationSomatic(repo))
+	router.GET("/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationSomatic(repo))
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/somatic/%s/%s/%s", sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -161,23 +163,23 @@ func assertGetInterpretationSomatic(t *testing.T, sequencingId string, locusId s
 }
 
 func Test_GetInterpretationSomatic_ok(t *testing.T) {
-	assertGetInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, `{"created_at":"0001-01-01T00:00:00Z", "id":"seq1-locus1-trans1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+	assertGetInterpretationSomatic(t, "11", "seq1", "locus1", "trans1", http.StatusOK, `{"case_id":"11", "created_at":"0001-01-01T00:00:00Z", "id":"11-seq1-locus1-trans1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_GetInterpretationSomatic_error(t *testing.T) {
-	assertGetInterpretationSomatic(t, "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error", "detail": "error"}`)
+	assertGetInterpretationSomatic(t, "11", "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error", "detail": "error"}`)
 }
 
 func Test_GetInterpretationSomatic_notFound(t *testing.T) {
-	assertGetInterpretationSomatic(t, "seq1", "locus1", "trans3", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
+	assertGetInterpretationSomatic(t, "11", "seq1", "locus1", "trans3", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 }
 
-func assertPostInterpretationSomatic(t *testing.T, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
+func assertPostInterpretationSomatic(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/interpretations/somatic/:sequencing_id/:locus_id/:transcript_id", PostInterpretationSomatic(repo))
+	router.POST("/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", PostInterpretationSomatic(repo))
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/somatic/%s/%s/%s", sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -188,21 +190,21 @@ func assertPostInterpretationSomatic(t *testing.T, sequencingId string, locusId 
 func Test_PostInterpretationSomatic_create_ok(t *testing.T) {
 	body := `{
 			}`
-	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+	assertPostInterpretationSomatic(t, "11", "seq1", "locus1", "trans1", http.StatusOK, body, `{"case_id":"11", "created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_PostInterpretationSomatic_update_ok(t *testing.T) {
 	body := `{
 				"id":"uuid1"
 			}`
-	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusOK, body, `{"created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {},  "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+	assertPostInterpretationSomatic(t, "11", "seq1", "locus1", "trans1", http.StatusOK, body, `{"case_id":"11", "created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {},  "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_PostInterpretationSomatic_error(t *testing.T) {
 	body := `{
 				"id":"uuid2"
 			}`
-	assertPostInterpretationSomatic(t, "seq1", "locus1", "trans1", http.StatusBadRequest, body, `{"status": 400, "message":"pubmed citation not found"}`)
+	assertPostInterpretationSomatic(t, "11", "seq1", "locus1", "trans1", http.StatusBadRequest, body, `{"status": 400, "message":"pubmed citation not found"}`)
 }
 
 func assertGetPubmedCitation(t *testing.T, id string, status int, expected string) {

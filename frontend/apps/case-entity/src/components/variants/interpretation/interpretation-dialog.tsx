@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useRef, useState } from 'react';
+import { useParams } from 'react-router';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
@@ -42,7 +43,9 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
   const [isDirty, setIsDirty] = useState(false);
   const gerlimeFormRef = useRef<InterpretationFormRef>(null);
   const somaticFormRef = useRef<InterpretationFormRef>(null);
+  const { caseId } = useParams<{ caseId: string }>();
   const { fetch: fetchInterpretationHelper, save: saveInterpretationHelper } = useInterpretationHelper(
+    caseId!,
     occurrence,
     isSomatic,
   );

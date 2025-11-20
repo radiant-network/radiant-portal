@@ -6,11 +6,12 @@ import { interpretationApi, occurrencesApi } from '@/utils/api';
 
 import { Interpretation } from './types';
 
-export function useInterpretationHelper(occurrence: GermlineSNVOccurrence, isSomatic: boolean) {
+export function useInterpretationHelper(caseId: string, occurrence: GermlineSNVOccurrence, isSomatic: boolean) {
   const fetch = useCallback(async () => {
     if (isSomatic) {
       return interpretationApi
         .getInterpretationSomatic(
+          caseId,
           occurrence.seq_id!.toString(),
           occurrence.locus_id!.toString(),
           occurrence.transcript_id!,
@@ -19,6 +20,7 @@ export function useInterpretationHelper(occurrence: GermlineSNVOccurrence, isSom
     } else {
       return interpretationApi
         .getInterpretationGermline(
+          caseId,
           occurrence.seq_id!.toString(),
           occurrence.locus_id!.toString(),
           occurrence.transcript_id!,
@@ -38,6 +40,7 @@ export function useInterpretationHelper(occurrence: GermlineSNVOccurrence, isSom
       if (isSomatic) {
         return interpretationApi
           .postInterpretationSomatic(
+            caseId,
             occurrence.seq_id!.toString(),
             occurrence.locus_id!.toString(),
             occurrence.transcript_id!,
@@ -47,6 +50,7 @@ export function useInterpretationHelper(occurrence: GermlineSNVOccurrence, isSom
       } else {
         return interpretationApi
           .postInterpretationGermline(
+            caseId,
             occurrence.seq_id!.toString(),
             occurrence.locus_id!.toString(),
             occurrence.transcript_id!,

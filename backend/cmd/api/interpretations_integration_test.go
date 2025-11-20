@@ -40,23 +40,23 @@ func Test_GetInterpretationGermline(t *testing.T) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		// not found
-		assertGetInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
+		assertGetInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 		// create
 		interpretation := &types.InterpretationGermline{}
-		actual := assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual := assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 		// update
 		interpretation.Condition = "one condition"
 		interpretation.Metadata.AnalysisId = "analysis1"
-		actual = assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.Equal(t, actual.Condition, "one condition")
 		assert.Equal(t, actual.Metadata.AnalysisId, "analysis1")
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
-		assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
+		assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
 		// Update with known pubmed
 		interpretation.Pubmed[0].CitationID = "1"
-		actual = assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 	})
 }
@@ -67,16 +67,16 @@ func Test_GetInterpretationGermlineWithPartialContent(t *testing.T) {
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		interpretation := &types.InterpretationGermline{}
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
-		assertPostInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
-		assertGetInterpretationGermline(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusPartialContent, "")
+		assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		assertGetInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusPartialContent, "")
 	})
 }
 
-func assertGetInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, expected string) {
+func assertGetInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	router := gin.Default()
-	router.GET("/interpretations/germline/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationGermline(repo))
+	router.GET("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationGermline(repo))
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/germline/%s/%s/%s", sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -86,12 +86,12 @@ func assertGetInterpretationGermline(t *testing.T, repo repository.Interpretatio
 	}
 }
 
-func assertPostInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationGermline, expected string) *types.InterpretationGermline {
+func assertPostInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationGermline, expected string) *types.InterpretationGermline {
 	router := gin.Default()
-	router.POST("/interpretations/germline/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationGermline(repo))
+	router.POST("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationGermline(repo))
 
 	body, _ := json.Marshal(interpretation)
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/germline/%s/%s/%s", sequencingId, locusId, transcriptId), bytes.NewReader(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewReader(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -112,23 +112,23 @@ func Test_GetInterpretationsomatic(t *testing.T) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		// not found
-		assertGetInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
+		assertGetInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 		// create
 		interpretation := &types.InterpretationSomatic{}
-		actual := assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual := assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 		// update
 		interpretation.Oncogenicity = "one Oncogenicity"
 		interpretation.Metadata.AnalysisId = "analysis1"
-		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.Equal(t, actual.Oncogenicity, "one Oncogenicity")
 		assert.Equal(t, actual.Metadata.AnalysisId, "analysis1")
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
-		assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
+		assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
 		// Update with known pubmed
 		interpretation.Pubmed[0].CitationID = "1"
-		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 	})
 }
@@ -139,16 +139,16 @@ func Test_GetInterpretationSomaticWithPartialContent(t *testing.T) {
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		interpretation := &types.InterpretationSomatic{}
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
-		assertPostInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
-		assertGetInterpretationSomatic(t, repo.Interpretations, "seq1", "locus1", "trans1", http.StatusPartialContent, "")
+		assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		assertGetInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusPartialContent, "")
 	})
 }
 
-func assertGetInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, expected string) {
+func assertGetInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	router := gin.Default()
-	router.GET("/interpretations/somatic/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationSomatic(repo))
+	router.GET("/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationSomatic(repo))
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/somatic/%s/%s/%s", sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -158,12 +158,12 @@ func assertGetInterpretationSomatic(t *testing.T, repo repository.Interpretation
 	}
 }
 
-func assertPostInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationSomatic, expected string) *types.InterpretationSomatic {
+func assertPostInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationSomatic, expected string) *types.InterpretationSomatic {
 	router := gin.Default()
-	router.POST("/interpretations/somatic/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationSomatic(repo))
+	router.POST("/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationSomatic(repo))
 
 	body, _ := json.Marshal(interpretation)
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/somatic/%s/%s/%s", sequencingId, locusId, transcriptId), bytes.NewReader(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewReader(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -191,8 +191,8 @@ func Test_SearchGermline(t *testing.T) {
 		// add interpretations
 		interpretation1 := &types.InterpretationGermline{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "foo"}}}
 		interpretation2 := &types.InterpretationGermline{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "toto"}}}
-		assertPostInterpretationGermline(t, repo, "seq1", "locus1", "trans1", http.StatusOK, interpretation1, "")
-		assertPostInterpretationGermline(t, repo, "seq2", "locus1", "trans1", http.StatusOK, interpretation2, "")
+		assertPostInterpretationGermline(t, repo, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation1, "")
+		assertPostInterpretationGermline(t, repo, "10", "seq2", "locus1", "trans1", http.StatusOK, interpretation2, "")
 
 		// search again
 		assertSearchInterpretationGermline(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 2)
@@ -227,8 +227,8 @@ func Test_SearchSomatic(t *testing.T) {
 		// add interpretations
 		interpretation1 := &types.InterpretationSomatic{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "foo"}}}
 		interpretation2 := &types.InterpretationSomatic{InterpretationCommon: types.InterpretationCommon{Metadata: types.InterpretationMetadata{AnalysisId: "toto"}}}
-		assertPostInterpretationSomatic(t, repo, "seq1", "locus1", "trans1", http.StatusOK, interpretation1, "")
-		assertPostInterpretationSomatic(t, repo, "seq2", "locus1", "trans1", http.StatusOK, interpretation2, "")
+		assertPostInterpretationSomatic(t, repo, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation1, "")
+		assertPostInterpretationSomatic(t, repo, "11", "seq2", "locus1", "trans1", http.StatusOK, interpretation2, "")
 
 		// search again
 		assertSearchInterpretationSomatic(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 2)

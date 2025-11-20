@@ -60,6 +60,7 @@ var InterpretationSomaticTable = Table{
 
 type InterpretationCommonDAO struct {
 	ID             string `gorm:"primary_key; unique; type:uuid; default:gen_random_uuid()"`
+	CaseId         string
 	SequencingId   string
 	LocusId        string
 	TranscriptId   string
