@@ -69,8 +69,6 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilterInstance
       updated_on: string;
     };
 
-    console.warn('savedFilterObj', savedFilterObj);
-
     if (!savedFilterObj.updated_on) {
       return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', 'n/a');
     }
