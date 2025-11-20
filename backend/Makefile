@@ -13,21 +13,21 @@ build:
 	@echo "Building API..."
 	
 	
-	@go build -o bin/api/main cmd/api/main.go
+	@go build -o bin/api/ ./cmd/api/
 
 # Run the application
 run:
-	@go run cmd/api/main.go
+	@go run ./cmd/api/
 
 build-worker:
 	@echo "Building Worker..."
 
 
-	@go build -o bin/worker/main cmd/worker/main.go
+	@go build -o bin/worker/ ./cmd/worker/
 
 # Run the worker
 run-worker:
-	@go run cmd/worker/main.go
+	@go run ./cmd/worker -stderrthreshold=INFO
 
 
 # Create DB container
