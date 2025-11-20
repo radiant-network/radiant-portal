@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Patients - Batch - Missing fields - Life Status Code', () => {
+describe('Patients - Batch - Missing fields - String fields', () => {
   let response: any;
 
   before(() => {
@@ -9,10 +9,6 @@ describe('Patients - Batch - Missing fields - Life Status Code', () => {
     const body: string = `{
       "patients": [
         {
-          "organization_patient_id": "Cypress0001",
-          "organization_patient_id_type": "MR",
-          "organization_code": "Cypress",
-          "sex_code": "male",
           "date_of_birth": "1979-09-19"
         }
       ]
@@ -28,6 +24,10 @@ describe('Patients - Batch - Missing fields - Life Status Code', () => {
   });
 
   it('Message', () => {
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'OrganizationPatientId', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'OrganizationPatientIdType', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'OrganizationCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'LifeStatusCode', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'SexCode', 'required'));
   });
 });

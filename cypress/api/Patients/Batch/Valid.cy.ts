@@ -31,6 +31,6 @@ describe('Patients - Batch - Valid', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedPatientsBatchResponse(response);
+    cy.validateAcceptedPatientsBatchResponse(response, 'patient');
   });
 });

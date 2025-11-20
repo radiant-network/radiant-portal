@@ -75,11 +75,11 @@ Cypress.Commands.add('getToken', () => {
  * and validates dynamic fields (id format as UUID, created_on as recent ISO date).
  * @param response The API response object from a patients batch request.
  */
-Cypress.Commands.add('validateAcceptedPatientsBatchResponse', (response: any) => {
+Cypress.Commands.add('validateAcceptedPatientsBatchResponse', (response: any, batch_type: string) => {
   expect(response.body).to.have.keys('id', 'dry_run', 'batch_type', 'status', 'created_on', 'username');
   expect(response.body).to.include({
     dry_run: true,
-    batch_type: 'patient',
+    batch_type: batch_type,
     status: 'PENDING',
     username: 'cypress',
   });
