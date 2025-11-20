@@ -58,7 +58,7 @@ func GetBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.Ha
 			FinishedOn: batch.FinishedOn,
 			Username:   batch.Username,
 			Summary:    batch.Summary,
-			Errors:     batch.Errors,
+			Errors:     batch.Report,
 		}
 		c.JSON(http.StatusOK, response)
 	}

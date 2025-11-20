@@ -54,7 +54,7 @@ func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth
 			return
 		}
 
-		batch, err := repo.CreateBatch(body.Patients, "patient", *username, queryParam.DryRun)
+		batch, err := repo.CreateBatch(body.Patients, types.PatientBatchType, *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return

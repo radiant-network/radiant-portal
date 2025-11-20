@@ -1,0 +1,1 @@
+ALTER TABLE batch RENAME COLUMN report TO errors;

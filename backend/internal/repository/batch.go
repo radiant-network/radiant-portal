@@ -52,6 +52,15 @@ func (r *BatchRepository) CreateBatch(payload any, batchType string, username st
 	return r.GetBatchByID(newBatch.ID)
 }
 
+func (r *BatchRepository) UpdateBatch(batch Batch) (int64, error) {
+	result := r.db.Model(&batch).Updates(batch)
+	if result.Error != nil {
+		return 0, fmt.Errorf("error updating batch: %w", result.Error)
+	}
+	return result.RowsAffected, nil
+
+}
+
 func (r *BatchRepository) GetBatchByID(batchId string) (*Batch, error) {
 	var batch Batch
 
