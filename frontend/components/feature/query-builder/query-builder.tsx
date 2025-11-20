@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/ui/accordion';
 import { Card } from '@/components/base/ui/card';
+import { Separator } from '@/components/base/ui/separator';
 import { Skeleton } from '@/components/base/ui/skeleton';
 import { deepMerge } from '@/components/lib/merge';
 
@@ -14,7 +15,6 @@ import SavedFiltersRightActions from './saved-filter/saved-filter-right-actions'
 import { defaultQueryReferenceColors, useQueryBuilderDictionary } from './data';
 import { QueryBuilderContext, QueryBuilderDictContext } from './query-builder-context';
 import { QueryBuilderContextType, QueryBuilderProps } from './types';
-import { Separator } from '@/components/base/ui/separator';
 
 function QueryBuilder({
   enableCombine = true,

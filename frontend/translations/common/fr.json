@@ -248,7 +248,19 @@
       },
       "discard_tooltip": "Annuler les modifications non enregistrées",
       "no_saved_filters": "Vous n'avez aucun filtre enregistré",
-      "untitled_filter": "Filtre sans titre"
+      "untitled_filter": "Filtre sans titre",
+      "notifications": {
+        "created": "Filtre enregistré",
+        "deleted": "Filtre supprimé",
+        "updated": "Filtre mis à jour",
+        "errors": {
+          "fetching": "Impossible de récupérer les filtres",
+          "duplicated": "Un filtre avec ce nom existe déjà",
+          "created": "Impossible de créer le filtre",
+          "updated": "Impossible de mettre à jour le filtre",
+          "deleted": "Impossible de supprimer le filtre"
+        }
+      }
     },
     "components": {
       "query_pill_remote": "Composant Query Pill Remote",
