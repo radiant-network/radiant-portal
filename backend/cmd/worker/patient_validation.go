@@ -10,6 +10,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
 )
 
 const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
@@ -33,7 +34,8 @@ const OrganizationTypeCode = "PATIENT-006"
 
 type PatientValidationRecord struct {
 	BaseValidationRecord
-	Patient types.PatientBatch
+	Patient        types.PatientBatch
+	OrganizationId int
 }
 
 func (r PatientValidationRecord) GetBase() *BaseValidationRecord {
@@ -131,7 +133,10 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 
 		r.addErrors(message, OrganizationTypeCode, path)
 
+	} else {
+		r.OrganizationId = organization.ID
 	}
+
 }
 
 func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types.Patient) {
@@ -171,7 +176,7 @@ func validateExistingPatientFieldFn[T comparable](
 	}
 }
 
-func processPatientBatch(batch *types.Batch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoBatch *repository.BatchRepository) {
+func processPatientBatch(batch *types.Batch, dB *gorm.DB, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoBatch *repository.BatchRepository) {
 	payload := []byte(batch.Payload)
 	var batches []types.PatientBatch
 
@@ -188,15 +193,59 @@ func processPatientBatch(batch *types.Batch, repoOrganization *repository.Organi
 
 	glog.Infof("Patient batch %v processed with %d records", batch.ID, len(records))
 
-	rowsUpdated, unexpectedErr := updateBatch(batch, records, repoBatch)
-	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error updating patient batch: %v", unexpectedErr), repoBatch)
+	err := persistBatchAndPatientRecords(dB, batch, records)
+	if err != nil {
+		processUnexpectedError(batch, fmt.Errorf("error processing patient batch records: %v", err), repoBatch)
 		return
 	}
-	if rowsUpdated == 0 {
-		glog.Warningf("no rows updated when updating patient batch %v", batch.ID)
-	}
+}
 
+func persistBatchAndPatientRecords(dB *gorm.DB, batch *types.Batch, records []PatientValidationRecord) error {
+	return dB.Transaction(func(tx *gorm.DB) error {
+		txRepoPatient := repository.NewPatientsRepository(tx)
+		txRepoBatch := repository.NewBatchRepository(tx)
+		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, txRepoBatch)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			/* Logs directly, and return error to trigger rollback if the batch does not exist in db */
+			return fmt.Errorf("no rows updated when updating patient batch %v", batch.ID)
+		}
+		if !batch.DryRun && batch.Status == "SUCCESS" {
+			err := insertPatientRecords(records, txRepoPatient)
+			if err != nil {
+				return fmt.Errorf("error during patient insertion %v", err)
+			}
+		}
+
+		return nil
+	})
+}
+
+func insertPatientRecords(records []PatientValidationRecord, repo *repository.PatientsRepository) error {
+	for _, record := range records {
+		if !record.Skipped {
+			patient := types.Patient{
+				OrganizationPatientId:     record.Patient.OrganizationPatientId,
+				OrganizationID:            record.OrganizationId,
+				OrganizationPatientIdType: record.Patient.OrganizationPatientIdType,
+				FirstName:                 record.Patient.FirstName,
+				LastName:                  record.Patient.LastName,
+				Jhn:                       record.Patient.Jhn,
+				SexCode:                   record.Patient.SexCode,
+				LifeStatusCode:            record.Patient.LifeStatusCode,
+			}
+			if record.Patient.DateOfBirth != nil {
+				patient.DateOfBirth = record.Patient.DateOfBirth.Time
+			}
+			err := repo.CreatePatient(&patient)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func validatePatientBatch(batches []types.PatientBatch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) ([]PatientValidationRecord, error) {

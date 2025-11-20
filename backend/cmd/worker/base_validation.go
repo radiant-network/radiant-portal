@@ -41,6 +41,10 @@ func (r *BaseValidationRecord) addInfos(message string, code string, path string
 
 }
 
+func (r *BaseValidationRecord) isValid() bool {
+	return len(r.Errors) == 0
+}
+
 func updateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {
 	copyRecordIntoBatch(batch, records)
 	now := time.Now()

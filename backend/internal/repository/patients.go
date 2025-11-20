@@ -30,3 +30,8 @@ func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId in
 	}
 	return &patient, nil
 }
+
+func (r *PatientsRepository) CreatePatient(newPatient *types.Patient) error {
+	tx := r.db.Create(newPatient)
+	return tx.Error
+}

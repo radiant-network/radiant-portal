@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -297,4 +299,70 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 	for _, w := range rec.Warnings {
 		assert.Equal(t, ExistingPatientDifferentFieldCode, w.Code)
 	}
+}
+func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		/* This test verifies that rollback occurs when there is an error inserting patient records. */
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PROCESSING', ?, false, 'user999', '2025-10-09')
+    		RETURNING id;
+		`, "{}", types.PatientBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		//Batch has been considered as SUCCESS before inserting patient records
+		batch := types.Batch{
+			ID:        id,
+			BatchType: types.PatientBatchType,
+			Payload:   "[]",
+			Status:    "SUCCESS",
+			DryRun:    false,
+		}
+		//Patient records with one having a non-existent organization to trigger foreign key violation
+		// Should never happen in real life as we validate organization existence before this step
+		// but this is to test rollback functionality
+		patientRecords := []PatientValidationRecord{
+			{
+				Patient: types.PatientBatch{
+					OrganizationPatientId:     "id1",
+					OrganizationPatientIdType: "mrn",
+					SexCode:                   "male",
+					LifeStatusCode:            "alive",
+				},
+				OrganizationId: 1,
+			},
+			{
+				Patient: types.PatientBatch{
+					OrganizationPatientId:     "id2",
+					OrganizationPatientIdType: "mrn",
+					SexCode:                   "male",
+					LifeStatusCode:            "alive",
+				},
+				OrganizationId: 99999, // Non-existent organization to trigger foreign key violation
+			},
+		}
+
+		err := persistBatchAndPatientRecords(db, &batch, patientRecords)
+		if assert.NotNil(t, err) {
+			assert.Contains(t, err.Error(), "violates foreign key constraint")
+		}
+
+		// Verify that no patient records were inserted due to rollback
+		var countPatient int64
+		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "id2", 1).Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(0), countPatient) // No patient should have been inserted due to rollback
+
+		// Verify that batch status has been rolled back to PROCESSING
+		resultBatch := types.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, "PROCESSING", resultBatch.Status) // Batch status should have been rollback
+
+	})
+
 }
