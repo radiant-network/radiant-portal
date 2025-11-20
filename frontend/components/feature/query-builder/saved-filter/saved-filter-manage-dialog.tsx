@@ -66,14 +66,14 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilterInstance
 
   const getLastSaveAtDisplay = useCallback(() => {
     const savedFilterObj = savedFilter.raw() as ISavedFilter & {
-      updated_date: string;
+      updated_on: string;
     };
 
-    if (!savedFilterObj.updated_date) {
+    if (!savedFilterObj.updated_on) {
       return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', 'n/a');
     }
 
-    const lastSaveAt = formatDistance(new Date(), new Date(savedFilterObj.updated_date), {
+    const lastSaveAt = formatDistance(new Date(), new Date(savedFilterObj.updated_on), {
       locale: frCA,
     });
 
