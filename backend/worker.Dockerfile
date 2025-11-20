@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY .. .
 RUN go mod download && go mod tidy
-RUN CGO_ENABLED=0 GOOS=linux go build -o bin/main cmd/worker/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o bin/main ./cmd/worker/
 
 # Fetch CA certificates
 FROM alpine:latest AS certs
