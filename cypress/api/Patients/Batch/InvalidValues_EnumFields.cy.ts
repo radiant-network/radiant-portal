@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Patients - Batch - Blank fields - Organization Patient Id Type', () => {
+describe('Patients - Batch - Invalid values - Enum fields', () => {
   let response: any;
 
   before(() => {
@@ -10,10 +10,10 @@ describe('Patients - Batch - Blank fields - Organization Patient Id Type', () =>
       "patients": [
         {
           "organization_patient_id": "Cypress0001",
-          "organization_patient_id_type": "",
+          "organization_patient_id_type": "MR",
           "organization_code": "Cypress",
-          "life_status_code": "alive",
-          "sex_code": "male",
+          "life_status_code": "InvalidValue",
+          "sex_code": "InvalidValue",
           "date_of_birth": "1979-09-19"
         }
       ]
@@ -29,6 +29,7 @@ describe('Patients - Batch - Blank fields - Organization Patient Id Type', () =>
   });
 
   it('Message', () => {
-    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'OrganizationPatientIdType', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'LifeStatusCode', 'oneof'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'SexCode', 'oneof'));
   });
 });
