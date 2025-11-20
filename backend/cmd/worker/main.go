@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang/glog"
@@ -15,6 +17,12 @@ func main() {
 	flag.Parse()
 	defer glog.Flush()
 	dbPostgres, initDbErr := database.NewPostgresDB()
+	pollIntervalStr := getEnvOrDefault("POLL_INTERVAL_MS", "1000")
+	pollInterval, pollIntervalErr := strconv.Atoi(pollIntervalStr)
+	if pollIntervalErr != nil {
+		glog.Fatalf("Polling interval defined in env var POLL_INTERVAL_MS (%v) must be an integer ", pollIntervalStr)
+	}
+
 	if initDbErr != nil {
 		glog.Fatalf("Failed to initialize postgres database: %v", initDbErr)
 	}
@@ -24,9 +32,17 @@ func main() {
 	glog.Info("Worker started...")
 	for {
 		processBatch(repoBatch, repoOrganization, repoPatient)
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(pollInterval) * time.Millisecond)
 	}
 
+}
+
+func getEnvOrDefault(key, fallback string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists || value == "" { // Check if not exists OR if the value is empty
+		return fallback
+	}
+	return value
 }
 
 func processBatch(repoBatch *repository.BatchRepository, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) {

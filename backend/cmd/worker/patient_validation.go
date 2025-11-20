@@ -172,7 +172,6 @@ func validateExistingPatientFieldFn[T comparable](
 }
 
 func processPatientBatch(batch *types.Batch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoBatch *repository.BatchRepository) {
-	//TODO move this funtion into a common  file. Make a test for it.
 	payload := []byte(batch.Payload)
 	var batches []types.PatientBatch
 
