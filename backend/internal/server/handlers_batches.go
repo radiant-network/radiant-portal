@@ -44,7 +44,7 @@ func GetBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.Ha
 			return
 		}
 		if !hasRole {
-			HandleUnauthorizedError(c)
+			HandleForbiddenError(c)
 			return
 		}
 

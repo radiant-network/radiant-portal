@@ -9,11 +9,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
-// PostPatientBatchHandler
-// @Summary Create a new patient batch
-// @Id postPatientBatch
-// @Description Create a new patient batch
-// @Tags patients
+// PostSampleBatchHandler
+// @Summary Create a new sample batch
+// @Id postSampleBatch
+// @Description Create a new sample batch
+// @Tags samples
 // @Security bearerauth
 // @Accept json
 // @Produce json
@@ -21,11 +21,11 @@ import (
 // @Failure 400 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /patients/batch [post]
-func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
+// @Router /samples/batch [post]
+func PostSampleBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body       types.CreatePatientBatchBody
+			body       types.CreateSampleBatchBody
 			queryParam types.CreateBatchQueryParam
 		)
 		if err := c.ShouldBindJSON(&body); err != nil {
@@ -54,7 +54,7 @@ func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth
 			return
 		}
 
-		batch, err := repo.CreateBatch(body.Patients, types.PatientBatchType, *username, queryParam.DryRun)
+		batch, err := repo.CreateBatch(body.Samples, "sample", *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return

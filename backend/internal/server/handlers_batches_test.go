@@ -72,7 +72,7 @@ func Test_GetBatchHandler_Success(t *testing.T) {
 	assert.Contains(t, w.Body.String(), `"username":"test-username"`)
 }
 
-func Test_GetBatchHandler_Unauthorized(t *testing.T) {
+func Test_GetBatchHandler_Forbidden(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	repo := &MockBatchRepository{
@@ -94,8 +94,8 @@ func Test_GetBatchHandler_Unauthorized(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "Unauthorized")
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.Contains(t, w.Body.String(), "Forbidden")
 }
 
 func Test_GetBatchHandler_NotFound(t *testing.T) {

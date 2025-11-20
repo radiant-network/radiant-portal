@@ -16,7 +16,7 @@ import (
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
-func TestPostPatientBatchHandler_Success(t *testing.T) {
+func TestPostSampleBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
 		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
@@ -39,9 +39,9 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
-	body := `{"patients": [{"organization_patient_id": "p1", "organization_patient_id_type": "MR", "organization_code": "org1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
-	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
+	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
+	body := `{"samples": [{"organization_patient_id": "p1", "organization_code": "org1", "type_code": "blood", "histology_code": "tumoral", "submitter_sample_id": "s1", "submitter_organization_code": "org1"}]}`
+	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -50,12 +50,12 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 	var response types.CreateBatchResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.Equal(t, "patient", response.BatchType)
+	assert.Equal(t, "sample", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
 	assert.Equal(t, "PENDING", response.Status)
 }
 
-func TestPostPatientBatchHandler_Forbidden(t *testing.T) {
+func TestPostSampleBatchHandler_Forbidden(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{
@@ -68,9 +68,9 @@ func TestPostPatientBatchHandler_Forbidden(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
-	body := `{"patients": [{"organization_patient_id": "p1", "organization_patient_id_type": "MR", "organization_code": "org1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
-	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
+	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
+	body := `{"samples": [{"organization_patient_id": "p1", "organization_code": "org1", "type_code": "blood", "histology_code": "tumoral", "submitter_sample_id": "s1", "submitter_organization_code": "org1"}]}`
+	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -78,7 +78,7 @@ func TestPostPatientBatchHandler_Forbidden(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
-func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
+func TestPostSampleBatchHandler_ValidationError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{
@@ -91,9 +91,9 @@ func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
-	body := `{"patients": [{"organization_patient_id": "p1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
-	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
+	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
+	body := `{"samples": [{"organization_patient_id": "", "organization_code": "org1", "type_code": "blood", "histology_code": "tumorsal", "submitter_sample_id": "s1", "submitter_organization_code": "org1"}]}`
+	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -101,7 +101,7 @@ func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func TestPostPatientBatchHandler_EmptyPatients(t *testing.T) {
+func TestPostSampleBatchHandler_EmptySamples(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
 		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
@@ -124,9 +124,9 @@ func TestPostPatientBatchHandler_EmptyPatients(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
-	body := `{"patients": []}`
-	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
+	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
+	body := `{"samples": []}`
+	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

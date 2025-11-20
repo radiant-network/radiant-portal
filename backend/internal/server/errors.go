@@ -23,3 +23,7 @@ func HandleError(c *gin.Context, err error) {
 func HandleUnauthorizedError(c *gin.Context) {
 	c.JSON(http.StatusUnauthorized, types.ApiError{Status: http.StatusUnauthorized, Message: "Unauthorized"})
 }
+
+func HandleForbiddenError(c *gin.Context) {
+	c.JSON(http.StatusForbidden, types.ApiError{Status: http.StatusForbidden, Message: "Forbidden"})
+}
