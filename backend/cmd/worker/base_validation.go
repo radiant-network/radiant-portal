@@ -73,7 +73,7 @@ func copyRecordIntoBatch[T interface{ GetBase() *BaseValidationRecord }](batch *
 		}
 		if base.Skipped {
 			skipped += 1
-		} else {
+		} else if !batch.DryRun {
 			created += 1
 		}
 	}
