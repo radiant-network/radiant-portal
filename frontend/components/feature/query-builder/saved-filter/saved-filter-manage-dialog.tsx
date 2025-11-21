@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { formatDistance } from 'date-fns';
+import { enCA } from 'date-fns/locale/en-CA';
 import { frCA } from 'date-fns/locale/fr-CA';
 
 import List from '@/components/base/list/list';
@@ -14,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/ui/dialog';
+import { useI18n } from '@/components/hooks/i18n';
 import { SavedFilterInstance } from '@/components/model/query-builder-core';
 import { ISavedFilter } from '@/components/model/saved-filter';
 
@@ -61,7 +63,7 @@ function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpe
 
 const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilterInstance }) => {
   const dict = useQueryBuilderDictContext();
-
+  const { currentLanguage } = useI18n();
   const [openEdit, setOpenEdit] = useState(false);
 
   const getLastSaveAtDisplay = useCallback(() => {
@@ -74,7 +76,7 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilterInstance
     }
 
     const lastSaveAt = formatDistance(new Date(), new Date(savedFilterObj.updated_on), {
-      locale: frCA,
+      locale: currentLanguage === 'fr' ? frCA : enCA,
     });
 
     return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', lastSaveAt);
