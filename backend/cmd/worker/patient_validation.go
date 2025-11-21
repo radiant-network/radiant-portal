@@ -26,10 +26,10 @@ const TextMaxLength = 100
 var AllowedOrganizationCategories = []string{"healthcare_provider", "research_institute"}
 
 const PatientAlreadyExistCode = "PATIENT-001"
-const ExistingPatientDifferentFieldCode = "PATIENT-002"
-const OrganizationNotExistCode = "PATIENT-003"
-const InvalidValueCode = "PATIENT-004"
-const OrganizationTypeCode = "PATIENT-005"
+const PatientExistingPatientDifferentFieldCode = "PATIENT-002"
+const PatientOrganizationNotExistCode = "PATIENT-003"
+const PatientInvalidValueCode = "PATIENT-004"
+const PatientOrganizationTypeCode = "PATIENT-005"
 
 type PatientValidationRecord struct {
 	BaseValidationRecord
@@ -42,7 +42,7 @@ func (r PatientValidationRecord) GetBase() *BaseValidationRecord {
 }
 
 func formatInvalidField(patient types.PatientBatch, fieldName string, reason string) string {
-	message := fmt.Sprintf("Invalid Field %s for sample  (%s / %s). Reason: %s", fieldName, patient.OrganizationCode, patient.OrganizationPatientId, reason)
+	message := fmt.Sprintf("Invalid Field %s for patient (%s / %s). Reason: %s", fieldName, patient.OrganizationCode, patient.OrganizationPatientId, reason)
 	return message
 }
 
@@ -68,11 +68,11 @@ func (r *PatientValidationRecord) validateOrganizationPatientId() {
 	if len(r.Patient.OrganizationPatientId) > TextMaxLength {
 		message := formatFieldTooLong(r.Patient, "organization_patient_id", TextMaxLength)
 
-		r.addErrors(message, InvalidValueCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.OrganizationPatientId) {
 		message := formatFieldRegexpMatch(r.Patient, "organization_patient_id", ExternalIdRegexp)
-		r.addErrors(message, InvalidValueCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -83,11 +83,11 @@ func (r *PatientValidationRecord) validateLastName() {
 	path := r.formatPath("last_name")
 	if len(r.Patient.LastName) > TextMaxLength {
 		message := formatFieldTooLong(r.Patient, "last_name", TextMaxLength)
-		r.addErrors(message, InvalidValueCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.LastName) {
 		message := formatFieldRegexpMatch(r.Patient, "last_name", NameRegExp)
-		r.addErrors(message, InvalidValueCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -98,11 +98,11 @@ func (r *PatientValidationRecord) validateFirstName() {
 	path := r.formatPath("first_name")
 	if len(r.Patient.FirstName) > TextMaxLength {
 		message := formatFieldTooLong(r.Patient, "first_name", TextMaxLength)
-		r.addErrors(message, InvalidValueCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.FirstName) {
 		message := formatFieldRegexpMatch(r.Patient, "first_name", NameRegExp)
-		r.addErrors(message, InvalidValueCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -113,11 +113,11 @@ func (r *PatientValidationRecord) validateJhn() {
 	path := r.formatPath("jhn")
 	if len(r.Patient.Jhn) > TextMaxLength {
 		message := formatFieldTooLong(r.Patient, "jhn", TextMaxLength)
-		r.addErrors(message, InvalidValueCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn) {
 		message := formatFieldRegexpMatch(r.Patient, "jhn", ExternalIdRegexp)
-		r.addErrors(message, InvalidValueCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -126,7 +126,7 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 	if organization == nil {
 		message := fmt.Sprintf("Organization %s for patient %s does not exist.", r.Patient.OrganizationCode, r.Patient.OrganizationPatientId)
 
-		r.addErrors(message, OrganizationNotExistCode, path)
+		r.addErrors(message, PatientOrganizationNotExistCode, path)
 	} else if !slices.Contains(AllowedOrganizationCategories, organization.CategoryCode) {
 		message := fmt.Sprintf("Organization type (%s) defined for patient (%s / %s) is not in this list : %s.",
 			organization.CategoryCode,
@@ -135,7 +135,7 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 			strings.Join(AllowedOrganizationCategories, ", "),
 		)
 
-		r.addErrors(message, OrganizationTypeCode, path)
+		r.addErrors(message, PatientOrganizationTypeCode, path)
 
 	} else {
 		r.OrganizationId = organization.ID
@@ -176,7 +176,7 @@ func validateExistingPatientFieldFn[T comparable](
 			recordValue,
 		)
 
-		r.addWarnings(message, ExistingPatientDifferentFieldCode, path)
+		r.addWarnings(message, PatientExistingPatientDifferentFieldCode, path)
 	}
 }
 

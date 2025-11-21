@@ -52,7 +52,7 @@ func processBatch(db *gorm.DB, repoBatch *repository.BatchRepository, repoOrgani
 		glog.Errorf("Error claiming next batch: %v", err)
 	}
 	if nextBatch != nil {
-		glog.Info("Processing batch: %v", nextBatch)
+		glog.Info("Processing batch: %v", nextBatch.ID)
 		if nextBatch.BatchType == types.PatientBatchType {
 			processPatientBatch(nextBatch, db, repoOrganization, repoPatient, repoBatch)
 		} else {

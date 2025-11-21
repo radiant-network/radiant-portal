@@ -29,7 +29,7 @@ func Test_OrganizationPatientId_Too_Long(t *testing.T) {
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateOrganizationPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
-	assert.Equal(t, fmt.Sprintf("Invalid Field organization_patient_id for sample  (CHUSJ / %s). Reason: field is too long, maximum length allowed is 100", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid Field organization_patient_id for patient (CHUSJ / %s). Reason: field is too long, maximum length allowed is 100", orgPatientId), patientValidationRecord.Errors[0].Message)
 	assert.Equal(t, "patient[0].organization_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
@@ -39,7 +39,7 @@ func Test_OrganizationPatientId_Special_Characters(t *testing.T) {
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateOrganizationPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
-	assert.Equal(t, fmt.Sprintf("Invalid Field organization_patient_id for sample  (CHUSJ / %s). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid Field organization_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$", orgPatientId), patientValidationRecord.Errors[0].Message)
 	assert.Equal(t, "patient[0].organization_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
@@ -204,7 +204,7 @@ func Test_ValidateOrganization(t *testing.T) {
 	rec.validateOrganization(nil)
 	assert.Len(t, rec.Errors, 1)
 	assert.Contains(t, rec.Errors[0].Message, "does not exist")
-	assert.Equal(t, rec.Errors[0].Code, OrganizationNotExistCode)
+	assert.Equal(t, rec.Errors[0].Code, PatientOrganizationNotExistCode)
 
 	// Invalid organization category: should have error
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id2"}
@@ -213,7 +213,7 @@ func Test_ValidateOrganization(t *testing.T) {
 	rec.validateOrganization(invalidOrg)
 	assert.Len(t, rec.Errors, 1)
 	assert.Contains(t, rec.Errors[0].Message, "is not in this list")
-	assert.Equal(t, rec.Errors[0].Code, OrganizationTypeCode)
+	assert.Equal(t, rec.Errors[0].Code, PatientOrganizationTypeCode)
 
 	// Valid organization with healthcare_provider category: no errors
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id3"}
@@ -297,7 +297,7 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 	// All 6 differing fields should produce 6 warnings
 	assert.Len(t, rec.Warnings, 6)
 	for _, w := range rec.Warnings {
-		assert.Equal(t, ExistingPatientDifferentFieldCode, w.Code)
+		assert.Equal(t, PatientExistingPatientDifferentFieldCode, w.Code)
 	}
 }
 func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
