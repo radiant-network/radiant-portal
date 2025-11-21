@@ -62,3 +62,6 @@ VALUES
     (60, 'MRN-283832','mrn',3,'female', '1979-07-01', 'alive', 'Gabriel', 'Fortin', 'FOR7907010876'),
     (61, 'MRN-283833','mrn',3,'female', '1971-07-25', 'alive', 'Camille', 'Bergeron', 'BER7107256143')
 ON CONFLICT (id) DO NOTHING;
+
+/* Reset id, so the next inserted row will start at 1000 */
+ALTER TABLE patient ALTER COLUMN id RESTART WITH 1000;

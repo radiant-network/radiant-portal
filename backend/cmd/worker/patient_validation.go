@@ -10,6 +10,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
 )
 
 const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
@@ -25,29 +26,34 @@ const TextMaxLength = 100
 var AllowedOrganizationCategories = []string{"healthcare_provider", "research_institute"}
 
 const PatientAlreadyExistCode = "PATIENT-001"
-const ExistingPatientDifferentFieldCode = "PATIENT-002"
-const OrganizationNotExistCode = "PATIENT-003"
-const FieldTooLongCode = "PATIENT-004"
-const RegExpNotMatchCode = "PATIENT-005"
-const OrganizationTypeCode = "PATIENT-006"
+const PatientExistingPatientDifferentFieldCode = "PATIENT-002"
+const PatientOrganizationNotExistCode = "PATIENT-003"
+const PatientInvalidValueCode = "PATIENT-004"
+const PatientOrganizationTypeCode = "PATIENT-005"
 
 type PatientValidationRecord struct {
 	BaseValidationRecord
-	Patient types.PatientBatch
+	Patient        types.PatientBatch
+	OrganizationId int
 }
 
 func (r PatientValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func formatFieldTooLong(patient types.PatientBatch, fieldName string, maxLength int) string {
-	message := fmt.Sprintf("Field %s for patient (%s / %s) is too long ( > %d).", fieldName, patient.OrganizationCode, patient.OrganizationPatientId, maxLength)
+func (r PatientValidationRecord) formatInvalidField(fieldName string, reason string) string {
+	message := fmt.Sprintf("Invalid Field %s for patient (%s / %s). Reason: %s", fieldName, r.Patient.OrganizationCode, r.Patient.OrganizationPatientId, reason)
 	return message
 }
 
-func formatFieldRegexpMatch(patient types.PatientBatch, fieldName string, regexp string) string {
-	message := fmt.Sprintf("Field %s for patient (%s / %s) does not match the regular expression %s.", fieldName, patient.OrganizationCode, patient.OrganizationPatientId, regexp)
-	return message
+func (r PatientValidationRecord) formatFieldTooLong(fieldName string, maxLength int) string {
+	reason := fmt.Sprintf("field is too long, maximum length allowed is %d", maxLength)
+	return r.formatInvalidField(fieldName, reason)
+}
+
+func (r PatientValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
+	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
+	return r.formatInvalidField(fieldName, reason)
 }
 
 func (r PatientValidationRecord) formatPath(fieldName string) string {
@@ -60,13 +66,13 @@ func (r PatientValidationRecord) formatPath(fieldName string) string {
 func (r *PatientValidationRecord) validateOrganizationPatientId() {
 	path := r.formatPath("organization_patient_id")
 	if len(r.Patient.OrganizationPatientId) > TextMaxLength {
-		message := formatFieldTooLong(r.Patient, "organization_patient_id", TextMaxLength)
+		message := r.formatFieldTooLong("organization_patient_id", TextMaxLength)
 
-		r.addErrors(message, FieldTooLongCode, path)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.OrganizationPatientId) {
-		message := formatFieldRegexpMatch(r.Patient, "organization_patient_id", ExternalIdRegexp)
-		r.addErrors(message, RegExpNotMatchCode, path)
+		message := r.formatFieldRegexpMatch("organization_patient_id", ExternalIdRegexp)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -76,12 +82,12 @@ func (r *PatientValidationRecord) validateLastName() {
 	}
 	path := r.formatPath("last_name")
 	if len(r.Patient.LastName) > TextMaxLength {
-		message := formatFieldTooLong(r.Patient, "last_name", TextMaxLength)
-		r.addErrors(message, FieldTooLongCode, path)
+		message := r.formatFieldTooLong("last_name", TextMaxLength)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.LastName) {
-		message := formatFieldRegexpMatch(r.Patient, "last_name", NameRegExp)
-		r.addErrors(message, RegExpNotMatchCode, path)
+		message := r.formatFieldRegexpMatch("last_name", NameRegExp)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -91,12 +97,12 @@ func (r *PatientValidationRecord) validateFirstName() {
 	}
 	path := r.formatPath("first_name")
 	if len(r.Patient.FirstName) > TextMaxLength {
-		message := formatFieldTooLong(r.Patient, "first_name", TextMaxLength)
-		r.addErrors(message, FieldTooLongCode, path)
+		message := r.formatFieldTooLong("first_name", TextMaxLength)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.FirstName) {
-		message := formatFieldRegexpMatch(r.Patient, "first_name", NameRegExp)
-		r.addErrors(message, RegExpNotMatchCode, path)
+		message := r.formatFieldRegexpMatch("first_name", NameRegExp)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -106,12 +112,12 @@ func (r *PatientValidationRecord) validateJhn() {
 	}
 	path := r.formatPath("jhn")
 	if len(r.Patient.Jhn) > TextMaxLength {
-		message := formatFieldTooLong(r.Patient, "jhn", TextMaxLength)
-		r.addErrors(message, FieldTooLongCode, path)
+		message := r.formatFieldTooLong("jhn", TextMaxLength)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn) {
-		message := formatFieldRegexpMatch(r.Patient, "jhn", ExternalIdRegexp)
-		r.addErrors(message, RegExpNotMatchCode, path)
+		message := r.formatFieldRegexpMatch("jhn", ExternalIdRegexp)
+		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -120,7 +126,7 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 	if organization == nil {
 		message := fmt.Sprintf("Organization %s for patient %s does not exist.", r.Patient.OrganizationCode, r.Patient.OrganizationPatientId)
 
-		r.addErrors(message, OrganizationNotExistCode, path)
+		r.addErrors(message, PatientOrganizationNotExistCode, path)
 	} else if !slices.Contains(AllowedOrganizationCategories, organization.CategoryCode) {
 		message := fmt.Sprintf("Organization type (%s) defined for patient (%s / %s) is not in this list : %s.",
 			organization.CategoryCode,
@@ -129,9 +135,12 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 			strings.Join(AllowedOrganizationCategories, ", "),
 		)
 
-		r.addErrors(message, OrganizationTypeCode, path)
+		r.addErrors(message, PatientOrganizationTypeCode, path)
 
+	} else {
+		r.OrganizationId = organization.ID
 	}
+
 }
 
 func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types.Patient) {
@@ -167,11 +176,11 @@ func validateExistingPatientFieldFn[T comparable](
 			recordValue,
 		)
 
-		r.addWarnings(message, ExistingPatientDifferentFieldCode, path)
+		r.addWarnings(message, PatientExistingPatientDifferentFieldCode, path)
 	}
 }
 
-func processPatientBatch(batch *types.Batch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoBatch *repository.BatchRepository) {
+func processPatientBatch(batch *types.Batch, dB *gorm.DB, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoBatch *repository.BatchRepository) {
 	payload := []byte(batch.Payload)
 	var batches []types.PatientBatch
 
@@ -188,15 +197,59 @@ func processPatientBatch(batch *types.Batch, repoOrganization *repository.Organi
 
 	glog.Infof("Patient batch %v processed with %d records", batch.ID, len(records))
 
-	rowsUpdated, unexpectedErr := updateBatch(batch, records, repoBatch)
-	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error updating patient batch: %v", unexpectedErr), repoBatch)
+	err := persistBatchAndPatientRecords(dB, batch, records)
+	if err != nil {
+		processUnexpectedError(batch, fmt.Errorf("error processing patient batch records: %v", err), repoBatch)
 		return
 	}
-	if rowsUpdated == 0 {
-		glog.Warningf("no rows updated when updating patient batch %v", batch.ID)
-	}
+}
 
+func persistBatchAndPatientRecords(dB *gorm.DB, batch *types.Batch, records []PatientValidationRecord) error {
+	return dB.Transaction(func(tx *gorm.DB) error {
+		txRepoPatient := repository.NewPatientsRepository(tx)
+		txRepoBatch := repository.NewBatchRepository(tx)
+		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, txRepoBatch)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			/* Logs directly, and return error to trigger rollback if the batch does not exist in db */
+			return fmt.Errorf("no rows updated when updating patient batch %v", batch.ID)
+		}
+		if !batch.DryRun && batch.Status == "SUCCESS" {
+			err := insertPatientRecords(records, txRepoPatient)
+			if err != nil {
+				return fmt.Errorf("error during patient insertion %v", err)
+			}
+		}
+
+		return nil
+	})
+}
+
+func insertPatientRecords(records []PatientValidationRecord, repo *repository.PatientsRepository) error {
+	for _, record := range records {
+		if !record.Skipped {
+			patient := types.Patient{
+				OrganizationPatientId:     record.Patient.OrganizationPatientId,
+				OrganizationID:            record.OrganizationId,
+				OrganizationPatientIdType: record.Patient.OrganizationPatientIdType,
+				FirstName:                 record.Patient.FirstName,
+				LastName:                  record.Patient.LastName,
+				Jhn:                       record.Patient.Jhn,
+				SexCode:                   record.Patient.SexCode,
+				LifeStatusCode:            record.Patient.LifeStatusCode,
+			}
+			if record.Patient.DateOfBirth != nil {
+				patient.DateOfBirth = record.Patient.DateOfBirth.Time
+			}
+			err := repo.CreatePatient(&patient)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func validatePatientBatch(batches []types.PatientBatch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) ([]PatientValidationRecord, error) {

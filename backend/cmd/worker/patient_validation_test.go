@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -27,7 +29,7 @@ func Test_OrganizationPatientId_Too_Long(t *testing.T) {
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateOrganizationPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
-	assert.Equal(t, fmt.Sprintf("Field organization_patient_id for patient (CHUSJ / %s) is too long ( > 100).", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid Field organization_patient_id for patient (CHUSJ / %s). Reason: field is too long, maximum length allowed is 100", orgPatientId), patientValidationRecord.Errors[0].Message)
 	assert.Equal(t, "patient[0].organization_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
@@ -37,7 +39,7 @@ func Test_OrganizationPatientId_Special_Characters(t *testing.T) {
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateOrganizationPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
-	assert.Equal(t, fmt.Sprintf("Field organization_patient_id for patient (CHUSJ / %s) does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid Field organization_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$", orgPatientId), patientValidationRecord.Errors[0].Message)
 	assert.Equal(t, "patient[0].organization_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
@@ -202,7 +204,7 @@ func Test_ValidateOrganization(t *testing.T) {
 	rec.validateOrganization(nil)
 	assert.Len(t, rec.Errors, 1)
 	assert.Contains(t, rec.Errors[0].Message, "does not exist")
-	assert.Equal(t, rec.Errors[0].Code, OrganizationNotExistCode)
+	assert.Equal(t, rec.Errors[0].Code, PatientOrganizationNotExistCode)
 
 	// Invalid organization category: should have error
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id2"}
@@ -211,7 +213,7 @@ func Test_ValidateOrganization(t *testing.T) {
 	rec.validateOrganization(invalidOrg)
 	assert.Len(t, rec.Errors, 1)
 	assert.Contains(t, rec.Errors[0].Message, "is not in this list")
-	assert.Equal(t, rec.Errors[0].Code, OrganizationTypeCode)
+	assert.Equal(t, rec.Errors[0].Code, PatientOrganizationTypeCode)
 
 	// Valid organization with healthcare_provider category: no errors
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id3"}
@@ -295,6 +297,72 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 	// All 6 differing fields should produce 6 warnings
 	assert.Len(t, rec.Warnings, 6)
 	for _, w := range rec.Warnings {
-		assert.Equal(t, ExistingPatientDifferentFieldCode, w.Code)
+		assert.Equal(t, PatientExistingPatientDifferentFieldCode, w.Code)
 	}
+}
+func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		/* This test verifies that rollback occurs when there is an error inserting patient records. */
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PROCESSING', ?, false, 'user999', '2025-10-09')
+    		RETURNING id;
+		`, "{}", types.PatientBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		//Batch has been considered as SUCCESS before inserting patient records
+		batch := types.Batch{
+			ID:        id,
+			BatchType: types.PatientBatchType,
+			Payload:   "[]",
+			Status:    "SUCCESS",
+			DryRun:    false,
+		}
+		//Patient records with one having a non-existent organization to trigger foreign key violation
+		// Should never happen in real life as we validate organization existence before this step
+		// but this is to test rollback functionality
+		patientRecords := []PatientValidationRecord{
+			{
+				Patient: types.PatientBatch{
+					OrganizationPatientId:     "id1",
+					OrganizationPatientIdType: "mrn",
+					SexCode:                   "male",
+					LifeStatusCode:            "alive",
+				},
+				OrganizationId: 1,
+			},
+			{
+				Patient: types.PatientBatch{
+					OrganizationPatientId:     "id2",
+					OrganizationPatientIdType: "mrn",
+					SexCode:                   "male",
+					LifeStatusCode:            "alive",
+				},
+				OrganizationId: 99999, // Non-existent organization to trigger foreign key violation
+			},
+		}
+
+		err := persistBatchAndPatientRecords(db, &batch, patientRecords)
+		if assert.NotNil(t, err) {
+			assert.Contains(t, err.Error(), "violates foreign key constraint")
+		}
+
+		// Verify that no patient records were inserted due to rollback
+		var countPatient int64
+		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "id2", 1).Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(0), countPatient) // No patient should have been inserted due to rollback
+
+		// Verify that batch status has been rolled back to PROCESSING
+		resultBatch := types.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, "PROCESSING", resultBatch.Status) // Batch status should have been rollback
+
+	})
+
 }

@@ -15,17 +15,17 @@ func Test_GetSavedFilterByID(t *testing.T) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilter, err := repo.GetSavedFilterByID("1e1c5bc3-4f65-496a-ad61-cab239bf72d5")
 		assert.NoError(t, err)
-		assert.NotNil(t, savedFilter)
-
-		assert.Equal(t, "1e1c5bc3-4f65-496a-ad61-cab239bf72d5", savedFilter.ID)
-		assert.Equal(t, "1", savedFilter.UserID)
-		assert.Equal(t, "saved_filter_snv_1", savedFilter.Name)
-		assert.Equal(t, types.GERMLINE_SNV_OCCURRENCE, savedFilter.Type)
-		assert.Equal(t, false, *(savedFilter.Favorite))
-		assert.NotNil(t, savedFilter.CreatedOn)
-		assert.NotNil(t, savedFilter.UpdatedOn)
-		assert.Len(t, savedFilter.Queries, 1)
-		assert.Equal(t, "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5", savedFilter.Queries[0].Id)
+		if assert.NotNil(t, savedFilter) {
+			assert.Equal(t, "1e1c5bc3-4f65-496a-ad61-cab239bf72d5", savedFilter.ID)
+			assert.Equal(t, "1", savedFilter.UserID)
+			assert.Equal(t, "saved_filter_snv_1", savedFilter.Name)
+			assert.Equal(t, types.GERMLINE_SNV_OCCURRENCE, savedFilter.Type)
+			assert.Equal(t, false, *(savedFilter.Favorite))
+			assert.NotNil(t, savedFilter.CreatedOn)
+			assert.NotNil(t, savedFilter.UpdatedOn)
+			assert.Len(t, savedFilter.Queries, 1)
+			assert.Equal(t, "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5", savedFilter.Queries[0].Id)
+		}
 	})
 }
 
