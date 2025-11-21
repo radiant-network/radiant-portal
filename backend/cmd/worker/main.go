@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -34,6 +35,7 @@ func main() {
 	repoPatient := repository.NewPatientsRepository(dbPostgres)
 	repoSample := repository.NewSamplesRepository(dbPostgres)
 
+	StartHealthProbe(dbPostgres)
 	glog.Info("Worker started...")
 	for {
 		processBatch(dbPostgres, repoBatch, repoOrganization, repoPatient, repoSample)
@@ -55,7 +57,7 @@ func processBatch(db *gorm.DB, repoBatch *repository.BatchRepository, repoOrgani
 		glog.Errorf("Error claiming next batch: %v", err)
 	}
 	if nextBatch != nil {
-		glog.Info("Processing batch: %v", nextBatch.ID)
+		glog.Infof("Processing batch: %v", nextBatch.ID)
 		switch nextBatch.BatchType {
 		case types.PatientBatchType:
 			processPatientBatch(nextBatch, db, repoOrganization, repoPatient, repoBatch)
@@ -66,4 +68,39 @@ func processBatch(db *gorm.DB, repoBatch *repository.BatchRepository, repoOrgani
 			processUnexpectedError(nextBatch, notSupportedBatch, repoBatch)
 		}
 	}
+}
+
+func StartHealthProbe(db *gorm.DB) {
+	port := getEnvOrDefault("PROBE_PORT", "9999")
+	if _, err := strconv.Atoi(port); err != nil {
+		glog.Fatalf("Probe port defined in env var PROBE_PORT (%v) must be an integer ", port)
+	}
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		sqlDb, err := db.DB()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if err = sqlDb.Ping(); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: mux,
+	}
+
+	go func() {
+		glog.Infof("Starting health probe on :%s", port)
+
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			glog.Fatalf("Failed to start health probe: %v", err)
+		}
+	}()
 }
