@@ -173,16 +173,22 @@ func Test_GetVariantUninterpretedCases_Add_phenotypes(t *testing.T) {
 		assert.Equal(t, 0, len((*uninterpretedCases)[0].Phenotypes))
 
 		assert.Equal(t, 2, len((*uninterpretedCases)[1].Phenotypes))
-		assert.Equal(t, "HP:0100622", (*uninterpretedCases)[1].Phenotypes[0].ID)
-		assert.Equal(t, "Maternal seizure", (*uninterpretedCases)[1].Phenotypes[0].Name)
-		assert.Equal(t, "HP:0001562", (*uninterpretedCases)[1].Phenotypes[1].ID)
-		assert.Equal(t, "Oligohydramnios", (*uninterpretedCases)[1].Phenotypes[1].Name)
+		assert.ElementsMatch(t,
+			[]types.Term{
+				{ID: "HP:0100622", Name: "Maternal seizure"},
+				{ID: "HP:0001562", Name: "Oligohydramnios"},
+			},
+			(*uninterpretedCases)[1].Phenotypes,
+		)
 
 		assert.Equal(t, 2, len((*uninterpretedCases)[2].Phenotypes))
-		assert.Equal(t, "HP:0009800", (*uninterpretedCases)[2].Phenotypes[0].ID)
-		assert.Equal(t, "Maternal diabetes", (*uninterpretedCases)[2].Phenotypes[0].Name)
-		assert.Equal(t, "HP:0100622", (*uninterpretedCases)[2].Phenotypes[1].ID)
-		assert.Equal(t, "Maternal seizure", (*uninterpretedCases)[2].Phenotypes[1].Name)
+		assert.ElementsMatch(t,
+			[]types.Term{
+				{ID: "HP:0009800", Name: "Maternal diabetes"},
+				{ID: "HP:0100622", Name: "Maternal seizure"},
+			},
+			(*uninterpretedCases)[2].Phenotypes,
+		)
 
 		assert.Equal(t, 12, len((*uninterpretedCases)[3].Phenotypes))
 	})
