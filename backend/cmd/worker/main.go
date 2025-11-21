@@ -11,6 +11,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 
 	glog.Info("Worker started...")
 	for {
-		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
+		processBatch(dbPostgres, repoBatch, repoOrganization, repoPatient, repoSample)
 		time.Sleep(time.Duration(pollInterval) * time.Millisecond)
 	}
 }
@@ -48,23 +49,18 @@ func getEnvOrDefault(key, fallback string) string {
 	return value
 }
 
-func processBatch(
-	repoBatch *repository.BatchRepository,
-	repoOrganization *repository.OrganizationRepository,
-	repoPatient *repository.PatientsRepository,
-	repoSample *repository.SamplesRepository,
-) {
+func processBatch(db *gorm.DB, repoBatch *repository.BatchRepository, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoSample *repository.SamplesRepository) {
 	nextBatch, err := repoBatch.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)
 	}
 	if nextBatch != nil {
-		glog.Info("Processing batch: %v", nextBatch)
+		glog.Info("Processing batch: %v", nextBatch.ID)
 		switch nextBatch.BatchType {
 		case types.PatientBatchType:
-			processPatientBatch(nextBatch, repoOrganization, repoPatient, repoBatch)
+			processPatientBatch(nextBatch, db, repoOrganization, repoPatient, repoBatch)
 		case types.SampleBatchType:
-			processSampleBatch(nextBatch, repoOrganization, repoSample, repoBatch)
+			processSampleBatch(nextBatch, db, repoOrganization, repoSample, repoBatch)
 		default:
 			notSupportedBatch := fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
 			processUnexpectedError(nextBatch, notSupportedBatch, repoBatch)

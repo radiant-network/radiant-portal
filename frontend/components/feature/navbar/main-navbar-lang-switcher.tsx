@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { cn } from '@/components/lib/utils';
+
 import { Button } from '@/components/base/ui/button';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 interface NavbarLangSwitcherProps {
   className?: string;

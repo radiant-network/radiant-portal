@@ -7,6 +7,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
 )
 
 type Batch = types.Batch
@@ -21,7 +22,7 @@ func (r SampleValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func processSampleBatch(batch *Batch, repoOrganization *repository.OrganizationRepository, repoSample *repository.SamplesRepository, repoBatch *repository.BatchRepository) {
+func processSampleBatch(batch *Batch, db *gorm.DB, repoOrganization *repository.OrganizationRepository, repoSample *repository.SamplesRepository, repoBatch *repository.BatchRepository) {
 	payload := []byte(batch.Payload)
 	var batches []types.SampleBatch
 

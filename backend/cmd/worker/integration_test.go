@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func Test_ProcessBatch_Patient_Success(t *testing.T) {
+func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
@@ -38,7 +38,7 @@ func Test_ProcessBatch_Patient_Success(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -51,6 +51,13 @@ func Test_ProcessBatch_Patient_Success(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Warnings, 0)
 		assert.Len(t, resultBatch.Report.Infos, 0)
 		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var countPatient int64
+		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(0), countPatient)
 
 	})
 
@@ -86,7 +93,7 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -135,7 +142,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -150,6 +157,65 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Infos, 0)
 		assert.Len(t, resultBatch.Report.Warnings, 0)
 		assert.Len(t, resultBatch.Report.Errors, 1)
+
+		var countPatient int64
+		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(0), countPatient)
+
+	})
+
+}
+
+func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		payload := `[
+			{
+				"organization_patient_id": "MRN-TEST-123",
+				"organization_patient_id_type" : "mrn",
+				"organization_code": "CHOP",
+				"sex_code": "female",
+				"life_status_code": "alive",
+				"date_of_birth": "2010-05-15"	
+			}	
+		]
+		`
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+    		RETURNING id;
+		`, payload, types.PatientBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		repoBatch := repository.NewBatchRepository(db)
+		repoOrganization := repository.NewOrganizationRepository(db)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, "SUCCESS", resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var countPatient int64
+		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(1), countPatient)
 
 	})
 
@@ -177,7 +243,7 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)

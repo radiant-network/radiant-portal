@@ -3,17 +3,18 @@ package types
 import "time"
 
 type Patient struct {
-	ID                    int
-	OrganizationPatientId string
-	OrganizationID        int
-	Organization          Organization `gorm:"foreignKey:ID;references:OrganizationID"`
-	SexCode               string
-	LifeStatusCode        string
-	FirstName             string    `json:"first_name,omitempty"`
-	LastName              string    `json:"last_name,omitempty"`
-	Jhn                   string    `json:"jhn,omitempty"`
-	Sex                   Sex       `gorm:"foreignKey:Code;references:SexCode"`
-	DateOfBirth           time.Time `gorm:"type:DATE"`
+	ID                        int
+	OrganizationPatientId     string
+	OrganizationPatientIdType string
+	OrganizationID            int
+	Organization              Organization `gorm:"foreignKey:ID;references:OrganizationID"`
+	SexCode                   string
+	LifeStatusCode            string
+	FirstName                 string    `json:"first_name,omitempty"`
+	LastName                  string    `json:"last_name,omitempty"`
+	Jhn                       string    `json:"jhn,omitempty"`
+	Sex                       Sex       `gorm:"foreignKey:Code;references:SexCode"`
+	DateOfBirth               time.Time `gorm:"type:DATE"`
 }
 
 var PatientTable = Table{
@@ -27,7 +28,7 @@ var ProbandTable = Table{
 }
 
 func (Patient) TableName() string {
-	return PatientTable.Name
+	return "patient"
 }
 
 var ProbandOrganizationIDField = Field{
