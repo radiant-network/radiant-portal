@@ -24,6 +24,8 @@ func (d *DateOfBirthType) UnmarshalJSON(b []byte) (err error) {
 	return
 }
 
+const PatientBatchType = "patient"
+
 type PatientBatch struct {
 	OrganizationPatientId     string           `json:"organization_patient_id" binding:"required"`
 	OrganizationPatientIdType string           `json:"organization_patient_id_type" binding:"required"`

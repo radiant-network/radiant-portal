@@ -38,7 +38,6 @@ func (r *BaseValidationRecord) addInfos(message string, code string, path string
 		Message: message,
 		Path:    path,
 	})
-
 }
 
 func updateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {

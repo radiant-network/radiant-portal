@@ -61,7 +61,6 @@ func (r *PatientValidationRecord) validateOrganizationPatientId() {
 	path := r.formatPath("organization_patient_id")
 	if len(r.Patient.OrganizationPatientId) > TextMaxLength {
 		message := formatFieldTooLong(r.Patient, "organization_patient_id", TextMaxLength)
-
 		r.addErrors(message, FieldTooLongCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.OrganizationPatientId) {
@@ -176,7 +175,7 @@ func processPatientBatch(batch *types.Batch, repoOrganization *repository.Organi
 	var batches []types.PatientBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &batches); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling patients batches: %v", unexpectedErr), repoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling patient batches: %v", unexpectedErr), repoBatch)
 		return
 	}
 

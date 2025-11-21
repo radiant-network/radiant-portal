@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-const PatientBatchType = "patient"
-
 type BatchSummary struct {
 	Created int `json:"created"`
 	Updated int `json:"updated"`

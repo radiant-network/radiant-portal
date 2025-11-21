@@ -35,9 +35,10 @@ func Test_ProcessBatch_Patient_Success(t *testing.T) {
 		}
 
 		repoBatch := repository.NewBatchRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
 		repoOrganization := repository.NewOrganizationRepository(db)
-		processBatch(repoBatch, repoOrganization, repoPatient)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -82,9 +83,10 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 		}
 
 		repoBatch := repository.NewBatchRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
 		repoOrganization := repository.NewOrganizationRepository(db)
-		processBatch(repoBatch, repoOrganization, repoPatient)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -130,9 +132,10 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		}
 
 		repoBatch := repository.NewBatchRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
 		repoOrganization := repository.NewOrganizationRepository(db)
-		processBatch(repoBatch, repoOrganization, repoPatient)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -171,9 +174,10 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 		}
 
 		repoBatch := repository.NewBatchRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
 		repoOrganization := repository.NewOrganizationRepository(db)
-		processBatch(repoBatch, repoOrganization, repoPatient)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		processBatch(repoBatch, repoOrganization, repoPatient, repoSample)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)

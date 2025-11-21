@@ -1,5 +1,7 @@
 package types
 
+const SampleBatchType = "sample"
+
 type SampleBatch struct {
 	OrganizationPatientId     string `json:"organization_patient_id" binding:"required"`
 	OrganizationCode          string `json:"organization_code" binding:"required"`
