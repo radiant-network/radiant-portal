@@ -24,6 +24,17 @@ func (d *DateOfBirthType) UnmarshalJSON(b []byte) (err error) {
 	return
 }
 
+func (d DateOfBirthType) MarshalJSON() ([]byte, error) {
+	if d.Time.IsZero() {
+		return []byte(`""`), nil
+	}
+	// Format using the same pattern used for parsing.
+	s := d.Time.Format(DateOfBirthFormat)
+
+	// Return as a JSON string
+	return []byte(fmt.Sprintf(`"%s"`, s)), nil
+}
+
 type PatientBatch struct {
 	OrganizationPatientId     string           `json:"organization_patient_id" binding:"required"`
 	OrganizationPatientIdType string           `json:"organization_patient_id_type" binding:"required"`
