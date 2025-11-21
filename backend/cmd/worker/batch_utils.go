@@ -12,7 +12,7 @@ func processUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch *
 	glog.Errorf("unexpected error for batch %v: %v", batch.ID, unexpectedErr)
 	now := time.Now()
 	batch.FinishedOn = &now
-	batch.Status = "ERROR"
+	batch.Status = types.BatchStatusError
 	errorMessage := types.BatchMessage{
 		Code:    "GLOBAL-000",
 		Message: unexpectedErr.Error(),

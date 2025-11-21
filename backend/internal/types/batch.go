@@ -56,11 +56,20 @@ func (e *BatchReport) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, e)
 }
 
+type BatchStatus string
+
+const (
+	BatchStatusPending BatchStatus = "PENDING"
+	BatchStatusRunning BatchStatus = "RUNNING"
+	BatchStatusSuccess BatchStatus = "SUCCESS"
+	BatchStatusError   BatchStatus = "ERROR"
+)
+
 type Batch struct {
 	ID         string       `json:"id" validate:"required" gorm:"primary_key; unique; type:uuid; column:id; default:uuid_generate_v4()"`
 	DryRun     bool         `json:"dry_run"`
 	BatchType  string       `json:"batch_type"`
-	Status     string       `json:"status"`
+	Status     BatchStatus  `json:"status"`
 	CreatedOn  time.Time    `json:"created_on"`
 	StartedOn  *time.Time   `json:"started_on,omitempty"`
 	FinishedOn *time.Time   `json:"finished_on,omitempty"`
@@ -88,12 +97,12 @@ type CreateBatchQueryParam struct {
 // CreateBatchResponse represents the response returned when creating a new batch
 // @Description CreateBatchResponse represents the response returned when creating a new batch
 type CreateBatchResponse struct {
-	ID        string    `json:"id"`
-	DryRun    bool      `json:"dry_run"`
-	BatchType string    `json:"batch_type"`
-	Status    string    `json:"status"`
-	CreatedOn time.Time `json:"created_on"`
-	Username  string    `json:"username"`
+	ID        string      `json:"id"`
+	DryRun    bool        `json:"dry_run"`
+	BatchType string      `json:"batch_type"`
+	Status    BatchStatus `json:"status"`
+	CreatedOn time.Time   `json:"created_on"`
+	Username  string      `json:"username"`
 } //@Name CreateBatchResponse
 
 // GetBatchResponse represents the response returned when retrieving a batch
@@ -102,7 +111,7 @@ type GetBatchResponse struct {
 	ID         string       `json:"id"`
 	DryRun     bool         `json:"dry_run"`
 	BatchType  string       `json:"batch_type"`
-	Status     string       `json:"status"`
+	Status     BatchStatus  `json:"status"`
 	CreatedOn  time.Time    `json:"created_on"`
 	StartedOn  *time.Time   `json:"started_on,omitempty"`
 	FinishedOn *time.Time   `json:"finished_on,omitempty"`

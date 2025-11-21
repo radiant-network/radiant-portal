@@ -42,7 +42,7 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-		assert.Equal(t, "SUCCESS", resultBatch.Status)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
 		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
@@ -97,7 +97,7 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-		assert.Equal(t, "SUCCESS", resultBatch.Status)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
 		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
@@ -146,7 +146,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-		assert.Equal(t, "ERROR", resultBatch.Status)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
 		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
@@ -200,7 +200,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-		assert.Equal(t, "SUCCESS", resultBatch.Status)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
 		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
@@ -247,7 +247,7 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-		assert.Equal(t, "ERROR", resultBatch.Status)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
 		assert.Equal(t, "unsupported_type", resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)

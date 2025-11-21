@@ -83,8 +83,8 @@ func copyRecordIntoBatch[T interface{ GetBase() *BaseValidationRecord }](batch *
 	summary := types.BatchSummary{Created: created, Skipped: skipped, Errors: errors}
 	batch.Summary = summary
 	if errors > 0 {
-		batch.Status = "ERROR"
+		batch.Status = types.BatchStatusError
 	} else {
-		batch.Status = "SUCCESS"
+		batch.Status = types.BatchStatusSuccess
 	}
 }

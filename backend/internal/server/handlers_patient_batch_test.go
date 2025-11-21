@@ -23,7 +23,7 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
@@ -52,7 +52,7 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "patient", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
-	assert.Equal(t, "PENDING", response.Status)
+	assert.Equal(t, types.BatchStatusPending, response.Status)
 }
 
 func TestPostPatientBatchHandler_Forbidden(t *testing.T) {
@@ -108,7 +108,7 @@ func TestPostPatientBatchHandler_EmptyPatients(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,

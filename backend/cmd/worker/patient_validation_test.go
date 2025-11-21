@@ -306,7 +306,7 @@ func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
 		var id string
 		initErr := db.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PROCESSING', ?, false, 'user999', '2025-10-09')
+    		VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09')
     		RETURNING id;
 		`, "{}", types.PatientBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -318,7 +318,7 @@ func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
 			ID:        id,
 			BatchType: types.PatientBatchType,
 			Payload:   "[]",
-			Status:    "SUCCESS",
+			Status:    types.BatchStatusSuccess,
 			DryRun:    false,
 		}
 		//Patient records with one having a non-existent organization to trigger foreign key violation
@@ -358,10 +358,10 @@ func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), countPatient) // No patient should have been inserted due to rollback
 
-		// Verify that batch status has been rolled back to PROCESSING
+		// Verify that batch status has been rolled back to RUNNING
 		resultBatch := types.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-		assert.Equal(t, "PROCESSING", resultBatch.Status) // Batch status should have been rollback
+		assert.Equal(t, types.BatchStatusRunning, resultBatch.Status) // Batch status should have been rollback
 
 	})
 

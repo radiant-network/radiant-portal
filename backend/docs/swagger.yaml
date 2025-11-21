@@ -130,6 +130,13 @@ components:
           type: array
           uniqueItems: false
       type: object
+    BatchStatus:
+      type: string
+      x-enum-varnames:
+      - BatchStatusPending
+      - BatchStatusRunning
+      - BatchStatusSuccess
+      - BatchStatusError
     BatchSummary:
       properties:
         created:
@@ -525,6 +532,11 @@ components:
           type: string
         status:
           type: string
+          x-enum-varnames:
+          - BatchStatusPending
+          - BatchStatusRunning
+          - BatchStatusSuccess
+          - BatchStatusError
         username:
           type: string
       type: object
@@ -1034,7 +1046,7 @@ components:
         started_on:
           type: string
         status:
-          type: string
+          $ref: '#/components/schemas/BatchStatus'
         summary:
           $ref: '#/components/schemas/BatchSummary'
         username:

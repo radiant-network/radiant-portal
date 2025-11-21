@@ -17,7 +17,7 @@ func (r TestValidationRecord) GetBase() *BaseValidationRecord {
 
 func Test_CopyRecordIntoBatch_Success(t *testing.T) {
 	batch := &types.Batch{
-		Status: "PROCESSING",
+		Status: types.BatchStatusRunning,
 		Report: types.BatchReport{},
 	}
 
@@ -36,7 +36,7 @@ func Test_CopyRecordIntoBatch_Success(t *testing.T) {
 
 	copyRecordIntoBatch(batch, records)
 
-	assert.Equal(t, "SUCCESS", batch.Status)
+	assert.Equal(t, types.BatchStatusSuccess, batch.Status)
 	assert.Equal(t, 2, batch.Summary.Created)
 	assert.Equal(t, 0, batch.Summary.Skipped)
 	assert.Equal(t, 0, batch.Summary.Errors)
@@ -44,7 +44,7 @@ func Test_CopyRecordIntoBatch_Success(t *testing.T) {
 
 func Test_CopyRecordIntoBatch_WithErrors(t *testing.T) {
 	batch := &types.Batch{
-		Status: "PROCESSING",
+		Status: types.BatchStatusRunning,
 		Report: types.BatchReport{},
 	}
 
@@ -61,7 +61,7 @@ func Test_CopyRecordIntoBatch_WithErrors(t *testing.T) {
 
 	copyRecordIntoBatch(batch, records)
 
-	assert.Equal(t, "ERROR", batch.Status)
+	assert.Equal(t, types.BatchStatusError, batch.Status)
 	assert.Equal(t, 0, batch.Summary.Created)
 	assert.Equal(t, 1, batch.Summary.Skipped)
 	assert.Equal(t, 1, batch.Summary.Errors)
@@ -69,7 +69,7 @@ func Test_CopyRecordIntoBatch_WithErrors(t *testing.T) {
 
 func Test_CopyRecordIntoBatch_WithSkipped(t *testing.T) {
 	batch := &types.Batch{
-		Status: "PROCESSING",
+		Status: types.BatchStatusRunning,
 		Report: types.BatchReport{},
 	}
 
@@ -87,7 +87,7 @@ func Test_CopyRecordIntoBatch_WithSkipped(t *testing.T) {
 
 	copyRecordIntoBatch(batch, records)
 
-	assert.Equal(t, "SUCCESS", batch.Status)
+	assert.Equal(t, types.BatchStatusSuccess, batch.Status)
 	assert.Equal(t, 1, batch.Summary.Created)
 	assert.Equal(t, 1, batch.Summary.Skipped)
 	assert.Equal(t, 0, batch.Summary.Errors)
@@ -95,7 +95,7 @@ func Test_CopyRecordIntoBatch_WithSkipped(t *testing.T) {
 
 func Test_CopyRecordIntoBatch_MixedRecords(t *testing.T) {
 	batch := &types.Batch{
-		Status: "PROCESSING",
+		Status: types.BatchStatusRunning,
 		Report: types.BatchReport{},
 	}
 
@@ -121,7 +121,7 @@ func Test_CopyRecordIntoBatch_MixedRecords(t *testing.T) {
 
 	copyRecordIntoBatch(batch, records)
 
-	assert.Equal(t, "ERROR", batch.Status)
+	assert.Equal(t, types.BatchStatusError, batch.Status)
 	assert.Equal(t, 0, batch.Summary.Created)
 	assert.Equal(t, 2, batch.Summary.Skipped)
 	assert.Equal(t, 2, batch.Summary.Errors)
@@ -129,7 +129,7 @@ func Test_CopyRecordIntoBatch_MixedRecords(t *testing.T) {
 
 func Test_CopyRecordIntoBatch_EmptyRecords(t *testing.T) {
 	batch := &types.Batch{
-		Status: "PROCESSING",
+		Status: types.BatchStatusRunning,
 		Report: types.BatchReport{},
 	}
 
@@ -137,7 +137,7 @@ func Test_CopyRecordIntoBatch_EmptyRecords(t *testing.T) {
 
 	copyRecordIntoBatch(batch, records)
 
-	assert.Equal(t, "SUCCESS", batch.Status)
+	assert.Equal(t, types.BatchStatusSuccess, batch.Status)
 	assert.Equal(t, 0, batch.Summary.Created)
 	assert.Equal(t, 0, batch.Summary.Skipped)
 	assert.Equal(t, 0, batch.Summary.Errors)
@@ -145,7 +145,7 @@ func Test_CopyRecordIntoBatch_EmptyRecords(t *testing.T) {
 
 func Test_CopyRecordIntoBatch_MultipleMessages(t *testing.T) {
 	batch := &types.Batch{
-		Status: "PROCESSING",
+		Status: types.BatchStatusRunning,
 		Report: types.BatchReport{},
 	}
 
@@ -164,7 +164,7 @@ func Test_CopyRecordIntoBatch_MultipleMessages(t *testing.T) {
 
 	copyRecordIntoBatch(batch, records)
 
-	assert.Equal(t, "ERROR", batch.Status)
+	assert.Equal(t, types.BatchStatusError, batch.Status)
 	assert.Equal(t, 1, batch.Summary.Errors)
 	assert.Equal(t, 0, batch.Summary.Skipped)
 }
