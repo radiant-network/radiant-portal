@@ -41,19 +41,19 @@ func (r PatientValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func formatInvalidField(patient types.PatientBatch, fieldName string, reason string) string {
-	message := fmt.Sprintf("Invalid Field %s for patient (%s / %s). Reason: %s", fieldName, patient.OrganizationCode, patient.OrganizationPatientId, reason)
+func (r PatientValidationRecord) formatInvalidField(fieldName string, reason string) string {
+	message := fmt.Sprintf("Invalid Field %s for patient (%s / %s). Reason: %s", fieldName, r.Patient.OrganizationCode, r.Patient.OrganizationPatientId, reason)
 	return message
 }
 
-func formatFieldTooLong(patient types.PatientBatch, fieldName string, maxLength int) string {
+func (r PatientValidationRecord) formatFieldTooLong(fieldName string, maxLength int) string {
 	reason := fmt.Sprintf("field is too long, maximum length allowed is %d", maxLength)
-	return formatInvalidField(patient, fieldName, reason)
+	return r.formatInvalidField(fieldName, reason)
 }
 
-func formatFieldRegexpMatch(patient types.PatientBatch, fieldName string, regexp string) string {
+func (r PatientValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
 	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
-	return formatInvalidField(patient, fieldName, reason)
+	return r.formatInvalidField(fieldName, reason)
 }
 
 func (r PatientValidationRecord) formatPath(fieldName string) string {
@@ -66,12 +66,12 @@ func (r PatientValidationRecord) formatPath(fieldName string) string {
 func (r *PatientValidationRecord) validateOrganizationPatientId() {
 	path := r.formatPath("organization_patient_id")
 	if len(r.Patient.OrganizationPatientId) > TextMaxLength {
-		message := formatFieldTooLong(r.Patient, "organization_patient_id", TextMaxLength)
+		message := r.formatFieldTooLong("organization_patient_id", TextMaxLength)
 
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.OrganizationPatientId) {
-		message := formatFieldRegexpMatch(r.Patient, "organization_patient_id", ExternalIdRegexp)
+		message := r.formatFieldRegexpMatch("organization_patient_id", ExternalIdRegexp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
@@ -82,11 +82,11 @@ func (r *PatientValidationRecord) validateLastName() {
 	}
 	path := r.formatPath("last_name")
 	if len(r.Patient.LastName) > TextMaxLength {
-		message := formatFieldTooLong(r.Patient, "last_name", TextMaxLength)
+		message := r.formatFieldTooLong("last_name", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.LastName) {
-		message := formatFieldRegexpMatch(r.Patient, "last_name", NameRegExp)
+		message := r.formatFieldRegexpMatch("last_name", NameRegExp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
@@ -97,11 +97,11 @@ func (r *PatientValidationRecord) validateFirstName() {
 	}
 	path := r.formatPath("first_name")
 	if len(r.Patient.FirstName) > TextMaxLength {
-		message := formatFieldTooLong(r.Patient, "first_name", TextMaxLength)
+		message := r.formatFieldTooLong("first_name", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.FirstName) {
-		message := formatFieldRegexpMatch(r.Patient, "first_name", NameRegExp)
+		message := r.formatFieldRegexpMatch("first_name", NameRegExp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
@@ -112,11 +112,11 @@ func (r *PatientValidationRecord) validateJhn() {
 	}
 	path := r.formatPath("jhn")
 	if len(r.Patient.Jhn) > TextMaxLength {
-		message := formatFieldTooLong(r.Patient, "jhn", TextMaxLength)
+		message := r.formatFieldTooLong("jhn", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn) {
-		message := formatFieldRegexpMatch(r.Patient, "jhn", ExternalIdRegexp)
+		message := r.formatFieldRegexpMatch("jhn", ExternalIdRegexp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
