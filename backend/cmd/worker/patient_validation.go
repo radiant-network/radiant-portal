@@ -70,7 +70,7 @@ func (r *PatientValidationRecord) validateOrganizationPatientId() {
 
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Patient.OrganizationPatientId) {
+	if !ExternalIdRegexpCompiled.MatchString(r.Patient.OrganizationPatientId.String()) {
 		message := r.formatFieldRegexpMatch("organization_patient_id", ExternalIdRegexp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
@@ -85,7 +85,7 @@ func (r *PatientValidationRecord) validateLastName() {
 		message := r.formatFieldTooLong("last_name", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
-	if !NameRegExpCompiled.MatchString(r.Patient.LastName) {
+	if !NameRegExpCompiled.MatchString(r.Patient.LastName.String()) {
 		message := r.formatFieldRegexpMatch("last_name", NameRegExp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
@@ -100,7 +100,7 @@ func (r *PatientValidationRecord) validateFirstName() {
 		message := r.formatFieldTooLong("first_name", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
-	if !NameRegExpCompiled.MatchString(r.Patient.FirstName) {
+	if !NameRegExpCompiled.MatchString(r.Patient.FirstName.String()) {
 		message := r.formatFieldRegexpMatch("first_name", NameRegExp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
@@ -115,7 +115,7 @@ func (r *PatientValidationRecord) validateJhn() {
 		message := r.formatFieldTooLong("jhn", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn) {
+	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn.String()) {
 		message := r.formatFieldRegexpMatch("jhn", ExternalIdRegexp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
@@ -152,9 +152,9 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 		validateExistingPatientFieldFn(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
 		validateExistingPatientFieldFn(r, "life_status_code", existingPatient.LifeStatusCode, r.Patient.LifeStatusCode)
 		validateExistingPatientFieldFn(r, "date_of_birth", existingPatient.DateOfBirth, r.Patient.DateOfBirth.Time)
-		validateExistingPatientFieldFn(r, "last_name", existingPatient.LastName, r.Patient.LastName)
-		validateExistingPatientFieldFn(r, "first_name", existingPatient.FirstName, r.Patient.FirstName)
-		validateExistingPatientFieldFn(r, "jhn", existingPatient.Jhn, r.Patient.Jhn)
+		validateExistingPatientFieldFn(r, "last_name", existingPatient.LastName, r.Patient.LastName.String())
+		validateExistingPatientFieldFn(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String())
+		validateExistingPatientFieldFn(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String())
 	}
 
 }
@@ -231,12 +231,12 @@ func insertPatientRecords(records []PatientValidationRecord, repo *repository.Pa
 	for _, record := range records {
 		if !record.Skipped {
 			patient := types.Patient{
-				OrganizationPatientId:     record.Patient.OrganizationPatientId,
+				OrganizationPatientId:     record.Patient.OrganizationPatientId.String(),
 				OrganizationID:            record.OrganizationId,
-				OrganizationPatientIdType: record.Patient.OrganizationPatientIdType,
-				FirstName:                 record.Patient.FirstName,
-				LastName:                  record.Patient.LastName,
-				Jhn:                       record.Patient.Jhn,
+				OrganizationPatientIdType: record.Patient.OrganizationPatientIdType.String(),
+				FirstName:                 record.Patient.FirstName.String(),
+				LastName:                  record.Patient.LastName.String(),
+				Jhn:                       record.Patient.Jhn.String(),
 				SexCode:                   record.Patient.SexCode,
 				LifeStatusCode:            record.Patient.LifeStatusCode,
 			}
@@ -279,7 +279,7 @@ func validatePatientRecord(patient types.PatientBatch, index int, repoOrganizati
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
-		existingPatient, patientErr := repoPatient.GetPatientByOrganizationPatientId(organization.ID, patient.OrganizationPatientId)
+		existingPatient, patientErr := repoPatient.GetPatientByOrganizationPatientId(organization.ID, patient.OrganizationPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		} else {
