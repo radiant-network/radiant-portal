@@ -25,7 +25,7 @@ func randomString(n int, alphabet string) string {
 
 func Test_OrganizationPatientId_Too_Long(t *testing.T) {
 	orgPatientId := randomString(120, letters)
-	patient := types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: orgPatientId}
+	patient := types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateOrganizationPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
@@ -35,7 +35,7 @@ func Test_OrganizationPatientId_Too_Long(t *testing.T) {
 
 func Test_OrganizationPatientId_Special_Characters(t *testing.T) {
 	orgPatientId := "id_with_invalid_char_🧪"
-	patient := types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: orgPatientId}
+	patient := types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateOrganizationPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
@@ -45,7 +45,7 @@ func Test_OrganizationPatientId_Special_Characters(t *testing.T) {
 
 func Test_OrganizationPatientId_Multiple_Errors(t *testing.T) {
 	orgPatientId := fmt.Sprintf("%s_🧪", randomString(120, letters))
-	patient := types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: orgPatientId}
+	patient := types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateOrganizationPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 2)
@@ -53,7 +53,7 @@ func Test_OrganizationPatientId_Multiple_Errors(t *testing.T) {
 
 func Test_OrganizationPatientId_Valid(t *testing.T) {
 	orgPatientId := "valid_patient_id_1"
-	patient := types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: orgPatientId}
+	patient := types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateOrganizationPatientId()
 	assert.Nil(t, patientValidationRecord.Errors)
@@ -74,7 +74,7 @@ func Test_ValidateLastName(t *testing.T) {
 
 	// Too long last name
 	longName := randomString(120, letters)
-	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id2", LastName: longName}
+	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id2", LastName: types.TrimmedString(longName)}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateLastName()
 	assert.Len(t, rec.Errors, 1)
@@ -82,7 +82,7 @@ func Test_ValidateLastName(t *testing.T) {
 	assert.Equal(t, "patient[0].last_name", rec.Errors[0].Path)
 
 	// Invalid characters
-	invalidName := "Smith🧪"
+	invalidName := types.TrimmedString("Smith🧪")
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id3", LastName: invalidName}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateLastName()
@@ -91,14 +91,14 @@ func Test_ValidateLastName(t *testing.T) {
 	assert.Equal(t, "patient[0].last_name", rec.Errors[0].Path)
 
 	// Both errors
-	both := longName + "🧪"
+	both := types.TrimmedString(longName + "🧪")
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id4", LastName: both}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateLastName()
 	assert.Len(t, rec.Errors, 2)
 
 	// Valid last name
-	validName := "Smith-Jones"
+	validName := types.TrimmedString("Smith-Jones")
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id5", LastName: validName}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateLastName()
@@ -119,7 +119,7 @@ func Test_ValidateFirstName(t *testing.T) {
 	assert.Nil(t, rec.Errors)
 
 	// Too long first name
-	longName := randomString(120, letters)
+	longName := types.TrimmedString(randomString(120, letters))
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id2", FirstName: longName}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateFirstName()
@@ -128,7 +128,7 @@ func Test_ValidateFirstName(t *testing.T) {
 	assert.Equal(t, "patient[0].first_name", rec.Errors[0].Path)
 
 	// Invalid characters
-	invalidName := "John🧪"
+	invalidName := types.TrimmedString("John🧪")
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id3", FirstName: invalidName}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateFirstName()
@@ -144,7 +144,7 @@ func Test_ValidateFirstName(t *testing.T) {
 	assert.Len(t, rec.Errors, 2)
 
 	// Valid first name
-	validName := "John-Paul"
+	validName := types.TrimmedString("John-Paul")
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id5", FirstName: validName}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateFirstName()
@@ -165,7 +165,7 @@ func Test_ValidateJhn(t *testing.T) {
 	assert.Nil(t, rec.Errors)
 
 	// Too long JHN
-	longJhn := randomString(120, letters)
+	longJhn := types.TrimmedString(randomString(120, letters))
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id2", Jhn: longJhn}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateJhn()
@@ -174,7 +174,7 @@ func Test_ValidateJhn(t *testing.T) {
 	assert.Equal(t, "patient[0].jhn", rec.Errors[0].Path)
 
 	// Invalid characters
-	invalidJhn := "JHN🧪"
+	invalidJhn := types.TrimmedString("JHN🧪")
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id3", Jhn: invalidJhn}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateJhn()
@@ -183,14 +183,14 @@ func Test_ValidateJhn(t *testing.T) {
 	assert.Equal(t, "patient[0].jhn", rec.Errors[0].Path)
 
 	// Both errors
-	both := longJhn + "🧪"
+	both := types.TrimmedString(longJhn + "🧪")
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id4", Jhn: both}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateJhn()
 	assert.Len(t, rec.Errors, 2)
 
 	// Valid JHN
-	validJhn := "JHN-1234"
+	validJhn := types.TrimmedString("JHN-1234")
 	patient = types.PatientBatch{OrganizationCode: "CHUSJ", OrganizationPatientId: "id5", Jhn: validJhn}
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateJhn()
