@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -12,11 +15,27 @@ type SamplesRepository struct {
 }
 
 type SamplesDAO interface {
+	GetSampleByOrganizationId(organizationId int, submitterSampleId string) (*Sample, error)
 	CreateSample(newSample *Sample) error
 }
 
 func NewSamplesRepository(db *gorm.DB) *SamplesRepository {
 	return &SamplesRepository{db: db}
+}
+
+func (r *SamplesRepository) GetSampleByOrganizationId(organizationId int, submitterSampleId string) (*Sample, error) {
+	var sample Sample
+	tx := r.db.
+		Table(sample.TableName()).
+		Where("submitter_organization_id = ? and submitter_sample_id = ?", organizationId, submitterSampleId)
+	if err := tx.First(&sample).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error retrieve sample its ID: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+	return &sample, nil
 }
 
 func (r *SamplesRepository) CreateSample(newSample *Sample) error {

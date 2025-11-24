@@ -35,6 +35,7 @@ func processSampleBatch(batch *types.Batch, db *gorm.DB, repoOrganization *repos
 	}
 
 	glog.Infof("Sample batch %v processed with %d records", batch.ID, len(records))
+
 	err := persistBatchAndSampleRecords(db, batch, records)
 	if err != nil {
 		processUnexpectedError(batch, fmt.Errorf("error processing sample batch records: %v", err), repoBatch)
@@ -60,7 +61,6 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []Sam
 				return fmt.Errorf("error during sample insertion %v", err)
 			}
 		}
-
 		return nil
 	})
 }
@@ -99,5 +99,19 @@ func validateSampleRecord(sample types.SampleBatch, index int, repoOrganization 
 
 	// TODO: Implement sample validation logic here
 
+	organization, orgErr := repoOrganization.GetOrganizationByCode(sample.OrganizationCode)
+	if orgErr != nil {
+		return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
+	} else {
+		// record.validateOrganization(organization)
+	}
+	if organization != nil {
+		_, sampleErr := repoSample.GetSampleByOrganizationId(organization.ID, sample.SubmitterSampleId)
+		if sampleErr != nil {
+			return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
+		} else {
+			// record.validateExistingSample(existingSample)
+		}
+	}
 	return &record, nil
 }

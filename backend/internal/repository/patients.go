@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -25,11 +28,12 @@ func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId in
 	tx := r.db.
 		Table(patient.TableName()).
 		Where("organization_patient_id = ? and organization_id = ?", organizationPatientId, organizationId)
-	if err := tx.Scan(&patient).Error; err != nil {
-		return nil, err
-	}
-	if patient.ID == 0 {
-		return nil, nil
+	if err := tx.First(&patient).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)
+		} else {
+			return nil, nil
+		}
 	}
 	return &patient, nil
 }

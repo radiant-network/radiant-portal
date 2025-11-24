@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -22,11 +25,12 @@ func (r *OrganizationRepository) GetOrganizationByCode(organizationCode string) 
 	tx := r.db.
 		Table("organization").
 		Where("code = ?", organizationCode)
-	if err := tx.Scan(&organization).Error; err != nil {
-		return nil, err
-	}
-	if organization.ID == 0 {
-		return nil, nil
+	if err := tx.First(&organization).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error retrieve organization its ID: %w", err)
+		} else {
+			return nil, nil
+		}
 	}
 	return &organization, nil
 }

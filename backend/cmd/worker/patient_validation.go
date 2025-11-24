@@ -221,7 +221,6 @@ func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []Pa
 				return fmt.Errorf("error during patient insertion %v", err)
 			}
 		}
-
 		return nil
 	})
 }
