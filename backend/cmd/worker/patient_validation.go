@@ -124,7 +124,6 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 	path := r.formatPath("organization_patient_code")
 	if organization == nil {
 		message := fmt.Sprintf("Organization %s for patient %s does not exist.", r.Patient.OrganizationCode, r.Patient.OrganizationPatientId)
-
 		r.addErrors(message, PatientOrganizationNotExistCode, path)
 	} else if !slices.Contains(AllowedOrganizationCategories, organization.CategoryCode) {
 		message := fmt.Sprintf("Organization type (%s) defined for patient (%s / %s) is not in this list : %s.",
@@ -145,7 +144,6 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types.Patient) {
 	if existingPatient != nil {
 		message := fmt.Sprintf("Patient (%s / %s) already exist, skipped.", r.Patient.OrganizationCode, r.Patient.OrganizationPatientId)
-
 		r.addInfos(message, PatientAlreadyExistCode, r.formatPath(""))
 		r.Skipped = true
 		validateExistingPatientFieldFn(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
@@ -155,7 +153,6 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 		validateExistingPatientFieldFn(r, "first_name", existingPatient.FirstName, r.Patient.FirstName)
 		validateExistingPatientFieldFn(r, "jhn", existingPatient.Jhn, r.Patient.Jhn)
 	}
-
 }
 
 func validateExistingPatientFieldFn[T comparable](
@@ -181,14 +178,14 @@ func validateExistingPatientFieldFn[T comparable](
 
 func processPatientBatch(batch *types.Batch, db *gorm.DB, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoBatch *repository.BatchRepository) {
 	payload := []byte(batch.Payload)
-	var batches []types.PatientBatch
+	var patients []types.PatientBatch
 
-	if unexpectedErr := json.Unmarshal(payload, &batches); unexpectedErr != nil {
+	if unexpectedErr := json.Unmarshal(payload, &patients); unexpectedErr != nil {
 		processUnexpectedError(batch, fmt.Errorf("error unmarshalling patient batch: %v", unexpectedErr), repoBatch)
 		return
 	}
 
-	records, unexpectedErr := validatePatientsBatch(batches, repoOrganization, repoPatient)
+	records, unexpectedErr := validatePatientsBatch(patients, repoOrganization, repoPatient)
 	if unexpectedErr != nil {
 		processUnexpectedError(batch, fmt.Errorf("error patient batch validation: %v", unexpectedErr), repoBatch)
 		return
@@ -215,7 +212,7 @@ func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []Pa
 			/* Logs directly, and return error to trigger rollback if the batch does not exist in db */
 			return fmt.Errorf("no rows updated when updating patient batch %v", batch.ID)
 		}
-		if !batch.DryRun && batch.Status == "SUCCESS" {
+		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := insertPatientRecords(records, txRepoPatient)
 			if err != nil {
 				return fmt.Errorf("error during patient insertion %v", err)
@@ -250,9 +247,9 @@ func insertPatientRecords(records []PatientValidationRecord, repo *repository.Pa
 	return nil
 }
 
-func validatePatientsBatch(batch []types.PatientBatch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) ([]PatientValidationRecord, error) {
+func validatePatientsBatch(patients []types.PatientBatch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) ([]PatientValidationRecord, error) {
 	var records []PatientValidationRecord
-	for index, patient := range batch {
+	for index, patient := range patients {
 		record, err := validatePatientRecord(patient, index, repoOrganization, repoPatient)
 		if err != nil {
 			return nil, fmt.Errorf("error during patient validation: %v", err)
