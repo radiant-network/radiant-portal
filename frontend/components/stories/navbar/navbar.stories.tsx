@@ -1,5 +1,3 @@
-import { SidebarProvider } from '@/components/base/ui/sidebar';
-import MainNavbar from '@/components/feature/navbar/main-navbar';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import {
@@ -14,6 +12,9 @@ import {
   TelescopeIcon,
   UsersIcon,
 } from 'lucide-react';
+
+import { SidebarProvider } from '@/components/base/ui/sidebar';
+import MainNavbar from '@/components/feature/navbar/main-navbar';
 
 const meta = {
   title: 'Navbar/Main Navbar',
@@ -110,7 +111,5 @@ export const Default: Story = {
       email: 'olivier.castro-perrier@ssss.gouv.qc.ca',
     },
   },
-  render: args => {
-    return <MainNavbar {...args} />;
-  },
+  render: args => <MainNavbar {...args} />,
 };
