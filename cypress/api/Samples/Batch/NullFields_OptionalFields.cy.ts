@@ -8,14 +8,14 @@ describe('Samples - Batch - Null fields - Optional fields', () => {
     const body: string = `{
       "samples": [
         {
-          "organization_patient_id": "Cypress0001",
-          "organization_code": "MR",
+          "submitter_patient_id": "Cypress0001",
+          "patient_organization_code": "MR",
           "type_code": "a",
-          "parent_submitter_sample_id": null,
+          "submitter_parent_sample_id": null,
           "tissue_site": null,
           "histology_code": "normal",
           "submitter_sample_id": "Cypress0001",
-          "submitter_organization_code": "MR"
+          "sample_organization_code": "MR"
         }
       ]
     }`;

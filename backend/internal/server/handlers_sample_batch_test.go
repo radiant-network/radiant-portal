@@ -40,7 +40,7 @@ func TestPostSampleBatchHandler_Success(t *testing.T) {
 
 	router := gin.Default()
 	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
-	body := `{"samples": [{"organization_patient_id": "p1", "organization_code": "org1", "type_code": "blood", "histology_code": "tumoral", "submitter_sample_id": "s1", "submitter_organization_code": "org1"}]}`
+	body := `{"samples": [{"submitter_patient_id": "p1", "patient_organization_code": "org1", "type_code": "blood", "histology_code": "tumoral", "submitter_sample_id": "s1", "sample_organization_code": "org1"}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
@@ -69,7 +69,7 @@ func TestPostSampleBatchHandler_Forbidden(t *testing.T) {
 
 	router := gin.Default()
 	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
-	body := `{"samples": [{"organization_patient_id": "p1", "organization_code": "org1", "type_code": "blood", "histology_code": "tumoral", "submitter_sample_id": "s1", "submitter_organization_code": "org1"}]}`
+	body := `{"samples": [{"submitter_patient_id": "p1", "patient_organization_code": "org1", "type_code": "blood", "histology_code": "tumoral", "submitter_sample_id": "s1", "sample_organization_code": "org1"}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
@@ -92,7 +92,7 @@ func TestPostSampleBatchHandler_ValidationError(t *testing.T) {
 
 	router := gin.Default()
 	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
-	body := `{"samples": [{"organization_patient_id": "", "organization_code": "org1", "type_code": "blood", "histology_code": "tumorsal", "submitter_sample_id": "s1", "submitter_organization_code": "org1"}]}`
+	body := `{"samples": [{"submitter_patient_id": "", "patient_organization_code": "org1", "type_code": "blood", "histology_code": "tumorsal", "submitter_sample_id": "s1", "sample_organization_code": "org1"}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
