@@ -24,6 +24,14 @@ func (d *DateOfBirthType) UnmarshalJSON(b []byte) (err error) {
 	return
 }
 
+func (d DateOfBirthType) MarshalJSON() ([]byte, error) {
+	if d.Time.IsZero() {
+		return []byte(`""`), nil
+	}
+	s := d.Time.Format(DateOfBirthFormat)
+	return fmt.Appendf(nil, `"%s"`, s), nil
+}
+
 const PatientBatchType = "patient"
 
 type PatientBatch struct {
