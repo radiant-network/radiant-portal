@@ -13,7 +13,7 @@ describe('Cases - Columns', () => {
     CasesTable.validations.shouldMatchDefaultColumnVisibility();
   });
 
-  it('Order [SJRA-839]', () => {
+  it('Order', () => {
     setupTest();
     CasesTable.validations.shouldShowAllColumns();
   });

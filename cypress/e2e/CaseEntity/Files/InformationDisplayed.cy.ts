@@ -3,7 +3,7 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { FilesTable } from 'pom/pages/FilesTable';
 
-describe('CaseEntity - Files - Information displayed [SJRA-853]', () => {
+describe('CaseEntity - Files - Information displayed', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseFilesPage(data.file.case, data.file.search_criteria);

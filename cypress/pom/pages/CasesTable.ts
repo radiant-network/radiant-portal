@@ -170,7 +170,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 15,
+    position: 14,
     tooltip: 'Organization managing the patient’s file',
   },
   {
@@ -181,7 +181,7 @@ const tableColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 16,
+    position: 15,
     tooltip: null,
   },
 ];

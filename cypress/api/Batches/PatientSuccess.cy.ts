@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 
-describe('Batches / Patient pending', () => {
+describe('Batches / Patient success', () => {
   let response: any;
   let batchId: any;
 
@@ -19,15 +19,21 @@ describe('Batches / Patient pending', () => {
   });
 
   it('Return content', () => {
-    expect(response.body).to.have.all.keys('id', 'dry_run', 'batch_type', 'status', 'created_on', 'username', 'summary', 'errors');
+    expect(response.body).to.have.all.keys('id', 'dry_run', 'batch_type', 'status', 'created_on', 'started_on', 'finished_on', 'username', 'summary', 'report');
     expect(response.body).to.include({
       id: batchId,
       dry_run: true,
       batch_type: 'patient',
-      status: 'PENDING',
+      status: 'SUCCESS',
       username: 'cypress',
     });
     expect(response.body.created_on)
+      .to.be.a('string')
+      .and.match(/^\d{4}-\d{2}-\d{2}T/);
+    expect(response.body.started_on)
+      .to.be.a('string')
+      .and.match(/^\d{4}-\d{2}-\d{2}T/);
+    expect(response.body.finished_on)
       .to.be.a('string')
       .and.match(/^\d{4}-\d{2}-\d{2}T/);
     expect(response.body.summary).to.deep.equal({
@@ -36,6 +42,6 @@ describe('Batches / Patient pending', () => {
       skipped: 0,
       errors: 0,
     });
-    expect(response.body.errors).to.be.empty;
+    expect(response.body.report).to.be.empty;
   });
 });
