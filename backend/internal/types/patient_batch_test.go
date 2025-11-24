@@ -98,9 +98,9 @@ func TestDateOfBirthType_Marshal_ZeroValue(t *testing.T) {
 
 func TestPatientBatch_JSON_BlankJHN(t *testing.T) {
 	inputJSON := `{
-        "organization_patient_id": "  MRN-001 ",
-        "organization_patient_id_type": "  mrn  ",
-        "organization_code": "FERLAB",
+        "submitter_patient_id": "  MRN-001 ",
+        "submitter_patient_id_type": "  mrn  ",
+        "patient_organization_code": "FERLAB",
         "life_status_code": "alive",
         "first_name": "   John   ",
         "last_name": "  Doe ",
@@ -116,9 +116,9 @@ func TestPatientBatch_JSON_BlankJHN(t *testing.T) {
 	require.NoError(t, err)
 
 	// ---- TrimmedString fields ----
-	require.Equal(t, TrimmedString("MRN-001"), batch.OrganizationPatientId)
-	require.Equal(t, TrimmedString("mrn"), batch.OrganizationPatientIdType)
-	require.Equal(t, "FERLAB", batch.OrganizationCode)
+	require.Equal(t, TrimmedString("MRN-001"), batch.SubmitterPatientId)
+	require.Equal(t, TrimmedString("mrn"), batch.SubmitterPatientIdType)
+	require.Equal(t, "FERLAB", batch.PatientOrganizationCode)
 	require.Equal(t, TrimmedString("John"), batch.FirstName)
 	require.Equal(t, TrimmedString("Doe"), batch.LastName)
 
@@ -134,9 +134,9 @@ func TestPatientBatch_JSON_BlankJHN(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedJSON := `{
-        "organization_patient_id": "MRN-001",
-        "organization_patient_id_type": "mrn",
-        "organization_code": "FERLAB",
+        "submitter_patient_id": "MRN-001",
+        "submitter_patient_id_type": "mrn",
+        "patient_organization_code": "FERLAB",
         "life_status_code": "alive",
         "first_name": "John",
         "last_name": "Doe",
