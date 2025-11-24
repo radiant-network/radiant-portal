@@ -2132,12 +2132,6 @@ export interface GetBatchResponse {
     'dry_run'?: boolean;
     /**
      * 
-     * @type {BatchReport}
-     * @memberof GetBatchResponse
-     */
-    'errors'?: BatchReport;
-    /**
-     * 
      * @type {string}
      * @memberof GetBatchResponse
      */
@@ -2148,6 +2142,12 @@ export interface GetBatchResponse {
      * @memberof GetBatchResponse
      */
     'id'?: string;
+    /**
+     * 
+     * @type {BatchReport}
+     * @memberof GetBatchResponse
+     */
+    'report'?: BatchReport;
     /**
      * 
      * @type {string}
