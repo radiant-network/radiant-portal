@@ -188,7 +188,7 @@ func processPatientBatch(batch *types.Batch, db *gorm.DB, repoOrganization *repo
 		return
 	}
 
-	records, unexpectedErr := validatePatientBatch(batches, repoOrganization, repoPatient)
+	records, unexpectedErr := validatePatientsBatch(batches, repoOrganization, repoPatient)
 	if unexpectedErr != nil {
 		processUnexpectedError(batch, fmt.Errorf("error patient batch validation: %v", unexpectedErr), repoBatch)
 		return
@@ -250,9 +250,9 @@ func insertPatientRecords(records []PatientValidationRecord, repo *repository.Pa
 	return nil
 }
 
-func validatePatientBatch(batches []types.PatientBatch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) ([]PatientValidationRecord, error) {
+func validatePatientsBatch(batch []types.PatientBatch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) ([]PatientValidationRecord, error) {
 	var records []PatientValidationRecord
-	for index, patient := range batches {
+	for index, patient := range batch {
 		record, err := validatePatientRecord(patient, index, repoOrganization, repoPatient)
 		if err != nil {
 			return nil, fmt.Errorf("error during patient validation: %v", err)
