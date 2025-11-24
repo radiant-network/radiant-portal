@@ -110,5 +110,5 @@ type GetBatchResponse struct {
 	FinishedOn *time.Time   `json:"finished_on,omitempty"`
 	Username   string       `json:"username"`
 	Summary    BatchSummary `json:"summary"`
-	Errors     BatchReport  `json:"errors,omitempty"`
+	Report     BatchReport  `json:"report,omitempty"`
 } //@Name GetBatchResponse
