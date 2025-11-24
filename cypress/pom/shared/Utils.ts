@@ -126,6 +126,24 @@ export const getStatusIcon = (status: string) => {
 };
 
 /**
+ * Gets the text operateur associated with a symbol operator.
+ * @param operator The symbol operator (e.g., 'between', '<', etc.).
+ * @returns The text operateur.
+ */
+export const getTextOperator = (operator: string) => {
+  const mapping: Record<string, string> = {
+    '<': 'Less than',
+    '<=': 'Less than or equal to',
+    '>': 'Greater than',
+    '>=': 'Greater than or equal to',
+    between: 'Between',
+    in: 'In',
+  };
+
+  return mapping[operator];
+};
+
+/**
  * Returns the URL for a given columnID and data object.
  * @param columnID The column identifier (e.g., 'dbsnp', 'gene', 'omim', etc.).
  * @param data The data object containing the necessary fields.

@@ -1,13 +1,14 @@
 /// <reference types="cypress"/>
 import { CommonTexts } from 'pom/shared/Texts';
 import { CommonSelectors } from '../shared/Selectors';
+import { getTextOperator } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[class*= "lucide-audio-waveform"]',
   toggle: '[class*= "h-6 p-2"]:contains("SNV")',
 };
 
-const tableFacets = [
+export const tableFacets = [
   {
     section: 'Variant',
     facets: [
@@ -44,7 +45,7 @@ const tableFacets = [
         apiField: 'start',
         position: 3,
         tooltip: null,
-        defaultOperator: 'Between',
+        defaultOperator: 'between',
         hasDictionary: false,
       },
     ],
@@ -67,7 +68,7 @@ const tableFacets = [
         apiField: 'gnomad_pli',
         position: 1,
         tooltip: null,
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -76,7 +77,7 @@ const tableFacets = [
         apiField: 'gnomad_loeuf',
         position: 2,
         tooltip: null,
-        defaultOperator: 'Less than',
+        defaultOperator: '<',
         hasDictionary: false,
       },
       {
@@ -162,7 +163,7 @@ const tableFacets = [
         apiField: 'exomiser_gene_combined_score',
         position: 2,
         tooltip: 'Exomiser score based on variant properties and patient phenotypes',
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -189,7 +190,7 @@ const tableFacets = [
         apiField: 'cadd_score',
         position: 5,
         tooltip: 'Combined Annotation Dependent Depletion',
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -198,7 +199,7 @@ const tableFacets = [
         apiField: 'cadd_phred',
         position: 6,
         tooltip: 'Combined Annotation Dependent Depletion PHRED',
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -207,7 +208,7 @@ const tableFacets = [
         apiField: 'dann_score',
         position: 7,
         tooltip: 'Deleterious Annotation of genetic variants using Neural Networks',
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -243,7 +244,7 @@ const tableFacets = [
         apiField: 'revel_score',
         position: 11,
         tooltip: 'Rare Exome Variant Ensemble Learner',
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -252,7 +253,7 @@ const tableFacets = [
         apiField: 'spliceai_ds',
         position: 12,
         tooltip: null,
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -275,7 +276,7 @@ const tableFacets = [
         apiField: 'pf_wgs',
         position: 0,
         tooltip: 'All Patient Frequency (WGS)',
-        defaultOperator: 'Less than',
+        defaultOperator: '<',
         hasDictionary: false,
       },
       {
@@ -284,7 +285,7 @@ const tableFacets = [
         apiField: 'pf_wgs_affected',
         position: 1,
         tooltip: 'Affected Patient Frequency (WGS)',
-        defaultOperator: 'Less than',
+        defaultOperator: '<',
         hasDictionary: false,
       },
       {
@@ -293,7 +294,7 @@ const tableFacets = [
         apiField: 'pf_wgs_not_affected',
         position: 2,
         tooltip: 'Non-affected Patient Frequency (WGS)',
-        defaultOperator: 'Less than',
+        defaultOperator: '<',
         hasDictionary: false,
       },
       {
@@ -302,7 +303,7 @@ const tableFacets = [
         apiField: 'gnomad_v3_af',
         position: 3,
         tooltip: null,
-        defaultOperator: 'Less than',
+        defaultOperator: '<',
         hasDictionary: false,
       },
       {
@@ -311,7 +312,7 @@ const tableFacets = [
         apiField: 'topmed_af',
         position: 4,
         tooltip: null,
-        defaultOperator: 'Less than',
+        defaultOperator: '<',
         hasDictionary: false,
       },
       {
@@ -320,7 +321,7 @@ const tableFacets = [
         apiField: 'thousand_genome_af',
         position: 5,
         tooltip: null,
-        defaultOperator: 'Less than',
+        defaultOperator: '<',
         hasDictionary: false,
       },
     ],
@@ -388,7 +389,7 @@ const tableFacets = [
         apiField: 'info_qd',
         position: 6,
         tooltip: null,
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -397,7 +398,7 @@ const tableFacets = [
         apiField: 'ad_alt',
         position: 7,
         tooltip: null,
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -406,7 +407,7 @@ const tableFacets = [
         apiField: 'ad_total',
         position: 8,
         tooltip: null,
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -415,7 +416,7 @@ const tableFacets = [
         apiField: 'ad_ratio',
         position: 9,
         tooltip: null,
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
       {
@@ -424,7 +425,7 @@ const tableFacets = [
         apiField: 'genotype_quality',
         position: 10,
         tooltip: null,
-        defaultOperator: 'Greater than',
+        defaultOperator: '>',
         hasDictionary: false,
       },
     ],
@@ -456,6 +457,87 @@ export const CaseEntity_Variants_SNV_Facets = {
 
   validations: {
     /**
+     * Validates that dictionary additional values have zero count.
+     */
+    shouldDictionaryAdditionalValuesHaveZeroCount() {
+      tableFacets.forEach(section => {
+        CaseEntity_Variants_SNV_Facets.actions.clickSidebarSection(section.section);
+
+        section.facets.forEach(facet => {
+          if (facet.hasDictionary) {
+            cy.intercept('POST', '**/aggregate?with_dictionary=false', req => {
+              if (req.body.field.includes(facet.apiField)) {
+                req.alias = 'postDicFalse';
+              }
+            });
+            cy.get(CommonSelectors.facetHeader).eq(facet.position).contains(facet.name).click({ force: true });
+            cy.wait('@postDicFalse').then(interceptWithoutDict => {
+              const responseWithoutDict = interceptWithoutDict.response?.body;
+
+              cy.intercept('POST', '**/aggregate?with_dictionary=true', req => {
+                if (req.body.field.includes(facet.apiField)) {
+                  req.alias = 'postDicTrue';
+                }
+              });
+              cy.get(CommonSelectors.facetHeader).contains(facet.name).parents(CommonSelectors.facet).find(CommonSelectors.facetDictionaryButton).click({ force: true });
+              cy.wait('@postDicTrue').then(interceptWithDict => {
+                const responseWithDict = interceptWithDict.response?.body;
+
+                const valuesWithoutDict = responseWithoutDict.map((item: any) => item.key);
+                const dictionaryOnlyValues = responseWithDict.filter((item: any) => !valuesWithoutDict.includes(item.key));
+
+                dictionaryOnlyValues.forEach((item: any) => {
+                  expect(item.count, `${facet.name}: "${item.key}" should have count = 0`).to.eq(0);
+                });
+              });
+            });
+          }
+        });
+      });
+    },
+    /**
+     * Validates that dictionary api responses include all non-zero values from non-dictionary api responses.
+     */
+    shouldDictionaryIncludeAllNonZeroValues() {
+      tableFacets.forEach(section => {
+        CaseEntity_Variants_SNV_Facets.actions.clickSidebarSection(section.section);
+
+        section.facets.forEach(facet => {
+          if (facet.hasDictionary) {
+            cy.intercept('POST', '**/aggregate?with_dictionary=false', req => {
+              if (req.body.field.includes(facet.apiField)) {
+                req.alias = 'postDicFalse';
+              }
+            });
+            cy.get(CommonSelectors.facetHeader).eq(facet.position).contains(facet.name).click({ force: true });
+            cy.wait('@postDicFalse').then(interceptWithoutDict => {
+              const responseWithoutDict = interceptWithoutDict.response?.body;
+
+              cy.intercept('POST', '**/aggregate?with_dictionary=true', req => {
+                if (req.body.field.includes(facet.apiField)) {
+                  req.alias = 'postDicTrue';
+                }
+              });
+              cy.get(CommonSelectors.facetHeader).contains(facet.name).parents(CommonSelectors.facet).find(CommonSelectors.facetDictionaryButton).click({ force: true });
+              cy.wait('@postDicTrue').then(interceptWithDict => {
+                const responseWithDict = interceptWithDict.response?.body;
+
+                const valuesWithoutDict = responseWithoutDict.map((item: any) => item.key);
+                const valuesWithDict = responseWithDict.map((item: any) => item.key);
+
+                valuesWithoutDict.forEach((key: string) => {
+                  const countWithoutDict = responseWithoutDict.find((item: any) => item.key === key)?.count;
+                  const countWithDict = responseWithDict.find((item: any) => item.key === key)?.count;
+                  expect(valuesWithDict, `${facet.name}: key "${key}" should be in dictionary response`).to.include(key);
+                  expect(countWithDict, `${facet.name}: count for "${key}" should match`).to.eq(countWithoutDict);
+                });
+              });
+            });
+          }
+        });
+      });
+    },
+    /**
      * Validates that facets have or do not have a dictionary based on their configuration.
      * Iterates through all sections and checks each facet's dictionary presence.
      */
@@ -466,7 +548,7 @@ export const CaseEntity_Variants_SNV_Facets = {
 
         section.facets.forEach(facet => {
           const expectedExist = facet.hasDictionary ? 'exist' : 'not.exist';
-          cy.get(CommonSelectors.facetHeader).contains(facet.name).parents('[data-slot="card"]').find(CommonSelectors.facetDictionaryButton).should(expectedExist);
+          cy.get(CommonSelectors.facetHeader).contains(facet.name).parents(CommonSelectors.facet).find(CommonSelectors.facetDictionaryButton).should(expectedExist);
         });
       });
     },
@@ -495,7 +577,7 @@ export const CaseEntity_Variants_SNV_Facets = {
 
         section.facets.forEach(facet => {
           if (facet.defaultOperator !== null) {
-            cy.get(CommonSelectors.facetOperator(facet.apiField)).contains(facet.defaultOperator).should('exist');
+            cy.get(CommonSelectors.facetOperator(facet.apiField)).contains(getTextOperator(facet.defaultOperator)).should('exist');
           }
         });
       });
@@ -517,6 +599,48 @@ export const CaseEntity_Variants_SNV_Facets = {
         cy.get(`${CommonSelectors.facetState('open')} ${CommonSelectors.facetHeader}`).should('not.exist');
       });
     },
+    /**
+     * Validates the request body sent to the API when applying a facet filter.
+     * Compares the intercepted request with the expected fixture data.
+     * @param section - The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
+     * @param facet - The facet ID to test (e.g., 'variant_type', 'consequence').
+     * @throws Error if the section or facet is not found in tableFacets configuration.
+     */
+    shouldRequestOnApply(section: string, facet: string) {
+      CaseEntity_Variants_SNV_Facets.actions.clickSidebarSection(section);
+      const sectionData = tableFacets.find(s => s.section === section);
+
+      if (!sectionData) {
+        throw new Error(`Section "${section}" not found in tableFacets`);
+      }
+      const facetData = sectionData.facets.find(f => f.id === facet);
+
+      if (!facetData) {
+        throw new Error(`Facet "${facet}" not found in tableFacets section ${section}`);
+      }
+
+      let opWithData = facetData.defaultOperator ? facetData.defaultOperator : '';
+      cy.get(CommonSelectors.facetHeader).contains(facetData.name).clickAndWait({ force: true });
+
+      if (!facetData.defaultOperator) {
+        cy.get(CommonSelectors.facetHeader).contains(facetData.name).parents(CommonSelectors.facet).find(CommonSelectors.facetCheckbox('')).eq(0).click({ force: true });
+        opWithData = 'in';
+      }
+
+      cy.intercept('POST', '**/count').as('postCount');
+      cy.get(CommonSelectors.facetHeader).contains(facetData.name).parents(CommonSelectors.facet).find(CommonSelectors.facetApplyButton).click({ force: true });
+
+      cy.wait('@postCount').then(interception => {
+        cy.fixture('RequestBody/ApplyFacet.json').then(fixture => {
+          const fixtureWithData = JSON.parse(JSON.stringify(fixture).replace('_FIELD', facetData.apiField).replace('_OP', opWithData));
+          const interceptionWithData = { ...interception.request.body };
+          interceptionWithData.sqon.content[0].content.value = ['_VALUE'];
+
+          expect(interceptionWithData).to.deep.equal(fixtureWithData);
+        });
+      });
+    },
+
     /**
      * Validates that all facets in a section are displayed in the correct order.
      * @param section - The section name to validate (e.g., 'Variant', 'Gene', 'Pathogenicity').
