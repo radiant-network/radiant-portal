@@ -162,7 +162,7 @@ func validateExistingPatientFieldFn[T comparable](
 	}
 }
 
-func processPatientBatch(batch *types.Batch, db *gorm.DB, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoBatch *repository.BatchRepository) {
+func processPatientBatch(batch *types.Batch, db *gorm.DB, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoBatch repository.BatchDAO) {
 	payload := []byte(batch.Payload)
 	var patients []types.PatientBatch
 
@@ -208,7 +208,7 @@ func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []Pa
 	})
 }
 
-func insertPatientRecords(records []PatientValidationRecord, repo *repository.PatientsRepository) error {
+func insertPatientRecords(records []PatientValidationRecord, repo repository.PatientsDAO) error {
 	for _, record := range records {
 		if !record.Skipped {
 			patient := types.Patient{
@@ -233,7 +233,7 @@ func insertPatientRecords(records []PatientValidationRecord, repo *repository.Pa
 	return nil
 }
 
-func validatePatientsBatch(patients []types.PatientBatch, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) ([]PatientValidationRecord, error) {
+func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) ([]PatientValidationRecord, error) {
 	var records []PatientValidationRecord
 	for index, patient := range patients {
 		record, err := validatePatientRecord(patient, index, repoOrganization, repoPatient)
@@ -245,7 +245,7 @@ func validatePatientsBatch(patients []types.PatientBatch, repoOrganization *repo
 	return records, nil
 }
 
-func validatePatientRecord(patient types.PatientBatch, index int, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) (*PatientValidationRecord, error) {
+func validatePatientRecord(patient types.PatientBatch, index int, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) (*PatientValidationRecord, error) {
 	record := PatientValidationRecord{Patient: patient}
 	record.Index = index
 	record.validateSubmitterPatientId()

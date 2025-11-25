@@ -13,15 +13,15 @@ import (
 const SampleAlreadyExistCode = "SAMPLE-001"
 const SampleExistingSampleDifferentFieldCode = "SAMPLE-002"
 const SampleOrgNotExistCode = "SAMPLE-003"
-const SampleInvalidOrgPatientCombinationCode = "SAMPLE-004"
+const SamplePatientNotExistCode = "SAMPLE-004"
 const SampleUnknownParentSubmitterSampleIdCode = "SAMPLE-005"
 const SampleInvalidValueCode = "SAMPLE-006"
-
-// TODO: Need more details for SAMPLE-007 error code
+const SampleInvalidPatientForParentSampleCode = "SAMPLE-007"
 
 type SampleValidationRecord struct {
 	BaseValidationRecord
 	Sample         types.SampleBatch
+	PatientId      int
 	OrganizationId int
 }
 
@@ -30,7 +30,7 @@ func (r SampleValidationRecord) GetBase() *BaseValidationRecord {
 }
 
 func (r SampleValidationRecord) formatInvalidField(fieldName string, reason string) string {
-	message := fmt.Sprintf("Invalid Field %s for sample (%s / %s). Reason: %s", fieldName, r.Sample.PatientOrganizationCode, r.Sample.SubmitterPatientId, reason)
+	message := fmt.Sprintf("Invalid Field %s for sample (%s / %s). Reason: %s", fieldName, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId, reason)
 	return message
 }
 
@@ -46,11 +46,6 @@ func (r SampleValidationRecord) formatPath(fieldName string) string {
 	return fmt.Sprintf("sample[%d].%s", r.Index, fieldName)
 }
 
-func (r SampleValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
-	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
-	return r.formatInvalidField(fieldName, reason)
-}
-
 func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValue string) {
 	if fieldValue == "" {
 		return
@@ -62,28 +57,23 @@ func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValu
 	}
 }
 
-func (r *SampleValidationRecord) validateOrganizationPatientId() {
-	path := r.formatPath("organization_patient_id")
-	if len(r.Sample.SubmitterPatientId) > TextMaxLength {
-		message := r.formatFieldTooLong("organization_patient_id", TextMaxLength)
-		r.addErrors(message, SampleInvalidValueCode, path)
-	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Sample.SubmitterPatientId) {
-		message := r.formatFieldRegexpMatch("organization_patient_id", ExternalIdRegexp)
-		r.addErrors(message, SampleInvalidValueCode, path)
+func (r *SampleValidationRecord) validatePatient(patient *types.Patient) {
+	if patient == nil {
+		path := r.formatPath("submitter_patient_id")
+		message := fmt.Sprintf("Patient %s / %s for sample %s does not exist", r.Sample.PatientOrganizationCode, r.Sample.SubmitterPatientId, r.Sample.SubmitterSampleId)
+		r.addErrors(message, SamplePatientNotExistCode, path)
+	} else {
+		r.PatientId = patient.ID
 	}
 }
 
-func (r *SampleValidationRecord) validateExistingSampleInBatch(existingSample *types.SampleBatch) {
-	if existingSample != nil {
-		message := fmt.Sprintf("Sample (%s / %s) already exist in batch, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
-		r.addInfos(message, SampleAlreadyExistCode, r.formatPath(""))
-		r.Skipped = true
-		validateExistingSampleFieldFn(r, "organization_patient_id", existingSample.SubmitterPatientId, r.Sample.SubmitterPatientId)
-		validateExistingSampleFieldFn(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
-		validateExistingSampleFieldFn(r, "parent_submitter_sample_id", existingSample.SubmitterParentSampleId, r.Sample.SubmitterParentSampleId)
-		validateExistingSampleFieldFn(r, "tissue_site", existingSample.TissueSite, r.Sample.TissueSite)
-		validateExistingSampleFieldFn(r, "histology_code", existingSample.HistologyCode, r.Sample.HistologyCode)
+func (r *SampleValidationRecord) validateOrganization(organization *types.Organization) {
+	if organization == nil {
+		path := r.formatPath("sample_organization_code")
+		message := fmt.Sprintf("Organization %s for sample %s does not exist", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+		r.addErrors(message, SampleOrgNotExistCode, path)
+	} else {
+		r.OrganizationId = organization.ID
 	}
 }
 
@@ -92,45 +82,26 @@ func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *type
 		message := fmt.Sprintf("Sample (%s / %s) already exists in database, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 		r.addInfos(message, SampleAlreadyExistCode, r.formatPath(""))
 		r.Skipped = true
-		// TODO: Validate organization_patient_id
 		validateExistingSampleFieldFn(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
 		validateExistingSampleFieldFn(r, "tissue_site", existingSample.TissueType, r.Sample.TissueSite)              // TODO: Check if this is correct
 		validateExistingSampleFieldFn(r, "histology_code", existingSample.HistologyTypeCode, r.Sample.HistologyCode) // TODO: Check if this is correct
 	}
 }
 
-func (r *SampleValidationRecord) validateExistingParentSampleInBatch(samplesMap map[string]*types.SampleBatch, existingSample *types.SampleBatch) {
-	if existingSample.SubmitterParentSampleId != "" {
-		_, parentSampleExists := samplesMap[fmt.Sprintf("%s:%s", existingSample.SampleOrganizationCode, existingSample.SubmitterParentSampleId)]
-		if !parentSampleExists {
-			// Parent sample does not exist in batch, add error message
-			path := r.formatPath("parent_submitter_sample_id")
-			message := fmt.Sprintf("Parent sample with submitter_sample_id %s does not exist in batch for organization %s", existingSample.SubmitterParentSampleId, existingSample.SampleOrganizationCode)
-			r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
+func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParentSample *types.Sample) {
+	if existingParentSample != nil {
+		if existingParentSample.PatientID != r.PatientId {
+			path := r.formatPath("submitter_parent_sample_id")
+			message := fmt.Sprintf("Invalid parent sample %s for sample (%s / %s)", r.Sample.SubmitterParentSampleId, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
+		} else {
+			// TODO: Check if necessary
+			validateExistingSampleFieldFn(r, "submitter_parent_sample_id", existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId)
 		}
-	}
-}
-
-func (r *SampleValidationRecord) validateExistingParentSampleInDb(sample types.SampleBatch, organizationId int, repoSample repository.SamplesDAO) error {
-	if sample.SubmitterParentSampleId != "" {
-		parentSample, parentSampleErr := repoSample.GetSampleBySubmitterSampleId(organizationId, sample.SubmitterParentSampleId)
-		if parentSampleErr != nil {
-			return fmt.Errorf("error getting parent sample: %v", parentSampleErr)
-		} else if parentSample == nil {
-			// Parent sample does not exist, add error message
-			path := r.formatPath("parent_submitter_sample_id")
-			message := fmt.Sprintf("Parent sample with submitter_sample_id %s does not exist for organization %s", sample.SubmitterParentSampleId, sample.SampleOrganizationCode)
-			r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
-		}
-	}
-	return nil
-}
-
-func (r *SampleValidationRecord) validateSubmitterOrganization(organization *types.Organization) {
-	if organization == nil {
-		path := r.formatPath("submitter_organization_code")
-		message := fmt.Sprintf("Organization with code %s does not exist for sample with submitter_sample_id %s", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
-		r.addErrors(message, SampleOrgNotExistCode, path)
+	} else {
+		path := r.formatPath("submitter_parent_sample_id")
+		message := fmt.Sprintf("Sample %s does not exist", r.Sample.SubmitterParentSampleId)
+		r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
 	}
 }
 
@@ -154,7 +125,7 @@ func validateExistingSampleFieldFn[T comparable](
 	}
 }
 
-func processSampleBatch(batch *types.Batch, db *gorm.DB, repoOrganization repository.OrganizationDAO, repoSample repository.SamplesDAO, repoBatch *repository.BatchRepository) {
+func processSampleBatch(batch *types.Batch, db *gorm.DB, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO, repoBatch repository.BatchDAO) {
 	payload := []byte(batch.Payload)
 	var samplesbatch []types.SampleBatch
 
@@ -163,7 +134,7 @@ func processSampleBatch(batch *types.Batch, db *gorm.DB, repoOrganization reposi
 		return
 	}
 
-	records, unexpectedErr := validateSamplesBatch(samplesbatch, repoOrganization, repoSample)
+	records, unexpectedErr := validateSamplesBatch(samplesbatch, repoOrganization, repoPatient, repoSample)
 	if unexpectedErr != nil {
 		processUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), repoBatch)
 		return
@@ -200,7 +171,7 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []Sam
 	})
 }
 
-func insertSampleRecords(records []SampleValidationRecord, repo *repository.SamplesRepository) error {
+func insertSampleRecords(records []SampleValidationRecord, repo repository.SamplesDAO) error {
 	for _, record := range records {
 		if !record.Skipped {
 			sample := types.Sample{
@@ -220,34 +191,40 @@ func insertSampleRecords(records []SampleValidationRecord, repo *repository.Samp
 	return nil
 }
 
-func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoSample repository.SamplesDAO) ([]SampleValidationRecord, error) {
+func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]SampleValidationRecord, error) {
 	var records []SampleValidationRecord
-	samplesMap := make(map[string]*types.SampleBatch)
 
 	for index, sample := range samples {
-		record := &SampleValidationRecord{Sample: sample}
-		record.Index = index
+		record := &SampleValidationRecord{
+			Sample: sample,
+			BaseValidationRecord: BaseValidationRecord{
+				Index: index,
+			},
+		}
 
 		// 1. Validate fields
-		record.validateOrganizationPatientId()
-		record.validateFieldLength("parent_submitter_sample_id", sample.SubmitterParentSampleId)
+		record.validateFieldLength("submitter_parent_sample_id", sample.SubmitterParentSampleId)
 		record.validateFieldLength("tissue_site", sample.TissueSite)
 
-		// 2. Check if there's already a sample with same key submitter_organization_id:submitter_sample_id in map
-		key := fmt.Sprintf("%s:%s", sample.SampleOrganizationCode, sample.SubmitterSampleId)
-		existingSample, exists := samplesMap[key]
-		if exists {
-			// 3. If yes, check if all fields are identical, if not add error messages
-			record.validateExistingSampleInBatch(existingSample)
-			// Validate parent_submitter_sample_id in batch if provided
-			record.validateExistingParentSampleInBatch(samplesMap, existingSample)
+		// 2. Validate patient
+		patientOrg, patientOrgErr := repoOrganization.GetOrganizationByCode(sample.PatientOrganizationCode)
+		if patientOrgErr != nil {
+			return nil, fmt.Errorf("error getting existing patient organization: %v", patientOrgErr)
 		}
+		patient, patientErr := repoPatient.GetPatientByOrganizationPatientId(patientOrg.ID, sample.SubmitterPatientId)
+		if patientErr != nil {
+			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+		}
+		record.validatePatient(patient)
 
-		// 4. If no, check if sample exists in DB
+		// 3. Validate organization
 		organization, orgErr := repoOrganization.GetOrganizationByCode(sample.SampleOrganizationCode)
 		if orgErr != nil {
-			return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
+			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
 		}
+		record.validateOrganization(organization)
+
+		// 4. Validate if sample exists in DB
 		if organization != nil {
 			existingSample, sampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId)
 			if sampleErr != nil {
@@ -256,17 +233,16 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 				// 5. If exists, check if all fields are identical, if not add error messages
 				record.validateExistingSampleInDb(existingSample)
 			}
-			// Validate parent_submitter_sample_id in DB if provided
-			parentSampleErr := record.validateExistingParentSampleInDb(sample, organization.ID, repoSample)
-			if parentSampleErr != nil {
-				return nil, fmt.Errorf("error validating parent sample id: %v", parentSampleErr)
+
+			// 6. Validate parent sample in DB if provided
+			if sample.SubmitterParentSampleId != "" {
+				existingParentSample, parentSampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterParentSampleId)
+				if parentSampleErr != nil {
+					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
+				}
+				record.validateExistingParentSampleInDb(existingParentSample)
 			}
 		}
-		record.validateSubmitterOrganization(organization)
-
-		// 6. Add to records and to sample map
-		samplesMap[key] = &sample
-		records = append(records, *record)
 	}
 	return records, nil
 }

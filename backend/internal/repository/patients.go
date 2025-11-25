@@ -15,7 +15,7 @@ type PatientsRepository struct {
 }
 
 type PatientsDAO interface {
-	GetPatientByOrganizationId(organizationCode string, organizationPatientId string) (*Patient, error)
+	GetPatientByOrganizationPatientId(organizationId int, organizationPatientId string) (*Patient, error)
 	CreatePatient(newPatient *Patient) error
 }
 

@@ -2,6 +2,7 @@ package types
 
 const SampleBatchType = "sample"
 
+// TODO: Use TrimmedString where applicable
 type SampleBatch struct {
 	SubmitterPatientId      string `json:"submitter_patient_id" binding:"required"`
 	PatientOrganizationCode string `json:"patient_organization_code" binding:"required"`

@@ -24,7 +24,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /batches/{batchId} [get]
-func GetBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
+func GetBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		batchID := c.Param("batch_id")
 		batch, err := repo.GetBatchByID(batchID)

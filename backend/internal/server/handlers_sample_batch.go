@@ -22,7 +22,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /samples/batch [post]
-func PostSampleBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
+func PostSampleBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.CreateSampleBatchBody

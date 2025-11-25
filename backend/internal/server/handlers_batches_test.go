@@ -26,6 +26,10 @@ func (m *MockBatchRepository) CreateBatch(payload any, batchType string, usernam
 	return nil, errors.New("CreateBatchFunc not implemented")
 }
 
+func (m *MockBatchRepository) UpdateBatch(batch types.Batch) (int64, error) {
+	return 0, errors.New("UpdateBatch not implemented")
+}
+
 func (m *MockBatchRepository) GetBatchByID(batchId string) (*types.Batch, error) {
 	if m.GetBatchByIDFunc != nil {
 		return m.GetBatchByIDFunc(batchId)

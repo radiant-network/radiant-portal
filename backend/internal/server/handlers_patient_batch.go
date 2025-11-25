@@ -22,7 +22,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /patients/batch [post]
-func PostPatientBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
+func PostPatientBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.CreatePatientBatchBody

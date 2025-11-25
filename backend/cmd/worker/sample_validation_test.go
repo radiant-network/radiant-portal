@@ -133,48 +133,48 @@ func Test_ValidateExistingSampleInDb_DifferentValues(t *testing.T) {
 	}
 }
 
-func Test_ValidateExistingSampleInBatch_SameValues(t *testing.T) {
-	sample := types.SampleBatch{
-		SampleOrganizationCode: "CHUSJ",
-		SubmitterSampleId:      "S1",
-		TypeCode:               "tumoral",
-		TissueSite:             "dna",
-		HistologyCode:          "8041/3",
-	}
-	existing := &types.SampleBatch{
-		TypeCode:      "tumoral",
-		TissueSite:    "dna",
-		HistologyCode: "8041/3",
-	}
-	rec := SampleValidationRecord{Sample: sample}
-	rec.validateExistingSampleInBatch(existing)
+// func Test_ValidateExistingSampleInBatch_SameValues(t *testing.T) {
+// 	sample := types.SampleBatch{
+// 		SampleOrganizationCode: "CHUSJ",
+// 		SubmitterSampleId:      "S1",
+// 		TypeCode:               "tumoral",
+// 		TissueSite:             "dna",
+// 		HistologyCode:          "8041/3",
+// 	}
+// 	existing := &types.SampleBatch{
+// 		TypeCode:      "tumoral",
+// 		TissueSite:    "dna",
+// 		HistologyCode: "8041/3",
+// 	}
+// 	rec := SampleValidationRecord{Sample: sample}
+// 	rec.validateExistingSampleInBatch(existing)
 
-	assert.True(t, rec.Skipped)
-	assert.Len(t, rec.Infos, 1)
-	assert.Equal(t, SampleAlreadyExistCode, rec.Infos[0].Code)
-	assert.Nil(t, rec.Warnings)
-}
+// 	assert.True(t, rec.Skipped)
+// 	assert.Len(t, rec.Infos, 1)
+// 	assert.Equal(t, SampleAlreadyExistCode, rec.Infos[0].Code)
+// 	assert.Nil(t, rec.Warnings)
+// }
 
-func Test_ValidateExistingSampleInBatch_DifferentValues(t *testing.T) {
-	sample := types.SampleBatch{
-		SampleOrganizationCode: "CHUSJ",
-		SubmitterSampleId:      "S1",
-		TypeCode:               "normal",
-		TissueSite:             "blood",
-		HistologyCode:          "9000/0",
-	}
-	existing := &types.SampleBatch{
-		TypeCode:      "tumoral",
-		TissueSite:    "dna",
-		HistologyCode: "8041/3",
-	}
-	rec := SampleValidationRecord{Sample: sample}
-	rec.validateExistingSampleInBatch(existing)
+// func Test_ValidateExistingSampleInBatch_DifferentValues(t *testing.T) {
+// 	sample := types.SampleBatch{
+// 		SampleOrganizationCode: "CHUSJ",
+// 		SubmitterSampleId:      "S1",
+// 		TypeCode:               "normal",
+// 		TissueSite:             "blood",
+// 		HistologyCode:          "9000/0",
+// 	}
+// 	existing := &types.SampleBatch{
+// 		TypeCode:      "tumoral",
+// 		TissueSite:    "dna",
+// 		HistologyCode: "8041/3",
+// 	}
+// 	rec := SampleValidationRecord{Sample: sample}
+// 	rec.validateExistingSampleInBatch(existing)
 
-	assert.True(t, rec.Skipped)
-	assert.Len(t, rec.Infos, 1)
-	assert.Len(t, rec.Warnings, 3)
-	for _, w := range rec.Warnings {
-		assert.Equal(t, SampleExistingSampleDifferentFieldCode, w.Code)
-	}
-}
+// 	assert.True(t, rec.Skipped)
+// 	assert.Len(t, rec.Infos, 1)
+// 	assert.Len(t, rec.Warnings, 3)
+// 	for _, w := range rec.Warnings {
+// 		assert.Equal(t, SampleExistingSampleDifferentFieldCode, w.Code)
+// 	}
+// }

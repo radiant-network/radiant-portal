@@ -51,7 +51,7 @@ func getEnvOrDefault(key, fallback string) string {
 	return value
 }
 
-func processBatch(db *gorm.DB, repoBatch *repository.BatchRepository, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository, repoSample *repository.SamplesRepository) {
+func processBatch(db *gorm.DB, repoBatch repository.BatchDAO, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) {
 	nextBatch, err := repoBatch.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)
@@ -62,7 +62,7 @@ func processBatch(db *gorm.DB, repoBatch *repository.BatchRepository, repoOrgani
 		case types.PatientBatchType:
 			processPatientBatch(nextBatch, db, repoOrganization, repoPatient, repoBatch)
 		case types.SampleBatchType:
-			processSampleBatch(nextBatch, db, repoOrganization, repoSample, repoBatch)
+			processSampleBatch(nextBatch, db, repoOrganization, repoPatient, repoSample, repoBatch)
 		default:
 			notSupportedBatch := fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
 			processUnexpectedError(nextBatch, notSupportedBatch, repoBatch)
