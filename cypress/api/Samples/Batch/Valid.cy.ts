@@ -8,14 +8,14 @@ describe('Samples - Batch - Valid', () => {
     const body: string = `{
       "samples": [
         {
-          "organization_patient_id": "Cypress0001",
-          "organization_code": "MR",
+          "submitter_patient_id": "Cypress0001",
+          "patient_organization_code": "MR",
           "type_code": "a",
-          "parent_submitter_sample_id": "/|(){}[]%?&#$!@*:;,.-_",
+          "submitter_parent_sample_id": "/|(){}[]%?&#$!@*:;,.-_",
           "tissue_site": "1",
           "histology_code": "normal",
           "submitter_sample_id": "Cypress0001",
-          "submitter_organization_code": "MR"
+          "sample_organization_code": "MR"
         }
       ]
     }`;

@@ -9,12 +9,12 @@ describe('Samples - Batch - Blank fields - String fields', () => {
     const body: string = `{
       "samples": [
         {
-          "organization_patient_id": "",
-          "organization_code": "",
+          "submitter_patient_id": "",
+          "patient_organization_code": "",
           "type_code": "",
           "histology_code": "",
           "submitter_sample_id": "",
-          "submitter_organization_code": ""
+          "sample_organization_code": ""
         }
       ]
     }`;
@@ -29,11 +29,11 @@ describe('Samples - Batch - Blank fields - String fields', () => {
   });
 
   it('Message', () => {
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'OrganizationPatientId', 'required'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'OrganizationCode', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'SubmitterPatientId', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'PatientOrganizationCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'TypeCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'HistologyCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'SubmitterSampleId', 'required'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'SubmitterOrganizationCode', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreateSampleBatchBody.Samples[0]', 'SampleOrganizationCode', 'required'));
   });
 });
