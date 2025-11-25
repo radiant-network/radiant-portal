@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -99,7 +100,13 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 			// TODO: Check if necessary
 			validateExistingSampleFieldFn(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId)
 		}
-	} else {
+	}
+}
+
+func (r *SampleValidationRecord) validateExistingParentSampleInBatch(parentSampleInBatch bool) {
+	fieldName := "submitter_parent_sample_id"
+	path := r.formatPath(fieldName)
+	if !parentSampleInBatch {
 		message := fmt.Sprintf("Sample %s does not exist", r.Sample.SubmitterParentSampleId)
 		r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
 	}
@@ -226,7 +233,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
 			} else if existingSample != nil {
-				// 5. If exists, check if all fields are identical, if not add error messages
+				// 5. If exists, check if all fields are identical, and add error messages
 				record.validateExistingSampleInDb(existingSample)
 			}
 
@@ -237,9 +244,16 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
 				}
 				record.validateExistingParentSampleInDb(existingParentSample)
+
+				if existingParentSample == nil {
+					// 7. If parent sample does not exist in DB, check if it exists in the current batch
+					parentSampleInBatch := slices.ContainsFunc(samples, func(s types.SampleBatch) bool {
+						return s.SubmitterSampleId == sample.SubmitterParentSampleId && s.SampleOrganizationCode == sample.SampleOrganizationCode
+					})
+					record.validateExistingParentSampleInBatch(parentSampleInBatch)
+				}
 			}
 		}
-
 		records = append(records, *record)
 	}
 	return records, nil
