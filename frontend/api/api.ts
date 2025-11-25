@@ -735,12 +735,6 @@ export interface CasePatientClinicalInformation {
     'organization_name'?: string;
     /**
      * 
-     * @type {string}
-     * @memberof CasePatientClinicalInformation
-     */
-    'organization_patient_id'?: string;
-    /**
-     * 
      * @type {number}
      * @memberof CasePatientClinicalInformation
      */
@@ -757,6 +751,12 @@ export interface CasePatientClinicalInformation {
      * @memberof CasePatientClinicalInformation
      */
     'sex_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'submitter_patient_id'?: string;
 }
 /**
  * Line represented a case in case list
@@ -871,12 +871,6 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'proband_organization_id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseResult
-     */
     'project_code'?: string;
     /**
      * 
@@ -890,6 +884,12 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'submitter_proband_id'?: string;
     /**
      * 
      * @type {string}

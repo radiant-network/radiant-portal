@@ -1,4 +1,4 @@
-INSERT INTO "sample" (id, type_code, parent_sample_id, tissue_site, histology_code, submitter_sample_id, patient_id, submitter_organization_id)
+INSERT INTO "sample" (id, type_code, parent_sample_id, tissue_site, histology_code, submitter_sample_id, patient_id, organization_id)
 VALUES (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 6),
        (2, 'dna', 63, NULL, 'normal', 'S13225', 1, 6),
        (3, 'dna', 64, NULL, 'normal', 'S13226', 2,6),

@@ -17,11 +17,11 @@ func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
 	return &PatientsRepository{db: db}
 }
 
-func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId int, organizationPatientId string) (*types.Patient, error) {
+func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId int, submitterPatientId string) (*types.Patient, error) {
 	var patient types.Patient
 	tx := r.db.
 		Table("patient").
-		Where("organization_patient_id = ? and organization_id = ?", organizationPatientId, organizationId)
+		Where("submitter_patient_id = ? and organization_id = ?", submitterPatientId, organizationId)
 	if err := tx.Scan(&patient).Error; err != nil {
 		return nil, err
 	}

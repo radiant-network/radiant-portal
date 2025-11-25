@@ -231,14 +231,14 @@ func insertPatientRecords(records []PatientValidationRecord, repo *repository.Pa
 	for _, record := range records {
 		if !record.Skipped {
 			patient := types.Patient{
-				OrganizationPatientId:     record.Patient.SubmitterPatientId.String(),
-				OrganizationID:            record.OrganizationId,
-				OrganizationPatientIdType: record.Patient.SubmitterPatientIdType.String(),
-				FirstName:                 record.Patient.FirstName.String(),
-				LastName:                  record.Patient.LastName.String(),
-				Jhn:                       record.Patient.Jhn.String(),
-				SexCode:                   record.Patient.SexCode,
-				LifeStatusCode:            record.Patient.LifeStatusCode,
+				SubmitterPatientId:     record.Patient.SubmitterPatientId.String(),
+				OrganizationId:         record.OrganizationId,
+				SubmitterPatientIdType: record.Patient.SubmitterPatientIdType.String(),
+				FirstName:              record.Patient.FirstName.String(),
+				LastName:               record.Patient.LastName.String(),
+				Jhn:                    record.Patient.Jhn.String(),
+				SexCode:                record.Patient.SexCode,
+				LifeStatusCode:         record.Patient.LifeStatusCode,
 			}
 			if record.Patient.DateOfBirth != nil {
 				patient.DateOfBirth = record.Patient.DateOfBirth.Time

@@ -288,7 +288,7 @@
         "search": {
           "case_id": "Cas",
           "patient_id": "Patient",
-          "organization_patient_id": "MRN",
+          "submitter_patient_id": "MRN",
           "run_name": "Nom du lot",
           "sample_id": "Sample ID",
           "task_id": "Tâche"
@@ -721,8 +721,8 @@
       "headers": {
         "case_id": "Cas",
         "patient_id": "Patient",
-        "organization_patient_id": "Dossier",
-        "organization_patient_id_tooltip": "Numéro de dossier médicale du patient",
+        "submitter_patient_id": "Dossier",
+        "submitter_patient_id_tooltip": "Numéro de dossier médicale du patient",
         "priority_code": "Priorité",
         "status_code": "Statut",
         "case_type": "Type de cas",
@@ -1271,7 +1271,7 @@
       "dob": "Date de naissance",
       "sex": "Sexe",
       "jhn": "JHN",
-      "organization_patient_id": "Dossier",
+      "submitter_patient_id": "Dossier",
       "managing_org": "Organisation resp.",
       "managing_org_tooltip": "Organisation responsable du dossier du patient"
     },

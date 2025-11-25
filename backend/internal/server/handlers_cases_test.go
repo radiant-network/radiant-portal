@@ -18,7 +18,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 		{
 			CaseID:                   1,
 			ProbandID:                3,
-			ProbandOrganizationID:    "MRN-283775",
+			SubmitterProbandId:       "MRN-283775",
 			PriorityCode:             "routine",
 			StatusCode:               "in_progress",
 			CaseTypeCode:             "germline",
@@ -114,9 +114,9 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 			{ID: 1, TypeCode: "alignment", TypeName: "Alignment", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "proband, mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
 		},
 		Members: types.JsonArray[types.CasePatientClinicalInformation]{
-			{PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", OrganizationPatientID: "MRN-283775", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
-			{PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", OrganizationPatientID: "MRN-283773", SexCode: "female", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC)},
-			{PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", OrganizationPatientID: "MRN-283774", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC)},
+			{PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SubmitterPatientId: "MRN-283775", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
+			{PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SubmitterPatientId: "MRN-283773", SexCode: "female", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC)},
+			{PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SubmitterPatientId: "MRN-283774", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC)},
 		},
 	}, nil
 }
@@ -142,7 +142,7 @@ func Test_SearchCasesHandler(t *testing.T) {
 			"created_on":"2000-01-01T00:00:00Z",
 			"ordering_organization_code":"CHUSJ",
 			"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine",
-			"proband_organization_id":"MRN-283775",
+			"submitter_proband_id":"MRN-283775",
 			"proband_id":3,
 			"diagnosis_lab_code":"CQGC",
 			"diagnosis_lab_name":"Quebec Clinical Genomic Center",
@@ -241,7 +241,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"date_of_birth":"1973-03-23T00:00:00Z",
 				"organization_code":"CHUSJ", 
 				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"organization_patient_id":"MRN-283775", 
+				"submitter_patient_id":"MRN-283775", 
 				"patient_id":3, 
 				"relationship_to_proband":"proband",
 				"sex_code":"male", 
@@ -252,7 +252,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"date_of_birth":"2012-02-03T00:00:00Z", 
 				"organization_code":"CHUSJ", 
 				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"organization_patient_id":"MRN-283773", 
+				"submitter_patient_id":"MRN-283773", 
 				"patient_id":1, 
 				"relationship_to_proband":"mother", "sex_code":"female"
 			},
@@ -261,7 +261,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"date_of_birth":"1970-01-30T00:00:00Z", 
 				"organization_code":"CHUSJ", 
 				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"organization_patient_id":"MRN-283774", 
+				"submitter_patient_id":"MRN-283774", 
 				"patient_id":2, 
 				"relationship_to_proband":"father", 
 				"sex_code":"male"
