@@ -9,9 +9,9 @@ describe('Patients - Batch - Invalid values - Enum fields', () => {
     const body: string = `{
       "patients": [
         {
-          "organization_patient_id": "Cypress0001",
-          "organization_patient_id_type": "MR",
-          "organization_code": "Cypress",
+          "submitter_patient_id": "Cypress0001",
+          "submitter_patient_id_type": "MR",
+          "patient_organization_code": "Cypress",
           "life_status_code": "InvalidValue",
           "sex_code": "InvalidValue",
           "date_of_birth": "1979-09-19"

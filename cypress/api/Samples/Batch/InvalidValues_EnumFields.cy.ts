@@ -9,12 +9,12 @@ describe('Samples - Batch - Invalid values - Enum fields', () => {
     const body: string = `{
       "samples": [
         {
-          "organization_patient_id": "Cypress0001",
-          "organization_code": "MR",
+          "submitter_patient_id": "Cypress0001",
+          "patient_organization_code": "MR",
           "type_code": "a",
           "histology_code": "InvalidValue",
           "submitter_sample_id": "Cypress0001",
-          "submitter_organization_code": "MR"
+          "sample_organization_code": "MR"
         }
       ]
     }`;

@@ -37,7 +37,7 @@ const buttonVariants = tv({
   base: 'text-secondary dark:text-foreground',
   variants: {
     selected: {
-      true: 'bg-accent text-accent-foreground',
+      true: 'bg-sidebar-brand-accent text-sidebar-brand-accent-foreground',
     },
   },
   defaultVariants: {
@@ -83,7 +83,9 @@ export function SidebarGroups({
               <Button
                 iconOnly
                 onClick={() => toggleSidebar()}
-                className={buttonVariants({ className: 'mb-1' })}
+                className={buttonVariants({
+                  className: 'mb-1 hover:bg-sidebar-brand-accent hover:text-sidebar-brand-accent-foreground',
+                })}
                 size="sm"
                 variant="ghost"
               >

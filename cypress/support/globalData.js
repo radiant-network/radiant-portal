@@ -3,8 +3,8 @@ const globalData = {
     token: null, // Will be set by initializeGlobalData
   },
   BatchesId: {
-    patientPending: '19cc572a-1472-4081-92d5-4edab37d35c9',
-    patientNotFound: '19cc572a-1472-4081-92d5-4edab37d35c0',
+    patientPending: '760b1d91-7c9e-427a-8fcf-c08de7fd6aa2',
+    patientNotFound: '00000000-0000-0000-0000-000000000000',
   },
 };
 

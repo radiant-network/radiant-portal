@@ -9,9 +9,9 @@ describe('Patients - Batch - Null fields - String fields', () => {
     const body: string = `{
       "patients": [
         {
-          "organization_patient_id": null,
-          "organization_patient_id_type": null,
-          "organization_code": null,
+          "submitter_patient_id": null,
+          "submitter_patient_id_type": null,
+          "patient_organization_code": null,
           "life_status_code": null,
           "sex_code": null,
           "date_of_birth": "1979-09-19"
@@ -29,9 +29,9 @@ describe('Patients - Batch - Null fields - String fields', () => {
   });
 
   it('Message', () => {
-    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'OrganizationPatientId', 'required'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'OrganizationPatientIdType', 'required'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'OrganizationCode', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'SubmitterPatientId', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'SubmitterPatientIdType', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'PatientOrganizationCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'LifeStatusCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreatePatientBatchBody.Patients[0]', 'SexCode', 'required'));
   });

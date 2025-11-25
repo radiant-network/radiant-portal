@@ -8,9 +8,9 @@ describe('Patients - Batch - Valid', () => {
     const body: string = `{
       "patients": [
         {
-          "organization_patient_id": "Cypress0001",
-          "organization_patient_id_type": "MR",
-          "organization_code": "Cypress",
+          "submitter_patient_id": "Cypress0001",
+          "submitter_patient_id_type": "MR",
+          "patient_organization_code": "Cypress",
           "first_name": "/|(){}[]%?&#$!@*:;,.-_",
           "last_name": "x",
           "jhn": "Cypress0001",

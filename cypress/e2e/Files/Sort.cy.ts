@@ -2,7 +2,7 @@
 import 'support/commands';
 import { FilesTable } from 'pom/pages/FilesTable';
 
-describe('Files - Sort [SJRA-853]', () => {
+describe('Files - Sort', () => {
   const setupTest = () => {
     cy.login();
     cy.visitFilesPage();

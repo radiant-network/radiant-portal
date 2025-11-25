@@ -1037,12 +1037,12 @@ components:
           type: string
         dry_run:
           type: boolean
-        errors:
-          $ref: '#/components/schemas/BatchReport'
         finished_on:
           type: string
         id:
           type: string
+        report:
+          $ref: '#/components/schemas/BatchReport'
         started_on:
           type: string
         status:

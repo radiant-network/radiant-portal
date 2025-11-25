@@ -2,7 +2,7 @@
 import 'support/commands';
 import { FilesTable } from 'pom/pages/FilesTable';
 
-describe('CaseEntity - Files - Sort [SJRA-853]', () => {
+describe('CaseEntity - Files - Sort', () => {
   const setupTest = () => {
     cy.login();
     cy.visitFilesPage();

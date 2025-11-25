@@ -30,7 +30,7 @@ func (r SampleValidationRecord) GetBase() *BaseValidationRecord {
 }
 
 func (r SampleValidationRecord) formatInvalidField(fieldName string, reason string) string {
-	message := fmt.Sprintf("Invalid Field %s for sample (%s / %s). Reason: %s", fieldName, r.Sample.OrganizationCode, r.Sample.OrganizationPatientId, reason)
+	message := fmt.Sprintf("Invalid Field %s for sample (%s / %s). Reason: %s", fieldName, r.Sample.PatientOrganizationCode, r.Sample.SubmitterPatientId, reason)
 	return message
 }
 
@@ -64,11 +64,11 @@ func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValu
 
 func (r *SampleValidationRecord) validateOrganizationPatientId() {
 	path := r.formatPath("organization_patient_id")
-	if len(r.Sample.OrganizationPatientId) > TextMaxLength {
+	if len(r.Sample.SubmitterPatientId) > TextMaxLength {
 		message := r.formatFieldTooLong("organization_patient_id", TextMaxLength)
 		r.addErrors(message, SampleInvalidValueCode, path)
 	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Sample.OrganizationPatientId) {
+	if !ExternalIdRegexpCompiled.MatchString(r.Sample.SubmitterPatientId) {
 		message := r.formatFieldRegexpMatch("organization_patient_id", ExternalIdRegexp)
 		r.addErrors(message, SampleInvalidValueCode, path)
 	}
@@ -76,12 +76,12 @@ func (r *SampleValidationRecord) validateOrganizationPatientId() {
 
 func (r *SampleValidationRecord) validateExistingSampleInBatch(existingSample *types.SampleBatch) {
 	if existingSample != nil {
-		message := fmt.Sprintf("Sample (%s / %s) already exist in batch, skipped.", r.Sample.SubmitterOrganizationCode, r.Sample.SubmitterSampleId)
+		message := fmt.Sprintf("Sample (%s / %s) already exist in batch, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 		r.addInfos(message, SampleAlreadyExistCode, r.formatPath(""))
 		r.Skipped = true
-		validateExistingSampleFieldFn(r, "organization_patient_id", existingSample.OrganizationPatientId, r.Sample.OrganizationPatientId)
+		validateExistingSampleFieldFn(r, "organization_patient_id", existingSample.SubmitterPatientId, r.Sample.SubmitterPatientId)
 		validateExistingSampleFieldFn(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
-		validateExistingSampleFieldFn(r, "parent_submitter_sample_id", existingSample.ParentSubmitterSampleId, r.Sample.ParentSubmitterSampleId)
+		validateExistingSampleFieldFn(r, "parent_submitter_sample_id", existingSample.SubmitterParentSampleId, r.Sample.SubmitterParentSampleId)
 		validateExistingSampleFieldFn(r, "tissue_site", existingSample.TissueSite, r.Sample.TissueSite)
 		validateExistingSampleFieldFn(r, "histology_code", existingSample.HistologyCode, r.Sample.HistologyCode)
 	}
@@ -89,7 +89,7 @@ func (r *SampleValidationRecord) validateExistingSampleInBatch(existingSample *t
 
 func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *types.Sample) {
 	if existingSample != nil {
-		message := fmt.Sprintf("Sample (%s / %s) already exists in database, skipped.", r.Sample.SubmitterOrganizationCode, r.Sample.SubmitterSampleId)
+		message := fmt.Sprintf("Sample (%s / %s) already exists in database, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 		r.addInfos(message, SampleAlreadyExistCode, r.formatPath(""))
 		r.Skipped = true
 		// TODO: Validate organization_patient_id
@@ -100,26 +100,26 @@ func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *type
 }
 
 func (r *SampleValidationRecord) validateExistingParentSampleInBatch(samplesMap map[string]*types.SampleBatch, existingSample *types.SampleBatch) {
-	if existingSample.ParentSubmitterSampleId != "" {
-		_, parentSampleExists := samplesMap[fmt.Sprintf("%s:%s", existingSample.SubmitterOrganizationCode, existingSample.ParentSubmitterSampleId)]
+	if existingSample.SubmitterParentSampleId != "" {
+		_, parentSampleExists := samplesMap[fmt.Sprintf("%s:%s", existingSample.SampleOrganizationCode, existingSample.SubmitterParentSampleId)]
 		if !parentSampleExists {
 			// Parent sample does not exist in batch, add error message
 			path := r.formatPath("parent_submitter_sample_id")
-			message := fmt.Sprintf("Parent sample with submitter_sample_id %s does not exist in batch for organization %s", existingSample.ParentSubmitterSampleId, existingSample.SubmitterOrganizationCode)
+			message := fmt.Sprintf("Parent sample with submitter_sample_id %s does not exist in batch for organization %s", existingSample.SubmitterParentSampleId, existingSample.SampleOrganizationCode)
 			r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
 		}
 	}
 }
 
 func (r *SampleValidationRecord) validateExistingParentSampleInDb(sample types.SampleBatch, organizationId int, repoSample repository.SamplesDAO) error {
-	if sample.ParentSubmitterSampleId != "" {
-		parentSample, parentSampleErr := repoSample.GetSampleBySubmitterSampleId(organizationId, sample.ParentSubmitterSampleId)
+	if sample.SubmitterParentSampleId != "" {
+		parentSample, parentSampleErr := repoSample.GetSampleBySubmitterSampleId(organizationId, sample.SubmitterParentSampleId)
 		if parentSampleErr != nil {
 			return fmt.Errorf("error getting parent sample: %v", parentSampleErr)
 		} else if parentSample == nil {
 			// Parent sample does not exist, add error message
 			path := r.formatPath("parent_submitter_sample_id")
-			message := fmt.Sprintf("Parent sample with submitter_sample_id %s does not exist for organization %s", sample.ParentSubmitterSampleId, sample.SubmitterOrganizationCode)
+			message := fmt.Sprintf("Parent sample with submitter_sample_id %s does not exist for organization %s", sample.SubmitterParentSampleId, sample.SampleOrganizationCode)
 			r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
 		}
 	}
@@ -129,7 +129,7 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(sample types.S
 func (r *SampleValidationRecord) validateSubmitterOrganization(organization *types.Organization) {
 	if organization == nil {
 		path := r.formatPath("submitter_organization_code")
-		message := fmt.Sprintf("Organization with code %s does not exist for sample with submitter_sample_id %s", r.Sample.SubmitterOrganizationCode, r.Sample.SubmitterSampleId)
+		message := fmt.Sprintf("Organization with code %s does not exist for sample with submitter_sample_id %s", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 		r.addErrors(message, SampleOrgNotExistCode, path)
 	}
 }
@@ -144,7 +144,7 @@ func validateExistingSampleFieldFn[T comparable](
 	if existingSampleValue != recordValue {
 		path := r.formatPath(fieldName)
 		message := fmt.Sprintf("A sample with same ids (%s / %s) has been found  but with a different %s (%v <> %v)",
-			r.Sample.SubmitterOrganizationCode,
+			r.Sample.SampleOrganizationCode,
 			r.Sample.SubmitterSampleId,
 			fieldName,
 			existingSampleValue,
@@ -230,11 +230,11 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 
 		// 1. Validate fields
 		record.validateOrganizationPatientId()
-		record.validateFieldLength("parent_submitter_sample_id", sample.ParentSubmitterSampleId)
+		record.validateFieldLength("parent_submitter_sample_id", sample.SubmitterParentSampleId)
 		record.validateFieldLength("tissue_site", sample.TissueSite)
 
 		// 2. Check if there's already a sample with same key submitter_organization_id:submitter_sample_id in map
-		key := fmt.Sprintf("%s:%s", sample.SubmitterOrganizationCode, sample.SubmitterSampleId)
+		key := fmt.Sprintf("%s:%s", sample.SampleOrganizationCode, sample.SubmitterSampleId)
 		existingSample, exists := samplesMap[key]
 		if exists {
 			// 3. If yes, check if all fields are identical, if not add error messages
@@ -244,7 +244,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		}
 
 		// 4. If no, check if sample exists in DB
-		organization, orgErr := repoOrganization.GetOrganizationByCode(sample.SubmitterOrganizationCode)
+		organization, orgErr := repoOrganization.GetOrganizationByCode(sample.SampleOrganizationCode)
 		if orgErr != nil {
 			return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
 		}

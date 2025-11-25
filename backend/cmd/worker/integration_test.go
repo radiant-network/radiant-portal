@@ -15,9 +15,9 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
-				"organization_patient_id": "MRN-TEST-123",
-				"organization_patient_id_type" : "mrn",
-				"organization_code": "CHOP",
+				"submitter_patient_id": "MRN-TEST-123",
+				"submitter_patient_id_type" : "mrn",
+				"patient_organization_code": "CHOP",
 				"sex_code": "female",
 				"life_status_code": "alive",
 				"date_of_birth": "2010-05-15"	
@@ -67,9 +67,9 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
-				"organization_patient_id": "MRN-283773",
-				"organization_patient_id_type" : "mrn",
-				"organization_code": "CHUSJ",
+				"submitter_patient_id": "MRN-283773",
+				"submitter_patient_id_type" : "mrn",
+				"patient_organization_code": "CHUSJ",
 				"sex_code": "male",
 				"life_status_code": "alive",
 				"last_name": "Gagnon",
@@ -116,9 +116,9 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
-				"organization_patient_id": "MRN-283773",
-				"organization_patient_id_type" : "mrn",
-				"organization_code": "UNKNOWN_ORG",
+				"submitter_patient_id": "MRN-283773",
+				"submitter_patient_id_type" : "mrn",
+				"patient_organization_code": "UNKNOWN_ORG",
 				"sex_code": "male",
 				"life_status_code": "alive",
 				"last_name": "Gagnon",
@@ -173,9 +173,9 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
-				"organization_patient_id": "MRN-TEST-123",
-				"organization_patient_id_type" : "mrn",
-				"organization_code": "CHOP",
+				"submitter_patient_id": "MRN-TEST-123",
+				"submitter_patient_id_type" : "mrn",
+				"patient_organization_code": "CHOP",
 				"sex_code": "female",
 				"life_status_code": "alive",
 				"date_of_birth": "2010-05-15"	

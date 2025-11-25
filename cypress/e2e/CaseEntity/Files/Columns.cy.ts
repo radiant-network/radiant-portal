@@ -3,7 +3,7 @@ import 'support/commands';
 import { CaseEntity_Files } from 'pom/pages/CaseEntity_Files';
 import { data } from 'pom/shared/Data';
 
-describe('CaseEntity - Files - Columns [SJRA-853]', () => {
+describe('CaseEntity - Files - Columns', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseFilesPage(data.file.case);

@@ -31,7 +31,7 @@ func (r PatientValidationRecord) GetBase() *BaseValidationRecord {
 }
 
 func (r PatientValidationRecord) formatInvalidField(fieldName string, reason string) string {
-	message := fmt.Sprintf("Invalid Field %s for patient (%s / %s). Reason: %s", fieldName, r.Patient.OrganizationCode, r.Patient.OrganizationPatientId, reason)
+	message := fmt.Sprintf("Invalid Field %s for patient (%s / %s). Reason: %s", fieldName, r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId, reason)
 	return message
 }
 
@@ -52,14 +52,14 @@ func (r PatientValidationRecord) formatPath(fieldName string) string {
 	return fmt.Sprintf("patient[%d].%s", r.Index, fieldName)
 }
 
-func (r *PatientValidationRecord) validateOrganizationPatientId() {
-	path := r.formatPath("organization_patient_id")
-	if len(r.Patient.OrganizationPatientId) > TextMaxLength {
-		message := r.formatFieldTooLong("organization_patient_id", TextMaxLength)
+func (r *PatientValidationRecord) validateSubmitterPatientId() {
+	path := r.formatPath("submitter_patient_id")
+	if len(r.Patient.SubmitterPatientId) > TextMaxLength {
+		message := r.formatFieldTooLong("submitter_patient_id", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Patient.OrganizationPatientId) {
-		message := r.formatFieldRegexpMatch("organization_patient_id", ExternalIdRegexp)
+	if !ExternalIdRegexpCompiled.MatchString(r.Patient.SubmitterPatientId.String()) {
+		message := r.formatFieldRegexpMatch("submitter_patient_id", ExternalIdRegexp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
@@ -73,7 +73,7 @@ func (r *PatientValidationRecord) validateLastName() {
 		message := r.formatFieldTooLong("last_name", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
-	if !NameRegExpCompiled.MatchString(r.Patient.LastName) {
+	if !NameRegExpCompiled.MatchString(r.Patient.LastName.String()) {
 		message := r.formatFieldRegexpMatch("last_name", NameRegExp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
@@ -88,7 +88,7 @@ func (r *PatientValidationRecord) validateFirstName() {
 		message := r.formatFieldTooLong("first_name", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
-	if !NameRegExpCompiled.MatchString(r.Patient.FirstName) {
+	if !NameRegExpCompiled.MatchString(r.Patient.FirstName.String()) {
 		message := r.formatFieldRegexpMatch("first_name", NameRegExp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
@@ -103,44 +103,42 @@ func (r *PatientValidationRecord) validateJhn() {
 		message := r.formatFieldTooLong("jhn", TextMaxLength)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn) {
+	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn.String()) {
 		message := r.formatFieldRegexpMatch("jhn", ExternalIdRegexp)
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
 func (r *PatientValidationRecord) validateOrganization(organization *types.Organization) {
-	path := r.formatPath("organization_patient_code")
+	path := r.formatPath("patient_organization_code")
 	if organization == nil {
-		message := fmt.Sprintf("Organization %s for patient %s does not exist.", r.Patient.OrganizationCode, r.Patient.OrganizationPatientId)
+		message := fmt.Sprintf("Organization %s for patient %s does not exist.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
 		r.addErrors(message, PatientOrganizationNotExistCode, path)
 	} else if !slices.Contains(AllowedOrganizationCategories, organization.CategoryCode) {
 		message := fmt.Sprintf("Organization type (%s) defined for patient (%s / %s) is not in this list : %s.",
 			organization.CategoryCode,
-			r.Patient.OrganizationCode,
-			r.Patient.OrganizationPatientId,
+			r.Patient.PatientOrganizationCode,
+			r.Patient.SubmitterPatientId,
 			strings.Join(AllowedOrganizationCategories, ", "),
 		)
-
 		r.addErrors(message, PatientOrganizationTypeCode, path)
-
 	} else {
 		r.OrganizationId = organization.ID
 	}
-
 }
 
 func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types.Patient) {
 	if existingPatient != nil {
-		message := fmt.Sprintf("Patient (%s / %s) already exist, skipped.", r.Patient.OrganizationCode, r.Patient.OrganizationPatientId)
+		message := fmt.Sprintf("Patient (%s / %s) already exist, skipped.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
+
 		r.addInfos(message, PatientAlreadyExistCode, r.formatPath(""))
 		r.Skipped = true
 		validateExistingPatientFieldFn(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
 		validateExistingPatientFieldFn(r, "life_status_code", existingPatient.LifeStatusCode, r.Patient.LifeStatusCode)
 		validateExistingPatientFieldFn(r, "date_of_birth", existingPatient.DateOfBirth, r.Patient.DateOfBirth.Time)
-		validateExistingPatientFieldFn(r, "last_name", existingPatient.LastName, r.Patient.LastName)
-		validateExistingPatientFieldFn(r, "first_name", existingPatient.FirstName, r.Patient.FirstName)
-		validateExistingPatientFieldFn(r, "jhn", existingPatient.Jhn, r.Patient.Jhn)
+		validateExistingPatientFieldFn(r, "last_name", existingPatient.LastName, r.Patient.LastName.String())
+		validateExistingPatientFieldFn(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String())
+		validateExistingPatientFieldFn(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String())
 	}
 }
 
@@ -154,13 +152,12 @@ func validateExistingPatientFieldFn[T comparable](
 	if existingPatientValue != recordValue {
 		path := r.formatPath(fieldName)
 		message := fmt.Sprintf("A patient with same ids (%s / %s) has been found  but with a different %s (%v <> %v)",
-			r.Patient.OrganizationCode,
-			r.Patient.OrganizationPatientId,
+			r.Patient.PatientOrganizationCode,
+			r.Patient.SubmitterPatientId,
 			fieldName,
 			existingPatientValue,
 			recordValue,
 		)
-
 		r.addWarnings(message, PatientExistingPatientDifferentFieldCode, path)
 	}
 }
@@ -215,12 +212,12 @@ func insertPatientRecords(records []PatientValidationRecord, repo *repository.Pa
 	for _, record := range records {
 		if !record.Skipped {
 			patient := types.Patient{
-				OrganizationPatientId:     record.Patient.OrganizationPatientId,
+				OrganizationPatientId:     record.Patient.SubmitterPatientId.String(),
 				OrganizationID:            record.OrganizationId,
-				OrganizationPatientIdType: record.Patient.OrganizationPatientIdType,
-				FirstName:                 record.Patient.FirstName,
-				LastName:                  record.Patient.LastName,
-				Jhn:                       record.Patient.Jhn,
+				OrganizationPatientIdType: record.Patient.SubmitterPatientIdType.String(),
+				FirstName:                 record.Patient.FirstName.String(),
+				LastName:                  record.Patient.LastName.String(),
+				Jhn:                       record.Patient.Jhn.String(),
 				SexCode:                   record.Patient.SexCode,
 				LifeStatusCode:            record.Patient.LifeStatusCode,
 			}
@@ -251,19 +248,19 @@ func validatePatientsBatch(patients []types.PatientBatch, repoOrganization *repo
 func validatePatientRecord(patient types.PatientBatch, index int, repoOrganization *repository.OrganizationRepository, repoPatient *repository.PatientsRepository) (*PatientValidationRecord, error) {
 	record := PatientValidationRecord{Patient: patient}
 	record.Index = index
-	record.validateOrganizationPatientId()
+	record.validateSubmitterPatientId()
 	record.validateFirstName()
 	record.validateLastName()
 	record.validateJhn()
 
-	organization, orgErr := repoOrganization.GetOrganizationByCode(patient.OrganizationCode)
+	organization, orgErr := repoOrganization.GetOrganizationByCode(patient.PatientOrganizationCode)
 	if orgErr != nil {
 		return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
 	} else {
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
-		existingPatient, patientErr := repoPatient.GetPatientByOrganizationPatientId(organization.ID, patient.OrganizationPatientId)
+		existingPatient, patientErr := repoPatient.GetPatientByOrganizationPatientId(organization.ID, patient.SubmitterPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		} else {

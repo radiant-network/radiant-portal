@@ -40,7 +40,7 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 
 	router := gin.Default()
 	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
-	body := `{"patients": [{"organization_patient_id": "p1", "organization_patient_id_type": "MR", "organization_code": "org1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
+	body := `{"patients": [{"submitter_patient_id": "p1", "submitter_patient_id_type": "MR", "patient_organization_code": "org1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
@@ -69,7 +69,7 @@ func TestPostPatientBatchHandler_Forbidden(t *testing.T) {
 
 	router := gin.Default()
 	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
-	body := `{"patients": [{"organization_patient_id": "p1", "organization_patient_id_type": "MR", "organization_code": "org1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
+	body := `{"patients": [{"submitter_patient_id": "p1", "submitter_patient_id_type": "MR", "patient_organization_code": "org1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
@@ -92,7 +92,7 @@ func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 
 	router := gin.Default()
 	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
-	body := `{"patients": [{"organization_patient_id": "p1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
+	body := `{"patients": [{"submitter_patient_id": "p1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()

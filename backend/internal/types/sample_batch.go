@@ -3,14 +3,14 @@ package types
 const SampleBatchType = "sample"
 
 type SampleBatch struct {
-	OrganizationPatientId     string `json:"organization_patient_id" binding:"required"`
-	OrganizationCode          string `json:"organization_code" binding:"required"`
-	TypeCode                  string `json:"type_code" binding:"required"`
-	ParentSubmitterSampleId   string `json:"parent_submitter_sample_id,omitempty"`
-	TissueSite                string `json:"tissue_site,omitempty"`
-	HistologyCode             string `json:"histology_code" binding:"required,oneof=tumoral normal"`
-	SubmitterSampleId         string `json:"submitter_sample_id" binding:"required"`
-	SubmitterOrganizationCode string `json:"submitter_organization_code" binding:"required"`
+	SubmitterPatientId      string `json:"submitter_patient_id" binding:"required"`
+	PatientOrganizationCode string `json:"patient_organization_code" binding:"required"`
+	TypeCode                string `json:"type_code" binding:"required"`
+	SubmitterParentSampleId string `json:"submitter_parent_sample_id,omitempty"`
+	TissueSite              string `json:"tissue_site,omitempty"`
+	HistologyCode           string `json:"histology_code" binding:"required,oneof=tumoral normal"`
+	SubmitterSampleId       string `json:"submitter_sample_id" binding:"required"`
+	SampleOrganizationCode  string `json:"sample_organization_code" binding:"required"`
 }
 
 // CreateSampleBatchBody represents the body required to create a sample batch
