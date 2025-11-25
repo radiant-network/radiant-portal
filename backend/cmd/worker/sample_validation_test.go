@@ -41,9 +41,9 @@ func (m *MockSamplesRepository) CreateSample(newSample *types.Sample) error {
 func Test_SampleField_Too_Long(t *testing.T) {
 	longString := randomString(120, letters)
 	sample := types.SampleBatch{
-		SubmitterOrganizationCode: "CHUSJ",
-		SubmitterSampleId:         "S1",
-		TissueSite:                longString,
+		SampleOrganizationCode: "CHUSJ",
+		SubmitterSampleId:      "S1",
+		TissueSite:             longString,
 	}
 	rec := SampleValidationRecord{Sample: sample}
 	rec.validateFieldLength("tissue_site", sample.TissueSite)
@@ -57,9 +57,9 @@ func Test_SampleField_Too_Long(t *testing.T) {
 func Test_SampleField_Valid_Length(t *testing.T) {
 	validString := "some-tissue-site"
 	sample := types.SampleBatch{
-		SubmitterOrganizationCode: "CHUSJ",
-		SubmitterSampleId:         "S1",
-		TissueSite:                validString,
+		SampleOrganizationCode: "CHUSJ",
+		SubmitterSampleId:      "S1",
+		TissueSite:             validString,
 	}
 	rec := SampleValidationRecord{Sample: sample}
 	rec.validateFieldLength("tissue_site", sample.TissueSite)
@@ -69,9 +69,9 @@ func Test_SampleField_Valid_Length(t *testing.T) {
 
 func Test_SampleField_Empty(t *testing.T) {
 	sample := types.SampleBatch{
-		SubmitterOrganizationCode: "CHUSJ",
-		SubmitterSampleId:         "S1",
-		TissueSite:                "",
+		SampleOrganizationCode: "CHUSJ",
+		SubmitterSampleId:      "S1",
+		TissueSite:             "",
 	}
 	rec := SampleValidationRecord{Sample: sample}
 	rec.validateFieldLength("tissue_site", sample.TissueSite)
@@ -89,11 +89,11 @@ func Test_ValidateExistingSampleInDb_Nil(t *testing.T) {
 
 func Test_ValidateExistingSampleInDb_SameValues(t *testing.T) {
 	sample := types.SampleBatch{
-		SubmitterOrganizationCode: "CHUSJ",
-		SubmitterSampleId:         "S1",
-		TypeCode:                  "tumoral",
-		TissueSite:                "dna",
-		HistologyCode:             "8041/3",
+		SampleOrganizationCode: "CHUSJ",
+		SubmitterSampleId:      "S1",
+		TypeCode:               "tumoral",
+		TissueSite:             "dna",
+		HistologyCode:          "8041/3",
 	}
 	existing := &types.Sample{
 		TypeCode:          "tumoral",
@@ -111,11 +111,11 @@ func Test_ValidateExistingSampleInDb_SameValues(t *testing.T) {
 
 func Test_ValidateExistingSampleInDb_DifferentValues(t *testing.T) {
 	sample := types.SampleBatch{
-		SubmitterOrganizationCode: "CHUSJ",
-		SubmitterSampleId:         "S1",
-		TypeCode:                  "normal",
-		TissueSite:                "blood",
-		HistologyCode:             "9000/0",
+		SampleOrganizationCode: "CHUSJ",
+		SubmitterSampleId:      "S1",
+		TypeCode:               "normal",
+		TissueSite:             "blood",
+		HistologyCode:          "9000/0",
 	}
 	existing := &types.Sample{
 		TypeCode:          "tumoral",
@@ -135,11 +135,11 @@ func Test_ValidateExistingSampleInDb_DifferentValues(t *testing.T) {
 
 func Test_ValidateExistingSampleInBatch_SameValues(t *testing.T) {
 	sample := types.SampleBatch{
-		SubmitterOrganizationCode: "CHUSJ",
-		SubmitterSampleId:         "S1",
-		TypeCode:                  "tumoral",
-		TissueSite:                "dna",
-		HistologyCode:             "8041/3",
+		SampleOrganizationCode: "CHUSJ",
+		SubmitterSampleId:      "S1",
+		TypeCode:               "tumoral",
+		TissueSite:             "dna",
+		HistologyCode:          "8041/3",
 	}
 	existing := &types.SampleBatch{
 		TypeCode:      "tumoral",
@@ -157,11 +157,11 @@ func Test_ValidateExistingSampleInBatch_SameValues(t *testing.T) {
 
 func Test_ValidateExistingSampleInBatch_DifferentValues(t *testing.T) {
 	sample := types.SampleBatch{
-		SubmitterOrganizationCode: "CHUSJ",
-		SubmitterSampleId:         "S1",
-		TypeCode:                  "normal",
-		TissueSite:                "blood",
-		HistologyCode:             "9000/0",
+		SampleOrganizationCode: "CHUSJ",
+		SubmitterSampleId:      "S1",
+		TypeCode:               "normal",
+		TissueSite:             "blood",
+		HistologyCode:          "9000/0",
 	}
 	existing := &types.SampleBatch{
 		TypeCode:      "tumoral",
