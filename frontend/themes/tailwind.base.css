@@ -169,6 +169,15 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --color-sidebar-brand-background: var(--sidebar-brand-background);
+  --color-sidebar-brand-foreground: var(--sidebar-brand-foreground);
+  --color-sidebar-brand-primary: var(--sidebar-brand-primary);
+  --color-sidebar-brand-primary-foreground: var(--sidebar-brand-primary-foreground);
+  --color-sidebar-brand-accent: var(--sidebar-brand-accent);
+  --color-sidebar-brand-accent-foreground: var(--sidebar-brand-accent-foreground);
+  --color-sidebar-brand-border: var(--sidebar-brand-border);
+  --color-sidebar-brand-ring: var(--sidebar-brand-ring);
+
   /* Radiant Custom Colors */
   --color-amber: var(--radiant-amber-500);
   --color-amber-foreground: var(--radiant-amber-800);
