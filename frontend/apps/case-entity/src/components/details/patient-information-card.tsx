@@ -41,11 +41,11 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
           {titleCase(member.sex_code)}
         </InformationField>
 
-        <InformationField label={t('case_entity.patient_information.organization_patient_id')}>
-          {member.organization_patient_id && (
+        <InformationField label={t('case_entity.patient_information.submitter_patient_id')}>
+          {member.submitter_patient_id && (
             <CopyButton
-              value={member.organization_patient_id}
-              label={member.organization_patient_id}
+              value={member.submitter_patient_id}
+              label={member.submitter_patient_id}
               className="-m-2"
             />
           )}

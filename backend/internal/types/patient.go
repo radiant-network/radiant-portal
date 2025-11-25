@@ -3,18 +3,18 @@ package types
 import "time"
 
 type Patient struct {
-	ID                        int
-	OrganizationPatientId     string
-	OrganizationPatientIdType string
-	OrganizationID            int
-	Organization              Organization `gorm:"foreignKey:ID;references:OrganizationID"`
-	SexCode                   string
-	LifeStatusCode            string
-	FirstName                 string    `json:"first_name,omitempty"`
-	LastName                  string    `json:"last_name,omitempty"`
-	Jhn                       string    `json:"jhn,omitempty"`
-	Sex                       Sex       `gorm:"foreignKey:Code;references:SexCode"`
-	DateOfBirth               time.Time `gorm:"type:DATE"`
+	ID                     int
+	SubmitterPatientId     string
+	SubmitterPatientIdType string
+	OrganizationId         int
+	Organization           Organization `gorm:"foreignKey:ID;references:OrganizationId"`
+	SexCode                string
+	LifeStatusCode         string
+	FirstName              string    `json:"first_name,omitempty"`
+	LastName               string    `json:"last_name,omitempty"`
+	Jhn                    string    `json:"jhn,omitempty"`
+	Sex                    Sex       `gorm:"foreignKey:Code;references:SexCode"`
+	DateOfBirth            time.Time `gorm:"type:DATE"`
 }
 
 var PatientTable = Table{
@@ -31,9 +31,9 @@ func (Patient) TableName() string {
 	return "patient"
 }
 
-var ProbandOrganizationIDField = Field{
-	Name:          "organization_patient_id",
-	Alias:         "proband_organization_id",
+var SubmitterProbandIdField = Field{
+	Name:          "submitter_patient_id",
+	Alias:         "submitter_proband_id",
 	CanBeSelected: true,
 	CanBeSorted:   true,
 	Table:         ProbandTable,
@@ -46,8 +46,8 @@ var PatientIdField = Field{
 	Table:         PatientTable,
 }
 
-var PatientOrganizationIDField = Field{
-	Name:          "organization_patient_id",
+var SubmitterPatientIdField = Field{
+	Name:          "submitter_patient_id",
 	CanBeFiltered: true,
 	Table:         PatientTable,
 }

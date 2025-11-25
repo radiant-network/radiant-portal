@@ -301,7 +301,7 @@
         "search": {
           "case_id": "Case",
           "patient_id": "Patient",
-          "organization_patient_id": "MRN",
+          "submitter_patient_id": "MRN",
           "run_name": "Run Name",
           "sample_id": "Sample ID",
           "task_id": "Task"
@@ -729,8 +729,8 @@
       "headers": {
         "case_id": "Case",
         "patient_id": "Patient",
-        "organization_patient_id": "MRN",
-        "organization_patient_id_tooltip": "Patient's medical record number",
+        "submitter_patient_id": "MRN",
+        "submitter_patient_id_tooltip": "Patient's medical record number",
         "priority_code": "Priority",
         "status_code": "Status",
         "case_type": "Type",
@@ -1210,7 +1210,7 @@
       "dob": "DOB",
       "sex": "Sex",
       "jhn": "JHN",
-      "organization_patient_id": "MRN",
+      "submitter_patient_id": "MRN",
       "managing_org": "Managing Org.",
       "managing_org_tooltip": "Organization managing the patient’s file"
     },

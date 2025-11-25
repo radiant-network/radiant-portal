@@ -33,7 +33,7 @@ const tableColumns = [
   {
     id: 'mrn',
     name: 'MRN',
-    apiField: 'proband_organization_id',
+    apiField: 'submitter_proband_id',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,

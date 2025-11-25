@@ -252,13 +252,13 @@ func Test_ValidateExistingPatient_SameValues(t *testing.T) {
 		Jhn:                     "JHN-123",
 	}
 	existing := &types.Patient{
-		OrganizationPatientId: "id2",
-		SexCode:               "M",
-		LifeStatusCode:        "alive",
-		DateOfBirth:           dob,
-		LastName:              "Doe",
-		FirstName:             "John",
-		Jhn:                   "JHN-123",
+		SubmitterPatientId: "id2",
+		SexCode:            "M",
+		LifeStatusCode:     "alive",
+		DateOfBirth:        dob,
+		LastName:           "Doe",
+		FirstName:          "John",
+		Jhn:                "JHN-123",
 	}
 	rec := PatientValidationRecord{Patient: patient}
 	rec.validateExistingPatient(existing)
@@ -282,13 +282,13 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 		Jhn:                     "JHN-999",
 	}
 	existing := &types.Patient{
-		OrganizationPatientId: "id3",
-		SexCode:               "M",
-		LifeStatusCode:        "alive",
-		DateOfBirth:           dobExisting,
-		LastName:              "Jones",
-		FirstName:             "Bob",
-		Jhn:                   "JHN-123",
+		SubmitterPatientId: "id3",
+		SexCode:            "M",
+		LifeStatusCode:     "alive",
+		DateOfBirth:        dobExisting,
+		LastName:           "Jones",
+		FirstName:          "Bob",
+		Jhn:                "JHN-123",
 	}
 	rec := PatientValidationRecord{Patient: patient}
 	rec.validateExistingPatient(existing)
@@ -352,7 +352,7 @@ func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
 
 		// Verify that no patient records were inserted due to rollback
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "id2", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "id2", 1).Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}

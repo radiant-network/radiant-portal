@@ -81,7 +81,7 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	    UNION
 	    (SELECT "patient_id" as type, proband_id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(proband_id AS TEXT) LIKE '1%')
 	    UNION
-	    (SELECT "mrn" as type, organization_patient_id as value from `radiant_jdbc`.`public`.`patient` WHERE organization_patient_id LIKE '1%')
+	    (SELECT "mrn" as type, submitter_patient_id as value from `radiant_jdbc`.`public`.`patient` WHERE submitter_patient_id LIKE '1%')
 	    ORDER BY value asc;
 	*/
 	var autocompleteResult []AutocompleteResult
@@ -95,8 +95,8 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	subQueryProbandId = subQueryProbandId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
 	subQueryOrgPatID := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
-	subQueryOrgPatID = subQueryOrgPatID.Select("organization_patient_id_type as type, organization_patient_id as value")
-	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(organization_patient_id) LIKE ?", strings.ToLower(searchInput))
+	subQueryOrgPatID = subQueryOrgPatID.Select("submitter_patient_id_type as type, submitter_patient_id as value")
+	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(submitter_patient_id) LIKE ?", strings.ToLower(searchInput))
 
 	tx := r.db.Table("(? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID)
 	tx = tx.Order("value asc, type asc")
@@ -274,7 +274,7 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` mgmt_org on p.organization_id = mgmt_org.id")
 	txMembers = txMembers.Where("f.case_id = ?", caseId)
 	txMembers = txMembers.Order("affected_status_code asc, relationship_to_proband_code desc")
-	txMembers = txMembers.Select("p.id as patient_id, f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, p.date_of_birth, p.sex_code, p.organization_patient_id, mgmt_org.code as organization_code, mgmt_org.name as organization_name")
+	txMembers = txMembers.Select("p.id as patient_id, f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, p.date_of_birth, p.sex_code, p.submitter_patient_id, mgmt_org.code as organization_code, mgmt_org.name as organization_name")
 	if err := txMembers.Find(&members).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case members: %w", err)
 	}

@@ -344,13 +344,13 @@ components:
           type: string
         organization_name:
           type: string
-        organization_patient_id:
-          type: string
         patient_id:
           type: integer
         relationship_to_proband:
           type: string
         sex_code:
+          type: string
+        submitter_patient_id:
           type: string
       required:
       - affected_status_code
@@ -395,13 +395,13 @@ components:
           type: string
         proband_id:
           type: integer
-        proband_organization_id:
-          type: string
         project_code:
           type: string
         project_name:
           type: string
         status_code:
+          type: string
+        submitter_proband_id:
           type: string
         updated_on:
           type: string

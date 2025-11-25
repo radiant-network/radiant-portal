@@ -38,7 +38,7 @@ type Case struct {
 type CaseResult struct {
 	CaseID                   int       `json:"case_id" validate:"required"`
 	ProbandID                int       `json:"proband_id,omitempty"`
-	ProbandOrganizationID    string    `json:"proband_organization_id,omitempty"`
+	SubmitterProbandId       string    `json:"submitter_proband_id,omitempty"`
 	PriorityCode             string    `json:"priority_code,omitempty"`
 	StatusCode               string    `json:"status_code" validate:"required"`
 	CaseTypeCode             string    `json:"-"`
@@ -117,7 +117,7 @@ type CasePatientClinicalInformation struct {
 	PatientID             int               `json:"patient_id" validate:"required"`
 	DateOfBirth           time.Time         `json:"date_of_birth"`
 	SexCode               string            `json:"sex_code" validate:"required"`
-	OrganizationPatientID string            `json:"organization_patient_id,omitempty"`
+	SubmitterPatientId    string            `json:"submitter_patient_id,omitempty"`
 	OrganizationCode      string            `json:"organization_code,omitempty"`
 	OrganizationName      string            `json:"organization_name,omitempty"`
 	EthnicityCodes        JsonArray[string] `json:"ethnicity_codes,omitempty"` // TODO
@@ -153,8 +153,8 @@ var CasesFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
 	PatientIdField,
-	PatientOrganizationIDField,
-	ProbandOrganizationIDField,
+	SubmitterPatientIdField,
+	SubmitterProbandIdField,
 	CasePriorityCodeField,
 	CaseStatusCodeField,
 	CaseTypeCodeField,
@@ -178,7 +178,7 @@ var CasesFields = []Field{
 var CasesDefaultFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
-	ProbandOrganizationIDField,
+	SubmitterProbandIdField,
 	CasePriorityCodeField,
 	CaseStatusCodeField,
 	CaseTypeCodeField,

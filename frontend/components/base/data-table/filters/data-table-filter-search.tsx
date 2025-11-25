@@ -36,7 +36,7 @@ function getTypeIcon(type: string) {
   const iconMap: { [key: string]: any } = {
     case_id: FolderOpen,
     patient_id: User,
-    organization_patient_id: Barcode,
+    submitter_patient_id: Barcode,
   };
   return iconMap[type.toLowerCase()] || FolderOpen;
 }
