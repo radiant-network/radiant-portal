@@ -239,6 +239,8 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 				record.validateExistingParentSampleInDb(existingParentSample)
 			}
 		}
+
+		records = append(records, *record)
 	}
 	return records, nil
 }
