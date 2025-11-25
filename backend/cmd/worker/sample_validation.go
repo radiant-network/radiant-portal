@@ -89,17 +89,17 @@ func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *type
 }
 
 func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParentSample *types.Sample) {
+	fieldName := "submitter_parent_sample_id"
+	path := r.formatPath(fieldName)
 	if existingParentSample != nil {
 		if existingParentSample.PatientID != r.PatientId {
-			path := r.formatPath("submitter_parent_sample_id")
 			message := fmt.Sprintf("Invalid parent sample %s for sample (%s / %s)", r.Sample.SubmitterParentSampleId, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
 		} else {
 			// TODO: Check if necessary
-			validateExistingSampleFieldFn(r, "submitter_parent_sample_id", existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId)
+			validateExistingSampleFieldFn(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId)
 		}
 	} else {
-		path := r.formatPath("submitter_parent_sample_id")
 		message := fmt.Sprintf("Sample %s does not exist", r.Sample.SubmitterParentSampleId)
 		r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
 	}
@@ -207,11 +207,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		record.validateFieldLength("tissue_site", sample.TissueSite)
 
 		// 2. Validate patient
-		patientOrg, patientOrgErr := repoOrganization.GetOrganizationByCode(sample.PatientOrganizationCode)
-		if patientOrgErr != nil {
-			return nil, fmt.Errorf("error getting existing patient organization: %v", patientOrgErr)
-		}
-		patient, patientErr := repoPatient.GetPatientByOrganizationPatientId(patientOrg.ID, sample.SubmitterPatientId)
+		patient, patientErr := repoPatient.GetPatientByOrgCodeAndOrgPatientId(sample.PatientOrganizationCode, sample.SubmitterPatientId)
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}

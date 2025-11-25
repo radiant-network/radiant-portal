@@ -16,6 +16,7 @@ type PatientsRepository struct {
 
 type PatientsDAO interface {
 	GetPatientByOrganizationPatientId(organizationId int, organizationPatientId string) (*Patient, error)
+	GetPatientByOrgCodeAndOrgPatientId(organizationCode string, organizationPatientId string) (*Patient, error)
 	CreatePatient(newPatient *Patient) error
 }
 
@@ -28,6 +29,22 @@ func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId in
 	tx := r.db.
 		Table(patient.TableName()).
 		Where("organization_patient_id = ? and organization_id = ?", organizationPatientId, organizationId)
+	if err := tx.First(&patient).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+	return &patient, nil
+}
+
+func (r *PatientsRepository) GetPatientByOrgCodeAndOrgPatientId(organizationCode string, organizationPatientId string) (*Patient, error) {
+	var patient Patient
+	tx := r.db.
+		Table(patient.TableName()).
+		Joins("JOIN organization o ON o.id = patient.organization_id").
+		Where("patient.organization_patient_id = ? AND o.code = ?", organizationPatientId, organizationCode)
 	if err := tx.First(&patient).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)
