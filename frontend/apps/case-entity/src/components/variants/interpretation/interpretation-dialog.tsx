@@ -17,9 +17,10 @@ import {
   DialogTitle,
 } from '@/components/base/ui/dialog';
 import { useI18n } from '@/components/hooks/i18n';
+import { occurrencesApi } from '@/utils/api';
 
 import InterpretationVariantHeader from './header';
-import { useInterpretationHelper, useOccurrenceExpandHelper } from './hook';
+import { useInterpretationHelper } from './hook';
 import InterpretationFormGermline from './interpretation-form-germline';
 import InterpretationFormSomatic from './interpretation-form-somatic';
 import InterpretationLastUpdatedBanner from './last-updated-banner';
@@ -49,14 +50,20 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
     occurrence,
     isSomatic,
   );
-  const { fetch: fetchOccurrenceExpandHelper } = useOccurrenceExpandHelper(caseId!, occurrence);
 
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
-  const occurrenceUniqueKey = `occurrence-${occurrence.seq_id}-${occurrence.locus_id}`;
 
   const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence>(
-    occurrenceUniqueKey,
-    fetchOccurrenceExpandHelper,
+    {
+      caseId,
+      occurrence,
+    },
+    async () =>
+      caseId && occurrence.seq_id && occurrence.locus_id
+        ? occurrencesApi
+            .getExpandedGermlineSNVOccurrence(caseId, `${occurrence.seq_id}`, occurrence.locus_id)
+            .then(response => response.data)
+        : ({} as ExpandedGermlineSNVOccurrence),
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,
