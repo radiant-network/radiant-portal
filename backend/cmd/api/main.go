@@ -150,6 +150,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.GET("/dictionary", server.GetGermlineSNVDictionary(repoFacets))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
+	sequencingGroup.POST("/batch", server.PostSequencingExperimentBatchHandler(repoBatches, auth))
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoSeqExp))
 
 	usersGroup := privateRoutes.Group("/users")
