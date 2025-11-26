@@ -180,14 +180,18 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.GET("/autocomplete", server.DocumentsAutocompleteHandler(repoDocuments))
 	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
 
-	batchesGroup := privateRoutes.Group("/batches")
-	batchesGroup.GET("/:batch_id", server.GetBatchHandler(repoBatches, auth))
+	dataManagerRoutes := privateRoutes.Group("/")
+	dataManagerRoutes.Use(server.RequireRole(auth, "data_manager"))
+	{
+		batchesGroup := dataManagerRoutes.Group("/batches")
+		batchesGroup.GET("/:batch_id", server.GetBatchHandler(repoBatches))
 
-	patientsGroup := privateRoutes.Group("/patients")
-	patientsGroup.POST("/batch", server.PostPatientBatchHandler(repoBatches, auth))
+		patientsGroup := dataManagerRoutes.Group("/patients")
+		patientsGroup.POST("/batch", server.PostPatientBatchHandler(repoBatches, auth))
 
-	samplesGroup := privateRoutes.Group("/samples")
-	samplesGroup.POST("/batch", server.PostSampleBatchHandler(repoBatches, auth))
+		samplesGroup := dataManagerRoutes.Group("/samples")
+		samplesGroup.POST("/batch", server.PostSampleBatchHandler(repoBatches, auth))
+	}
 
 	r.Use(gin.Recovery())
 	return r

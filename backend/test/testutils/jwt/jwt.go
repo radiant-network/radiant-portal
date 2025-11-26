@@ -5,7 +5,7 @@ import (
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
-func GenerateMockJWT() (string, error) {
+func GenerateMockJWT(roles []string) (string, error) {
 	claims := jwt.MapClaims{
 		"jti":             "abc123",
 		"exp":             0,
@@ -23,7 +23,7 @@ func GenerateMockJWT() (string, error) {
 		"allowed_origins": nil,
 		"resource_access": map[string]map[string][]string{
 			"radiant": {
-				"roles": []string{"data_manager"},
+				"roles": roles,
 			},
 			"CBTN": {
 				"roles": []string{"geneticist"},

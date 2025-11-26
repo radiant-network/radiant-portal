@@ -37,17 +37,6 @@ func PostSampleBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.Handl
 			return
 		}
 
-		// Check if user has data_manager role
-		hasRole, err := auth.UserHasRole(c, "data_manager")
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if !hasRole {
-			HandleForbiddenError(c)
-			return
-		}
-
 		username, err := auth.RetrieveUsernameFromToken(c)
 		if err != nil {
 			HandleError(c, err)

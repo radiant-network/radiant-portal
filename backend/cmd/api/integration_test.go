@@ -97,10 +97,60 @@ func Test_SecureRoutes(t *testing.T) {
 	})
 }
 
+// func Test_DataManagerRoutes(t *testing.T) {
+// 	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+// 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
+// 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
+
+// 		router := setupRouter(starrocks, postgres)
+// 		server := httptest.NewServer(router)
+// 		t.Cleanup(server.Close)
+// 		client := server.Client()
+
+// 		tokenWithRole, err := jwt.GenerateMockJWT([]string{"data_manager"})
+// 		assert.NoError(t, err)
+// 		tokenWithoutRole, err := jwt.GenerateMockJWT([]string{"clinician"})
+// 		assert.NoError(t, err)
+
+// 		dataManagerRoutes := []struct {
+// 			method string
+// 			route  string
+// 		}{
+// 			{http.MethodGet, "/batches/some_id"},
+// 			{http.MethodPost, "/patients/batch"},
+// 			{http.MethodPost, "/samples/batch"},
+// 		}
+
+// 		for _, tc := range dataManagerRoutes {
+// 			t.Run(fmt.Sprintf("%s_%s_Forbidden", tc.method, tc.route), func(t *testing.T) {
+// 				req, err := http.NewRequest(tc.method, server.URL+tc.route, nil)
+// 				assert.NoError(t, err)
+// 				req.Header.Set("Authorization", "Bearer "+tokenWithoutRole)
+
+// 				res, err := client.Do(req)
+// 				assert.NoError(t, err)
+// 				defer res.Body.Close()
+// 				assert.Equal(t, http.StatusForbidden, res.StatusCode)
+// 			})
+// 			t.Run(fmt.Sprintf("%s_%s_Allowed", tc.method, tc.route), func(t *testing.T) {
+// 				req, err := http.NewRequest(tc.method, server.URL+tc.route, nil)
+// 				assert.NoError(t, err)
+// 				req.Header.Set("Authorization", "Bearer "+tokenWithRole)
+
+// 				res, err := client.Do(req)
+// 				assert.NoError(t, err)
+// 				defer res.Body.Close()
+// 				assert.NotEqual(t, http.StatusForbidden, res.StatusCode)
+// 				assert.NotEqual(t, http.StatusUnauthorized, res.StatusCode)
+// 			})
+// 		}
+// 	})
+// }
+
 func Test_OpenFGA_Authorization(t *testing.T) {
 	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
 		func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
-			token, err := jwt.GenerateMockJWT()
+			token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 			assert.NoError(t, err)
 
 			// We can't use t.Setenv because we need OpenFGA context during the setup of the environment

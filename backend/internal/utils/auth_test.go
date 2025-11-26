@@ -26,7 +26,7 @@ func Test_RetrieveUserIdFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveUserIdFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -81,7 +81,7 @@ func Test_RetrieveAzpFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveAzpFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -137,7 +137,7 @@ func Test_RetrieveResourceAccessFromToken_InvalidKeycloakToken(t *testing.T) {
 func Test_RetrieveResourceAccessFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -173,7 +173,7 @@ func Test_RetrieveUsernameFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveUsernameFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -216,7 +216,7 @@ func Test_RetrieveUsernameFromToken_NoTokenInContext(t *testing.T) {
 func Test_UserHasRole_Success(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -235,7 +235,7 @@ func Test_UserHasRole_Success(t *testing.T) {
 func Test_UserHasRole_RoleNotPresent(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -266,7 +266,7 @@ func Test_UserHasRole_NoTokenInContext(t *testing.T) {
 func Test_ParseJWTFromHeader_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
