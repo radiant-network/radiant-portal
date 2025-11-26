@@ -16,7 +16,7 @@ function ParticipantFrequencyCell({ value, locusId }: NumberCellProps) {
   const scientificNotation = toExponentialNotation(value);
 
   return (
-    <AnchorLink size="sm" href={`/variants/entity/${locusId}#patients`} target="_blank">
+    <AnchorLink size="sm" href={`/variants/entity/${locusId}?tab=patients`} target="_blank">
       {scientificNotation ? scientificNotation : value}
     </AnchorLink>
   );
