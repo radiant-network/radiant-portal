@@ -528,6 +528,19 @@ components:
         username:
           type: string
       type: object
+    CreateSequencingExperimentBatchBody:
+      description: CreateSequencingExperimentBatchBody represents the body required
+        to create a sequencing experiment batch
+      properties:
+        sequencing_experiments:
+          items:
+            $ref: '#/components/schemas/SequencingExperimentBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - sequencing_experiments
+      type: object
     DocumentFilters:
       properties:
         data_type:
@@ -1404,6 +1417,58 @@ components:
           type: string
         vcf_filepath:
           type: string
+      type: object
+    SequencingExperimentBatch:
+      properties:
+        aliquot:
+          type: string
+        capture_kit:
+          type: string
+        experimental_strategy_code:
+          enum:
+          - wgs
+          - wxs
+          - rnaseq
+          - targeted_dna
+          type: string
+        platform_code:
+          type: string
+        run_alias:
+          type: string
+        run_date:
+          example: "2023-10-01T00:00:00Z"
+          format: date-time
+          type: string
+        sample_organization_code:
+          type: string
+        sequencing_lab_code:
+          type: string
+        sequencing_read_technology_code:
+          enum:
+          - short_read
+          - long_read
+          type: string
+        status_code:
+          enum:
+          - unknown
+          - draft
+          - revoke
+          - completed
+          - incomplete
+          - submitted
+          - in_progress
+          type: string
+        submitter_sample_id:
+          type: string
+      required:
+      - aliquot
+      - experimental_strategy_code
+      - platform_code
+      - sample_organization_code
+      - sequencing_lab_code
+      - sequencing_read_technology_code
+      - status_code
+      - submitter_sample_id
       type: object
     SortBody:
       properties:
@@ -3671,6 +3736,53 @@ paths:
       security:
       - bearerauth: []
       summary: Get a Sequencing
+      tags:
+      - sequencing
+  /sequencing/batch:
+    post:
+      description: Create a new sequencing experiment batch
+      operationId: postSequencingExperimentBatch
+      parameters:
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSequencingExperimentBatchBody'
+        description: Create Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create a new sequencing experiment batch
       tags:
       - sequencing
   /status:
