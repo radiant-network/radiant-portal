@@ -49,7 +49,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
     occurrence,
     isSomatic,
   );
-  const { fetch: fetchOccurrenceExpandHelper } = useOccurrenceExpandHelper(occurrence);
+  const { fetch: fetchOccurrenceExpandHelper } = useOccurrenceExpandHelper(caseId!, occurrence);
 
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
   const occurrenceUniqueKey = `occurrence-${occurrence.seq_id}-${occurrence.locus_id}`;
