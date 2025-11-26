@@ -65,10 +65,12 @@ type CaseSheetContentProps = {
 
 function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }: CaseSheetContentProps) {
   const { t } = useI18n();
+  const { caseId } = useParams<{ caseId: string }>();
   const params = useParams<{ locusId: string }>();
   const locusId = params.locusId!;
 
   const { expandResult, caseResult, proband, assay, isLoading } = useOccurrenceAndCase(
+    caseId!,
     caseData.seq_id.toString(),
     locusId,
   );
@@ -85,6 +87,7 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
         onNext={onNext}
         hasPrevious={hasPrevious}
         hasNext={hasNext}
+        locusId={locusId}
       />
       <Separator />
       <PreviewSheetSubHeader

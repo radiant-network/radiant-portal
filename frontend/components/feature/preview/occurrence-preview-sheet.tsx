@@ -62,12 +62,13 @@ type OccurrenceSheetContentProps = {
 
 function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, hasNext }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
+  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
+  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
   const { expandResult, proband, assay, isLoading } = useOccurrenceAndCase(
+    caseIdParam!,
     occurrence.seq_id.toString(),
     occurrence.locus_id.toString(),
   );
-  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
-  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
 
   if (isLoading || !expandResult.data) {
     return <PreviewSheetSkeleton />;

@@ -68,11 +68,11 @@ export function useInterpretationHelper(caseId: string, occurrence: GermlineSNVO
   };
 }
 
-export function useOccurrenceExpandHelper(occurrence: GermlineSNVOccurrence) {
+export function useOccurrenceExpandHelper(caseId: string, occurrence: GermlineSNVOccurrence) {
   const fetch = useCallback(
     async () =>
       occurrencesApi
-        .getExpandedGermlineSNVOccurrence(occurrence.seq_id!.toString(), occurrence.locus_id!.toString())
+        .getExpandedGermlineSNVOccurrence(caseId, occurrence.seq_id!.toString(), occurrence.locus_id!.toString())
         .then(response => response.data),
     [occurrence.seq_id, occurrence.locus_id],
   );
