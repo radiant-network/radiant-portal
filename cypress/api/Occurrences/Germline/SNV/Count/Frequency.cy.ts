@@ -23,10 +23,10 @@ describe('Occurrences - Germline - SNV - Count - Frequency', () => {
     const facetName = facet.name instanceof RegExp ? facet.name.source.replace(/^\^|\$$/g, '') : facet.name;
 
     it(`${facetName}`, () => {
-      const facetData = globalData.Count.Frequency.find((f: { field: string }) => f.field === facet.apiField);
+      const facetData = globalData.Count.snv[sectionData.section].find((f: { field: string }) => f.field === facet.apiField);
 
       if (!facetData) {
-        throw new Error(`Facet data for "${facet.apiField}" not found in globalData.Count.Frequency`);
+        throw new Error(`Facet data for "${facet.apiField}" not found in globalData.Count.snv${sectionData.section}`);
       }
 
       cy.fixture('RequestBody/ApplyFacet.json').then(fixture => {

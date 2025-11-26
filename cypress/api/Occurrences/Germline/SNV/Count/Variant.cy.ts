@@ -21,10 +21,10 @@ describe('Occurrences - Germline - SNV - Count - Variant', () => {
 
   sectionData.facets.forEach(facet => {
     it(`${facet.name}`, () => {
-      const facetData = globalData.Count.Variant.find((f: { field: string }) => f.field === facet.apiField);
+      const facetData = globalData.Count.snv[sectionData.section].find((f: { field: string }) => f.field === facet.apiField);
 
       if (!facetData) {
-        throw new Error(`Facet data for "${facet.apiField}" not found in globalData.Count.Variant`);
+        throw new Error(`Facet data for "${facet.apiField}" not found in globalData.Count.snv${sectionData.section}`);
       }
 
       cy.fixture('RequestBody/ApplyFacet.json').then(fixture => {
