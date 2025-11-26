@@ -183,7 +183,7 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 	return nil
 }
 
-func createSamplesInBatchMap(samples []types.SampleBatch) map[string]*types.SampleBatch {
+func samplesMap(samples []types.SampleBatch) map[string]*types.SampleBatch {
 	samplesMap := make(map[string]*types.SampleBatch)
 	for i := range samples {
 		key := fmt.Sprintf("%s:%s", samples[i].SampleOrganizationCode, samples[i].SubmitterSampleId)
@@ -228,7 +228,7 @@ func reorderSampleRecords(records []*SampleValidationRecord) {
 
 func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
-	parentSamplesInBatch := createSamplesInBatchMap(samples)
+	samplesMap := samplesMap(samples)
 
 	for index, sample := range samples {
 		record := &SampleValidationRecord{
@@ -274,7 +274,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 
 				if existingParentSample == nil {
 					// 7. If parent sample does not exist in DB, check if it exists in the current batch
-					_, parentSampleIsInBatch := parentSamplesInBatch[fmt.Sprintf("%s:%s", sample.SampleOrganizationCode, sample.SubmitterParentSampleId)]
+					_, parentSampleIsInBatch := samplesMap[fmt.Sprintf("%s:%s", sample.SampleOrganizationCode, sample.SubmitterParentSampleId)]
 					record.validateExistingParentSampleInBatch(parentSampleIsInBatch)
 				}
 			}
