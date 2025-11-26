@@ -30,32 +30,19 @@ func (r PatientValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func (r PatientValidationRecord) formatInvalidField(fieldName string, reason string) string {
-	message := fmt.Sprintf("Invalid Field %s for patient (%s / %s). Reason: %s", fieldName, r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId, reason)
-	return message
-}
-
-func (r PatientValidationRecord) formatFieldTooLong(fieldName string, maxLength int) string {
-	reason := fmt.Sprintf("field is too long, maximum length allowed is %d", maxLength)
-	return r.formatInvalidField(fieldName, reason)
+func (r PatientValidationRecord) GetResourceType() string {
+	return types.PatientBatchType
 }
 
 func (r PatientValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
 	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
-	return r.formatInvalidField(fieldName, reason)
-}
-
-func (r PatientValidationRecord) formatPath(fieldName string) string {
-	if fieldName == "" {
-		return fmt.Sprintf("patient[%d]", r.Index)
-	}
-	return fmt.Sprintf("patient[%d].%s", r.Index, fieldName)
+	return formatInvalidField(r, fieldName, reason, []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()})
 }
 
 func (r *PatientValidationRecord) validateSubmitterPatientId() {
-	path := r.formatPath("submitter_patient_id")
+	path := formatPath(r, "submitter_patient_id")
 	if len(r.Patient.SubmitterPatientId) > TextMaxLength {
-		message := r.formatFieldTooLong("submitter_patient_id", TextMaxLength)
+		message := formatFieldTooLong(r, "submitter_patient_id", TextMaxLength, []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()})
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.SubmitterPatientId.String()) {
@@ -68,9 +55,9 @@ func (r *PatientValidationRecord) validateLastName() {
 	if r.Patient.LastName == "" {
 		return
 	}
-	path := r.formatPath("last_name")
+	path := formatPath(r, "last_name")
 	if len(r.Patient.LastName) > TextMaxLength {
-		message := r.formatFieldTooLong("last_name", TextMaxLength)
+		message := formatFieldTooLong(r, "last_name", TextMaxLength, []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()})
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.LastName.String()) {
@@ -83,9 +70,9 @@ func (r *PatientValidationRecord) validateFirstName() {
 	if r.Patient.FirstName == "" {
 		return
 	}
-	path := r.formatPath("first_name")
+	path := formatPath(r, "first_name")
 	if len(r.Patient.FirstName) > TextMaxLength {
-		message := r.formatFieldTooLong("first_name", TextMaxLength)
+		message := formatFieldTooLong(r, "first_name", TextMaxLength, []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()})
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.FirstName.String()) {
@@ -98,9 +85,9 @@ func (r *PatientValidationRecord) validateJhn() {
 	if r.Patient.Jhn == "" {
 		return
 	}
-	path := r.formatPath("jhn")
+	path := formatPath(r, "jhn")
 	if len(r.Patient.Jhn) > TextMaxLength {
-		message := r.formatFieldTooLong("jhn", TextMaxLength)
+		message := formatFieldTooLong(r, "jhn", TextMaxLength, []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()})
 		r.addErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn.String()) {
@@ -110,7 +97,7 @@ func (r *PatientValidationRecord) validateJhn() {
 }
 
 func (r *PatientValidationRecord) validateOrganization(organization *types.Organization) {
-	path := r.formatPath("patient_organization_code")
+	path := formatPath(r, "patient_organization_code")
 	if organization == nil {
 		message := fmt.Sprintf("Organization %s for patient %s does not exist.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
 		r.addErrors(message, PatientOrganizationNotExistCode, path)
@@ -131,18 +118,18 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 	if existingPatient != nil {
 		message := fmt.Sprintf("Patient (%s / %s) already exist, skipped.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
 
-		r.addInfos(message, PatientAlreadyExistCode, r.formatPath(""))
+		r.addInfos(message, PatientAlreadyExistCode, formatPath(r, ""))
 		r.Skipped = true
-		validateExistingPatientFieldFn(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
-		validateExistingPatientFieldFn(r, "life_status_code", existingPatient.LifeStatusCode, r.Patient.LifeStatusCode)
-		validateExistingPatientFieldFn(r, "date_of_birth", existingPatient.DateOfBirth, r.Patient.DateOfBirth.Time)
-		validateExistingPatientFieldFn(r, "last_name", existingPatient.LastName, r.Patient.LastName.String())
-		validateExistingPatientFieldFn(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String())
-		validateExistingPatientFieldFn(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String())
+		validateExistingPatientField(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
+		validateExistingPatientField(r, "life_status_code", existingPatient.LifeStatusCode, r.Patient.LifeStatusCode)
+		validateExistingPatientField(r, "date_of_birth", existingPatient.DateOfBirth, r.Patient.DateOfBirth.Time)
+		validateExistingPatientField(r, "last_name", existingPatient.LastName, r.Patient.LastName.String())
+		validateExistingPatientField(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String())
+		validateExistingPatientField(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String())
 	}
 }
 
-func validateExistingPatientFieldFn[T comparable](
+func validateExistingPatientField[T comparable](
 	r *PatientValidationRecord,
 	fieldName string,
 	existingPatientValue T,
@@ -150,7 +137,7 @@ func validateExistingPatientFieldFn[T comparable](
 
 ) {
 	if existingPatientValue != recordValue {
-		path := r.formatPath(fieldName)
+		path := formatPath(r, fieldName)
 		message := fmt.Sprintf("A patient with same ids (%s / %s) has been found  but with a different %s (%v <> %v)",
 			r.Patient.PatientOrganizationCode,
 			r.Patient.SubmitterPatientId,
@@ -246,8 +233,10 @@ func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repos
 }
 
 func validatePatientRecord(patient types.PatientBatch, index int, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) (*PatientValidationRecord, error) {
-	record := PatientValidationRecord{Patient: patient}
-	record.Index = index
+	record := PatientValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: index},
+		Patient:              patient,
+	}
 	record.validateSubmitterPatientId()
 	record.validateFirstName()
 	record.validateLastName()

@@ -26,7 +26,7 @@ func NewSamplesRepository(db *gorm.DB) *SamplesRepository {
 func (r *SamplesRepository) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*Sample, error) {
 	var sample Sample
 	tx := r.db.
-		Table(sample.TableName()).
+		Table("sample").
 		Where("submitter_organization_id = ? and submitter_sample_id = ?", organizationId, submitterSampleId)
 	if err := tx.First(&sample).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {

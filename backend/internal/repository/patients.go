@@ -27,7 +27,7 @@ func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
 func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId int, organizationPatientId string) (*Patient, error) {
 	var patient Patient
 	tx := r.db.
-		Table(patient.TableName()).
+		Table("patient").
 		Where("organization_patient_id = ? and organization_id = ?", organizationPatientId, organizationId)
 	if err := tx.First(&patient).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -42,7 +42,7 @@ func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId in
 func (r *PatientsRepository) GetPatientByOrgCodeAndOrgPatientId(organizationCode string, organizationPatientId string) (*Patient, error) {
 	var patient Patient
 	tx := r.db.
-		Table(patient.TableName()).
+		Table("patient").
 		Joins("JOIN organization o ON o.id = patient.organization_id").
 		Where("patient.organization_patient_id = ? AND o.code = ?", organizationPatientId, organizationCode)
 	if err := tx.First(&patient).Error; err != nil {

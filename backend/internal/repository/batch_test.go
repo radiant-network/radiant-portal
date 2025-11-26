@@ -45,8 +45,8 @@ func Test_GetBatchByID_Success(t *testing.T) {
 		batchId := uuid.NewString()
 		initErr := db.Exec(`
             INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on) VALUES
-            (?, '{}', 'SUCCESS', 'patient', true, 'user1', now())
-        `, batchId).Error
+            (?, '{}', ?, 'patient', true, 'user1', now())
+        `, batchId, types.BatchStatusSuccess).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -96,9 +96,9 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		// Add two pending batches
 		initErr := db.Exec(`
 			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on) VALUES
-            ('{}', 'PENDING', 'patient', true, 'user1', '2025-10-09'),
-            ('{}', 'PENDING', 'sample', false, 'user2', '2025-11-09')
-		`).Error
+            ('{}', ?, 'patient', true, 'user1', '2025-10-09'),
+            ('{}', ?, 'sample', false, 'user2', '2025-11-09')
+		`, types.BatchStatusPending, types.BatchStatusPending).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -124,9 +124,9 @@ func Test_UpdateBatch(t *testing.T) {
 		var id string
 		initErr := db.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES ('{}', 'RUNNING', 'patient', true, 'user999', '2025-10-09')
+    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09')
     		RETURNING id;
-		`).Scan(&id).Error
+		`, types.BatchStatusRunning).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
