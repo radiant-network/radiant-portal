@@ -25,11 +25,11 @@ type GermlineSNVOccurrencesRepository struct {
 }
 
 type GermlineSNVOccurrencesDAO interface {
-	GetOccurrences(seqId int, userFilter types.ListQuery) ([]GermlineSNVOccurrence, error)
-	CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error)
-	AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error)
-	GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
-	GetExpandedOccurrence(seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error)
+	GetOccurrences(caseId int, seqId int, userFilter types.ListQuery) ([]GermlineSNVOccurrence, error)
+	CountOccurrences(caseId int, seqId int, userQuery types.CountQuery) (int64, error)
+	AggregateOccurrences(caseId int, seqId int, userQuery types.AggQuery) ([]Aggregation, error)
+	GetStatisticsOccurrences(caseId int, seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
+	GetExpandedOccurrence(caseId int, seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error)
 }
 
 func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRepository {
@@ -48,7 +48,7 @@ func joinWithVariants(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("JOIN germline__snv__variant v ON v.locus_id=o.locus_id")
 }
 
-func (r *GermlineSNVOccurrencesRepository) GetOccurrences(seqId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
+func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
 	var occurrences []GermlineSNVOccurrence
 
 	tx, part, err := prepareListOrCountQuery(seqId, userQuery, r)
@@ -71,7 +71,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(seqId int, userQuery t
 	// ) AND o.seq_id=? AND o.part=? AND v.locus_id=o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("o.locus_id")
 	tx = r.db.Table("(germline__snv__occurrence o, germline__snv__variant v)").
-		Joins("LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = o.locus_id AND i.sequencing_id = ?", fmt.Sprintf("%d", seqId)).
+		Joins("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
 		Select(columns).
 		Where("o.seq_id = ? and part=? and v.locus_id = o.locus_id and o.locus_id in (?)", seqId, part, tx)
 
@@ -163,7 +163,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *GermlineSNVOcc
 	return tx, part, nil
 }
 
-func (r *GermlineSNVOccurrencesRepository) CountOccurrences(seqId int, userQuery types.CountQuery) (int64, error) {
+func (r *GermlineSNVOccurrencesRepository) CountOccurrences(caseId int, seqId int, userQuery types.CountQuery) (int64, error) {
 	tx, _, err := prepareListOrCountQuery(seqId, userQuery, r)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
@@ -206,7 +206,7 @@ func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *GermlineSN
 	return tx, part, nil
 }
 
-func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
+func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
 	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
 	var aggregation []Aggregation
 	if err != nil {
@@ -235,7 +235,7 @@ func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(seqId int, userQ
 	return aggregation, nil
 }
 
-func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
 	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
 	var statistics types.Statistics
 	if err != nil {
@@ -256,14 +256,12 @@ func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(seqId int, u
 	return &statistics, nil
 }
 
-func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {
+func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(caseId int, seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {
 	tx := r.db.Table("germline__snv__occurrence o")
 	tx = tx.Joins("JOIN germline__snv__consequence c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
 	tx = tx.Joins("JOIN germline__snv__variant v ON o.locus_id=v.locus_id")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id=o.locus_id AND i.sequencing_id = o.seq_id AND i.transcript_id = v.transcript_id")
-	tx = tx.Joins(fmt.Sprintf("JOIN %s %s ON o.seq_id=%s.id", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
-	tx = tx.Joins(fmt.Sprintf("JOIN %s %s ON o.seq_id=%s.sequencing_experiment_id", types.CaseHasSequencingExperimentTable.Name, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
-	tx = tx.Select("chseq.case_id, c.locus_id, v.hgvsg, v.locus, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, " +
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id=o.locus_id AND i.sequencing_id = o.seq_id AND i.transcript_id = v.transcript_id AND i.case_id = ?", fmt.Sprintf("%d", caseId))
+	tx = tx.Select("c.locus_id, v.hgvsg, v.locus, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, " +
 		"v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, " +
 		"v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, " +
 		"v.pf_wgs, v.gnomad_v3_af, c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, " +

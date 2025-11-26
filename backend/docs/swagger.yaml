@@ -647,8 +647,6 @@ components:
           type: number
         cadd_score:
           type: number
-        case_id:
-          type: integer
         chromosome:
           type: string
         clinvar:
@@ -773,7 +771,6 @@ components:
         zygosity:
           type: string
       required:
-      - case_id
       - exomiser_acmg_evidence
       - exomiser_gene_combined_score
       - genotype_quality
@@ -3099,11 +3096,17 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
-  /occurrences/germline/cnv/{seq_id}/{cnv_id}/genes_overlap:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap:
     get:
       description: List genes overlapping a CNV with a given ID
       operationId: listGermlineCNVGenesOverlap
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3142,11 +3145,17 @@ paths:
       summary: List genes overlapping a CNV with a given ID
       tags:
       - occurrences
-  /occurrences/germline/cnv/{seq_id}/aggregate:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/aggregate:
     post:
       description: Aggregate germline CNV occurrences for a given sequence ID
       operationId: aggregateGermlineCNVOccurrences
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3192,11 +3201,17 @@ paths:
       summary: Aggregate germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{seq_id}/count:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/count:
     post:
       description: Counts germline CNV occurrences for a given sequence ID
       operationId: countGermlineCNVOccurrences
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3240,11 +3255,17 @@ paths:
       summary: Count germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{seq_id}/list:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/list:
     post:
       description: List germline CNV occurrences for a given sequence ID
       operationId: listGermlineCNVOccurrences
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3290,11 +3311,17 @@ paths:
       summary: List germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{seq_id}/statistics:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
       operationId: statisticsGermlineCNVOccurrences
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3338,11 +3365,17 @@ paths:
       summary: Statistics of germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{seq_id}/{locus_id}/expanded:
+  /occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded:
     get:
       description: Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
       operationId: getExpandedGermlineSNVOccurrence
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3379,11 +3412,17 @@ paths:
       summary: Get a germline ExpandedGermlineSNVOccurrence
       tags:
       - occurrences
-  /occurrences/germline/snv/{seq_id}/aggregate:
+  /occurrences/germline/snv/{case_id}/{seq_id}/aggregate:
     post:
       description: Aggregate germline SNV occurrences for a given sequence ID
       operationId: aggregateGermlineSNVOccurrences
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3435,11 +3474,17 @@ paths:
       summary: Aggregate germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{seq_id}/count:
+  /occurrences/germline/snv/{case_id}/{seq_id}/count:
     post:
       description: Counts germline SNV occurrences for a given sequence ID
       operationId: countGermlineSNVOccurrences
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3483,11 +3528,17 @@ paths:
       summary: Count germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{seq_id}/list:
+  /occurrences/germline/snv/{case_id}/{seq_id}/list:
     post:
       description: List germline SNV occurrences for a given sequence ID
       operationId: listGermlineSNVOccurrences
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
@@ -3533,11 +3584,17 @@ paths:
       summary: List germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{seq_id}/statistics:
+  /occurrences/germline/snv/{case_id}/{seq_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
       operationId: statisticsGermlineSNVOccurrences
       parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: string
       - description: Sequence ID
         in: path
         name: seq_id
