@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"slices"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -142,7 +141,7 @@ func processSampleBatch(batch *types.Batch, db *gorm.DB, repoOrganization reposi
 	}
 }
 
-func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []SampleValidationRecord) error {
+func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		txRepoSample := repository.NewSamplesRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
@@ -164,7 +163,7 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []Sam
 	})
 }
 
-func insertSampleRecords(records []SampleValidationRecord, repo repository.SamplesDAO) error {
+func insertSampleRecords(records []*SampleValidationRecord, repo repository.SamplesDAO) error {
 	for _, record := range records {
 		if !record.Skipped {
 			sample := types.Sample{
@@ -184,8 +183,52 @@ func insertSampleRecords(records []SampleValidationRecord, repo repository.Sampl
 	return nil
 }
 
-func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]SampleValidationRecord, error) {
-	var records []SampleValidationRecord
+func createSamplesInBatchMap(samples []types.SampleBatch) map[string]*types.SampleBatch {
+	samplesMap := make(map[string]*types.SampleBatch)
+	for i := range samples {
+		key := fmt.Sprintf("%s:%s", samples[i].SampleOrganizationCode, samples[i].SubmitterSampleId)
+		samplesMap[key] = &samples[i]
+	}
+	return samplesMap
+}
+
+func reorderSampleRecords(records []*SampleValidationRecord) {
+	makeKey := func(r *SampleValidationRecord) string {
+		return fmt.Sprintf("%s:%s", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+	}
+
+	keyToRecord := make(map[string]*SampleValidationRecord, len(records))
+	for _, r := range records {
+		keyToRecord[makeKey(r)] = r
+	}
+
+	visited := make(map[string]bool, len(records))
+	var sorted []*SampleValidationRecord
+	var visit func(*SampleValidationRecord)
+	visit = func(r *SampleValidationRecord) {
+		id := makeKey(r)
+		if visited[id] {
+			return
+		}
+		visited[id] = true
+		if r.Sample.SubmitterParentSampleId != "" {
+			parentID := fmt.Sprintf("%s:%s", r.Sample.SampleOrganizationCode, r.Sample.SubmitterParentSampleId)
+			if parent, ok := keyToRecord[parentID]; ok {
+				visit(parent)
+			}
+		}
+		sorted = append(sorted, r)
+	}
+
+	for _, r := range records {
+		visit(r)
+	}
+	copy(records, sorted)
+}
+
+func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]*SampleValidationRecord, error) {
+	records := make([]*SampleValidationRecord, 0, len(samples))
+	parentSamplesInBatch := createSamplesInBatchMap(samples)
 
 	for index, sample := range samples {
 		record := &SampleValidationRecord{
@@ -231,14 +274,14 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 
 				if existingParentSample == nil {
 					// 7. If parent sample does not exist in DB, check if it exists in the current batch
-					parentSampleInBatch := slices.ContainsFunc(samples, func(s types.SampleBatch) bool {
-						return s.SubmitterSampleId == sample.SubmitterParentSampleId && s.SampleOrganizationCode == sample.SampleOrganizationCode
-					})
-					record.validateExistingParentSampleInBatch(parentSampleInBatch)
+					_, parentSampleIsInBatch := parentSamplesInBatch[fmt.Sprintf("%s:%s", sample.SampleOrganizationCode, sample.SubmitterParentSampleId)]
+					record.validateExistingParentSampleInBatch(parentSampleIsInBatch)
 				}
 			}
 		}
-		records = append(records, *record)
+		records = append(records, record)
 	}
+
+	reorderSampleRecords(records)
 	return records, nil
 }

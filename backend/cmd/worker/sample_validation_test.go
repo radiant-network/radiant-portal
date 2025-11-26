@@ -145,41 +145,85 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 	}
 
 	samples := []types.SampleBatch{
-		{SubmitterSampleId: "S1", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                     // 1. Valid new sample
-		{SubmitterSampleId: "S2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                     // 2. Conflict with DB
-		{SubmitterSampleId: "S3", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-BATCH"}, // 3. Parent in batch
-		{SubmitterSampleId: "S4", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-DB"},    // 4. Parent in DB
-		{SubmitterSampleId: "S5", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-NONE"},  // 5. Parent not found
-		{SubmitterSampleId: "P-BATCH", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                // 6. The parent for S3
+		{SubmitterSampleId: "S1", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                           // 1. Valid new sample
+		{SubmitterSampleId: "S2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                           // 2. Conflict with DB
+		{SubmitterSampleId: "S3", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-BATCH"},       // 3. Parent in batch
+		{SubmitterSampleId: "S4", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-DB"},          // 4. Parent in DB
+		{SubmitterSampleId: "S5", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-NONE"},        // 5. Parent not found
+		{SubmitterSampleId: "P-BATCH", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-BATCH2"}, // 6. The parent for S3
+		{SubmitterSampleId: "P-BATCH2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                     // 7. The grandparent for S3
 	}
 
 	records, err := validateSamplesBatch(samples, mockOrgRepo, mockPatientRepo, mockSampleRepo)
 	assert.NoError(t, err)
-	assert.Len(t, records, 6)
+	assert.Len(t, records, 7) // Updated from 6 to 7 to include P-BATCH2
+
+	// Helper to find a record by SubmitterSampleId
+	findRecord := func(id string) *SampleValidationRecord {
+		for _, r := range records {
+			if r.Sample.SubmitterSampleId == id {
+				return r
+			}
+		}
+		return nil
+	}
 
 	// 1. Valid (S1)
-	assert.False(t, records[0].Skipped)
-	assert.Empty(t, records[0].Errors)
+	s1 := findRecord("S1")
+	assert.NotNil(t, s1)
+	assert.False(t, s1.Skipped)
+	assert.Empty(t, s1.Errors)
 
 	// 2. Conflict with DB (S2)
-	assert.True(t, records[1].Skipped)
-	assert.Len(t, records[1].Warnings, 1)
-	assert.Equal(t, SampleExistingSampleDifferentFieldCode, records[1].Warnings[0].Code)
+	s2 := findRecord("S2")
+	assert.NotNil(t, s2)
+	assert.True(t, s2.Skipped)
+	assert.Len(t, s2.Warnings, 1)
+	assert.Equal(t, SampleExistingSampleDifferentFieldCode, s2.Warnings[0].Code)
 
-	// 3. Parent in batch (S3 with parent P-BATCH)
-	assert.False(t, records[2].Skipped)
-	assert.Empty(t, records[2].Errors)
+	// 3. Parent in batch (S3 with parent P-BATCH) - should come AFTER P-BATCH in the reordered list
+	s3 := findRecord("S3")
+	assert.NotNil(t, s3)
+	assert.False(t, s3.Skipped)
+	assert.Empty(t, s3.Errors)
+
+	// 6. Parent sample (P-BATCH with parent P-BATCH2)
+	pBatch := findRecord("P-BATCH")
+	assert.NotNil(t, pBatch)
+	assert.False(t, pBatch.Skipped)
+	assert.Empty(t, pBatch.Errors)
+
+	// 7. Grandparent sample (P-BATCH2)
+	pBatch2 := findRecord("P-BATCH2")
+	assert.NotNil(t, pBatch2)
+	assert.False(t, pBatch2.Skipped)
+	assert.Empty(t, pBatch2.Errors)
+
+	// Verify the ordering
+	var pBatch2Idx, pBatchIdx, s3Idx int
+	for i, r := range records {
+		switch r.Sample.SubmitterSampleId {
+		case "P-BATCH2":
+			pBatch2Idx = i
+		case "P-BATCH":
+			pBatchIdx = i
+		case "S3":
+			s3Idx = i
+		}
+	}
+	assert.Less(t, pBatch2Idx, pBatchIdx, "Grandparent P-BATCH2 should appear before parent P-BATCH")
+	assert.Less(t, pBatchIdx, s3Idx, "Parent P-BATCH should appear before child S3")
 
 	// 4. Parent in DB (S4 with parent P-DB)
-	assert.False(t, records[3].Skipped)
-	assert.Empty(t, records[3].Errors)
+	s4 := findRecord("S4")
+	assert.NotNil(t, s4)
+	assert.False(t, s4.Skipped)
+	assert.Empty(t, s4.Errors)
 
 	// 5. Parent not found (S5 with parent P-NONE)
-	assert.False(t, records[4].Skipped)
-	assert.Len(t, records[4].Errors, 1)
-	assert.Equal(t, SampleUnknownParentSubmitterSampleIdCode, records[4].Errors[0].Code)
-
-	// 6. Parent sample itself (P-BATCH)
-	assert.False(t, records[5].Skipped)
-	assert.Empty(t, records[5].Errors)
+	s5 := findRecord("S5")
+	assert.NotNil(t, s5)
+	assert.False(t, s5.Skipped)
+	assert.Len(t, s5.Errors, 1)
+	assert.Equal(t, SampleUnknownParentSubmitterSampleIdCode, s5.Errors[0].Code)
 }
