@@ -7,11 +7,13 @@ import { queryBuilderRemote } from '@/components/model/query-builder-core/query-
 import { occurrencesApi } from '@/utils/api';
 
 type AggregateContextProps = {
+  caseId: string;
   seqId: string;
 };
-export const AggregateContext = React.createContext<AggregateContextProps>({ seqId: '1' });
+export const AggregateContext = React.createContext<AggregateContextProps>({ caseId: '1', seqId: '1' });
 
 type OccurrenceAggregationInput = {
+  caseId: string;
   seqId: string;
   aggregationBody: AggregationBodyWithSqon;
   withDictionary?: boolean;
@@ -22,12 +24,12 @@ const fetcher = (appId: ApplicationId) => {
     case ApplicationId.cnv_occurrence:
       return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
         occurrencesApi
-          .aggregateGermlineCNVOccurrences(input.seqId, input.aggregationBody)
+          .aggregateGermlineCNVOccurrences(input.caseId, input.seqId, input.aggregationBody)
           .then(response => response.data);
     default:
       return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
         occurrencesApi
-          .aggregateGermlineSNVOccurrences(input.seqId, input.aggregationBody, input.withDictionary)
+          .aggregateGermlineSNVOccurrences(input.caseId, input.seqId, input.aggregationBody, input.withDictionary)
           .then(response => response.data);
   }
 };
@@ -37,16 +39,17 @@ export function useAggregationBuilder(
   size: number = 30,
   shouldFetch: boolean = false,
   withDictionary: boolean = false,
-  appId: string,
+  appId: ApplicationId,
 ) {
   let data: OccurrenceAggregationInput | null;
 
-  const { seqId } = React.useContext(AggregateContext);
+  const { caseId, seqId } = React.useContext(AggregateContext);
 
   if (!shouldFetch) {
     data = null;
   } else {
     data = {
+      caseId,
       seqId,
       aggregationBody: {
         field: field,
