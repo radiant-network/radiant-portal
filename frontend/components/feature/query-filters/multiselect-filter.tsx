@@ -62,7 +62,10 @@ function isWithDictionaryEnabled(appId: ApplicationId, field: AggregationConfig)
 
 export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
-  const { appId } = useFilterConfig();
+  const { appId, clearUnappliedFilters } = useFilterConfig();
+
+  // Clé unique pour toutes les sélections temporaires
+  const globalStorageKey = `temp-filters-${appId}`;
 
   // State to manage the dictionary switch value
   const [withDictionaryToggle, setWithDictionaryToggle] = useState(isWithDictionaryEnabled(appId, field));
@@ -76,26 +79,85 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     appId,
   );
 
-  const [items, setItems] = useState<Aggregation[]>(aggregationData || []);
-  // items that are include in the search
-  const [appliedSelectedItems, setAppliedSelectedItems] = useState<string[]>([]);
-  // items that are currently checked
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
-  const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
+  // Initialize selectedItems with query builder + global sessionStorage
+  const getInitialSelectedItems = (): string[] => {
+    // Try sessionStorage first
+    try {
+      const stored = sessionStorage.getItem(globalStorageKey);
+      if (stored) {
+        const allTempSelections = JSON.parse(stored);
+        const fieldSelections = allTempSelections[field.key];
+        if (fieldSelections) {
+          return fieldSelections;
+        }
+      }
+    } catch (error) {
+      // Error reading global storage - continue with query builder values
+    }
 
-  useEffect(() => {
-    // if page reload and there is item selected in the querybuilder
+    // Otherwise use query builder
     const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
       .getResolvedActiveQuery(appId)
       // @ts-ignore
       .content.find((x: IValueFilter) => x.content.field === field.key);
-    if (prevSelectedItems) {
-      setSelectedItems(prevSelectedItems.content.value as string[]);
-      setHasUnappliedItems(true);
-    } else {
-      // update data from upstream, maybe querybuilder flush the selection
-      setSelectedItems([]);
+
+    const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
+    return queryBuilderItems;
+  };
+
+  const [items, setItems] = useState<Aggregation[]>(aggregationData || []);
+  // items that are currently checked
+  const [selectedItems, setSelectedItems] = useState<string[]>(getInitialSelectedItems());
+  const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
+  const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
+  const [hasBeenReset, setHasBeenReset] = useState(false);
+  const [lastQueryBuilderState, setLastQueryBuilderState] = useState<string>('');
+
+  // Monitor query builder changes to clean sessionStorage
+  useEffect(() => {
+    const currentQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
+    const currentQueryString = JSON.stringify(currentQuery);
+
+    // If query builder has changed since last time
+    if (lastQueryBuilderState && lastQueryBuilderState !== currentQueryString) {
+      // Clear sessionStorage as query builder state was modified by external action
+      clearUnappliedFilters();
+
+      // Update selectedItems with new query builder values
+      const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+        .getResolvedActiveQuery(appId)
+        // @ts-ignore
+        .content.find((x: IValueFilter) => x.content.field === field.key);
+
+      const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
+      setSelectedItems(queryBuilderItems);
+    }
+
+    setLastQueryBuilderState(currentQueryString);
+  }, [appId, field.key, clearUnappliedFilters, lastQueryBuilderState]);
+
+  useEffect(() => {
+    // Check if there are items in the query builder
+    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+      .getResolvedActiveQuery(appId)
+      // @ts-ignore
+      .content.find((x: IValueFilter) => x.content.field === field.key);
+
+    // Determine if there are unapplied items
+    const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
+    const hasUnapplied = JSON.stringify([...selectedItems].sort()) !== JSON.stringify([...queryBuilderItems].sort());
+
+    setHasUnappliedItems(hasUnapplied);
+
+    // Synchronize only if selectedItems is empty and there are items in query builder
+    // AND it's not following a reset
+    if (selectedItems.length === 0 && queryBuilderItems.length > 0 && !hasBeenReset) {
+      setSelectedItems(queryBuilderItems);
+    }
+
+    // Reset the reset flag if we have selected items
+    if (selectedItems.length > 0 && hasBeenReset) {
+      setHasBeenReset(false);
     }
 
     aggregationData?.sort((a, b) => {
@@ -122,7 +184,49 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
 
     setItems(aggregationData || []);
     setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));
-  }, [aggregationData, appId, field.key, maxVisibleItems]);
+  }, [aggregationData, appId, field.key, maxVisibleItems, selectedItems]);
+
+  // Save temporarily in global sessionStorage
+  useEffect(() => {
+    if (selectedItems.length > 0) {
+      try {
+        const stored = sessionStorage.getItem(globalStorageKey) || '{}';
+        const allTempSelections = JSON.parse(stored);
+        allTempSelections[field.key] = selectedItems;
+        sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
+      } catch (error) {
+        // Error saving to global storage
+      }
+    } else {
+      try {
+        const stored = sessionStorage.getItem(globalStorageKey);
+        if (stored) {
+          const allTempSelections = JSON.parse(stored);
+          delete allTempSelections[field.key];
+          if (Object.keys(allTempSelections).length === 0) {
+            sessionStorage.removeItem(globalStorageKey);
+          } else {
+            sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
+          }
+        }
+      } catch (error) {
+        // Error cleaning global storage
+      }
+    }
+  }, [selectedItems, globalStorageKey, field.key]);
+
+  // Clean sessionStorage on page reload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      sessionStorage.removeItem(globalStorageKey);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [globalStorageKey]);
 
   // Memoize these functions with useCallback
   //
@@ -184,22 +288,40 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   );
 
   const reset = useCallback(() => {
-    setHasUnappliedItems(false);
-    setSelectedItems([...appliedSelectedItems]);
-  }, [appliedSelectedItems]);
+    setHasUnappliedItems(true); // There will be unapplied changes after reset
+    setSelectedItems([]); // Uncheck ALL values (including those from query builder)
+    setHasBeenReset(true); // Mark that a reset occurred to avoid re-synchronization
+    // Clean from global object
+    try {
+      const stored = sessionStorage.getItem(globalStorageKey);
+      if (stored) {
+        const allTempSelections = JSON.parse(stored);
+        delete allTempSelections[field.key];
+        if (Object.keys(allTempSelections).length === 0) {
+          sessionStorage.removeItem(globalStorageKey);
+        } else {
+          sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
+        }
+      }
+    } catch (error) {
+      // Error during reset cleanup
+    }
+  }, [globalStorageKey, field.key]);
 
   const applyWithOperator = useCallback(
     (operator?: TermOperators) => {
       setHasUnappliedItems(false);
-      setAppliedSelectedItems(selectedItems);
+      setHasBeenReset(false); // Reset the reset flag
       queryBuilderRemote.updateActiveQueryField(appId, {
         field: field.key,
         value: [...selectedItems],
         merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         operator: operator,
       });
+      // Clean all temporary selections after apply
+      clearUnappliedFilters();
     },
-    [selectedItems, appId, field.key],
+    [selectedItems, appId, field.key, clearUnappliedFilters],
   );
 
   const apply = useCallback(() => {
@@ -302,7 +424,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       </CardContent>
       <CardFooter size="sm">
         <div className="flex align-right justify-end items-center space-x-2">
-          <Button size="xxs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems || isLoading}>
+          <Button size="xxs" variant="ghost" onClick={reset} disabled={selectedItems.length === 0 || isLoading}>
             {t('common.filters.buttons.clear')}
           </Button>
           <div className="flex space-x-2">
@@ -326,7 +448,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
                 },
               ]}
               onDefaultAction={apply}
-              disabled={isLoading}
+              disabled={!hasUnappliedItems || isLoading}
             >
               {t('common.filters.buttons.apply')}
             </ActionButton>
