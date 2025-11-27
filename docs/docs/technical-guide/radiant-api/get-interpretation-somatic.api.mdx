@@ -1,0 +1,71 @@
+---
+id: get-interpretation-somatic
+title: "Get interpretation somatic"
+description: "Get interpretation somatic"
+sidebar_label: "Get interpretation somatic"
+hide_title: true
+hide_table_of_contents: true
+api: eJztV0tv20YQ/ivEnBqAFVUh7YE3wXUCtWlqRC56MARhRI7FTchdencoVyD434vhQyZlSrCVW+ATuTszO+9vd0qIyUVW5ayMhhA+EntKM9ncEqNses5kyCoCH0xOtt5bxA3rYsC5PDDmaDEjJusgvCuPVFyhI2/xO/igZJkjJ+CDxowghAgdrVUMPlh6KJSlGEK2BfngooQyhLAE3ufC6tgqvYWq8o81LOmhIB0pvT2pxx1YvlvbJxMV7qSiVKjfrePWom7WJxXxgeW12lbC7HKjHTmhz6ZT+URGM2mWX8zzVEV1koOvTiwqe+flVgqDVSPdZfC5Ih+iVGkVYbouWKWK9+NMlpApXiOfJW/OS2/26yYwIzwnrBvW/SjLIZtjxIwYY+SRmKDGdO/USckcWZHmU+QdWoWa1wm6ZLRcuh2z+UoRgw+sOJWNYYP+1RlY+WB0ZLakVXQqDX2GdZSic+q+rYF1ZBWTVVg7p5gyN3pEu4HW4h58KLR6KGjRsN9j6khcLzYZxYNzjupJnclHRxyP3IsDc9MY8UKTh9gx6vigF0c5isxYTNcNYYShyONzXdCRT3TBE/lUF7w4Nh2qVyIyRKW//xRds+lvb3DxBhdvcPEGF+fh4gYtK0y9qxYpKh/eT9+/CjuGB85zdW2tsZ6l3JIjzc5D7ZHsySt0UBgxMaoUwrJuPedwOx5Jx8hFv0Clz7dk6xg8ParuDoccRFanY9RZOhaWz4a9D6bQdUH9+sq3148YkLqgNKbekuyOrNcxSitFha0R6K6EDaEliwUnEN6t5BXLuJWB4wiZazsy4sTI1LIlrgcUkYLgiDPYzYJ23AnK9maqgnLQwVVQdrBeBeWgdStxvba5mXsKm4oSENs605eSuiYBfQe61QdjM+lh+OPfW2gf7RKvhgqHgCbMeR0Spe/N80K4TZTzlPM4IW9+s/DujfW+YCzXgieQ7uUp8r2x2QR8SFVE2tXJb2eJeY5RQt5sMhVQq70QhWEQPD4+TrCmTozdBq2oCz4trq4/L69/nk2mk4SztAatNted4vnNAnyQ6DRG/jKZ1reZcZyh7qk/O4QOHO11ynmpNmxM/3GQp6h0DXviWdkWw/Oy8WE3kxwcDgmfptPweIAMe4NeOAT0lQ+JcSwqynKDjv6xaVXJ9kNBVop51V7aG4mXDMzKyX/cXiJnnP7pS9uA77ynuXrU2e6q0nJR7TAtZAU+fKN9b+6uR89LtB/P3BfYMAzpxZb05vELjDik8WL9x7P6BUYM66daVT4khDHZujoannkUUc496WcXRdXHvY/Xgicd2LTqD6jS/sjpo5aVZcNxa76RrqonQ2UtBlbV/y+fYbQ=
+sidebar_class_name: "get api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get interpretation somatic"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get interpretation somatic
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Case ID","in":"path","name":"case_id","required":true,"schema":{"type":"string"}},{"description":"Sequencing ID","in":"path","name":"sequencing_id","required":true,"schema":{"type":"string"}},{"description":"Locus ID","in":"path","name":"locus_id","required":true,"schema":{"type":"string"}},{"description":"Transcript ID","in":"path","name":"transcript_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"case_id":{"type":"string"},"clinical_utility":{"type":"string"},"created_at":{"type":"string"},"created_by":{"type":"string"},"created_by_name":{"type":"string"},"id":{"type":"string"},"interpretation":{"type":"string"},"locus_id":{"type":"string"},"metadata":{"properties":{"analysis_id":{"type":"string"},"patient_id":{"type":"string"},"variant_hash":{"type":"string"}},"type":"object","title":"InterpretationMetadata"},"oncogenicity":{"type":"string"},"oncogenicity_classification_criterias":{"items":{"type":"string"},"type":"array","uniqueItems":false},"pubmed":{"items":{"properties":{"citation":{"type":"string"},"citation_id":{"type":"string"}},"type":"object","title":"InterpretationPubmed"},"type":"array","uniqueItems":false},"sequencing_id":{"type":"string"},"transcript_id":{"type":"string"},"tumoral_type":{"type":"string"},"updated_at":{"type":"string"},"updated_by":{"type":"string"},"updated_by_name":{"type":"string"}},"type":"object","title":"InterpretationSomatic"}}},"description":"OK"},"206":{"content":{"application/json":{"schema":{"properties":{"case_id":{"type":"string"},"clinical_utility":{"type":"string"},"created_at":{"type":"string"},"created_by":{"type":"string"},"created_by_name":{"type":"string"},"id":{"type":"string"},"interpretation":{"type":"string"},"locus_id":{"type":"string"},"metadata":{"properties":{"analysis_id":{"type":"string"},"patient_id":{"type":"string"},"variant_hash":{"type":"string"}},"type":"object","title":"InterpretationMetadata"},"oncogenicity":{"type":"string"},"oncogenicity_classification_criterias":{"items":{"type":"string"},"type":"array","uniqueItems":false},"pubmed":{"items":{"properties":{"citation":{"type":"string"},"citation_id":{"type":"string"}},"type":"object","title":"InterpretationPubmed"},"type":"array","uniqueItems":false},"sequencing_id":{"type":"string"},"transcript_id":{"type":"string"},"tumoral_type":{"type":"string"},"updated_at":{"type":"string"},"updated_by":{"type":"string"},"updated_by_name":{"type":"string"}},"type":"object","title":"InterpretationSomatic"}}},"description":"Partial Content"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

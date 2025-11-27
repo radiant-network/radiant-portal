@@ -1,0 +1,71 @@
+---
+id: get-user-set
+title: "Get user set by id"
+description: "Get user set"
+sidebar_label: "Get user set by id"
+hide_title: true
+hide_table_of_contents: true
+api: eJzdVU1v3DYQ/SvEnFpA3d0a6UW3ResE2xZpEDvowVgYs9J4xUQi6eHI7kLQfy+GktZaRymQa0+iOI8zbz742EFJsWAbxHoHObwjMW0kNpEEMvCBGNW0Kwfjp0h8k0wBGRsS4gj5XffKzQgzu98gA6s7AaWCDBw2BDloiPtIcm9LyIDpsbVMJeTCLWUQi4oahLwDOQWFR2HrjtD3ewXH4F2kqParzUY/hXdCTnSJIdS2SJzXn6OS6Wb+AmtGYofTWIh9olmcg/c1oYM+A1suxNftdNIKNXERMG4gM54gg9bZx5Z2A/wB60j9VIRvHl4wtKFEofIeZdms5Vxk/MLIHz5ToY0TKzW99Ah6BV22768/1OubzZvvKu6lj22w18yeDVNgiuQkGnSGdE/H56ITJQnaGvKuz6ChGPG4XIcoKO288NYJHYlToi9jdHd2cj6y/3YhJqZLlXjvxbz1rSs1+i/fOW3/x4LsnBA7rM0N8ROxmYAZRCpatnJKcnAgZGJspYL8bq/3VvCoSnG++olBQ1J5lZbjqCmKh7Vi4lpB624mFb2yT2EHzWm5VjSo+yn6jVZ/qOGcw/T31nOjlwh+//sWRqVJNz9Z4VyTSiSkrKx78F/38ray0dhopCKz/bAzD57NRywtOjElCppQozx4blaQQW0LcjH1b5S/bcCiInO12qhEpCw0YL5ePz8/rzBZV56P6/FoXP+5+/X6/c31T1erzaqSpk5qMbZrCrz9sIMMtDoDyZ9XG4UFH6VBNws/F3lzOJkkwhcJzob89ZMwFkjoH1mHGm1Sy5RDN/Zv6HFMzRL95HO532dQ+SgK67oDRvrEdd/r9mNLrNOzz+AJ2eJBs9OnxUZdl6OA/gfVHz6OE/+juXiBFjlPSu1Up5+wbvUPMvhCp1cvVL/vM6gIS+JEaEBsi4KCzM5+JQb9fMLfXevATdM4PTjT2I0L9b7Iq+sGxK3/Qq7vzzRF/5Vg3/8LYnSqDw==
+sidebar_class_name: "get api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get user set by id"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/sets/{user_set_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get user set
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"UserSet ID","in":"path","name":"user_set_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"active":{"type":"boolean"},"id":{"type":"string"},"ids":{"items":{"type":"string"},"type":"array","uniqueItems":false},"name":{"type":"string"},"type":{"type":"string"},"updated_at":{"type":"string"},"user_id":{"type":"string"}},"type":"object","title":"UserSet"}}},"description":"OK"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

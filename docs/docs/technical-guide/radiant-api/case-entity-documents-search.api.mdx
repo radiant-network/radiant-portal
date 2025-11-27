@@ -1,0 +1,71 @@
+---
+id: case-entity-documents-search
+title: "Search DocumentResult list for a case entity"
+description: "Search for DocumentResult list for a case entity"
+sidebar_label: "Search DocumentResult list for a case entity"
+hide_title: true
+hide_table_of_contents: true
+api: eJzdV99v2zYQ/lcEPm2AantB96K3LE0Bb0UbJBn6YBjCWTpbbChSIU91M0H/+3CkZMux7Lnt294k8n5+vDt+bESOLrOyImm0SMQDgs2KaG1s9M5kdYma7tHViiIlHfl1iDJwGKEmSS8iFqZCC6w+z0UieO/Wb/X6LtgUsajAQomE1olk0bzyfMNG5+9ELCT/VkCsoqHEzmoqcxELi8+1tJiLhGyNsXBZgSWIpBH0UrGoIyv1RrTtMgijoz9M/sISmdGEmvgTqkrJzIc9/eI4gGZg6jAyVo/MOoKAQWc02koqIhfwyqwktBI4ScuAkETn/eS5ZDOg0rVElftFSVi6kZDjfgGsBYa21vK5xnkQX4Ny2MZCyVLSQFtqwg1aVjfrtcMTexVsMJU6x2/j+yGTdJfJMM7DnHwio+GHUjB2dPMrqBqHZi/Kdy9kVl8wIxELkqRwV6s3IWCjL8XPGUs/lp3N0aeGui5FshDgMhH7YhHL+Kj+zgRubKjJn0XggwzF/VlSjwOIljUOK5jlIu/xdQO1vOAqo13I/mo2+65OOcQuM7U+UX7cOmdQ7xt8VDezCIR5GpwfnUsOBCmvppnJcVxEwkYbJ12qYHWpWJg9Y2LdZDsZ8NrYEui0nwJcMbpx0mUFJM95tKj8EblCVimZtLJmBTo/HYKtdQpKwvgccvh80pWT/+CJnXpVSiK0qYOyUq8OdDDlwD2dMN8OC3QxmPuDGjg68cMTOYS/w/QAwf+Aq0txH+fydAceXpIXN/RBjr5pug65wFV3n953bTvW75/+4kjezt7+xK13Xclba42NLFYWHTuOQEfIa0fXXI4EUoWZXqJzsBmvOkdAtbvg4HsjO5UzwPSRjiHx0VD03tQ6Z++/f+dw+z8CMteEVoOKHtB+RRv1gtzzWW2Z0jE3WyFYtFBTIZLFkrkUwcb1Lem9l0iFYcpXGUehwQqRiKkXmDZd67bTvjfd1PVE0HnfgQXWVrGWYB99CA98BAHIYSD933vf3yIRf35+FB0F5LzDrtgBUxBVPjU+2vs9F7z95sfTCX626I9nueNasz21mh0yqdkIcVrsSERvaciM9msdIVroWikPcWAmo+qBenjG0S5b5shrc1yij4V0kXQRFRhd3809Xb+HXIKmiGdmVCkgno4TP28y5PmRND3Lvq4gKzC6msx4cPlzYQiT6XS73U7A706M3Uw7VTf9ML+5/fhw++ZqMpsUVCo/ALsq7B1f3805WbQuBPnbZOZvNOOoBD1w3709Ln13HKQ+6OofecN0BUP4jaaVAunJpEeg6eq6L/xYJPtLaVfaoi8DLpqC+yFZiKZZgcO/rWpbXn6u0XJzLfnkrYQVo8TPIOn4O++uhzOJ/XLfDYRfo/1raTT0/hLSL/s6EyIWT/gyeE35SioQfG0tmm73Jvh788g29tpHo7KNe43rLMOKzsoO58Xdpwdu21X3Kis9RREWtnwxwzZEanz+fgT4tUYo0Jvaz1ERbHJn94OhS3g3AboPzmoUi6YJEo/mCXXb7qAh/mdg2vZfO8o8Xg==
+sidebar_class_name: "post api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Search DocumentResult list for a case entity"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/cases/{case_id}/documents/search"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Search for DocumentResult list for a case entity
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Case ID","in":"path","name":"case_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"description":"Body of a list request with search criteria","properties":{"additional_fields":{"items":{"type":"string"},"type":"array","uniqueItems":false},"limit":{"type":"integer"},"offset":{"type":"integer"},"page_index":{"type":"integer"},"search_criteria":{"items":{"properties":{"field":{"type":"string"},"operator":{"type":"string"},"value":{"items":{},"type":"array","uniqueItems":false}},"type":"object","title":"SearchCriterion"},"type":"array","uniqueItems":false},"sort":{"items":{"properties":{"field":{"type":"string"},"order":{"enum":["asc","desc"],"type":"string"}},"type":"object","title":"SortBody"},"type":"array","uniqueItems":false}},"type":"object","title":"ListBodyWithCriteria"}}},"description":"List Body","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"count":{"type":"integer"},"list":{"items":{"properties":{"case_id":{"type":"integer"},"created_on":{"type":"string"},"data_type_code":{"type":"string"},"diagnosis_lab_code":{"type":"string"},"diagnosis_lab_name":{"type":"string"},"document_id":{"type":"integer"},"format_code":{"type":"string"},"hash":{"type":"string"},"name":{"type":"string"},"patient_id":{"type":"integer"},"relationship_to_proband_code":{"type":"string"},"run_alias":{"type":"string"},"seq_id":{"type":"integer"},"size":{"type":"integer"},"submitter_sample_id":{"type":"string"},"task_id":{"type":"integer"}},"required":["case_id","created_on","data_type_code","document_id","format_code","name","patient_id","relationship_to_proband_code","size","task_id"],"type":"object","title":"DocumentResult"},"type":"array","uniqueItems":false}},"required":["count","list"],"type":"object","title":"DocumentsSearchResponse"}}},"description":"OK"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

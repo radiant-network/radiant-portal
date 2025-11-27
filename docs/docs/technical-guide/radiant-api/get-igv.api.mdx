@@ -1,0 +1,71 @@
+---
+id: get-igv
+title: "Get IGV"
+description: "Get IGV tracks for a case"
+sidebar_label: "Get IGV"
+hide_title: true
+hide_table_of_contents: true
+api: eJzdVU1v2zgQ/SvEnHYBreUN2otuRusa2i3aIknTQ2AUE2kssZFIhhw5MQT992Ik2VEaJdhe9ySR8/X4OHzTQk4h89qxtgYS2BCrdHOl2GN2G9TOeoUqw0AQgXXkUfzSHBIoiNPNFUTg0GNNTD5Act3+ku8dBlLpe4hAy9IhlxCBwZogAcn7XecQgae7RnvKIWHfUAQhK6lGSFrggxPXwF6bArpuK87BWRMoiP1suZRPZg2TYflF5yqd9UDjH0FQtJN8zssxWA/RWOnC1GOgZqrDc58d1ro6fPe2ohlAEeysr5FnTdrk9PD1/OOrxvWD055W0wzaMBXkxWugaibcIWsyLPzNBgZ6mI0bNmYMja9e2n8N4ikl2JsflDFEwJqFK0g3V5fSR2vjdVZS/lge0Hs8QASN0XcNpQPzO6wC/ZeEATpxe9pqn/+V/G+Wb36rH57mWDm99t565cl5CmQ4KDSKZE9a/Ulj5MSohbMugppCwGKe2MDITXiBu8fOvz4lOYVsX6biiHSOiU+W1QfbmJ7wt7/5QP6PhKSGyRus1AX5PXl1dJRXkjVe86GXrhtCTx4bLiG53orUMBaiaqCLvdSuiUs7il+vfOIJsS72cTuKWSdg+yqDHPavCmKQbMdiF0L2QNm05HH1YRQU+OfbJYxaKCccrHCioGR2/SG02dnnV3dZ6qB0UFySWn1Jey0/x1yjYZUjo3IVsojXAiKodEYm9Nc1ivPKYVaSOlssYdSGvmASx/f39wvsrQvri3gMDfHH9N3608X6r7PFclFyXfXPfbydY+HVlxQiEHYGkH8vlr2Y2cA1mkn5cRDBL1c5aeRXZ9VIEdMDx65CbSYKN1zbcKkRJMcptI2gtIHF0rY3GOirr7pOtu8a8tIh2wj26DXeyJFk1Okg//moXK9A/eN87Oo/1eNEnMV41Ecj6rjHqpEVRHBLh8nE7LZdBCVhTr5HMlhXWUaOJ3HPXno3beLNWtrr2Htj4VOTjT+SfRZT2w4el/aWTNedILKsBWDX/QQV1dhp
+sidebar_class_name: "get api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get IGV"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/igv/{case_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get IGV tracks for a case
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Case ID","in":"path","name":"case_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"alignment":{"items":{"properties":{"family_role":{"type":"string"},"format":{"type":"string"},"indexURL":{"type":"string"},"indexURLExpireAt":{"type":"integer"},"name":{"type":"string"},"patient_id":{"type":"integer"},"sex":{"type":"string"},"type":{"type":"string"},"url":{"type":"string"},"urlExpireAt":{"type":"integer"}},"type":"object","title":"IGVTrackEnriched"},"type":"array","uniqueItems":false}},"type":"object","title":"IGVTracks"}}},"description":"OK"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

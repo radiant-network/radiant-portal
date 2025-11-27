@@ -1,0 +1,71 @@
+---
+id: hpo-term-auto-complete
+title: "Get AutoCompleteTerm list of matching input string with highlighted"
+description: "Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted"
+sidebar_label: "Get AutoCompleteTerm list of matching input string with highlighted"
+hide_title: true
+hide_table_of_contents: true
+api: eJzNVVtv2zoM/isCn84AnyQrcF78Fgzdlm3YijbDeSiCQbWZSJssaRTdLjD83wf6kjptWmwPA/ZkS7x85EeRbKDEVJCNbIOHHC6RyeItqmXN4VWookPGNVKlnE2swla9vfikGKlKqtJcGOt3yvpYs0pMcrizbJSxO+PszjCWkEGISFoAViXkYGIQh1MAyCBq0hUyUoL8unkQ1QXh1v6ADKycvtdIe8jA6wohhzgKCb/XlrCEnKnGDFJhsNKQN8D7KJp9hNC22UOAD7ay/IR/N8iedrcR7BSDT5hEfrZYyKcIntGz/OoYnS06DuZfk0A2E3+WseoMIwlVbHs3BxIfi2x5Io4x4hMCCY2/FKE8LZZ6nuRpvAk3X7EQEtiykwupoFimUFOBf22Azyg8fOBwr6uJ9B5asT5+Jp/ei9Z/v1neYx/LaM+JAinCSJjQc1LaK5Q76YMjGktkbR3kTZtBhSnp3Wl+Emuu00RkPeMOqWPgvi+uD04OJptnGBoiPcXEyjOS105dId0iqVExg4RFTZb3XRvfoCYkXbOB/HojjcJ6Jx0uU0CwK2QTZCrskLspIJowNzHMdc2huB8QqQPqp0NNTrRAHI54V8J3z9oUdTy9DlRphhze/b8em1mS7KVwYMEwxy4P67fhcfXWxiZlk2KDanmxUttA6lKXVntWpWatotO8DVTNIANnC/Spq9gwS5ZRFwbV2WwB2ZCFAObz+d3d3Ux30lmg3XwwTfMPq1fnH6/O/z2bLWaGK9c906FAI/DyYgUZCDt9kC9nC1GLIXGl/QT+DfLTg/2Xx/kRI5M++DPLY6gL4w+eR6etl9Q66prhufSPKYOjB7PJwITEIm2aG53wM7m2let+vHdLxiZ946QxttolfCazfy6HHnqhDrvoZGDfcD9dSbfa1aIE3cr5ZbhxHT0DMW6le4SNHMgKRNdsGRjUJVKXam+0LAqMU6tHg6ud9uSb83VPq5lMlkPDDD/ifZybfj/x3TS9xjp8Q9+2MEbOcoZ207btT+/R7IM=
+sidebar_class_name: "get api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get AutoCompleteTerm list of matching input string with highlighted"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/hpo/autocomplete"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Prefix","in":"query","name":"prefix","required":true,"schema":{"type":"string"}},{"description":"Limit","in":"query","name":"limit","schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"items":{"properties":{"highlight":{"properties":{"id":{"type":"string"},"name":{"type":"string"},"onset_code":{"type":"string"},"term":{"type":"string"}},"type":"object","title":"Term"},"source":{"properties":{"id":{"type":"string"},"name":{"type":"string"},"onset_code":{"type":"string"},"term":{"type":"string"}},"type":"object","title":"Term"}},"type":"object","title":"AutoCompleteTerm"},"type":"array"}}},"description":"OK"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

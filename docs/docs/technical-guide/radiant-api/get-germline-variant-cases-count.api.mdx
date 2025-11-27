@@ -1,0 +1,71 @@
+---
+id: get-germline-variant-cases-count
+title: "Get germline cases count for a given locus"
+description: "Retrieve cases count for a given locus id"
+sidebar_label: "Get germline cases count for a given locus"
+hide_title: true
+hide_table_of_contents: true
+api: eJzdVU1v3DgM/SsCT1tAO54N2otvg2waTFu0RZLdPQSDgrGZsVpbUik62cDwfy/oj4HTDLLNdU+2JJLv8YmkOigpFeyiuOAhhwsSdnRHpsBEyRSh9WJuAxs0e3dH3tShaJNxJVgIkRjVb1tCDnuSc+Kmdp7+Rnbo5VRDnGoEsBCRsSEhTpBfdz+hfhiCbv8EC07XEaUCCx4bghwGyC8DJNP31jGVkAu3ZCEVFTUIeQfyENU2CTu/h77fqXGKwSdKen6yXuunCF7Ii/5ijLUrhgSyr0l5dIt4kTU9caP3oMMX54U4MokSOEDq7p4YejuZtf4/DPtlItdHgh+PtLNzpHDzlQpVVZzUuvFU8V5RHqv86b1yfL1+/SIhHsfYRHfGHNgwRaZEXpJBb0j39JYfqVaSoKsh73oLDaWEezpyVRaSoLTpF5SagxxcnpFkZnpMiY9BzNvQ+lLR37ywMv6Pgmy1zDzW5pL4jtjMhhYSFS07eRi69oaQibGVCvLrnfaY4F4bGu7GAlT8hqQK00QYGl+tIZssUrafpkTWzY3dZ8O0yYppVqSBxDgoWq7VGxRs5nKpdzEqumQ0r94GblAgh3f/XME0I1SA8RQOClUiccjR+dvw9GavKpeMS0YqMpvP22EKXmCpSZgSBU2sUW4DNyuwULuCfBpuc5pam4hFReZktQY7ZaGAeZbd39+vcDhdBd5nk2vKPmxPzz5env1+slqvKmlqrYT58mbgzectWFB1RpJ/rNZqFkOSBv0C/pzEzEo/P8zhp2JYtMKLnoNJVaF/JYs1Oq/EhsS7qQgOZaKYMzmwkC8m/AA0D0AtpyokUdeuu8FEf3Hd97r9vSXWotzZMeiNyqQPi0v6X0J+i3WiZ3L77WJqpFdm8f4czWLaRP+g4mPd6gosfKOH5fvU73oLFWFJPHAZjzdFQVEWjk/GS7/smvMzLdq5oifkQ+lOPxr9KKmuGy2uwjfyfX/gKLpWgn3/A/5Xv5U=
+sidebar_class_name: "get api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get germline cases count for a given locus"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/variants/germline/{locus_id}/cases/count"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve cases count for a given locus id
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Locus ID","in":"path","name":"locus_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"count_interpreted":{"type":"integer"},"count_uninterpreted":{"type":"integer"}},"required":["count_interpreted","count_uninterpreted"],"type":"object","title":"VariantCasesCount"}}},"description":"OK"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

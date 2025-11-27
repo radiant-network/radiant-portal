@@ -1,0 +1,71 @@
+---
+id: put-saved-filter
+title: "Update a saved filter"
+description: "Update a saved filter"
+sidebar_label: "Update a saved filter"
+hide_title: true
+hide_table_of_contents: true
+api: eJztV19v4kYQ/yrWPN1JDqTR9QX1KnGUVLS5JAJyfUAIDfYAe2fvOrtrCEL+7tXs2rHBBF3Vp6r3hNn5P/PbmdkDxGQiLTIrlIQePGUxWgowMLilOFiJxJKGEFRGGplnFEMPstxOmH5bkTPUmJIlbaA3O5zodKyB5w1Gv0EIgo8ztBsIQWJK0ANnb+HtLUQMIWh6zoWmGHpW5xSCiTaUIvQOYPeZE7FayDUUxdwzk7GfVLxnjkhJS9LyJ2ZZIiLne/erYYcODVWZ5sisIMP/VrhVWlhqGFkqlRBKKCpPW+ZDeM5JlxqEpdS0FTf8UZIeVi5LJ7YFJfFZ9VtMcmoqL8KKCbXGPYSQS/Gc08jTV5gYKmomtfxKkYUQrLAJH9wRrgalR0X4qhcioaM8Qf1u8qzkezixUsyLEMR5F1XGxyTzFHozLm8IKLmIitEhFVtfkt0RMelXCOEX/v3IHx89x5WXShKYh60Kvx0Luwrfm5AaUrO61mVh6zLOL1irUe9vykhmuYWClV8AvVVB7thbsHZOmUxJ41Fwc339L/AbaUJL8cJztap0Gd5vlPYH6v/TqK94aj/XpNNESFoYuV2oKMq1JhkxNF8p0SnFqBStiNoiFaElcWRli1qgtKcm6uOm/vZpk7eVphBerji0qy1qxipPIPh9OP58N7ofLib3XxYPg8HTeDy8HwwhrCmDU8rk4XN/Ohq0RSpCS+LIypf+eNS/n56aqI+b+tunTd752YYz5bCLEHwnefOS58YP0DNz8rgBNppF2OyGbvietMQy6UfGa1Pf1zDPdcmHP9nlD/+w6R3r6GdiqLXSgaZMkyFpTYAyID7j1eSo38RkUSS+m6RkDK7PNzdj0eamQRLS0toFcZzFSsmryIVkVJ6ey8QnjIOxX2J8Sj7871Nyr2xwq3IZs/Wff2AERtKSlpgEE9Jb0kHFGIKhKNfC7t2EXRJq0pjbDfRmc96OLa5dW2wu2c6LlOxGlRu9W+NZBrp8sU33iLt7ONnQCw7H+eF3/lwnLApsr3JnwuXwSW06Vf27VTpFCz344y9uha54bilx1HoSb6zNXJhc5nG96Q9fMM0SOt7c/WOhelVUM+J1WZkdYahcP2q+cuuYyTxJqslfU3ng85z3S4FcqTbSphthAmECu6Gg/zgKVkoHY4x5dgUxWgyyBO1K6bQDISQiImlcAKXD/QyjDQU3nWvury6lHH2v293tdh101I7S624parp3o8HwfjK8uulcdzY2TdxaUIKpMtx/HHFspI138qfONbNlytgUZcP8W8+/oxgbGXxToKycpRfbzRIUbltx8RxKlM3c+ODRcozKEHqnb8F5CBtlLMscDks09KSTouBjLiuDfs6V0wKXHDY/QIXh77jcgi4E8G5cXtT3QfudejaKaueS+xovACF8o/2Zd6yDyoYwJu0881zlHno19VO10tJqabyneol+FFFmL/I27/PjE9+oZfkcTlXMIhp3/ADBnXdYuXS42+nODpCgXOeu3YFXyZeuurPVi6G6nOUHB3U2JYeD55iqbySL4jVDlv9zXorib+09nqI=
+sidebar_class_name: "put api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Update a saved filter"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"put"}
+  path={"/users/saved_filters/{saved_filter_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Update a saved filter
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Saved Filter ID","in":"path","name":"saved_filter_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"properties":{"favorite":{"type":"boolean"},"name":{"type":"string"},"queries":{"items":{"properties":{"content":{"oneOf":[{"properties":{"field":{"type":"string"},"value":{"items":{},"type":"array","uniqueItems":false}},"type":"object","title":"LeafContent"},{"items":"circular(Sqon)","type":"array"}]},"id":{"type":"string"},"op":{"enum":["in","and","or","not","between",">","<",">=","<=","not-in","all"],"type":"string"}},"type":"object","title":"Sqon"},"type":"array","uniqueItems":false}},"required":["favorite","name","queries"],"type":"object","title":"SavedFilterUpdateInput"}}},"description":"Saved Filter to update","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"created_on":{"type":"string"},"favorite":{"type":"boolean"},"id":{"type":"string"},"name":{"type":"string"},"queries":{"items":{"properties":{"content":{"oneOf":[{"properties":{"field":{"type":"string"},"value":{"items":{},"type":"array","uniqueItems":false}},"type":"object","title":"LeafContent"},{"items":"circular(Sqon)","type":"array"}]},"id":{"type":"string"},"op":{"enum":["in","and","or","not","between",">","<",">=","<=","not-in","all"],"type":"string"}},"type":"object","title":"Sqon"},"type":"array","uniqueItems":false},"type":{"enum":["germline_snv_occurrence","germline_cnv_occurrence","somatic_snv_occurrence","somatic_cnv_occurrence","germline_snv_variant","germline_cnv_variant","somatic_snv_variant","somatic_cnv_variant"],"type":"string","x-enum-varnames":["GERMLINE_SNV_OCCURRENCE","GERMLINE_CNV_OCCURRENCE","SOMATIC_SNV_OCCURRENCE","SOMATIC_CNV_OCCURRENCE","GERMLINE_SNV_VARIANT","GERMLINE_CNV_VARIANT","SOMATIC_SNV_VARIANT","SOMATIC_CNV_VARIANT"],"title":"SavedFilterType"},"updated_on":{"type":"string"},"user_id":{"type":"string"}},"required":["created_on","favorite","id","name","queries","type","updated_on","user_id"],"type":"object","title":"SavedFilter"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

@@ -1,0 +1,71 @@
+---
+id: list-germline-cnv-occurrences
+title: "List germline CNV occurrences"
+description: "List germline CNV occurrences for a given sequence ID"
+sidebar_label: "List germline CNV occurrences"
+hide_title: true
+hide_table_of_contents: true
+api: eJztWN9v2zYQ/leIe2oB1faK7sVYB6RZOngrkiLO2gfDMGjpZLGlSJmknBqC/vfiKMqWYylLtr5tT1FI3q/v7j7yXEGCNjaicEIrmMIHYR3boMmlUMgurz8xHcelMahitCzVhnG2ETtUzOK2pFU2+w0i0AUaTjpmCUxBCut+D0ourz/dHFVABAU3PEeHxsJ0UT2wPz/RKmip4C6DCBTPEaZgcbsSCURgcFsKgwlMnSkxAhtnmHOYVuD2hT/pjFAbqOtlcxite6eTPZ2ItXKoHH3yopAi9q6Pv1jyoeqoOnWOxJlOGWcUIAtKKSRD8TuB1qtMEkESXK5SgTLxi8Jhbnu8i9oFbgzfQwSlEtsSZ83xlEuLdQRS5MJ1pIVyuEFD4jpNLQ7sFXyDK6ES/Na/b7VxJ86dBuK97/VZmwQN7aAqc5gugNsYIg8XLKOzDBxW9PoLxoSYE07SwlybJitPBMJumxSdOtrJp1Z4k/rCemosOy5L7KLwJFceiekD8vQyeFRHB70QCxOXkpsX861WL+GBlXpZRyAG4C66WAsFEXBFTaANdYYm62t094i09StE8Av9fUsfb5sTrxopKZ+ZH8L70WBF01afhcvC4TrqIxWf5YdtW9OCLbSyTZZeTybP6s9D4Z4a7OUeZrAwaFE5SyTWz3HnzSzFttSuNy3ruL+tYi5lb9N3zjyl2OPM6FxbnWOv+VigSn6EGVHoH+KuGoBD7VYDhR3vnV7z/iiex5ABinPrqZCu4aozvRulc56s7EAa2+20s63KfH26OxC0RLVxWf9ec5X1OKTWqw0qHMiBWq+s2g0wPf6ABG5LLoXb94ZrMJU4EGu4k/v38l511nEzcGnZ3bChXbPWA53d52st/30dDRiou8y16Hbmob6bGjxkPqQ5Or5YmpiDieUwpfay15n/PTx78yedevNMDj3VcVGIK2O0OWFLxZDWzsgxQceFbK7MHK3lm4HkOO7K3sJ8gGur5CDyCEytp31IvOMJuw3PMw/Jm/88JNfasfe6VAlZ//n/GoGZcmgUl2yOZoeGtQepY+PSeCJcVLBGbtDwksh8saRhwvENjS7QmYzIhxxdpmn6KXQzFNDcMoVx59i4fXWMY7UbVw0z1GOaJjxRkB/NVFQaSbJA9lp35pSOBtSuU+1/77XJuYMp/PH5DsI8RBg0u8fnZuZc4cOkNN8eB6OrbzwvJA5MMIs2VcvDNDI5Dh+T01lj0o4Wi8PDuxU/zA5+ZPDhhSd9pxjPZMIbfaFKKdt3ckdj4cvFByVUqs8r9i4TlgnLXIbs4uPMD7K3PBFcOZZwx1khuUu1yUdE4CJGZT0QYei8KHicIXs9mtC14VNDKE7H4/v7+xH3uyNtNuMgascfZpdX1/OrV69Hk1HmcunpOxRla/ji44xCQ2MbJ38aTfxVrq3LueqYf3Qohwd13QHyH0/zoVIcfnPjQnKCNsRdhbI+rf4IWiPNdQgRTA/Xnq/uZQQZtcV0AVW15hb/MrKuaXlboqFOW1KWjeBrwoh+FxCWvpNwNT8S5YvbwA4v2fzvw2gvUbU/1hVABF9xf/x5wQ9jGXJfqYsqbIah7tUdqTgKn1EnDX2NxEUcY+EePdtljo83c2rddfiZItcJyRh+T4MTv28c1R4CTwN+rQLJ1ab0vAqNTmqElhxCvAcWCB8UVS8UVdWcuNNfUdX1ARlH/xMwdf0d0dg9fA==
+sidebar_class_name: "post api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"List germline CNV occurrences"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/occurrences/germline/cnv/{seq_id}/list"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+List germline CNV occurrences for a given sequence ID
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Sequence ID","in":"path","name":"seq_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"description":"Body of a list request","properties":{"additional_fields":{"items":{"type":"string"},"type":"array","uniqueItems":false},"limit":{"type":"integer"},"offset":{"type":"integer"},"page_index":{"type":"integer"},"sort":{"items":{"properties":{"field":{"type":"string"},"order":{"enum":["asc","desc"],"type":"string"}},"type":"object","title":"SortBody"},"type":"array","uniqueItems":false},"sqon":{"properties":{"content":{"oneOf":[{"properties":{"field":{"type":"string"},"value":{"items":{},"type":"array","uniqueItems":false}},"type":"object","title":"LeafContent"},{"items":"circular(Sqon)","type":"array"}]},"id":{"type":"string"},"op":{"enum":["in","and","or","not","between",">","<",">=","<=","not-in","all"],"type":"string"}},"type":"object","title":"Sqon"}},"type":"object","title":"ListBodyWithSqon"}}},"description":"List Body","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"items":{"description":"GermlineCNVOccurrence represents a germline CNV occurrence","properties":{"aliquot":{"type":"string"},"bc":{"type":"integer"},"calls":{"items":{"type":"integer"},"type":"array","uniqueItems":false},"chromosome":{"type":"string"},"ciend":{"items":{"type":"integer"},"type":"array","uniqueItems":false},"cipos":{"items":{"type":"integer"},"type":"array","uniqueItems":false},"cn":{"type":"integer"},"cnv_id":{"type":"string"},"cytoband":{"items":{"type":"string"},"type":"array","uniqueItems":false},"end":{"type":"integer"},"filter":{"type":"string"},"gnomad_sc":{"type":"integer"},"gnomad_sf":{"type":"number"},"gnomad_sn":{"type":"integer"},"length":{"type":"integer"},"name":{"type":"string"},"nb_genes":{"type":"integer"},"nb_snv":{"type":"integer"},"pe":{"items":{"type":"integer"},"type":"array","uniqueItems":false},"quality":{"type":"number"},"reflen":{"type":"integer"},"seq_id":{"type":"integer"},"sm":{"type":"number"},"start":{"type":"integer"},"svlen":{"type":"integer"},"svtype":{"type":"string"},"symbol":{"items":{"type":"string"},"type":"array","uniqueItems":false},"type":{"type":"string"}},"required":["chromosome","cnv_id","end","length","name","seq_id","start","type"],"type":"object","title":"GermlineCNVOccurrence"},"type":"array"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

@@ -1,0 +1,71 @@
+---
+id: post-sequencing-experiment-batch
+title: "Create a new sequencing experiment batch"
+description: "Create a new sequencing experiment batch"
+sidebar_label: "Create a new sequencing experiment batch"
+hide_title: true
+hide_table_of_contents: true
+api: eJztV01v4zYQ/SsCz4rteNuLb0k2C6Qo2iBJUaBBIIylicWNRMrDURzX0H8vhhJt2ZbdXeyxBYLA4nxyOPP4uFEZupR0xdoaNVM3hMAYQWRwFTlc1mhSbRYRflRIukTD0Rw4zVWsbIUEYnaXqZmqrOPHrf7tVv26066AoERGcmr2vDmI+pnW0UNtVKy0fC5rpLWKlYES1UxltE7IS12aYwlqtlG8rkQ0t7ZAMKppXmJFEt7xtc3WopJaw2hYfkJVFTr1yY6/Ogm56fkaqsDJrYj3iLAidGjYRZxjNG/XlrUmzCK2URqqeL6CFUkNWaPzCW11k52ul2jG0v/YN4BCL2vLvXI4Jm0WqolVChXXhMmbHpbvIkCROCZgXKyT1GYo6mjqUs2e1WrhVKxWH/KfDDhcqlgx0AIZsyQzoF7iY99VAfxqqdy6O9Kg2iRQaHAnpRlwm8kHlFUh8ulk+unicnIxuXyaTGb+7y8VKwkELF0CjBesS1QDKTnvJbG0AKP/9o1wOrveQRQw/yY9QsgSxjQ3trADhXS5JfZaKlaF7SwGq+cYuHZHHmrzZuxKhiAjeGU5EHy3b7Lb1MrmGDM/P+FLxqWel5qDIKnILgidGw7b6VLS1UpnA5tu2imTPpekQgee7afDhjhzGsO1//dK71dteDO7Tdv5V0wladbsW+s0bjWxKrW5a+fvcusBiEAAqjZ6WWMnfoXC4WGFTgz1mWS+AX9UI2EGgduL+ykw1ehzcpU1rgWO6WT6wwDpk3novB4CIu3WuSaDWbTK0bSwKFjYXi/DMOhXk7Y6Q8Dmo2dJm+ORONwVA1dErAZbOvTOoKh2SO0tNDQK549wr0JDR3aVpljJdDax+mky+YEjuar0LZGl/jmAiVDWjgqcIYMu1GwjzY3OweIEvB2WRRvGBdIRCgQnW5Mz3R0yHarHNWTRQ3uHtyX59J8vyRdLc51l6Nv35/97RN0Zloksokekd6QoKModkdakee3p5RyBkKDmXM2eX4QcMizcPiBLCiVybgN99SxVLNR4pzUOKOV8wJa91lSIlhLHIe6j1L2DsF708PUl8JRf/nwKTNbDk5fuOEvOXPn9yHk+7BjtbSBCp4nic48ShjM6YIK75XMEsON9BzxuZ9ujb/uLLWs7RdVOk7Cdl0HuNSgeplz7TGuPS/Uo1CDZ2bb1i1wV5tUez9BTrl2k2zvu6v4uerUUPUCmwXCUAUMUSjYSmqdTFOSfbcJD5qqCNMdoOpoId/A9JMc9G49Xq9UIvHRkaTHuTN3417ub298eby+mo8ko57KQmQtjEgJf3d+pWElvtklejiaehVvHJZhe+O942+1tuwc53+Oja2jGDx5XBWiPYX7Xm27O9qYxbm9+mcpchnH2rDabOTj8g4qmkeX2Wehfj9rBvBBk8aTrTL67l+VgOm+43ntgvkNRi5af7HcgLWE8hMQqR8iQfPzW7KaNcvEknne2R6DcxMGivfHP6vZB6f73R8GKefegLds2JljJuMFK8pRnuFh73PFrG1WAWdQesVXrU+AkoFFgRQF2uh+yq0BuzbqX4WbTajzZNzRNo0LNWL5lVprmH18btv8=
+sidebar_class_name: "post api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create a new sequencing experiment batch"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/sequencing/batch"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Create a new sequencing experiment batch
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Dry Run","in":"query","name":"dry_run","schema":{"type":"boolean"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"description":"CreateSequencingExperimentBatchBody represents the body required to create a sequencing experiment batch","properties":{"sequencing_experiments":{"items":{"properties":{"aliquot":{"type":"string"},"capture_kit":{"type":"string"},"experimental_strategy_code":{"enum":["wgs","wxs","rnaseq","targeted_dna"],"type":"string"},"platform_code":{"type":"string"},"run_alias":{"type":"string"},"run_date":{"example":"2023-10-01T00:00:00Z","format":"date-time","type":"string"},"sample_organization_code":{"type":"string"},"sequencing_lab_code":{"type":"string"},"sequencing_read_technology_code":{"enum":["short_read","long_read"],"type":"string"},"status_code":{"enum":["unknown","draft","revoke","completed","incomplete","submitted","in_progress"],"type":"string"},"submitter_sample_id":{"type":"string"}},"required":["aliquot","experimental_strategy_code","platform_code","sample_organization_code","sequencing_lab_code","sequencing_read_technology_code","status_code","submitter_sample_id"],"type":"object","title":"SequencingExperimentBatch"},"minItems":1,"type":"array","uniqueItems":false}},"required":["sequencing_experiments"],"type":"object","title":"CreateSequencingExperimentBatchBody"}}},"description":"Create Body","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"202":{"content":{"application/json":{"schema":{"description":"CreateBatchResponse represents the response returned when creating a new batch","properties":{"batch_type":{"type":"string"},"created_on":{"type":"string"},"dry_run":{"type":"boolean"},"id":{"type":"string"},"status":{"type":"string"},"username":{"type":"string"}},"type":"object","title":"CreateBatchResponse"}}},"description":"Accepted"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"403":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Forbidden"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

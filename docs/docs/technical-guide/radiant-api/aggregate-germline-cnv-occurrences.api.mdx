@@ -1,0 +1,71 @@
+---
+id: aggregate-germline-cnv-occurrences
+title: "Aggregate germline CNV occurrences"
+description: "Aggregate germline CNV occurrences for a given sequence ID"
+sidebar_label: "Aggregate germline CNV occurrences"
+hide_title: true
+hide_table_of_contents: true
+api: eJztVktv20YQ/iuLOSUALapGeiGaArbrFGoNO7Dc5CAIxYgckRsvd6ndpRVF4H8vZklKtKQ4CXpsT6JmZuf9+LaQkUutrLw0GhK4yHNLOXoSOdlSSU3i6vaDMGlaW0s6JSeWxgoUuXwiLRytaqaKyW8QganIIiuaZJAA9qp+7zRd3X642+uBCCq0WJIn6yCZbQ88mT5TLZlUoS8gAo0lQQKOVn/LDCKwtKqlpQwSb2uKwKUFlQjJFvymCpLeSp1D08xbYXL+0mQblkiN9qQ9f2JVKZkG/+NPjn3YDlRVlqPzkhz/W0pS2QkLETj5hQYMqT3lZANn1ep8rmnggNF0twyZ+F5jT6jqYE16Klm2iXohtBY3EEGt5aqmSctfonLU7IXM4hOlHiLw0ism3BAurzqPmminF1Jp01qhfTVdGf0aDqw08yYCedpFUzGZdF1CMuMyRoCaq2Ysl9Kw9QX5NRGzfoUIfuHft/zxtpU4a18pBfPoqKRfj4VdfVGg73VpNLfDR+mL7k0TfWUspNEitM5h1zVMcJXRrq3Z+Xj8Q+3VF/AFu5YqS460dwK1wGccVyuO7LC16tb0c51XTBZSC1+QWNTpI/l9QQf9+kib48eXQV4w76gWEShckDp+dMNkkRrbpiiTOhfeBPsnFX1fzeCw2U/U7e5Plnrzg8U4qEElr6019qAAxLSjnGfkUap2EktyDnM6vSY8+tqdWhTNsLVmOyW7J/MXktN5eioTl5iJ+3b3tSl5859Pya3x4p2pdcbWf/6/R2CiPVmNSkzJPpEVvWAEjtLaSr8J12lBaMli7QtIZnM+qh5zPuEwgAnsQ0m+MAwFKuPCeuL7nUA8EIt7mBGn+inetje9iXfYgWMKzrQQobaKFQAb7X2ack3azA496/+9M7ZEDwn88fEBOnDAiWi5++VTeF+FWLnW93uUcP0Zy0rR4BD3JeqP/Xh/2wftcyTcHeuZrpXqD+aey3eSzyN7IPXSHPfYQyGdkC6szYv3k4DD7jGTqL3I0KOoFPqlseUIIlAyJe2C1x1cuqgwLUicj8aMCkIeOeQkjtfr9QgDd2RsHndPXXwzubq+nV6fnY/Go8KXKizcro16wxfvJxwaWdc6+dNozGJc8BL10Pw3gSUctOMgm/8OlnYF9vTZx5VCGS5HyMC2a8nnnRtBbwQiSPUTRJDswOa+M+cRFNzXyQy22wU6+suqpmHyqibLozLnoluJC04ZA1zp+DvrgNgL8b6678b7tZh+O5b+CurNvs0Augve4+QA0grCjGxwpmV2YO/sgVXsHx/tPgaD7YuLNKXKvyg7HP33d1Meu0WHt0uT8RuLa4ZQuG4dNSEFYYQDbQsKdV6HxQitTp6LfrC7eHcT3H1wVCdTsd22Eg/mkXTT7DLj+T8npmn+AQLqeck=
+sidebar_class_name: "post api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Aggregate germline CNV occurrences"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/occurrences/germline/cnv/{seq_id}/aggregate"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Aggregate germline CNV occurrences for a given sequence ID
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Sequence ID","in":"path","name":"seq_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"properties":{"field":{"type":"string"},"size":{"type":"integer"},"sqon":{"properties":{"content":{"oneOf":[{"properties":{"field":{"type":"string"},"value":{"items":{},"type":"array","uniqueItems":false}},"type":"object","title":"LeafContent"},{"items":"circular(Sqon)","type":"array"}]},"id":{"type":"string"},"op":{"enum":["in","and","or","not","between",">","<",">=","<=","not-in","all"],"type":"string"}},"type":"object","title":"Sqon"}},"type":"object","title":"AggregationBodyWithSqon"}}},"description":"Aggregation Body","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"items":{"description":"Aggregation represents an aggregation result","properties":{"count":{"description":"Count in the bucket","type":"integer"},"key":{"description":"Bucket key","type":"string"},"label":{"description":"Label corresponding to the key","type":"string"}},"type":"object","title":"Aggregation"},"type":"array"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      
