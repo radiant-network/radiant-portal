@@ -16,7 +16,7 @@ import { type Aggregation as AggregationConfig, ApplicationId } from '@/componen
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/model/sqon';
 
-import { useFilterConfig } from './filter-list';
+import { getGlobalStorageKey, useFilterConfig } from './filter-list';
 import { useAggregationBuilder } from './use-aggregation-builder';
 
 interface IProps {
@@ -64,8 +64,8 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
   const { appId, clearUnappliedFilters } = useFilterConfig();
 
-  // Clé unique pour toutes les sélections temporaires
-  const globalStorageKey = `temp-filters-${appId}`;
+  // Unique key for all temporary selections
+  const globalStorageKey = getGlobalStorageKey(appId);
 
   // State to manage the dictionary switch value
   const [withDictionaryToggle, setWithDictionaryToggle] = useState(isWithDictionaryEnabled(appId, field));

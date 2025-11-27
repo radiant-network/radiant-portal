@@ -33,6 +33,13 @@ export const useFilterConfig = (): FilterListContextProps => {
 };
 
 /**
+ * Generate the global storage key for temporary filter selections
+ */
+export function getGlobalStorageKey(appId: ApplicationId): string {
+  return `temp-filters-${appId}`;
+}
+
+/**
  * Create facets
  */
 interface FilterListProps {
@@ -47,8 +54,8 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
   const [expandedFilters, setExpandedFilters] = useState<string[]>([]);
   const [prevGroupKey, setPrevGroupKey] = useState<string | null | undefined>(groupKey);
 
-  // Unique key for all temporary selections of this appId
-  const globalStorageKey = `temp-filters-${appId}`;
+  // Unique key for all temporary selections
+  const globalStorageKey = getGlobalStorageKey(appId);
 
   // Simple function to clean all temporary selections
   const clearUnappliedFilters = () => {
