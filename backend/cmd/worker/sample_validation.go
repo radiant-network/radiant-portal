@@ -70,8 +70,8 @@ func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *type
 		r.addInfos(message, SampleAlreadyExistCode, formatPath(r, ""))
 		r.Skipped = true
 		validateExistingSampleField(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
-		validateExistingSampleField(r, "tissue_site", existingSample.TissueType, r.Sample.TissueSite)              // TODO: Check if this is correct
-		validateExistingSampleField(r, "histology_code", existingSample.HistologyTypeCode, r.Sample.HistologyCode) // TODO: Check if this is correct
+		validateExistingSampleField(r, "tissue_site", existingSample.TissueType, r.Sample.TissueSite)
+		validateExistingSampleField(r, "histology_code", existingSample.HistologyTypeCode, r.Sample.HistologyCode)
 	}
 }
 
@@ -83,7 +83,6 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 			message := fmt.Sprintf("Invalid parent sample %s for sample (%s / %s)", r.Sample.SubmitterParentSampleId, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
 		} else {
-			// TODO: Check if necessary
 			validateExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId)
 		}
 	}
@@ -167,7 +166,6 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 	for _, record := range records {
 		if !record.Skipped {
 			sample := types.Sample{
-				// TODO: Make sure all fields are correctly mapped
 				TypeCode:                record.Sample.TypeCode,
 				SubmitterSampleId:       record.Sample.SubmitterSampleId,
 				TissueType:              record.Sample.TissueSite,

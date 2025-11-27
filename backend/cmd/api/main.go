@@ -181,7 +181,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
 
 	dataManagerRoutes := privateRoutes.Group("/")
-	dataManagerRoutes.Use(server.RequireRole(auth, "data_manager"))
+	dataManagerRoutes.Use(server.RequireRole(auth, utils.DataManagerRole))
 	{
 		batchesGroup := dataManagerRoutes.Group("/batches")
 		batchesGroup.GET("/:batch_id", server.GetBatchHandler(repoBatches))
