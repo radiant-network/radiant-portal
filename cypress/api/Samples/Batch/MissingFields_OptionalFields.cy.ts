@@ -28,6 +28,6 @@ describe('Samples - Batch - Missing fields - Optional fields', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedPatientsBatchResponse(response, 'sample');
+    cy.validateAcceptedBatchResponse(response, 'sample');
   });
 });
