@@ -265,13 +265,34 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     setSelectedItems(items.map(f => f.key!));
   }, [items, selectedItems]);
 
+  // Helper function to clear all selections and clean sessionStorage
+  const clearAllSelections = useCallback(() => {
+    setHasUnappliedItems(true); // There will be unapplied changes after clear
+    setSelectedItems([]); // Uncheck ALL values (including those from query builder)
+    setHasBeenReset(true); // Mark that a reset occurred to avoid re-synchronization
+    // Clean from global object
+    try {
+      const stored = sessionStorage.getItem(globalStorageKey);
+      if (stored) {
+        const allTempSelections = JSON.parse(stored);
+        delete allTempSelections[field.key];
+        if (Object.keys(allTempSelections).length === 0) {
+          sessionStorage.removeItem(globalStorageKey);
+        } else {
+          sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
+        }
+      }
+    } catch (error) {
+      // Error during clear cleanup
+    }
+  }, [globalStorageKey, field.key]);
+
   const unSelectAll = useCallback(() => {
     if (selectedItems.length === 0) {
       return;
     }
-    setHasUnappliedItems(true);
-    setSelectedItems([]);
-  }, [selectedItems]);
+    clearAllSelections();
+  }, [selectedItems, clearAllSelections]);
 
   const itemSelected = useCallback(
     (item: Aggregation) => {
@@ -288,25 +309,8 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   );
 
   const reset = useCallback(() => {
-    setHasUnappliedItems(true); // There will be unapplied changes after reset
-    setSelectedItems([]); // Uncheck ALL values (including those from query builder)
-    setHasBeenReset(true); // Mark that a reset occurred to avoid re-synchronization
-    // Clean from global object
-    try {
-      const stored = sessionStorage.getItem(globalStorageKey);
-      if (stored) {
-        const allTempSelections = JSON.parse(stored);
-        delete allTempSelections[field.key];
-        if (Object.keys(allTempSelections).length === 0) {
-          sessionStorage.removeItem(globalStorageKey);
-        } else {
-          sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
-        }
-      }
-    } catch (error) {
-      // Error during reset cleanup
-    }
-  }, [globalStorageKey, field.key]);
+    clearAllSelections();
+  }, [clearAllSelections]);
 
   const applyWithOperator = useCallback(
     (operator?: TermOperators) => {
