@@ -39,7 +39,7 @@ func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValu
 	}
 	if len(fieldValue) > TextMaxLength {
 		path := formatPath(r, fieldName)
-		message := formatFieldTooLong(r, fieldName, TextMaxLength, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId})
+		message := formatFieldTooLong(r, fieldName, TextMaxLength, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
 		r.addErrors(message, SampleInvalidValueCode, path)
 	}
 }
@@ -70,7 +70,7 @@ func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *type
 		r.addInfos(message, SampleAlreadyExistCode, formatPath(r, ""))
 		r.Skipped = true
 		validateExistingSampleField(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
-		validateExistingSampleField(r, "tissue_site", existingSample.TissueType, r.Sample.TissueSite)
+		validateExistingSampleField(r, "tissue_site", existingSample.TissueType, r.Sample.TissueSite.String())
 		validateExistingSampleField(r, "histology_code", existingSample.HistologyTypeCode, r.Sample.HistologyCode)
 	}
 }
@@ -83,7 +83,7 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 			message := fmt.Sprintf("Invalid parent sample %s for sample (%s / %s)", r.Sample.SubmitterParentSampleId, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
 		} else {
-			validateExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId)
+			validateExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
 		}
 	}
 }
@@ -167,8 +167,8 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 		if !record.Skipped {
 			sample := types.Sample{
 				TypeCode:                record.Sample.TypeCode,
-				SubmitterSampleId:       record.Sample.SubmitterSampleId,
-				TissueType:              record.Sample.TissueSite,
+				SubmitterSampleId:       record.Sample.SubmitterSampleId.String(),
+				TissueType:              record.Sample.TissueSite.String(),
 				HistologyTypeCode:       record.Sample.HistologyCode,
 				SubmitterOrganizationId: record.OrganizationId,
 			}
@@ -235,11 +235,11 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		}
 
 		// 1. Validate fields
-		record.validateFieldLength("submitter_parent_sample_id", sample.SubmitterParentSampleId)
-		record.validateFieldLength("tissue_site", sample.TissueSite)
+		record.validateFieldLength("submitter_parent_sample_id", sample.SubmitterParentSampleId.String())
+		record.validateFieldLength("tissue_site", sample.TissueSite.String())
 
 		// 2. Validate patient
-		patient, patientErr := repoPatient.GetPatientByOrgCodeAndOrgPatientId(sample.PatientOrganizationCode, sample.SubmitterPatientId)
+		patient, patientErr := repoPatient.GetPatientByOrgCodeAndOrgPatientId(sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}
@@ -254,7 +254,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 
 		// 4. Validate if sample exists in DB
 		if organization != nil {
-			existingSample, sampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId)
+			existingSample, sampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId.String())
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
 			} else if existingSample != nil {
@@ -264,7 +264,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 
 			// 6. Validate parent sample in DB if provided
 			if sample.SubmitterParentSampleId != "" {
-				existingParentSample, parentSampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterParentSampleId)
+				existingParentSample, parentSampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterParentSampleId.String())
 				if parentSampleErr != nil {
 					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
 				}

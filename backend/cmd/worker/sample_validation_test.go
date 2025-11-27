@@ -56,9 +56,9 @@ func (m *MockSamplesRepository) CreateSample(newSample *types.Sample) error {
 
 func Test_SampleField_Too_Long(t *testing.T) {
 	longString := randomString(120, letters)
-	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: longString}
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: types.TrimmedString(longString)}
 	rec := SampleValidationRecord{Sample: sample}
-	rec.validateFieldLength("tissue_site", rec.Sample.TissueSite)
+	rec.validateFieldLength("tissue_site", rec.Sample.TissueSite.String())
 
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
@@ -161,7 +161,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 	// Helper to find a record by SubmitterSampleId
 	findRecord := func(id string) *SampleValidationRecord {
 		for _, r := range records {
-			if r.Sample.SubmitterSampleId == id {
+			if r.Sample.SubmitterSampleId.String() == id {
 				return r
 			}
 		}
