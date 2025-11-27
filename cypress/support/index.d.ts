@@ -7,6 +7,9 @@ declare namespace Cypress {
     apiCall(method: string, query: string, body: string, token: string, retries?: number): cy & CyEventEmitter;
     getToken(): Chainable<string>;
     validateAcceptedBatchResponse(response: any, batch_type: string): cy & CyEventEmitter;
+    validateReport(response: any, level: string, code: string, message: string, path: string): cy & CyEventEmitter;
+    validateSuccessBatchProcessed(response: any, batch_type: string, batch_id: string): cy & CyEventEmitter;
+    validateSummary(response: any, created: number, updated: number, skipped: number, errors: number): cy & CyEventEmitter;
     validateMessage(response: any, message: string): cy & CyEventEmitter;
 
     // commands

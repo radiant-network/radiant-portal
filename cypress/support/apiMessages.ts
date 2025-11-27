@@ -1,9 +1,17 @@
 export const apiMessages = {
+  DateEmpty: 'date cannot be empty',
   ImmediateError: (keyPrefix: string, field: string, tag: string) => `Key: '${keyPrefix}.${field}' Error:Field validation for '${field}' failed on the '${tag}' tag`,
   InternalServerError: 'Internal Server Error',
   InvalidBatchUUID: (batchId: string) => `error retrieve batch by its ID: ERROR: invalid input syntax for type uuid: \"${batchId}\" (SQLSTATE 22P02)`,
   InvalidDateFormat: 'invalid date format for date of birth, expected YYYY-MM-DD',
   BatchIdNotFound: 'batch_id not found',
   ParsingError: (field: string) => `error parsing ${field}`,
-  ParsingErrorDateTime: (field: string) => `parsing time \"${field}\" as \"2006-01-02T15:04:05Z07:00\": cannot parse `,
+  ParsingErrorDateFormat: 'invalid date format, expected RFC3339 (e.g. 2020-01-02T15:04:05Z)',
+  Patient001: (code: string, id: string) => `Patient (${code} / ${id}) already exist, skipped.`,
+  Patient002: (code: string, id: string, field: string, originValue: string, newValue: string) => `A patient with same ids (${code} / ${id}) has been found  but with a different ${field} (${originValue} <> ${newValue})`,
+  Patient003: (value: string, id: string) => `Organization ${value} for patient ${id} does not exist.`,
+  Patient004RegExp: (field: string, code: string, id: string) => `Invalid Field ${field} for patient (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- .'À-ÿ]*$`,
+  Patient004RegExpId: (field: string, code: string, id: string) => `Invalid Field ${field} for patient (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$`,
+  Patient004TooLong: (field: string, code: string, id: string) => `Invalid Field ${field} for patient (${code} / ${id}). Reason: field is too long, maximum length allowed is 100`,
+  Patient005: (orgType: string, code: string, id: string) => `Organization type (${orgType}) defined for patient (${code} / ${id}) is not in this list : healthcare_provider, research_institute.`,
 };

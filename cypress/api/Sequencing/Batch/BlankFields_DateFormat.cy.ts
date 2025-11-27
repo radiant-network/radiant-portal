@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Sequencing - Batch - Blank fields - Date time', () => {
+describe('Sequencing - Batch - Blank fields - Date format', () => {
   let response: any;
 
   before(() => {
@@ -33,6 +33,6 @@ describe('Sequencing - Batch - Blank fields - Date time', () => {
   });
 
   it('Message', () => {
-    cy.validateMessage(response, apiMessages.ParsingErrorDateTime(''));
+    cy.validateMessage(response, apiMessages.DateEmpty);
   });
 });

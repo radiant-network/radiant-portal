@@ -19,29 +19,6 @@ describe('Batches / Patient success', () => {
   });
 
   it('Return content', () => {
-    expect(response.body).to.have.all.keys('id', 'dry_run', 'batch_type', 'status', 'created_on', 'started_on', 'finished_on', 'username', 'summary', 'report');
-    expect(response.body).to.include({
-      id: batchId,
-      dry_run: true,
-      batch_type: 'patient',
-      status: 'SUCCESS',
-      username: 'cypress',
-    });
-    expect(response.body.created_on)
-      .to.be.a('string')
-      .and.match(/^\d{4}-\d{2}-\d{2}T/);
-    expect(response.body.started_on)
-      .to.be.a('string')
-      .and.match(/^\d{4}-\d{2}-\d{2}T/);
-    expect(response.body.finished_on)
-      .to.be.a('string')
-      .and.match(/^\d{4}-\d{2}-\d{2}T/);
-    expect(response.body.summary).to.deep.equal({
-      created: 0,
-      updated: 0,
-      skipped: 0,
-      errors: 0,
-    });
-    expect(response.body.report).to.be.empty;
+    cy.validateSuccessBatchProcessed(response, 'patient', batchId);
   });
 });

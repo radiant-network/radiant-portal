@@ -93,6 +93,75 @@ Cypress.Commands.add('validateAcceptedBatchResponse', (response: any, batch_type
 });
 
 /**
+ * Validates that a batch processed response has the expected report values.
+ * Checks a specific level and code error message.
+ * @param response The API response object from a batch processed.
+ * @param level The level of the error to validate.
+ * @param code The code error of the error to validate.
+ * @param message The message of the error to validate.
+ * @param path The path of the error to validate.
+ */
+Cypress.Commands.add('validateReport', (response: any, level: string, code: string, message: string, path: string) => {
+  expect(response.body.report).to.have.property(level);
+  expect(response.body.report[level]).to.be.an('array');
+
+  const matchingItem = response.body.report[level].find((item: any) => item.code === code && item.message === message && item.path === path);
+
+  expect(matchingItem, `No item found in report.${level} with code="${code}", message="${message}", path="${path}"`).to.exist;
+});
+
+/**
+ * Validates that a batch processed response has the expected structure and values.
+ * Checks response keys, static fields and validates dynamic fields.
+ * @param response The API response object from a batch processed.
+ * @param batch_type The type of the batch processed (patient, sample, etc.).
+ * @param batch_id The id of the batch processed.
+ */
+Cypress.Commands.add('validateSuccessBatchProcessed', (response: any, batch_type: string, batch_id: string) => {
+  expect(response.body).to.have.all.keys('id', 'dry_run', 'batch_type', 'status', 'created_on', 'started_on', 'finished_on', 'username', 'summary', 'report');
+  expect(response.body).to.include({
+    id: batch_id,
+    dry_run: true,
+    batch_type: 'patient',
+    status: 'SUCCESS',
+    username: 'cypress',
+  });
+  expect(response.body.created_on)
+    .to.be.a('string')
+    .and.match(/^\d{4}-\d{2}-\d{2}T/);
+  expect(response.body.started_on)
+    .to.be.a('string')
+    .and.match(/^\d{4}-\d{2}-\d{2}T/);
+  expect(response.body.finished_on)
+    .to.be.a('string')
+    .and.match(/^\d{4}-\d{2}-\d{2}T/);
+  expect(response.body.summary).to.deep.equal({
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    errors: 0,
+  });
+  expect(response.body.report).to.be.empty;
+});
+
+/**
+ * Validates that a batch processed response has the expected summary values.
+ * @param response The API response object from a batch processed.
+ * @param created The number of created objects to validate.
+ * @param updated The number of updated objects to validate.
+ * @param skipped The number of skipped objects to validate.
+ * @param errors The number of errors objects to validate.
+ */
+Cypress.Commands.add('validateSummary', (response: any, created: number, updated: number, skipped: number, errors: number) => {
+  expect(response.body.summary).to.deep.equal({
+    created: created,
+    updated: updated,
+    skipped: skipped,
+    errors: errors,
+  });
+});
+
+/**
  * Validates that an API response contains a specific message.
  * @param response The API response object to validate.
  * @param message The expected message that should be included in response.body.message.
