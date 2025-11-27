@@ -53,7 +53,7 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 0)
 
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}
@@ -159,7 +159,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 1)
 
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}
@@ -211,7 +211,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 0)
 
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}

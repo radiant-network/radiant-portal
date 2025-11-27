@@ -1,17 +1,17 @@
 package types
 
 type Sample struct {
-	ID                      int
-	TypeCode                string
-	Type                    SampleType `gorm:"foreignKey:code;references:TypeCode"`
-	ParentSampleID          int
-	ParentSample            *Sample `gorm:"foreignKey:ID;references:ParentSampleID"`
-	TissueType              string
-	HistologyTypeCode       string
-	HistologyType           HistologyType `gorm:"foreignKey:code;references:HistologyTypeCode"`
-	SubmitterSampleId       string
-	PatientID               int
-	SubmitterOrganizationId int
+	ID                int
+	TypeCode          string
+	Type              SampleType `gorm:"foreignKey:code;references:TypeCode"`
+	ParentSampleID    int
+	ParentSample      *Sample `gorm:"foreignKey:ID;references:ParentSampleID"`
+	TissueSite        string
+	HistologyCode     string
+	HistologyType     HistologyType `gorm:"foreignKey:code;references:HistologyCode"`
+	SubmitterSampleId string
+	PatientID         int
+	OrganizationId    int
 }
 
 var SampleSubmitterSampleIdField = Field{

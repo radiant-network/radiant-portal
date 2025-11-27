@@ -70,8 +70,8 @@ func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *type
 		r.addInfos(message, SampleAlreadyExistCode, formatPath(r, ""))
 		r.Skipped = true
 		validateExistingSampleField(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
-		validateExistingSampleField(r, "tissue_site", existingSample.TissueType, r.Sample.TissueSite.String())
-		validateExistingSampleField(r, "histology_code", existingSample.HistologyTypeCode, r.Sample.HistologyCode)
+		validateExistingSampleField(r, "tissue_site", existingSample.TissueSite, r.Sample.TissueSite.String())
+		validateExistingSampleField(r, "histology_code", existingSample.HistologyCode, r.Sample.HistologyCode)
 	}
 }
 
@@ -166,11 +166,11 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 	for _, record := range records {
 		if !record.Skipped {
 			sample := types.Sample{
-				TypeCode:                record.Sample.TypeCode,
-				SubmitterSampleId:       record.Sample.SubmitterSampleId.String(),
-				TissueType:              record.Sample.TissueSite.String(),
-				HistologyTypeCode:       record.Sample.HistologyCode,
-				SubmitterOrganizationId: record.OrganizationId,
+				TypeCode:          record.Sample.TypeCode,
+				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
+				TissueSite:        record.Sample.TissueSite.String(),
+				HistologyCode:     record.Sample.HistologyCode,
+				OrganizationId:    record.OrganizationId,
 			}
 			err := repo.CreateSample(&sample)
 			if err != nil {
@@ -239,7 +239,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		record.validateFieldLength("tissue_site", sample.TissueSite.String())
 
 		// 2. Validate patient
-		patient, patientErr := repoPatient.GetPatientByOrgCodeAndOrgPatientId(sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
+		patient, patientErr := repoPatient.GetPatientByOrgCodeAndSubmitterPatientId(sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}

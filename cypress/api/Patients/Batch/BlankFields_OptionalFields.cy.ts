@@ -31,6 +31,6 @@ describe('Patients - Batch - Blank fields - Optional fields', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedPatientsBatchResponse(response, 'patient');
+    cy.validateAcceptedBatchResponse(response, 'patient');
   });
 });

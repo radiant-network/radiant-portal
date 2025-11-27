@@ -199,14 +199,14 @@ func insertPatientRecords(records []PatientValidationRecord, repo repository.Pat
 	for _, record := range records {
 		if !record.Skipped {
 			patient := types.Patient{
-				OrganizationPatientId:     record.Patient.SubmitterPatientId.String(),
-				OrganizationID:            record.OrganizationId,
-				OrganizationPatientIdType: record.Patient.SubmitterPatientIdType.String(),
-				FirstName:                 record.Patient.FirstName.String(),
-				LastName:                  record.Patient.LastName.String(),
-				Jhn:                       record.Patient.Jhn.String(),
-				SexCode:                   record.Patient.SexCode,
-				LifeStatusCode:            record.Patient.LifeStatusCode,
+				SubmitterPatientId:     record.Patient.SubmitterPatientId.String(),
+				OrganizationId:         record.OrganizationId,
+				SubmitterPatientIdType: record.Patient.SubmitterPatientIdType.String(),
+				FirstName:              record.Patient.FirstName.String(),
+				LastName:               record.Patient.LastName.String(),
+				Jhn:                    record.Patient.Jhn.String(),
+				SexCode:                record.Patient.SexCode,
+				LifeStatusCode:         record.Patient.LifeStatusCode,
 			}
 			if record.Patient.DateOfBirth != nil {
 				patient.DateOfBirth = record.Patient.DateOfBirth.Time
@@ -249,7 +249,7 @@ func validatePatientRecord(patient types.PatientBatch, index int, repoOrganizati
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
-		existingPatient, patientErr := repoPatient.GetPatientByOrganizationPatientId(organization.ID, patient.SubmitterPatientId.String())
+		existingPatient, patientErr := repoPatient.GetPatientBySubmitterPatientId(organization.ID, patient.SubmitterPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		} else {

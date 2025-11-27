@@ -735,12 +735,6 @@ export interface CasePatientClinicalInformation {
     'organization_name'?: string;
     /**
      * 
-     * @type {string}
-     * @memberof CasePatientClinicalInformation
-     */
-    'organization_patient_id'?: string;
-    /**
-     * 
      * @type {number}
      * @memberof CasePatientClinicalInformation
      */
@@ -757,6 +751,12 @@ export interface CasePatientClinicalInformation {
      * @memberof CasePatientClinicalInformation
      */
     'sex_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'submitter_patient_id'?: string;
 }
 /**
  * Line represented a case in case list
@@ -871,12 +871,6 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'proband_organization_id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseResult
-     */
     'project_code'?: string;
     /**
      * 
@@ -890,6 +884,12 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseResult
+     */
+    'submitter_proband_id'?: string;
     /**
      * 
      * @type {string}
@@ -1113,6 +1113,19 @@ export interface CreateBatchResponse {
      * @memberof CreateBatchResponse
      */
     'username'?: string;
+}
+/**
+ * CreateSequencingExperimentBatchBody represents the body required to create a sequencing experiment batch
+ * @export
+ * @interface CreateSequencingExperimentBatchBody
+ */
+export interface CreateSequencingExperimentBatchBody {
+    /**
+     * 
+     * @type {Array<SequencingExperimentBatch>}
+     * @memberof CreateSequencingExperimentBatchBody
+     */
+    'sequencing_experiments': Array<SequencingExperimentBatch>;
 }
 /**
  * 
@@ -2953,6 +2966,106 @@ export interface Sequencing {
      */
     'vcf_filepath'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface SequencingExperimentBatch
+ */
+export interface SequencingExperimentBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'aliquot': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'capture_kit'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'experimental_strategy_code': SequencingExperimentBatchExperimentalStrategyCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'platform_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'run_alias'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'run_date'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'sample_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'sequencing_lab_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'sequencing_read_technology_code': SequencingExperimentBatchSequencingReadTechnologyCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'status_code': SequencingExperimentBatchStatusCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'submitter_sample_id': string;
+}
+
+export const SequencingExperimentBatchExperimentalStrategyCodeEnum = {
+    Wgs: 'wgs',
+    Wxs: 'wxs',
+    Rnaseq: 'rnaseq',
+    TargetedDna: 'targeted_dna'
+} as const;
+
+export type SequencingExperimentBatchExperimentalStrategyCodeEnum = typeof SequencingExperimentBatchExperimentalStrategyCodeEnum[keyof typeof SequencingExperimentBatchExperimentalStrategyCodeEnum];
+export const SequencingExperimentBatchSequencingReadTechnologyCodeEnum = {
+    ShortRead: 'short_read',
+    LongRead: 'long_read'
+} as const;
+
+export type SequencingExperimentBatchSequencingReadTechnologyCodeEnum = typeof SequencingExperimentBatchSequencingReadTechnologyCodeEnum[keyof typeof SequencingExperimentBatchSequencingReadTechnologyCodeEnum];
+export const SequencingExperimentBatchStatusCodeEnum = {
+    Unknown: 'unknown',
+    Draft: 'draft',
+    Revoke: 'revoke',
+    Completed: 'completed',
+    Incomplete: 'incomplete',
+    Submitted: 'submitted',
+    InProgress: 'in_progress'
+} as const;
+
+export type SequencingExperimentBatchStatusCodeEnum = typeof SequencingExperimentBatchStatusCodeEnum[keyof typeof SequencingExperimentBatchStatusCodeEnum];
+
 /**
  * 
  * @export
@@ -8204,6 +8317,51 @@ export const SequencingApiAxiosParamCreator = function (configuration?: Configur
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Create a new sequencing experiment batch
+         * @summary Create a new sequencing experiment batch
+         * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postSequencingExperimentBatch: async (createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createSequencingExperimentBatchBody' is not null or undefined
+            assertParamExists('postSequencingExperimentBatch', 'createSequencingExperimentBatchBody', createSequencingExperimentBatchBody)
+            const localVarPath = `/sequencing/batch`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createSequencingExperimentBatchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -8227,6 +8385,20 @@ export const SequencingApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['SequencingApi.getSequencing']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Create a new sequencing experiment batch
+         * @summary Create a new sequencing experiment batch
+         * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async postSequencingExperimentBatch(createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postSequencingExperimentBatch(createSequencingExperimentBatchBody, dryRun, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SequencingApi.postSequencingExperimentBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -8246,6 +8418,17 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
          */
         getSequencing(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<Sequencing> {
             return localVarFp.getSequencing(seqId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new sequencing experiment batch
+         * @summary Create a new sequencing experiment batch
+         * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postSequencingExperimentBatch(createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postSequencingExperimentBatch(createSequencingExperimentBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -8267,6 +8450,19 @@ export class SequencingApi extends BaseAPI {
      */
     public getSequencing(seqId: string, options?: RawAxiosRequestConfig) {
         return SequencingApiFp(this.configuration).getSequencing(seqId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new sequencing experiment batch
+     * @summary Create a new sequencing experiment batch
+     * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
+     * @param {boolean} [dryRun] Dry Run
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SequencingApi
+     */
+    public postSequencingExperimentBatch(createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return SequencingApiFp(this.configuration).postSequencingExperimentBatch(createSequencingExperimentBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

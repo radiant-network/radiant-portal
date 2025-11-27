@@ -23,7 +23,7 @@ func randomString(n int, alphabet string) string {
 	return string(b)
 }
 
-func Test_OrganizationPatientId_Too_Long(t *testing.T) {
+func Test_SubmitterPatientId_Too_Long(t *testing.T) {
 	orgPatientId := randomString(120, letters)
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
@@ -33,7 +33,7 @@ func Test_OrganizationPatientId_Too_Long(t *testing.T) {
 	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
-func Test_OrganizationPatientId_Special_Characters(t *testing.T) {
+func Test_SubmitterPatientId_Special_Characters(t *testing.T) {
 	orgPatientId := "id_with_invalid_char_🧪"
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
@@ -43,7 +43,7 @@ func Test_OrganizationPatientId_Special_Characters(t *testing.T) {
 	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
-func Test_OrganizationPatientId_Multiple_Errors(t *testing.T) {
+func Test_SubmitterPatientId_Multiple_Errors(t *testing.T) {
 	orgPatientId := fmt.Sprintf("%s_🧪", randomString(120, letters))
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
@@ -51,7 +51,7 @@ func Test_OrganizationPatientId_Multiple_Errors(t *testing.T) {
 	assert.Len(t, patientValidationRecord.Errors, 2)
 }
 
-func Test_OrganizationPatientId_Valid(t *testing.T) {
+func Test_SubmitterPatientId_Valid(t *testing.T) {
 	orgPatientId := "valid_patient_id_1"
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
@@ -252,13 +252,13 @@ func Test_ValidateExistingPatient_SameValues(t *testing.T) {
 		Jhn:                     "JHN-123",
 	}
 	existing := &types.Patient{
-		OrganizationPatientId: "id2",
-		SexCode:               "M",
-		LifeStatusCode:        "alive",
-		DateOfBirth:           dob,
-		LastName:              "Doe",
-		FirstName:             "John",
-		Jhn:                   "JHN-123",
+		SubmitterPatientId: "id2",
+		SexCode:            "M",
+		LifeStatusCode:     "alive",
+		DateOfBirth:        dob,
+		LastName:           "Doe",
+		FirstName:          "John",
+		Jhn:                "JHN-123",
 	}
 	rec := PatientValidationRecord{Patient: patient}
 	rec.validateExistingPatient(existing)
@@ -282,13 +282,13 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 		Jhn:                     "JHN-999",
 	}
 	existing := &types.Patient{
-		OrganizationPatientId: "id3",
-		SexCode:               "M",
-		LifeStatusCode:        "alive",
-		DateOfBirth:           dobExisting,
-		LastName:              "Jones",
-		FirstName:             "Bob",
-		Jhn:                   "JHN-123",
+		SubmitterPatientId: "id3",
+		SexCode:            "M",
+		LifeStatusCode:     "alive",
+		DateOfBirth:        dobExisting,
+		LastName:           "Jones",
+		FirstName:          "Bob",
+		Jhn:                "JHN-123",
 	}
 	rec := PatientValidationRecord{Patient: patient}
 	rec.validateExistingPatient(existing)
@@ -352,7 +352,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 
 		// Verify that no patient records were inserted due to rollback
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("organization_patient_id = ? AND organization_id = ?", "id2", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "id2", 1).Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}

@@ -10,7 +10,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 1,
         proband_id: 3,
-        proband_organization_id: 'MRN-283775',
+        submitter_proband_id: 'MRN-283775',
         priority_code: 'routine',
         status_code: 'in_progress',
         analysis_catalog_code: 'WGA',
@@ -34,7 +34,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 2,
         proband_id: 4,
-        proband_organization_id: 'MRN-283776',
+        submitter_proband_id: 'MRN-283776',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'WGA',
@@ -58,7 +58,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 3,
         proband_id: 8,
-        proband_organization_id: 'MRN-283780',
+        submitter_proband_id: 'MRN-283780',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'WGA',
@@ -82,7 +82,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 4,
         proband_id: 10,
-        proband_organization_id: 'MRN-283782',
+        submitter_proband_id: 'MRN-283782',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'IDGD',
@@ -106,7 +106,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 5,
         proband_id: 15,
-        proband_organization_id: 'MRN-283787',
+        submitter_proband_id: 'MRN-283787',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'WGA',
@@ -130,7 +130,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 6,
         proband_id: 16,
-        proband_organization_id: 'MRN-283788',
+        submitter_proband_id: 'MRN-283788',
         priority_code: 'routine',
         status_code: 'draft',
         analysis_catalog_code: 'WGA',
@@ -154,7 +154,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 7,
         proband_id: 20,
-        proband_organization_id: 'MRN-283792',
+        submitter_proband_id: 'MRN-283792',
         priority_code: 'routine',
         status_code: 'revoke',
         analysis_catalog_code: 'WGA',
@@ -178,7 +178,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 8,
         proband_id: 22,
-        proband_organization_id: 'MRN-283794',
+        submitter_proband_id: 'MRN-283794',
         priority_code: 'routine',
         status_code: 'completed',
         analysis_catalog_code: 'WGA',
@@ -202,7 +202,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 9,
         proband_id: 23,
-        proband_organization_id: 'MRN-283795',
+        submitter_proband_id: 'MRN-283795',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'WGA',
@@ -226,7 +226,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 10,
         proband_id: 27,
-        proband_organization_id: 'MRN-283799',
+        submitter_proband_id: 'MRN-283799',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'IDGD',
@@ -250,7 +250,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 11,
         proband_id: 30,
-        proband_organization_id: 'MRN-283802',
+        submitter_proband_id: 'MRN-283802',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'WGA',
@@ -274,7 +274,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 12,
         proband_id: 34,
-        proband_organization_id: 'MRN-283806',
+        submitter_proband_id: 'MRN-283806',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'WGA',
@@ -298,7 +298,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 13,
         proband_id: 37,
-        proband_organization_id: 'MRN-283809',
+        submitter_proband_id: 'MRN-283809',
         priority_code: 'routine',
         status_code: 'incomplete',
         analysis_catalog_code: 'WGA',
@@ -322,7 +322,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 14,
         proband_id: 39,
-        proband_organization_id: 'MRN-283811',
+        submitter_proband_id: 'MRN-283811',
         priority_code: 'routine',
         status_code: 'draft',
         analysis_catalog_code: 'IDGD',
@@ -346,7 +346,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 15,
         proband_id: 42,
-        proband_organization_id: 'MRN-283814',
+        submitter_proband_id: 'MRN-283814',
         priority_code: 'routine',
         status_code: 'draft',
         analysis_catalog_code: 'WGA',
@@ -370,7 +370,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 16,
         proband_id: 44,
-        proband_organization_id: 'MRN-283816',
+        submitter_proband_id: 'MRN-283816',
         priority_code: 'routine',
         status_code: 'draft',
         analysis_catalog_code: 'WGA',
@@ -394,7 +394,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 17,
         proband_id: 47,
-        proband_organization_id: 'MRN-283819',
+        submitter_proband_id: 'MRN-283819',
         priority_code: 'routine',
         status_code: 'draft',
         analysis_catalog_code: 'IDGD',
@@ -418,7 +418,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 18,
         proband_id: 50,
-        proband_organization_id: 'MRN-283822',
+        submitter_proband_id: 'MRN-283822',
         priority_code: 'routine',
         status_code: 'revoke',
         analysis_catalog_code: 'IDGD',
@@ -442,7 +442,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 19,
         proband_id: 55,
-        proband_organization_id: 'MRN-283827',
+        submitter_proband_id: 'MRN-283827',
         priority_code: 'routine',
         status_code: 'revoke',
         analysis_catalog_code: 'IDGD',
@@ -466,7 +466,7 @@ export async function httpCaseSearchApiResponse() {
       {
         case_id: 20,
         proband_id: 58,
-        proband_organization_id: 'MRN-283830',
+        submitter_proband_id: 'MRN-283830',
         priority_code: 'routine',
         status_code: 'revoke',
         analysis_catalog_code: 'IDGD',

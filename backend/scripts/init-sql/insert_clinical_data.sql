@@ -562,7 +562,7 @@ VALUES (1, 'N1', 'NeuroDev Phase I', 'Phase one NeuroDev cases'),
 ON CONFLICT (id) DO NOTHING;
 
 
-INSERT INTO patient (id, organization_patient_id, organization_patient_id_type, organization_id, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
+INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_id, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
 VALUES (1, 'MRN-283773','mrn',3,'female', '2012-02-03', 'alive', 'Juliette', 'Gagnon', 'GAG1202030277'),
        (2, 'MRN-283774','mrn',3,'male', '1970-01-30', 'alive', 'Antoine', 'Lefebvre', 'LEF7001303889'),
        (3, 'MRN-283775','mrn',3,'male', '1973-03-23', 'alive', 'Marie', 'Lambert', 'LAM7303233380'),
@@ -625,7 +625,7 @@ VALUES (1, 'MRN-283773','mrn',3,'female', '2012-02-03', 'alive', 'Juliette', 'Ga
        (60, 'MRN-283832','mrn',3,'female', '1979-07-01', 'alive', 'Gabriel', 'Fortin', 'FOR7907010876'),
        (61, 'MRN-283833','mrn',3,'female', '1971-07-25', 'alive', 'Camille', 'Bergeron', 'BER7107256143');
 
-INSERT INTO "sample" (id, type_code, parent_sample_id, tissue_site, histology_code, submitter_sample_id, patient_id, submitter_organization_id)
+INSERT INTO "sample" (id, type_code, parent_sample_id, tissue_site, histology_code, submitter_sample_id, patient_id, organization_id)
 VALUES (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 6),
        (2, 'dna', 63, NULL, 'normal', 'S13225', 1, 6),
        (3, 'dna', 64, NULL, 'normal', 'S13226', 2,6),

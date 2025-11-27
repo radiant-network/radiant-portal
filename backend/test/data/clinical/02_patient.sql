@@ -1,4 +1,4 @@
-INSERT INTO patient (id, organization_patient_id, organization_patient_id_type, organization_id, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
+INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_id, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
 VALUES
     (1, 'MRN-283773','mrn',3,'female', '2012-02-03', 'alive', 'Juliette', 'Gagnon', 'GAG1202030277'),
     (2, 'MRN-283774','mrn',3,'male', '1970-01-30', 'alive', 'Antoine', 'Lefebvre', 'LEF7001303889'),

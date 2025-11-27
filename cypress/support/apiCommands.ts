@@ -70,12 +70,12 @@ Cypress.Commands.add('getToken', () => {
 });
 
 /**
- * Validates that a patients batch response has the expected structure and values.
- * Checks response keys, static fields (dry_run, batch_type, status, username),
- * and validates dynamic fields (id format as UUID, created_on as recent ISO date).
- * @param response The API response object from a patients batch request.
+ * Validates that a batch response has the expected structure and values.
+ * Checks response keys, static fields and validates dynamic fields.
+ * @param response The API response object from a batch request.
+ * @param batch_type The type of the batch request (patient, sample, etc.).
  */
-Cypress.Commands.add('validateAcceptedPatientsBatchResponse', (response: any, batch_type: string) => {
+Cypress.Commands.add('validateAcceptedBatchResponse', (response: any, batch_type: string) => {
   expect(response.body).to.have.keys('id', 'dry_run', 'batch_type', 'status', 'created_on', 'username');
   expect(response.body).to.include({
     dry_run: true,

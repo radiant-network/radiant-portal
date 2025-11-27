@@ -15,8 +15,8 @@ type PatientsRepository struct {
 }
 
 type PatientsDAO interface {
-	GetPatientByOrganizationPatientId(organizationId int, organizationPatientId string) (*Patient, error)
-	GetPatientByOrgCodeAndOrgPatientId(organizationCode string, organizationPatientId string) (*Patient, error)
+	GetPatientBySubmitterPatientId(organizationId int, submitterPatientId string) (*Patient, error)
+	GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*Patient, error)
 	CreatePatient(newPatient *Patient) error
 }
 
@@ -24,11 +24,11 @@ func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
 	return &PatientsRepository{db: db}
 }
 
-func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId int, organizationPatientId string) (*Patient, error) {
+func (r *PatientsRepository) GetPatientBySubmitterPatientId(organizationId int, submitterPatientId string) (*Patient, error) {
 	var patient Patient
 	tx := r.db.
 		Table("patient").
-		Where("organization_patient_id = ? and organization_id = ?", organizationPatientId, organizationId)
+		Where("submitter_patient_id = ? and organization_id = ?", submitterPatientId, organizationId)
 	if err := tx.First(&patient).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)
@@ -39,12 +39,12 @@ func (r *PatientsRepository) GetPatientByOrganizationPatientId(organizationId in
 	return &patient, nil
 }
 
-func (r *PatientsRepository) GetPatientByOrgCodeAndOrgPatientId(organizationCode string, organizationPatientId string) (*Patient, error) {
+func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*Patient, error) {
 	var patient Patient
 	tx := r.db.
 		Table("patient").
 		Joins("JOIN organization o ON o.id = patient.organization_id").
-		Where("patient.organization_patient_id = ? AND o.code = ?", organizationPatientId, organizationCode)
+		Where("patient.submitter_patient_id = ? AND o.code = ?", submitterPatientId, organizationCode)
 	if err := tx.First(&patient).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)

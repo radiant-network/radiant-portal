@@ -1,0 +1,14 @@
+{
+  "sqon": {
+    "content": [
+      {
+        "content": {
+          "field": "_FIELD",
+          "value": ["_VALUE"]
+        },
+        "op": "_OP"
+      }
+    ],
+    "op": "and"
+  }
+}
