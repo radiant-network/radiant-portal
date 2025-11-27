@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Sequencing - Batch - InvalidValues - Date time', () => {
+describe('Sequencing - Batch - InvalidValues - Date format', () => {
   let response: any;
 
   before(() => {
@@ -33,6 +33,6 @@ describe('Sequencing - Batch - InvalidValues - Date time', () => {
   });
 
   it('Message', () => {
-    cy.validateMessage(response, apiMessages.ParsingErrorDateTime('2025-01-01'));
+    cy.validateMessage(response, apiMessages.ParsingErrorDateFormat);
   });
 });
