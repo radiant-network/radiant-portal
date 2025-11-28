@@ -59,7 +59,7 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 	}
 
 	txSeqExp := r.db.Table("staging_sequencing_experiment se")
-	txSeqExp = txSeqExp.Select("se.task_id, tctx.case_id")
+	txSeqExp = txSeqExp.Select("DISTINCT(se.task_id), tctx.case_id")
 	txSeqExp = txSeqExp.Where("ingested_at IS NOT NULL AND task_type = 'radiant_germline_annotation'")
 	txSeqExp.Joins(fmt.Sprintf("LEFT JOIN %s tctx ON tctx.task_id = se.task_id", types.TaskContextTable.Name))
 
@@ -256,7 +256,7 @@ func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON spl.patient_id = f.family_member_id AND chseq.case_id = f.case_id")
-	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null")
+	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null and se.task_type = 'radiant_germline_annotation'")
 	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc")

@@ -1391,8 +1391,6 @@ components:
           type: string
         analysis_type:
           type: string
-        case_id:
-          type: integer
         created_at:
           type: string
         experimental_strategy:
