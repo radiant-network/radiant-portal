@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -11,6 +12,15 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
+
+// Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
+const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
+
+var ExternalIdRegexpCompiled = regexp.MustCompile(ExternalIdRegexp)
+
+const NameRegExp = `^[a-zA-Z0-9\- .'À-ÿ]*$`
+
+var NameRegExpCompiled = regexp.MustCompile(NameRegExp)
 
 var AllowedOrganizationCategories = []string{"healthcare_provider", "research_institute"}
 

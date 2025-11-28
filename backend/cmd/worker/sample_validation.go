@@ -181,36 +181,50 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 	return nil
 }
 
-func samplesMap(samples []types.SampleBatch) map[string]*types.SampleBatch {
-	samplesMap := make(map[string]*types.SampleBatch)
+type samplesKey struct {
+	OrganizationCode  string
+	SubmitterSampleId string
+}
+
+func samplesMap(samples []types.SampleBatch) map[samplesKey]*types.SampleBatch {
+	samplesMap := make(map[samplesKey]*types.SampleBatch)
 	for i := range samples {
-		key := fmt.Sprintf("%s:%s", samples[i].SampleOrganizationCode, samples[i].SubmitterSampleId)
+		key := samplesKey{
+			OrganizationCode:  samples[i].SampleOrganizationCode,
+			SubmitterSampleId: samples[i].SubmitterSampleId.String(),
+		}
 		samplesMap[key] = &samples[i]
 	}
 	return samplesMap
 }
 
 func reorderSampleRecords(records []*SampleValidationRecord) {
-	makeKey := func(r *SampleValidationRecord) string {
-		return fmt.Sprintf("%s:%s", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
-	}
-
-	keyToRecord := make(map[string]*SampleValidationRecord, len(records))
+	keyToRecord := make(map[samplesKey]*SampleValidationRecord, len(records))
 	for _, r := range records {
-		keyToRecord[makeKey(r)] = r
+		key := samplesKey{
+			OrganizationCode:  r.Sample.SampleOrganizationCode,
+			SubmitterSampleId: r.Sample.SubmitterSampleId.String(),
+		}
+		keyToRecord[key] = r
 	}
 
-	visited := make(map[string]bool, len(records))
+	visited := make(map[samplesKey]bool, len(records))
 	var sorted []*SampleValidationRecord
 	var visit func(*SampleValidationRecord)
 	visit = func(r *SampleValidationRecord) {
-		id := makeKey(r)
+		id := samplesKey{
+			OrganizationCode:  r.Sample.SampleOrganizationCode,
+			SubmitterSampleId: r.Sample.SubmitterSampleId.String(),
+		}
 		if visited[id] {
 			return
 		}
 		visited[id] = true
 		if r.Sample.SubmitterParentSampleId != "" {
-			parentID := fmt.Sprintf("%s:%s", r.Sample.SampleOrganizationCode, r.Sample.SubmitterParentSampleId)
+			parentID := samplesKey{
+				OrganizationCode:  r.Sample.SampleOrganizationCode,
+				SubmitterSampleId: r.Sample.SubmitterParentSampleId.String(),
+			}
 			if parent, ok := keyToRecord[parentID]; ok {
 				visit(parent)
 			}
@@ -272,7 +286,10 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 
 				if existingParentSample == nil {
 					// 7. If parent sample does not exist in DB, check if it exists in the current batch
-					_, parentSampleIsInBatch := samplesMap[fmt.Sprintf("%s:%s", sample.SampleOrganizationCode, sample.SubmitterParentSampleId)]
+					_, parentSampleIsInBatch := samplesMap[samplesKey{
+						OrganizationCode:  sample.SampleOrganizationCode,
+						SubmitterSampleId: sample.SubmitterParentSampleId.String(),
+					}]
 					record.validateExistingParentSampleInBatch(parentSampleIsInBatch)
 				}
 			}

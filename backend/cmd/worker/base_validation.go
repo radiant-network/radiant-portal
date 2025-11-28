@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -10,14 +9,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
-
-const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
-
-var ExternalIdRegexpCompiled = regexp.MustCompile(ExternalIdRegexp)
-
-const NameRegExp = `^[a-zA-Z0-9\- .'À-ÿ]*$`
-
-var NameRegExpCompiled = regexp.MustCompile(NameRegExp)
 
 const TextMaxLength = 100
 
