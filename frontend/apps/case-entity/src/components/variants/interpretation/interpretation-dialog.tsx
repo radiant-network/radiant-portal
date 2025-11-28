@@ -53,7 +53,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
 
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
 
-  const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence>(
+  const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence | undefined>(
     {
       caseId,
       occurrence,
@@ -63,7 +63,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
         ? occurrencesApi
             .getExpandedGermlineSNVOccurrence(caseId, `${occurrence.seq_id}`, occurrence.locus_id)
             .then(response => response.data)
-        : ({} as ExpandedGermlineSNVOccurrence),
+        : undefined,
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,
