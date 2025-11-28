@@ -119,7 +119,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
         onEscapeKeyDown={e => e.preventDefault()}
         variant="stickyBoth"
       >
-        {fetchInterpretation.isLoading || fetchOccurrenceExpand.isLoading ? (
+        {fetchInterpretation.isLoading || fetchOccurrenceExpand?.isLoading ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
           </DialogBody>
