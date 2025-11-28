@@ -1,1 +1,0 @@
-const a={admin:{app_id:"admin",admin_code:"admin"},variant_entity:{app_id:"variant_entity"},variant_exploration:{app_id:"variant_exploration_shared",aggregations:{variant:{items:[]}}},portal:{name:"",navigation:{dashboard:void 0,variant:void 0,profile:void 0,settings:void 0,logout:void 0}}};export{a as c};
