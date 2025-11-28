@@ -1,11 +1,12 @@
 package server
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"net/http"
-	"strconv"
 )
 
 // OccurrencesGermlineCNVListHandler handles list of germline CNV occurrences
@@ -14,6 +15,7 @@ import (
 // @Description List germline CNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param case_id path string true "Case ID"
 // @Param seq_id path string true "Sequence ID"
 // @Param			message	body		types.ListBodyWithSqon	true	"List Body"
 // @Accept json
@@ -22,7 +24,7 @@ import (
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/cnv/{seq_id}/list [post]
+// @Router /occurrences/germline/cnv/{case_id}/{seq_id}/list [post]
 func OccurrencesGermlineCNVListHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -42,12 +44,17 @@ func OccurrencesGermlineCNVListHandler(repo repository.GermlineCNVOccurrencesDAO
 			HandleValidationError(c, err)
 			return
 		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		occurrences, err := repo.GetOccurrences(seqID, query)
+		occurrences, err := repo.GetOccurrences(caseID, seqID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -63,6 +70,7 @@ func OccurrencesGermlineCNVListHandler(repo repository.GermlineCNVOccurrencesDAO
 // @Description Counts germline CNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param case_id path string true "Case ID"
 // @Param seq_id path string true "Sequence ID"
 // @Param			message	body		types.CountBodyWithSqon	true	"Count Body"
 // @Accept json
@@ -71,7 +79,7 @@ func OccurrencesGermlineCNVListHandler(repo repository.GermlineCNVOccurrencesDAO
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/cnv/{seq_id}/count [post]
+// @Router /occurrences/germline/cnv/{case_id}/{seq_id}/count [post]
 func OccurrencesGermlineCNVCountHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -90,12 +98,17 @@ func OccurrencesGermlineCNVCountHandler(repo repository.GermlineCNVOccurrencesDA
 			HandleValidationError(c, err)
 			return
 		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		count, err := repo.CountOccurrences(seqID, query)
+		count, err := repo.CountOccurrences(caseID, seqID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -111,6 +124,7 @@ func OccurrencesGermlineCNVCountHandler(repo repository.GermlineCNVOccurrencesDA
 // @Description Aggregate germline CNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param case_id path string true "Case ID"
 // @Param seq_id path string true "Sequence ID"
 // @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
 // @Accept json
@@ -119,7 +133,7 @@ func OccurrencesGermlineCNVCountHandler(repo repository.GermlineCNVOccurrencesDA
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/cnv/{seq_id}/aggregate [post]
+// @Router /occurrences/germline/cnv/{case_id}/{seq_id}/aggregate [post]
 func OccurrencesGermlineCNVAggregateHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -139,12 +153,17 @@ func OccurrencesGermlineCNVAggregateHandler(repo repository.GermlineCNVOccurrenc
 			HandleValidationError(c, err)
 			return
 		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		aggregation, err := repo.AggregateOccurrences(seqID, query)
+		aggregation, err := repo.AggregateOccurrences(caseID, seqID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -159,6 +178,7 @@ func OccurrencesGermlineCNVAggregateHandler(repo repository.GermlineCNVOccurrenc
 // @Description Return statistics about a field for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param case_id path string true "Case ID"
 // @Param seq_id path string true "Sequence ID"
 // @Param			message	body		types.StatisticsBodyWithSqon	true	"Statistics Body"
 // @Accept json
@@ -167,7 +187,7 @@ func OccurrencesGermlineCNVAggregateHandler(repo repository.GermlineCNVOccurrenc
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/cnv/{seq_id}/statistics [post]
+// @Router /occurrences/germline/cnv/{case_id}/{seq_id}/statistics [post]
 func OccurrencesGermlineCNVStatisticsHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -187,12 +207,17 @@ func OccurrencesGermlineCNVStatisticsHandler(repo repository.GermlineCNVOccurren
 			HandleValidationError(c, err)
 			return
 		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
 		seqID, err := strconv.Atoi(c.Param("seq_id"))
 		if err != nil {
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		statistics, err := repo.GetStatisticsOccurrences(seqID, query)
+		statistics, err := repo.GetStatisticsOccurrences(caseID, seqID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -207,15 +232,21 @@ func OccurrencesGermlineCNVStatisticsHandler(repo repository.GermlineCNVOccurren
 // @Description List genes overlapping a CNV with a given ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param cnv_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {array} types.CNVGeneOverlap
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/cnv/{seq_id}/{cnv_id}/genes_overlap [get]
+// @Router /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap [get]
 func OccurrencesGermlineCNVGenesOverlapHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
+		if errSeq != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
 		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
 		if errSeq != nil {
 			HandleNotFoundError(c, "seq_id")
@@ -227,7 +258,7 @@ func OccurrencesGermlineCNVGenesOverlapHandler(repo repository.GermlineCNVOccurr
 			return
 		}
 
-		genesOverlap, err := repo.GetGenesOverlap(seqId, cnvId)
+		genesOverlap, err := repo.GetGenesOverlap(caseId, seqId, cnvId)
 		if err != nil {
 			HandleError(c, err)
 			return
