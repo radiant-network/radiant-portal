@@ -53,14 +53,15 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 	})
 
 	columns = append(columns, "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END AS case_type")
-	columns = append(columns, "se.case_id IS NOT NULL AS has_variants")
+	columns = append(columns, "se.task_id IS NOT NULL AS has_variants")
 	if err = tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
 	}
 
-	txSeqExp := r.db.Table("staging_sequencing_experiment")
-	txSeqExp = txSeqExp.Select("DISTINCT(case_id)")
-	txSeqExp = txSeqExp.Where("ingested_at IS NOT NULL")
+	txSeqExp := r.db.Table("staging_sequencing_experiment se")
+	txSeqExp = txSeqExp.Select("se.task_id, tctx.case_id")
+	txSeqExp = txSeqExp.Where("ingested_at IS NOT NULL AND task_type = 'radiant_germline_annotation'")
+	txSeqExp.Joins(fmt.Sprintf("LEFT JOIN %s tctx ON tctx.task_id = se.task_id", types.TaskContextTable.Name))
 
 	txMembersCount := r.db.Table(types.FamilyTable.Name).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
 

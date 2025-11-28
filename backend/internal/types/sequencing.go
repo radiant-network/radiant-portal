@@ -27,7 +27,6 @@ package types
 // Sequencing represents a sequencing
 // @Description Sequencing represents a sequencing
 type Sequencing struct {
-	CaseId               int    `json:"case_id,omitempty"`
 	SeqId                int    `json:"seq_id,omitempty"`
 	TaskId               int    `json:"task_id,omitempty"`
 	Part                 int    `json:"part,omitempty"`
