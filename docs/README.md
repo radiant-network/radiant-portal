@@ -9,7 +9,7 @@ npm install
 ```
 ## Local Development
 
-First, generate MDX files for API : 
+First, generate MDX files for API: 
 
 ```bash
 npx docusaurus gen-api-docs all

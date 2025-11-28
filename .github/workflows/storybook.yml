@@ -43,7 +43,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: storybook
           folder: frontend/components/storybook-static
-          target-folder: storybook
+          target-folder: docs/storybook
           clean: false  # keep Docusaurus files
 
   deploy_docusaurus:
@@ -87,5 +87,5 @@ jobs:
           branch: storybook
           folder: docs/build
           # deploy at root of the gh-pages branch
-          target-folder: .
+          target-folder: docs
           clean: false  # keep Storybook files

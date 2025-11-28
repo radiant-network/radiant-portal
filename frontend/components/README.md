@@ -30,8 +30,7 @@ Both folders and files must follow the kebab-case conventions
 
 ## `base/`
 **Description:**
-Contains foundational, reusable, and stateless components. 
-These are the "atoms" of the application, representing single UI elements like buttons, inputs, or icons.
+Contains foundational, reusable, and stateless components. These are the "atoms" of the application, representing single UI elements like buttons, inputs, or icons.
 
 **Examples:**
 - `base/table/table.jsx`
