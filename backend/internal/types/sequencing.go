@@ -4,7 +4,6 @@ package types
 +------------------------+---------------------+------+-----+---------+-------+
 | Field                  | Type                | Null | Key | Default | Extra |
 +------------------------+---------------------+------+-----+---------+-------+
-| case_id                | int                 | NO   | YES | null    |       |
 | seq_id                 | int                 | NO   | YES | null    |       |
 | task_id                | int                 | NO   | YES | null    |       |
 | part                   | int                 | NO   |     | null    |       |
