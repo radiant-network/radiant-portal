@@ -1,5 +1,5 @@
 /// <reference types="cypress"/>
-import { tableFacets } from 'pom/pages/CaseEntity_Variants_SNV_Facets';
+import { tableSNVFacets } from 'pom/pages/CaseEntity_Variants_Facets';
 
 describe('Occurrences - Germline - SNV - Count - Pathogenicity', () => {
   let response: any;
@@ -13,7 +13,7 @@ describe('Occurrences - Germline - SNV - Count - Pathogenicity', () => {
     seq_id = globalData.Count.seq_id;
   });
 
-  const sectionData = tableFacets.find(s => s.section === 'Pathogenicity');
+  const sectionData = tableSNVFacets.find(s => s.section === 'Pathogenicity');
 
   if (!sectionData) {
     throw new Error(`Section "Pathogenicity" not found in tableFacets`);
