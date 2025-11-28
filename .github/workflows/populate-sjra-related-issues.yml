@@ -1,0 +1,59 @@
+name: Populate SJRA Related Issues
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  update_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get commit messages for PR
+        id: commits
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          COMMITS_RAW=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/commits --jq '.[].commit.message')
+          # Remove surrounding quotes from --jq output (if any) and normalize to one-per-line
+          COMMITS=$(echo "$COMMITS_RAW" | sed 's/^"//; s/"$//; s/\\n/\n/g')
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Extract SJRA ticket keys from conventional-commit subjects
+        id: extract
+        run: |
+          # Read commits from previous step
+          COMMITS="${{ steps.commits.outputs.commits }}"
+          # Extract SJRA-<digits> only if it appears after a colon (conventional commit style)
+          # Example matches: "feat: SJRA-1324", "fix(scope): SJRA-12 details"
+          TICKETS=$(printf "%s\n" "$COMMITS" \
+            | grep -oP '(?<=:)\s*SJRA-[0-9]+' \
+            | grep -oE 'SJRA-[0-9]+' \
+            | sort -u \
+            | tr '\n' ' ')
+
+          echo "tickets=$TICKETS" >> $GITHUB_OUTPUT
+
+      - name: Update PR body with SJRA links
+        if: steps.extract.outputs.tickets != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JIRA_BASE: "https://d3b.atlassian.net/browse"
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          TICKETS="${{ steps.extract.outputs.tickets }}"
+
+          LINKS=""
+          for T in $TICKETS; do
+            LINKS="${LINKS}- [$T](${JIRA_BASE}/$T)\n"
+          done
+          LINKS=$(printf "%b" "$LINKS")
+
+          BODY=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.body // ""')
+
+          # Replace content between markers using perl (safe for multiline and special chars)
+          NEW_BODY=$(echo "$BODY" | perl -0777 -pe "s|(<!-- Begin JIRA Issues -->).*?(<!-- End JIRA Issues -->)|\$1\n$LINKS\$2|s")
+
+          gh api -X PATCH "repos/${{ github.repository }}/pulls/$PR_NUMBER" -f body="$NEW_BODY"
