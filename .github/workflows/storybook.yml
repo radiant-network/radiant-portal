@@ -1,4 +1,4 @@
-name: Build and Deploy Storybook
+name: Deploy Docusaurus and Storybook
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build_and_deploy:
+  deploy_storybook:
     runs-on: ubuntu-latest
 
     steps:
@@ -43,5 +43,49 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: storybook
           folder: frontend/components/storybook-static
-          clean: true
-          target-folder: docs
+          target-folder: storybook
+          clean: false  # keep Docusaurus files
+
+  deploy_docusaurus:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      # Detect docs changes
+      - name: Check Changed Files in docs 👀
+        uses: dorny/paths-filter@v3
+        id: docs_filter
+        with:
+          filters: |
+            docs:
+              - "docs/**"
+      - name: Check Changed Files in backend/docs 👀
+        uses: dorny/paths-filter@v3
+        id: backend_docs_filter
+        with:
+          filters: |
+            docs:
+              - "backend/docs/**"            
+
+      - name: Build Docusaurus 🔧
+        if: steps.docs_filter.outputs.docs == 'true' || steps.backend_docs_filter.outputs.docs == 'true'
+        run: |
+          cd docs
+          npm ci
+          npx docusaurus gen-api-docs all
+          npm run build
+
+      - name: Deploy Docusaurus 🚀
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (steps.docs_filter.outputs.docs == 'true' || steps.backend_docs_filter.outputs.docs == 'true')
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: storybook
+          folder: docs/build
+          # deploy at root of the gh-pages branch
+          target-folder: .
+          clean: false  # keep Storybook files
