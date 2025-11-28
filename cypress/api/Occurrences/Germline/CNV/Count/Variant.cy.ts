@@ -1,5 +1,5 @@
 /// <reference types="cypress"/>
-import { tableFacets } from 'pom/pages/CaseEntity_Variants_CNV_Facets';
+import { tableCNVFacets } from 'pom/pages/CaseEntity_Variants_Facets';
 
 describe('Occurrences - Germline - CNV - Count - Variant', () => {
   let response: any;
@@ -13,7 +13,7 @@ describe('Occurrences - Germline - CNV - Count - Variant', () => {
     seq_id = globalData.Count.seq_id;
   });
 
-  const sectionData = tableFacets.find(s => s.section === 'Variant');
+  const sectionData = tableCNVFacets.find(s => s.section === 'Variant');
 
   if (!sectionData) {
     throw new Error(`Section "Variant" not found in tableFacets`);
