@@ -100,7 +100,7 @@ func Test_SecureRoutes(t *testing.T) {
 func Test_OpenFGA_Authorization(t *testing.T) {
 	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
 		func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
-			token, err := jwt.GenerateMockJWT()
+			token, err := jwt.GenerateMockJWT([]string{"data_manager"})
 			assert.NoError(t, err)
 
 			// We can't use t.Setenv because we need OpenFGA context during the setup of the environment

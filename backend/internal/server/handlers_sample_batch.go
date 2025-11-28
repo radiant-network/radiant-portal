@@ -22,7 +22,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /samples/batch [post]
-func PostSampleBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
+func PostSampleBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.CreateSampleBatchBody
@@ -34,17 +34,6 @@ func PostSampleBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth)
 		}
 		if err := c.ShouldBindQuery(&queryParam); err != nil {
 			HandleValidationError(c, err)
-			return
-		}
-
-		// Check if user has data_manager role
-		hasRole, err := auth.UserHasRole(c, "data_manager")
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if !hasRole {
-			HandleForbiddenError(c)
 			return
 		}
 

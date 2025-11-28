@@ -17,8 +17,9 @@ type BatchRepository struct {
 	db *gorm.DB
 }
 
-type BatchRepositoryDAO interface {
+type BatchDAO interface {
 	CreateBatch(payload any, batchType string, username string, dryRun bool) (*Batch, error)
+	UpdateBatch(batch Batch) (int64, error)
 	GetBatchByID(batchId string) (*Batch, error)
 	ClaimNextBatch() (*Batch, error)
 }

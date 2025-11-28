@@ -12,6 +12,8 @@ import (
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
+const DataManagerRole = "data_manager"
+
 type Auth interface {
 	RetrieveUserIdFromToken(c *gin.Context) (*string, error)
 	RetrieveAzpFromToken(c *gin.Context) (*string, error)

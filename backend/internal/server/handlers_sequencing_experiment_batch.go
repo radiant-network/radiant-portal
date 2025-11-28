@@ -24,7 +24,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /sequencing/batch [post]
-func PostSequencingExperimentBatchHandler(repo repository.BatchRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
+func PostSequencingExperimentBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.CreateSequencingExperimentBatchBody
@@ -36,17 +36,6 @@ func PostSequencingExperimentBatchHandler(repo repository.BatchRepositoryDAO, au
 		}
 		if err := c.ShouldBindQuery(&queryParam); err != nil {
 			HandleValidationError(c, err)
-			return
-		}
-
-		// Check if user has data_manager role
-		hasRole, err := auth.UserHasRole(c, "data_manager")
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if !hasRole {
-			HandleForbiddenError(c)
 			return
 		}
 

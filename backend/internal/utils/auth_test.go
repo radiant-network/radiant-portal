@@ -26,7 +26,7 @@ func Test_RetrieveUserIdFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveUserIdFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -81,7 +81,7 @@ func Test_RetrieveAzpFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveAzpFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -137,7 +137,7 @@ func Test_RetrieveResourceAccessFromToken_InvalidKeycloakToken(t *testing.T) {
 func Test_RetrieveResourceAccessFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -154,7 +154,7 @@ func Test_RetrieveResourceAccessFromToken_ValidJWT(t *testing.T) {
 	assert.Equal(t, map[string]ginkeycloak.ServiceRole{
 		"CBTN":    {Roles: []string{"geneticist"}},
 		"UDN":     {Roles: []string{"requester"}},
-		"radiant": {Roles: []string{"data_manager"}},
+		"radiant": {Roles: []string{DataManagerRole}},
 	}, *resAcc)
 }
 
@@ -173,7 +173,7 @@ func Test_RetrieveUsernameFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveUsernameFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -216,7 +216,7 @@ func Test_RetrieveUsernameFromToken_NoTokenInContext(t *testing.T) {
 func Test_UserHasRole_Success(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -226,7 +226,7 @@ func Test_UserHasRole_Success(t *testing.T) {
 	}
 
 	auth := KeycloakAuth{}
-	hasRole, err := auth.UserHasRole(&c, "data_manager")
+	hasRole, err := auth.UserHasRole(&c, DataManagerRole)
 
 	assert.NoError(t, err)
 	assert.True(t, hasRole)
@@ -235,7 +235,7 @@ func Test_UserHasRole_Success(t *testing.T) {
 func Test_UserHasRole_RoleNotPresent(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -257,7 +257,7 @@ func Test_UserHasRole_NoTokenInContext(t *testing.T) {
 	}
 
 	auth := KeycloakAuth{}
-	hasRole, err := auth.UserHasRole(&c, "data_manager")
+	hasRole, err := auth.UserHasRole(&c, DataManagerRole)
 
 	assert.Error(t, err)
 	assert.False(t, hasRole)
@@ -266,7 +266,7 @@ func Test_UserHasRole_NoTokenInContext(t *testing.T) {
 func Test_ParseJWTFromHeader_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT()
+	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{

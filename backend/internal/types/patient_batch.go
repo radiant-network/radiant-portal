@@ -28,12 +28,11 @@ func (d DateOfBirthType) MarshalJSON() ([]byte, error) {
 	if d.Time.IsZero() {
 		return []byte(`""`), nil
 	}
-	// Format using the same pattern used for parsing.
 	s := d.Time.Format(DateOfBirthFormat)
-
-	// Return as a JSON string
-	return []byte(fmt.Sprintf(`"%s"`, s)), nil
+	return fmt.Appendf(nil, `"%s"`, s), nil
 }
+
+const PatientBatchType = "patient"
 
 type PatientBatch struct {
 	SubmitterPatientId      TrimmedString    `json:"submitter_patient_id" binding:"required"`

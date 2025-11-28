@@ -23,7 +23,7 @@ func randomString(n int, alphabet string) string {
 	return string(b)
 }
 
-func Test_OrganizationPatientId_Too_Long(t *testing.T) {
+func Test_SubmitterPatientId_Too_Long(t *testing.T) {
 	orgPatientId := randomString(120, letters)
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
@@ -33,7 +33,7 @@ func Test_OrganizationPatientId_Too_Long(t *testing.T) {
 	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
-func Test_OrganizationPatientId_Special_Characters(t *testing.T) {
+func Test_SubmitterPatientId_Special_Characters(t *testing.T) {
 	orgPatientId := "id_with_invalid_char_🧪"
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
@@ -43,7 +43,7 @@ func Test_OrganizationPatientId_Special_Characters(t *testing.T) {
 	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
-func Test_OrganizationPatientId_Multiple_Errors(t *testing.T) {
+func Test_SubmitterPatientId_Multiple_Errors(t *testing.T) {
 	orgPatientId := fmt.Sprintf("%s_🧪", randomString(120, letters))
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
@@ -51,7 +51,7 @@ func Test_OrganizationPatientId_Multiple_Errors(t *testing.T) {
 	assert.Len(t, patientValidationRecord.Errors, 2)
 }
 
-func Test_OrganizationPatientId_Valid(t *testing.T) {
+func Test_SubmitterPatientId_Valid(t *testing.T) {
 	orgPatientId := "valid_patient_id_1"
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
@@ -300,13 +300,13 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 		assert.Equal(t, PatientExistingPatientDifferentFieldCode, w.Code)
 	}
 }
-func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
+func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		/* This test verifies that rollback occurs when there is an error inserting patient records. */
 		var id string
 		initErr := db.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PROCESSING', ?, false, 'user999', '2025-10-09')
+    		VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09')
     		RETURNING id;
 		`, "{}", types.PatientBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -318,7 +318,7 @@ func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
 			ID:        id,
 			BatchType: types.PatientBatchType,
 			Payload:   "[]",
-			Status:    "SUCCESS",
+			Status:    types.BatchStatusSuccess,
 			DryRun:    false,
 		}
 		//Patient records with one having a non-existent organization to trigger foreign key violation
@@ -358,10 +358,10 @@ func Test_Persist_Batch_And_Patient_Records_Rallback_On_Error(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), countPatient) // No patient should have been inserted due to rollback
 
-		// Verify that batch status has been rolled back to PROCESSING
+		// Verify that batch status has been rolled back to RUNNING
 		resultBatch := types.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-		assert.Equal(t, "PROCESSING", resultBatch.Status) // Batch status should have been rollback
+		assert.Equal(t, types.BatchStatusRunning, resultBatch.Status) // Batch status should have been rollback
 
 	})
 

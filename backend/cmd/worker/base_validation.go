@@ -1,12 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
+
+const TextMaxLength = 100
+
+type ValidationRecord interface {
+	GetBase() *BaseValidationRecord
+	GetResourceType() string
+}
 
 type BaseValidationRecord struct {
 	Index    int
@@ -38,7 +47,27 @@ func (r *BaseValidationRecord) addInfos(message string, code string, path string
 		Message: message,
 		Path:    path,
 	})
+}
 
+func formatPath(r ValidationRecord, fieldName string) string {
+	if fieldName == "" {
+		return fmt.Sprintf("%s[%d]", r.GetResourceType(), r.GetBase().Index)
+	}
+	return fmt.Sprintf("%s[%d].%s", r.GetResourceType(), r.GetBase().Index, fieldName)
+}
+
+func formatInvalidField(r ValidationRecord, fieldName string, reason string, resourceIds []string) string {
+	formatResourceIds := ""
+	if len(resourceIds) > 0 {
+		formatResourceIds = fmt.Sprintf(" (%s)", strings.Join(resourceIds, " / "))
+	}
+	message := fmt.Sprintf("Invalid Field %s for %s%s. Reason: %s", fieldName, r.GetResourceType(), formatResourceIds, reason)
+	return message
+}
+
+func formatFieldTooLong(r ValidationRecord, fieldName string, maxLength int, resourceIds []string) string {
+	reason := fmt.Sprintf("field is too long, maximum length allowed is %d", maxLength)
+	return formatInvalidField(r, fieldName, reason, resourceIds)
 }
 
 func updateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {
@@ -47,14 +76,6 @@ func updateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Ba
 	batch.FinishedOn = &now
 	return r.UpdateBatch(*batch)
 }
-
-//func toBaseValidationRecords[T interface{ BaseValidationRecord }](records []T) []BaseValidationRecord {
-//	baseRecords := make([]BaseValidationRecord, len(records))
-//	for i, r := range records {
-//		baseRecords[i] = r.BaseValidationRecord
-//	}
-//	return baseRecords
-//}
 
 func copyRecordIntoBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T) {
 	skipped := 0
@@ -84,8 +105,8 @@ func copyRecordIntoBatch[T interface{ GetBase() *BaseValidationRecord }](batch *
 	summary := types.BatchSummary{Created: created, Skipped: skipped, Errors: errors}
 	batch.Summary = summary
 	if errors > 0 {
-		batch.Status = "ERROR"
+		batch.Status = types.BatchStatusError
 	} else {
-		batch.Status = "SUCCESS"
+		batch.Status = types.BatchStatusSuccess
 	}
 }

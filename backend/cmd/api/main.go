@@ -150,7 +150,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.GET("/dictionary", server.GetGermlineSNVDictionary(repoFacets))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
-	sequencingGroup.POST("/batch", server.PostSequencingExperimentBatchHandler(repoBatches, auth))
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoSeqExp))
 
 	usersGroup := privateRoutes.Group("/users")
@@ -181,14 +180,21 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.GET("/autocomplete", server.DocumentsAutocompleteHandler(repoDocuments))
 	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
 
-	batchesGroup := privateRoutes.Group("/batches")
-	batchesGroup.GET("/:batch_id", server.GetBatchHandler(repoBatches, auth))
+	dataManagerRoutes := privateRoutes.Group("/")
+	dataManagerRoutes.Use(server.RequireRole(auth, utils.DataManagerRole))
+	{
+		batchesGroup := dataManagerRoutes.Group("/batches")
+		batchesGroup.GET("/:batch_id", server.GetBatchHandler(repoBatches))
 
-	patientsGroup := privateRoutes.Group("/patients")
-	patientsGroup.POST("/batch", server.PostPatientBatchHandler(repoBatches, auth))
+		patientsGroup := dataManagerRoutes.Group("/patients")
+		patientsGroup.POST("/batch", server.PostPatientBatchHandler(repoBatches, auth))
 
-	samplesGroup := privateRoutes.Group("/samples")
-	samplesGroup.POST("/batch", server.PostSampleBatchHandler(repoBatches, auth))
+		samplesGroup := dataManagerRoutes.Group("/samples")
+		samplesGroup.POST("/batch", server.PostSampleBatchHandler(repoBatches, auth))
+
+		sequencingGroup := dataManagerRoutes.Group("/sequencing")
+		sequencingGroup.POST("/batch", server.PostSequencingExperimentBatchHandler(repoBatches, auth))
+	}
 
 	r.Use(gin.Recovery())
 	return r

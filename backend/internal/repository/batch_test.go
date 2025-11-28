@@ -31,7 +31,7 @@ func Test_CreateBatch_Valid(t *testing.T) {
 		assert.Equal(t, batchType, createdBatch.BatchType)
 		assert.Equal(t, username, createdBatch.Username)
 		assert.Equal(t, dryRun, createdBatch.DryRun)
-		assert.Equal(t, "PENDING", createdBatch.Status)
+		assert.Equal(t, types.BatchStatusPending, createdBatch.Status)
 		var dbBatch types.Batch
 		err = db.First(&dbBatch, "id = ?", createdBatch.ID).Error
 		assert.NoError(t, err)
@@ -45,8 +45,8 @@ func Test_GetBatchByID_Success(t *testing.T) {
 		batchId := uuid.NewString()
 		initErr := db.Exec(`
             INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on) VALUES
-            (?, '{}', 'COMPLETED', 'patient', true, 'user1', now())
-        `, batchId).Error
+            (?, '{}', ?, 'patient', true, 'user1', now())
+        `, batchId, types.BatchStatusSuccess).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -56,7 +56,7 @@ func Test_GetBatchByID_Success(t *testing.T) {
 		assert.Equal(t, batchId, batch.ID)
 		assert.Equal(t, "patient", batch.BatchType)
 		assert.Equal(t, "user1", batch.Username)
-		assert.Equal(t, "COMPLETED", batch.Status)
+		assert.Equal(t, types.BatchStatusSuccess, batch.Status)
 		assert.Empty(t, batch.Payload)
 	})
 }
@@ -96,9 +96,9 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		// Add two pending batches
 		initErr := db.Exec(`
 			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on) VALUES
-            ('{}', 'PENDING', 'patient', true, 'user1', '2025-10-09'),
-            ('{}', 'PENDING', 'sample', false, 'user2', '2025-11-09')
-		`).Error
+            ('{}', ?, 'patient', true, 'user1', '2025-10-09'),
+            ('{}', ?, 'sample', false, 'user2', '2025-11-09')
+		`, types.BatchStatusPending, types.BatchStatusPending).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -107,12 +107,12 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		assert.NotNil(t, batch)
 		expectedDate, _ := time.Parse(time.DateOnly, "2025-10-09")
 		assert.Equal(t, expectedDate, batch.CreatedOn)
-		assert.Equal(t, "RUNNING", batch.Status)
+		assert.Equal(t, types.BatchStatusRunning, batch.Status)
 		assert.Equal(t, true, batch.DryRun)
 		assert.Equal(t, "patient", batch.BatchType)
 		// Verify that only one pending batch remains
 		var count int64
-		db.Table("batch").Where("status = 'PENDING'").Count(&count)
+		db.Table("batch").Where("status = ?", types.BatchStatusPending).Count(&count)
 		assert.Equal(t, int64(1), count)
 	})
 }
@@ -124,20 +124,20 @@ func Test_UpdateBatch(t *testing.T) {
 		var id string
 		initErr := db.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES ('{}', 'PROCESSING', 'patient', true, 'user999', '2025-10-09')
+    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09')
     		RETURNING id;
-		`).Scan(&id).Error
+		`, types.BatchStatusRunning).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
 		finished := time.Date(2025, 10, 9, 15, 30, 0, 0, time.UTC)
-		rowsUpdated, err := repo.UpdateBatch(Batch{ID: id, Status: "COMPLETED", FinishedOn: &finished})
+		rowsUpdated, err := repo.UpdateBatch(Batch{ID: id, Status: types.BatchStatusSuccess, FinishedOn: &finished})
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, rowsUpdated)
 		resultBatch := Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-		assert.Equal(t, "COMPLETED", resultBatch.Status)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
 		assert.Equal(t, "patient", resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)

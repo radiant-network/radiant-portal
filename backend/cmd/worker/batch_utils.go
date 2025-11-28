@@ -8,11 +8,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-func processUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch *repository.BatchRepository) {
+func processUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch repository.BatchDAO) {
 	glog.Errorf("unexpected error for batch %v: %v", batch.ID, unexpectedErr)
 	now := time.Now()
 	batch.FinishedOn = &now
-	batch.Status = "ERROR"
+	batch.Status = types.BatchStatusError
 	errorMessage := types.BatchMessage{
 		Code:    "GLOBAL-000",
 		Message: unexpectedErr.Error(),

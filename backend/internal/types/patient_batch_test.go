@@ -79,10 +79,8 @@ func TestDateOfBirthType_Marshal(t *testing.T) {
 	const input = `"1980-05-12"`
 	expectedTime, _ := time.Parse(DateOfBirthFormat, "1980-05-12")
 
-	// ---- Unmarshal ----
 	dob := DateOfBirthType{Time: expectedTime}
 
-	// ---- Marshal ----
 	output, err := json.Marshal(dob)
 	require.NoError(t, err)
 	require.Equal(t, input, string(output))
@@ -90,7 +88,6 @@ func TestDateOfBirthType_Marshal(t *testing.T) {
 
 func TestDateOfBirthType_Marshal_ZeroValue(t *testing.T) {
 	dob := DateOfBirthType{} // Zero time
-
 	output, err := json.Marshal(dob)
 	require.NoError(t, err)
 	require.Equal(t, `""`, string(output))

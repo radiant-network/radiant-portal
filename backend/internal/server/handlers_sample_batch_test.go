@@ -13,7 +13,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
 func TestPostSampleBatchHandler_Success(t *testing.T) {
@@ -23,20 +22,14 @@ func TestPostSampleBatchHandler_Success(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
 	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
@@ -52,43 +45,13 @@ func TestPostSampleBatchHandler_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "sample", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
-	assert.Equal(t, "PENDING", response.Status)
-}
-
-func TestPostSampleBatchHandler_Forbidden(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	repo := &MockBatchRepository{}
-	auth := &testutils.MockAuth{
-		Id:       "testuser-id",
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"some_other_role"}},
-		},
-	}
-
-	router := gin.Default()
-	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
-	body := `{"samples": [{"submitter_patient_id": "p1", "patient_organization_code": "org1", "type_code": "blood", "histology_code": "tumoral", "submitter_sample_id": "s1", "sample_organization_code": "org1"}]}`
-	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.Equal(t, types.BatchStatusPending, response.Status)
 }
 
 func TestPostSampleBatchHandler_ValidationError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
-	auth := &testutils.MockAuth{
-		Id:       "testuser-id",
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
 	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
@@ -108,20 +71,14 @@ func TestPostSampleBatchHandler_EmptySamples(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
 	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))

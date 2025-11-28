@@ -13,7 +13,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
 func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
@@ -23,20 +22,14 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
 	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
@@ -67,7 +60,7 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "sequencing_experiment", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
-	assert.Equal(t, "PENDING", response.Status)
+	assert.Equal(t, types.BatchStatusPending, response.Status)
 }
 
 func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
@@ -77,20 +70,14 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
 	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
@@ -120,44 +107,7 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "sequencing_experiment", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
-	assert.Equal(t, "PENDING", response.Status)
-}
-
-func TestPostSequencingExperimentBatchHandler_Forbidden(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	repo := &MockBatchRepository{}
-	auth := &testutils.MockAuth{
-		Id:       "testuser-id",
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"some_other_role"}},
-		},
-	}
-
-	router := gin.Default()
-	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
-	body := `
-		{
-			"sequencing_experiments": [
-				{
-					"aliquot": "aliquot1",
-					"sample_organization_code": "org1",
-					"submitter_sample_id": "sample1",
-					"sequencing_lab_code": "org1", 
-					"platform_code": "illumina", 
-					"experimental_strategy_code": "wgs",
-					"sequencing_read_technology_code": "short_read",
-					"status_code": "completed"
-				}
-			]
-		}`
-	req, _ := http.NewRequest(http.MethodPost, "/sequencing/batch", bytes.NewBuffer([]byte(body)))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.Equal(t, types.BatchStatusPending, response.Status)
 }
 
 func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
@@ -167,21 +117,14 @@ func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Id:       "testuser-id",
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
 	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
@@ -215,21 +158,14 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Id:       "testuser-id",
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
 	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
@@ -264,21 +200,14 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Id:       "testuser-id",
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
 	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
@@ -313,20 +242,14 @@ func TestPostSequencingExperimentBatchHandler_EmptySequencingExperiments(t *test
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
-				Status:    "PENDING",
+				Status:    types.BatchStatusPending,
 				CreatedOn: time.Now(),
 				Username:  username,
 				DryRun:    dryRun,
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Username: "testuser",
-		Azp:      "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
+	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
 	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))

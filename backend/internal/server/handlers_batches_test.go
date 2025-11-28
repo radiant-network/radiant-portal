@@ -8,9 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
 type MockBatchRepository struct {
@@ -24,6 +22,10 @@ func (m *MockBatchRepository) CreateBatch(payload any, batchType string, usernam
 		return m.CreateBatchFunc(payload, batchType, username, dryRun)
 	}
 	return nil, errors.New("CreateBatchFunc not implemented")
+}
+
+func (m *MockBatchRepository) UpdateBatch(batch types.Batch) (int64, error) {
+	return 0, errors.New("UpdateBatch not implemented")
 }
 
 func (m *MockBatchRepository) GetBatchByID(batchId string) (*types.Batch, error) {
@@ -53,15 +55,9 @@ func Test_GetBatchHandler_Success(t *testing.T) {
 			}, nil
 		},
 	}
-	auth := &testutils.MockAuth{
-		Azp: "mock-azp",
-		ResourceAccess: map[string]ginkeycloak.ServiceRole{
-			"mock-azp": {Roles: []string{"data_manager"}},
-		},
-	}
 
 	router := gin.Default()
-	router.GET("/batches/:batch_id", GetBatchHandler(repo, auth))
+	router.GET("/batches/:batch_id", GetBatchHandler(repo))
 
 	req, _ := http.NewRequest("GET", "/batches/test-batch-id", nil)
 	w := httptest.NewRecorder()
@@ -72,32 +68,6 @@ func Test_GetBatchHandler_Success(t *testing.T) {
 	assert.Contains(t, w.Body.String(), `"username":"test-username"`)
 }
 
-func Test_GetBatchHandler_Forbidden(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	repo := &MockBatchRepository{
-		GetBatchByIDFunc: func(batchId string) (*types.Batch, error) {
-			return &types.Batch{
-				ID:        batchId,
-				BatchType: "test-batch-type",
-				Username:  "test-username",
-				Status:    "PENDING",
-			}, nil
-		},
-	}
-	auth := &testutils.MockAuth{}
-
-	router := gin.Default()
-	router.GET("/batches/:batch_id", GetBatchHandler(repo, auth))
-
-	req, _ := http.NewRequest("GET", "/batches/test-batch-id", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusForbidden, w.Code)
-	assert.Contains(t, w.Body.String(), "Forbidden")
-}
-
 func Test_GetBatchHandler_NotFound(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -106,10 +76,9 @@ func Test_GetBatchHandler_NotFound(t *testing.T) {
 			return nil, nil
 		},
 	}
-	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.GET("/batches/:batch_id", GetBatchHandler(repo, auth))
+	router.GET("/batches/:batch_id", GetBatchHandler(repo))
 
 	req, _ := http.NewRequest("GET", "/batches/non-existent-id", nil)
 	w := httptest.NewRecorder()
