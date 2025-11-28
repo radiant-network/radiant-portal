@@ -1,0 +1,71 @@
+---
+id: autocomplete-cases
+title: "Get AutocompleteResult list of matching prefix"
+description: "Retrieve AutocompleteResult list of ids matching prefix"
+sidebar_label: "Get AutocompleteResult list of matching prefix"
+hide_title: true
+hide_table_of_contents: true
+api: eJylVE1v00AQ/SurOYFkklCJi28RKlUAQdUWcahymDqTeMt6d5kdt0SW/zsafxSHlAjEyd6djzfzduY1sKFUsI1ig4ccrkjY0gOZZS2hCFV0JHRFqXZinE1iwtbYTTIVSlFavzORaWt/QAYhEqNmWW0gB5yEv8VECTKIyFiRECfIb5vfgC/HPFZP32viPWTgsSLI4QmE6XttmTaQC9eUQSpKqhDyBmQf1TMJW7+Dts1+B/hoKyt/yO8G25/TrRU7xeC1lbyBs8VCP0XwQl70F2N0tugYmN8nhWwm+axQ1QVGVqLE9ml6mCO4DB7Q1c9Z2ikHt7119F5no3e4u6dCGxIrTi+OX1NBBm9kxj20mvuQss8f1OvNP7Z6mGMZ7TlzYMMUmRJ5SQa9Ib3TmTigY0OC1kHetBlUlBLunmcnCUo9IRCsF9oRH/EzJnkKOcXRUOlzTKy8EHt05pr4gdiMjhkkKmq2su9G+o6QibGWEvLbtQ6N4E6nHYpuB9balpRBN2RH0u2E+sK8s8+nW6M1d2D9ttTs1A806Yh5rZz3zE2Rx9O7wBUK5PD+68043Npob4UnJkqR2PVi/TYcv+BNaZOxyUhJZnm5MtvA5go3Fr2YDQqa6FC2gasZZOBsQT51rzbs1jJiUZI5my0gG7pQwHw+f3x8nGFnnQXezYfQNP+4env+6fr81dlsMSulct2oDo80Ai8vVzr3xKkv8vVsoW4xJKnQT+AvSE5p2bGOHTQ/Gfv/kMaBZ6EfMo8OrddSOyqaYQDGAckOhFPnpQxJ1N40d5joC7u21etewDoZtQnvnI77Fl2iEw28uBo246W5PFnaN9pPRXfQIoBOVP8abhTcExCj7v5CWOuBrUJ0K5RBSbgh7lrtg5ZFQXEadSRH7XTPLs5velrLiV48rcDwo9lHNfT7Se6m6T1uwjfybQtj5aJnaNdt2/4Elxx/vQ==
+sidebar_class_name: "get api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get AutocompleteResult list of matching prefix"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/cases/autocomplete"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve AutocompleteResult list of ids matching prefix
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Prefix","in":"query","name":"prefix","required":true,"schema":{"type":"string"}},{"description":"Limit","in":"query","name":"limit","schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"items":{"properties":{"type":{"type":"string"},"value":{"type":"string"}},"required":["type","value"],"type":"object","title":"AutocompleteResult"},"type":"array"}}},"description":"OK"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

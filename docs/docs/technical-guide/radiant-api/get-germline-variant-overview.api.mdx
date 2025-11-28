@@ -1,0 +1,71 @@
+---
+id: get-germline-variant-overview
+title: "Get a germline VariantOverview"
+description: "Retrieve germline Variant Overview data for a given locus"
+sidebar_label: "Get a germline VariantOverview"
+hide_title: true
+hide_table_of_contents: true
+api: eJzdV0tv20YQ/ivEnFqAkRw3RQHdjFp21KaR4bjJwRCI0XIkbrwv7y5lCwL/ezB8yJJCCQmMXnoStTM7j2/nuYGcgvDSRWkNjOCWope0omRJXitpKPmMXqKJyXRFfiXpKckxYrKwPsFkKVdkEmVFGSAF68gjy5nkMIIlxetWRiuikwApOPSoKZIPMLrfHNjwgeUlk0tIQfJ/h7GAFAxqghHU2jKZQwqeHkvpKYdR9CWlEERBGmG0gbh2zBuil2YJVTVj5uCsCRSYfn52xj/Cmkgm8ic6p6SozR9+DWzHZkee8+xclM1txEwUaJbUoyoFgXmeuaK2a0s2pZ6T35KDsJ76yUqaFXqmyUg69KpoD9B7XEMKpZGPJU0a9gWqQC+Csga2HiE5GnPCkNyc9JKerZaBfIZCLzOhMAS5aAHMhC1NbKDKc8lHqG72IGzlSRNp2ehrT+z8K4nYajCZR/PQz1+To42o+ukLjIXWmdt/hxcHWvpxAJbGaswzZalcnGJwSp4ir37LsP8+G+udp9iC9h9gKEMm0FgjxR5Mc2sVoWk5NBrKnCrDaY5AiqX28jQloA9m5ePxN2Di8QewWupMWNN4H/ZSYj8hpSnIy4hGUCZsTq/Pnlq3K8hY5uZy0yfJoSHVQ/nuKVKIMio+mGqpr8nQTX31B61xIntaHnlztzigvQDoirWyN2//eMJ15rzUGPuBdlI8UM5QB3osyQgKr0fQmRM2W7VmcM+zgkvU0fg44DseKp5WpE7RQ/vdpyXIxYkYranHJQduG4Qyy/vfYEtvKK9FNaz13PaFXArRo2na6LFwXZHLpHbYZPF+072bXk4hBTKlhtE9/DO9nFxNxreQwofpF0j5YHx7cTeGFN5Prt/DLD2Qn8LzG779ZoWee074YTFtZnwmN2mMq6rd3n6/X0kPitpBBfuuXHW1aZso/eE+O56xh9NLxebtgzf9m+F9d/bup4aKfRkXTo69tz7x5DwFMjEkaBLiMzZ6r+DlFFFyGFQpaAoBj3TpEDGWvUl4AHEnZHvlBCCdpX1IfLQxubKlyVn77z85Zf0fAZlwkzeokk/kV+STjjGFQKL0Mq7rCXhO6MljGQsY3c94Xo24rFNo1YQf69cUC9vO1vUQzdwwbDnCsJvZh5tuSK6G9mXoDrUFzcRdesVXgTV1hnzih2jg3DWn+3dlvcYII/jryx20w3Y9BtRU2MJTxOhqB6VZ2J5CU8iQyJDEgpKLm0m9SdxiXu8Y9WrhFMaF9XrAuSsFmVA/ZTv+XzgUBSXngzMukbUXrHA0HD49PQ2wpg6sXw7bq2H4YfLn+OOn8ZvzwdmgiLppuu3LdYovbibA9dGHxsi3g7Om/4So0eyov6bIe8/BcrSz2ew5uxP7r9qsWmQjPcehUyjrmat2ftNGwTZOmL3TACmMdtalbSjMUihsiHxrs5ljoH+9qio+fizJc0DO0kbenFHiBU0G/s7bRnTCzV9u2yT6NdnZ43od6Pqd4W63QlXyP0jhgda7e141q1IoCHNu3/eblnwhBLm4c/G70lLtZsz1mGO2C+hugO0it/1g6b1GbTYNx519IFNVWxsj/2cDq+obDMJOpQ==
+sidebar_class_name: "get api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get a germline VariantOverview"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/variants/germline/{locus_id}/overview"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve germline Variant Overview data for a given locus
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Locus ID","in":"path","name":"locus_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"aa_change":{"type":"string"},"cadd_phred":{"type":"number"},"cadd_score":{"type":"number"},"clinvar":{"items":{"type":"string"},"type":"array","uniqueItems":false},"clinvar_name":{"type":"string"},"dann_score":{"type":"number"},"dna_change":{"type":"string"},"exomiser_acmg_classification_counts":{"additionalProperties":{"type":"integer"},"type":"object"},"exon_rank":{"type":"integer"},"exon_total":{"type":"integer"},"fathmm_pred":{"type":"string"},"fathmm_score":{"type":"number"},"gnomad_loeuf":{"type":"number"},"gnomad_pli":{"type":"number"},"gnomad_v3_af":{"type":"number"},"interpretation_classification_counts":{"additionalProperties":{"type":"integer"},"type":"object"},"is_canonical":{"type":"boolean"},"is_mane_plus":{"type":"boolean"},"is_mane_select":{"type":"boolean"},"locus":{"type":"string"},"lrt_pred":{"type":"string"},"lrt_score":{"type":"number"},"omim_conditions":{"items":{"properties":{"inheritance_code":{"items":{"type":"string"},"type":"array","uniqueItems":false},"omim_phenotype_id":{"type":"string"},"panel":{"type":"string"}},"type":"object","title":"OmimGenePanel"},"type":"array","uniqueItems":false},"pc_wgs":{"type":"integer"},"pf_wgs":{"type":"number"},"phyloP17way_primate":{"type":"number"},"picked_consequences":{"items":{"type":"string"},"type":"array","uniqueItems":false},"pn_wgs":{"type":"integer"},"polyphen2_hvar_pred":{"type":"string"},"polyphen2_hvar_score":{"type":"number"},"revel_score":{"type":"number"},"rsnumber":{"type":"string"},"sift_pred":{"type":"string"},"sift_score":{"type":"number"},"spliceai_ds":{"type":"number"},"spliceai_type":{"items":{"type":"string"},"type":"array","uniqueItems":false},"symbol":{"type":"string"},"transcript_id":{"type":"string"},"vep_impact":{"description":"TODO","enum":["MODIFIER","LOW","MODERATE","HIGH"],"type":"string","x-enum-varnames":["MODIFIER","LOW","MODERATE","HIGH"],"title":"VepImpact"}},"required":["gnomad_v3_af","is_canonical","is_mane_plus","is_mane_select","locus","pf_wgs","picked_consequences"],"type":"object","title":"VariantOverview"}}},"description":"OK"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

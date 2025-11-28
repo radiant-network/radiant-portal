@@ -1,0 +1,71 @@
+---
+id: post-user-preferences
+title: "Create or update user preference"
+description: "Create or update user preference"
+sidebar_label: "Create or update user preference"
+hide_title: true
+hide_table_of_contents: true
+api: eJztV0tv2zgQ/ivEnBXbDboX3dIgBbyPxojd3YNhBGNpbLGlSIak6rqC/vtiKCmWXddI0dNicyOpb97fkKMacvKZkzZIoyGFW0cYSBgnKpvzqvLkhHW0IUc6I0jAWHLI8GkOKVjjw0dPbvYM8ZCAo6eKfHhn8j2kNWRGB9KBl2itklmUH3/ybLMGnxVUIq+sY+1BkuddwLWix1x6qzDqwTyXLIlqdgQ8FsuMqkp973JyvJWBylbd3hKk4IOTegtN0h+gc7iHBCotnyqatvANKk9N0imbSa1Z6Dtbijbh1404uS1+Wc0BZNafKAuQQJBB8cHtMIhbozcy6mxjm8tvXWg/Sm+nVupAW3JwwdDv3ui/0F61fl9JHQ52/pZerqWS4WIpO81rYxSh/glbLMFwi1upsaXzabUsbmkuv9G5oC5Ymj2r7HN3Abxg0h5y/ELvGeYfT2S59x5lfoYPTdti0lEO6fKkUQ6Cqx/bP+5ZaFjl8VXACHGAiGBEdnI7wNCN4KrIZfLWaN8m/Hoyee3/1/5/7f//YP/f/8E+vP3JDj7WcWPlnXPGCUfWkScdvEAtiM8gOalOTgGlgrRuEijJe9zS2VbwAUN1lpgnaemVPItcyEfv6blMvMNcPLQTTZuSt//7lHwwQbw3lc7Z+m+vHIGpDuQ0KjEn94Wc6IEJeMoqF2+9ZQ1rQkcOq1BAulw1bAy3nh2JPWsHU/SKIwyF6adszgWyHIwZ68f2aOT20a6PViqnGAasvzc/5/S3SRw60e/eG1di4IvpnwVri2i+iONXeE5KEYKNYXFZHw5j/t1XLK2ic8/28CYblEjqjfmeDYtCeiG9CAWJm9lUbIwTD5hL1EHkGFBYhWFjXDmCBJTMSPtoVGPZlgizgsT1aMLXYEwDe5yOx7vdboTx68i47bgT9eM/p7d3H+Z3V9ejyagIZXxD+oL3hm9mU0iA09s6+WY0iU+N8aFEPTD/gt+no3AHTfMS2a4Ggb6GsVUo4/sYo6w7brQ88rFvjqhUMIPSJdT1Gj19dKpp+PipIsfMXCXwBZ3kykViJlAQxgFqWcNn2schInp6tWAnGK6qOJGctnqT9BI3WUY2XMQOST67nzP11t1PY2lylnG44zETd5BC/Ptk6UjjeFaDQr2t4j0ArU5mZ0/ufpzoWdwtOKp+otL7gYd13SIW5jPppoGkCyXwHppV0zT/AgTaUTU=
+sidebar_class_name: "post api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create or update user preference"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/users/preferences"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Create or update user preference
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"properties":{"table_display":{"additionalProperties":{"properties":{"columnOrder":{"items":{"type":"string"},"type":"array","uniqueItems":false},"columnPinning":{"properties":{"left":{"items":{"type":"string"},"type":"array","uniqueItems":false},"right":{"items":{"type":"string"},"type":"array","uniqueItems":false}},"type":"object","title":"ColumnPinningConfig"},"columnSizing":{"additionalProperties":{"type":"integer"},"type":"object","title":"JsonMap-string-int"},"columnVisibility":{"additionalProperties":{"type":"boolean"},"type":"object","title":"JsonMap-string-bool"},"pagination":{"properties":{"pageSize":{"type":"integer"}},"type":"object","title":"PaginationConfig"}},"type":"object","title":"TableConfig"},"type":"object","title":"JsonMap-string-types_TableConfig"},"user_id":{"type":"string"}},"required":["table_display","user_id"],"type":"object","title":"UserPreference"}}},"description":"User Preference to create or update","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"table_display":{"additionalProperties":{"properties":{"columnOrder":{"items":{"type":"string"},"type":"array","uniqueItems":false},"columnPinning":{"properties":{"left":{"items":{"type":"string"},"type":"array","uniqueItems":false},"right":{"items":{"type":"string"},"type":"array","uniqueItems":false}},"type":"object","title":"ColumnPinningConfig"},"columnSizing":{"additionalProperties":{"type":"integer"},"type":"object","title":"JsonMap-string-int"},"columnVisibility":{"additionalProperties":{"type":"boolean"},"type":"object","title":"JsonMap-string-bool"},"pagination":{"properties":{"pageSize":{"type":"integer"}},"type":"object","title":"PaginationConfig"}},"type":"object","title":"TableConfig"},"type":"object","title":"JsonMap-string-types_TableConfig"},"user_id":{"type":"string"}},"required":["table_display","user_id"],"type":"object","title":"UserPreference"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

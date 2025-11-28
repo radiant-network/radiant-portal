@@ -1,0 +1,71 @@
+---
+id: statistics-germline-cnv-occurrences
+title: "Statistics of germline CNV occurrences"
+description: "Return statistics about a field for a given sequence ID"
+sidebar_label: "Statistics of germline CNV occurrences"
+hide_title: true
+hide_table_of_contents: true
+api: eJztVktv20YQ/iuLuTQBGMk10ouQFHBcp1Cb2oblJAdBKEbkSNxkuUvtDi0LBP97MXyIlC27CXJsT6J25/l9MztTQkIh9jpn7SxM4Ia48FYFRtaBdRwULl3BCtVKk0nUynmFaq3vyKpAm4JsTGr6G0TgcvIoVqYJTKA38Dv5zGhL55efruK48F5UAkSQo8eMmHyAybx8EMfswLaWoxw5hQgsZiQOaPO3TiACT5tCe0pgwr6gCEKcUoYwKYF3eS3JXts1VNWiEabA71yyE4nYWSbL8ol5bnRcJzD+EiSGcmAq95Ieawryr4biiIcIwqbRPJQfuHGWrlZ1vt9q8g5NQXKjmTKRraJOCL3HHURQWL0paNrcr9AEqnoht/xCMUMErNnIwQfC1XkbURXt7UKsfVwY9C9mG2dfwgMv1aKKQB8P0eVyTLbIYDIXsiJAK9w4L4Q58b4k3hLJ1a8QwRv5fSsfbxuJV42WMbCIHhH3dC4S6vMC+zoUzj9rTluVKnpYcX3J1+XxsLIqOQi5s6Fh7PTk5LtK6ElvnnJPgSyHY20XO1Nkgs1hvWR4/9joX3hfN6gtMvI6ViuMiXsibZEtyQthmbZHtLX9Nu3m4KH6rVNMxqiPU6VXSvNPQaFV2jKtyav62Ugo1hka+C6G95AcI+3qTwno9Q9RcZbrC++dHxKBVpGcPcI9IUZtmi7MKARc0/GHgJGLMLhqgahz7QtrvjeyV1k8jUUX6TEk3mGibprXrYHk9X8ekkvH6r0rbCLef/m/RmBqmbxFo2bk78irTjCCQHHhNe/qybQk9OSx4BQm84WMTca1DGlwgwG+kOQ4dTLtcxe4nuiiAuOB2Hjdjv9xbO/GZTO1q3H/0ElSdTTNFlB4IxZAvHZBzYSUBtphaN2/985nyDCBPz7fQjv/BYnmtn9sUua8TlbIvukXgYt7zHJDgynccdTP80HZPJJpB/TcFsZ0Q7K/ldkoI1Eca7tyRx7OVAelg+KU1Nn1tH6DbzDRaFklyKhyg7xyPhtBBEbHZEMdbLsIneUYp6RORyeyCdTwSaaT8Xi73Y6wvh05vx63qmH8YXp+cTm7eHU6OhmlnJn6TW/Lp3N8dj2V1MiHJsifRyciJkRnaAfuB4PMrVTHtjq//KTcwbp3kPQA0R9YOVtime55nBsUlFsIyrYWD0s2gi4+iCC2dxDBZL9HDkpyEUEqFT2ZQ1kuMdBHb6pKjjcFeWmShdDuNS4FNFledZDvpF2/nsn2xU3b2C/V7N+T6VYwu+sLDSCCr7Trd+B6NUsJE/J1MM1lu+K9uhUTvfKjV09WwEbjLI4p52dlh01/fTWTflu2u3TmEtHxuJXVCbdNoK6GoO7d+qwEg3Zd1E8iNDalM7qObvPdt277IVkdhaIsG4lb95VsVe2RYfkvwFTVP4LZbks=
+sidebar_class_name: "post api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Statistics of germline CNV occurrences"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/occurrences/germline/cnv/{seq_id}/statistics"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Return statistics about a field for a given sequence ID
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Sequence ID","in":"path","name":"seq_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"properties":{"field":{"type":"string"},"sqon":{"properties":{"content":{"oneOf":[{"properties":{"field":{"type":"string"},"value":{"items":{},"type":"array","uniqueItems":false}},"type":"object","title":"LeafContent"},{"items":"circular(Sqon)","type":"array"}]},"id":{"type":"string"},"op":{"enum":["in","and","or","not","between",">","<",">=","<=","not-in","all"],"type":"string"}},"type":"object","title":"Sqon"}},"type":"object","title":"StatisticsBodyWithSqon"}}},"description":"Statistics Body","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"description":"Statistics represents statistics about a column","properties":{"max":{"description":"Max for numeric facet","type":"number"},"min":{"description":"Min for numeric facet","type":"number"},"type":{"description":"To tell UI if it's an integer or a decimal","type":"string"}},"type":"object","title":"Statistics"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

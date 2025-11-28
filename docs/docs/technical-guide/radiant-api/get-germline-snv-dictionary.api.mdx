@@ -1,0 +1,71 @@
+---
+id: get-germline-snv-dictionary
+title: "Get germline SNV facets dictionary"
+description: "Retrieve germline SNV facets"
+sidebar_label: "Get germline SNV facets dictionary"
+hide_title: true
+hide_table_of_contents: true
+api: eJztVcFy20YM/ZUdnFlR8aQX3tTW9qjtuBnLTQ8eHWASEjchd2ksKFfD4b93sCRlKlGa9pycRC0fgIe34EMHBYWcbSPWO8jgnoQtHcjsievKOjKbu/dmhzlJgAR8Q4wKXReQwZ7kdoRt7t7/YnN9g3yEBBpkrEmIA2SP3SdF/nBkPJvaM42pjXjDY2lIwCrquaWYymFNkMGJQ8hLqhGyDqxQHfRBjo1CgrB1e+iT6QCZ8Qh9v02AKTTeBYr4q+VSf3LvhJzoIzZNZfPYWvohKMvuUqGGVQGxQ5qB2YXyB6zaAfIfKSbQOvvc0nqA77AK1L+C/NMHygUSECuVHtyoGBca7ZNPpf5NUW//Z7/nOVaNvWb2bJgapkBOgkFnSM/0qs80KUjQVpB1fQI1hYD7yxIFQWnnylgntCcG7YHpubVMBWSPpySnkO2XZZmYXlLiJyzMPT23FGSQ5O03L8mdF3PjW1do9R+/zwisnRA7rMyG+EBsJmACgfKWrRyjmz0RMjG2UkL2uFV3Edyr0YHP85aZXE6RQ01S+tEpoylqBKQzVDr5bBrcIS3mFhoih8E/W640ELTWRGWjVzEIOic0/bvxXKNABr/+9TC5pvY/vIWTQKVIE1u0buc/v9iH0gZjg5GSzOrd2uw8m3ssLDoxBQqapkLZea4XkEBlc3KBXr0RVg3mJZmrxVI9LnahBbM0fXl5WWB8u/C8T8fQkP6+/vn6bnP9w9ViuSilrqLLjXc3FV69W0MCqs5A8s1iqbDGB6nRzcrfklzaZOZM6LOGZ1/A15bhKKDQ35I2FVqnHGKP3XjV5wORwJRH78MdtPQrj20CpQ+iQV33hIH+5Krv9XhYhHGN2oBPlc583BD/Qv2rK/Yi+Y90nG/auMYggzh2B2SrxePIJ1ASFsSR1RC1ynNqZBb1mX308y/i9lqnchrZkc1pNscHzT5tOHec5e66AfHgP5Lre5ioi/6Hftv3/T/5Hw0Z
+sidebar_class_name: "get api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get germline SNV facets dictionary"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/occurrences/germline/snv/dictionary"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve germline SNV facets
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"One or more facets to retrieve","in":"query","name":"facets","schema":{"items":{"type":"string"},"type":"array"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"items":{"properties":{"name":{"type":"string"},"values":{"items":{"type":"string"},"type":"array","uniqueItems":false}},"type":"object","title":"Facet"},"type":"array"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"404":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Not Found"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

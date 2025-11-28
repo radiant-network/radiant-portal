@@ -1,0 +1,71 @@
+---
+id: post-interpretation-germline
+title: "Create or Update interpretation germline"
+description: "Create or Update interpretation germline"
+sidebar_label: "Create or Update interpretation germline"
+hide_title: true
+hide_table_of_contents: true
+api: eJztWE1v5DYM/SsGTy3gHadBe/Etm6bFtNtukGTRw2Aw4NjMWLu2rEhysgPD/72gbI8/xk6TSY+52SQlUhT5nqQSYjKRFsqKXEIIl5rQkpdr74uK+UtIS1ppssgW3o50lgpJ4EOuSDvhMoYQrnNjlwPb3ztThRozsqQNhKty7BINectfwQfBvwptAj5IzAhCiNDQRsTgg6aHQmiKIbS6IB9MlFCGEJZg94pNjdVC7qCq/LGHW3ooSEZC7mb9mIPJm719yqPCzDpKWftmH3caZf0/68geTF7rbV0bk7Ef83jPFlEuLUnLn6hUKiK3wcFXw8GUvamU5qqwgowb1mzesQ8fohSNEffNVC8w2URaWNIC3dTCUmYmRzUC1Br34EMhxUNBy9r8HlNDPHMuYzHv1/VAvEH7rHq7/w/1pt6JCZuZnAx7bdLkUD5TyowsxmgndgIlpnsjZkcqtIKknVM/ohYo7SZBk0zWZyvJt18psuCDFTZlwRAS/moDZJfFNqN4sJej6hHP5KFVTkf84oCu6yBeWDZDkJgsvkHTzVpkwhgOPstj+h/KuXBQPVuwrXqmYDv1XMG+OJ0HyK94zBCyhpaeg5YxKlUsMCqXpk7L+dnZO/y8w887/LzDz1vh5/Of7OznVwLKcI4LJa60zrWnSWkyJK3xUHrEMj7lDuonJosihbB0nWEM7qab0Vi0RT/53IY70m7dHTyuDpMchqzn89JGOpWJjxh7N/X5jv3/8p6Suowkpt4t6UfSXmvIPRcVWti9u7dsCTVpLGwC4WrN52SLO77SjKDTxZGRTXK+GancWHcH4mEQjEyDx/OgvVQFZUNZVVAOmr0KyhZ5q6AcdHnFi3dR13erQqfsBTi6Nvhb3rx6C/pLaP9+y3XGvQt//HMHzcWAM1Zr4ZDSxFrlksJFcdPdEK6+Y6ZSGlBuu5vHTDun6RPsqjVaD8iyN7THkcdSRpop6aa97LWqYaRj/us0He11sj7bDfitM+nTWicdslmfBRtKWvXJp7eOPucchq2PeKEbMaKDkWLEAv2c9xG9G9UH8inpKL3uRHGfH2PGXSKMJ4xnE/Iurpfefa69G4w5KR5n1FMp2vtcZwtOvYhIGldczfQXCqOEvPPFGXt35c6VGQbB09PTAp12ketd0Aw1wafl5dXft1cfzhdni8RmqSO2BhZaxxfXS94b0qYO8qfFmduT3NgMZc/9K15IBsvuQexr5mh6z9J3G6gUhXScyasuG0g5Rh8fHs/Bh94sYfeOEo6fOsLek0Q4LJm1DwmjV7iCstyioS86rSoWPxSkGRTXTT1vOZn8tCMMf8fN6eCZHPxw0wD5j173AjS52vYMIveue9KC/8CHb7TvvRC5R5JTvI9fh06IYZjSkyPpvRydEMRhG0/2P35VOiGIYf1U68qHhDAm7aqjtrmsfX+445m6OY6OHbyOesRFFJGyz9r2Gff68y0T2bZ5vWKAgxA0PvGFE5/qeHNVN0tY1rISUpS7wp1JoJ6Tua6lymbZB05sPnhVkxkpy9riLv9Gsqq6BPE/J6aq/gUsooHc
+sidebar_class_name: "post api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create or Update interpretation germline"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Create or Update interpretation germline
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Case ID","in":"path","name":"case_id","required":true,"schema":{"type":"string"}},{"description":"Sequencing ID","in":"path","name":"sequencing_id","required":true,"schema":{"type":"string"}},{"description":"Locus ID","in":"path","name":"locus_id","required":true,"schema":{"type":"string"}},{"description":"Transcript ID","in":"path","name":"transcript_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"properties":{"case_id":{"type":"string"},"classification":{"type":"string"},"classification_criterias":{"items":{"type":"string"},"type":"array","uniqueItems":false},"condition":{"type":"string"},"created_at":{"type":"string"},"created_by":{"type":"string"},"created_by_name":{"type":"string"},"id":{"type":"string"},"interpretation":{"type":"string"},"locus_id":{"type":"string"},"metadata":{"properties":{"analysis_id":{"type":"string"},"patient_id":{"type":"string"},"variant_hash":{"type":"string"}},"type":"object","title":"InterpretationMetadata"},"pubmed":{"items":{"properties":{"citation":{"type":"string"},"citation_id":{"type":"string"}},"type":"object","title":"InterpretationPubmed"},"type":"array","uniqueItems":false},"sequencing_id":{"type":"string"},"transcript_id":{"type":"string"},"transmission_modes":{"items":{"type":"string"},"type":"array","uniqueItems":false},"updated_at":{"type":"string"},"updated_by":{"type":"string"},"updated_by_name":{"type":"string"}},"type":"object","title":"InterpretationGermline"}}},"description":"Interpretation Body","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"case_id":{"type":"string"},"classification":{"type":"string"},"classification_criterias":{"items":{"type":"string"},"type":"array","uniqueItems":false},"condition":{"type":"string"},"created_at":{"type":"string"},"created_by":{"type":"string"},"created_by_name":{"type":"string"},"id":{"type":"string"},"interpretation":{"type":"string"},"locus_id":{"type":"string"},"metadata":{"properties":{"analysis_id":{"type":"string"},"patient_id":{"type":"string"},"variant_hash":{"type":"string"}},"type":"object","title":"InterpretationMetadata"},"pubmed":{"items":{"properties":{"citation":{"type":"string"},"citation_id":{"type":"string"}},"type":"object","title":"InterpretationPubmed"},"type":"array","uniqueItems":false},"sequencing_id":{"type":"string"},"transcript_id":{"type":"string"},"transmission_modes":{"items":{"type":"string"},"type":"array","uniqueItems":false},"updated_at":{"type":"string"},"updated_by":{"type":"string"},"updated_by_name":{"type":"string"}},"type":"object","title":"InterpretationGermline"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      

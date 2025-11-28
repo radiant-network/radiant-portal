@@ -1,0 +1,71 @@
+---
+id: post-interpretation-somatic
+title: "Create or Update interpretation somatic"
+description: "Create or Update interpretation somatic"
+sidebar_label: "Create or Update interpretation somatic"
+hide_title: true
+hide_table_of_contents: true
+api: eJztWN1v4zYM/1cMPW2AL+6K7cVvva4Dst12RdvDHoIgYGw21p0tuRLdXmD4fz9Q/k7soM299s0mKZHix48SSxGjjYzMSWolQnFtEAg9bbwvecxfUhGa3CABS3hWZ0AyEr7QORpHW8YiFLfa0nIket9J5mAgQ0JjRbgqDxWCRW/5p/CF5N8cKBG+UJChCEUEFjcyFr4w+FRIg7EIyRToCxslmIEIS0H7nEUtGal2oqr8Qw33+FSgiqTazeqxnchPa/uko8LOKkqZ+9M6Hgyo+n9WEXUib9W2roXR0kcd71ki0opQEX9CnqcycvENvlo2phxslRtOCpJo3bImeMc6fBGlUskI0k1BMpW0nxZyuRhvgE6yt6dXb/eb2icTMjPWjXN+UqQL5BQzQ4IYaMInoCDdWzm7MgeSqGiO/QxGgqJNAjaZzJSWordfMSLhC5KUMmFcm/+2Bla+0CrSO1QymgvDUGATpWCtfGxyYBMZSWgkuMNJwsxObtEQwBjYC18USj4VuKzFHyG1yEcvthnGo30O8kmeiEfLnPbcqx1zWxvxSpPHsDF58FEZTkoUmTaQbmrGhEDhcHi2Clr2TBX07LkqeLVvWkCveMkYkMaCngOOQ8ypmGBzrWwdzsuLi3dweQeXd3B5B5fT4PL5H9b1+xvhYrzHVS5vjNHGM5gbtKjIeqA8ZBrfUEe5ECOBTEVYumqzFnbTzrMEVAxzkkt7h8Yduwe/VbdJt2Q975bW0ilPfITYu6vvZqz/j3eX1FmkIPXu0Tyj8VpBrp+oMA52VqXYIhg0UFAiwtWa77gEO36OHMCxsyNDSjQ/anJtyb1feJkIDkSD58ugeQ4FZdOPqqAc1W0VlC2YV0E5KtiKz+6Mrp9FhUlZiWDjWtvvOXZ1BIYnaP/+0ibjyhV///8gmjs9O6zmis6jCVHufMI5cddf7m++Q5anOOqnbTCn2uiAN+iex9TtpGyHEj1rrPCwM/acviH2tGEfHHW+XmTY8HrquM/N9KLhglf2qFW7Yt33m9WwswxcMmwonQXrI9DvVxxg/YAxgviePkT2Y+o4Qkc4PrquPOpj8HhIpPWk9ShB7+p26T1q491BzH71OChengI9apMtOHoyQmVdmjXbX+UQJehdLi5Yu0t8ztEwCF5eXhbguAttdkGz1Aafltc3/93ffLhcXCwSylLX3Rp8aBVf3S45vGhsbeRviwt37dGWMlAD9a8fcoxOPYDaN2zRBIbwOwV5ClK5zslnLhtkOQYhXzxfckF3m4T9JCQ8HFaEg6FCOM6TtS8SxrBwJcpyCxa/mLSqmPxUoGFoXDf1sGVP8nBGWv6Om3vICQ/8ctfA+a9eP8OZPGx721F7V31pwX/CF99wP5jxuDHHOdoP5ztn2DB26dmWDGY/ZxjRhfFs/YdzoTOMGOdPta58kSDEaFx21DLXte4PD7xTv8fR5YPPUa+4iiLM6aTssO/efr7nfrZt5k+ZjnmNgRd+VMJLba/O61oJy5pWihTUrnA3E1HvyS2v7ZjNsbvW2HzwqSY9Upa1xIP+hqqqegfxPzumqn4AjQRt6g==
+sidebar_class_name: "post api-method"
+info_path: docs/technical-guide/radiant-api/radiant-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create or Update interpretation somatic"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Create or Update interpretation somatic
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"description":"Case ID","in":"path","name":"case_id","required":true,"schema":{"type":"string"}},{"description":"Sequencing ID","in":"path","name":"sequencing_id","required":true,"schema":{"type":"string"}},{"description":"Locus ID","in":"path","name":"locus_id","required":true,"schema":{"type":"string"}},{"description":"Transcript ID","in":"path","name":"transcript_id","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"properties":{"case_id":{"type":"string"},"clinical_utility":{"type":"string"},"created_at":{"type":"string"},"created_by":{"type":"string"},"created_by_name":{"type":"string"},"id":{"type":"string"},"interpretation":{"type":"string"},"locus_id":{"type":"string"},"metadata":{"properties":{"analysis_id":{"type":"string"},"patient_id":{"type":"string"},"variant_hash":{"type":"string"}},"type":"object","title":"InterpretationMetadata"},"oncogenicity":{"type":"string"},"oncogenicity_classification_criterias":{"items":{"type":"string"},"type":"array","uniqueItems":false},"pubmed":{"items":{"properties":{"citation":{"type":"string"},"citation_id":{"type":"string"}},"type":"object","title":"InterpretationPubmed"},"type":"array","uniqueItems":false},"sequencing_id":{"type":"string"},"transcript_id":{"type":"string"},"tumoral_type":{"type":"string"},"updated_at":{"type":"string"},"updated_by":{"type":"string"},"updated_by_name":{"type":"string"}},"type":"object","title":"InterpretationSomatic"}}},"description":"Interpretation Body","required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"properties":{"case_id":{"type":"string"},"clinical_utility":{"type":"string"},"created_at":{"type":"string"},"created_by":{"type":"string"},"created_by_name":{"type":"string"},"id":{"type":"string"},"interpretation":{"type":"string"},"locus_id":{"type":"string"},"metadata":{"properties":{"analysis_id":{"type":"string"},"patient_id":{"type":"string"},"variant_hash":{"type":"string"}},"type":"object","title":"InterpretationMetadata"},"oncogenicity":{"type":"string"},"oncogenicity_classification_criterias":{"items":{"type":"string"},"type":"array","uniqueItems":false},"pubmed":{"items":{"properties":{"citation":{"type":"string"},"citation_id":{"type":"string"}},"type":"object","title":"InterpretationPubmed"},"type":"array","uniqueItems":false},"sequencing_id":{"type":"string"},"transcript_id":{"type":"string"},"tumoral_type":{"type":"string"},"updated_at":{"type":"string"},"updated_by":{"type":"string"},"updated_by_name":{"type":"string"}},"type":"object","title":"InterpretationSomatic"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Bad Request"},"500":{"content":{"application/json":{"schema":{"description":"ApiError represents an error","properties":{"detail":{},"message":{"type":"string"},"status":{"type":"integer"}},"required":["message","status"],"type":"object","title":"ApiError"}}},"description":"Internal Server Error"}}}
+>
+  
+</StatusCodes>
+
+
+      
