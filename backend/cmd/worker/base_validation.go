@@ -56,18 +56,50 @@ func formatPath(r ValidationRecord, fieldName string) string {
 	return fmt.Sprintf("%s[%d].%s", r.GetResourceType(), r.GetBase().Index, fieldName)
 }
 
-func formatInvalidField(r ValidationRecord, fieldName string, reason string, resourceIds []string) string {
+func formatIds(resourceIds []string) string {
 	formatResourceIds := ""
 	if len(resourceIds) > 0 {
-		formatResourceIds = fmt.Sprintf(" (%s)", strings.Join(resourceIds, " / "))
+		formatResourceIds = fmt.Sprintf("(%s)", strings.Join(resourceIds, " / "))
 	}
-	message := fmt.Sprintf("Invalid Field %s for %s%s. Reason: %s", fieldName, r.GetResourceType(), formatResourceIds, reason)
+	return formatResourceIds
+}
+
+func formatInvalidField(r ValidationRecord, fieldName string, reason string, ids []string) string {
+	formatResourceIds := formatIds(ids)
+	invalidFieldMessage := strings.TrimSpace(fmt.Sprintf("Invalid Field %s for %s %s", fieldName, r.GetResourceType(), formatResourceIds))
+	reasonMessage := fmt.Sprintf("Reason: %s", reason)
+	message := strings.TrimSpace(fmt.Sprintf("%s. %s", invalidFieldMessage, reasonMessage))
 	return message
 }
 
-func formatFieldTooLong(r ValidationRecord, fieldName string, maxLength int, resourceIds []string) string {
+func formatFieldTooLong(r ValidationRecord, fieldName string, maxLength int, ids []string) string {
 	reason := fmt.Sprintf("field is too long, maximum length allowed is %d", maxLength)
-	return formatInvalidField(r, fieldName, reason, resourceIds)
+	return formatInvalidField(r, fieldName, reason, ids)
+}
+
+func formatDuplicateInBatch(r ValidationRecord, ids []string) string {
+	formatResourceIds := formatIds(ids)
+	resourceType := r.GetResourceType()
+	capitalizedResourceType := strings.ToUpper(string(resourceType[0])) + resourceType[1:]
+	message := fmt.Sprintf("%s %s appears multiple times in the batch.", capitalizedResourceType, formatResourceIds)
+	return message
+}
+
+func validateUniquenessInBatch[K comparable, V any](
+	record ValidationRecord,
+	key K,
+	seenBatchMap map[K]V,
+	duplicateCode string,
+	ids []string,
+) {
+	if _, exists := seenBatchMap[key]; exists {
+		message := formatDuplicateInBatch(record, ids)
+		path := formatPath(record, "")
+		record.GetBase().addErrors(message, duplicateCode, path)
+	} else {
+		var elem V
+		seenBatchMap[key] = elem
+	}
 }
 
 func updateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {

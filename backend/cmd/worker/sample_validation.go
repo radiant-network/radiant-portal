@@ -17,6 +17,7 @@ const SamplePatientNotExistCode = "SAMPLE-004"
 const SampleUnknownParentSubmitterSampleIdCode = "SAMPLE-005"
 const SampleInvalidValueCode = "SAMPLE-006"
 const SampleInvalidPatientForParentSampleCode = "SAMPLE-007"
+const SampleDuplicateInBatchCode = "SAMPLE-008"
 
 type SampleValidationRecord struct {
 	BaseValidationRecord
@@ -25,11 +26,11 @@ type SampleValidationRecord struct {
 	OrganizationId int
 }
 
-func (r SampleValidationRecord) GetBase() *BaseValidationRecord {
+func (r *SampleValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func (r SampleValidationRecord) GetResourceType() string {
+func (r *SampleValidationRecord) GetResourceType() string {
 	return types.SampleBatchType
 }
 
@@ -241,6 +242,7 @@ func reorderSampleRecords(records []*SampleValidationRecord) {
 func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
+	seenSamples := make(map[samplesKey]*types.SampleBatch)
 
 	for index, sample := range samples {
 		record := &SampleValidationRecord{
@@ -252,31 +254,43 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		record.validateFieldLength("submitter_parent_sample_id", sample.SubmitterParentSampleId.String())
 		record.validateFieldLength("tissue_site", sample.TissueSite.String())
 
-		// 2. Validate patient
+		// 2. Validate duplicates in batch
+		validateUniquenessInBatch(
+			record,
+			samplesKey{
+				OrganizationCode:  sample.SampleOrganizationCode,
+				SubmitterSampleId: sample.SubmitterSampleId.String(),
+			},
+			seenSamples,
+			SampleDuplicateInBatchCode,
+			[]string{sample.SampleOrganizationCode, sample.SubmitterSampleId.String()},
+		)
+
+		// 3. Validate patient
 		patient, patientErr := repoPatient.GetPatientByOrgCodeAndSubmitterPatientId(sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}
 		record.validatePatient(patient)
 
-		// 3. Validate organization
+		// 4. Validate organization
 		organization, orgErr := repoOrganization.GetOrganizationByCode(sample.SampleOrganizationCode)
 		if orgErr != nil {
 			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
 		}
 		record.validateOrganization(organization)
 
-		// 4. Validate if sample exists in DB
+		// 5. Validate if sample exists in DB
 		if organization != nil {
 			existingSample, sampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId.String())
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
 			} else if existingSample != nil {
-				// 5. If exists, check if all fields are identical, and add error messages
+				// 6. If exists, check if all fields are identical, and add error messages
 				record.validateExistingSampleInDb(existingSample)
 			}
 
-			// 6. Validate parent sample in DB if provided
+			// 7. Validate parent sample in DB if provided
 			if sample.SubmitterParentSampleId != "" {
 				existingParentSample, parentSampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterParentSampleId.String())
 				if parentSampleErr != nil {
@@ -285,7 +299,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 				record.validateExistingParentSampleInDb(existingParentSample)
 
 				if existingParentSample == nil {
-					// 7. If parent sample does not exist in DB, check if it exists in the current batch
+					// 8. If parent sample does not exist in DB, check if it exists in the current batch
 					_, parentSampleIsInBatch := samplesMap[samplesKey{
 						OrganizationCode:  sample.SampleOrganizationCode,
 						SubmitterSampleId: sample.SubmitterParentSampleId.String(),
