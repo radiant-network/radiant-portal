@@ -17,9 +17,10 @@ import {
   DialogTitle,
 } from '@/components/base/ui/dialog';
 import { useI18n } from '@/components/hooks/i18n';
+import { occurrencesApi } from '@/utils/api';
 
 import InterpretationVariantHeader from './header';
-import { useInterpretationHelper, useOccurrenceExpandHelper } from './hook';
+import { useInterpretationHelper } from './hook';
 import InterpretationFormGermline from './interpretation-form-germline';
 import InterpretationFormSomatic from './interpretation-form-somatic';
 import InterpretationLastUpdatedBanner from './last-updated-banner';
@@ -49,14 +50,20 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
     occurrence,
     isSomatic,
   );
-  const { fetch: fetchOccurrenceExpandHelper } = useOccurrenceExpandHelper(occurrence);
 
   const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
-  const occurrenceUniqueKey = `occurrence-${occurrence.seq_id}-${occurrence.locus_id}`;
 
-  const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence>(
-    occurrenceUniqueKey,
-    fetchOccurrenceExpandHelper,
+  const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence | undefined>(
+    {
+      caseId,
+      occurrence,
+    },
+    async () =>
+      caseId && occurrence.seq_id && occurrence.locus_id
+        ? occurrencesApi
+            .getExpandedGermlineSNVOccurrence(caseId, `${occurrence.seq_id}`, occurrence.locus_id)
+            .then(response => response.data)
+        : undefined,
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,
@@ -101,7 +108,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
   const handleOpen = useCallback(async () => {
     setOpen(true);
     fetchInterpretation.mutate();
-    fetchOccurrenceExpand.mutate();
+    fetchOccurrenceExpand?.mutate();
   }, []);
 
   return (
@@ -112,7 +119,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
         onEscapeKeyDown={e => e.preventDefault()}
         variant="stickyBoth"
       >
-        {fetchInterpretation.isLoading || fetchOccurrenceExpand.isLoading ? (
+        {fetchInterpretation.isLoading || fetchOccurrenceExpand?.isLoading ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
           </DialogBody>
@@ -124,7 +131,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
             <DialogBody className="overflow-scroll space-y-6 h-[calc(95vh-150px)]">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
-              <InterpretationTranscript occurrence={fetchOccurrenceExpand.data} />
+              <InterpretationTranscript occurrence={fetchOccurrenceExpand?.data} />
               <div className="grid gap-6 grid-cols-12">
                 <div className="rounded-sm col-span-7 border p-6 bg-muted">
                   {isSomatic ? (
@@ -152,7 +159,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
                   )}
                 </div>
                 <div className="rounded-sm col-span-5 border py-4 px-6">
-                  <OccurrenceDetails occurrence={fetchOccurrenceExpand.data} />
+                  <OccurrenceDetails occurrence={fetchOccurrenceExpand?.data} />
                 </div>
               </div>
             </DialogBody>

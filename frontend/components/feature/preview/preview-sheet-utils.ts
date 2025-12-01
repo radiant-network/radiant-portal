@@ -5,6 +5,7 @@ import { PROBAND } from '@/components/feature/constants';
 import { caseApi, occurrencesApi } from '@/utils/api';
 
 export type OccurrenceExpandInput = {
+  caseId: string;
   seqId: string;
   locusId: string;
 };
@@ -15,7 +16,7 @@ export type CaseInput = {
 };
 
 export async function fetchOccurrenceExpand(input: OccurrenceExpandInput) {
-  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(input.seqId, input.locusId);
+  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(input.caseId, input.seqId, input.locusId);
   return response.data;
 }
 
@@ -31,9 +32,10 @@ export async function fetchCase(input: CaseInput) {
 /**
  * Hook to fetch occurrence and case data for preview sheets
  */
-export function useOccurrenceAndCase(seqId: string, locusId: string, patientSelected?: CaseAssay) {
+export function useOccurrenceAndCase(caseId: string, seqId: string, locusId: string, patientSelected?: CaseAssay) {
   const expandResult = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
+      caseId: caseId,
       locusId: locusId,
       seqId: seqId,
     },
@@ -47,7 +49,7 @@ export function useOccurrenceAndCase(seqId: string, locusId: string, patientSele
   const caseResult = useSWR<CaseEntity | null, any, CaseInput>(
     {
       key: 'case-entity',
-      caseId: expandResult.data?.case_id,
+      caseId: caseId,
     },
     fetchCase,
     {

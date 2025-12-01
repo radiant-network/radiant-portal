@@ -73,13 +73,14 @@ function OccurrenceSheetContent({
   patientSelected,
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
+  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
+  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
   const { patient, assay, expandResult, isLoading } = useOccurrenceAndCase(
+    caseIdParam!,
     occurrence.seq_id.toString(),
     occurrence.locus_id.toString(),
     patientSelected,
   );
-  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
-  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
 
   if (isLoading || !expandResult.data) {
     return <PreviewSheetSkeleton />;

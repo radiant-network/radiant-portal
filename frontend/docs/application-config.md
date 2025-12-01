@@ -69,12 +69,12 @@ We use radiant for this example.
       case ApplicationId.cnv_occurrence:
         return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
           occurrencesApi
-            .aggregateGermlineCNVOccurrences(input.seqId, input.aggregationBody)
+            .aggregateGermlineCNVOccurrences(input.caseId, input.seqId, input.aggregationBody)
             .then(response => response.data);
       default:
         return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
           occurrencesApi
-            .aggregateGermlineSNVOccurrences(input.seqId, input.aggregationBody)
+            .aggregateGermlineSNVOccurrences(input.caseId, input.seqId, input.aggregationBody)
             .then(response => response.data);
     }
   };
