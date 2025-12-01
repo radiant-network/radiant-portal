@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "radiant_python"
-version = "1.0.0"
+version = "0.1.0"
 description = "Radiant API"
 authors = ["Radiant-Network"]
 license = "Apache 2.0"

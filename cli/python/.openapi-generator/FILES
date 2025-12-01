@@ -1,5 +1,6 @@
 .github/workflows/python.yml
 .gitignore
+README.md
 docs/Aggregation.md
 docs/AggregationBodyWithSqon.md
 docs/ApiError.md
