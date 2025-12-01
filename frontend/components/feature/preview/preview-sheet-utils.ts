@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-import { CaseEntity, ExpandedGermlineSNVOccurrence } from '@/api/api';
+import { CaseAssay, CaseEntity, CasePatientClinicalInformation, ExpandedGermlineSNVOccurrence } from '@/api/api';
 import { PROBAND } from '@/components/feature/constants';
 import { caseApi, occurrencesApi } from '@/utils/api';
 
@@ -31,7 +31,7 @@ export async function fetchCase(input: CaseInput) {
 /**
  * Hook to fetch occurrence and case data for preview sheets
  */
-export function useOccurrenceAndCase(seqId: string, locusId: string) {
+export function useOccurrenceAndCase(seqId: string, locusId: string, patientSelected?: CaseAssay) {
   const expandResult = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
       locusId: locusId,
@@ -56,13 +56,20 @@ export function useOccurrenceAndCase(seqId: string, locusId: string) {
     },
   );
 
-  const proband = caseResult.data?.members.find(member => member.relationship_to_proband === PROBAND);
-  const assay = caseResult.data?.assays.find(assay => assay.patient_id === proband?.patient_id);
+  let patient: CasePatientClinicalInformation | undefined;
+  let assay: CaseAssay | undefined;
+  if (patientSelected) {
+    patient = caseResult.data?.members.find(member => member.patient_id === patientSelected.patient_id);
+    assay = caseResult.data?.assays.find(assay => assay.patient_id === patientSelected.patient_id);
+  } else {
+    patient = caseResult.data?.members.find(member => member.relationship_to_proband === PROBAND);
+    assay = caseResult.data?.assays.find(assay => assay.patient_id === patient?.patient_id);
+  }
 
   return {
     expandResult,
     caseResult,
-    proband,
+    patient,
     assay,
     isLoading: expandResult.isLoading || !expandResult.data || caseResult.isLoading || !caseResult.data,
   };

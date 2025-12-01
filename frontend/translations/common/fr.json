@@ -1079,6 +1079,9 @@
     }
   },
   "preview_sheet": {
+    "header": {
+      "germline": "Germinal"
+    },
     "actions": {
       "download_report": "Télécharger le rapport",
       "open_igv": "Ouvrir IGV",
@@ -1136,6 +1139,8 @@
     },
     "occurrence_details": {
       "title": "Détails de l'occurrence",
+      "patient": "Patient",
+      "assay": "Essai",
       "actions": {
         "view_in_igv": "Ouvrir dans IGV"
       },
@@ -1396,7 +1401,7 @@
       "radiant": "Radiant",
       "consequence": "Conséquence",
       "clin_var": "ClinVar",
-      "patient": "Patient",
+      "patients": "Patients",
       "patients_tooltip": "Nombre de patients affectés et fréquence dans Mon Organisation",
       "gnom_ad": "gnomAD",
       "gnom_ad_info_tooltip": "gnomAD Génome 3.1.2 (fréquence allélique)",

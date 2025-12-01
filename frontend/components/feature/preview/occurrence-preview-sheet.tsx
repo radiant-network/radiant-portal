@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { ClipboardPen } from 'lucide-react';
 
-import { GermlineSNVOccurrence } from '@/api/api';
+import { CaseAssay, GermlineSNVOccurrence } from '@/api/api';
 import InterpretationDialog from '@/apps/case-entity/src/components/variants/interpretation/interpretation-dialog';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import { Button } from '@/components/base/ui/button';
@@ -25,6 +25,7 @@ type OccurrencePreviewSheetProps = {
   onNext?: () => void;
   hasPrevious?: boolean;
   hasNext?: boolean;
+  patientSelected?: CaseAssay;
 };
 
 function OccurrencePreviewSheet({
@@ -36,6 +37,7 @@ function OccurrencePreviewSheet({
   onNext,
   hasPrevious,
   hasNext,
+  patientSelected,
 }: OccurrencePreviewSheetProps) {
   return (
     <PreviewSheet trigger={children} open={open} setOpen={setOpen}>
@@ -46,6 +48,7 @@ function OccurrencePreviewSheet({
           onNext={onNext}
           hasPrevious={hasPrevious}
           hasNext={hasNext}
+          patientSelected={patientSelected}
         />
       )}
     </PreviewSheet>
@@ -58,13 +61,22 @@ type OccurrenceSheetContentProps = {
   onNext?: () => void;
   hasPrevious?: boolean;
   hasNext?: boolean;
+  patientSelected?: CaseAssay;
 };
 
-function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, hasNext }: OccurrenceSheetContentProps) {
+function OccurrenceSheetContent({
+  occurrence,
+  onPrevious,
+  onNext,
+  hasPrevious,
+  hasNext,
+  patientSelected,
+}: OccurrenceSheetContentProps) {
   const { t } = useI18n();
-  const { expandResult, proband, assay, isLoading } = useOccurrenceAndCase(
+  const { patient, assay, expandResult, isLoading } = useOccurrenceAndCase(
     occurrence.seq_id.toString(),
     occurrence.locus_id.toString(),
+    patientSelected,
   );
   const { caseId: caseIdParam } = useParams<{ caseId: string }>();
   const caseId = caseIdParam ? Number(caseIdParam) : undefined;
@@ -85,7 +97,8 @@ function OccurrenceSheetContent({ occurrence, onPrevious, onNext, hasPrevious, h
       />
       <Separator />
       <PreviewSheetSubHeader
-        probandId={proband?.patient_id}
+        patientId={patient?.patient_id}
+        relationshipToProband={patient?.relationship_to_proband}
         seqId={assay?.seq_id}
         actions={
           <InterpretationDialog
