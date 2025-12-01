@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.mondo_api import MondoApi
+from radiant-python.api.mondo_api import MondoApi
 
 
 class TestMondoApi(unittest.TestCase):

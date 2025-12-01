@@ -21,7 +21,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.case_patient_clinical_information import CasePatientClinicalInformation
+from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 
 # TODO update the JSON string below
 json = "{}"

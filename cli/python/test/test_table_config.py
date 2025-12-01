@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.table_config import TableConfig
+from radiant-python.models.table_config import TableConfig
 
 class TestTableConfig(unittest.TestCase):
     """TableConfig unit test stubs"""
@@ -38,7 +38,7 @@ class TestTableConfig(unittest.TestCase):
                 column_order = [
                     ''
                     ],
-                column_pinning = openapi_client.models.column_pinning_config.ColumnPinningConfig(
+                column_pinning = radiant-python.models.column_pinning_config.ColumnPinningConfig(
                     left = [
                         ''
                         ], 
@@ -51,7 +51,7 @@ class TestTableConfig(unittest.TestCase):
                 column_visibility = {
                     'key' : True
                     },
-                pagination = openapi_client.models.pagination_config.PaginationConfig(
+                pagination = radiant-python.models.pagination_config.PaginationConfig(
                     page_size = 56, )
             )
         else:

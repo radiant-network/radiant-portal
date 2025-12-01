@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.term import Term
+from radiant-python.models.term import Term
 
 class TestTerm(unittest.TestCase):
     """Term unit test stubs"""

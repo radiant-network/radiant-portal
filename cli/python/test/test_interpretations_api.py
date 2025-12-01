@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.interpretations_api import InterpretationsApi
+from radiant-python.api.interpretations_api import InterpretationsApi
 
 
 class TestInterpretationsApi(unittest.TestCase):

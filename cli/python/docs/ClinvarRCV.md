@@ -21,7 +21,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.clinvar_rcv import ClinvarRCV
+from radiant_python.models.clinvar_rcv import ClinvarRCV
 
 # TODO update the JSON string below
 json = "{}"

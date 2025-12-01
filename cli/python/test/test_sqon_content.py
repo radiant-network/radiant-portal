@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.sqon_content import SqonContent
+from radiant-python.models.sqon_content import SqonContent
 
 class TestSqonContent(unittest.TestCase):
     """SqonContent unit test stubs"""

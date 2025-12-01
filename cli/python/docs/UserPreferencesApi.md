@@ -1,4 +1,4 @@
-# openapi_client.UserPreferencesApi
+# radiant_python.UserPreferencesApi
 
 All URIs are relative to *http://localhost*
 
@@ -20,14 +20,14 @@ Get user preferences
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.user_preference import UserPreference
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.user_preference import UserPreference
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -37,14 +37,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.UserPreferencesApi(api_client)
+    api_instance = radiant_python.UserPreferencesApi(api_client)
 
     try:
         # Get user preferences
@@ -96,14 +96,14 @@ Create or update user preference
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.user_preference import UserPreference
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.user_preference import UserPreference
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -113,15 +113,15 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.UserPreferencesApi(api_client)
-    user_preference = openapi_client.UserPreference() # UserPreference | User Preference to create or update
+    api_instance = radiant_python.UserPreferencesApi(api_client)
+    user_preference = radiant_python.UserPreference() # UserPreference | User Preference to create or update
 
     try:
         # Create or update user preference

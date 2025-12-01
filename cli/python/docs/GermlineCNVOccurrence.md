@@ -38,7 +38,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.germline_cnv_occurrence import GermlineCNVOccurrence
+from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 
 # TODO update the JSON string below
 json = "{}"

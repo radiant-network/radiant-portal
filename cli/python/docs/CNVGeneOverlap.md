@@ -19,7 +19,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.cnv_gene_overlap import CNVGeneOverlap
+from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
 
 # TODO update the JSON string below
 json = "{}"

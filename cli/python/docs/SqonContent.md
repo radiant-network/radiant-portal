@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.sqon_content import SqonContent
+from radiant_python.models.sqon_content import SqonContent
 
 # TODO update the JSON string below
 json = "{}"

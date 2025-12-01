@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 
 # TODO update the JSON string below
 json = "{}"

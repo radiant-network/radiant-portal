@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.variant_uninterpreted_cases_search_response import VariantUninterpretedCasesSearchResponse
+from radiant-python.models.variant_uninterpreted_cases_search_response import VariantUninterpretedCasesSearchResponse
 
 class TestVariantUninterpretedCasesSearchResponse(unittest.TestCase):
     """VariantUninterpretedCasesSearchResponse unit test stubs"""
@@ -37,7 +37,7 @@ class TestVariantUninterpretedCasesSearchResponse(unittest.TestCase):
             return VariantUninterpretedCasesSearchResponse(
                 count = 56,
                 list = [
-                    openapi_client.models.variant_uninterpreted_case.VariantUninterpretedCase(
+                    radiant-python.models.variant_uninterpreted_case.VariantUninterpretedCase(
                         affected_status = '', 
                         analysis_catalog_code = '', 
                         analysis_catalog_name = '', 
@@ -50,7 +50,7 @@ class TestVariantUninterpretedCasesSearchResponse(unittest.TestCase):
                             ''
                             ], 
                         observed_phenotypes = [
-                            openapi_client.models.term.Term(
+                            radiant-python.models.term.Term(
                                 id = '', 
                                 name = '', 
                                 onset_code = '', 
@@ -71,7 +71,7 @@ class TestVariantUninterpretedCasesSearchResponse(unittest.TestCase):
             return VariantUninterpretedCasesSearchResponse(
                 count = 56,
                 list = [
-                    openapi_client.models.variant_uninterpreted_case.VariantUninterpretedCase(
+                    radiant-python.models.variant_uninterpreted_case.VariantUninterpretedCase(
                         affected_status = '', 
                         analysis_catalog_code = '', 
                         analysis_catalog_name = '', 
@@ -84,7 +84,7 @@ class TestVariantUninterpretedCasesSearchResponse(unittest.TestCase):
                             ''
                             ], 
                         observed_phenotypes = [
-                            openapi_client.models.term.Term(
+                            radiant-python.models.term.Term(
                                 id = '', 
                                 name = '', 
                                 onset_code = '', 

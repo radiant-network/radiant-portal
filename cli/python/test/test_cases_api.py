@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.cases_api import CasesApi
+from radiant-python.api.cases_api import CasesApi
 
 
 class TestCasesApi(unittest.TestCase):

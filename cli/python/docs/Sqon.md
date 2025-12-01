@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.sqon import Sqon
+from radiant_python.models.sqon import Sqon
 
 # TODO update the JSON string below
 json = "{}"

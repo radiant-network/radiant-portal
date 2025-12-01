@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.sort_body import SortBody
+from radiant_python.models.sort_body import SortBody
 
 # TODO update the JSON string below
 json = "{}"

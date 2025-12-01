@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.igv_api import IgvApi
+from radiant-python.api.igv_api import IgvApi
 
 
 class TestIgvApi(unittest.TestCase):

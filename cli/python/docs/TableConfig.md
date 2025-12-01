@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.table_config import TableConfig
+from radiant_python.models.table_config import TableConfig
 
 # TODO update the JSON string below
 json = "{}"

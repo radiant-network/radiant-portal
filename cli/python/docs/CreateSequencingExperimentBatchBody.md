@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.create_sequencing_experiment_batch_body import CreateSequencingExperimentBatchBody
+from radiant_python.models.create_sequencing_experiment_batch_body import CreateSequencingExperimentBatchBody
 
 # TODO update the JSON string below
 json = "{}"

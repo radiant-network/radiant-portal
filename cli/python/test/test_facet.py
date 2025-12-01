@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.facet import Facet
+from radiant-python.models.facet import Facet
 
 class TestFacet(unittest.TestCase):
     """Facet unit test stubs"""

@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.variant_expanded_interpreted_case import VariantExpandedInterpretedCase
+from radiant-python.models.variant_expanded_interpreted_case import VariantExpandedInterpretedCase
 
 class TestVariantExpandedInterpretedCase(unittest.TestCase):
     """VariantExpandedInterpretedCase unit test stubs"""

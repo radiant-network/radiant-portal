@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.omim_gene_panel import OmimGenePanel
+from radiant-python.models.omim_gene_panel import OmimGenePanel
 
 class TestOmimGenePanel(unittest.TestCase):
     """OmimGenePanel unit test stubs"""

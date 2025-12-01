@@ -1,4 +1,4 @@
-# openapi_client.OccurrencesApi
+# radiant_python.OccurrencesApi
 
 All URIs are relative to *http://localhost*
 
@@ -29,15 +29,15 @@ Aggregate germline CNV occurrences for a given sequence ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.aggregation import Aggregation
-from openapi_client.models.aggregation_body_with_sqon import AggregationBodyWithSqon
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -47,16 +47,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
-    aggregation_body_with_sqon = openapi_client.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
+    aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
 
     try:
         # Aggregate germline CNV occurrences
@@ -113,15 +113,15 @@ Aggregate germline SNV occurrences for a given sequence ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.aggregation import Aggregation
-from openapi_client.models.aggregation_body_with_sqon import AggregationBodyWithSqon
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -131,16 +131,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
-    aggregation_body_with_sqon = openapi_client.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
+    aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
     with_dictionary = False # bool | Whether to include all possible facet values (optional) (default to False)
 
     try:
@@ -199,15 +199,15 @@ Counts germline CNV occurrences for a given sequence ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.count import Count
-from openapi_client.models.count_body_with_sqon import CountBodyWithSqon
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.count import Count
+from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -217,16 +217,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
-    count_body_with_sqon = openapi_client.CountBodyWithSqon() # CountBodyWithSqon | Count Body
+    count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
 
     try:
         # Count germline CNV occurrences
@@ -283,15 +283,15 @@ Counts germline SNV occurrences for a given sequence ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.count import Count
-from openapi_client.models.count_body_with_sqon import CountBodyWithSqon
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.count import Count
+from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -301,16 +301,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
-    count_body_with_sqon = openapi_client.CountBodyWithSqon() # CountBodyWithSqon | Count Body
+    count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
 
     try:
         # Count germline SNV occurrences
@@ -367,14 +367,14 @@ Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -384,14 +384,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
     locus_id = 'locus_id_example' # str | Locus ID
 
@@ -449,14 +449,14 @@ Retrieve germline SNV facets
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.facet import Facet
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.facet import Facet
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -466,14 +466,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     facets = ['facets_example'] # List[str] | One or more facets to retrieve (optional)
 
     try:
@@ -530,14 +530,14 @@ List genes overlapping a CNV with a given ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.cnv_gene_overlap import CNVGeneOverlap
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -547,14 +547,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 56 # int | Sequence ID
     cnv_id = 'cnv_id_example' # str | Locus ID
 
@@ -612,15 +612,15 @@ List germline CNV occurrences for a given sequence ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.germline_cnv_occurrence import GermlineCNVOccurrence
-from openapi_client.models.list_body_with_sqon import ListBodyWithSqon
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
+from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -630,16 +630,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
-    list_body_with_sqon = openapi_client.ListBodyWithSqon() # ListBodyWithSqon | List Body
+    list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
 
     try:
         # List germline CNV occurrences
@@ -696,15 +696,15 @@ List germline SNV occurrences for a given sequence ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.germline_snv_occurrence import GermlineSNVOccurrence
-from openapi_client.models.list_body_with_sqon import ListBodyWithSqon
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
+from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -714,16 +714,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
-    list_body_with_sqon = openapi_client.ListBodyWithSqon() # ListBodyWithSqon | List Body
+    list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
 
     try:
         # List germline SNV occurrences
@@ -780,15 +780,15 @@ Return statistics about a field for a given sequence ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.statistics import Statistics
-from openapi_client.models.statistics_body_with_sqon import StatisticsBodyWithSqon
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.statistics import Statistics
+from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -798,16 +798,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
-    statistics_body_with_sqon = openapi_client.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
+    statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
 
     try:
         # Statistics of germline CNV occurrences
@@ -864,15 +864,15 @@ Return statistics about a field for a given sequence ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.statistics import Statistics
-from openapi_client.models.statistics_body_with_sqon import StatisticsBodyWithSqon
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.statistics import Statistics
+from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -882,16 +882,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.OccurrencesApi(api_client)
+    api_instance = radiant_python.OccurrencesApi(api_client)
     seq_id = 'seq_id_example' # str | Sequence ID
-    statistics_body_with_sqon = openapi_client.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
+    statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
 
     try:
         # Statistics of germline SNV occurrences

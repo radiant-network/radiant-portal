@@ -25,7 +25,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.sequencing import Sequencing
+from radiant_python.models.sequencing import Sequencing
 
 # TODO update the JSON string below
 json = "{}"

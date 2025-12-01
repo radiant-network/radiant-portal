@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.user_preferences_api import UserPreferencesApi
+from radiant-python.api.user_preferences_api import UserPreferencesApi
 
 
 class TestUserPreferencesApi(unittest.TestCase):

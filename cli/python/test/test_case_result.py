@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.case_result import CaseResult
+from radiant-python.models.case_result import CaseResult
 
 class TestCaseResult(unittest.TestCase):
     """CaseResult unit test stubs"""

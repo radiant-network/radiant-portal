@@ -20,7 +20,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.sequencing_experiment_batch import SequencingExperimentBatch
+from radiant_python.models.sequencing_experiment_batch import SequencingExperimentBatch
 
 # TODO update the JSON string below
 json = "{}"

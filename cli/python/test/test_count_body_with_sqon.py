@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.count_body_with_sqon import CountBodyWithSqon
+from radiant-python.models.count_body_with_sqon import CountBodyWithSqon
 
 class TestCountBodyWithSqon(unittest.TestCase):
     """CountBodyWithSqon unit test stubs"""
@@ -35,7 +35,7 @@ class TestCountBodyWithSqon(unittest.TestCase):
         model = CountBodyWithSqon()
         if include_optional:
             return CountBodyWithSqon(
-                sqon = openapi_client.models.sqon.Sqon(
+                sqon = radiant-python.models.sqon.Sqon(
                     content = null, 
                     id = '', 
                     op = 'in', )

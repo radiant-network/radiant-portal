@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.gene_panel_condition import GenePanelCondition
+from radiant_python.models.gene_panel_condition import GenePanelCondition
 
 # TODO update the JSON string below
 json = "{}"

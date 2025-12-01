@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.case_filters import CaseFilters
+from radiant-python.models.case_filters import CaseFilters
 
 class TestCaseFilters(unittest.TestCase):
     """CaseFilters unit test stubs"""
@@ -36,37 +36,37 @@ class TestCaseFilters(unittest.TestCase):
         if include_optional:
             return CaseFilters(
                 case_analysis = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 diagnosis_lab = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 ordering_organization = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 priority = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 project = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 status = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
@@ -75,37 +75,37 @@ class TestCaseFilters(unittest.TestCase):
         else:
             return CaseFilters(
                 case_analysis = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 diagnosis_lab = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 ordering_organization = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 priority = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 project = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 status = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )

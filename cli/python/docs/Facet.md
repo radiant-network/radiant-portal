@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.facet import Facet
+from radiant_python.models.facet import Facet
 
 # TODO update the JSON string below
 json = "{}"

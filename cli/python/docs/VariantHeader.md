@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.variant_header import VariantHeader
+from radiant_python.models.variant_header import VariantHeader
 
 # TODO update the JSON string below
 json = "{}"

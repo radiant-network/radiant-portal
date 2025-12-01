@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.batch_summary import BatchSummary
+from radiant-python.models.batch_summary import BatchSummary
 
 class TestBatchSummary(unittest.TestCase):
     """BatchSummary unit test stubs"""

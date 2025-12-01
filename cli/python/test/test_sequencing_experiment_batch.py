@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.sequencing_experiment_batch import SequencingExperimentBatch
+from radiant-python.models.sequencing_experiment_batch import SequencingExperimentBatch
 
 class TestSequencingExperimentBatch(unittest.TestCase):
     """SequencingExperimentBatch unit test stubs"""

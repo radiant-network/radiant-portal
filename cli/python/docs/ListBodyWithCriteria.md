@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.list_body_with_criteria import ListBodyWithCriteria
+from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 
 # TODO update the JSON string below
 json = "{}"

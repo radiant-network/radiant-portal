@@ -1,16 +1,16 @@
 [tool.poetry]
-name = "openapi_client"
+name = "radiant_python"
 version = "1.0.0"
 description = "Radiant API"
-authors = ["OpenAPI Generator Community <team@openapitools.org>"]
+authors = ["Radiant-Network"]
 license = "Apache 2.0"
 readme = "README.md"
-repository = "https://github.com/GIT_USER_ID/GIT_REPO_ID"
-keywords = ["OpenAPI", "OpenAPI-Generator", "Radiant API"]
-include = ["openapi_client/py.typed"]
+repository = "https://github.com/radiant-network/radiant-portal"
+keywords = ["Radiant Python CLI"]
+include = ["radiant_python/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.12"
 
 urllib3 = ">= 1.25.3, < 3.0.0"
 python-dateutil = ">= 2.8.2"
@@ -35,7 +35,7 @@ extension-pkg-whitelist = "pydantic"
 
 [tool.mypy]
 files = [
-  "openapi_client",
+  "radiant_python",
   #"test",  # auto-generated tests
   "tests", # hand-written tests
 ]
@@ -73,7 +73,7 @@ disallow_any_generics = true
 
 [[tool.mypy.overrides]]
 module = [
-  "openapi_client.configuration",
+  "radiant_python.configuration",
 ]
 warn_unused_ignores = true
 strict_equality = true

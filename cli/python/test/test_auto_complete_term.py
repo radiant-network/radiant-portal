@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.auto_complete_term import AutoCompleteTerm
+from radiant-python.models.auto_complete_term import AutoCompleteTerm
 
 class TestAutoCompleteTerm(unittest.TestCase):
     """AutoCompleteTerm unit test stubs"""
@@ -35,12 +35,12 @@ class TestAutoCompleteTerm(unittest.TestCase):
         model = AutoCompleteTerm()
         if include_optional:
             return AutoCompleteTerm(
-                highlight = openapi_client.models.term.Term(
+                highlight = radiant-python.models.term.Term(
                     id = '', 
                     name = '', 
                     onset_code = '', 
                     term = '', ),
-                source = openapi_client.models.term.Term(
+                source = radiant-python.models.term.Term(
                     id = '', 
                     name = '', 
                     onset_code = '', 

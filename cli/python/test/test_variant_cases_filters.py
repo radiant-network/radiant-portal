@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.variant_cases_filters import VariantCasesFilters
+from radiant-python.models.variant_cases_filters import VariantCasesFilters
 
 class TestVariantCasesFilters(unittest.TestCase):
     """VariantCasesFilters unit test stubs"""
@@ -36,19 +36,19 @@ class TestVariantCasesFilters(unittest.TestCase):
         if include_optional:
             return VariantCasesFilters(
                 case_analysis = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 classification = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 diagnosis_lab = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
@@ -57,19 +57,19 @@ class TestVariantCasesFilters(unittest.TestCase):
         else:
             return VariantCasesFilters(
                 case_analysis = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 classification = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 diagnosis_lab = [
-                    openapi_client.models.aggregation.Aggregation(
+                    radiant-python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )

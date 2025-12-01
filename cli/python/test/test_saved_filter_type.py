@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.saved_filter_type import SavedFilterType
+from radiant-python.models.saved_filter_type import SavedFilterType
 
 class TestSavedFilterType(unittest.TestCase):
     """SavedFilterType unit test stubs"""

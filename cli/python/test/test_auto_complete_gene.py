@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.auto_complete_gene import AutoCompleteGene
+from radiant-python.models.auto_complete_gene import AutoCompleteGene
 
 class TestAutoCompleteGene(unittest.TestCase):
     """AutoCompleteGene unit test stubs"""
@@ -35,12 +35,12 @@ class TestAutoCompleteGene(unittest.TestCase):
         model = AutoCompleteGene()
         if include_optional:
             return AutoCompleteGene(
-                highlight = openapi_client.models.term.Term(
+                highlight = radiant-python.models.term.Term(
                     id = '', 
                     name = '', 
                     onset_code = '', 
                     term = '', ),
-                source = openapi_client.models.term.Term(
+                source = radiant-python.models.term.Term(
                     id = '', 
                     name = '', 
                     onset_code = '', 

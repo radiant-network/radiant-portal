@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.column_pinning_config import ColumnPinningConfig
+from radiant_python.models.column_pinning_config import ColumnPinningConfig
 
 # TODO update the JSON string below
 json = "{}"

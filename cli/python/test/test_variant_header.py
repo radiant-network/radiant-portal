@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.variant_header import VariantHeader
+from radiant-python.models.variant_header import VariantHeader
 
 class TestVariantHeader(unittest.TestCase):
     """VariantHeader unit test stubs"""

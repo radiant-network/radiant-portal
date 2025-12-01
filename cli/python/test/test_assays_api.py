@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.assays_api import AssaysApi
+from radiant-python.api.assays_api import AssaysApi
 
 
 class TestAssaysApi(unittest.TestCase):

@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.genes_api import GenesApi
+from radiant-python.api.genes_api import GenesApi
 
 
 class TestGenesApi(unittest.TestCase):

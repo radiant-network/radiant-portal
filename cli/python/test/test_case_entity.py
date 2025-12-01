@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.case_entity import CaseEntity
+from radiant-python.models.case_entity import CaseEntity
 
 class TestCaseEntity(unittest.TestCase):
     """CaseEntity unit test stubs"""
@@ -38,7 +38,7 @@ class TestCaseEntity(unittest.TestCase):
                 analysis_catalog_code = '',
                 analysis_catalog_name = '',
                 assays = [
-                    openapi_client.models.case_assay.CaseAssay(
+                    radiant-python.models.case_assay.CaseAssay(
                         affected_status_code = '', 
                         experimental_strategy_code = '', 
                         has_variants = True, 
@@ -58,21 +58,21 @@ class TestCaseEntity(unittest.TestCase):
                 diagnosis_lab_code = '',
                 diagnosis_lab_name = '',
                 members = [
-                    openapi_client.models.case_patient_clinical_information.CasePatientClinicalInformation(
+                    radiant-python.models.case_patient_clinical_information.CasePatientClinicalInformation(
                         affected_status_code = '', 
                         date_of_birth = '', 
                         ethnicity_codes = [
                             ''
                             ], 
                         non_observed_phenotypes = [
-                            openapi_client.models.term.Term(
+                            radiant-python.models.term.Term(
                                 id = '', 
                                 name = '', 
                                 onset_code = '', 
                                 term = '', )
                             ], 
                         observed_phenotypes = [
-                            openapi_client.models.term.Term(
+                            radiant-python.models.term.Term(
                                 id = '', 
                                 name = '', 
                                 onset_code = '', 
@@ -96,7 +96,7 @@ class TestCaseEntity(unittest.TestCase):
                 project_name = '',
                 status_code = '',
                 tasks = [
-                    openapi_client.models.case_task.CaseTask(
+                    radiant-python.models.case_task.CaseTask(
                         created_on = '', 
                         id = 56, 
                         patients = [
@@ -110,7 +110,7 @@ class TestCaseEntity(unittest.TestCase):
         else:
             return CaseEntity(
                 assays = [
-                    openapi_client.models.case_assay.CaseAssay(
+                    radiant-python.models.case_assay.CaseAssay(
                         affected_status_code = '', 
                         experimental_strategy_code = '', 
                         has_variants = True, 
@@ -127,21 +127,21 @@ class TestCaseEntity(unittest.TestCase):
                 case_id = 56,
                 created_on = '',
                 members = [
-                    openapi_client.models.case_patient_clinical_information.CasePatientClinicalInformation(
+                    radiant-python.models.case_patient_clinical_information.CasePatientClinicalInformation(
                         affected_status_code = '', 
                         date_of_birth = '', 
                         ethnicity_codes = [
                             ''
                             ], 
                         non_observed_phenotypes = [
-                            openapi_client.models.term.Term(
+                            radiant-python.models.term.Term(
                                 id = '', 
                                 name = '', 
                                 onset_code = '', 
                                 term = '', )
                             ], 
                         observed_phenotypes = [
-                            openapi_client.models.term.Term(
+                            radiant-python.models.term.Term(
                                 id = '', 
                                 name = '', 
                                 onset_code = '', 
@@ -156,7 +156,7 @@ class TestCaseEntity(unittest.TestCase):
                     ],
                 status_code = '',
                 tasks = [
-                    openapi_client.models.case_task.CaseTask(
+                    radiant-python.models.case_task.CaseTask(
                         created_on = '', 
                         id = 56, 
                         patients = [

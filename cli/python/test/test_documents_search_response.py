@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.documents_search_response import DocumentsSearchResponse
+from radiant-python.models.documents_search_response import DocumentsSearchResponse
 
 class TestDocumentsSearchResponse(unittest.TestCase):
     """DocumentsSearchResponse unit test stubs"""
@@ -37,7 +37,7 @@ class TestDocumentsSearchResponse(unittest.TestCase):
             return DocumentsSearchResponse(
                 count = 56,
                 list = [
-                    openapi_client.models.document_result.DocumentResult(
+                    radiant-python.models.document_result.DocumentResult(
                         case_id = 56, 
                         created_on = '', 
                         data_type_code = '', 
@@ -60,7 +60,7 @@ class TestDocumentsSearchResponse(unittest.TestCase):
             return DocumentsSearchResponse(
                 count = 56,
                 list = [
-                    openapi_client.models.document_result.DocumentResult(
+                    radiant-python.models.document_result.DocumentResult(
                         case_id = 56, 
                         created_on = '', 
                         data_type_code = '', 

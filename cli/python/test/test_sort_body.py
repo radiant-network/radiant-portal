@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.sort_body import SortBody
+from radiant-python.models.sort_body import SortBody
 
 class TestSortBody(unittest.TestCase):
     """SortBody unit test stubs"""

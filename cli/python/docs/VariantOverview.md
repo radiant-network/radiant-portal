@@ -48,7 +48,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.variant_overview import VariantOverview
+from radiant_python.models.variant_overview import VariantOverview
 
 # TODO update the JSON string below
 json = "{}"

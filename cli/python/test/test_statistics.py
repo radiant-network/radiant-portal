@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.statistics import Statistics
+from radiant-python.models.statistics import Statistics
 
 class TestStatistics(unittest.TestCase):
     """Statistics unit test stubs"""

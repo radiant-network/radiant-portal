@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.autocomplete_result import AutocompleteResult
+from radiant-python.models.autocomplete_result import AutocompleteResult
 
 class TestAutocompleteResult(unittest.TestCase):
     """AutocompleteResult unit test stubs"""

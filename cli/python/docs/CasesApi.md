@@ -1,4 +1,4 @@
-# openapi_client.CasesApi
+# radiant_python.CasesApi
 
 All URIs are relative to *http://localhost*
 
@@ -24,14 +24,14 @@ Retrieve AutocompleteResult list of ids matching prefix
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.autocomplete_result import AutocompleteResult
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.autocomplete_result import AutocompleteResult
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -41,14 +41,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.CasesApi(api_client)
+    api_instance = radiant_python.CasesApi(api_client)
     prefix = 'prefix_example' # str | Prefix
     limit = 'limit_example' # str | Limit (optional)
 
@@ -105,14 +105,14 @@ Retrieve CaseEntity by its ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.case_entity import CaseEntity
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.case_entity import CaseEntity
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -122,14 +122,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.CasesApi(api_client)
+    api_instance = radiant_python.CasesApi(api_client)
     case_id = 56 # int | Case ID
 
     try:
@@ -185,15 +185,15 @@ Retrieve DocumentFilters documents filters for a specific case
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.document_filters import DocumentFilters
-from openapi_client.models.filters_body_with_criteria import FiltersBodyWithCriteria
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.document_filters import DocumentFilters
+from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -203,16 +203,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.CasesApi(api_client)
+    api_instance = radiant_python.CasesApi(api_client)
     case_id = 'case_id_example' # str | Case ID
-    filters_body_with_criteria = openapi_client.FiltersBodyWithCriteria() # FiltersBodyWithCriteria | Filters Body
+    filters_body_with_criteria = radiant_python.FiltersBodyWithCriteria() # FiltersBodyWithCriteria | Filters Body
 
     try:
         # Get DocumentFilters documents filters for a specific case
@@ -267,15 +267,15 @@ Search for DocumentResult list for a case entity
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.documents_search_response import DocumentsSearchResponse
-from openapi_client.models.list_body_with_criteria import ListBodyWithCriteria
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.documents_search_response import DocumentsSearchResponse
+from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -285,16 +285,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.CasesApi(api_client)
+    api_instance = radiant_python.CasesApi(api_client)
     case_id = 'case_id_example' # str | Case ID
-    list_body_with_criteria = openapi_client.ListBodyWithCriteria() # ListBodyWithCriteria | List Body
+    list_body_with_criteria = radiant_python.ListBodyWithCriteria() # ListBodyWithCriteria | List Body
 
     try:
         # Search DocumentResult list for a case entity
@@ -350,15 +350,15 @@ Retrieve CaseFilters cases filters
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.case_filters import CaseFilters
-from openapi_client.models.filters_body_with_criteria import FiltersBodyWithCriteria
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.case_filters import CaseFilters
+from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -368,15 +368,15 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.CasesApi(api_client)
-    filters_body_with_criteria = openapi_client.FiltersBodyWithCriteria() # FiltersBodyWithCriteria | Filters Body
+    api_instance = radiant_python.CasesApi(api_client)
+    filters_body_with_criteria = radiant_python.FiltersBodyWithCriteria() # FiltersBodyWithCriteria | Filters Body
 
     try:
         # Get CaseFilters cases filters
@@ -430,15 +430,15 @@ Search cases
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.cases_search_response import CasesSearchResponse
-from openapi_client.models.list_body_with_criteria import ListBodyWithCriteria
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.cases_search_response import CasesSearchResponse
+from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -448,15 +448,15 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.CasesApi(api_client)
-    list_body_with_criteria = openapi_client.ListBodyWithCriteria() # ListBodyWithCriteria | List Body
+    api_instance = radiant_python.CasesApi(api_client)
+    list_body_with_criteria = radiant_python.ListBodyWithCriteria() # ListBodyWithCriteria | List Body
 
     try:
         # Search cases

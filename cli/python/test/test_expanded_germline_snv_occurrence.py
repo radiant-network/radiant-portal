@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
+from radiant-python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
 
 class TestExpandedGermlineSNVOccurrence(unittest.TestCase):
     """ExpandedGermlineSNVOccurrence unit test stubs"""
@@ -83,7 +83,7 @@ class TestExpandedGermlineSNVOccurrence(unittest.TestCase):
                     56
                     ],
                 omim_conditions = [
-                    openapi_client.models.omim_gene_panel.OmimGenePanel(
+                    radiant-python.models.omim_gene_panel.OmimGenePanel(
                         inheritance_code = [
                             ''
                             ], 

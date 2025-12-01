@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.variant_uninterpreted_cases_search_response import VariantUninterpretedCasesSearchResponse
+from radiant_python.models.variant_uninterpreted_cases_search_response import VariantUninterpretedCasesSearchResponse
 
 # TODO update the JSON string below
 json = "{}"

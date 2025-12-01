@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.saved_filter_creation_input import SavedFilterCreationInput
+from radiant_python.models.saved_filter_creation_input import SavedFilterCreationInput
 
 # TODO update the JSON string below
 json = "{}"

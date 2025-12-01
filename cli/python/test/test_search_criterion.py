@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.search_criterion import SearchCriterion
+from radiant-python.models.search_criterion import SearchCriterion
 
 class TestSearchCriterion(unittest.TestCase):
     """SearchCriterion unit test stubs"""

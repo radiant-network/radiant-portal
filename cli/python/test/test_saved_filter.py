@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.saved_filter import SavedFilter
+from radiant-python.models.saved_filter import SavedFilter
 
 class TestSavedFilter(unittest.TestCase):
     """SavedFilter unit test stubs"""
@@ -40,7 +40,7 @@ class TestSavedFilter(unittest.TestCase):
                 id = '',
                 name = '',
                 queries = [
-                    openapi_client.models.sqon.Sqon(
+                    radiant-python.models.sqon.Sqon(
                         content = null, 
                         id = '', 
                         op = 'in', )
@@ -56,7 +56,7 @@ class TestSavedFilter(unittest.TestCase):
                 id = '',
                 name = '',
                 queries = [
-                    openapi_client.models.sqon.Sqon(
+                    radiant-python.models.sqon.Sqon(
                         content = null, 
                         id = '', 
                         op = 'in', )

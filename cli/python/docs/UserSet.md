@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.user_set import UserSet
+from radiant_python.models.user_set import UserSet
 
 # TODO update the JSON string below
 json = "{}"

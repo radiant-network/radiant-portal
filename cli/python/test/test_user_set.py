@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.user_set import UserSet
+from radiant-python.models.user_set import UserSet
 
 class TestUserSet(unittest.TestCase):
     """UserSet unit test stubs"""

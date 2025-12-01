@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.documents_api import DocumentsApi
+from radiant-python.api.documents_api import DocumentsApi
 
 
 class TestDocumentsApi(unittest.TestCase):

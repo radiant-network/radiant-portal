@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.aggregation import Aggregation
+from radiant_python.models.aggregation import Aggregation
 
 # TODO update the JSON string below
 json = "{}"

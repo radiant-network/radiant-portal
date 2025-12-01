@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.case_task import CaseTask
+from radiant-python.models.case_task import CaseTask
 
 class TestCaseTask(unittest.TestCase):
     """CaseTask unit test stubs"""

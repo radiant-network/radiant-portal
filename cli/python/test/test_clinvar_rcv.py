@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.clinvar_rcv import ClinvarRCV
+from radiant-python.models.clinvar_rcv import ClinvarRCV
 
 class TestClinvarRCV(unittest.TestCase):
     """ClinvarRCV unit test stubs"""

@@ -17,7 +17,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.saved_filter import SavedFilter
+from radiant_python.models.saved_filter import SavedFilter
 
 # TODO update the JSON string below
 json = "{}"

@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.search_criterion import SearchCriterion
+from radiant_python.models.search_criterion import SearchCriterion
 
 # TODO update the JSON string below
 json = "{}"

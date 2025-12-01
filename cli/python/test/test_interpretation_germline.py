@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.interpretation_germline import InterpretationGermline
+from radiant-python.models.interpretation_germline import InterpretationGermline
 
 class TestInterpretationGermline(unittest.TestCase):
     """InterpretationGermline unit test stubs"""
@@ -47,12 +47,12 @@ class TestInterpretationGermline(unittest.TestCase):
                 id = '',
                 interpretation = '',
                 locus_id = '',
-                metadata = openapi_client.models.interpretation_metadata.InterpretationMetadata(
+                metadata = radiant-python.models.interpretation_metadata.InterpretationMetadata(
                     analysis_id = '', 
                     patient_id = '', 
                     variant_hash = '', ),
                 pubmed = [
-                    openapi_client.models.interpretation_pubmed.InterpretationPubmed(
+                    radiant-python.models.interpretation_pubmed.InterpretationPubmed(
                         citation = '', 
                         citation_id = '', )
                     ],

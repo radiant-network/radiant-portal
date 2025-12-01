@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.samples_api import SamplesApi
+from radiant-python.api.samples_api import SamplesApi
 
 
 class TestSamplesApi(unittest.TestCase):

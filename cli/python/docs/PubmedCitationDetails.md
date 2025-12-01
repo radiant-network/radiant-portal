@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.pubmed_citation_details import PubmedCitationDetails
+from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
 
 # TODO update the JSON string below
 json = "{}"

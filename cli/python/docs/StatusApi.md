@@ -1,4 +1,4 @@
-# openapi_client.StatusApi
+# radiant_python.StatusApi
 
 All URIs are relative to *http://localhost*
 
@@ -18,21 +18,21 @@ Returns the current status of the API
 
 
 ```python
-import openapi_client
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.StatusApi(api_client)
+    api_instance = radiant_python.StatusApi(api_client)
 
     try:
         # Get API status

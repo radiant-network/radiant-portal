@@ -27,7 +27,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.interpretation_somatic import InterpretationSomatic
+from radiant_python.models.interpretation_somatic import InterpretationSomatic
 
 # TODO update the JSON string below
 json = "{}"

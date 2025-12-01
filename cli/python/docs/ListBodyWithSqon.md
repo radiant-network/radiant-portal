@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
 
 # TODO update the JSON string below
 json = "{}"

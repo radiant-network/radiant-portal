@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.igv_tracks import IGVTracks
+from radiant_python.models.igv_tracks import IGVTracks
 
 # TODO update the JSON string below
 json = "{}"

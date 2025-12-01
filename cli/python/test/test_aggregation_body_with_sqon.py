@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.aggregation_body_with_sqon import AggregationBodyWithSqon
+from radiant-python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
 
 class TestAggregationBodyWithSqon(unittest.TestCase):
     """AggregationBodyWithSqon unit test stubs"""
@@ -37,7 +37,7 @@ class TestAggregationBodyWithSqon(unittest.TestCase):
             return AggregationBodyWithSqon(
                 var_field = '',
                 size = 56,
-                sqon = openapi_client.models.sqon.Sqon(
+                sqon = radiant-python.models.sqon.Sqon(
                     content = null, 
                     id = '', 
                     op = 'in', )

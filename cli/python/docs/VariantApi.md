@@ -1,4 +1,4 @@
-# openapi_client.VariantApi
+# radiant_python.VariantApi
 
 All URIs are relative to *http://localhost*
 
@@ -28,14 +28,14 @@ Retrieve germline expanded interpreted case for a given locus, sequencing and tr
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.variant_expanded_interpreted_case import VariantExpandedInterpretedCase
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.variant_expanded_interpreted_case import VariantExpandedInterpretedCase
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -45,14 +45,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
     seq_id = 'seq_id_example' # str | Seq ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
@@ -112,14 +112,14 @@ Retrieve cases count for a given locus id
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.variant_cases_count import VariantCasesCount
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.variant_cases_count import VariantCasesCount
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -129,14 +129,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
 
     try:
@@ -192,14 +192,14 @@ Retrieve cases filters for germline variant entity
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.variant_cases_filters import VariantCasesFilters
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.variant_cases_filters import VariantCasesFilters
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -209,14 +209,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
 
     try:
         # Get cases filters for germline variant entity
@@ -268,14 +268,14 @@ Retrieve conditions for germline variant entity for a specific gene panel
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.gene_panel_conditions import GenePanelConditions
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.gene_panel_conditions import GenePanelConditions
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -285,14 +285,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
     panel_type = 'panel_type_example' # str | Gene panel type
     filter = 'filter_example' # str | Condition filter (optional)
@@ -352,14 +352,14 @@ Retrieve ClinVar conditions for germline variant entity
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.clinvar_rcv import ClinvarRCV
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.clinvar_rcv import ClinvarRCV
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -369,14 +369,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
 
     try:
@@ -432,14 +432,14 @@ Retrieve germline Variant Consequences for a given locus
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.variant_consequence import VariantConsequence
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.variant_consequence import VariantConsequence
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -449,14 +449,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
 
     try:
@@ -512,14 +512,14 @@ Retrieve germline Variant Header data for a given locus
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.variant_header import VariantHeader
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.variant_header import VariantHeader
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -529,14 +529,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
 
     try:
@@ -592,15 +592,15 @@ Retrieve Germline Variant interpreted cases for a given locus
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.list_body_with_criteria import ListBodyWithCriteria
-from openapi_client.models.variant_interpreted_cases_search_response import VariantInterpretedCasesSearchResponse
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
+from radiant_python.models.variant_interpreted_cases_search_response import VariantInterpretedCasesSearchResponse
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -610,16 +610,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
-    list_body_with_criteria = openapi_client.ListBodyWithCriteria() # ListBodyWithCriteria | Search Body with criteria
+    list_body_with_criteria = radiant_python.ListBodyWithCriteria() # ListBodyWithCriteria | Search Body with criteria
 
     try:
         # Get list of interpreted Cases for a germline variant
@@ -675,14 +675,14 @@ Retrieve germline Variant Overview data for a given locus
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.variant_overview import VariantOverview
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.variant_overview import VariantOverview
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -692,14 +692,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
 
     try:
@@ -755,15 +755,15 @@ Retrieve Germline Variant uninterpreted cases for a given locus
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.list_body_with_criteria import ListBodyWithCriteria
-from openapi_client.models.variant_uninterpreted_cases_search_response import VariantUninterpretedCasesSearchResponse
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
+from radiant_python.models.variant_uninterpreted_cases_search_response import VariantUninterpretedCasesSearchResponse
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -773,16 +773,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.VariantApi(api_client)
+    api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
-    list_body_with_criteria = openapi_client.ListBodyWithCriteria() # ListBodyWithCriteria | Search Body with criteria
+    list_body_with_criteria = radiant_python.ListBodyWithCriteria() # ListBodyWithCriteria | Search Body with criteria
 
     try:
         # Get list of uninterpreted Cases for a germline variant

@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.list_body_with_sqon import ListBodyWithSqon
+from radiant-python.models.list_body_with_sqon import ListBodyWithSqon
 
 class TestListBodyWithSqon(unittest.TestCase):
     """ListBodyWithSqon unit test stubs"""
@@ -42,11 +42,11 @@ class TestListBodyWithSqon(unittest.TestCase):
                 offset = 56,
                 page_index = 56,
                 sort = [
-                    openapi_client.models.sort_body.SortBody(
+                    radiant-python.models.sort_body.SortBody(
                         field = '', 
                         order = 'asc', )
                     ],
-                sqon = openapi_client.models.sqon.Sqon(
+                sqon = radiant-python.models.sqon.Sqon(
                     content = null, 
                     id = '', 
                     op = 'in', )

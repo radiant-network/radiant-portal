@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.pagination_config import PaginationConfig
+from radiant_python.models.pagination_config import PaginationConfig
 
 # TODO update the JSON string below
 json = "{}"

@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.omim_gene_panel import OmimGenePanel
+from radiant_python.models.omim_gene_panel import OmimGenePanel
 
 # TODO update the JSON string below
 json = "{}"

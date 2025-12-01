@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.get_batch_response import GetBatchResponse
+from radiant-python.models.get_batch_response import GetBatchResponse
 
 class TestGetBatchResponse(unittest.TestCase):
     """GetBatchResponse unit test stubs"""
@@ -40,15 +40,15 @@ class TestGetBatchResponse(unittest.TestCase):
                 dry_run = True,
                 finished_on = '',
                 id = '',
-                report = openapi_client.models.batch_report.BatchReport(
+                report = radiant-python.models.batch_report.BatchReport(
                     error = [
-                        openapi_client.models.batch_message.BatchMessage(
+                        radiant-python.models.batch_message.BatchMessage(
                             code = '', 
                             message = '', 
                             path = '', )
                         ], 
                     info = [
-                        openapi_client.models.batch_message.BatchMessage(
+                        radiant-python.models.batch_message.BatchMessage(
                             code = '', 
                             message = '', 
                             path = '', )
@@ -58,7 +58,7 @@ class TestGetBatchResponse(unittest.TestCase):
                         ], ),
                 started_on = '',
                 status = '',
-                summary = openapi_client.models.batch_summary.BatchSummary(
+                summary = radiant-python.models.batch_summary.BatchSummary(
                     created = 56, 
                     errors = 56, 
                     skipped = 56, 

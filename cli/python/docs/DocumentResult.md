@@ -25,7 +25,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.document_result import DocumentResult
+from radiant_python.models.document_result import DocumentResult
 
 # TODO update the JSON string below
 json = "{}"

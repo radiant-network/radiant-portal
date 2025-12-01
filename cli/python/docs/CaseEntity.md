@@ -31,7 +31,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.case_entity import CaseEntity
+from radiant_python.models.case_entity import CaseEntity
 
 # TODO update the JSON string below
 json = "{}"

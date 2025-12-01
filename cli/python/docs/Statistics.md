@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.statistics import Statistics
+from radiant_python.models.statistics import Statistics
 
 # TODO update the JSON string below
 json = "{}"

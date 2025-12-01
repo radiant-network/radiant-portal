@@ -67,7 +67,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
+from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
 
 # TODO update the JSON string below
 json = "{}"

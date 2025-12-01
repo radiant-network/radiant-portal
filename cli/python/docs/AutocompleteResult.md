@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.autocomplete_result import AutocompleteResult
+from radiant_python.models.autocomplete_result import AutocompleteResult
 
 # TODO update the JSON string below
 json = "{}"

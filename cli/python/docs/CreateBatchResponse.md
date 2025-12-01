@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.create_batch_response import CreateBatchResponse
+from radiant_python.models.create_batch_response import CreateBatchResponse
 
 # TODO update the JSON string below
 json = "{}"

@@ -1,4 +1,4 @@
-# openapi_client.SavedFiltersApi
+# radiant_python.SavedFiltersApi
 
 All URIs are relative to *http://localhost*
 
@@ -23,13 +23,13 @@ Delete a saved filter
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -39,14 +39,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.SavedFiltersApi(api_client)
+    api_instance = radiant_python.SavedFiltersApi(api_client)
     saved_filter_id = 'saved_filter_id_example' # str | Saved Filter ID
 
     try:
@@ -100,14 +100,14 @@ Get saved filter by id
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.saved_filter import SavedFilter
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.saved_filter import SavedFilter
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -117,14 +117,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.SavedFiltersApi(api_client)
+    api_instance = radiant_python.SavedFiltersApi(api_client)
     saved_filter_id = 'saved_filter_id_example' # str | Saved Filter ID
 
     try:
@@ -180,14 +180,14 @@ Get user saved filters
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.saved_filter import SavedFilter
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.saved_filter import SavedFilter
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -197,14 +197,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.SavedFiltersApi(api_client)
+    api_instance = radiant_python.SavedFiltersApi(api_client)
     type = 'type_example' # str | Saved Filter Type (optional)
 
     try:
@@ -261,15 +261,15 @@ Create a new saved filter
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.saved_filter import SavedFilter
-from openapi_client.models.saved_filter_creation_input import SavedFilterCreationInput
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.saved_filter import SavedFilter
+from radiant_python.models.saved_filter_creation_input import SavedFilterCreationInput
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -279,15 +279,15 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.SavedFiltersApi(api_client)
-    saved_filter_creation_input = openapi_client.SavedFilterCreationInput() # SavedFilterCreationInput | New Saved Filter to create
+    api_instance = radiant_python.SavedFiltersApi(api_client)
+    saved_filter_creation_input = radiant_python.SavedFilterCreationInput() # SavedFilterCreationInput | New Saved Filter to create
 
     try:
         # Create a new saved filter
@@ -343,15 +343,15 @@ Update a saved filter
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.saved_filter import SavedFilter
-from openapi_client.models.saved_filter_update_input import SavedFilterUpdateInput
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.saved_filter import SavedFilter
+from radiant_python.models.saved_filter_update_input import SavedFilterUpdateInput
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -361,16 +361,16 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.SavedFiltersApi(api_client)
+    api_instance = radiant_python.SavedFiltersApi(api_client)
     saved_filter_id = 'saved_filter_id_example' # str | Saved Filter ID
-    saved_filter_update_input = openapi_client.SavedFilterUpdateInput() # SavedFilterUpdateInput | Saved Filter to update
+    saved_filter_update_input = radiant_python.SavedFilterUpdateInput() # SavedFilterUpdateInput | Saved Filter to update
 
     try:
         # Update a saved filter

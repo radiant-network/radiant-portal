@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.documents_search_response import DocumentsSearchResponse
+from radiant_python.models.documents_search_response import DocumentsSearchResponse
 
 # TODO update the JSON string below
 json = "{}"

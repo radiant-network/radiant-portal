@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.batch_summary import BatchSummary
+from radiant_python.models.batch_summary import BatchSummary
 
 # TODO update the JSON string below
 json = "{}"

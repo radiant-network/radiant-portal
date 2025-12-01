@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.interpretation_metadata import InterpretationMetadata
+from radiant_python.models.interpretation_metadata import InterpretationMetadata
 
 # TODO update the JSON string below
 json = "{}"

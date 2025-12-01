@@ -1,4 +1,4 @@
-# openapi_client.BatchesApi
+# radiant_python.BatchesApi
 
 All URIs are relative to *http://localhost*
 
@@ -19,14 +19,14 @@ Retrieve a batch by ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.get_batch_response import GetBatchResponse
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.get_batch_response import GetBatchResponse
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -36,14 +36,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.BatchesApi(api_client)
+    api_instance = radiant_python.BatchesApi(api_client)
     batch_id = 'batch_id_example' # str | Batch ID
     body = None # object |  (optional)
 

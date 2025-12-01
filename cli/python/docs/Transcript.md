@@ -32,7 +32,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.transcript import Transcript
+from radiant_python.models.transcript import Transcript
 
 # TODO update the JSON string below
 json = "{}"

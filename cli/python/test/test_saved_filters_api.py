@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.saved_filters_api import SavedFiltersApi
+from radiant-python.api.saved_filters_api import SavedFiltersApi
 
 
 class TestSavedFiltersApi(unittest.TestCase):

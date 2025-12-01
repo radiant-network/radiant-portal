@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.api.occurrences_api import OccurrencesApi
+from radiant-python.api.occurrences_api import OccurrencesApi
 
 
 class TestOccurrencesApi(unittest.TestCase):

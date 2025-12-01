@@ -27,7 +27,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.interpretation_germline import InterpretationGermline
+from radiant_python.models.interpretation_germline import InterpretationGermline
 
 # TODO update the JSON string below
 json = "{}"

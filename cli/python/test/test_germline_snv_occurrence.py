@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.germline_snv_occurrence import GermlineSNVOccurrence
+from radiant-python.models.germline_snv_occurrence import GermlineSNVOccurrence
 
 class TestGermlineSNVOccurrence(unittest.TestCase):
     """GermlineSNVOccurrence unit test stubs"""

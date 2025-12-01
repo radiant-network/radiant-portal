@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.term import Term
+from radiant_python.models.term import Term
 
 # TODO update the JSON string below
 json = "{}"

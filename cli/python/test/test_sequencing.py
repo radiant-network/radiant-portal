@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.sequencing import Sequencing
+from radiant-python.models.sequencing import Sequencing
 
 class TestSequencing(unittest.TestCase):
     """Sequencing unit test stubs"""

@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.pagination_config import PaginationConfig
+from radiant-python.models.pagination_config import PaginationConfig
 
 class TestPaginationConfig(unittest.TestCase):
     """PaginationConfig unit test stubs"""

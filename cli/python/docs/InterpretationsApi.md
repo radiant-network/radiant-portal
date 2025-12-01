@@ -1,4 +1,4 @@
-# openapi_client.InterpretationsApi
+# radiant_python.InterpretationsApi
 
 All URIs are relative to *http://localhost*
 
@@ -29,14 +29,14 @@ Get interpretation germline
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_germline import InterpretationGermline
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_germline import InterpretationGermline
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -46,14 +46,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     case_id = 'case_id_example' # str | Case ID
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
@@ -116,14 +116,14 @@ Get interpretation germline
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_germline import InterpretationGermline
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_germline import InterpretationGermline
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -133,14 +133,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
@@ -201,14 +201,14 @@ Get interpretation somatic
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_somatic import InterpretationSomatic
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_somatic import InterpretationSomatic
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -218,14 +218,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     case_id = 'case_id_example' # str | Case ID
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
@@ -288,14 +288,14 @@ Get interpretation somatic
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_somatic import InterpretationSomatic
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_somatic import InterpretationSomatic
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -305,14 +305,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
@@ -373,14 +373,14 @@ Get pubmed citation by ID
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.pubmed_citation import PubmedCitation
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.pubmed_citation import PubmedCitation
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -390,14 +390,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     citation_id = 'citation_id_example' # str | Citation ID
 
     try:
@@ -454,14 +454,14 @@ Create or Update interpretation germline
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_germline import InterpretationGermline
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_germline import InterpretationGermline
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -471,19 +471,19 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     case_id = 'case_id_example' # str | Case ID
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
-    interpretation_germline = openapi_client.InterpretationGermline() # InterpretationGermline | Interpretation Body
+    interpretation_germline = radiant_python.InterpretationGermline() # InterpretationGermline | Interpretation Body
 
     try:
         # Create or Update interpretation germline
@@ -542,14 +542,14 @@ Create or Update interpretation germline
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_germline import InterpretationGermline
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_germline import InterpretationGermline
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -559,18 +559,18 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
-    interpretation_germline = openapi_client.InterpretationGermline() # InterpretationGermline | Interpretation Body
+    interpretation_germline = radiant_python.InterpretationGermline() # InterpretationGermline | Interpretation Body
 
     try:
         # Create or Update interpretation germline
@@ -628,14 +628,14 @@ Create or Update interpretation somatic
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_somatic import InterpretationSomatic
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_somatic import InterpretationSomatic
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -645,19 +645,19 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     case_id = 'case_id_example' # str | Case ID
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
-    interpretation_somatic = openapi_client.InterpretationSomatic() # InterpretationSomatic | Interpretation Body
+    interpretation_somatic = radiant_python.InterpretationSomatic() # InterpretationSomatic | Interpretation Body
 
     try:
         # Create or Update interpretation somatic
@@ -716,14 +716,14 @@ Create or Update interpretation somatic
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_somatic import InterpretationSomatic
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_somatic import InterpretationSomatic
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -733,18 +733,18 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
-    interpretation_somatic = openapi_client.InterpretationSomatic() # InterpretationSomatic | Interpretation Body
+    interpretation_somatic = radiant_python.InterpretationSomatic() # InterpretationSomatic | Interpretation Body
 
     try:
         # Create or Update interpretation somatic
@@ -802,14 +802,14 @@ Search interpretation germline
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_germline import InterpretationGermline
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_germline import InterpretationGermline
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -819,14 +819,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
 
     try:
         # Search interpretation germline
@@ -877,14 +877,14 @@ Search interpretation somatic
 * Bearer (JWT) Authentication (bearerauth):
 
 ```python
-import openapi_client
-from openapi_client.models.interpretation_somatic import InterpretationSomatic
-from openapi_client.rest import ApiException
+import radiant_python
+from radiant_python.models.interpretation_somatic import InterpretationSomatic
+from radiant_python.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     host = "http://localhost"
 )
 
@@ -894,14 +894,14 @@ configuration = openapi_client.Configuration(
 # satisfies your auth use case.
 
 # Configure Bearer authorization (JWT): bearerauth
-configuration = openapi_client.Configuration(
+configuration = radiant_python.Configuration(
     access_token = os.environ["BEARER_TOKEN"]
 )
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.InterpretationsApi(api_client)
+    api_instance = radiant_python.InterpretationsApi(api_client)
 
     try:
         # Search interpretation somatic

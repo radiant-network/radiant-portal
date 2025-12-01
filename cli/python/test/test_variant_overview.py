@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.variant_overview import VariantOverview
+from radiant-python.models.variant_overview import VariantOverview
 
 class TestVariantOverview(unittest.TestCase):
     """VariantOverview unit test stubs"""
@@ -64,7 +64,7 @@ class TestVariantOverview(unittest.TestCase):
                 lrt_pred = '',
                 lrt_score = 1.337,
                 omim_conditions = [
-                    openapi_client.models.omim_gene_panel.OmimGenePanel(
+                    radiant-python.models.omim_gene_panel.OmimGenePanel(
                         inheritance_code = [
                             ''
                             ], 

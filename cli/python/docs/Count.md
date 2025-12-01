@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.count import Count
+from radiant_python.models.count import Count
 
 # TODO update the JSON string below
 json = "{}"

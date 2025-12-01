@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.auto_complete_term import AutoCompleteTerm
+from radiant_python.models.auto_complete_term import AutoCompleteTerm
 
 # TODO update the JSON string below
 json = "{}"

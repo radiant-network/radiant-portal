@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.variant_consequence import VariantConsequence
+from radiant-python.models.variant_consequence import VariantConsequence
 
 class TestVariantConsequence(unittest.TestCase):
     """VariantConsequence unit test stubs"""
@@ -45,7 +45,7 @@ class TestVariantConsequence(unittest.TestCase):
                     ],
                 symbol = '',
                 transcripts = [
-                    openapi_client.models.transcript.Transcript(
+                    radiant-python.models.transcript.Transcript(
                         aa_change = '', 
                         cadd_phred = 1.337, 
                         cadd_score = 1.337, 

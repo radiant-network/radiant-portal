@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.aggregation_body_with_sqon import AggregationBodyWithSqon
+from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
 
 # TODO update the JSON string below
 json = "{}"

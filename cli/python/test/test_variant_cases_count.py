@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.variant_cases_count import VariantCasesCount
+from radiant-python.models.variant_cases_count import VariantCasesCount
 
 class TestVariantCasesCount(unittest.TestCase):
     """VariantCasesCount unit test stubs"""

@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.cases_search_response import CasesSearchResponse
+from radiant-python.models.cases_search_response import CasesSearchResponse
 
 class TestCasesSearchResponse(unittest.TestCase):
     """CasesSearchResponse unit test stubs"""
@@ -37,7 +37,7 @@ class TestCasesSearchResponse(unittest.TestCase):
             return CasesSearchResponse(
                 count = 56,
                 list = [
-                    openapi_client.models.case_result.CaseResult(
+                    radiant-python.models.case_result.CaseResult(
                         analysis_catalog_code = '', 
                         analysis_catalog_name = '', 
                         case_id = 56, 
@@ -66,7 +66,7 @@ class TestCasesSearchResponse(unittest.TestCase):
             return CasesSearchResponse(
                 count = 56,
                 list = [
-                    openapi_client.models.case_result.CaseResult(
+                    radiant-python.models.case_result.CaseResult(
                         analysis_catalog_code = '', 
                         analysis_catalog_name = '', 
                         case_id = 56, 

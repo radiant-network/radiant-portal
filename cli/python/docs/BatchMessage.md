@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.batch_message import BatchMessage
+from radiant_python.models.batch_message import BatchMessage
 
 # TODO update the JSON string below
 json = "{}"

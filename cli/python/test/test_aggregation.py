@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.aggregation import Aggregation
+from radiant-python.models.aggregation import Aggregation
 
 class TestAggregation(unittest.TestCase):
     """Aggregation unit test stubs"""

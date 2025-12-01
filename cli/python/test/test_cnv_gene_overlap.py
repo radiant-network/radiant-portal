@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.cnv_gene_overlap import CNVGeneOverlap
+from radiant-python.models.cnv_gene_overlap import CNVGeneOverlap
 
 class TestCNVGeneOverlap(unittest.TestCase):
     """CNVGeneOverlap unit test stubs"""

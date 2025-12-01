@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.variant_cases_filters import VariantCasesFilters
+from radiant_python.models.variant_cases_filters import VariantCasesFilters
 
 # TODO update the JSON string below
 json = "{}"

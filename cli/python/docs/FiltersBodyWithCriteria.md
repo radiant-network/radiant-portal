@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.filters_body_with_criteria import FiltersBodyWithCriteria
+from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
 
 # TODO update the JSON string below
 json = "{}"
