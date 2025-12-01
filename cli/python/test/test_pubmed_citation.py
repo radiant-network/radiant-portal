@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.pubmed_citation import PubmedCitation
+from radiant_python.models.pubmed_citation import PubmedCitation
 
 class TestPubmedCitation(unittest.TestCase):
     """PubmedCitation unit test stubs"""
@@ -36,7 +36,7 @@ class TestPubmedCitation(unittest.TestCase):
         if include_optional:
             return PubmedCitation(
                 id = '',
-                nlm = radiant-python.models.pubmed_citation_details.PubmedCitationDetails(
+                nlm = radiant_python.models.pubmed_citation_details.PubmedCitationDetails(
                     format = '', )
             )
         else:

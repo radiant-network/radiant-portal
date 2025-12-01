@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.api.status_api import StatusApi
+from radiant_python.api.status_api import StatusApi
 
 
 class TestStatusApi(unittest.TestCase):

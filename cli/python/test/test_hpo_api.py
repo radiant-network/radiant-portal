@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.api.hpo_api import HpoApi
+from radiant_python.api.hpo_api import HpoApi
 
 
 class TestHpoApi(unittest.TestCase):

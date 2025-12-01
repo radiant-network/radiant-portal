@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: generate-cli
 
 generate-cli-python:
 	openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g python -o ./cli/python -c cli/python/openapi-config.yaml

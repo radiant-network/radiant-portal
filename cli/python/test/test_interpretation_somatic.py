@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.interpretation_somatic import InterpretationSomatic
+from radiant_python.models.interpretation_somatic import InterpretationSomatic
 
 class TestInterpretationSomatic(unittest.TestCase):
     """InterpretationSomatic unit test stubs"""
@@ -43,7 +43,7 @@ class TestInterpretationSomatic(unittest.TestCase):
                 id = '',
                 interpretation = '',
                 locus_id = '',
-                metadata = radiant-python.models.interpretation_metadata.InterpretationMetadata(
+                metadata = radiant_python.models.interpretation_metadata.InterpretationMetadata(
                     analysis_id = '', 
                     patient_id = '', 
                     variant_hash = '', ),
@@ -52,7 +52,7 @@ class TestInterpretationSomatic(unittest.TestCase):
                     ''
                     ],
                 pubmed = [
-                    radiant-python.models.interpretation_pubmed.InterpretationPubmed(
+                    radiant_python.models.interpretation_pubmed.InterpretationPubmed(
                         citation = '', 
                         citation_id = '', )
                     ],

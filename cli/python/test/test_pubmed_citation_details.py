@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.pubmed_citation_details import PubmedCitationDetails
+from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
 
 class TestPubmedCitationDetails(unittest.TestCase):
     """PubmedCitationDetails unit test stubs"""

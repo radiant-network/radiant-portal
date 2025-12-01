@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.igv_tracks import IGVTracks
+from radiant_python.models.igv_tracks import IGVTracks
 
 class TestIGVTracks(unittest.TestCase):
     """IGVTracks unit test stubs"""
@@ -36,7 +36,7 @@ class TestIGVTracks(unittest.TestCase):
         if include_optional:
             return IGVTracks(
                 alignment = [
-                    radiant-python.models.igv_track_enriched.IGVTrackEnriched(
+                    radiant_python.models.igv_track_enriched.IGVTrackEnriched(
                         family_role = '', 
                         format = '', 
                         index_url = '', 

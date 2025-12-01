@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.auto_complete_term import AutoCompleteTerm
+from radiant_python.models.auto_complete_term import AutoCompleteTerm
 
 class TestAutoCompleteTerm(unittest.TestCase):
     """AutoCompleteTerm unit test stubs"""
@@ -35,12 +35,12 @@ class TestAutoCompleteTerm(unittest.TestCase):
         model = AutoCompleteTerm()
         if include_optional:
             return AutoCompleteTerm(
-                highlight = radiant-python.models.term.Term(
+                highlight = radiant_python.models.term.Term(
                     id = '', 
                     name = '', 
                     onset_code = '', 
                     term = '', ),
-                source = radiant-python.models.term.Term(
+                source = radiant_python.models.term.Term(
                     id = '', 
                     name = '', 
                     onset_code = '', 

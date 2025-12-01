@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.create_sequencing_experiment_batch_body import CreateSequencingExperimentBatchBody
+from radiant_python.models.create_sequencing_experiment_batch_body import CreateSequencingExperimentBatchBody
 
 class TestCreateSequencingExperimentBatchBody(unittest.TestCase):
     """CreateSequencingExperimentBatchBody unit test stubs"""
@@ -36,7 +36,7 @@ class TestCreateSequencingExperimentBatchBody(unittest.TestCase):
         if include_optional:
             return CreateSequencingExperimentBatchBody(
                 sequencing_experiments = [
-                    radiant-python.models.sequencing_experiment_batch.SequencingExperimentBatch(
+                    radiant_python.models.sequencing_experiment_batch.SequencingExperimentBatch(
                         aliquot = '', 
                         capture_kit = '', 
                         experimental_strategy_code = 'wgs', 
@@ -53,7 +53,7 @@ class TestCreateSequencingExperimentBatchBody(unittest.TestCase):
         else:
             return CreateSequencingExperimentBatchBody(
                 sequencing_experiments = [
-                    radiant-python.models.sequencing_experiment_batch.SequencingExperimentBatch(
+                    radiant_python.models.sequencing_experiment_batch.SequencingExperimentBatch(
                         aliquot = '', 
                         capture_kit = '', 
                         experimental_strategy_code = 'wgs', 

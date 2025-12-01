@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
+from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
 
 class TestStatisticsBodyWithSqon(unittest.TestCase):
     """StatisticsBodyWithSqon unit test stubs"""
@@ -36,7 +36,7 @@ class TestStatisticsBodyWithSqon(unittest.TestCase):
         if include_optional:
             return StatisticsBodyWithSqon(
                 var_field = '',
-                sqon = radiant-python.models.sqon.Sqon(
+                sqon = radiant_python.models.sqon.Sqon(
                     content = null, 
                     id = '', 
                     op = 'in', )

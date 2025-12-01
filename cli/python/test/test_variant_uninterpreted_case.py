@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.variant_uninterpreted_case import VariantUninterpretedCase
+from radiant_python.models.variant_uninterpreted_case import VariantUninterpretedCase
 
 class TestVariantUninterpretedCase(unittest.TestCase):
     """VariantUninterpretedCase unit test stubs"""
@@ -47,7 +47,7 @@ class TestVariantUninterpretedCase(unittest.TestCase):
                     ''
                     ],
                 observed_phenotypes = [
-                    radiant-python.models.term.Term(
+                    radiant_python.models.term.Term(
                         id = '', 
                         name = '', 
                         onset_code = '', 

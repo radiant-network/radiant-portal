@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.clinvar_rcv import ClinvarRCV
+from radiant_python.models.clinvar_rcv import ClinvarRCV
 
 class TestClinvarRCV(unittest.TestCase):
     """ClinvarRCV unit test stubs"""

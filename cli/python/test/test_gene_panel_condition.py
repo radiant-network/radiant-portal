@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.gene_panel_condition import GenePanelCondition
+from radiant_python.models.gene_panel_condition import GenePanelCondition
 
 class TestGenePanelCondition(unittest.TestCase):
     """GenePanelCondition unit test stubs"""

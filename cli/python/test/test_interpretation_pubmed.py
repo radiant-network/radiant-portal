@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.interpretation_pubmed import InterpretationPubmed
+from radiant_python.models.interpretation_pubmed import InterpretationPubmed
 
 class TestInterpretationPubmed(unittest.TestCase):
     """InterpretationPubmed unit test stubs"""

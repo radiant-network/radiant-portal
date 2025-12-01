@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.saved_filter import SavedFilter
+from radiant_python.models.saved_filter import SavedFilter
 
 class TestSavedFilter(unittest.TestCase):
     """SavedFilter unit test stubs"""
@@ -40,7 +40,7 @@ class TestSavedFilter(unittest.TestCase):
                 id = '',
                 name = '',
                 queries = [
-                    radiant-python.models.sqon.Sqon(
+                    radiant_python.models.sqon.Sqon(
                         content = null, 
                         id = '', 
                         op = 'in', )
@@ -56,7 +56,7 @@ class TestSavedFilter(unittest.TestCase):
                 id = '',
                 name = '',
                 queries = [
-                    radiant-python.models.sqon.Sqon(
+                    radiant_python.models.sqon.Sqon(
                         content = null, 
                         id = '', 
                         op = 'in', )

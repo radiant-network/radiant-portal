@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.case_assay import CaseAssay
+from radiant_python.models.case_assay import CaseAssay
 
 class TestCaseAssay(unittest.TestCase):
     """CaseAssay unit test stubs"""

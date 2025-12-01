@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.batch_message import BatchMessage
+from radiant_python.models.batch_message import BatchMessage
 
 class TestBatchMessage(unittest.TestCase):
     """BatchMessage unit test stubs"""

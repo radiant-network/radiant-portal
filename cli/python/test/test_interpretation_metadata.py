@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.interpretation_metadata import InterpretationMetadata
+from radiant_python.models.interpretation_metadata import InterpretationMetadata
 
 class TestInterpretationMetadata(unittest.TestCase):
     """InterpretationMetadata unit test stubs"""

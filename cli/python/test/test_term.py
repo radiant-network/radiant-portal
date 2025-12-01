@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.term import Term
+from radiant_python.models.term import Term
 
 class TestTerm(unittest.TestCase):
     """Term unit test stubs"""

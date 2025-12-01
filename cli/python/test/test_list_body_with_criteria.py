@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.list_body_with_criteria import ListBodyWithCriteria
+from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 
 class TestListBodyWithCriteria(unittest.TestCase):
     """ListBodyWithCriteria unit test stubs"""
@@ -42,7 +42,7 @@ class TestListBodyWithCriteria(unittest.TestCase):
                 offset = 56,
                 page_index = 56,
                 search_criteria = [
-                    radiant-python.models.search_criterion.SearchCriterion(
+                    radiant_python.models.search_criterion.SearchCriterion(
                         field = '', 
                         operator = '', 
                         value = [
@@ -50,7 +50,7 @@ class TestListBodyWithCriteria(unittest.TestCase):
                             ], )
                     ],
                 sort = [
-                    radiant-python.models.sort_body.SortBody(
+                    radiant_python.models.sort_body.SortBody(
                         field = '', 
                         order = 'asc', )
                     ]

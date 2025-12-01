@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.api_error import ApiError
+from radiant_python.models.api_error import ApiError
 
 class TestApiError(unittest.TestCase):
     """ApiError unit test stubs"""

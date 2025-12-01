@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.case_patient_clinical_information import CasePatientClinicalInformation
+from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 
 class TestCasePatientClinicalInformation(unittest.TestCase):
     """CasePatientClinicalInformation unit test stubs"""
@@ -41,14 +41,14 @@ class TestCasePatientClinicalInformation(unittest.TestCase):
                     ''
                     ],
                 non_observed_phenotypes = [
-                    radiant-python.models.term.Term(
+                    radiant_python.models.term.Term(
                         id = '', 
                         name = '', 
                         onset_code = '', 
                         term = '', )
                     ],
                 observed_phenotypes = [
-                    radiant-python.models.term.Term(
+                    radiant_python.models.term.Term(
                         id = '', 
                         name = '', 
                         onset_code = '', 

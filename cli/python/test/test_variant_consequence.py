@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.variant_consequence import VariantConsequence
+from radiant_python.models.variant_consequence import VariantConsequence
 
 class TestVariantConsequence(unittest.TestCase):
     """VariantConsequence unit test stubs"""
@@ -45,7 +45,7 @@ class TestVariantConsequence(unittest.TestCase):
                     ],
                 symbol = '',
                 transcripts = [
-                    radiant-python.models.transcript.Transcript(
+                    radiant_python.models.transcript.Transcript(
                         aa_change = '', 
                         cadd_phred = 1.337, 
                         cadd_score = 1.337, 

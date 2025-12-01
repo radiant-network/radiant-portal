@@ -32,6 +32,7 @@ tox.ini
 openapi-config.yaml
 pyproject.toml
 LICENSE
+Makefile
 requirements.txt
 setup.cfg
 setup.py

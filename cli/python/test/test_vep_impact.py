@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.vep_impact import VepImpact
+from radiant_python.models.vep_impact import VepImpact
 
 class TestVepImpact(unittest.TestCase):
     """VepImpact unit test stubs"""

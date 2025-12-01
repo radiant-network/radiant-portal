@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.document_filters import DocumentFilters
+from radiant_python.models.document_filters import DocumentFilters
 
 class TestDocumentFilters(unittest.TestCase):
     """DocumentFilters unit test stubs"""
@@ -36,31 +36,31 @@ class TestDocumentFilters(unittest.TestCase):
         if include_optional:
             return DocumentFilters(
                 data_type = [
-                    radiant-python.models.aggregation.Aggregation(
+                    radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 diagnosis_lab = [
-                    radiant-python.models.aggregation.Aggregation(
+                    radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 format = [
-                    radiant-python.models.aggregation.Aggregation(
+                    radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 project = [
-                    radiant-python.models.aggregation.Aggregation(
+                    radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 relationship_to_proband = [
-                    radiant-python.models.aggregation.Aggregation(
+                    radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
@@ -69,19 +69,19 @@ class TestDocumentFilters(unittest.TestCase):
         else:
             return DocumentFilters(
                 data_type = [
-                    radiant-python.models.aggregation.Aggregation(
+                    radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 format = [
-                    radiant-python.models.aggregation.Aggregation(
+                    radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
                 relationship_to_proband = [
-                    radiant-python.models.aggregation.Aggregation(
+                    radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )

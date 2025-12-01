@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.filters_body_with_criteria import FiltersBodyWithCriteria
+from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
 
 class TestFiltersBodyWithCriteria(unittest.TestCase):
     """FiltersBodyWithCriteria unit test stubs"""
@@ -36,7 +36,7 @@ class TestFiltersBodyWithCriteria(unittest.TestCase):
         if include_optional:
             return FiltersBodyWithCriteria(
                 search_criteria = [
-                    radiant-python.models.search_criterion.SearchCriterion(
+                    radiant_python.models.search_criterion.SearchCriterion(
                         field = '', 
                         operator = '', 
                         value = [

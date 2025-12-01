@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.api.sequencing_api import SequencingApi
+from radiant_python.api.sequencing_api import SequencingApi
 
 
 class TestSequencingApi(unittest.TestCase):

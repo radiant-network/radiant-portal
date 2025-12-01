@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.leaf_content import LeafContent
+from radiant_python.models.leaf_content import LeafContent
 
 class TestLeafContent(unittest.TestCase):
     """LeafContent unit test stubs"""

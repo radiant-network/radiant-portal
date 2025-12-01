@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.germline_cnv_occurrence import GermlineCNVOccurrence
+from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 
 class TestGermlineCNVOccurrence(unittest.TestCase):
     """GermlineCNVOccurrence unit test stubs"""

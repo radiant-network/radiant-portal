@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.aggregation import Aggregation
+from radiant_python.models.aggregation import Aggregation
 
 class TestAggregation(unittest.TestCase):
     """Aggregation unit test stubs"""

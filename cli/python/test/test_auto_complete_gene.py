@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.auto_complete_gene import AutoCompleteGene
+from radiant_python.models.auto_complete_gene import AutoCompleteGene
 
 class TestAutoCompleteGene(unittest.TestCase):
     """AutoCompleteGene unit test stubs"""
@@ -35,12 +35,12 @@ class TestAutoCompleteGene(unittest.TestCase):
         model = AutoCompleteGene()
         if include_optional:
             return AutoCompleteGene(
-                highlight = radiant-python.models.term.Term(
+                highlight = radiant_python.models.term.Term(
                     id = '', 
                     name = '', 
                     onset_code = '', 
                     term = '', ),
-                source = radiant-python.models.term.Term(
+                source = radiant_python.models.term.Term(
                     id = '', 
                     name = '', 
                     onset_code = '', 

@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.saved_filter_type import SavedFilterType
+from radiant_python.models.saved_filter_type import SavedFilterType
 
 class TestSavedFilterType(unittest.TestCase):
     """SavedFilterType unit test stubs"""

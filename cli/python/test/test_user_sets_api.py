@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.api.user_sets_api import UserSetsApi
+from radiant_python.api.user_sets_api import UserSetsApi
 
 
 class TestUserSetsApi(unittest.TestCase):

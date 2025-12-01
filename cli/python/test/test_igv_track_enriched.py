@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.igv_track_enriched import IGVTrackEnriched
+from radiant_python.models.igv_track_enriched import IGVTrackEnriched
 
 class TestIGVTrackEnriched(unittest.TestCase):
     """IGVTrackEnriched unit test stubs"""

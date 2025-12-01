@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.user_preference import UserPreference
+from radiant_python.models.user_preference import UserPreference
 
 class TestUserPreference(unittest.TestCase):
     """UserPreference unit test stubs"""
@@ -36,11 +36,11 @@ class TestUserPreference(unittest.TestCase):
         if include_optional:
             return UserPreference(
                 table_display = {
-                    'key' : radiant-python.models.table_config.TableConfig(
+                    'key' : radiant_python.models.table_config.TableConfig(
                         column_order = [
                             ''
                             ], 
-                        column_pinning = radiant-python.models.column_pinning_config.ColumnPinningConfig(
+                        column_pinning = radiant_python.models.column_pinning_config.ColumnPinningConfig(
                             left = [
                                 ''
                                 ], 
@@ -53,7 +53,7 @@ class TestUserPreference(unittest.TestCase):
                         column_visibility = {
                             'key' : True
                             }, 
-                        pagination = radiant-python.models.pagination_config.PaginationConfig(
+                        pagination = radiant_python.models.pagination_config.PaginationConfig(
                             page_size = 56, ), )
                     },
                 user_id = ''
@@ -61,11 +61,11 @@ class TestUserPreference(unittest.TestCase):
         else:
             return UserPreference(
                 table_display = {
-                    'key' : radiant-python.models.table_config.TableConfig(
+                    'key' : radiant_python.models.table_config.TableConfig(
                         column_order = [
                             ''
                             ], 
-                        column_pinning = radiant-python.models.column_pinning_config.ColumnPinningConfig(
+                        column_pinning = radiant_python.models.column_pinning_config.ColumnPinningConfig(
                             left = [
                                 ''
                                 ], 
@@ -78,7 +78,7 @@ class TestUserPreference(unittest.TestCase):
                         column_visibility = {
                             'key' : True
                             }, 
-                        pagination = radiant-python.models.pagination_config.PaginationConfig(
+                        pagination = radiant_python.models.pagination_config.PaginationConfig(
                             page_size = 56, ), )
                     },
                 user_id = '',

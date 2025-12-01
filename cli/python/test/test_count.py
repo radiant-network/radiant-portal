@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.count import Count
+from radiant_python.models.count import Count
 
 class TestCount(unittest.TestCase):
     """Count unit test stubs"""

@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.document_result import DocumentResult
+from radiant_python.models.document_result import DocumentResult
 
 class TestDocumentResult(unittest.TestCase):
     """DocumentResult unit test stubs"""

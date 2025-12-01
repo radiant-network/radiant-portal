@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.batch_report import BatchReport
+from radiant_python.models.batch_report import BatchReport
 
 class TestBatchReport(unittest.TestCase):
     """BatchReport unit test stubs"""
@@ -36,19 +36,19 @@ class TestBatchReport(unittest.TestCase):
         if include_optional:
             return BatchReport(
                 error = [
-                    radiant-python.models.batch_message.BatchMessage(
+                    radiant_python.models.batch_message.BatchMessage(
                         code = '', 
                         message = '', 
                         path = '', )
                     ],
                 info = [
-                    radiant-python.models.batch_message.BatchMessage(
+                    radiant_python.models.batch_message.BatchMessage(
                         code = '', 
                         message = '', 
                         path = '', )
                     ],
                 warn = [
-                    radiant-python.models.batch_message.BatchMessage(
+                    radiant_python.models.batch_message.BatchMessage(
                         code = '', 
                         message = '', 
                         path = '', )

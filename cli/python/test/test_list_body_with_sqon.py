@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
 
 class TestListBodyWithSqon(unittest.TestCase):
     """ListBodyWithSqon unit test stubs"""
@@ -42,11 +42,11 @@ class TestListBodyWithSqon(unittest.TestCase):
                 offset = 56,
                 page_index = 56,
                 sort = [
-                    radiant-python.models.sort_body.SortBody(
+                    radiant_python.models.sort_body.SortBody(
                         field = '', 
                         order = 'asc', )
                     ],
-                sqon = radiant-python.models.sqon.Sqon(
+                sqon = radiant_python.models.sqon.Sqon(
                     content = null, 
                     id = '', 
                     op = 'in', )

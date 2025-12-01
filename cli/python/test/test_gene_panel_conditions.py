@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.gene_panel_conditions import GenePanelConditions
+from radiant_python.models.gene_panel_conditions import GenePanelConditions
 
 class TestGenePanelConditions(unittest.TestCase):
     """GenePanelConditions unit test stubs"""
@@ -37,7 +37,7 @@ class TestGenePanelConditions(unittest.TestCase):
             return GenePanelConditions(
                 conditions = {
                     'key' : [
-                        radiant-python.models.gene_panel_condition.GenePanelCondition(
+                        radiant_python.models.gene_panel_condition.GenePanelCondition(
                             inheritance_code = [
                                 ''
                                 ], 
@@ -53,7 +53,7 @@ class TestGenePanelConditions(unittest.TestCase):
             return GenePanelConditions(
                 conditions = {
                     'key' : [
-                        radiant-python.models.gene_panel_condition.GenePanelCondition(
+                        radiant_python.models.gene_panel_condition.GenePanelCondition(
                             inheritance_code = [
                                 ''
                                 ], 

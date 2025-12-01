@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.transcript import Transcript
+from radiant_python.models.transcript import Transcript
 
 class TestTranscript(unittest.TestCase):
     """Transcript unit test stubs"""

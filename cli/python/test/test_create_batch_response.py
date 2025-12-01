@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.create_batch_response import CreateBatchResponse
+from radiant_python.models.create_batch_response import CreateBatchResponse
 
 class TestCreateBatchResponse(unittest.TestCase):
     """CreateBatchResponse unit test stubs"""

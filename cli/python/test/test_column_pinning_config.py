@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.column_pinning_config import ColumnPinningConfig
+from radiant_python.models.column_pinning_config import ColumnPinningConfig
 
 class TestColumnPinningConfig(unittest.TestCase):
     """ColumnPinningConfig unit test stubs"""

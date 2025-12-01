@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.saved_filter_creation_input import SavedFilterCreationInput
+from radiant_python.models.saved_filter_creation_input import SavedFilterCreationInput
 
 class TestSavedFilterCreationInput(unittest.TestCase):
     """SavedFilterCreationInput unit test stubs"""
@@ -37,7 +37,7 @@ class TestSavedFilterCreationInput(unittest.TestCase):
             return SavedFilterCreationInput(
                 name = '',
                 queries = [
-                    radiant-python.models.sqon.Sqon(
+                    radiant_python.models.sqon.Sqon(
                         content = null, 
                         id = '', 
                         op = 'in', )
@@ -48,7 +48,7 @@ class TestSavedFilterCreationInput(unittest.TestCase):
             return SavedFilterCreationInput(
                 name = '',
                 queries = [
-                    radiant-python.models.sqon.Sqon(
+                    radiant_python.models.sqon.Sqon(
                         content = null, 
                         id = '', 
                         op = 'in', )

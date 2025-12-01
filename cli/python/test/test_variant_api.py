@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.api.variant_api import VariantApi
+from radiant_python.api.variant_api import VariantApi
 
 
 class TestVariantApi(unittest.TestCase):

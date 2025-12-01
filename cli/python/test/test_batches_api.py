@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.api.batches_api import BatchesApi
+from radiant_python.api.batches_api import BatchesApi
 
 
 class TestBatchesApi(unittest.TestCase):

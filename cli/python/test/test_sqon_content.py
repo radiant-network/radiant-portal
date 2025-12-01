@@ -14,7 +14,7 @@
 
 import unittest
 
-from radiant-python.models.sqon_content import SqonContent
+from radiant_python.models.sqon_content import SqonContent
 
 class TestSqonContent(unittest.TestCase):
     """SqonContent unit test stubs"""
