@@ -39,7 +39,6 @@ function OccurrencePreviewSheet({
   hasNext,
   patientSelected,
 }: OccurrencePreviewSheetProps) {
-  // console.warn('OccurrencePreviewSheet occurrence', occurrence);
   return (
     <PreviewSheet trigger={children} open={open} setOpen={setOpen}>
       {occurrence && (
