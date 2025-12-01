@@ -68,7 +68,7 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
   const params = useParams<{ locusId: string }>();
   const locusId = params.locusId!;
 
-  const { expandResult, caseResult, proband, assay, isLoading } = useOccurrenceAndCase(
+  const { expandResult, caseResult, patient, assay, isLoading } = useOccurrenceAndCase(
     caseData.seq_id.toString(),
     locusId,
   );
@@ -85,10 +85,11 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
         onNext={onNext}
         hasPrevious={hasPrevious}
         hasNext={hasNext}
+        locusId={locusId}
       />
       <Separator />
       <PreviewSheetSubHeader
-        probandId={proband?.patient_id}
+        patientId={patient?.patient_id}
         seqId={assay?.seq_id}
         actions={
           <ActionButton

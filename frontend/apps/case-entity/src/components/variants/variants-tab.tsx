@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
-import { CaseEntity } from '@/api/api';
+import { CaseAssay, CaseEntity } from '@/api/api';
 
 import AssayVariantFilters from './filters/assay-variant-filters';
 import CNVTab from './occurrence/cnv-tab';
@@ -22,6 +22,7 @@ type VariantTabProps = {
 function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeInterface, setActiveInterface] = useState<VariantInterface>(VariantInterface.SNV);
+  const [patientSelected, setPatientSelected] = useState<CaseAssay | undefined>(undefined);
 
   // only use assay with variants
   const assaysWithVariants = caseEntity?.assays.filter(assay => assay.has_variants) ?? [];
@@ -61,12 +62,13 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
             searchParams.set('seq_id', value);
             setSearchParams(searchParams, { replace: true });
             setSeqId(value);
+            setPatientSelected(assaysWithVariants.find(assay => assay.seq_id.toString() === value));
           }}
           activeInterface={activeInterface}
           onActiveInterfaceChange={setActiveInterface}
         />
 
-        {activeInterface == VariantInterface.SNV && <SNVTab seqId={seqId} />}
+        {activeInterface == VariantInterface.SNV && <SNVTab seqId={seqId} patientSelected={patientSelected} />}
         {activeInterface == VariantInterface.CNV && <CNVTab seqId={seqId} />}
       </div>
     </SeqIDContext>

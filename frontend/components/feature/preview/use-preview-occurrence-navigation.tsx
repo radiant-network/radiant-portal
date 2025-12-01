@@ -32,6 +32,9 @@ export function usePreviewOccurrenceNavigation<T extends OccurrenceItem>({
   selectedOccurrenceParamKey,
   setRowSelection,
 }: UsePreviewOccurrenceNavigationParams<T>): UsePreviewOccurrenceNavigationReturn<T> {
+  // console.warn('occurrencesData', occurrencesData);
+  // console.warn('searchParams', searchParams.toString());
+  // console.warn('selectedOccurrenceParamKey', selectedOccurrenceParamKey);
   const selectedVariant = searchParams.get(selectedOccurrenceParamKey);
   const selectedOccurrence = occurrencesData.find(occurrence => occurrence.locus_id === selectedVariant);
 

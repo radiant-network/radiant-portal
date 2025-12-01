@@ -4,7 +4,7 @@ import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 
-import { Count, GermlineSNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
+import { CaseAssay, Count, GermlineSNVOccurrence, SavedFilterType, SortBody, SortBodyOrderEnum, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Card, CardContent } from '@/components/base/ui/card';
@@ -79,9 +79,10 @@ type SnvOccurrenceType = {
 
 type SNVTabProps = {
   seqId: string;
+  patientSelected?: CaseAssay;
 };
 
-function SNVTab({ seqId }: SNVTabProps) {
+function SNVTab({ seqId, patientSelected }: SNVTabProps) {
   const { t } = useI18n();
   const config = useConfig();
   const [rowSelection, setRowSelection] = useState({});
@@ -327,6 +328,7 @@ function SNVTab({ seqId }: SNVTabProps) {
             onNext={handleNextOccurrence}
             hasPrevious={hasPrevious}
             hasNext={hasNext}
+            patientSelected={patientSelected}
           />
         </main>
       </div>

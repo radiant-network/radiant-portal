@@ -1013,6 +1013,9 @@
     }
   },
   "preview_sheet": {
+    "header": {
+      "germline": "Germline"
+    },
     "actions": {
       "download_report": "Download report",
       "open_igv": "Open IGV",
@@ -1073,6 +1076,8 @@
       "actions": {
         "view_in_igv": "View in IGV"
       },
+      "patient": "Patient",
+      "assay": "Assay",
       "sections": {
         "inheritance": {
           "title": "Inheritance",

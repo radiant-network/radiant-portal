@@ -1,5 +1,5 @@
-import { InfoIcon } from 'lucide-react';
 import { Link, useParams } from 'react-router';
+import { InfoIcon } from 'lucide-react';
 
 import { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';

@@ -1,7 +1,9 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/ui/badge';
 import { Button } from '@/components/base/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useI18n } from '@/components/hooks/i18n';
 
 type PreviewSheetHeaderProps = {
   hgvsg: string;
@@ -20,6 +22,8 @@ function PreviewSheetHeader({
   hasPrevious = true,
   hasNext = true,
 }: PreviewSheetHeaderProps) {
+  const { t } = useI18n();
+
   return (
     <div className="flex flex-row items-center size-full pr-8">
       <div className="flex flex-wrap gap-4 items-center pr-4 w-full min-w-0">
@@ -37,7 +41,7 @@ function PreviewSheetHeader({
           <span className="overflow-hidden text-ellipsis max-w-52">{hgvsg}</span>
         </AnchorLink>
         <Badge variant="secondary" className="bg-slate-500/20 text-slate-800 border-transparent">
-          Germline
+          {t('preview_sheet.header.germline')}
         </Badge>
       </div>
       <div className="flex gap-2 items-center justify-end">
