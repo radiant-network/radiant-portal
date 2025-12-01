@@ -89,7 +89,7 @@ func Test_validateUniquenessInBatch_NoDuplicate(t *testing.T) {
 		ID      string
 	}
 
-	seenBatchMap := make(map[testKey]string)
+	seenBatchMap := map[testKey]struct{}{}
 	key := testKey{OrgCode: "ORG1", ID: "P1"}
 
 	validateUniquenessInBatch(
@@ -115,16 +115,14 @@ func Test_validateUniquenessInBatch_DuplicateFound(t *testing.T) {
 		ID      string
 	}
 
-	batchMap := map[testKey]string{
-		{OrgCode: "ORG1", ID: "P1"}: "some_value",
-	}
-
+	seenBatchMap := map[testKey]struct{}{}
 	key := testKey{OrgCode: "ORG1", ID: "P1"}
+	seenBatchMap[key] = struct{}{}
 
 	validateUniquenessInBatch(
 		record,
 		key,
-		batchMap,
+		seenBatchMap,
 		"DUPLICATE-001",
 		[]string{"ORG1", "P1"},
 	)
@@ -141,17 +139,16 @@ func Test_validateUniquenessInBatch_MultipleDuplicates(t *testing.T) {
 		ID      string
 	}
 
-	batchMap := map[testKey]string{
-		{OrgCode: "ORG1", ID: "P1"}: "value1",
-	}
-
+	seenBatchMap := map[testKey]struct{}{}
 	record1 := &TestValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 1},
 	}
+	key := testKey{OrgCode: "ORG1", ID: "P1"}
+	seenBatchMap[key] = struct{}{}
 	validateUniquenessInBatch(
 		record1,
-		testKey{OrgCode: "ORG1", ID: "P1"},
-		batchMap,
+		key,
+		seenBatchMap,
 		"DUPLICATE-001",
 		[]string{"ORG1", "P1"},
 	)
@@ -161,8 +158,8 @@ func Test_validateUniquenessInBatch_MultipleDuplicates(t *testing.T) {
 	}
 	validateUniquenessInBatch(
 		record2,
-		testKey{OrgCode: "ORG1", ID: "P1"},
-		batchMap,
+		key,
+		seenBatchMap,
 		"DUPLICATE-001",
 		[]string{"ORG1", "P1"},
 	)
@@ -179,17 +176,16 @@ func Test_validateUniquenessInBatch_DifferentKeys(t *testing.T) {
 		ID      string
 	}
 
-	batchMap := map[testKey]string{
-		{OrgCode: "ORG1", ID: "P1"}: "value1",
-	}
-
+	seenBatchMap := map[testKey]struct{}{}
+	key := testKey{OrgCode: "ORG1", ID: "P1"}
+	seenBatchMap[key] = struct{}{}
 	record := &TestValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 2},
 	}
 	validateUniquenessInBatch(
 		record,
 		testKey{OrgCode: "ORG1", ID: "P2"}, // Different ID
-		batchMap,
+		seenBatchMap,
 		"DUPLICATE-001",
 		[]string{"ORG1", "P2"},
 	)
@@ -207,13 +203,13 @@ func Test_validateUniquenessInBatch_EmptyBatchMap(t *testing.T) {
 		ID      string
 	}
 
-	batchMap := make(map[testKey]string)
+	seenBatchMap := map[testKey]struct{}{}
 	key := testKey{OrgCode: "ORG1", ID: "P1"}
 
 	validateUniquenessInBatch(
 		record,
 		key,
-		batchMap,
+		seenBatchMap,
 		"DUPLICATE-001",
 		[]string{"ORG1", "P1"},
 	)

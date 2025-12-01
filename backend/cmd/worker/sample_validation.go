@@ -242,7 +242,7 @@ func reorderSampleRecords(records []*SampleValidationRecord) {
 func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
-	seenSamples := make(map[samplesKey]*types.SampleBatch)
+	seenSamples := make(map[samplesKey]struct{})
 
 	for index, sample := range samples {
 		record := &SampleValidationRecord{

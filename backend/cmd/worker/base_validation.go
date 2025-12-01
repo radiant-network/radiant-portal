@@ -85,10 +85,10 @@ func formatDuplicateInBatch(r ValidationRecord, ids []string) string {
 	return message
 }
 
-func validateUniquenessInBatch[K comparable, V any](
+func validateUniquenessInBatch[K comparable](
 	record ValidationRecord,
 	key K,
-	seenBatchMap map[K]V,
+	seenBatchMap map[K]struct{},
 	duplicateCode string,
 	ids []string,
 ) {
@@ -97,8 +97,7 @@ func validateUniquenessInBatch[K comparable, V any](
 		path := formatPath(record, "")
 		record.GetBase().addErrors(message, duplicateCode, path)
 	} else {
-		var elem V
-		seenBatchMap[key] = elem
+		seenBatchMap[key] = struct{}{}
 	}
 }
 

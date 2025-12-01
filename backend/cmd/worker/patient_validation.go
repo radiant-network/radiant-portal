@@ -29,6 +29,7 @@ const PatientExistingPatientDifferentFieldCode = "PATIENT-002"
 const PatientOrganizationNotExistCode = "PATIENT-003"
 const PatientInvalidValueCode = "PATIENT-004"
 const PatientOrganizationTypeCode = "PATIENT-005"
+const PatientDuplicateInBatchCode = "PATIENT-006"
 
 type PatientValidationRecord struct {
 	BaseValidationRecord
@@ -232,8 +233,9 @@ func insertPatientRecords(records []PatientValidationRecord, repo repository.Pat
 
 func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) ([]PatientValidationRecord, error) {
 	var records []PatientValidationRecord
+	seenPatients := map[patientsKey]struct{}{}
 	for index, patient := range patients {
-		record, err := validatePatientRecord(patient, index, repoOrganization, repoPatient)
+		record, err := validatePatientRecord(patient, index, seenPatients, repoOrganization, repoPatient)
 		if err != nil {
 			return nil, fmt.Errorf("error during patient validation: %v", err)
 		}
@@ -242,7 +244,12 @@ func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repos
 	return records, nil
 }
 
-func validatePatientRecord(patient types.PatientBatch, index int, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) (*PatientValidationRecord, error) {
+type patientsKey struct {
+	OrganizationCode   string
+	SubmitterPatientId string
+}
+
+func validatePatientRecord(patient types.PatientBatch, index int, seenPatients map[patientsKey]struct{}, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) (*PatientValidationRecord, error) {
 	record := PatientValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: index},
 		Patient:              patient,
@@ -251,6 +258,16 @@ func validatePatientRecord(patient types.PatientBatch, index int, repoOrganizati
 	record.validateFirstName()
 	record.validateLastName()
 	record.validateJhn()
+
+	validateUniquenessInBatch(record,
+		patientsKey{
+			OrganizationCode:   patient.PatientOrganizationCode,
+			SubmitterPatientId: patient.SubmitterPatientId.String(),
+		},
+		seenPatients,
+		PatientAlreadyExistCode,
+		[]string{patient.PatientOrganizationCode, patient.SubmitterPatientId.String()},
+	)
 
 	organization, orgErr := repoOrganization.GetOrganizationByCode(patient.PatientOrganizationCode)
 	if orgErr != nil {
