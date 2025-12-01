@@ -108,7 +108,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
   const handleOpen = useCallback(async () => {
     setOpen(true);
     fetchInterpretation.mutate();
-    fetchOccurrenceExpand.mutate();
+    fetchOccurrenceExpand?.mutate();
   }, []);
 
   return (
