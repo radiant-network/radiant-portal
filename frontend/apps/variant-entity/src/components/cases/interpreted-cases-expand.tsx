@@ -21,6 +21,7 @@ interface InterpretedCasesExpendProps {
 
 type VariantExpandedInterpretedCaseInput = {
   locusId: string;
+  caseId: string;
   seqId: string;
   transcriptId: string;
 };
@@ -28,6 +29,7 @@ type VariantExpandedInterpretedCaseInput = {
 async function fetchOccurrenceExpand(input: VariantExpandedInterpretedCaseInput) {
   const response = await variantsApi.getExpandedGermlineVariantInterpretedCase(
     input.locusId,
+    input.caseId,
     input.seqId,
     input.transcriptId,
   );
@@ -44,6 +46,7 @@ function InterpretedCasesExpand({ locusId, data }: InterpretedCasesExpendProps) 
   >(
     {
       locusId: locusId.toString(),
+      caseId: data.case_id.toString(),
       seqId: data.seq_id.toString(),
       transcriptId: data.transcript_id,
     },

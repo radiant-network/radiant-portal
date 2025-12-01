@@ -123,7 +123,7 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 	}, &count, nil
 }
 
-func (m *MockRepository) GetVariantExpandedInterpretedCase(int, int, string) (*types.VariantExpandedInterpretedCase, error) {
+func (m *MockRepository) GetVariantExpandedInterpretedCase(int, int, int, string) (*types.VariantExpandedInterpretedCase, error) {
 	return &types.VariantExpandedInterpretedCase{
 		PatientID:               3,
 		GeneSymbol:              "BRAF",
@@ -412,9 +412,9 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 func Test_GetExpandedGermlineVariantInterpretedCaseHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/cases/interpreted/:seq_id/:transcript_id", GetExpandedGermlineVariantInterpretedCase(repo))
+	router.GET("/variants/germline/:locus_id/cases/interpreted/:case_id/:seq_id/:transcript_id", GetExpandedGermlineVariantInterpretedCase(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/cases/interpreted/1/T002", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/cases/interpreted/1/1/T002", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

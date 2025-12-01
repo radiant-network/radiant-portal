@@ -176,13 +176,13 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 	assertGetVariantUninterpretedCases(t, "simple", 1000, body, expected)
 }
 
-func assertGetExpandedVariantInterpretedCase(t *testing.T, data string, locusId int, seqId int, transcriptId string, expected string) {
+func assertGetExpandedVariantInterpretedCase(t *testing.T, data string, locusId int, caseId int, seqId int, transcriptId string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
-		router.GET("/variants/germline/:locus_id/cases/interpreted/:seq_id/:transcript_id", server.GetExpandedGermlineVariantInterpretedCase(repo))
+		router.GET("/variants/germline/:locus_id/cases/interpreted/:case_id/:seq_id/:transcript_id", server.GetExpandedGermlineVariantInterpretedCase(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/cases/interpreted/%d/%s", locusId, seqId, transcriptId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/cases/interpreted/%d/%d/%s", locusId, caseId, seqId, transcriptId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -202,7 +202,7 @@ func Test_GetExpandedVariantInterpretedCase(t *testing.T) {
 		"patient_sex_code":"male", 
 		"pubmed_ids":[]
 	}`
-	assertGetExpandedVariantInterpretedCase(t, "simple", 1000, 1, "T002", expected)
+	assertGetExpandedVariantInterpretedCase(t, "simple", 1000, 1, 1, "T002", expected)
 }
 
 func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected string) {

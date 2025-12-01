@@ -4243,7 +4243,7 @@ paths:
       summary: Get list of interpreted Cases for a germline variant
       tags:
       - variant
-  /variants/germline/{locus_id}/cases/interpreted/{seq_id}/{transcript_id}:
+  /variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id}:
     get:
       description: Retrieve germline expanded interpreted case for a given locus,
         sequencing and transcript
@@ -4252,6 +4252,12 @@ paths:
       - description: Locus ID
         in: path
         name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
         required: true
         schema:
           type: string

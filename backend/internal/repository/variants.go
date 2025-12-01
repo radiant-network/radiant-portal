@@ -30,7 +30,7 @@ type VariantsDAO interface {
 	GetVariantConsequences(locusId int) (*[]VariantConsequence, error)
 	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error)
 	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error)
-	GetVariantExpandedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error)
+	GetVariantExpandedInterpretedCase(locusId int, caseId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error)
 	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
 }
@@ -241,9 +241,10 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	return &variantUninterpretedCases, &count, nil
 }
 
-func (r *VariantsRepository) GetVariantExpandedInterpretedCase(locusId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error) {
+func (r *VariantsRepository) GetVariantExpandedInterpretedCase(locusId int, caseId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error) {
 	locusIdAsString := fmt.Sprintf("%d", locusId)
-	SeqIdAsString := fmt.Sprintf("%d", seqId)
+	caseIdAsString := fmt.Sprintf("%d", caseId)
+	seqIdAsString := fmt.Sprintf("%d", seqId)
 	tx := r.db.Table("radiant_jdbc.public.interpretation_germline i")
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON i.sequencing_id = o.seq_id and o.locus_id = i.locus_id")
 	tx = tx.Joins("INNER JOIN germline__snv__variant v ON i.locus_id = v.locus_id")
@@ -252,7 +253,7 @@ func (r *VariantsRepository) GetVariantExpandedInterpretedCase(locusId int, seqI
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq ON chseq.sequencing_experiment_id = o.seq_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON chseq.case_id = c.id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = c.proband_id")
-	tx = tx.Where("i.locus_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusIdAsString, SeqIdAsString, transcriptId)
+	tx = tx.Where("i.locus_id = ? AND i.case_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusIdAsString, caseIdAsString, seqIdAsString, transcriptId)
 	tx = tx.Select("sa.patient_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias_string, i.transmission_modes as inheritances_string, i.pubmed as pubmed_ids_string, p.sex_code as patient_sex_code")
 
 	var variantExpandedInterpretedCase VariantExpandedInterpretedCase
