@@ -37,15 +37,15 @@ type PatientValidationRecord struct {
 	OrganizationId int
 }
 
-func (r PatientValidationRecord) GetBase() *BaseValidationRecord {
+func (r *PatientValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func (r PatientValidationRecord) GetResourceType() string {
+func (r *PatientValidationRecord) GetResourceType() string {
 	return types.PatientBatchType
 }
 
-func (r PatientValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
+func (r *PatientValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
 	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
 	return formatInvalidField(r, fieldName, reason, []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()})
 }
@@ -184,7 +184,7 @@ func processPatientBatch(batch *types.Batch, db *gorm.DB, repoOrganization repos
 	}
 }
 
-func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []PatientValidationRecord) error {
+func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []*PatientValidationRecord) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		txRepoPatient := repository.NewPatientsRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
@@ -206,7 +206,7 @@ func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []Pa
 	})
 }
 
-func insertPatientRecords(records []PatientValidationRecord, repo repository.PatientsDAO) error {
+func insertPatientRecords(records []*PatientValidationRecord, repo repository.PatientsDAO) error {
 	for _, record := range records {
 		if !record.Skipped {
 			patient := types.Patient{
@@ -231,15 +231,15 @@ func insertPatientRecords(records []PatientValidationRecord, repo repository.Pat
 	return nil
 }
 
-func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) ([]PatientValidationRecord, error) {
-	var records []PatientValidationRecord
+func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) ([]*PatientValidationRecord, error) {
+	var records []*PatientValidationRecord
 	seenPatients := map[patientsKey]struct{}{}
 	for index, patient := range patients {
 		record, err := validatePatientRecord(patient, index, seenPatients, repoOrganization, repoPatient)
 		if err != nil {
 			return nil, fmt.Errorf("error during patient validation: %v", err)
 		}
-		records = append(records, *record)
+		records = append(records, record)
 	}
 	return records, nil
 }
@@ -250,7 +250,7 @@ type patientsKey struct {
 }
 
 func validatePatientRecord(patient types.PatientBatch, index int, seenPatients map[patientsKey]struct{}, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) (*PatientValidationRecord, error) {
-	record := PatientValidationRecord{
+	record := &PatientValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: index},
 		Patient:              patient,
 	}
@@ -283,5 +283,5 @@ func validatePatientRecord(patient types.PatientBatch, index int, seenPatients m
 			record.validateExistingPatient(existingPatient)
 		}
 	}
-	return &record, nil
+	return record, nil
 }

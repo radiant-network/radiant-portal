@@ -324,7 +324,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 		//Patient records with one having a non-existent organization to trigger foreign key violation
 		// Should never happen in real life as we validate organization existence before this step
 		// but this is to test rollback functionality
-		patientRecords := []PatientValidationRecord{
+		patientRecords := []*PatientValidationRecord{
 			{
 				Patient: types.PatientBatch{
 					SubmitterPatientId:     "id1",
