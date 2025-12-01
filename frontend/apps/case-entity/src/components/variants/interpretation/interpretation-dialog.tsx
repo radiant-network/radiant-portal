@@ -131,7 +131,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
             <DialogBody className="overflow-scroll space-y-6 h-[calc(95vh-150px)]">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
-              <InterpretationTranscript occurrence={fetchOccurrenceExpand.data} />
+              <InterpretationTranscript occurrence={fetchOccurrenceExpand?.data} />
               <div className="grid gap-6 grid-cols-12">
                 <div className="rounded-sm col-span-7 border p-6 bg-muted">
                   {isSomatic ? (
@@ -159,7 +159,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
                   )}
                 </div>
                 <div className="rounded-sm col-span-5 border py-4 px-6">
-                  <OccurrenceDetails occurrence={fetchOccurrenceExpand.data} />
+                  <OccurrenceDetails occurrence={fetchOccurrenceExpand?.data} />
                 </div>
               </div>
             </DialogBody>
