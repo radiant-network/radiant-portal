@@ -83,16 +83,35 @@ Clean up binary from the last build:
 ```bash
 make clean
 ```
+
 # Frontend
 
-## Generate the CLI
+Everytime the backend API model changes, the API clients need to be regenerated.
 
-To install the CLI: https://github.com/OpenAPITools/openapi-generator?tab=readme-ov-file#1---installation    
+## 1. Install the OpenAPI Generator CLI
+
+To install the CLI: https://github.com/OpenAPITools/openapi-generator?tab=readme-ov-file#1---installation
 
 (If the `openapi-generator-cli version` doesn't match the current version used by the repo, you can set it manually using `openapi-generator-cli version-manager set <version>`.)
 
-```bash 
-openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axios -o ./frontend/api
+## 2. Generating clients
+
+We currently support two types of clients for the Radiant Portal backend API:
+
+- Typescript
+- Python
+
+These can be generated from using the root Makefile (`radiant-portal/Makefile`) targets below:
+
+```bash
+make generate-client-typescript
+make generate-client-python
+```
+
+Or to generate both at once:
+
+```bash
+make generate-client-all
 ```
 
 # Dev local

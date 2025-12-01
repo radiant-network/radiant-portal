@@ -19,25 +19,3 @@ Radiant Data Platform
 # Frontend
 
 [Frontend Documentation](./frontend/README.md)
-
-# Development
-
-## Generating clients
-
-We currently support two types of clients for the Radiant Portal backend API:
-
-- Typescript
-- Python
-
-These can be generated from using the Makefile targets below:
-
-```bash
-make generate-client-typescript
-make generate-client-python
-```
-
-Or to generate both at once:
-
-```bash
-make generate-client-all
-```
