@@ -4,27 +4,60 @@ sidebar_position: 0
 
 # API Clients
 
-We generate two types of API clients to support different development environments:
-
-## TypeScript Client
-
-- **Generator:** `typescript-axios`
-- **Purpose:** For frontend applications built with TypeScript and React.
-- **Location:** `frontend/api`
+This section provides information about the available API clients for the Radiant Portal backend API.
 
 ## Python Client
 
-- **Generator:** `python`
-- **Purpose:** For backend services or CLI tools written in Python.
-- **Location:** `cli/python`
+### Requirements.
 
-Both clients are generated from the same OpenAPI specification (`swagger.yaml`) to ensure consistency across platforms.
+Python 3.12+
 
-## Generation Process
+### Installation
 
-The clients are generated automatically using the following Makefile targets:
+Install directly (using `pip`) in your environment by running the following command:
 
-- `generate-cli-python`: Generates the Python client.
-- `generate-cli-typescript`: Generates the TypeScript client.
+```sh
+pip install git+https://github.com/radiant-network/radiant-portal.git#subdirectory=cli/python
+```
 
-Refer to the Makefile for details on the generation commands.
+### Example Usage
+
+```python
+
+import radiant_python
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.AssaysApi(api_client)
+    seq_id = 'seq_id_example' # str | Seq ID
+
+    try:
+        # Get Assay by seq_id
+        api_response = api_instance.get_assay_by_seq_id(seq_id)
+        print("The response of AssaysApi->get_assay_by_seq_id:\n")
+        pprint(api_response)
+    except ApiException as e:
+        print("Exception when calling AssaysApi->get_assay_by_seq_id: %s\n" % e)
+
+```
+
+
+Authentication schemes defined for the API:
+<a id="bearerauth"></a>
+#### bearerauth
+
+- **Type**: Bearer authentication (JWT)
