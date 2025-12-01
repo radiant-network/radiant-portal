@@ -24,9 +24,9 @@
 
 ## 🔗 Related Issues
 
-<!-- Link to any relevant GitHub issues, Jira tickets, etc. -->
+<!-- Begin JIRA Issues -->
 
--
+<!-- End JIRA Issues -->
 
 ## 👀 Notes for Reviewers
 
