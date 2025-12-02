@@ -92,6 +92,7 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
         <div className="flex justify-end">
           <Button
             variant="link"
+            size="xs"
             onClick={() => {
               const newToggleExpandAll = !toggleExpandAll;
               setToggleExpandAll(newToggleExpandAll);
