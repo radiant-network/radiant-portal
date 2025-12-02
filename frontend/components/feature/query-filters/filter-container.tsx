@@ -37,7 +37,7 @@ export function AccordionContainer({ field, children }: AccordionContainerProps)
 
   return (
     <Card size="sm">
-      <AccordionItem key={field.key} value={field.key}>
+      <AccordionItem key={field.key} value={field.key} className="border-none">
         <CardHeader size="sm">
           <AccordionTrigger>
             {tooltipContent ? (
@@ -92,7 +92,11 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
   const fieldType = field.type;
 
   if (fieldType === 'divider') {
-    return <h4 className="mx-1 my-3 mt-5 text-muted-foreground">{t(`common.filters.${field.key}`)}</h4>;
+    return (
+      <h4 className="mx-1 my-3 mt-5 text-sidebar-foreground text-xs font-medium line-height-xs text-ellipsis overflow-hidden">
+        {t(`common.filters.${field.key}`)}
+      </h4>
+    );
   }
 
   let filterElement;
