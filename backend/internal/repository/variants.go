@@ -278,20 +278,20 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 
 	locusIdString := fmt.Sprintf("%d", locusId)
 	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline i")
-	txInterpreted = txInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = i.sequencing_id")
-	txInterpreted = txInterpreted.Distinct("s.id")
-	txInterpreted = txInterpreted.Where("i.locus_id = ?", locusIdString)
-	if err := txInterpreted.Count(&countInterpreted).Error; err != nil {
+	txInterpreted = txInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq ON chseq.sequencing_experiment_id = i.sequencing_id AND chseq.case_id = i.case_id")
+	txInterpreted = txInterpreted.Select("COUNT(1)")
+	txInterpreted = txInterpreted.Where("locus_id = ?", locusIdString)
+	if err := txInterpreted.Find(&countInterpreted).Error; err != nil {
 		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
 	}
 
 	txUnInterpreted := r.db.Table("germline__snv__occurrence o")
-	txUnInterpreted = txUnInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
-	txUnInterpreted = txUnInterpreted.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id = ? and i.sequencing_id = s.id", locusIdString)
-	txUnInterpreted = txUnInterpreted.Distinct("s.id")
+	txUnInterpreted = txUnInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq ON chseq.sequencing_experiment_id = o.seq_id")
+	txUnInterpreted = txUnInterpreted.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id = ? AND i.sequencing_id = chseq.sequencing_experiment_id AND i.case_id = chseq.case_id", locusIdString)
+	txUnInterpreted = txUnInterpreted.Select("COUNT(DISTINCT CONCAT(chseq.case_id, chseq.sequencing_experiment_id))")
 	txUnInterpreted = txUnInterpreted.Where("o.locus_id = ?", locusId)
 
-	if err := txUnInterpreted.Count(&countUnInterpreted).Error; err != nil {
+	if err := txUnInterpreted.Find(&countUnInterpreted).Error; err != nil {
 		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
 	}
 
