@@ -14,4 +14,5 @@ export const apiMessages = {
   Patient004RegExpId: (field: string, code: string, id: string) => `Invalid Field ${field} for patient (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$`,
   Patient004TooLong: (field: string, code: string, id: string) => `Invalid Field ${field} for patient (${code} / ${id}). Reason: field is too long, maximum length allowed is 100`,
   Patient005: (orgType: string, code: string, id: string) => `Organization type (${orgType}) defined for patient (${code} / ${id}) is not in this list : healthcare_provider, research_institute.`,
+  Patient006: (code: string, id: string) => `Patient (${code} / ${id}) appears multiple times in the batch.`,
 };

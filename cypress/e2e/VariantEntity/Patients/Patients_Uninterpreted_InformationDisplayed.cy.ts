@@ -10,22 +10,22 @@ describe('VariantEntity - Patients - Uninterpreted - Information displayed', () 
     VariantEntity_Patients.uninterpreted.actions.selectTab();
   };
 
-  it('Case', () => {
+  it('Case [SJRA-904]', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('case', data.variantGermline.uninterpreted);
   });
 
-  it('Assay', () => {
+  it('Assay [SJRA-904]', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('assay', data.variantGermline.uninterpreted);
   });
 
-  it('Patient', () => {
+  it('Patient [SJRA-904]', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('patient', data.variantGermline.uninterpreted);
   });
 
-  it('Sample', () => {
+  it('Sample [SJRA-904]', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sample', data.variantGermline.uninterpreted);
   });
