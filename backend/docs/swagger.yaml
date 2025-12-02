@@ -540,6 +540,32 @@ components:
         username:
           type: string
       type: object
+    CreatePatientBatchBody:
+      description: CreatePatientBatchBody represents the body required to create a
+        patient batch
+      properties:
+        patients:
+          items:
+            $ref: '#/components/schemas/PatientBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - patients
+      type: object
+    CreateSampleBatchBody:
+      description: CreateSampleBatchBody represents the body required to create a
+        sample batch
+      properties:
+        samples:
+          items:
+            $ref: '#/components/schemas/SampleBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - samples
+      type: object
     CreateSequencingExperimentBatchBody:
       description: CreateSequencingExperimentBatchBody represents the body required
         to create a sequencing experiment batch
@@ -552,6 +578,11 @@ components:
           uniqueItems: false
       required:
       - sequencing_experiments
+      type: object
+    DateOfBirthType:
+      properties:
+        time.Time:
+          type: string
       type: object
     DocumentFilters:
       properties:
@@ -1287,6 +1318,42 @@ components:
         pageSize:
           type: integer
       type: object
+    PatientBatch:
+      properties:
+        date_of_birth:
+          $ref: '#/components/schemas/DateOfBirthType'
+        first_name:
+          type: string
+        jhn:
+          type: string
+        last_name:
+          type: string
+        life_status_code:
+          enum:
+          - alive
+          - deceased
+          - unknown
+          type: string
+        patient_organization_code:
+          type: string
+        sex_code:
+          enum:
+          - male
+          - female
+          - unknown
+          type: string
+        submitter_patient_id:
+          type: string
+        submitter_patient_id_type:
+          type: string
+      required:
+      - date_of_birth
+      - life_status_code
+      - patient_organization_code
+      - sex_code
+      - submitter_patient_id
+      - submitter_patient_id_type
+      type: object
     PubmedCitation:
       properties:
         id:
@@ -1298,6 +1365,35 @@ components:
       properties:
         format:
           type: string
+      type: object
+    SampleBatch:
+      properties:
+        histology_code:
+          enum:
+          - tumoral
+          - normal
+          type: string
+        patient_organization_code:
+          type: string
+        sample_organization_code:
+          type: string
+        submitter_parent_sample_id:
+          type: string
+        submitter_patient_id:
+          type: string
+        submitter_sample_id:
+          type: string
+        tissue_site:
+          type: string
+        type_code:
+          type: string
+      required:
+      - histology_code
+      - patient_organization_code
+      - sample_organization_code
+      - submitter_patient_id
+      - submitter_sample_id
+      - type_code
       type: object
     SavedFilter:
       properties:
@@ -3698,11 +3794,20 @@ paths:
     post:
       description: Create a new patient batch
       operationId: postPatientBatch
+      parameters:
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/CreatePatientBatchBody'
+        description: Create Body
+        required: true
       responses:
         "202":
           content:
@@ -3737,11 +3842,20 @@ paths:
     post:
       description: Create a new sample batch
       operationId: postSampleBatch
+      parameters:
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/CreateSampleBatchBody'
+        description: Create Body
+        required: true
       responses:
         "202":
           content:
@@ -3816,6 +3930,7 @@ paths:
         in: query
         name: dry_run
         schema:
+          default: false
           type: boolean
       requestBody:
         content:

@@ -15,7 +15,7 @@ import (
 // @Description Create a new sequencing experiment batch
 // @Tags sequencing
 // @Security bearerauth
-// @Param dry_run query boolean false "Dry Run"
+// @Param dry_run query boolean false "Dry Run" default(false)
 // @Param message	body		types.CreateSequencingExperimentBatchBody	true	"Create Body"
 // @Accept json
 // @Produce json
