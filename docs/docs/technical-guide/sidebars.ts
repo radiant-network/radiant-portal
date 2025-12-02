@@ -1,6 +1,6 @@
-import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
+import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 import apiSidebar from "./api/sidebar";
-import radiantApiSidebar from "./radiant-api/sidebar";
+import radiantApiSidebar from "./api/sidebar";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /**
