@@ -15,6 +15,8 @@ import (
 // @Description Create a new patient batch
 // @Tags patients
 // @Security bearerauth
+// @Param dry_run query boolean false "Dry Run" default(false)
+// @Param message	body		types.CreatePatientBatchBody	true	"Create Body"
 // @Accept json
 // @Produce json
 // @Success 202 {object} types.CreateBatchResponse
