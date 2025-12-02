@@ -148,7 +148,13 @@ Cypress.Commands.add('setLang', (lang: string) => {
  * @param subject The tab element.
  */
 Cypress.Commands.add('shouldBeActiveTab', { prevSubject: 'element' }, subject => {
-  cy.wrap(subject).parents(CommonSelectors.activeTab).should('exist');
+  cy.wrap(subject).then($el => {
+    if ($el.is(CommonSelectors.activeTab)) {
+      cy.wrap($el).should('match', CommonSelectors.activeTab);
+    } else {
+      cy.wrap($el).parents(CommonSelectors.activeTab).should('exist');
+    }
+  });
 });
 
 /**

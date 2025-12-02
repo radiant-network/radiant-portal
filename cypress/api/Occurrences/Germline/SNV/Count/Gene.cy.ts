@@ -4,12 +4,14 @@ import { tableSNVFacets } from 'pom/pages/CaseEntity_Variants_Facets';
 describe('Occurrences - Germline - SNV - Count - Gene', () => {
   let response: any;
   let Auth: any;
+  let case_id: string;
   let seq_id: string;
   let globalData: any;
 
   before(() => {
     globalData = Cypress.env('globalData');
     Auth = globalData.Authorization;
+    case_id = globalData.Count.case_id;
     seq_id = globalData.Count.seq_id;
   });
 
@@ -32,7 +34,7 @@ describe('Occurrences - Germline - SNV - Count - Gene', () => {
       cy.fixture('RequestBody/ApplyFacet.json').then(fixture => {
         const body = JSON.parse(JSON.stringify(fixture).replace('_FIELD', facet.apiField).replace('_VALUE', facetData.value).replace('_OP', facetData.op));
 
-        cy.apiCall('POST', `occurrences/germline/snv/${seq_id}/count`, body, Auth.token).then(res => {
+        cy.apiCall('POST', `occurrences/germline/snv/${case_id}/${seq_id}/count`, body, Auth.token).then(res => {
           response = res;
           expect(response.status).to.eq(200);
           expect(response.body.count).to.eq(facetData.count);

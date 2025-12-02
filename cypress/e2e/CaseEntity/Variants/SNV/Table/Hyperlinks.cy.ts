@@ -33,7 +33,7 @@ describe('Case Entity - Variants - SNV - Table - Hyperlinks', () => {
     CaseEntity_Variants_SNV_Table.validations.shouldHaveSelectedQueryPill(data.variantGermline, 'gene');
   });
 
-  it('Freq. [SJRA-778]', () => {
+  it('Freq.', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.actions.clickTableCellLink(data.variantGermline, 'freq');
     VariantEntity_Patients.validations.shouldHaveActiveTab();
