@@ -265,7 +265,7 @@ func validatePatientRecord(patient types.PatientBatch, index int, seenPatients m
 			SubmitterPatientId: patient.SubmitterPatientId.String(),
 		},
 		seenPatients,
-		PatientAlreadyExistCode,
+		PatientDuplicateInBatchCode,
 		[]string{patient.PatientOrganizationCode, patient.SubmitterPatientId.String()},
 	)
 

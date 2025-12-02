@@ -9,7 +9,6 @@ import (
 )
 
 func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
-
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewPatientsRepository(db)
 		patient, err := repo.GetPatientBySubmitterPatientId(3, "MRN-283773")
