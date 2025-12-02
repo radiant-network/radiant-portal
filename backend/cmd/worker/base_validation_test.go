@@ -11,7 +11,7 @@ type TestValidationRecord struct {
 	BaseValidationRecord
 }
 
-func (r TestValidationRecord) GetBase() *BaseValidationRecord {
+func (r *TestValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
@@ -29,6 +29,20 @@ func Test_formatPath(t *testing.T) {
 
 	pathWithoutField := formatPath(record, "")
 	assert.Equal(t, "test_resource[5]", pathWithoutField)
+}
+
+func Test_formatIds(t *testing.T) {
+	result := formatIds([]string{})
+	assert.Equal(t, "", result)
+
+	result = formatIds([]string{"ORG1"})
+	assert.Equal(t, "(ORG1)", result)
+
+	result = formatIds([]string{"ORG1", "P123"})
+	assert.Equal(t, "(ORG1 / P123)", result)
+
+	result = formatIds(nil)
+	assert.Equal(t, "", result)
 }
 
 func Test_formatInvalidField(t *testing.T) {
@@ -55,13 +69,161 @@ func Test_formatFieldTooLong(t *testing.T) {
 	assert.Equal(t, expectedMessage, message)
 }
 
+func Test_formatDuplicateInBatch(t *testing.T) {
+	record := &TestValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 3},
+	}
+
+	message := formatDuplicateInBatch(record, []string{"ORG1", "P123"})
+	expected := "Test_resource (ORG1 / P123) appears multiple times in the batch."
+	assert.Equal(t, expected, message)
+}
+
+func Test_validateUniquenessInBatch_NoDuplicate(t *testing.T) {
+	record := &TestValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	type testKey struct {
+		OrgCode string
+		ID      string
+	}
+
+	seenBatchMap := map[testKey]struct{}{}
+	key := testKey{OrgCode: "ORG1", ID: "P1"}
+
+	validateUniquenessInBatch(
+		record,
+		key,
+		seenBatchMap,
+		"DUPLICATE-001",
+		[]string{"ORG1", "P1"},
+	)
+
+	assert.Empty(t, record.Errors)
+	_, exists := seenBatchMap[key]
+	assert.True(t, exists)
+}
+
+func Test_validateUniquenessInBatch_DuplicateFound(t *testing.T) {
+	record := &TestValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 5},
+	}
+
+	type testKey struct {
+		OrgCode string
+		ID      string
+	}
+
+	seenBatchMap := map[testKey]struct{}{}
+	key := testKey{OrgCode: "ORG1", ID: "P1"}
+	seenBatchMap[key] = struct{}{}
+
+	validateUniquenessInBatch(
+		record,
+		key,
+		seenBatchMap,
+		"DUPLICATE-001",
+		[]string{"ORG1", "P1"},
+	)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, "DUPLICATE-001", record.Errors[0].Code)
+	assert.Equal(t, "Test_resource (ORG1 / P1) appears multiple times in the batch.", record.Errors[0].Message)
+	assert.Equal(t, "test_resource[5]", record.Errors[0].Path)
+}
+
+func Test_validateUniquenessInBatch_MultipleDuplicates(t *testing.T) {
+	type testKey struct {
+		OrgCode string
+		ID      string
+	}
+
+	seenBatchMap := map[testKey]struct{}{}
+	record1 := &TestValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 1},
+	}
+	key := testKey{OrgCode: "ORG1", ID: "P1"}
+	seenBatchMap[key] = struct{}{}
+	validateUniquenessInBatch(
+		record1,
+		key,
+		seenBatchMap,
+		"DUPLICATE-001",
+		[]string{"ORG1", "P1"},
+	)
+
+	record2 := &TestValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 3},
+	}
+	validateUniquenessInBatch(
+		record2,
+		key,
+		seenBatchMap,
+		"DUPLICATE-001",
+		[]string{"ORG1", "P1"},
+	)
+
+	assert.Len(t, record1.Errors, 1)
+	assert.Len(t, record2.Errors, 1)
+	assert.Equal(t, "test_resource[1]", record1.Errors[0].Path)
+	assert.Equal(t, "test_resource[3]", record2.Errors[0].Path)
+}
+
+func Test_validateUniquenessInBatch_DifferentKeys(t *testing.T) {
+	type testKey struct {
+		OrgCode string
+		ID      string
+	}
+
+	seenBatchMap := map[testKey]struct{}{}
+	key := testKey{OrgCode: "ORG1", ID: "P1"}
+	seenBatchMap[key] = struct{}{}
+	record := &TestValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 2},
+	}
+	validateUniquenessInBatch(
+		record,
+		testKey{OrgCode: "ORG1", ID: "P2"}, // Different ID
+		seenBatchMap,
+		"DUPLICATE-001",
+		[]string{"ORG1", "P2"},
+	)
+
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateUniquenessInBatch_EmptyBatchMap(t *testing.T) {
+	record := &TestValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	type testKey struct {
+		OrgCode string
+		ID      string
+	}
+
+	seenBatchMap := map[testKey]struct{}{}
+	key := testKey{OrgCode: "ORG1", ID: "P1"}
+
+	validateUniquenessInBatch(
+		record,
+		key,
+		seenBatchMap,
+		"DUPLICATE-001",
+		[]string{"ORG1", "P1"},
+	)
+
+	assert.Empty(t, record.Errors)
+}
+
 func Test_CopyRecordIntoBatch_Success(t *testing.T) {
 	batch := &types.Batch{
 		Status: types.BatchStatusRunning,
 		Report: types.BatchReport{},
 	}
 
-	records := []TestValidationRecord{
+	records := []*TestValidationRecord{
 		{BaseValidationRecord{
 			Index:   0,
 			Skipped: false,
@@ -88,7 +250,7 @@ func Test_CopyRecordIntoBatch_WithErrors(t *testing.T) {
 		Report: types.BatchReport{},
 	}
 
-	records := []TestValidationRecord{
+	records := []*TestValidationRecord{
 		{BaseValidationRecord{
 			Index:  0,
 			Errors: []types.BatchMessage{{Code: "ERR-001", Message: "Error message", Path: "field1"}},
@@ -113,7 +275,7 @@ func Test_CopyRecordIntoBatch_WithSkipped(t *testing.T) {
 		Report: types.BatchReport{},
 	}
 
-	records := []TestValidationRecord{
+	records := []*TestValidationRecord{
 		{BaseValidationRecord{
 			Index:   0,
 			Skipped: true,
@@ -139,7 +301,7 @@ func Test_CopyRecordIntoBatch_MixedRecords(t *testing.T) {
 		Report: types.BatchReport{},
 	}
 
-	records := []TestValidationRecord{
+	records := []*TestValidationRecord{
 		{BaseValidationRecord{
 			Index:  0,
 			Errors: []types.BatchMessage{{Code: "ERR-001", Message: "Error 1", Path: "field1"}},
@@ -173,7 +335,7 @@ func Test_CopyRecordIntoBatch_EmptyRecords(t *testing.T) {
 		Report: types.BatchReport{},
 	}
 
-	records := []TestValidationRecord{}
+	records := []*TestValidationRecord{}
 
 	copyRecordIntoBatch(batch, records)
 
@@ -189,7 +351,7 @@ func Test_CopyRecordIntoBatch_MultipleMessages(t *testing.T) {
 		Report: types.BatchReport{},
 	}
 
-	records := []TestValidationRecord{
+	records := []*TestValidationRecord{
 		{BaseValidationRecord{
 			Index: 0,
 			Errors: []types.BatchMessage{
