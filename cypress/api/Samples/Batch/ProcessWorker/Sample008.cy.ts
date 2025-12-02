@@ -1,40 +1,34 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Patients - Batch - Process worker - Patient006', () => {
+describe('Samples - Batch - Process worker - Sample008', () => {
   let response: any;
   let batch_id: string;
 
   before(() => {
     const Auth = Cypress.env('globalData').Authorization;
     const body: string = `{
-      "patients": [
+      "samples": [
         {
-          "submitter_patient_id": "Cypress0001",
-          "submitter_patient_id_type": "MR",
+          "submitter_patient_id": "MRN-283775",
           "patient_organization_code": "CHUSJ",
-          "first_name": "Cypress",
-          "last_name": "Test",
-          "jhn": "Cypress0001",
-          "life_status_code": "alive",
-          "sex_code": "male",
-          "date_of_birth": "1979-09-19"
+          "type_code": "dna",
+          "histology_code": "normal",
+          "submitter_sample_id": "Cypress0001",
+          "sample_organization_code": "CQGC"
         },
         {
-          "submitter_patient_id": "Cypress0001",
-          "submitter_patient_id_type": "MR",
+          "submitter_patient_id": "MRN-283775",
           "patient_organization_code": "CHUSJ",
-          "first_name": "Cypress",
-          "last_name": "Test",
-          "jhn": "Cypress0001",
-          "life_status_code": "alive",
-          "sex_code": "male",
-          "date_of_birth": "1979-09-19"
+          "type_code": "dna",
+          "histology_code": "normal",
+          "submitter_sample_id": "Cypress0001",
+          "sample_organization_code": "CQGC"
         }
       ]
     }`;
 
-    cy.apiCall('POST', 'patients/batch?dry_run=true', body, Auth.token)
+    cy.apiCall('POST', 'samples/batch?dry_run=true', body, Auth.token)
       .then((postRes: any) => {
         batch_id = postRes.body.id;
         return batch_id;
@@ -60,7 +54,7 @@ describe('Patients - Batch - Process worker - Patient006', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report patient[1] [SJRA-902]', () => {
-    cy.validateReport(response, 'error', 'PATIENT-006', apiMessages.ProcessWorkerErrorMultiple('Patient', 'CHUSJ', 'Cypress0001'), 'patient[1]');
+  it('Validate report sample[1]', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-008', apiMessages.ProcessWorkerErrorMultiple('Sample', 'CQGC', 'Cypress0001'), 'sample[1]');
   });
 });
