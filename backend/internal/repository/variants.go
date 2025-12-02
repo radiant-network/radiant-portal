@@ -190,16 +190,16 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 
 	locusIdString := fmt.Sprintf("%d", locusId)
 
-	tx := r.db.Table("`radiant_jdbc`.`public`.`sequencing_experiment` s")
-	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON s.id = o.seq_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.case_has_sequencing_experiment chseq ON chseq.sequencing_experiment_id = o.seq_id")
+	tx := r.db.Table("`radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq")
+	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON chseq.sequencing_experiment_id = o.seq_id")
+	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id")
 	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = chseq.case_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`analysis_catalog` ca ON ca.id = c.analysis_catalog_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.diagnosis_lab_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`sample` sa ON sa.id = s.sample_id")
 	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = c.id and f.family_member_id= sa.patient_id")
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
-	tx = tx.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id = ? and i.sequencing_id = s.id", locusIdString)
+	tx = tx.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id = ? and i.sequencing_id = chseq.sequencing_experiment_id and i.case_id = chseq.case_id", locusIdString)
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = sa.patient_id", txAggPhenotypes)
 	tx = tx.Where("o.locus_id = ?", locusId)
 
