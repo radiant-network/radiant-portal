@@ -7,7 +7,8 @@ const globalData = {
     patientNotFound: '00000000-0000-0000-0000-000000000000',
   },
   Count: {
-    //occurrences/germline/snv/{seq_id}/count
+    //occurrences/germline/snv/{case_id}/{seq_id}/count
+    case_id: 1,
     seq_id: 1,
     snv: {
       Variant: [
