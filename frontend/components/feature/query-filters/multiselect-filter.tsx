@@ -86,13 +86,16 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       const stored = sessionStorage.getItem(globalStorageKey);
       if (stored) {
         const allTempSelections = JSON.parse(stored);
-        const fieldSelections = allTempSelections[field.key];
-        if (fieldSelections) {
-          return fieldSelections;
+        // Check if this field exists in sessionStorage (even if empty array)
+        if (Object.prototype.hasOwnProperty.call(allTempSelections, field.key)) {
+          const fieldSelections = allTempSelections[field.key];
+          console.error(`[${field.key}] Found in sessionStorage:`, fieldSelections);
+          return fieldSelections; // Can be empty array if user unchecked all
         }
       }
     } catch (error) {
-      // Error reading global storage - continue with query builder values
+      // SessionStorage error - fall back to query builder values
+      console.warn(`Failed to read filter state from sessionStorage for ${field.key}:`, error);
     }
 
     // Otherwise use query builder
@@ -111,7 +114,25 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
   const [hasBeenReset, setHasBeenReset] = useState(false);
-  const [lastQueryBuilderState, setLastQueryBuilderState] = useState<string>('');
+  const [lastQueryBuilderState, setLastQueryBuilderState] = useState<string>(() => {
+    // Initialize with current query builder state to avoid false positive on first render
+    const currentQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
+    return JSON.stringify(currentQuery);
+  });
+  const [isFromSessionStorage, setIsFromSessionStorage] = useState(() => {
+    // Check if initial values came from sessionStorage
+    try {
+      const stored = sessionStorage.getItem(globalStorageKey);
+      if (stored) {
+        const allTempSelections = JSON.parse(stored);
+        return Object.prototype.hasOwnProperty.call(allTempSelections, field.key);
+      }
+    } catch (error) {
+      // SessionStorage error - assume values don't come from storage
+      console.warn(`Failed to check sessionStorage state for ${field.key}:`, error);
+    }
+    return false;
+  });
 
   // Monitor query builder changes to clean sessionStorage
   useEffect(() => {
@@ -150,9 +171,21 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     setHasUnappliedItems(hasUnapplied);
 
     // Synchronize only if selectedItems is empty and there are items in query builder
-    // AND it's not following a reset
-    if (selectedItems.length === 0 && queryBuilderItems.length > 0 && !hasBeenReset) {
+    // AND it's not following a reset AND user hasn't made any changes yet
+    // AND values didn't come from sessionStorage initially
+    if (
+      selectedItems.length === 0 &&
+      queryBuilderItems.length > 0 &&
+      !hasBeenReset &&
+      !hasUnappliedItems &&
+      !isFromSessionStorage
+    ) {
       setSelectedItems(queryBuilderItems);
+    }
+
+    // Reset the sessionStorage flag after first effect run
+    if (isFromSessionStorage) {
+      setIsFromSessionStorage(false);
     }
 
     // Reset the reset flag if we have selected items
@@ -188,30 +221,15 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
 
   // Save temporarily in global sessionStorage
   useEffect(() => {
-    if (selectedItems.length > 0) {
-      try {
-        const stored = sessionStorage.getItem(globalStorageKey) || '{}';
-        const allTempSelections = JSON.parse(stored);
-        allTempSelections[field.key] = selectedItems;
-        sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
-      } catch (error) {
-        // Error saving to global storage
-      }
-    } else {
-      try {
-        const stored = sessionStorage.getItem(globalStorageKey);
-        if (stored) {
-          const allTempSelections = JSON.parse(stored);
-          delete allTempSelections[field.key];
-          if (Object.keys(allTempSelections).length === 0) {
-            sessionStorage.removeItem(globalStorageKey);
-          } else {
-            sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
-          }
-        }
-      } catch (error) {
-        // Error cleaning global storage
-      }
+    // Always save the current state (even empty array) to mark that user has interacted
+    try {
+      const stored = sessionStorage.getItem(globalStorageKey) || '{}';
+      const allTempSelections = JSON.parse(stored);
+      allTempSelections[field.key] = selectedItems;
+      sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
+    } catch (error) {
+      // SessionStorage error - filter state won't persist, but component still works
+      console.warn(`Failed to save filter state to sessionStorage for ${field.key}:`, error);
     }
   }, [selectedItems, globalStorageKey, field.key]);
 
@@ -283,7 +301,8 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
         }
       }
     } catch (error) {
-      // Error during clear cleanup
+      // SessionStorage error - clear operation failed, but component state is still reset
+      console.warn(`Failed to clear filter state from sessionStorage for ${field.key}:`, error);
     }
   }, [globalStorageKey, field.key]);
 
