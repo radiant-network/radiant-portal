@@ -277,7 +277,8 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 	var countUnInterpreted int64
 
 	locusIdString := fmt.Sprintf("%d", locusId)
-	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline")
+	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline i")
+	txInterpreted = txInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq ON chseq.sequencing_experiment_id = i.sequencing_id AND chseq.case_id = i.case_id")
 	txInterpreted = txInterpreted.Select("COUNT(1)")
 	txInterpreted = txInterpreted.Where("locus_id = ?", locusIdString)
 	if err := txInterpreted.Find(&countInterpreted).Error; err != nil {
