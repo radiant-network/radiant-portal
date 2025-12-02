@@ -122,7 +122,7 @@ Cypress.Commands.add('validateSuccessBatchProcessed', (response: any, batch_type
   expect(response.body).to.include({
     id: batch_id,
     dry_run: true,
-    batch_type: 'patient',
+    batch_type: batch_type,
     status: 'SUCCESS',
     username: 'cypress',
   });

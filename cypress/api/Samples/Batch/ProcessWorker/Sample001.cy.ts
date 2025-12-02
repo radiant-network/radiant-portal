@@ -1,29 +1,26 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Patients - Batch - Process worker - Patient001', () => {
+describe('Samples - Batch - Process worker - Sample001', () => {
   let response: any;
   let batch_id: string;
 
   before(() => {
     const Auth = Cypress.env('globalData').Authorization;
     const body: string = `{
-      "patients": [
+      "samples": [
         {
-          "submitter_patient_id": "MRN-283775  ",
-          "submitter_patient_id_type": "MR",
+          "submitter_patient_id": "MRN-283775",
           "patient_organization_code": "CHUSJ",
-          "first_name": "Marie",
-          "last_name": "Lambert",
-          "jhn": "LAM7303233380",
-          "life_status_code": "alive",
-          "sex_code": "male",
-          "date_of_birth": "1973-03-23"
+          "type_code": "dna",
+          "histology_code": "normal",
+          "submitter_sample_id": "S13224",
+          "sample_organization_code": "CQGC"
         }
       ]
     }`;
 
-    cy.apiCall('POST', 'patients/batch?dry_run=true', body, Auth.token)
+    cy.apiCall('POST', 'samples/batch?dry_run=true', body, Auth.token)
       .then((postRes: any) => {
         batch_id = postRes.body.id;
         return batch_id;
@@ -49,7 +46,7 @@ describe('Patients - Batch - Process worker - Patient001', () => {
     expect(Object.keys(response.body.report.info)).to.have.lengthOf(1);
   });
 
-  it('Validate report patient[0]', () => {
-    cy.validateReport(response, 'info', 'PATIENT-001', apiMessages.ProcessWorkerError001('Patient', 'CHUSJ', 'MRN-283775'), 'patient[0]');
+  it('Validate report sample[0] [SJRA-909]', () => {
+    cy.validateReport(response, 'info', 'SAMPLE-001', apiMessages.ProcessWorkerError001('Sample', 'CQGC', 'S13224'), 'sample[0]');
   });
 });

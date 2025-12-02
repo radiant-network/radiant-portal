@@ -48,7 +48,7 @@ func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValu
 func (r *SampleValidationRecord) validatePatient(patient *types.Patient) {
 	if patient == nil {
 		path := formatPath(r, "submitter_patient_id")
-		message := fmt.Sprintf("Patient %s / %s for sample %s does not exist", r.Sample.PatientOrganizationCode, r.Sample.SubmitterPatientId, r.Sample.SubmitterSampleId)
+		message := fmt.Sprintf("Patient (%s / %s) for sample %s does not exist.", r.Sample.PatientOrganizationCode, r.Sample.SubmitterPatientId, r.Sample.SubmitterSampleId)
 		r.addErrors(message, SamplePatientNotExistCode, path)
 	} else {
 		r.PatientId = patient.ID
@@ -58,7 +58,7 @@ func (r *SampleValidationRecord) validatePatient(patient *types.Patient) {
 func (r *SampleValidationRecord) validateOrganization(organization *types.Organization) {
 	if organization == nil {
 		path := formatPath(r, "sample_organization_code")
-		message := fmt.Sprintf("Organization %s for sample %s does not exist", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+		message := fmt.Sprintf("Organization %s for sample %s does not exist.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 		r.addErrors(message, SampleOrgNotExistCode, path)
 	} else {
 		r.OrganizationId = organization.ID
@@ -81,7 +81,7 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 	path := formatPath(r, fieldName)
 	if existingParentSample != nil {
 		if existingParentSample.PatientID != r.PatientId {
-			message := fmt.Sprintf("Invalid parent sample %s for sample (%s / %s)", r.Sample.SubmitterParentSampleId, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+			message := fmt.Sprintf("Invalid parent sample %s for sample (%s / %s).", r.Sample.SubmitterParentSampleId, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
 		} else {
 			validateExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
@@ -93,7 +93,7 @@ func (r *SampleValidationRecord) validateExistingParentSampleInBatch(parentSampl
 	fieldName := "submitter_parent_sample_id"
 	path := formatPath(r, fieldName)
 	if !parentSampleInBatch {
-		message := fmt.Sprintf("Sample %s does not exist", r.Sample.SubmitterParentSampleId)
+		message := fmt.Sprintf("Sample %s does not exist.", r.Sample.SubmitterParentSampleId)
 		r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
 	}
 }
@@ -106,7 +106,7 @@ func validateExistingSampleField[T comparable](
 ) {
 	if existingSampleValue != recordValue {
 		path := formatPath(r, fieldName)
-		message := fmt.Sprintf("A sample with same ids (%s / %s) has been found  but with a different %s (%v <> %v)",
+		message := fmt.Sprintf("A sample with same ids (%s / %s) has been found but with a different %s (%v <> %v).",
 			r.Sample.SampleOrganizationCode,
 			r.Sample.SubmitterSampleId,
 			fieldName,
