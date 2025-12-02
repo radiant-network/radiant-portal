@@ -140,7 +140,7 @@ function useStatisticsBuilder(field: string, appId: string, seqId: string, useEm
     };
   }
 
-  return useSWR<Statistics, any, OccurrenceStatisticsInput>(data, statisticsFetcher(appId), {
+  return useSWR<Statistics, any, OccurrenceStatisticsInput>(data, statisticsFetcher(appId as ApplicationId), {
     revalidateOnFocus: false,
   });
 }

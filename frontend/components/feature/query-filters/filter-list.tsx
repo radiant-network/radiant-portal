@@ -15,11 +15,13 @@ import { AggregationConfig, ApplicationId } from '@/components/model/application
 type FilterListContextProps = {
   appId: ApplicationId;
   aggregations: AggregationConfig;
+  clearUnappliedFilters: () => void;
 };
 
 const FilterConfigContext = createContext<FilterListContextProps>({
   appId: ApplicationId.variant_entity,
   aggregations: {},
+  clearUnappliedFilters: () => {},
 });
 
 export const useFilterConfig = (): FilterListContextProps => {
@@ -29,6 +31,13 @@ export const useFilterConfig = (): FilterListContextProps => {
   }
   return context;
 };
+
+/**
+ * Generate the global storage key for temporary filter selections
+ */
+export function getGlobalStorageKey(appId: ApplicationId): string {
+  return `temp-filters-${appId}`;
+}
 
 /**
  * Create facets
@@ -43,6 +52,15 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
   const { t } = useI18n();
   const [toggleExpandAll, setToggleExpandAll] = useState<boolean>(false);
   const [expandedFilters, setExpandedFilters] = useState<string[]>([]);
+  const [prevGroupKey, setPrevGroupKey] = useState<string | null | undefined>(groupKey);
+
+  // Unique key for all temporary selections
+  const globalStorageKey = getGlobalStorageKey(appId);
+
+  // Simple function to clean all temporary selections
+  const clearUnappliedFilters = () => {
+    sessionStorage.removeItem(globalStorageKey);
+  };
 
   // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
   const fields = groupKey
@@ -54,8 +72,22 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
     setExpandedFilters([]);
   }, [groupKey]);
 
+  // Detect sidebar closure (groupKey → null) OR content change (groupKey1 → groupKey2)
+  useEffect(() => {
+    // Closure: groupKey goes from a value to null
+    if (prevGroupKey && prevGroupKey !== null && groupKey === null) {
+      clearUnappliedFilters();
+    }
+    // Change: groupKey goes from one value to another value
+    else if (prevGroupKey && prevGroupKey !== null && groupKey && groupKey !== null && prevGroupKey !== groupKey) {
+      clearUnappliedFilters();
+    }
+
+    setPrevGroupKey(groupKey);
+  }, [groupKey, prevGroupKey]);
+
   return (
-    <FilterConfigContext value={{ appId, aggregations }}>
+    <FilterConfigContext value={{ appId, aggregations, clearUnappliedFilters }}>
       <div>
         <div className="flex justify-end">
           <Button
