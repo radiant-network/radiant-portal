@@ -27,7 +27,7 @@ func (r *SamplesRepository) GetSampleBySubmitterSampleId(organizationId int, sub
 	var sample Sample
 	tx := r.db.
 		Table("sample").
-		Where("submitter_organization_id = ? and submitter_sample_id = ?", organizationId, submitterSampleId)
+		Where("organization_id = ? and submitter_sample_id = ?", organizationId, submitterSampleId)
 	if err := tx.First(&sample).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve sample its ID: %w", err)
@@ -39,5 +39,5 @@ func (r *SamplesRepository) GetSampleBySubmitterSampleId(organizationId int, sub
 }
 
 func (r *SamplesRepository) CreateSample(newSample *Sample) error {
-	return r.db.Create(newSample).Error
+	return r.db.Table("sample").Create(newSample).Error
 }
