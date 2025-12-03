@@ -149,7 +149,7 @@ func validateExistingPatientField[T comparable](
 ) {
 	if existingPatientValue != recordValue {
 		path := formatPath(r, fieldName)
-		message := fmt.Sprintf("A patient with same ids (%s / %s) has been found  but with a different %s (%v <> %v)",
+		message := fmt.Sprintf("A patient with same ids (%s / %s) has been found  but with a different %s (%v <> %v).",
 			r.Patient.PatientOrganizationCode,
 			r.Patient.SubmitterPatientId,
 			fieldName,
