@@ -60,9 +60,8 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 
 	txStg := r.db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.Name))
 	txStg = txStg.Select("DISTINCT(chse.case_id)")
-	txStg = txStg.Where("ingested_at IS NOT NULL AND task_type = 'radiant_germline_annotation'")
+	txStg = txStg.Where("se.ingested_at IS NOT NULL AND se.task_type = 'radiant_germline_annotation'")
 	txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.Name))
-	txStg.Joins(fmt.Sprintf("JOIN %s tctx ON tctx.task_id = se.task_id", types.TaskContextTable.Name))
 
 	txMembersCount := r.db.Table(types.FamilyTable.Name).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
 
