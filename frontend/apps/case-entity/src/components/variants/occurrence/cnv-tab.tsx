@@ -185,9 +185,9 @@ function CNVTab({ seqId }: CNVTabProps) {
    * Re-fetch count
    */
   useEffect(() => {
-    if (seqId === '') return;
+    if (seqId === '' || caseId === '') return;
     fetchOccurrencesCount.mutate();
-  }, [seqId, activeSqon]);
+  }, [seqId, caseId, activeSqon]);
 
   /**
    * Reset pagination on sqon change
@@ -263,11 +263,23 @@ function CNVTab({ seqId }: CNVTabProps) {
                   }).then(res => res.count || 0);
                 }}
                 resolveSyntheticSqon={resolveSyntheticSqon}
-                onActiveQueryChange={sqon =>
-                  setActiveSqon(resolveSyntheticSqon(sqon, (qbState?.queries || []) as ISyntheticSqon[]) as Sqon)
-                }
+                onActiveQueryChange={sqon => {
+                  const newActiveSqon = resolveSyntheticSqon(
+                    sqon,
+                    (qbState?.queries || []) as ISyntheticSqon[],
+                  ) as Sqon;
+                  setActiveSqon(newActiveSqon);
+                }}
                 onStateChange={state => {
                   setQbState(state);
+
+                  // Get the active query from the new state and update activeSqon
+                  const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
+                  const newActiveSqon = resolveSyntheticSqon(
+                    activeQuery,
+                    (state?.queries || []) as ISyntheticSqon[],
+                  ) as Sqon;
+                  setActiveSqon(newActiveSqon);
                 }}
                 queryPillFacetFilterConfig={{
                   enable: true,
