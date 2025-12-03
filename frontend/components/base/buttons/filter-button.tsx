@@ -139,6 +139,7 @@ function getSelectedOptions(options: IFilterButtonItem[], selected: string[]) {
 function getUnselectedOptions(options: IFilterButtonItem[], selected: string[]) {
   return options.filter(option => !selected.includes(option.key || ''));
 }
+
 export default function FilterButton({
   label,
   options,
@@ -231,7 +232,7 @@ export default function FilterButton({
             <CommandEmpty>{t('common.table.no_result')}</CommandEmpty>
             <CommandGroup>
               {optionSnapshot.selectedOptions
-                .filter(option => option.count !== undefined && option.count !== 0)
+                .filter(option => option.count !== undefined || option.count !== 0)
                 .map(option => (
                   <CustomCommandItem
                     key={option.key}
@@ -248,7 +249,7 @@ export default function FilterButton({
             {optionSnapshot.selectedOptions.length > 0 && <CommandSeparator />}
             <CommandGroup>
               {optionSnapshot.unselectedOptions
-                .filter(option => option.count !== undefined && option.count !== 0)
+                .filter(option => option.count !== undefined || option.count !== 0)
                 .map(option => (
                   <CustomCommandItem
                     key={option.key}
