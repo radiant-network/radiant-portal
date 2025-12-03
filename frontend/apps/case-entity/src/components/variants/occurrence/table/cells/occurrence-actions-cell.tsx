@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useParams } from 'react-router';
 import { CellContext } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
@@ -13,6 +14,9 @@ function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>)
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
 
+  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
+  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
+
   const { locus_id, chromosome, start, rsnumber, seq_id, locus } = row.original;
 
   const onNavigateToVariantPage = () => {
@@ -26,14 +30,17 @@ function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>)
         setOpen={setSheetOpen}
         occurrence={row.original as GermlineSNVOccurrence}
       />
-      <IGVDialog
-        open={igvOpen}
-        setOpen={setIgvOpen}
-        seqId={seq_id}
-        locus={locus}
-        start={start}
-        chromosome={chromosome}
-      />
+      {caseId && (
+        <IGVDialog
+          open={igvOpen}
+          setOpen={setIgvOpen}
+          caseId={caseId}
+          seqId={seq_id}
+          locus={locus}
+          start={start}
+          chromosome={chromosome}
+        />
+      )}
       <ActionButton
         className="px-0"
         variant="outline"
