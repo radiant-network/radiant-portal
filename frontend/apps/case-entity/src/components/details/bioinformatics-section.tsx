@@ -38,7 +38,7 @@ function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewA
         </BadgeCell>
       ),
       header: t('case_entity.details.type'),
-      maxSize: 80,
+      maxSize: 200,
     }),
     columnHelper.accessor('patients', {
       cell: info => <BadgeListCell variant="outline" badges={info.getValue()} />,
