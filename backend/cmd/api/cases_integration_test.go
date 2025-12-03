@@ -31,7 +31,7 @@ func assertSearchCasesHandler(t *testing.T, data string, body string, expected s
 }
 
 func Test_SearchCasesHandler_WithCriteria(t *testing.T) {
-	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "proband_id":20, "submitter_proband_id":"MRN-283792", "priority_code":"routine", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHOP", "ordering_organization_name":"Children Hospital of Philadelphia", "status_code":"revoke", "updated_on":"2021-09-12T13:08:00Z", "has_variants":false}], "count": 1}`
+	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "proband_id":20, "submitter_proband_id":"MRN-283792", "priority_code":"routine", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHOP", "ordering_organization_name":"Children Hospital of Philadelphia", "status_code":"revoke", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
 	body := `{
 			"additional_fields":[],
 			"search_criteria":[{"field": "status_code", "value": ["revoke"]}]
@@ -40,7 +40,7 @@ func Test_SearchCasesHandler_WithCriteria(t *testing.T) {
 }
 
 func Test_SearchCasesHandler_WithAdditionalFields(t *testing.T) {
-	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "organization_code":"CHUSJ", "proband_id":20, "submitter_proband_id":"MRN-283792", "primary_condition_id":"MONDO:0700092", "primary_condition_name":"neurodevelopmental disorder", "priority_code":"routine", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHOP", "ordering_organization_name":"Children Hospital of Philadelphia", "status_code":"revoke", "updated_on":"2021-09-12T13:08:00Z", "has_variants":false}], "count": 1}`
+	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "organization_code":"CHUSJ", "proband_id":20, "submitter_proband_id":"MRN-283792", "primary_condition_id":"MONDO:0700092", "primary_condition_name":"neurodevelopmental disorder", "priority_code":"routine", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHOP", "ordering_organization_name":"Children Hospital of Philadelphia", "status_code":"revoke", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
 	body := `{
 			"additional_fields":["primary_condition_id", "primary_condition_name", "organization_code"],
 			"search_criteria":[{"field": "status_code", "value": ["revoke"]}]
