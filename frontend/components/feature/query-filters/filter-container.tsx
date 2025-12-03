@@ -93,7 +93,7 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
 
   if (fieldType === 'divider') {
     return (
-      <h4 className="mx-1 my-3 mt-5 text-sidebar-foreground text-xs font-medium line-height-xs text-ellipsis overflow-hidden">
+      <h4 className="px-2 h-8 text-sidebar-foreground/70 text-xs font-medium line-height-xs text-ellipsis overflow-hidden flex justify-between items-center">
         {t(`common.filters.${field.key}`)}
       </h4>
     );
