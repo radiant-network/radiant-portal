@@ -51,11 +51,11 @@ func Test_formatInvalidField(t *testing.T) {
 	}
 
 	messageWithIds := formatInvalidField(record, "tissue_site", "is empty", []string{"ORG1", "S1"})
-	expectedMsgWithIds := "Invalid Field tissue_site for test_resource (ORG1 / S1). Reason: is empty"
+	expectedMsgWithIds := "Invalid Field tissue_site for test_resource (ORG1 / S1). Reason: is empty."
 	assert.Equal(t, expectedMsgWithIds, messageWithIds)
 
 	messageWithoutIds := formatInvalidField(record, "type_code", "is unknown", []string{})
-	expectedMsgWithoutIds := "Invalid Field type_code for test_resource. Reason: is unknown"
+	expectedMsgWithoutIds := "Invalid Field type_code for test_resource. Reason: is unknown."
 	assert.Equal(t, expectedMsgWithoutIds, messageWithoutIds)
 }
 
@@ -65,7 +65,7 @@ func Test_formatFieldTooLong(t *testing.T) {
 	}
 
 	message := formatFieldTooLong(record, "first_name", 50, []string{"ORG2", "P2"})
-	expectedMessage := "Invalid Field first_name for test_resource (ORG2 / P2). Reason: field is too long, maximum length allowed is 50"
+	expectedMessage := "Invalid Field first_name for test_resource (ORG2 / P2). Reason: field is too long, maximum length allowed is 50."
 	assert.Equal(t, expectedMessage, message)
 }
 

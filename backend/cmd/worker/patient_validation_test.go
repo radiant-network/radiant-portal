@@ -29,7 +29,7 @@ func Test_SubmitterPatientId_Too_Long(t *testing.T) {
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateSubmitterPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
-	assert.Equal(t, fmt.Sprintf("Invalid Field submitter_patient_id for patient (CHUSJ / %s). Reason: field is too long, maximum length allowed is 100", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid Field submitter_patient_id for patient (CHUSJ / %s). Reason: field is too long, maximum length allowed is 100.", orgPatientId), patientValidationRecord.Errors[0].Message)
 	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
@@ -39,7 +39,7 @@ func Test_SubmitterPatientId_Special_Characters(t *testing.T) {
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateSubmitterPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
-	assert.Equal(t, fmt.Sprintf("Invalid Field submitter_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid Field submitter_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.", orgPatientId), patientValidationRecord.Errors[0].Message)
 	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
 }
 

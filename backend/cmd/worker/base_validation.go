@@ -68,7 +68,7 @@ func formatInvalidField(r ValidationRecord, fieldName string, reason string, ids
 	formatResourceIds := formatIds(ids)
 	invalidFieldMessage := strings.TrimSpace(fmt.Sprintf("Invalid Field %s for %s %s", fieldName, r.GetResourceType(), formatResourceIds))
 	reasonMessage := fmt.Sprintf("Reason: %s", reason)
-	message := strings.TrimSpace(fmt.Sprintf("%s. %s", invalidFieldMessage, reasonMessage))
+	message := strings.TrimSpace(fmt.Sprintf("%s. %s.", invalidFieldMessage, reasonMessage))
 	return message
 }
 
