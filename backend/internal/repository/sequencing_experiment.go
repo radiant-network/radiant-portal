@@ -12,15 +12,27 @@ type SequencingExperimentRepository struct {
 }
 
 type SequencingExperimentDAO interface {
-	GetSequencingExperimentBySample(sampleID int) ([]SequencingExperiment, error)
+	CreateSequencingExperiment(*SequencingExperiment) error
+	GetSequencingExperimentBySampleID(sampleID int) ([]SequencingExperiment, error)
+	GetSequencingExperimentByAliquot(aliquot string) ([]SequencingExperiment, error)
 }
 
-func NewSequencingExperimentRepo(db *gorm.DB) *SequencingExperimentRepository {
+func NewSequencingExperimentRepository(db *gorm.DB) *SequencingExperimentRepository {
 	return &SequencingExperimentRepository{db: db}
+}
+
+func (r *SequencingExperimentRepository) CreateSequencingExperiment(seqExp *SequencingExperiment) error {
+	return r.db.Create(&seqExp).Error
 }
 
 func (r *SequencingExperimentRepository) GetSequencingExperimentBySampleID(sampleID int) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
 	result := r.db.Table(types.SequencingExperimentTable.Name).Where("sample_id = ?", sampleID).Order("id").Find(&seqExps)
+	return seqExps, result.Error
+}
+
+func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(aliquot string) ([]SequencingExperiment, error) {
+	var seqExps []SequencingExperiment
+	result := r.db.Table(types.SequencingExperimentTable.Name).Where("aliquot = ?", aliquot).Order("id").Find(&seqExps)
 	return seqExps, result.Error
 }

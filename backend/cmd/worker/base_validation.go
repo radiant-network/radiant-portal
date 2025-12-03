@@ -101,6 +101,11 @@ func validateUniquenessInBatch[K comparable](
 	}
 }
 
+func formatFieldRegexpMatch(r ValidationRecord, fieldName string, regexp string, resourceIds []string) string {
+	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
+	return formatInvalidField(r, fieldName, reason, resourceIds)
+}
+
 func updateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {
 	copyRecordIntoBatch(batch, records)
 	now := time.Now()

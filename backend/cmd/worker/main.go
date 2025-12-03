@@ -34,11 +34,12 @@ func main() {
 	repoOrganization := repository.NewOrganizationRepository(dbPostgres)
 	repoPatient := repository.NewPatientsRepository(dbPostgres)
 	repoSample := repository.NewSamplesRepository(dbPostgres)
+	repoSeqExp := repository.NewSequencingExperimentRepository(dbPostgres)
 
 	StartHealthProbe(dbPostgres)
 	glog.Info("Worker started...")
 	for {
-		processBatch(dbPostgres, repoBatch, repoOrganization, repoPatient, repoSample)
+		processBatch(dbPostgres, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 		time.Sleep(time.Duration(pollInterval) * time.Millisecond)
 	}
 }
@@ -51,7 +52,7 @@ func getEnvOrDefault(key, fallback string) string {
 	return value
 }
 
-func processBatch(db *gorm.DB, repoBatch repository.BatchDAO, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) {
+func processBatch(db *gorm.DB, repoBatch repository.BatchDAO, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO, repoSeqExp repository.SequencingExperimentDAO) {
 	nextBatch, err := repoBatch.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)
@@ -63,6 +64,8 @@ func processBatch(db *gorm.DB, repoBatch repository.BatchDAO, repoOrganization r
 			processPatientBatch(nextBatch, db, repoOrganization, repoPatient, repoBatch)
 		case types.SampleBatchType:
 			processSampleBatch(nextBatch, db, repoOrganization, repoPatient, repoSample, repoBatch)
+		case types.SequencingExperimentBatchType:
+			processSequencingExperimentBatch(nextBatch, db, repoOrganization, repoSample, repoSeqExp, repoBatch)
 		default:
 			notSupportedBatch := fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
 			processUnexpectedError(nextBatch, notSupportedBatch, repoBatch)
