@@ -24,6 +24,7 @@ type SampleValidationRecord struct {
 	Sample         types.SampleBatch
 	PatientId      int
 	OrganizationId int
+	ParentSampleId *int
 }
 
 func (r *SampleValidationRecord) GetBase() *BaseValidationRecord {
@@ -166,6 +167,10 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []*Sa
 func insertSampleRecords(records []*SampleValidationRecord, repo repository.SamplesDAO) error {
 	for _, record := range records {
 		if !record.Skipped {
+			var parentSampleId *int
+			if record.ParentSampleId != nil {
+				parentSampleId = record.ParentSampleId
+			}
 			sample := types.Sample{
 				TypeCode:          record.Sample.TypeCode,
 				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
@@ -173,6 +178,7 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 				HistologyCode:     record.Sample.HistologyCode,
 				OrganizationId:    record.OrganizationId,
 				PatientID:         record.PatientId,
+				ParentSampleID:    parentSampleId,
 			}
 			err := repo.CreateSample(&sample)
 			if err != nil {
@@ -307,6 +313,9 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 						SubmitterSampleId: sample.SubmitterParentSampleId.String(),
 					}]
 					record.validateExistingParentSampleInBatch(parentSampleIsInBatch)
+				} else {
+					// Parent sample exists in DB, set the parent sample ID
+					record.ParentSampleId = &existingParentSample.ID
 				}
 			}
 		}

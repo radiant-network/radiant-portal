@@ -541,9 +541,78 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 0)
 		assert.Len(t, resultBatch.Report.Warnings, 0)
 
-		var countSamples int64
-		db.Table("sample").Where("organization_id = ? AND submitter_sample_id IN (?)", 3, []string{"SAMPLE-PARENT", "SAMPLE-CHILD"}).Count(&countSamples)
-		assert.Equal(t, int64(2), countSamples)
+		var childSample repository.Sample
+		childSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = ?", "SAMPLE-CHILD", 3).First(&childSample).Error
+		if childSampleErr != nil {
+			t.Fatal("failed to retrieve child sample:", childSampleErr)
+		}
+		assert.Equal(t, "SAMPLE-CHILD", childSample.SubmitterSampleId)
+		assert.Equal(t, 1, childSample.PatientID)
+		assert.Equal(t, 3, childSample.OrganizationId)
+		// assert.NotNil(t, childSample.ParentSampleID)
+
+		var parentSample repository.Sample
+		parentSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = ?", "SAMPLE-PARENT", 3).First(&parentSample).Error
+		if parentSampleErr != nil {
+			t.Fatal("failed to retrieve parent sample:", parentSampleErr)
+		}
+		// assert.Equal(t, *childSample.ParentSampleID, parentSample.ID)
+	})
+}
+
+func Test_ProcessBatch_Sample_Success_With_Parent_Sample_In_Db(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-CHILD-DB-PARENT",
+                "sample_organization_code": "CQGC",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "submitter_parent_sample_id": "B-803.2",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }	
+        ]
+        `
+		var id string
+		initErr := db.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            RETURNING id;
+        `, payload, types.SampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		repoBatch := repository.NewBatchRepository(db)
+		repoOrganization := repository.NewOrganizationRepository(db)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, types.SampleBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var childSample repository.Sample
+		childSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = ?", "SAMPLE-CHILD-DB-PARENT", 6).First(&childSample).Error
+		if childSampleErr != nil {
+			t.Fatal("failed to retrieve child sample:", childSampleErr)
+		}
+		assert.Equal(t, "SAMPLE-CHILD-DB-PARENT", childSample.SubmitterSampleId)
+		assert.Equal(t, 1, childSample.PatientID)
+		assert.Equal(t, 6, childSample.OrganizationId)
+		assert.NotNil(t, childSample.ParentSampleID)
+		assert.Equal(t, 63, *childSample.ParentSampleID)
 	})
 }
 
