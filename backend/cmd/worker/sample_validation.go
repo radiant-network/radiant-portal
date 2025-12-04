@@ -82,7 +82,7 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 	path := formatPath(r, fieldName)
 	if existingParentSample != nil {
 		if existingParentSample.PatientID != r.PatientId {
-			message := fmt.Sprintf("Invalid Field %s for sample (%s / %s). Reason: Invalid parent sample %s for this sample.", fieldName, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
+			message := fmt.Sprintf("Invalid field %s for sample (%s / %s). Reason: Invalid parent sample %s for this sample.", fieldName, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
 			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
 		} else {
 			validateExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
