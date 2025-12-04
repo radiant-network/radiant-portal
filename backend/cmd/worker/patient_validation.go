@@ -128,7 +128,6 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types.Patient) {
 	if existingPatient != nil {
 		message := fmt.Sprintf("Patient (%s / %s) already exists, skipped.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
-
 		r.addInfos(message, PatientAlreadyExistCode, formatPath(r, ""))
 		r.Skipped = true
 		validateExistingPatientField(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)

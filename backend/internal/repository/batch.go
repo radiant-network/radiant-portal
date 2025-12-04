@@ -41,7 +41,7 @@ func (r *BatchRepository) CreateBatch(payload any, batchType string, username st
 	newBatch := &Batch{
 		DryRun:    dryRun,
 		BatchType: batchType,
-		Status:    "PENDING",
+		Status:    types.BatchStatusPending,
 		Username:  username,
 		Payload:   string(jsonPayload),
 		CreatedOn: time.Now(),
@@ -88,13 +88,13 @@ func (r *BatchRepository) ClaimNextBatch() (*Batch, error) {
 		SET status = 'RUNNING', started_on = now()
 		WHERE id = (
 			SELECT id FROM %s
-			WHERE status = 'PENDING'
+			WHERE status = '%s'
 			ORDER BY created_on ASC
 			FOR UPDATE SKIP LOCKED
 			LIMIT 1
 		)
 		RETURNING id, payload, status, batch_type, dry_run, started_on, created_on;
-	`, types.BatchTable.Name, types.BatchTable.Name)
+	`, types.BatchTable.Name, types.BatchTable.Name, types.BatchStatusPending)
 
 	err := r.db.Raw(query).Scan(&batch).Error
 	if err != nil {

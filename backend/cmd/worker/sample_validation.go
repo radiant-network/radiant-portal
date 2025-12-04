@@ -172,6 +172,7 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 				TissueSite:        record.Sample.TissueSite.String(),
 				HistologyCode:     record.Sample.HistologyCode,
 				OrganizationId:    record.OrganizationId,
+				PatientID:         record.PatientId,
 			}
 			err := repo.CreateSample(&sample)
 			if err != nil {
@@ -287,10 +288,9 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 			existingSample, sampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId.String())
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
-			} else if existingSample != nil {
-				// 6. If exists, check if all fields are identical, and add error messages
-				record.validateExistingSampleInDb(existingSample)
 			}
+			// 6. If exists, check if all fields are identical, and add error messages
+			record.validateExistingSampleInDb(existingSample)
 
 			// 7. Validate parent sample in DB if provided
 			if sample.SubmitterParentSampleId != "" {
