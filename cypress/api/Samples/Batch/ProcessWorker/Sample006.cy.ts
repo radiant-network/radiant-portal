@@ -39,7 +39,7 @@ describe('Samples - Batch - Process worker - Sample006', () => {
     expect(response.status).to.eq(200);
   });
 
-  it('Validate summary [SJRA-912]', () => {
+  it('Validate summary', () => {
     cy.validateSummary(response, 0 /*created*/, 0 /*updated*/, 0 /*skipped*/, 1 /*errors*/);
   });
 
@@ -48,14 +48,14 @@ describe('Samples - Batch - Process worker - Sample006', () => {
   });
 
   it('Validate report sample[0] tissue_site [SJRA-912]', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorRegExp('sample', 'tissue_site', 'CQGC', ''), 'sample[0].tissue_site');
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorRegExp('sample', 'tissue_site', 'CQGC', 'dna!'), 'sample[0].tissue_site');
   });
 
   it('Validate report sample[0] submitter_sample_id 1 [SJRA-912]', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorRegExp('sample', 'submitter_sample_id', 'CQGC', ''), 'sample[0].submitter_sample_id');
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorRegExp('sample', 'submitter_sample_id', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sample[0].submitter_sample_id');
   });
 
   it('Validate report sample[0] submitter_sample_id 2 [SJRA-912]', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorTooLong('sample', 'submitter_sample_id', 'CQGC', ''), 'sample[0].submitter_sample_id');
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorTooLong('sample', 'submitter_sample_id', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sample[0].submitter_sample_id');
   });
 });
