@@ -579,11 +579,6 @@ components:
       required:
       - sequencing_experiments
       type: object
-    DateOfBirthType:
-      properties:
-        time.Time:
-          type: string
-      type: object
     DocumentFilters:
       properties:
         data_type:
@@ -1321,7 +1316,9 @@ components:
     PatientBatch:
       properties:
         date_of_birth:
-          $ref: '#/components/schemas/DateOfBirthType'
+          example: "2020-01-31"
+          format: date
+          type: string
         first_name:
           type: string
         jhn:

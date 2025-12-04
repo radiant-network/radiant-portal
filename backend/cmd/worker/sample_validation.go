@@ -24,6 +24,7 @@ type SampleValidationRecord struct {
 	Sample         types.SampleBatch
 	PatientId      int
 	OrganizationId int
+	ParentSampleId *int
 }
 
 func (r *SampleValidationRecord) GetBase() *BaseValidationRecord {
@@ -67,7 +68,7 @@ func (r *SampleValidationRecord) validateOrganization(organization *types.Organi
 
 func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *types.Sample) {
 	if existingSample != nil {
-		message := fmt.Sprintf("Sample (%s / %s) already exists in database, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+		message := fmt.Sprintf("Sample (%s / %s) already exists, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 		r.addInfos(message, SampleAlreadyExistCode, formatPath(r, ""))
 		r.Skipped = true
 		validateExistingSampleField(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
@@ -81,7 +82,7 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 	path := formatPath(r, fieldName)
 	if existingParentSample != nil {
 		if existingParentSample.PatientID != r.PatientId {
-			message := fmt.Sprintf("Invalid parent sample %s for sample (%s / %s).", r.Sample.SubmitterParentSampleId, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+			message := fmt.Sprintf("Invalid field %s for sample (%s / %s). Reason: Invalid parent sample %s for this sample.", fieldName, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
 			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
 		} else {
 			validateExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
@@ -164,19 +165,42 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []*Sa
 }
 
 func insertSampleRecords(records []*SampleValidationRecord, repo repository.SamplesDAO) error {
+	createdSamples := make(map[samplesKey]int)
+
 	for _, record := range records {
 		if !record.Skipped {
+			var parentSampleId *int
+			if record.ParentSampleId != nil {
+				parentSampleId = record.ParentSampleId
+			} else if record.Sample.SubmitterParentSampleId != "" {
+				parentKey := samplesKey{
+					OrganizationCode:  record.Sample.SampleOrganizationCode,
+					SubmitterSampleId: record.Sample.SubmitterParentSampleId.String(),
+				}
+				if parentId, exists := createdSamples[parentKey]; exists {
+					parentSampleId = &parentId
+				}
+			}
+
 			sample := types.Sample{
 				TypeCode:          record.Sample.TypeCode,
 				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
 				TissueSite:        record.Sample.TissueSite.String(),
 				HistologyCode:     record.Sample.HistologyCode,
 				OrganizationId:    record.OrganizationId,
+				PatientID:         record.PatientId,
+				ParentSampleID:    parentSampleId,
 			}
-			err := repo.CreateSample(&sample)
+			newSample, err := repo.CreateSample(&sample)
 			if err != nil {
 				return err
 			}
+
+			sampleKey := samplesKey{
+				OrganizationCode:  record.Sample.SampleOrganizationCode,
+				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
+			}
+			createdSamples[sampleKey] = newSample.ID
 		}
 	}
 	return nil
@@ -251,8 +275,10 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		}
 
 		// 1. Validate fields
+		record.validateFieldLength("submitter_patient_id", sample.SubmitterPatientId.String())
 		record.validateFieldLength("submitter_parent_sample_id", sample.SubmitterParentSampleId.String())
 		record.validateFieldLength("tissue_site", sample.TissueSite.String())
+		record.validateFieldLength("submitter_sample_id", sample.SubmitterSampleId.String())
 
 		// 2. Validate duplicates in batch
 		validateUniquenessInBatch(
@@ -285,10 +311,9 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 			existingSample, sampleErr := repoSample.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId.String())
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
-			} else if existingSample != nil {
-				// 6. If exists, check if all fields are identical, and add error messages
-				record.validateExistingSampleInDb(existingSample)
 			}
+			// 6. If exists, check if all fields are identical, and add error messages
+			record.validateExistingSampleInDb(existingSample)
 
 			// 7. Validate parent sample in DB if provided
 			if sample.SubmitterParentSampleId != "" {
@@ -305,6 +330,9 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 						SubmitterSampleId: sample.SubmitterParentSampleId.String(),
 					}]
 					record.validateExistingParentSampleInBatch(parentSampleIsInBatch)
+				} else {
+					// Parent sample exists in DB, set the parent sample ID
+					record.ParentSampleId = &existingParentSample.ID
 				}
 			}
 		}

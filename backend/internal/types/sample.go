@@ -4,7 +4,7 @@ type Sample struct {
 	ID                int
 	TypeCode          string
 	Type              SampleType `gorm:"foreignKey:code;references:TypeCode"`
-	ParentSampleID    int
+	ParentSampleID    *int
 	ParentSample      *Sample `gorm:"foreignKey:ID;references:ParentSampleID"`
 	TissueSite        string
 	HistologyCode     string

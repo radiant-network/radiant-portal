@@ -37,7 +37,7 @@ func (m *MockPatientsRepository) CreatePatient(newPatient *types.Patient) error 
 
 type MockSamplesRepository struct {
 	GetSampleBySubmitterSampleIdFunc func(organizationId int, submitterSampleId string) (*types.Sample, error)
-	CreateSampleFunc                 func(newSample *types.Sample) error
+	CreateSampleFunc                 func(newSample *types.Sample) (*types.Sample, error)
 }
 
 func (m *MockSamplesRepository) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {
@@ -47,11 +47,11 @@ func (m *MockSamplesRepository) GetSampleBySubmitterSampleId(organizationId int,
 	return nil, nil
 }
 
-func (m *MockSamplesRepository) CreateSample(newSample *types.Sample) error {
+func (m *MockSamplesRepository) CreateSample(newSample *types.Sample) (*types.Sample, error) {
 	if m.CreateSampleFunc != nil {
 		return m.CreateSampleFunc(newSample)
 	}
-	return nil
+	return nil, nil
 }
 
 func Test_SampleField_Too_Long(t *testing.T) {
