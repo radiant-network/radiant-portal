@@ -47,7 +47,7 @@ describe('Samples - Batch - Process worker - Sample007', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report sample[0] submitter_parent_sample_id [SJRA-914]', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-007', apiMessages.ProcessWorkerErrorNotSamePatient('sample', 'submitter_parent_sample_id', 'CQGC', 'Cypress0001'), 'sample[0].submitter_parent_sample_id');
+  it('Validate report sample[0] submitter_parent_sample_id', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-007', apiMessages.ProcessWorkerErrorNotSamePatient('sample', 'submitter_parent_sample_id', 'CQGC', 'Cypress0001', 'S13227'), 'sample[0].submitter_parent_sample_id');
   });
 });

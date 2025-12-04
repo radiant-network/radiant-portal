@@ -46,7 +46,7 @@ describe('Samples - Batch - Process worker - Sample001', () => {
     expect(Object.keys(response.body.report.info)).to.have.lengthOf(1);
   });
 
-  it('Validate report sample[0] [SJRA-909]', () => {
+  it('Validate report sample[0]', () => {
     cy.validateReport(response, 'info', 'SAMPLE-001', apiMessages.ProcessWorkerError001('Sample', 'CQGC', 'S13224'), 'sample[0]');
   });
 });
