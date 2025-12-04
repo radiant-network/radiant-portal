@@ -50,18 +50,18 @@ describe('Patients - Batch - Process worker - Patient004', () => {
   });
 
   it('Validate report patient[0] first_name', () => {
-    cy.validateReport(response, 'error', 'PATIENT-004', apiMessages.Patient004RegExp('first_name', 'CHUSJ', 'Cypress_0001'), 'patient[0].first_name');
+    cy.validateReport(response, 'error', 'PATIENT-004', apiMessages.ProcessWorkerErrorRegExp('patient', 'first_name', 'CHUSJ', 'Cypress_0001'), 'patient[0].first_name');
   });
 
   it('Validate report patient[0] last_name', () => {
-    cy.validateReport(response, 'error', 'PATIENT-004', apiMessages.Patient004RegExp('last_name', 'CHUSJ', 'Cypress_0001'), 'patient[0].last_name');
+    cy.validateReport(response, 'error', 'PATIENT-004', apiMessages.ProcessWorkerErrorRegExp('patient', 'last_name', 'CHUSJ', 'Cypress_0001'), 'patient[0].last_name');
   });
 
   it('Validate report patient[0] jhn 1', () => {
-    cy.validateReport(response, 'error', 'PATIENT-004', apiMessages.Patient004TooLong('jhn', 'CHUSJ', 'Cypress_0001'), 'patient[0].jhn');
+    cy.validateReport(response, 'error', 'PATIENT-004', apiMessages.ProcessWorkerErrorTooLong('patient', 'jhn', 'CHUSJ', 'Cypress_0001'), 'patient[0].jhn');
   });
 
   it('Validate report patient[0] jhn 2', () => {
-    cy.validateReport(response, 'error', 'PATIENT-004', apiMessages.Patient004RegExpId('jhn', 'CHUSJ', 'Cypress_0001'), 'patient[0].jhn');
+    cy.validateReport(response, 'error', 'PATIENT-004', apiMessages.ProcessWorkerErrorRegExpId('patient', 'jhn', 'CHUSJ', 'Cypress_0001'), 'patient[0].jhn');
   });
 });

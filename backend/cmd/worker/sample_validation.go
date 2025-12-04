@@ -94,7 +94,7 @@ func (r *SampleValidationRecord) validateExistingParentSampleInBatch(parentSampl
 	fieldName := "submitter_parent_sample_id"
 	path := formatPath(r, fieldName)
 	if !parentSampleInBatch {
-		message := fmt.Sprintf("Sample %s does not exist", r.Sample.SubmitterParentSampleId)
+		message := fmt.Sprintf("Sample %s does not exist.", r.Sample.SubmitterParentSampleId)
 		r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
 	}
 }
@@ -107,7 +107,7 @@ func validateExistingSampleField[T comparable](
 ) {
 	if existingSampleValue != recordValue {
 		path := formatPath(r, fieldName)
-		message := fmt.Sprintf("A sample with same ids (%s / %s) has been found  but with a different %s (%v <> %v).",
+		message := fmt.Sprintf("A sample with same ids (%s / %s) has been found but with a different %s (%v <> %v).",
 			r.Sample.SampleOrganizationCode,
 			r.Sample.SubmitterSampleId,
 			fieldName,

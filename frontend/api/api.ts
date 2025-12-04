@@ -1115,6 +1115,32 @@ export interface CreateBatchResponse {
     'username'?: string;
 }
 /**
+ * CreatePatientBatchBody represents the body required to create a patient batch
+ * @export
+ * @interface CreatePatientBatchBody
+ */
+export interface CreatePatientBatchBody {
+    /**
+     * 
+     * @type {Array<PatientBatch>}
+     * @memberof CreatePatientBatchBody
+     */
+    'patients': Array<PatientBatch>;
+}
+/**
+ * CreateSampleBatchBody represents the body required to create a sample batch
+ * @export
+ * @interface CreateSampleBatchBody
+ */
+export interface CreateSampleBatchBody {
+    /**
+     * 
+     * @type {Array<SampleBatch>}
+     * @memberof CreateSampleBatchBody
+     */
+    'samples': Array<SampleBatch>;
+}
+/**
  * CreateSequencingExperimentBatchBody represents the body required to create a sequencing experiment batch
  * @export
  * @interface CreateSequencingExperimentBatchBody
@@ -1126,6 +1152,19 @@ export interface CreateSequencingExperimentBatchBody {
      * @memberof CreateSequencingExperimentBatchBody
      */
     'sequencing_experiments': Array<SequencingExperimentBatch>;
+}
+/**
+ * 
+ * @export
+ * @interface DateOfBirthType
+ */
+export interface DateOfBirthType {
+    /**
+     * 
+     * @type {string}
+     * @memberof DateOfBirthType
+     */
+    'time.Time'?: string;
 }
 /**
  * 
@@ -2680,6 +2719,83 @@ export interface PaginationConfig {
 /**
  * 
  * @export
+ * @interface PatientBatch
+ */
+export interface PatientBatch {
+    /**
+     * 
+     * @type {DateOfBirthType}
+     * @memberof PatientBatch
+     */
+    'date_of_birth': DateOfBirthType;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientBatch
+     */
+    'first_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientBatch
+     */
+    'jhn'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientBatch
+     */
+    'last_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientBatch
+     */
+    'life_status_code': PatientBatchLifeStatusCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientBatch
+     */
+    'patient_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientBatch
+     */
+    'sex_code': PatientBatchSexCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientBatch
+     */
+    'submitter_patient_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientBatch
+     */
+    'submitter_patient_id_type': string;
+}
+
+export const PatientBatchLifeStatusCodeEnum = {
+    Alive: 'alive',
+    Deceased: 'deceased',
+    Unknown: 'unknown'
+} as const;
+
+export type PatientBatchLifeStatusCodeEnum = typeof PatientBatchLifeStatusCodeEnum[keyof typeof PatientBatchLifeStatusCodeEnum];
+export const PatientBatchSexCodeEnum = {
+    Male: 'male',
+    Female: 'female',
+    Unknown: 'unknown'
+} as const;
+
+export type PatientBatchSexCodeEnum = typeof PatientBatchSexCodeEnum[keyof typeof PatientBatchSexCodeEnum];
+
+/**
+ * 
+ * @export
  * @interface PubmedCitation
  */
 export interface PubmedCitation {
@@ -2709,6 +2825,69 @@ export interface PubmedCitationDetails {
      */
     'format'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface SampleBatch
+ */
+export interface SampleBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'histology_code': SampleBatchHistologyCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'patient_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'sample_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'submitter_parent_sample_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'submitter_patient_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'submitter_sample_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'tissue_site'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'type_code': string;
+}
+
+export const SampleBatchHistologyCodeEnum = {
+    Tumoral: 'tumoral',
+    Normal: 'normal'
+} as const;
+
+export type SampleBatchHistologyCodeEnum = typeof SampleBatchHistologyCodeEnum[keyof typeof SampleBatchHistologyCodeEnum];
+
 /**
  * 
  * @export
@@ -7706,11 +7885,14 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Create a new patient batch
          * @summary Create a new patient batch
-         * @param {object} [body] 
+         * @param {CreatePatientBatchBody} createPatientBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postPatientBatch: async (body?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postPatientBatch: async (createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createPatientBatchBody' is not null or undefined
+            assertParamExists('postPatientBatch', 'createPatientBatchBody', createPatientBatchBody)
             const localVarPath = `/patients/batch`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -7727,6 +7909,10 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
 
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
@@ -7734,7 +7920,7 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(createPatientBatchBody, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7754,12 +7940,13 @@ export const PatientsApiFp = function(configuration?: Configuration) {
         /**
          * Create a new patient batch
          * @summary Create a new patient batch
-         * @param {object} [body] 
+         * @param {CreatePatientBatchBody} createPatientBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postPatientBatch(body?: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postPatientBatch(body, options);
+        async postPatientBatch(createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postPatientBatch(createPatientBatchBody, dryRun, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PatientsApi.postPatientBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7777,12 +7964,13 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
         /**
          * Create a new patient batch
          * @summary Create a new patient batch
-         * @param {object} [body] 
+         * @param {CreatePatientBatchBody} createPatientBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postPatientBatch(body?: object, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
-            return localVarFp.postPatientBatch(body, options).then((request) => request(axios, basePath));
+        postPatientBatch(createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postPatientBatch(createPatientBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -7797,13 +7985,14 @@ export class PatientsApi extends BaseAPI {
     /**
      * Create a new patient batch
      * @summary Create a new patient batch
-     * @param {object} [body] 
+     * @param {CreatePatientBatchBody} createPatientBatchBody Create Body
+     * @param {boolean} [dryRun] Dry Run
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PatientsApi
      */
-    public postPatientBatch(body?: object, options?: RawAxiosRequestConfig) {
-        return PatientsApiFp(this.configuration).postPatientBatch(body, options).then((request) => request(this.axios, this.basePath));
+    public postPatientBatch(createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).postPatientBatch(createPatientBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -7818,11 +8007,14 @@ export const SamplesApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Create a new sample batch
          * @summary Create a new sample batch
-         * @param {object} [body] 
+         * @param {CreateSampleBatchBody} createSampleBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postSampleBatch: async (body?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postSampleBatch: async (createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createSampleBatchBody' is not null or undefined
+            assertParamExists('postSampleBatch', 'createSampleBatchBody', createSampleBatchBody)
             const localVarPath = `/samples/batch`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -7839,6 +8031,10 @@ export const SamplesApiAxiosParamCreator = function (configuration?: Configurati
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
 
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
@@ -7846,7 +8042,7 @@ export const SamplesApiAxiosParamCreator = function (configuration?: Configurati
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(createSampleBatchBody, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -7866,12 +8062,13 @@ export const SamplesApiFp = function(configuration?: Configuration) {
         /**
          * Create a new sample batch
          * @summary Create a new sample batch
-         * @param {object} [body] 
+         * @param {CreateSampleBatchBody} createSampleBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postSampleBatch(body?: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postSampleBatch(body, options);
+        async postSampleBatch(createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postSampleBatch(createSampleBatchBody, dryRun, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SamplesApi.postSampleBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7889,12 +8086,13 @@ export const SamplesApiFactory = function (configuration?: Configuration, basePa
         /**
          * Create a new sample batch
          * @summary Create a new sample batch
-         * @param {object} [body] 
+         * @param {CreateSampleBatchBody} createSampleBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postSampleBatch(body?: object, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
-            return localVarFp.postSampleBatch(body, options).then((request) => request(axios, basePath));
+        postSampleBatch(createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postSampleBatch(createSampleBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -7909,13 +8107,14 @@ export class SamplesApi extends BaseAPI {
     /**
      * Create a new sample batch
      * @summary Create a new sample batch
-     * @param {object} [body] 
+     * @param {CreateSampleBatchBody} createSampleBatchBody Create Body
+     * @param {boolean} [dryRun] Dry Run
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SamplesApi
      */
-    public postSampleBatch(body?: object, options?: RawAxiosRequestConfig) {
-        return SamplesApiFp(this.configuration).postSampleBatch(body, options).then((request) => request(this.axios, this.basePath));
+    public postSampleBatch(createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return SamplesApiFp(this.configuration).postSampleBatch(createSampleBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
