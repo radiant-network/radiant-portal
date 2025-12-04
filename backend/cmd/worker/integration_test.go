@@ -560,7 +560,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 	})
 }
 
-func Test_ProcessBatch_Sample_Success_With_Parent_Sample_In_Db(t *testing.T) {
+func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
