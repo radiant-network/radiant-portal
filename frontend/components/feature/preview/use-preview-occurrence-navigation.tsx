@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { SetURLSearchParams } from 'react-router';
+import { SetURLSearchParams } from 'react-router-dom';
 
 interface OccurrenceItem {
   locus_id: string;

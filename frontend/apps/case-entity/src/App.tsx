@@ -1,5 +1,5 @@
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { AudioWaveform, ClipboardList, FileIcon } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -28,7 +28,7 @@ type CaseEntityInput = {
 };
 
 async function fetchCaseEntity(input: CaseEntityInput) {
-  const response = await caseApi.caseEntity(input.caseId);
+  const response = await caseApi.caseEntity(+input.caseId);
   return response.data;
 }
 

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import useIsMobile from '@/components/hooks/use-is-mobile';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/ui/collapsible';
+import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-import { Link } from 'react-router';
+
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/ui/collapsible';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/base/ui/dropdown-menu';
-import MainNavbarLink, { MainNavbarLinkProps } from './main-navbar-button';
+import useIsMobile from '@/components/hooks/use-is-mobile';
 import { cn } from '@/components/lib/utils';
+
+import MainNavbarLink, { MainNavbarLinkProps } from './main-navbar-button';
 
 export interface MainNavbarItemProps extends Omit<MainNavbarLinkProps, 'children'> {
   title: string;
@@ -98,7 +100,7 @@ const renderDropdownItem = (item: NonNullable<MainNavbarItemProps['subItems']>[0
     );
   }
 
-  if (item.as === Link) {
+  if (item.as === Link && item.to) {
     return (
       <Link key={item.title} to={item.to}>
         {menuItem}

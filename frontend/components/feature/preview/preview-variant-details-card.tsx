@@ -1,3 +1,7 @@
+import { ReactNode, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowUpRight, AudioLines, Diamond } from 'lucide-react';
+
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
@@ -10,11 +14,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
-import { ArrowUpRight, AudioLines, Diamond } from 'lucide-react';
-import { ReactNode, useCallback } from 'react';
-import { Link } from 'react-router';
+
 import TranscriptIdLink from '../variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblTranscriptUrl, getOmimOrgUrl } from '../variant/utils';
+
 import { DescriptionRow, DescriptionSection } from './description';
 import PreviewCard from './preview-card';
 

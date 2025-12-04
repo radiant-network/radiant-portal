@@ -1,4 +1,4 @@
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
 import { VariantUninterpretedCase } from '@/api/api';

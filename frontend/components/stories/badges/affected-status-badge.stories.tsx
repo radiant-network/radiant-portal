@@ -46,6 +46,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {} as any,
   render: () => (
     <div className="flex gap-2">
       {['affected', 'non_affected', 'unknown'].map(status => (

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { ClipboardPen } from 'lucide-react';
 
 import { CaseAssay, GermlineSNVOccurrence } from '@/api/api';

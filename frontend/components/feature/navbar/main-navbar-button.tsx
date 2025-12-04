@@ -1,8 +1,9 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
+import { VariantProps } from 'tailwind-variants';
+
 import { buttonVariants } from '@/components/base/ui/button';
 import { cn } from '@/components/lib/utils';
-import { VariantProps } from 'tailwind-variants';
-import { Link } from 'react-router';
 
 type MainNavbarAnchorProps = {
   as: 'a';
@@ -55,8 +56,14 @@ function MainNavbarLink({
     Component = 'a';
   }
 
-  const otherProps =
-    as === Link ? { to: rest.to } : as === 'button' ? { type: 'button', onClick: rest.onClick } : { href: rest.href };
+  let otherProps;
+  if (as === Link) {
+    otherProps = { to: rest.to };
+  } else if (as === 'button') {
+    otherProps = { type: 'button', onClick: rest.onClick };
+  } else {
+    otherProps = { href: rest.href };
+  }
 
   return (
     <Component

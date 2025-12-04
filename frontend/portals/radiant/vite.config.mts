@@ -12,7 +12,7 @@ import { createMergeTranslationsPlugin } from './merge-translations';
 
 const configs: Record<string, PortalConfig> = {
   radiant: radiantConfig as PortalConfig,
-  kf: kfConfig as PortalConfig,
+  kf: kfConfig as unknown as PortalConfig,
 };
 
 const project = process.env.THEME || 'radiant';

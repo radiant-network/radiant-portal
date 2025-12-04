@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useRef, useState } from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
