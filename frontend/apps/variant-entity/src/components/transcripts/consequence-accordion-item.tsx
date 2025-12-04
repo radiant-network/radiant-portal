@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
 import { VariantConsequence } from '@/api/api';

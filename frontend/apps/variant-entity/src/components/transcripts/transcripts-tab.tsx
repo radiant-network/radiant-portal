@@ -1,4 +1,4 @@
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import useSWR from 'swr';
 
 import { VariantConsequence } from '@/api/api';

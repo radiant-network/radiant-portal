@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import useSWR from 'swr';
 
 import { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';

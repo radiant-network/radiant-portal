@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import useSWR from 'swr';
 
 import { ApiError, VariantHeader } from '@/api/api';

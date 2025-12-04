@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { useCallback } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';

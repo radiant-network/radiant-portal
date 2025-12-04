@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import useSWR from 'swr';

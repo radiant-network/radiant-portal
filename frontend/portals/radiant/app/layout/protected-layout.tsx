@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Link, Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
+import { Link, Outlet, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import logo from '@assets/logo/header.svg';
 import { FileIcon, FolderIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';

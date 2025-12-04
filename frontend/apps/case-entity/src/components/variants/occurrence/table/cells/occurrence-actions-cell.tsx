@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { CellContext } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { Search, SearchIcon } from 'lucide-react';
 import useSWR from 'swr';
 

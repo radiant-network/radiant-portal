@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';

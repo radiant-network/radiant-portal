@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router';
+import { Link, useParams } from 'react-router-dom';
 import { InfoIcon } from 'lucide-react';
 
 import { VariantOverview } from '@/api/api';

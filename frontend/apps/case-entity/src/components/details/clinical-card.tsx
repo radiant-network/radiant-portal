@@ -1,5 +1,5 @@
 import { ComponentProps } from 'react';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import { ArrowUpRightIcon, AudioWaveformIcon } from 'lucide-react';
 
 import { CaseEntity, Term } from '@/api/api';

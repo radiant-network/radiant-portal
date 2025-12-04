@@ -5,6 +5,7 @@ import React from 'react';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import type { Preview } from '@storybook/react';
 import { withThemeByClassName } from '@storybook/addon-themes';
+import { MemoryRouter } from 'react-router-dom';
 import { TooltipProvider } from '../base/ui/tooltip';
 import { AlertDialogProvider } from '../base/dialog/alert-dialog-provider';
 import { I18nextProvider } from 'react-i18next';
@@ -41,16 +42,18 @@ const preview: Preview = {
       },
       defaultTheme: 'light',
     }),
-    (Story) => (
-      <I18nextProvider i18n={i18n}>
-        <ThemeProvider>
-          <TooltipProvider delayDuration={0}>
-            <AlertDialogProvider>
-              <Story />
-            </AlertDialogProvider>
-          </TooltipProvider>
-        </ThemeProvider>
-      </I18nextProvider>
+    Story => (
+      <MemoryRouter>
+        <I18nextProvider i18n={i18n}>
+          <ThemeProvider>
+            <TooltipProvider delayDuration={0}>
+              <AlertDialogProvider>
+                <Story />
+              </AlertDialogProvider>
+            </TooltipProvider>
+          </ThemeProvider>
+        </I18nextProvider>
+      </MemoryRouter>
     ),
   ],
 };

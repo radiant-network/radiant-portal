@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { PaginationState } from '@tanstack/table-core';
 import useSWR from 'swr';
 

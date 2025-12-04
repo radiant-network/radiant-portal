@@ -1,6 +1,8 @@
+import { useSearchParams } from 'react-router-dom';
+
 import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import { useSearchParams } from 'react-router';
+
 import { SELECTED_VARIANT_PARAM } from '../../../constants';
 
 type HgvsgCellProps = {

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 
 import { CaseAssay, CaseEntity } from '@/api/api';
 
