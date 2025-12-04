@@ -549,14 +549,14 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 		assert.Equal(t, "SAMPLE-CHILD", childSample.SubmitterSampleId)
 		assert.Equal(t, 1, childSample.PatientID)
 		assert.Equal(t, 3, childSample.OrganizationId)
-		// assert.NotNil(t, childSample.ParentSampleID)
+		assert.NotNil(t, childSample.ParentSampleID)
 
 		var parentSample repository.Sample
 		parentSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = ?", "SAMPLE-PARENT", 3).First(&parentSample).Error
 		if parentSampleErr != nil {
 			t.Fatal("failed to retrieve parent sample:", parentSampleErr)
 		}
-		// assert.Equal(t, *childSample.ParentSampleID, parentSample.ID)
+		assert.Equal(t, *childSample.ParentSampleID, parentSample.ID)
 	})
 }
 

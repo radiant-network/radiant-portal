@@ -16,7 +16,7 @@ type SamplesRepository struct {
 
 type SamplesDAO interface {
 	GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*Sample, error)
-	CreateSample(newSample *Sample) error
+	CreateSample(newSample *Sample) (*Sample, error)
 }
 
 func NewSamplesRepository(db *gorm.DB) *SamplesRepository {
@@ -38,6 +38,7 @@ func (r *SamplesRepository) GetSampleBySubmitterSampleId(organizationId int, sub
 	return &sample, nil
 }
 
-func (r *SamplesRepository) CreateSample(newSample *Sample) error {
-	return r.db.Table("sample").Create(newSample).Error
+func (r *SamplesRepository) CreateSample(newSample *Sample) (*Sample, error) {
+	err := r.db.Table("sample").Create(newSample).Error
+	return newSample, err
 }

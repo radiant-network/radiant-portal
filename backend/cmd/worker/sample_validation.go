@@ -165,12 +165,23 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []*Sa
 }
 
 func insertSampleRecords(records []*SampleValidationRecord, repo repository.SamplesDAO) error {
+	createdSamples := make(map[samplesKey]int)
+
 	for _, record := range records {
 		if !record.Skipped {
 			var parentSampleId *int
 			if record.ParentSampleId != nil {
 				parentSampleId = record.ParentSampleId
+			} else if record.Sample.SubmitterParentSampleId != "" {
+				parentKey := samplesKey{
+					OrganizationCode:  record.Sample.SampleOrganizationCode,
+					SubmitterSampleId: record.Sample.SubmitterParentSampleId.String(),
+				}
+				if parentId, exists := createdSamples[parentKey]; exists {
+					parentSampleId = &parentId
+				}
 			}
+
 			sample := types.Sample{
 				TypeCode:          record.Sample.TypeCode,
 				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
@@ -180,10 +191,16 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 				PatientID:         record.PatientId,
 				ParentSampleID:    parentSampleId,
 			}
-			err := repo.CreateSample(&sample)
+			newSample, err := repo.CreateSample(&sample)
 			if err != nil {
 				return err
 			}
+
+			sampleKey := samplesKey{
+				OrganizationCode:  record.Sample.SampleOrganizationCode,
+				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
+			}
+			createdSamples[sampleKey] = newSample.ID
 		}
 	}
 	return nil
