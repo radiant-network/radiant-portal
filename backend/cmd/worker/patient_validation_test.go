@@ -240,13 +240,13 @@ func Test_ValidateExistingPatient_Nil(t *testing.T) {
 }
 
 func Test_ValidateExistingPatient_SameValues(t *testing.T) {
-	dob := time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC)
+	dob := types.DateISO8601(time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC))
 	patient := types.PatientBatch{
 		PatientOrganizationCode: "CHUSJ",
 		SubmitterPatientId:      "id2",
 		SexCode:                 "M",
 		LifeStatusCode:          "alive",
-		DateOfBirth:             &types.DateOfBirthType{Time: dob},
+		DateOfBirth:             &dob,
 		LastName:                "Doe",
 		FirstName:               "John",
 		Jhn:                     "JHN-123",
@@ -255,7 +255,7 @@ func Test_ValidateExistingPatient_SameValues(t *testing.T) {
 		SubmitterPatientId: "id2",
 		SexCode:            "M",
 		LifeStatusCode:     "alive",
-		DateOfBirth:        dob,
+		DateOfBirth:        time.Time(dob),
 		LastName:           "Doe",
 		FirstName:          "John",
 		Jhn:                "JHN-123",
@@ -271,12 +271,13 @@ func Test_ValidateExistingPatient_SameValues(t *testing.T) {
 func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 	dobExisting := time.Date(1990, 5, 6, 0, 0, 0, 0, time.UTC)
 	dobRecord := time.Date(1991, 7, 8, 0, 0, 0, 0, time.UTC)
+	dobRecordType := types.DateISO8601(dobRecord)
 	patient := types.PatientBatch{
 		PatientOrganizationCode: "CHUSJ",
 		SubmitterPatientId:      "id3",
 		SexCode:                 "F",
 		LifeStatusCode:          "deceased",
-		DateOfBirth:             &types.DateOfBirthType{Time: dobRecord},
+		DateOfBirth:             &dobRecordType,
 		LastName:                "Smith",
 		FirstName:               "Alice",
 		Jhn:                     "JHN-999",

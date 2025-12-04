@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -132,7 +133,7 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 		r.Skipped = true
 		validateExistingPatientField(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
 		validateExistingPatientField(r, "life_status_code", existingPatient.LifeStatusCode, r.Patient.LifeStatusCode)
-		validateExistingPatientField(r, "date_of_birth", existingPatient.DateOfBirth, r.Patient.DateOfBirth.Time)
+		validateExistingPatientField(r, "date_of_birth", existingPatient.DateOfBirth, time.Time(*r.Patient.DateOfBirth))
 		validateExistingPatientField(r, "last_name", existingPatient.LastName, r.Patient.LastName.String())
 		validateExistingPatientField(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String())
 		validateExistingPatientField(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String())
@@ -219,7 +220,7 @@ func insertPatientRecords(records []*PatientValidationRecord, repo repository.Pa
 				LifeStatusCode:         record.Patient.LifeStatusCode,
 			}
 			if record.Patient.DateOfBirth != nil {
-				patient.DateOfBirth = record.Patient.DateOfBirth.Time
+				patient.DateOfBirth = time.Time(*record.Patient.DateOfBirth)
 			}
 			err := repo.CreatePatient(&patient)
 			if err != nil {

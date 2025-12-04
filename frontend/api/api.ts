@@ -1156,19 +1156,6 @@ export interface CreateSequencingExperimentBatchBody {
 /**
  * 
  * @export
- * @interface DateOfBirthType
- */
-export interface DateOfBirthType {
-    /**
-     * 
-     * @type {string}
-     * @memberof DateOfBirthType
-     */
-    'time.Time'?: string;
-}
-/**
- * 
- * @export
  * @interface DocumentFilters
  */
 export interface DocumentFilters {
@@ -2724,10 +2711,10 @@ export interface PaginationConfig {
 export interface PatientBatch {
     /**
      * 
-     * @type {DateOfBirthType}
+     * @type {string}
      * @memberof PatientBatch
      */
-    'date_of_birth': DateOfBirthType;
+    'date_of_birth': string;
     /**
      * 
      * @type {string}
