@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -40,7 +41,8 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -95,7 +97,8 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -144,7 +147,8 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -198,7 +202,8 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -251,7 +256,8 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -302,7 +308,8 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -358,7 +365,8 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -404,7 +412,8 @@ func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -445,7 +454,8 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -484,7 +494,8 @@ func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -533,7 +544,8 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -589,7 +601,8 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -645,7 +658,8 @@ func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -692,7 +706,8 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -740,7 +755,8 @@ func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -780,7 +796,8 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -789,6 +806,457 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 1)
 		assert.Equal(t, SampleInvalidValueCode, resultBatch.Report.Errors[0].Code)
 		assert.Contains(t, resultBatch.Report.Errors[0].Message, "submitter_sample_id")
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2025-12-03T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}	
+		]
+		`
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, true, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		repoBatch := repository.NewBatchRepository(db)
+		repoOrganization := repository.NewOrganizationRepository(db)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
+		assert.Equal(t, true, resultBatch.DryRun)
+		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var count int64
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2025-12-03T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}	
+		]
+		`
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		repoBatch := repository.NewBatchRepository(db)
+		repoOrganization := repository.NewOrganizationRepository(db)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var seqExp types.SequencingExperiment
+		assert.Nil(t, db.Table("sequencing_experiment").Where("aliquot = 'ALIQUOT-12345'").First(&seqExp).Error)
+
+		assert.Equal(t, "ALIQUOT-12345", seqExp.Aliquot)
+		assert.Equal(t, 1, seqExp.SampleID)
+		assert.Equal(t, "wgs", seqExp.ExperimentalStrategyCode)
+		assert.Equal(t, "short_read", seqExp.SequencingReadTechnologyCode)
+		assert.Equal(t, "illumina", seqExp.PlatformCode)
+		assert.Equal(t, 3, seqExp.SequencingLabID)
+		assert.Equal(t, "Agilent V6", seqExp.CaptureKit)
+		assert.Equal(t, "RUN-001", seqExp.RunAlias)
+		expectedRunDate, _ := time.Parse(time.RFC3339, "2025-12-03T00:00:00Z")
+		assert.True(t, seqExp.RunDate.Equal(expectedRunDate))
+		assert.Equal(t, "Run Name 1", seqExp.RunName)
+		assert.Equal(t, "in_progress", seqExp.StatusCode)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2025-12-03T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}	
+		]
+		`
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		repoBatch := repository.NewBatchRepository(db)
+		repoOrganization := repository.NewOrganizationRepository(db)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		if err := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error; err != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 1)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2025-12-03T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}	
+		]
+		`
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		repoBatch := repository.NewBatchRepository(db)
+		repoOrganization := repository.NewOrganizationRepository(db)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		// // Changed sequencing_read_technology_code to `long_read` to trigger warning
+		diff := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "long_read", 
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2025-12-03T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}	
+		]
+		`
+		if err := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, diff, types.SequencingExperimentBatchType).Scan(&id).Error; err != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 1)
+		assert.Len(t, resultBatch.Report.Infos, 1)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var seqExp types.SequencingExperiment
+		assert.Nil(t, db.Table("sequencing_experiment").Where("aliquot = 'ALIQUOT-12345'").First(&seqExp).Error)
+		assert.Equal(t, "short_read", seqExp.SequencingReadTechnologyCode)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "WGS_INVALID",
+				"sequencing_read_technology_code": "mini_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2025-12-03T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_slow_progress"
+			}	
+		]
+		`
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		repoBatch := repository.NewBatchRepository(db)
+		repoOrganization := repository.NewOrganizationRepository(db)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 3)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2025-12-03T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			},
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2025-12-03T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}		
+		]
+		`
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		repoBatch := repository.NewBatchRepository(db)
+		repoOrganization := repository.NewOrganizationRepository(db)
+		repoPatient := repository.NewPatientsRepository(db)
+		repoSample := repository.NewSamplesRepository(db)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 1)
 	})
 }
 
@@ -814,7 +1282,8 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 		repoOrganization := repository.NewOrganizationRepository(db)
 		repoPatient := repository.NewPatientsRepository(db)
 		repoSample := repository.NewSamplesRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample)
+		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)

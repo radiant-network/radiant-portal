@@ -13,15 +13,14 @@ import (
 )
 
 const (
-	AliquotRegExp    = "^[A-Za-z0-9\\-_.]+$"
-	CaptureKitReqExp = "^[A-Za-z0-9\\-_. ]+$"
-	RunAliasRegExp   = "^[A-Za-z0-9\\-_.]+$"
+	AliquotRegExp  = "^[A-Za-z0-9\\-_.]+$" // Alphanumeric characters, hyphens, underscores and periods
+	RunAliasRegExp = "^[A-Za-z0-9\\-_.]+$"
 )
 
 var (
 	AliquotRegExpCompiled    = regexp.MustCompile(AliquotRegExp)
-	CaptureKitRegExpCompiled = regexp.MustCompile(CaptureKitReqExp)
-	RunAliasRegExpCompiled   = regexp.MustCompile(RunAliasRegExp)
+	CaptureKitRegExpCompiled = AliquotRegExpCompiled
+	RunAliasRegExpCompiled   = AliquotRegExpCompiled
 )
 
 var AllowedExperimentalStrategyCodes = map[string]bool{
@@ -58,9 +57,9 @@ const (
 type SequencingExperimentValidationRecord struct {
 	BaseValidationRecord
 	SequencingExperiment    types.SequencingExperimentBatch
-	SubmitterOrganizationID int
-	SampleID                int
-	SequencingLabID         int
+	SubmitterOrganizationID *int
+	SampleID                *int
+	SequencingLabID         *int
 }
 
 func (r SequencingExperimentValidationRecord) GetBase() *BaseValidationRecord {
@@ -99,9 +98,10 @@ func verifyIdentical[T comparable](lVal T, rVal T, r *SequencingExperimentValida
 	if lVal != rVal {
 		r.Warnings = append(r.Warnings, types.BatchMessage{
 			Code:    ExistingAliquotForSequencingLabCode,
-			Message: fmt.Sprintf("A sequencing with same ids (%s) has been found  but with a different %s (%v <> %v).", key, fieldName, lVal, rVal),
+			Message: fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different %s (%v <> %v).", key, fieldName, lVal, rVal),
 			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
 		})
+		r.Skipped = true
 	}
 }
 
@@ -128,12 +128,12 @@ func (r *SequencingExperimentValidationRecord) verifyStringField(value string, f
 }
 
 func (r *SequencingExperimentValidationRecord) validateAliquotField() {
-	resIds := []string{r.SequencingExperiment.Aliquot.String(), r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String()}
+	resIds := []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 	r.verifyStringField(r.SequencingExperiment.Aliquot.String(), "aliquot", TextMaxLength, AliquotRegExpCompiled, AliquotRegExp, resIds, true)
 }
 
 func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeField() {
-	resIds := []string{r.SequencingExperiment.Aliquot.String(), r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String()}
+	resIds := []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 	r.verifyStringField(r.SequencingExperiment.ExperimentalStrategyCode, "experimental_strategy_code", TextMaxLength, nil, "", resIds, true)
 
 	if !AllowedExperimentalStrategyCodes[r.SequencingExperiment.ExperimentalStrategyCode] {
@@ -146,7 +146,7 @@ func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeF
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyCodeField() {
-	resIds := []string{r.SequencingExperiment.Aliquot.String(), r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String()}
+	resIds := []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 	r.verifyStringField(r.SequencingExperiment.SequencingReadTechnologyCode, "sequencing_read_technology_code", TextMaxLength, nil, "", resIds, true)
 
 	if !AllowedSequencingReadTechnologyCode[r.SequencingExperiment.SequencingReadTechnologyCode] {
@@ -159,12 +159,12 @@ func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyC
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingLabCodeField() {
-	resIds := []string{r.SequencingExperiment.Aliquot.String(), r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String()}
+	resIds := []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 	r.verifyStringField(r.SequencingExperiment.SequencingLabCode, "sequencing_lab_code", TextMaxLength, nil, "", resIds, false)
 }
 
 func (r *SequencingExperimentValidationRecord) validateCaptureKitField() {
-	resIds := []string{r.SequencingExperiment.Aliquot.String(), r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String()}
+	resIds := []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 	r.verifyStringField(r.SequencingExperiment.CaptureKit.String(), "capture_kit", TextMaxLength, nil, "", resIds, false)
 }
 
@@ -178,7 +178,7 @@ func (r *SequencingExperimentValidationRecord) validateRunDateField() {
 		return
 	}
 
-	resIds := []string{r.SequencingExperiment.Aliquot.String(), r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String()}
+	resIds := []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 	now := time.Now()
 
 	if time.Time(*r.SequencingExperiment.RunDate).After(now) {
@@ -196,10 +196,10 @@ func (r *SequencingExperimentValidationRecord) validateRunNameField() {
 }
 
 func (r *SequencingExperimentValidationRecord) validateStatusCodeField() {
-	resIds := []string{r.SequencingExperiment.Aliquot.String(), r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String()}
+	resIds := []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 	r.verifyStringField(r.SequencingExperiment.StatusCode, "status_code", TextMaxLength, nil, "", resIds, false)
 
-	if !AllowedStatusCode[r.SequencingExperiment.SequencingReadTechnologyCode] {
+	if !AllowedStatusCode[r.SequencingExperiment.StatusCode] {
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    InvalidFieldValueCode,
 			Message: formatInvalidField(r, "status_code", "value not allowed", resIds),
@@ -208,13 +208,12 @@ func (r *SequencingExperimentValidationRecord) validateStatusCodeField() {
 	}
 }
 
-func (r *SequencingExperimentValidationRecord) validateIdenticalSequencingExperiment(repoSample repository.SamplesDAO, repoSeqExp repository.SequencingExperimentDAO) error {
-	sample, err := repoSample.GetSampleBySubmitterSampleId(r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
-	if err != nil {
-		return err
+func (r *SequencingExperimentValidationRecord) validateIdenticalSequencingExperiment(repoSeqExp repository.SequencingExperimentDAO) error {
+	if r.SampleID == nil {
+		return nil
 	}
 
-	seqExps, err := repoSeqExp.GetSequencingExperimentBySampleID(sample.ID)
+	seqExps, err := repoSeqExp.GetSequencingExperimentBySampleID(*r.SampleID)
 	if err != nil {
 		return err
 	}
@@ -226,56 +225,58 @@ func (r *SequencingExperimentValidationRecord) validateIdenticalSequencingExperi
 				Message: fmt.Sprintf("Sequencing (%s / %s / %s) already exists, skipped.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId, r.SequencingExperiment.Aliquot),
 				Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
 			})
+			r.Skipped = true
 		}
 	}
 	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingLabCode(repoOrg repository.OrganizationDAO) error {
-	org, err := repoOrg.GetOrganizationByCode(r.SequencingExperiment.SequencingLabCode)
-	if err != nil {
-		return err
-	}
-	if org == nil {
-		resIds := []string{r.SequencingExperiment.Aliquot.String(), r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String()}
+	if r.SequencingLabID == nil {
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    UnknownSequencingLabCode,
-			Message: formatInvalidField(r, "sequencing_lab_code", "unknown sequencing lab code", resIds),
+			Message: fmt.Sprintf("Sequencing lab %s for sequencing %s does not exist.", r.SequencingExperiment.SequencingLabCode, r.SequencingExperiment.Aliquot.String()),
 			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
 		})
 	}
-	r.SequencingLabID = org.ID
 	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequencingLabCode(repoSeqExp repository.SequencingExperimentDAO) error {
+	if r.SequencingLabID == nil || r.SampleID == nil {
+		return nil
+	}
+
 	seqExps, err := repoSeqExp.GetSequencingExperimentByAliquot(r.SequencingExperiment.Aliquot.String())
 	if err != nil {
 		return err
 	}
 	key := fmt.Sprintf("%s / %s / %s", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String())
 	for _, s := range seqExps {
-		if s.SequencingLabID == r.SequencingLabID {
-			verifyIdentical(s.SampleID, r.SampleID, r, key, "sample_id")
+		if s.SequencingLabID == *r.SequencingLabID {
+			verifyIdentical(s.SampleID, *r.SampleID, r, key, "sample_id")
 			verifyIdentical(s.StatusCode, r.SequencingExperiment.StatusCode, r, key, "status_code")
 			verifyIdentical(s.ExperimentalStrategyCode, r.SequencingExperiment.ExperimentalStrategyCode, r, key, "experimental_strategy_code")
 			verifyIdentical(s.SequencingReadTechnologyCode, r.SequencingExperiment.SequencingReadTechnologyCode, r, key, "sequencing_read_technology_code")
 			verifyIdentical(s.PlatformCode, r.SequencingExperiment.PlatformCode, r, key, "platform_code")
 			verifyIdentical(s.RunName, r.SequencingExperiment.RunName.String(), r, key, "run_name")
 			verifyIdentical(s.RunAlias, r.SequencingExperiment.RunAlias.String(), r, key, "run_alias")
-			verifyIdentical(s.RunDate, time.Time(*r.SequencingExperiment.RunDate), r, key, "run_date")
 			verifyIdentical(s.CaptureKit, r.SequencingExperiment.CaptureKit.String(), r, key, "capture_kit")
+
+			if !time.Time(*r.SequencingExperiment.RunDate).Equal(s.RunDate) {
+				r.Warnings = append(r.Warnings, types.BatchMessage{
+					Code:    ExistingAliquotForSequencingLabCode,
+					Message: fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, r.SequencingExperiment.RunDate, s.RunDate),
+					Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+				})
+			}
 		}
 	}
 	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateUnknownSampleForOrganizationCode(repoSample repository.SamplesDAO) error {
-	sample, err := repoSample.GetSampleBySubmitterSampleId(r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
-	if err != nil {
-		return err
-	}
-	if sample == nil {
+	if r.SampleID == nil {
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    UnknownSampleForOrganizationCode,
 			Message: fmt.Sprintf("Sample (%s / %s)  does not exist.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId),
@@ -311,7 +312,7 @@ func insertSequencingExperimentRecords(records []SequencingExperimentValidationR
 	for _, record := range records {
 		if !record.Skipped {
 			seqExp := types.SequencingExperiment{
-				SampleID:                     record.SampleID,
+				SampleID:                     *record.SampleID,
 				Aliquot:                      record.SequencingExperiment.Aliquot.String(),
 				StatusCode:                   record.SequencingExperiment.StatusCode,
 				ExperimentalStrategyCode:     record.SequencingExperiment.ExperimentalStrategyCode,
@@ -321,7 +322,7 @@ func insertSequencingExperimentRecords(records []SequencingExperimentValidationR
 
 			// nullable fields
 			if record.SequencingExperiment.SequencingLabCode != "" {
-				seqExp.SequencingLabID = record.SequencingLabID
+				seqExp.SequencingLabID = *record.SequencingLabID
 			}
 			if record.SequencingExperiment.RunName != "" {
 				seqExp.RunName = record.SequencingExperiment.RunName.String()
@@ -350,7 +351,7 @@ func validateSequencingExperimentBatch(seqExps []types.SequencingExperimentBatch
 	visited := map[string]bool{}
 
 	for index, seqExp := range seqExps {
-		key := fmt.Sprintf("%s / %s / %s", seqExp.Aliquot.String(), seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String())
+		key := fmt.Sprintf("%s / %s / %s", seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String(), seqExp.Aliquot.String())
 		record, err := validateSequencingExperimentRecord(seqExp, index, repoOrganization, repoSample, repoSeqExp)
 		if err != nil {
 			return nil, fmt.Errorf("error during sequencing experiment validation: %v", err)
@@ -362,10 +363,37 @@ func validateSequencingExperimentBatch(seqExps []types.SequencingExperimentBatch
 				Message: fmt.Sprintf("Sequencing (%s) appears multiple times in the batch.", key),
 				Path:    fmt.Sprintf("sequencing_experiments[%d]", index),
 			})
+		} else {
+			visited[key] = true
 		}
 		records = append(records, *record)
 	}
 	return records, nil
+}
+
+func (r *SequencingExperimentValidationRecord) preFetchValidationInfo(repoOrg repository.OrganizationDAO, repoSample repository.SamplesDAO) error {
+	soc, err := repoOrg.GetOrganizationByCode(r.SequencingExperiment.SampleOrganizationCode)
+	if err != nil {
+		return err
+	}
+	if soc != nil {
+		r.SubmitterOrganizationID = &soc.ID
+	}
+	sample, err := repoSample.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
+	if err != nil {
+		return err
+	}
+	if sample != nil {
+		r.SampleID = &sample.ID
+	}
+	sequencingLab, err := repoOrg.GetOrganizationByCode(r.SequencingExperiment.SequencingLabCode)
+	if err != nil {
+		return err
+	}
+	if sequencingLab != nil {
+		r.SequencingLabID = &sequencingLab.ID
+	}
+	return nil
 }
 
 func validateSequencingExperimentRecord(seqExp types.SequencingExperimentBatch, index int, repoOrg repository.OrganizationDAO, repoSample repository.SamplesDAO, repoSeqExp repository.SequencingExperimentDAO) (*SequencingExperimentValidationRecord, error) {
@@ -374,18 +402,10 @@ func validateSequencingExperimentRecord(seqExp types.SequencingExperimentBatch, 
 		SequencingExperiment: seqExp,
 	}
 
-	// Prepare the IDs needed for validation
-	sl, err := repoOrg.GetOrganizationByCode(record.SequencingExperiment.SequencingLabCode)
+	err := record.preFetchValidationInfo(repoOrg, repoSample)
 	if err != nil {
 		return nil, err
 	}
-	record.SequencingLabID = sl.ID
-
-	soc, err := repoOrg.GetOrganizationByCode(record.SequencingExperiment.SampleOrganizationCode)
-	if err != nil {
-		return nil, err
-	}
-	record.SubmitterOrganizationID = soc.ID
 
 	record.validateAliquotField()
 	record.validateExperimentalStrategyCodeField()
@@ -397,7 +417,7 @@ func validateSequencingExperimentRecord(seqExp types.SequencingExperimentBatch, 
 	record.validateRunNameField()
 	record.validateStatusCodeField()
 
-	if err := record.validateIdenticalSequencingExperiment(repoSample, repoSeqExp); err != nil {
+	if err := record.validateIdenticalSequencingExperiment(repoSeqExp); err != nil {
 		return nil, err
 	}
 	if err := record.validateSequencingLabCode(repoOrg); err != nil {
