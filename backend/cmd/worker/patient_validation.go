@@ -14,11 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
-const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
-
-var ExternalIdRegexpCompiled = regexp.MustCompile(ExternalIdRegexp)
-
 const NameRegExp = `^[a-zA-Z0-9\- .'À-ÿ]*$`
 
 var NameRegExpCompiled = regexp.MustCompile(NameRegExp)
