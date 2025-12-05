@@ -17,7 +17,7 @@
   "dependencies": {
     "@react-router/node": "^7.4.0",
     "@react-router/serve": "^7.4.0",
-    "axios": "^1.11.0",
+    "axios": "^1.13.2",
     "isbot": "^5.1.25",
     "jwt-decode": "4.0.0",
     "remix-auth": "^4.1.0",
