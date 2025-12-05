@@ -1,0 +1,17 @@
+import{j as r}from"./jsx-runtime-D_zvdyIk.js";import{a as d}from"./index-B-lxVbXh.js";import{q as y}from"./query-builder-remote-Cb2u0WYb.js";import{T as o}from"./filter-list-ClDbIfdB.js";import{C as g}from"./applications-config-3OOAo44D.js";import{c as p}from"./config-mock-BXxtYAjK.js";import"./v4-CtRu48qb.js";import"./index-CBYaBgW8.js";import"./sqon-xFXjybh7.js";import"./api-DSP0ZUQ6.js";import"./accordion-CtRRXK5y.js";import"./index-Ba5mf8A5.js";import"./index-C6lL4ijz.js";import"./index-Dut9wsGU.js";import"./index-sTUCEGFJ.js";import"./index-BWnBDfn-.js";import"./index-C1adakYs.js";import"./index-BZEiv_1o.js";import"./index-ycEarWk3.js";import"./utils-D-KgF5mV.js";import"./chevron-right-BONyyZTy.js";import"./createLucideIcon-B119WVF5.js";import"./chevron-down-DOuPo75j.js";import"./button-Due5thR0.js";import"./action-button-KkvxmIWD.js";import"./dropdown-menu-BJyjb2OL.js";import"./index-CJAxgcjH.js";import"./Combination-B-dCT06H.js";import"./index-DrGCp3O6.js";import"./index-BtWW-1ow.js";import"./check-DSe_yRo5.js";import"./separator-B36Ht569.js";import"./button.variants-Du9eY_ux.js";import"./index-C66Dxnp2.js";import"./spinner-CKwzofCp.js";import"./tooltip-BjBxR1Ac.js";import"./index-BiH9rn-5.js";import"./i18n-eKlDC8cj.js";import"./iframe-_8_Obfal.js";import"./i18next-CYn7LYXT.js";import"./card-CV4HB3NY.js";import"./checkbox-filter-Dg7BtyeC.js";import"./number-format-DxX1Gy7s.js";import"./checkbox-B4fiCiBj.js";import"./index-SF2qmtPV.js";import"./label-C8KZOh3h.js";import"./input-Dm5winle.js";import"./skeleton-Shk8p_SP.js";import"./switch-SfbwGtii.js";import"./api-boGUK73W.js";import"./index-lnksFm0-.js";import"./search-DKmUqS9g.js";import"./less-than-or-equal-operator-icon-BI5aNTvi.js";import"./select-DMB6Vi4A.js";import"./chevron-up-C0Hb7JXF.js";const u={...p,snv_occurrence:{...p.snv_occurrence,aggregations:{variant:{items:[{key:"chromosome",type:"multiple"},{key:"filter",type:"multiple"},{key:"zygosity",type:"multiple"},{key:"impact_score",type:"multiple"},{key:"variant_class",type:"multiple"},{key:"symbol",type:"multiple"},{key:"is_canonical",type:"boolean"}]}}}},fr={title:"QueryBuilder/Query Filters/Toggle Filter",component:o,args:{field:{key:"is_canonical",type:"boolean"}},decorators:[e=>r.jsx(g,{config:u,children:r.jsx(e,{})})]},t={render:e=>r.jsx("div",{className:"space-y-3",children:r.jsx(o,{...e})})},i={render:e=>(d("activeQuery")(y.updateActiveQueryField(u.snv_occurrence.app_id,{field:"is_canonical",value:["true"]})),r.jsx("div",{className:"space-y-3",children:r.jsx(o,{...e})}))};var m,a,s;t.parameters={...t.parameters,docs:{...(m=t.parameters)==null?void 0:m.docs,source:{originalSource:`{
+  render: args => {
+    return <div className="space-y-3">
+        <ToggleFilter {...args} />
+      </div>;
+  }
+}`,...(s=(a=t.parameters)==null?void 0:a.docs)==null?void 0:s.source}}};var c,l,n;i.parameters={...i.parameters,docs:{...(c=i.parameters)==null?void 0:c.docs,source:{originalSource:`{
+  render: args => {
+    action('activeQuery')(queryBuilderRemote.updateActiveQueryField(config.snv_occurrence.app_id, {
+      field: 'is_canonical',
+      value: ['true']
+    }));
+    return <div className="space-y-3">
+        <ToggleFilter {...args} />
+      </div>;
+  }
+}`,...(n=(l=i.parameters)==null?void 0:l.docs)==null?void 0:n.source}}};const _r=["Default","DataAppliedToQueryBuilder"];export{i as DataAppliedToQueryBuilder,t as Default,_r as __namedExportsOrder,fr as default};
