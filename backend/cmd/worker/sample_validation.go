@@ -3,12 +3,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
+
+const TissueSiteRegExp = `^[A-Za-z\- ]+$`
+
+var TissueSiteRegExpCompiled = regexp.MustCompile(TissueSiteRegExp)
 
 const SampleAlreadyExistCode = "SAMPLE-001"
 const SampleExistingSampleDifferentFieldCode = "SAMPLE-002"
@@ -33,6 +38,11 @@ func (r *SampleValidationRecord) GetBase() *BaseValidationRecord {
 
 func (r *SampleValidationRecord) GetResourceType() string {
 	return types.SampleBatchType
+}
+
+func (r *SampleValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
+	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
+	return formatInvalidField(r, fieldName, reason, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
 }
 
 func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValue string) {
@@ -263,6 +273,34 @@ func reorderSampleRecords(records []*SampleValidationRecord) {
 	copy(records, sorted)
 }
 
+func (r *SampleValidationRecord) validateFieldWithRegexp(fieldName string, fieldValue string, regexpCompiled *regexp.Regexp, regexpStr string, required bool) {
+	if !required && fieldValue == "" {
+		return
+	}
+	r.validateFieldLength(fieldName, fieldValue)
+	if !regexpCompiled.MatchString(fieldValue) {
+		message := r.formatFieldRegexpMatch(fieldName, regexpStr)
+		path := formatPath(r, fieldName)
+		r.addErrors(message, SampleInvalidValueCode, path)
+	}
+}
+
+func (r *SampleValidationRecord) validateSubmitterPatientId() {
+	r.validateFieldWithRegexp("submitter_patient_id", r.Sample.SubmitterPatientId.String(), ExternalIdRegexpCompiled, ExternalIdRegexp, true)
+}
+
+func (r *SampleValidationRecord) validateSubmitterSampleId() {
+	r.validateFieldWithRegexp("submitter_sample_id", r.Sample.SubmitterSampleId.String(), ExternalIdRegexpCompiled, ExternalIdRegexp, true)
+}
+
+func (r *SampleValidationRecord) validateSubmitterParentSampleId() {
+	r.validateFieldWithRegexp("submitter_parent_sample_id", r.Sample.SubmitterParentSampleId.String(), ExternalIdRegexpCompiled, ExternalIdRegexp, false)
+}
+
+func (r *SampleValidationRecord) validateTissueSite() {
+	r.validateFieldWithRegexp("tissue_site", r.Sample.TissueSite.String(), TissueSiteRegExpCompiled, TissueSiteRegExp, false)
+}
+
 func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
@@ -275,10 +313,10 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		}
 
 		// 1. Validate fields
-		record.validateFieldLength("submitter_patient_id", sample.SubmitterPatientId.String())
-		record.validateFieldLength("submitter_parent_sample_id", sample.SubmitterParentSampleId.String())
-		record.validateFieldLength("tissue_site", sample.TissueSite.String())
-		record.validateFieldLength("submitter_sample_id", sample.SubmitterSampleId.String())
+		record.validateSubmitterPatientId()
+		record.validateSubmitterSampleId()
+		record.validateSubmitterParentSampleId()
+		record.validateTissueSite()
 
 		// 2. Validate duplicates in batch
 		validateUniquenessInBatch(
