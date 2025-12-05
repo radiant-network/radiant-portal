@@ -251,7 +251,7 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 			verifyIdenticalField(s.RunAlias, r.SequencingExperiment.RunAlias.String(), r, key, "run_alias")
 			verifyIdenticalField(s.CaptureKit, r.SequencingExperiment.CaptureKit.String(), r, key, "capture_kit")
 
-			if !time.Time(*r.SequencingExperiment.RunDate).Equal(s.RunDate) {
+			if r.SequencingExperiment.RunDate != nil && !time.Time(*r.SequencingExperiment.RunDate).Equal(s.RunDate) {
 				r.addWarnings(
 					fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, r.SequencingExperiment.RunDate, s.RunDate),
 					ExistingAliquotForSequencingLabCode,
@@ -266,7 +266,7 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 func (r *SequencingExperimentValidationRecord) validateUnknownSampleForOrganizationCode() error {
 	if r.SampleID == nil {
 		r.addErrors(
-			fmt.Sprintf("Sample (%s / %s)  does not exist.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId),
+			fmt.Sprintf("Sample (%s / %s) does not exist.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId),
 			UnknownSampleForOrganizationCode,
 			r.getPath(),
 		)

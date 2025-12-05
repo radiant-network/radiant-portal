@@ -333,7 +333,7 @@ func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, UnknownSampleForOrganizationCode, r.Errors[0].Code)
-	assert.Equal(t, "Sample (ORG / S1)  does not exist.", r.Errors[0].Message)
+	assert.Equal(t, "Sample (ORG / S1) does not exist.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
 }
 

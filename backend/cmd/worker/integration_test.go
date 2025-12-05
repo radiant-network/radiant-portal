@@ -758,7 +758,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
 				"run_alias": "RUN-001",
-				"run_date": "2025-12-03T00:00:00Z",
+				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
 			}	
@@ -810,7 +810,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
 				"run_alias": "RUN-001",
-				"run_date": "2025-12-03T00:00:00Z",
+				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
 			}	
@@ -864,7 +864,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, 3, seqExp.SequencingLabID)
 		assert.Equal(t, "Agilent V6", seqExp.CaptureKit)
 		assert.Equal(t, "RUN-001", seqExp.RunAlias)
-		expectedRunDate, _ := time.Parse(time.RFC3339, "2025-12-03T00:00:00Z")
+		expectedRunDate, _ := time.Parse(time.RFC3339, "2020-01-01T00:00:00Z")
 		assert.True(t, seqExp.RunDate.Equal(expectedRunDate))
 		assert.Equal(t, "Run Name 1", seqExp.RunName)
 		assert.Equal(t, "in_progress", seqExp.StatusCode)
@@ -885,7 +885,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
 				"run_alias": "RUN-001",
-				"run_date": "2025-12-03T00:00:00Z",
+				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
 			}	
@@ -957,7 +957,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
 				"run_alias": "RUN-001",
-				"run_date": "2025-12-03T00:00:00Z",
+				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
 			}	
@@ -999,7 +999,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
 				"run_alias": "RUN-001",
-				"run_date": "2025-12-03T00:00:00Z",
+				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
 			}	
@@ -1051,7 +1051,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
 				"run_alias": "RUN-001",
-				"run_date": "2025-12-03T00:00:00Z",
+				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_slow_progress"
 			}	
@@ -1109,7 +1109,7 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
 				"run_alias": "RUN-001",
-				"run_date": "2025-12-03T00:00:00Z",
+				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
 			},
@@ -1123,7 +1123,7 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
 				"run_alias": "RUN-001",
-				"run_date": "2025-12-03T00:00:00Z",
+				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
 			}		
