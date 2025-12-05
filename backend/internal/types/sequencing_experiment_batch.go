@@ -1,5 +1,7 @@
 package types
 
+const SequencingExperimentBatchType = "sequencing_experiment"
+
 type SequencingExperimentBatch struct {
 	Aliquot                      TrimmedString `json:"aliquot" binding:"required"`
 	SampleOrganizationCode       string        `json:"sample_organization_code" binding:"required"`
@@ -11,6 +13,7 @@ type SequencingExperimentBatch struct {
 	SequencingLabCode            string        `json:"sequencing_lab_code" binding:"required"`
 	RunAlias                     TrimmedString `json:"run_alias,omitempty"`
 	RunDate                      *DateRFC3339  `json:"run_date,omitempty" format:"date-time" example:"2023-10-01T00:00:00Z"`
+	RunName                      TrimmedString `json:"run_name,omitempty"`
 	StatusCode                   string        `json:"status_code" binding:"required,oneof=unknown draft revoke completed incomplete submitted in_progress"`
 }
 

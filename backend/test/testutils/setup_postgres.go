@@ -30,6 +30,7 @@ func cleanUp(gormDb *gorm.DB) {
 	db.Exec("DELETE FROM batch WHERE created_on > '2025-01-01'")
 	db.Exec("DELETE FROM patient WHERE id >= 1000")
 	db.Exec("DELETE FROM sample WHERE id >= 1000")
+	db.Exec("DELETE FROM sequencing_experiment WHERE id >= 1000")
 }
 
 func initPostgresDb() (*gorm.DB, error) {

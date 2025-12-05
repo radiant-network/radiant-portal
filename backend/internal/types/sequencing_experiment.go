@@ -1,6 +1,8 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 type SequencingExperiment struct {
 	ID                           int
@@ -54,6 +56,11 @@ var SequencingExperimentTable = Table{
 	Alias: "s",
 }
 
+var ClinicalSequencingExperimentTable = Table{
+	Name:  "sequencing_experiment",
+	Alias: "s",
+}
+
 func (SequencingExperiment) TableName() string {
-	return SequencingExperimentTable.Name
+	return ClinicalSequencingExperimentTable.Name // We only create when we are in clinical context
 }
