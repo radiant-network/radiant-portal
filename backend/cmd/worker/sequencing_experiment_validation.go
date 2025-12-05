@@ -101,11 +101,11 @@ func processSequencingExperimentBatch(batch *types.Batch, db *gorm.DB, repoOrgan
 
 func verifyIdentical[T comparable](lVal T, rVal T, r *SequencingExperimentValidationRecord, key string, fieldName string) {
 	if lVal != rVal {
-		r.Warnings = append(r.Warnings, types.BatchMessage{
-			Code:    ExistingAliquotForSequencingLabCode,
-			Message: fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different %s (%v <> %v).", key, fieldName, lVal, rVal),
-			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-		})
+		r.addWarnings(
+			fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different %s (%v <> %v).", key, fieldName, lVal, rVal),
+			ExistingAliquotForSequencingLabCode,
+			fmt.Sprintf("sequencing_experiment[%d]", r.Index),
+		)
 		r.Skipped = true
 	}
 }
@@ -142,11 +142,7 @@ func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeF
 	r.verifyStringField(r.SequencingExperiment.ExperimentalStrategyCode, "experimental_strategy_code", TextMaxLength, nil, "", resIds, true)
 
 	if !AllowedExperimentalStrategyCodes[r.SequencingExperiment.ExperimentalStrategyCode] {
-		r.Errors = append(r.Errors, types.BatchMessage{
-			Code:    InvalidFieldValueCode,
-			Message: formatInvalidField(r, "experimental_strategy_code", "value not allowed", resIds),
-			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-		})
+		r.addErrors(formatInvalidField(r, "experimental_strategy_code", "value not allowed", resIds), InvalidFieldValueCode, fmt.Sprintf("sequencing_experiment[%d]", r.Index))
 	}
 }
 
@@ -155,11 +151,7 @@ func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyC
 	r.verifyStringField(r.SequencingExperiment.SequencingReadTechnologyCode, "sequencing_read_technology_code", TextMaxLength, nil, "", resIds, true)
 
 	if !AllowedSequencingReadTechnologyCode[r.SequencingExperiment.SequencingReadTechnologyCode] {
-		r.Errors = append(r.Errors, types.BatchMessage{
-			Code:    InvalidFieldValueCode,
-			Message: formatInvalidField(r, "sequencing_read_technology_code", "value not allowed", resIds),
-			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-		})
+		r.addErrors(formatInvalidField(r, "sequencing_read_technology_code", "value not allowed", resIds), InvalidFieldValueCode, fmt.Sprintf("sequencing_experiment[%d]", r.Index))
 	}
 }
 
@@ -187,11 +179,7 @@ func (r *SequencingExperimentValidationRecord) validateRunDateField() {
 	now := time.Now()
 
 	if time.Time(*r.SequencingExperiment.RunDate).After(now) {
-		r.Errors = append(r.Errors, types.BatchMessage{
-			Code:    InvalidFieldValueCode,
-			Message: formatInvalidField(r, "run_date", "must be a past date", resIds),
-			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-		})
+		r.addErrors(formatInvalidField(r, "run_date", "must be a past date", resIds), InvalidFieldValueCode, fmt.Sprintf("sequencing_experiment[%d]", r.Index))
 	}
 }
 
@@ -205,11 +193,7 @@ func (r *SequencingExperimentValidationRecord) validateStatusCodeField() {
 	r.verifyStringField(r.SequencingExperiment.StatusCode, "status_code", TextMaxLength, nil, "", resIds, false)
 
 	if !AllowedStatusCode[r.SequencingExperiment.StatusCode] {
-		r.Errors = append(r.Errors, types.BatchMessage{
-			Code:    InvalidFieldValueCode,
-			Message: formatInvalidField(r, "status_code", "value not allowed", resIds),
-			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-		})
+		r.addErrors(formatInvalidField(r, "status_code", "value not allowed", resIds), InvalidFieldValueCode, fmt.Sprintf("sequencing_experiment[%d]", r.Index))
 	}
 }
 
@@ -225,11 +209,11 @@ func (r *SequencingExperimentValidationRecord) validateIdenticalSequencingExperi
 
 	for _, s := range seqExps {
 		if s.Aliquot == r.SequencingExperiment.Aliquot.String() {
-			r.Infos = append(r.Infos, types.BatchMessage{
-				Code:    IdenticalSequencingExperimentInDBCode,
-				Message: fmt.Sprintf("Sequencing (%s / %s / %s) already exists, skipped.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId, r.SequencingExperiment.Aliquot),
-				Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-			})
+			r.addInfos(
+				fmt.Sprintf("Sequencing (%s / %s / %s) already exists, skipped.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId, r.SequencingExperiment.Aliquot),
+				IdenticalSequencingExperimentInDBCode,
+				fmt.Sprintf("sequencing_experiment[%d]", r.Index),
+			)
 			r.Skipped = true
 		}
 	}
@@ -238,11 +222,11 @@ func (r *SequencingExperimentValidationRecord) validateIdenticalSequencingExperi
 
 func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error {
 	if r.SequencingLabID == nil {
-		r.Errors = append(r.Errors, types.BatchMessage{
-			Code:    UnknownSequencingLabCode,
-			Message: fmt.Sprintf("Sequencing lab %s for sequencing %s does not exist.", r.SequencingExperiment.SequencingLabCode, r.SequencingExperiment.Aliquot.String()),
-			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-		})
+		r.addErrors(
+			fmt.Sprintf("Sequencing lab %s for sequencing %s does not exist.", r.SequencingExperiment.SequencingLabCode, r.SequencingExperiment.Aliquot.String()),
+			UnknownSequencingLabCode,
+			fmt.Sprintf("sequencing_experiment[%d]", r.Index),
+		)
 	}
 	return nil
 }
@@ -269,11 +253,11 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 			verifyIdentical(s.CaptureKit, r.SequencingExperiment.CaptureKit.String(), r, key, "capture_kit")
 
 			if !time.Time(*r.SequencingExperiment.RunDate).Equal(s.RunDate) {
-				r.Warnings = append(r.Warnings, types.BatchMessage{
-					Code:    ExistingAliquotForSequencingLabCode,
-					Message: fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, r.SequencingExperiment.RunDate, s.RunDate),
-					Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-				})
+				r.addWarnings(
+					fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, r.SequencingExperiment.RunDate, s.RunDate),
+					ExistingAliquotForSequencingLabCode,
+					fmt.Sprintf("sequencing_experiment[%d]", r.Index),
+				)
 			}
 		}
 	}
@@ -282,11 +266,11 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 
 func (r *SequencingExperimentValidationRecord) validateUnknownSampleForOrganizationCode() error {
 	if r.SampleID == nil {
-		r.Errors = append(r.Errors, types.BatchMessage{
-			Code:    UnknownSampleForOrganizationCode,
-			Message: fmt.Sprintf("Sample (%s / %s)  does not exist.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId),
-			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
-		})
+		r.addErrors(
+			fmt.Sprintf("Sample (%s / %s)  does not exist.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId),
+			UnknownSampleForOrganizationCode,
+			fmt.Sprintf("sequencing_experiment[%d]", r.Index),
+		)
 	}
 	return nil
 }
