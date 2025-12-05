@@ -4,7 +4,6 @@ package types
 +------------------------+---------------------+------+-----+---------+-------+
 | Field                  | Type                | Null | Key | Default | Extra |
 +------------------------+---------------------+------+-----+---------+-------+
-| case_id                | int                 | NO   | YES | null    |       |
 | seq_id                 | int                 | NO   | YES | null    |       |
 | task_id                | int                 | NO   | YES | null    |       |
 | part                   | int                 | NO   |     | null    |       |
@@ -27,7 +26,6 @@ package types
 // Sequencing represents a sequencing
 // @Description Sequencing represents a sequencing
 type Sequencing struct {
-	CaseId               int    `json:"case_id,omitempty"`
 	SeqId                int    `json:"seq_id,omitempty"`
 	TaskId               int    `json:"task_id,omitempty"`
 	Part                 int    `json:"part,omitempty"`

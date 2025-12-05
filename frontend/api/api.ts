@@ -3049,12 +3049,6 @@ export interface Sequencing {
     'analysis_type'?: string;
     /**
      * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'case_id'?: number;
-    /**
-     * 
      * @type {string}
      * @memberof Sequencing
      */
