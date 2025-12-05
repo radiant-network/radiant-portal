@@ -123,6 +123,9 @@ const CustomCommandItem = ({
               <span className="truncate flex-1 min-w-0">{option.label}</span>
             )}
           </div>
+          {option.count !== undefined && (
+            <span className="text-muted-foreground text-sm shrink-0 ml-2">{option.count}</span>
+          )}
         </div>
       )}
     </CommandItem>
@@ -136,6 +139,7 @@ function getSelectedOptions(options: IFilterButtonItem[], selected: string[]) {
 function getUnselectedOptions(options: IFilterButtonItem[], selected: string[]) {
   return options.filter(option => !selected.includes(option.key || ''));
 }
+
 export default function FilterButton({
   label,
   options,
@@ -225,35 +229,39 @@ export default function FilterButton({
             wrapperClassName="shrink-0 h-10 border-t-0 border-l-0 border-b-1 border-r-0 border-color-border rounded-none"
           />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{t('common.table.no_result')}</CommandEmpty>
             <CommandGroup>
-              {optionSnapshot.selectedOptions.map(option => (
-                <CustomCommandItem
-                  key={option.key}
-                  option={option}
-                  handleSelect={handleSelect}
-                  closeOnSelect={closeOnSelect}
-                  setOpen={setOpen}
-                  actionMode={actionMode}
-                  selected={selected}
-                  withTooltip={withTooltip}
-                />
-              ))}
+              {optionSnapshot.selectedOptions
+                .filter(option => option.count !== 0)
+                .map(option => (
+                  <CustomCommandItem
+                    key={option.key}
+                    option={option}
+                    handleSelect={handleSelect}
+                    closeOnSelect={closeOnSelect}
+                    setOpen={setOpen}
+                    actionMode={actionMode}
+                    selected={selected}
+                    withTooltip={withTooltip}
+                  />
+                ))}
             </CommandGroup>
             {optionSnapshot.selectedOptions.length > 0 && <CommandSeparator />}
             <CommandGroup>
-              {optionSnapshot.unselectedOptions.map(option => (
-                <CustomCommandItem
-                  key={option.key}
-                  option={option}
-                  handleSelect={handleSelect}
-                  closeOnSelect={closeOnSelect}
-                  setOpen={setOpen}
-                  actionMode={actionMode}
-                  selected={selected}
-                  withTooltip={withTooltip}
-                />
-              ))}
+              {optionSnapshot.unselectedOptions
+                .filter(option => option.count !== 0)
+                .map(option => (
+                  <CustomCommandItem
+                    key={option.key}
+                    option={option}
+                    handleSelect={handleSelect}
+                    closeOnSelect={closeOnSelect}
+                    setOpen={setOpen}
+                    actionMode={actionMode}
+                    selected={selected}
+                    withTooltip={withTooltip}
+                  />
+                ))}
             </CommandGroup>
           </CommandList>
         </Command>
