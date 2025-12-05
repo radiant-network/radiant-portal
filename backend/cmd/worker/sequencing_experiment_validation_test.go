@@ -84,7 +84,7 @@ func Test_VerifyIdentical_DifferentField_AddsWarning(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
-	verifyIdentical(1, 2, r, "key", "sample_id")
+	verifyIdenticalField(1, 2, r, "key", "sample_id")
 	assert.Len(t, r.Warnings, 1)
 	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[0].Code)
 	assert.Equal(t, "A sequencing with same ids (key) has been found but with a different sample_id (1 <> 2).", r.Warnings[0].Message)
@@ -95,7 +95,7 @@ func Test_VerifyIdentical_AddsInfo(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
-	verifyIdentical("same", "same", r, "key", "field")
+	verifyIdenticalField("same", "same", r, "key", "field")
 	assert.Empty(t, r.Warnings)
 }
 
