@@ -2048,3 +2048,15 @@ VALUES ('1', '1', '1000', 'T001', 'MONDO:0000001', 'LA6668-3', 'PM1', 'autosomal
        ('1', '1', '1000', 'T002', 'MONDO:0000002', 'LA6675-8', 'PM1,PM2', 'autosomal_dominant_de_novo', '2025-06-30 15:51:29.0'),
        ('2', '1', '1000', 'T001', 'MONDO:0000001', 'LA26332-9', 'PS1,PM1,PP2', 'autosomal_dominant_de_novo,x_linked_dominant_de_novo', '2025-06-27 19:51:00.0')
 ON CONFLICT (sequencing_id, locus_id, transcript_id) DO NOTHING;
+
+-- Reset sequences to prevent duplicate key errors when inserting new records
+SELECT setval('document_id_seq', (SELECT MAX(id) FROM document));
+SELECT setval('organization_id_seq', (SELECT MAX(id) FROM organization));
+SELECT setval('project_id_seq', (SELECT MAX(id) FROM project));
+SELECT setval('patient_id_seq', (SELECT MAX(id) FROM patient));
+SELECT setval('sample_id_seq', (SELECT MAX(id) FROM sample));
+SELECT setval('task_id_seq', (SELECT MAX(id) FROM task));
+SELECT setval('cases_id_seq', (SELECT MAX(id) FROM cases));
+SELECT setval('family_id_seq', (SELECT MAX(id) FROM family));
+SELECT setval('obs_categorical_id_seq', (SELECT MAX(id) FROM obs_categorical));
+SELECT setval('sequencing_experiment_id_seq', (SELECT MAX(id) FROM sequencing_experiment));

@@ -10,7 +10,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o bin/main ./cmd/worker/
 FROM alpine:latest AS certs
 RUN apk add --no-cache ca-certificates
 
-FROM scratch
+FROM alpine:latest
 COPY --from=builder /app/bin/main /main
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/main"]
