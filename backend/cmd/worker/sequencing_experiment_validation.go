@@ -18,9 +18,8 @@ const (
 )
 
 var (
-	AliquotRegExpCompiled    = regexp.MustCompile(AliquotRegExp)
-	CaptureKitRegExpCompiled = AliquotRegExpCompiled
-	RunAliasRegExpCompiled   = AliquotRegExpCompiled
+	AliquotRegExpCompiled  = regexp.MustCompile(AliquotRegExp)
+	RunAliasRegExpCompiled = AliquotRegExpCompiled
 )
 
 var AllowedExperimentalStrategyCodes = map[string]bool{
@@ -54,6 +53,12 @@ const (
 	IdenticalSequencingExperimentInBatchCode = "SEQ-006"
 )
 
+type SequencingExperimentKey struct {
+	SampleOrganizationCode string
+	SubmitterSampleId      string
+	Aliquot                string
+}
+
 type SequencingExperimentValidationRecord struct {
 	BaseValidationRecord
 	SequencingExperiment    types.SequencingExperimentBatch
@@ -62,11 +67,11 @@ type SequencingExperimentValidationRecord struct {
 	SequencingLabID         *int
 }
 
-func (r SequencingExperimentValidationRecord) GetBase() *BaseValidationRecord {
+func (r *SequencingExperimentValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func (r SequencingExperimentValidationRecord) GetResourceType() string {
+func (r *SequencingExperimentValidationRecord) GetResourceType() string {
 	return types.SequencingExperimentBatchType
 }
 
@@ -99,14 +104,14 @@ func verifyIdentical[T comparable](lVal T, rVal T, r *SequencingExperimentValida
 		r.Warnings = append(r.Warnings, types.BatchMessage{
 			Code:    ExistingAliquotForSequencingLabCode,
 			Message: fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different %s (%v <> %v).", key, fieldName, lVal, rVal),
-			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 		})
 		r.Skipped = true
 	}
 }
 
 func (r *SequencingExperimentValidationRecord) verifyStringField(value string, fieldName string, maxLength int, re *regexp.Regexp, reSrc string, resourceIDs []string, isRequired bool) {
-	path := fmt.Sprintf("sequencing_experiments[%d]", r.Index)
+	path := fmt.Sprintf("sequencing_experiment[%d]", r.Index)
 
 	if value == "" {
 		if isRequired {
@@ -140,7 +145,7 @@ func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeF
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    InvalidFieldValueCode,
 			Message: formatInvalidField(r, "experimental_strategy_code", "value not allowed", resIds),
-			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 		})
 	}
 }
@@ -153,7 +158,7 @@ func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyC
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    InvalidFieldValueCode,
 			Message: formatInvalidField(r, "sequencing_read_technology_code", "value not allowed", resIds),
-			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 		})
 	}
 }
@@ -185,7 +190,7 @@ func (r *SequencingExperimentValidationRecord) validateRunDateField() {
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    InvalidFieldValueCode,
 			Message: formatInvalidField(r, "run_date", "must be a past date", resIds),
-			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 		})
 	}
 }
@@ -203,7 +208,7 @@ func (r *SequencingExperimentValidationRecord) validateStatusCodeField() {
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    InvalidFieldValueCode,
 			Message: formatInvalidField(r, "status_code", "value not allowed", resIds),
-			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 		})
 	}
 }
@@ -223,7 +228,7 @@ func (r *SequencingExperimentValidationRecord) validateIdenticalSequencingExperi
 			r.Infos = append(r.Infos, types.BatchMessage{
 				Code:    IdenticalSequencingExperimentInDBCode,
 				Message: fmt.Sprintf("Sequencing (%s / %s / %s) already exists, skipped.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId, r.SequencingExperiment.Aliquot),
-				Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+				Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 			})
 			r.Skipped = true
 		}
@@ -231,12 +236,12 @@ func (r *SequencingExperimentValidationRecord) validateIdenticalSequencingExperi
 	return nil
 }
 
-func (r *SequencingExperimentValidationRecord) validateSequencingLabCode(repoOrg repository.OrganizationDAO) error {
+func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error {
 	if r.SequencingLabID == nil {
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    UnknownSequencingLabCode,
 			Message: fmt.Sprintf("Sequencing lab %s for sequencing %s does not exist.", r.SequencingExperiment.SequencingLabCode, r.SequencingExperiment.Aliquot.String()),
-			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 		})
 	}
 	return nil
@@ -267,7 +272,7 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 				r.Warnings = append(r.Warnings, types.BatchMessage{
 					Code:    ExistingAliquotForSequencingLabCode,
 					Message: fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, r.SequencingExperiment.RunDate, s.RunDate),
-					Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+					Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 				})
 			}
 		}
@@ -275,18 +280,18 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 	return nil
 }
 
-func (r *SequencingExperimentValidationRecord) validateUnknownSampleForOrganizationCode(repoSample repository.SamplesDAO) error {
+func (r *SequencingExperimentValidationRecord) validateUnknownSampleForOrganizationCode() error {
 	if r.SampleID == nil {
 		r.Errors = append(r.Errors, types.BatchMessage{
 			Code:    UnknownSampleForOrganizationCode,
 			Message: fmt.Sprintf("Sample (%s / %s)  does not exist.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId),
-			Path:    fmt.Sprintf("sequencing_experiments[%d]", r.Index),
+			Path:    fmt.Sprintf("sequencing_experiment[%d]", r.Index),
 		})
 	}
 	return nil
 }
 
-func persistBatchAndSequencingExperimentRecords(db *gorm.DB, batch *types.Batch, records []SequencingExperimentValidationRecord) error {
+func persistBatchAndSequencingExperimentRecords(db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		txRepoSeqExp := repository.NewSequencingExperimentRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
@@ -295,7 +300,6 @@ func persistBatchAndSequencingExperimentRecords(db *gorm.DB, batch *types.Batch,
 			return unexpectedErrUpdate
 		}
 		if rowsUpdated == 0 {
-			/* Logs directly, and return error to trigger rollback if the batch does not exist in db */
 			return fmt.Errorf("no rows updated when updating sequencing experiment batch %v", batch.ID)
 		}
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
@@ -308,7 +312,7 @@ func persistBatchAndSequencingExperimentRecords(db *gorm.DB, batch *types.Batch,
 	})
 }
 
-func insertSequencingExperimentRecords(records []SequencingExperimentValidationRecord, repo repository.SequencingExperimentDAO) error {
+func insertSequencingExperimentRecords(records []*SequencingExperimentValidationRecord, repo repository.SequencingExperimentDAO) error {
 	for _, record := range records {
 		if !record.Skipped {
 			seqExp := types.SequencingExperiment{
@@ -346,27 +350,22 @@ func insertSequencingExperimentRecords(records []SequencingExperimentValidationR
 	return nil
 }
 
-func validateSequencingExperimentBatch(seqExps []types.SequencingExperimentBatch, repoOrganization repository.OrganizationDAO, repoSample repository.SamplesDAO, repoSeqExp repository.SequencingExperimentDAO) ([]SequencingExperimentValidationRecord, error) {
-	var records []SequencingExperimentValidationRecord
-	visited := map[string]bool{}
+func validateSequencingExperimentBatch(seqExps []types.SequencingExperimentBatch, repoOrganization repository.OrganizationDAO, repoSample repository.SamplesDAO, repoSeqExp repository.SequencingExperimentDAO) ([]*SequencingExperimentValidationRecord, error) {
+	var records []*SequencingExperimentValidationRecord
+	visited := map[SequencingExperimentKey]struct{}{}
 
 	for index, seqExp := range seqExps {
-		key := fmt.Sprintf("%s / %s / %s", seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String(), seqExp.Aliquot.String())
+		key := SequencingExperimentKey{
+			SampleOrganizationCode: seqExp.SampleOrganizationCode,
+			SubmitterSampleId:      seqExp.SubmitterSampleId.String(),
+			Aliquot:                seqExp.Aliquot.String(),
+		}
 		record, err := validateSequencingExperimentRecord(seqExp, index, repoOrganization, repoSample, repoSeqExp)
 		if err != nil {
 			return nil, fmt.Errorf("error during sequencing experiment validation: %v", err)
 		}
-
-		if visited[key] {
-			record.Errors = append(record.Errors, types.BatchMessage{
-				Code:    IdenticalSequencingExperimentInBatchCode,
-				Message: fmt.Sprintf("Sequencing (%s) appears multiple times in the batch.", key),
-				Path:    fmt.Sprintf("sequencing_experiments[%d]", index),
-			})
-		} else {
-			visited[key] = true
-		}
-		records = append(records, *record)
+		validateUniquenessInBatch(record, key, visited, IdenticalSequencingExperimentInBatchCode, []string{seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String(), seqExp.Aliquot.String()})
+		records = append(records, record)
 	}
 	return records, nil
 }
@@ -420,13 +419,13 @@ func validateSequencingExperimentRecord(seqExp types.SequencingExperimentBatch, 
 	if err := record.validateIdenticalSequencingExperiment(repoSeqExp); err != nil {
 		return nil, err
 	}
-	if err := record.validateSequencingLabCode(repoOrg); err != nil {
+	if err := record.validateSequencingLabCode(); err != nil {
 		return nil, err
 	}
 	if err := record.validateExistingAliquotForSequencingLabCode(repoSeqExp); err != nil {
 		return nil, err
 	}
-	if err := record.validateUnknownSampleForOrganizationCode(repoSample); err != nil {
+	if err := record.validateUnknownSampleForOrganizationCode(); err != nil {
 		return nil, err
 	}
 	return &record, nil

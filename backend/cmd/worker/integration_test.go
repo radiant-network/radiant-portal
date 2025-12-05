@@ -37,12 +37,8 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -93,12 +89,8 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -143,12 +135,8 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -198,12 +186,8 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -252,12 +236,8 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -304,12 +284,8 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -361,12 +337,8 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -408,12 +380,8 @@ func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -450,12 +418,8 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -490,12 +454,8 @@ func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -540,12 +500,8 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -597,12 +553,8 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -654,12 +606,8 @@ func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -702,12 +650,8 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -751,12 +695,8 @@ func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -792,12 +732,8 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -838,13 +774,8 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -895,11 +826,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
+		context := NewBatchValidationContext(db)
 
 		// Make sure DB is clean before running the import
 		var count int64
@@ -908,7 +835,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
 		}
@@ -974,12 +901,6 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-
 		// Make sure DB is clean before running the import
 		var count int64
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
@@ -987,7 +908,8 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
 		}
@@ -1001,7 +923,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
 		}
@@ -1051,12 +973,6 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-
 		// Make sure DB is clean before running the import
 		var count int64
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
@@ -1064,7 +980,8 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
 		}
@@ -1096,7 +1013,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
 		}
@@ -1150,12 +1067,6 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-
 		// Make sure DB is clean before running the import
 		var count int64
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
@@ -1163,7 +1074,8 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
 		}
@@ -1227,12 +1139,6 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-
 		// Make sure DB is clean before running the import
 		var count int64
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
@@ -1240,7 +1146,8 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
 		}
@@ -1278,12 +1185,8 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		repoBatch := repository.NewBatchRepository(db)
-		repoOrganization := repository.NewOrganizationRepository(db)
-		repoPatient := repository.NewPatientsRepository(db)
-		repoSample := repository.NewSamplesRepository(db)
-		repoSeqExp := repository.NewSequencingExperimentRepository(db)
-		processBatch(db, repoBatch, repoOrganization, repoPatient, repoSample, repoSeqExp)
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
