@@ -23,8 +23,8 @@ func (m *mockOrgDAO) GetOrganizationByCode(code string) (*types.Organization, er
 
 type mockSampleDAO struct{ mock.Mock }
 
-func (m *mockSampleDAO) CreateSample(*types.Sample) error {
-	return nil
+func (m *mockSampleDAO) CreateSample(*types.Sample) (*types.Sample, error) {
+	return nil, nil
 }
 
 func (m *mockSampleDAO) GetSampleBySubmitterSampleId(orgID int, submitterID string) (*types.Sample, error) {
@@ -106,7 +106,7 @@ func Test_VerifyStringField_RequiredMissing(t *testing.T) {
 	r.verifyStringField("", "aliquot", 10, nil, "", nil, true)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
-	assert.Equal(t, "Invalid Field aliquot for sequencing_experiment. Reason: field is missing", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field aliquot for sequencing_experiment. Reason: field is missing.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiments[0]", r.Errors[0].Path)
 }
 
@@ -117,7 +117,7 @@ func Test_VerifyStringField_TooLong(t *testing.T) {
 	r.verifyStringField("0123456789", "aliquot", 5, nil, "", nil, true)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
-	assert.Equal(t, "Invalid Field aliquot for sequencing_experiment. Reason: field is too long, maximum length allowed is 5", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field aliquot for sequencing_experiment. Reason: field is too long, maximum length allowed is 5.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiments[0]", r.Errors[0].Path)
 }
 
@@ -126,10 +126,10 @@ func Test_VerifyStringField_RegexpMismatch(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
 	re := regexp.MustCompile(`^[A-Z]+$`)
-	r.verifyStringField("abc", "field", 10, re, "^[A-Z]+$", nil, true)
+	r.verifyStringField("abc", "mock", 10, re, "^[A-Z]+$", nil, true)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
-	assert.Equal(t, "Invalid Field field for sequencing_experiment. Reason: does not match the regular expression ^[A-Z]+$", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field mock for sequencing_experiment. Reason: does not match the regular expression ^[A-Z]+$.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiments[0]", r.Errors[0].Path)
 }
 
@@ -156,7 +156,7 @@ func Test_ValidateExperimentalStrategyCodeField_NotAllowed(t *testing.T) {
 	r.validateExperimentalStrategyCodeField()
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
-	assert.Equal(t, "Invalid Field experimental_strategy_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field experimental_strategy_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiments[0]", r.Errors[0].Path)
 }
 
@@ -176,7 +176,7 @@ func Test_ValidateSequencingReadTechnologyCodeField_NotAllowed(t *testing.T) {
 	r.validateSequencingReadTechnologyCodeField()
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
-	assert.Equal(t, "Invalid Field sequencing_read_technology_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field sequencing_read_technology_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiments[0]", r.Errors[0].Path)
 }
 
@@ -196,7 +196,7 @@ func Test_ValidateStatusCodeField_NotAllowed(t *testing.T) {
 	r.validateStatusCodeField()
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
-	assert.Equal(t, "Invalid Field status_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field status_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiments[0]", r.Errors[0].Path)
 }
 
@@ -218,7 +218,7 @@ func Test_ValidateRunDateField_FutureDateAddsError(t *testing.T) {
 	r.validateRunDateField()
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
-	assert.Equal(t, "Invalid Field run_date for sequencing_experiment (ORG / S1 / A1). Reason: must be a past date", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field run_date for sequencing_experiment (ORG / S1 / A1). Reason: must be a past date.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiments[0]", r.Errors[0].Path)
 }
 
@@ -312,9 +312,9 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[0].Code)
 	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different sample_id (1 <> 99).", r.Warnings[0].Message)
 	assert.Equal(t, "sequencing_experiments[0]", r.Warnings[0].Path)
-	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[8].Code)
-	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different capture_kit (OTHER <> CK1).", r.Warnings[8].Message)
-	assert.Equal(t, "sequencing_experiments[0]", r.Warnings[8].Path)
+	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[7].Code)
+	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different capture_kit (OTHER <> CK1).", r.Warnings[7].Message)
+	assert.Equal(t, "sequencing_experiments[0]", r.Warnings[7].Path)
 }
 
 func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
