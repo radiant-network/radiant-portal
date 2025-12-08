@@ -66,6 +66,82 @@ func Test_SampleField_Too_Long(t *testing.T) {
 	assert.Equal(t, "sample[0].tissue_site", rec.Errors[0].Path)
 }
 
+func Test_ValidateSubmitterPatientId_Valid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "PAT-123"}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateSubmitterPatientId()
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateSubmitterPatientId_Invalid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "INVALID$ID"}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateSubmitterPatientId()
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+}
+
+func Test_ValidateSubmitterSampleId_Valid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "SAMPLE-456"}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateSubmitterSampleId()
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateSubmitterSampleId_Invalid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "BAD@SAMPLE"}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateSubmitterSampleId()
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
+}
+
+func Test_ValidateSubmitterParentSampleId_Valid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterParentSampleId: "PARENT-123"}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateSubmitterParentSampleId()
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateSubmitterParentSampleId_Empty(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterParentSampleId: ""}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateSubmitterParentSampleId()
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateSubmitterParentSampleId_Invalid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterParentSampleId: "INVALID$PARENT"}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateSubmitterParentSampleId()
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
+}
+
+func Test_ValidateTissueSite_Valid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: "Blood-Derived"}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateTissueSite()
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateTissueSite_Empty(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: ""}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateTissueSite()
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateTissueSite_Invalid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: "Blood123"}
+	rec := SampleValidationRecord{Sample: sample}
+	rec.validateTissueSite()
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+}
+
 func Test_ValidatePatient_NotFound(t *testing.T) {
 	sample := types.SampleBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", SubmitterSampleId: "S1"}
 	rec := SampleValidationRecord{Sample: sample}

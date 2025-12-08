@@ -1,8 +1,8 @@
 CREATE TABLE `staging_sequencing_experiment`
 (
-    `case_id`               int NOT NULL,
     `seq_id`                int NOT NULL,
     `task_id`               int NOT NULL,
+    `task_type`             varchar(100) NOT NULL,
     `part`                  int NOT NULL,
     `analysis_type`         varchar(100) NULL,
     `sample_id`             varchar(255) NULL,
@@ -18,4 +18,4 @@ CREATE TABLE `staging_sequencing_experiment`
     `updated_at`            datetime NULL,
     `ingested_at`           datetime NULL
 ) ENGINE = OLAP
-    PRIMARY KEY(`case_id`,`seq_id`);
+    PRIMARY KEY(`seq_id`, `task_id`);

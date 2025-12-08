@@ -12,6 +12,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   postgres:
     image: postgres
     container_name: postgres_radiant
@@ -26,6 +27,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
@@ -50,6 +52,7 @@ services:
     ports:
       - "8080:8080"
       - "9000:9000"
+
 #  openfga:
 #    image: openfga/openfga:latest
 #    container_name: openfga
@@ -95,6 +98,26 @@ services:
       postgres:
         condition: service_healthy
       keycloak:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    container_name: radiant-worker
+    ports:
+      - "9999:9999"
+    environment:
+      PGUSER: radiant
+      PGPASSWORD: radiant
+      PGPORT: 5432
+      PGHOST: postgres
+      PGDATABASE: radiant
+      PGSSLMODE: disable
+    depends_on:
+      init-schema:
+        condition: service_completed_successfully
+      postgres:
         condition: service_healthy
 
   init-schema:

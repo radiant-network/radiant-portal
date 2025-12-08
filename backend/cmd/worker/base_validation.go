@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -11,6 +12,11 @@ import (
 )
 
 const TextMaxLength = 100
+
+// Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
+const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
+
+var ExternalIdRegexpCompiled = regexp.MustCompile(ExternalIdRegexp)
 
 type ValidationRecord interface {
 	GetBase() *BaseValidationRecord

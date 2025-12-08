@@ -255,9 +255,9 @@ CREATE TABLE IF NOT EXISTS orphanet_gene_panel
 
 CREATE TABLE IF NOT EXISTS `staging_sequencing_experiment`
 (
-    `case_id`               int NOT NULL,
     `seq_id`                int NOT NULL,
     `task_id`               int NOT NULL,
+    `task_type`             varchar(100) NOT NULL,
     `part`                  int NOT NULL,
     `analysis_type`         varchar(100) NULL,
     `sample_id`             varchar(255) NULL,
@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS `staging_sequencing_experiment`
     `updated_at`            datetime NULL,
     `ingested_at`           datetime NULL
     ) ENGINE = OLAP
-    PRIMARY KEY(`case_id`,`seq_id`,`task_id`);
+    PRIMARY KEY(`seq_id`,`task_id`);
 
 
 CREATE TABLE IF NOT EXISTS `clinvar_rcv_summary`
@@ -383,11 +383,11 @@ VALUES
     (1000, 3, 0.01, 10, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 0.01, 'hgvsg1', 'AD', 'class1', 'MODIFIER', 'BRAF', true, true, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
     (2000, 1, 0.02, 20, 100, 40, 50, 0.80, 20, 50, 0.4, 0.02, 'hgvsg2', 'Smu', 'class2', 'MODIFIER', 'BRAC', false, true, ['Pathogenic'], 'rs2222222', 'p.Arg19His', ['splice acceptor'], 'locus_full_2000', '2', 2222, 'C', 'G', 'T002');
 
-INSERT INTO staging_sequencing_experiment (case_id, seq_id, task_id, part, analysis_type, ingested_at)
+INSERT INTO staging_sequencing_experiment (seq_id, task_id, task_type, part, analysis_type, ingested_at)
 VALUES
-    (1, 1, 1, 1, 'germline', '1970-01-01'),
-    (1, 2, 1, 1, 'germline', '1970-01-01'),
-    (7, 19, 19, 1, 'germline', '1970-01-01');
+    (1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01'),
+    (2, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01'),
+    (19, 19, 'radiant_germline_annotation', 1, 'germline', '1970-01-01');
 
 INSERT INTO omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
 VALUES

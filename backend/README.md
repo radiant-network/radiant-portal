@@ -49,6 +49,7 @@ Run the application
 ```bash
 make run
 ```
+
 Create DB container
 ```bash
 make docker-run
