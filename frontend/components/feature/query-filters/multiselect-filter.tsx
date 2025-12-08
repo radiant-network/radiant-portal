@@ -193,15 +193,24 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       setHasBeenReset(false);
     }
 
-    aggregationData?.sort((a, b) => {
-      const aSelected = a.key && selectedItems.includes(a.key);
-      const bSelected = b.key && selectedItems.includes(b.key);
+    // Get only applied filters from query builder for ordering
+    const appliedFilterItems: string[] = (() => {
+      const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+        .getResolvedActiveQuery(appId)
+        // @ts-ignore
+        .content.find((x: IValueFilter) => x.content.field === field.key);
+      return (prevSelectedItems?.content.value as string[]) || [];
+    })();
 
-      if (aSelected === bSelected) {
+    aggregationData?.sort((a, b) => {
+      const aApplied = a.key && appliedFilterItems.includes(a.key);
+      const bApplied = b.key && appliedFilterItems.includes(b.key);
+
+      if (aApplied === bApplied) {
         return b.count! - a.count!; // Then sort by count
       }
 
-      return aSelected ? -1 : 1;
+      return aApplied ? -1 : 1;
     });
 
     /**
@@ -247,7 +256,6 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   }, [globalStorageKey]);
 
   // Memoize these functions with useCallback
-  //
   const updateSearch = useCallback(
     (search: string) => {
       if (!search.trim()) {
