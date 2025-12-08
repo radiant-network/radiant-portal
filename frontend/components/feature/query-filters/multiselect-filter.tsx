@@ -471,7 +471,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
                 },
               ]}
               onDefaultAction={apply}
-              disabled={!hasUnappliedItems || isLoading}
+              disabled={isLoading}
             >
               {t('common.filters.buttons.apply')}
             </ActionButton>
