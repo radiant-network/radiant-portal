@@ -28,14 +28,14 @@ function GeneCell({ className, symbol }: GeneCellProps) {
 
   return (
     <div className={cn('flex items-center gap-1', className)}>
-      <AnchorLink size="sm" variant="secondary" href={getOmimOrgUrl({ symbol })} target="_blank">
+      <AnchorLink size="sm" variant="primary" href={getOmimOrgUrl({ symbol })} target="_blank">
         {symbol}
       </AnchorLink>
       <Button
         size="xs"
         variant="ghost"
         iconOnly
-        className="size-5"
+        className="size-5 text-primary"
         onClick={() => {
           queryBuilderRemote.updateActiveQueryField(appId, {
             field: `symbol`,

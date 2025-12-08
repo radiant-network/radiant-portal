@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
-import { ZapIcon } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
@@ -17,6 +17,7 @@ import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cel
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { Badge } from '@/components/base/ui/badge';
 
 import HgvsgCell from './cells/hgvsg-cell';
 import InterpretationCell from './cells/interpretation-cell';
@@ -42,7 +43,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
       header: () => (
         <div className="flex justify-center">
           <TooltipHeader tooltip={t('variant.headers.clinical_interpretation')} iconOnly>
-            <ZapIcon size={16} />
+            <ClipboardList size={16} />
           </TooltipHeader>
         </div>
       ),
@@ -84,7 +85,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
       id: 'variant_class',
       cell: info => (
         <TextTooltipCell tooltipText={info.getValue()}>
-          {t(`variant.classes.${info.getValue()?.toLowerCase()}`)}
+          <Badge variant="outline">{t(`variant.classes.${info.getValue()?.toLowerCase()}`)}</Badge>
         </TextTooltipCell>
       ),
       header: t('variant.headers.variant_class'),
@@ -133,7 +134,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
           target="_blank"
           external
         >
-          {info.getValue()}
+          {info.getValue() && <span className="overflow-hidden text-ellipsis">{info.getValue()}</span>}
         </AnchorLinkCell>
       ),
       header: t('variant.headers.dbSNP'),

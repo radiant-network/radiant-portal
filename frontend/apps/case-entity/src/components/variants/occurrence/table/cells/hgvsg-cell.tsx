@@ -1,6 +1,8 @@
+import { useSearchParams } from 'react-router';
+
 import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import { useSearchParams } from 'react-router';
+
 import { SELECTED_VARIANT_PARAM } from '../../../constants';
 
 type HgvsgCellProps = {
@@ -18,7 +20,7 @@ function HgvsgCell({ occurrence }: HgvsgCellProps) {
   };
 
   return (
-    <AnchorLink size="sm" variant="secondary" className="overflow-hidden text-ellipsis block" onClick={handleClick}>
+    <AnchorLink size="sm" variant="primary" className="overflow-hidden text-ellipsis" onClick={handleClick}>
       {occurrence.hgvsg}
     </AnchorLink>
   );
