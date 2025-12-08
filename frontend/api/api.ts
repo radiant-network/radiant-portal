@@ -3173,6 +3173,12 @@ export interface SequencingExperimentBatch {
      * @type {string}
      * @memberof SequencingExperimentBatch
      */
+    'run_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
     'sample_organization_code': string;
     /**
      * 
