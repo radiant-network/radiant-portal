@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
@@ -15,6 +14,7 @@ import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent } from '@/components/base/ui/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 import { defaultSettings, getCaseEntityDocumentsColumns } from './files-table/files-tab-table-settings';
 import FilesTableFilters from './files-table/files-table-filters';
@@ -33,7 +33,7 @@ const DEFAULT_SORTING = [
 const ADDITIONAL_FIELDS = ['seq_id', 'hash', 'run_alias'];
 
 type DocumentInput = {
-  caseId: string;
+  caseId: number;
   body: ListBodyWithCriteria;
 };
 
@@ -44,7 +44,7 @@ async function fetchDocuments(input: DocumentInput) {
 
 function FilesTab() {
   const { t } = useI18n();
-  const params = useParams<{ caseId: string }>();
+  const caseId = useCaseIdFromParam();
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
   const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -55,7 +55,7 @@ function FilesTab() {
 
   const { data, error, isLoading } = useSWR<DocumentsSearchResponse, ApiError, DocumentInput>(
     {
-      caseId: params.caseId!,
+      caseId,
       body: {
         additional_fields: additionalFields,
         sort: sorting,
@@ -79,7 +79,7 @@ function FilesTab() {
             id="case-entity-files"
             columns={getCaseEntityDocumentsColumns(t)}
             TableFilters={
-              <FilesTableFilters caseId={params.caseId!} setSearchCriteria={setSearchCriteria} loading={isLoading} />
+              <FilesTableFilters caseId={caseId} setSearchCriteria={setSearchCriteria} loading={isLoading} />
             }
             data={data?.list ?? []}
             defaultColumnSettings={defaultSettings}

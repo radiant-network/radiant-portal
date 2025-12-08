@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
@@ -30,6 +29,7 @@ import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/quer
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { ISyntheticSqon } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/cnv-occurrence-table-settings';
 
@@ -48,8 +48,8 @@ async function fetchQueryCount(input: CnvOccurrenceCountInput) {
 }
 
 type CnvOccurrenceListInput = {
-  caseId: string;
-  seqId: string;
+  caseId: number;
+  seqId: number;
   listBody: {
     additional_fields?: string[];
     limit: number;
@@ -60,19 +60,19 @@ type CnvOccurrenceListInput = {
 };
 
 type CnvOccurrenceCountInput = {
-  caseId: string;
-  seqId: string;
+  caseId: number;
+  seqId: number;
   countBody: CountBodyWithSqon;
 };
 
 type CNVTabProps = {
-  seqId: string;
+  seqId: number;
 };
 
 function CNVTab({ seqId }: CNVTabProps) {
   const { t } = useI18n();
   const config = useConfig();
-  const { caseId } = useParams<{ caseId: string }>();
+  const caseId = useCaseIdFromParam();
   const [isQBLoading, setQbLoading] = useState<boolean>(true);
   const [isQBInitialized, setQBInitialized] = useState<boolean>(false);
 
@@ -116,7 +116,7 @@ function CNVTab({ seqId }: CNVTabProps) {
       },
     },
     async (params: CnvOccurrenceListInput) =>
-      seqId && caseId
+      seqId
         ? occurrencesApi.listGermlineCNVOccurrences(caseId, seqId, params.listBody).then(response => response.data)
         : [],
     {
@@ -133,7 +133,7 @@ function CNVTab({ seqId }: CNVTabProps) {
       countBody: { sqon: activeSqon },
     },
     async (params: CnvOccurrenceCountInput) =>
-      seqId && caseId
+      seqId
         ? occurrencesApi.countGermlineCNVOccurrences(caseId, seqId, params.countBody).then(response => response.data)
         : { count: 0 },
     {
@@ -185,7 +185,6 @@ function CNVTab({ seqId }: CNVTabProps) {
    * Re-fetch count
    */
   useEffect(() => {
-    if (seqId === '' || caseId === '') return;
     fetchOccurrencesCount.mutate();
   }, [seqId, caseId, activeSqon]);
 
@@ -200,8 +199,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   }, [activeSqon]);
 
   return (
-    seqId &&
-    caseId && (
+    seqId && (
       <div className="bg-muted w-full">
         <div className="flex flex-1 h-screen overflow-hidden">
           <aside className="w-auto min-w-fit h-full shrink-0">

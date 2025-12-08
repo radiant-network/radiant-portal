@@ -15,8 +15,8 @@ import (
 // @Description List germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param			message	body		types.ListBodyWithSqon	true	"List Body"
 // @Accept json
 // @Produce json
@@ -71,8 +71,8 @@ func OccurrencesGermlineSNVListHandler(repo repository.GermlineSNVOccurrencesDAO
 // @Description Counts germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param			message	body		types.CountBodyWithSqon	true	"Count Body"
 // @Accept json
 // @Produce json
@@ -125,8 +125,8 @@ func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDA
 // @Description Aggregate germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param with_dictionary query bool false "Whether to include all possible facet values" default(false)
 // @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
 // @Accept json
@@ -215,8 +215,8 @@ func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrenc
 // @Description Return statistics about a field for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param			message	body		types.StatisticsBodyWithSqon	true	"Statistics Body"
 // @Accept json
 // @Produce json
@@ -269,8 +269,8 @@ func OccurrencesGermlineSNVStatisticsHandler(repo repository.GermlineSNVOccurren
 // @Description Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.ExpandedGermlineSNVOccurrence

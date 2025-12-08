@@ -1,3 +1,5 @@
+import { useParams } from 'react-router';
+
 /**
  * Sanitize HTML to prevent XSS attacks
  * @param html - The HTML string to sanitize
@@ -34,3 +36,19 @@ export function decodeHtmlEntities(html: string): string {
   textarea.innerHTML = html;
   return textarea.value;
 }
+
+/**
+ * Retrieve case id from params.
+ * @returns case id.
+ * @throws Error if case id is not found or not a number.
+ */
+export const useCaseIdFromParam = function (): number {
+  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
+  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
+
+  if (caseId == undefined) {
+    throw new Error('Required parameter case_id was null or undefined.');
+  }
+
+  return caseId;
+};

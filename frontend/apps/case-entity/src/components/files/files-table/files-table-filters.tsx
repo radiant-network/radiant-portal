@@ -14,7 +14,7 @@ import { caseApi } from '@/utils/api';
 const DEFAULT_VISIBLE_FILTERS = ['format', 'data_type', 'relationship_to_proband'];
 
 type FilesTableFilters = {
-  caseId: string;
+  caseId: number;
   loading: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
 };
@@ -35,7 +35,7 @@ const CRITERIAS = {
   relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3, visible: true },
 };
 
-async function fetchFilters(caseId: string, searchCriteria: DocumentFiltersInput) {
+async function fetchFilters(caseId: number, searchCriteria: DocumentFiltersInput) {
   const response = await caseApi.caseEntityDocumentsFilters(caseId, searchCriteria);
   return response.data;
 }
