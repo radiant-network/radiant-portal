@@ -99,13 +99,15 @@ import {
   TSqonContentValue,
 } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 import { useFilterConfig } from './filter-list';
 
 const API_DEFAULT_TYPE = 'integer';
 
 type OccurrenceStatisticsInput = {
-  seqId: string;
+  caseId: number;
+  seqId: number;
   statisticsBody: StatisticsBodyWithSqon;
 };
 
@@ -114,18 +116,19 @@ const statisticsFetcher = (appId: ApplicationId) => {
     case ApplicationId.cnv_occurrence:
       return (input: OccurrenceStatisticsInput): Promise<Statistics> =>
         occurrencesApi
-          .statisticsGermlineCNVOccurrences(input.seqId, input.statisticsBody)
+          .statisticsGermlineCNVOccurrences(input.caseId, input.seqId, input.statisticsBody)
           .then(response => response.data);
     default:
       return (input: OccurrenceStatisticsInput): Promise<Statistics> =>
         occurrencesApi
-          .statisticsGermlineSNVOccurrences(input.seqId, input.statisticsBody)
+          .statisticsGermlineSNVOccurrences(input.caseId, input.seqId, input.statisticsBody)
           .then(response => response.data);
   }
 };
 
-function useStatisticsBuilder(field: string, appId: string, seqId: string, useEmptyQuery = false) {
+function useStatisticsBuilder(field: string, appId: string, caseId: number, seqId: number, useEmptyQuery = false) {
   const data: OccurrenceStatisticsInput = {
+    caseId,
     seqId,
     statisticsBody: {
       field: field,
@@ -259,6 +262,7 @@ export function NumericalFilter({ field }: IProps) {
   const { t } = useI18n();
   const { appId, aggregations } = useFilterConfig();
   const { seqId } = useContext(AggregateContext);
+  const caseId = useCaseIdFromParam();
   const fieldKey = field.key;
   const RANGE_OPERATOR_LABELS: Record<
     RangeOperators,
@@ -297,7 +301,7 @@ export function NumericalFilter({ field }: IProps) {
   };
 
   // Fetch statistics for min/max values
-  const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, appId, seqId, false);
+  const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, appId, caseId, seqId, false);
   const decimal = statistics?.type === API_DEFAULT_TYPE ? 0 : 3;
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
   const [numericValue, setNumericValue] = useState<string>('0');
