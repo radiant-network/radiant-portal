@@ -17,18 +17,16 @@ function OmimCell({ codes = [] }: OmimCellProps) {
 
   return (
     <>
-      {codes.map(code => {
-        return (
-          <Tooltip key={code}>
-            <TooltipTrigger>
-              <Badge key={code} className={cn('me-2')}>
-                {code}
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent>{t(`variant.omim.${code}`)}</TooltipContent>
-          </Tooltip>
-        );
-      })}
+      {codes.map(code => (
+        <Tooltip key={code}>
+          <TooltipTrigger>
+            <Badge key={code} variant="outline" className={cn('me-2')}>
+              {code}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>{t(`variant.omim.${code}`)}</TooltipContent>
+        </Tooltip>
+      ))}
     </>
   );
 }

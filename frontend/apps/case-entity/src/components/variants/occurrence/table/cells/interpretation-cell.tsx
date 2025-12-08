@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ClipboardCheckIcon, ClipboardIcon } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import { Button } from '@/components/base/ui/button';
@@ -29,19 +29,11 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
       renderTrigger={handleOpen => (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              className={cn('size-6', {
-                'text-primary': hasInterpretation,
-                'text-muted-foreground': !hasInterpretation,
-              })}
-              iconOnly
-              variant="ghost"
-              onClick={handleOpen}
-            >
+            <Button className={cn('size-6')} iconOnly variant="ghost" onClick={handleOpen}>
               {hasInterpretation ? (
-                <ClipboardCheckIcon className="color-primary" size={16} />
+                <ClipboardList className="text-primary fill-primary/30" size={16} />
               ) : (
-                <ClipboardIcon size={16} />
+                <ClipboardList className="text-muted-foreground/40" size={16} />
               )}
             </Button>
           </TooltipTrigger>

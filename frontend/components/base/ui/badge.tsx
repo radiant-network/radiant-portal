@@ -1,7 +1,9 @@
-import { cn } from '@/components/lib/utils';
-import { XIcon } from 'lucide-react';
 import * as React from 'react';
+import { XIcon } from 'lucide-react';
 import { tv, type VariantProps } from 'tailwind-variants';
+
+import { cn } from '@/components/lib/utils';
+
 import { Separator } from './separator';
 
 const badgeVariants = tv({
