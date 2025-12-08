@@ -7,7 +7,7 @@ import AssayVariantFilters from './filters/assay-variant-filters';
 import CNVTab from './occurrence/cnv-tab';
 import SNVTab from './occurrence/snv-tab';
 
-export const SeqIDContext = createContext<string>('');
+export const SeqIDContext = createContext<number>(-1);
 
 export enum VariantInterface {
   SNV = 'snv',
@@ -27,18 +27,18 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   // only use assay with variants
   const assaysWithVariants = caseEntity?.assays.filter(assay => assay.has_variants) ?? [];
 
-  let defaultSeqId = searchParams.get('seq_id') ?? '';
-  if (!defaultSeqId && assaysWithVariants[0]?.seq_id.toString()) {
-    defaultSeqId = assaysWithVariants[0]?.seq_id.toString();
+  let defaultSeqId = Number(searchParams.get('seq_id')) ?? -1;
+  if (!defaultSeqId && assaysWithVariants[0]?.seq_id) {
+    defaultSeqId = assaysWithVariants[0]?.seq_id;
   }
-  const [seqId, setSeqId] = useState<string>(defaultSeqId);
+  const [seqId, setSeqId] = useState<number>(defaultSeqId);
 
   /**
    * Set proband based on searchParams
    */
   useEffect(() => {
     if (searchParams.get('seq_id') != null) {
-      setSeqId(searchParams.get('seq_id') ?? '');
+      setSeqId(Number(searchParams.get('seq_id')) ?? -1);
       return;
     }
 
@@ -48,7 +48,7 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
     const assaysWithVariants = assays.filter(assay => assay.has_variants);
     if (assaysWithVariants.length === 0) return;
 
-    setSeqId(assaysWithVariants[0].seq_id.toString());
+    setSeqId(assaysWithVariants[0].seq_id);
   }, [searchParams, caseEntity]);
 
   return (
@@ -58,11 +58,11 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
           isLoading={isLoading}
           assays={assaysWithVariants}
           value={seqId}
-          handleChange={(value: string) => {
-            searchParams.set('seq_id', value);
+          handleChange={(value: number) => {
+            searchParams.set('seq_id', `${value}`);
             setSearchParams(searchParams, { replace: true });
             setSeqId(value);
-            setPatientSelected(assaysWithVariants.find(assay => assay.seq_id.toString() === value));
+            setPatientSelected(assaysWithVariants.find(assay => assay.seq_id === value));
           }}
           activeInterface={activeInterface}
           onActiveInterfaceChange={setActiveInterface}

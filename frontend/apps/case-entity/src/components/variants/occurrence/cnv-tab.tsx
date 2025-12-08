@@ -185,6 +185,7 @@ function CNVTab({ seqId }: CNVTabProps) {
    * Re-fetch count
    */
   useEffect(() => {
+    if (seqId === -1) return;
     fetchOccurrencesCount.mutate();
   }, [seqId, caseId, activeSqon]);
 

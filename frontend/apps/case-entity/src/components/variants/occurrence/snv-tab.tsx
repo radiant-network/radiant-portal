@@ -233,6 +233,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
    * Re-fetch count
    */
   useEffect(() => {
+    if (seqId === -1) return;
     fetchOccurrencesCount.mutate();
   }, [seqId, caseId, activeSqon]);
 
