@@ -29,6 +29,6 @@ describe('Patients - Batch - Blank fields - Date Of Birth', () => {
   });
 
   it('Message', () => {
-    cy.validateMessage(response, apiMessages.ParsingError('date of birth'));
+    cy.validateMessage(response, apiMessages.ParsingError('date'));
   });
 });

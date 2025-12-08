@@ -15,6 +15,7 @@ export const apiMessages = {
   ProcessWorkerErrorNotSamePatient: (type: string, field: string, code: string, id: string, parentId: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: Invalid parent ${type} ${parentId} for this ${type}.`,
   ProcessWorkerErrorRegExp: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- .'À-ÿ]*$.`,
   ProcessWorkerErrorRegExpId: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.`,
+  ProcessWorkerErrorRegExpTissue: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[A-Za-z\\- ]+$.`,
   ProcessWorkerErrorTooLong: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: field is too long, maximum length allowed is 100.`,
   Sample004: (code: string, patientId: string, SampleId: string) => `Patient (${code} / ${patientId}) for sample ${SampleId} does not exist.`,
   Sample005: (id: string) => `Sample ${id} does not exist.`,
