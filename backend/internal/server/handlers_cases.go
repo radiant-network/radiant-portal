@@ -155,7 +155,7 @@ func CaseEntityHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Description Search for types.DocumentResult list for a case entity
 // @Tags cases
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
+// @Param case_id path int true "Case ID"
 // @Param			message	body		types.ListBodyWithCriteria	true	"List Body"
 // @Accept json
 // @Produce json
@@ -204,7 +204,7 @@ func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerF
 // @Description Retrieve types.DocumentFilters documents filters for a specific case
 // @Tags cases
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
+// @Param case_id path int true "Case ID"
 // @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
 // @Accept json
 // @Produce json

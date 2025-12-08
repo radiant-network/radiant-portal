@@ -6,6 +6,7 @@ import { ActionButton } from '@/components/base/buttons';
 import Empty from '@/components/base/empty';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 import PreviewCaseDetailsCard from './preview-case-details-card';
 import OccurrenceSheetDetailsCard from './preview-occurrence-details-card';
@@ -65,13 +66,13 @@ type CaseSheetContentProps = {
 
 function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }: CaseSheetContentProps) {
   const { t } = useI18n();
-  const { caseId } = useParams<{ caseId: string }>();
+  const caseId = useCaseIdFromParam();
   const params = useParams<{ locusId: string }>();
   const locusId = params.locusId!;
 
   const { expandResult, caseResult, patient, assay, isLoading } = useOccurrenceAndCase(
-    caseId!,
-    caseData.seq_id.toString(),
+    caseId,
+    caseData.seq_id,
     locusId,
   );
 

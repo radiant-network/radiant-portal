@@ -1,5 +1,4 @@
 import { ReactNode, useCallback, useRef, useState } from 'react';
-import { useParams } from 'react-router';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
@@ -18,6 +17,7 @@ import {
 } from '@/components/base/ui/dialog';
 import { useI18n } from '@/components/hooks/i18n';
 import { occurrencesApi } from '@/utils/api';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 import InterpretationVariantHeader from './header';
 import { useInterpretationHelper } from './hook';
@@ -44,9 +44,9 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
   const [isDirty, setIsDirty] = useState(false);
   const gerlimeFormRef = useRef<InterpretationFormRef>(null);
   const somaticFormRef = useRef<InterpretationFormRef>(null);
-  const { caseId } = useParams<{ caseId: string }>();
+  const caseId = useCaseIdFromParam();
   const { fetch: fetchInterpretationHelper, save: saveInterpretationHelper } = useInterpretationHelper(
-    caseId!,
+    caseId,
     occurrence,
     isSomatic,
   );
@@ -61,7 +61,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
     async () =>
       caseId && occurrence.seq_id && occurrence.locus_id
         ? occurrencesApi
-            .getExpandedGermlineSNVOccurrence(caseId, `${occurrence.seq_id}`, occurrence.locus_id)
+            .getExpandedGermlineSNVOccurrence(caseId, occurrence.seq_id, occurrence.locus_id)
             .then(response => response.data)
         : undefined,
     {

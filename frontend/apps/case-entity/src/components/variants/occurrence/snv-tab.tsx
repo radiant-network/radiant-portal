@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
@@ -33,6 +33,7 @@ import { QueryBuilderState, resolveSyntheticSqon } from '@/components/model/quer
 import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
 import { ISyntheticSqon } from '@/components/model/sqon';
 import { occurrencesApi } from '@/utils/api';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { getVisibleAggregations } from '../utils';
@@ -75,8 +76,8 @@ async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
 }
 
 type SnvOccurrenceListInput = {
-  caseId: string;
-  seqId: string;
+  caseId: number;
+  seqId: number;
   listBody: {
     additional_fields?: string[];
     limit: number;
@@ -87,20 +88,20 @@ type SnvOccurrenceListInput = {
 };
 
 type SnvOccurrenceLCountInput = {
-  caseId: string;
-  seqId: string;
+  caseId: number;
+  seqId: number;
   countBody: CountBodyWithSqon;
 };
 
 type SNVTabProps = {
-  seqId: string;
+  seqId: number;
   patientSelected?: CaseAssay;
 };
 
 function SNVTab({ seqId, patientSelected }: SNVTabProps) {
   const { t } = useI18n();
   const config = useConfig();
-  const { caseId } = useParams<{ caseId: string }>();
+  const caseId = useCaseIdFromParam();
   const [rowSelection, setRowSelection] = useState({});
   const [isQBLoading, setQbLoading] = useState<boolean>(true);
   const [isQBInitialized, setQBInitialized] = useState<boolean>(false);
@@ -146,7 +147,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
       },
     },
     async (params: SnvOccurrenceListInput) =>
-      seqId && caseId
+      seqId
         ? occurrencesApi.listGermlineSNVOccurrences(caseId, seqId, params.listBody).then(response => response.data)
         : [],
     {
@@ -163,7 +164,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
       countBody: { sqon: activeSqon },
     },
     async (params: SnvOccurrenceLCountInput) =>
-      seqId && caseId
+      seqId
         ? occurrencesApi.countGermlineSNVOccurrences(caseId, seqId, params.countBody).then(response => response.data)
         : { count: 0 },
     {
@@ -232,7 +233,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
    * Re-fetch count
    */
   useEffect(() => {
-    if (seqId === '' || caseId === '') return;
+    if (seqId === -1) return;
     fetchOccurrencesCount.mutate();
   }, [seqId, caseId, activeSqon]);
 
@@ -247,8 +248,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
   }, [activeSqon]);
 
   return (
-    seqId &&
-    caseId && (
+    seqId && (
       <div className="bg-muted w-full">
         <div className="flex flex-1 h-screen overflow-hidden">
           <aside className="w-auto min-w-fit h-full shrink-0">

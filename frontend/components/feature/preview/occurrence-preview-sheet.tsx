@@ -1,4 +1,3 @@
-import { useParams } from 'react-router';
 import { ClipboardPen } from 'lucide-react';
 
 import { CaseAssay, GermlineSNVOccurrence } from '@/api/api';
@@ -7,6 +6,7 @@ import ClassificationBadge from '@/components/base/badges/classification-badge';
 import { Button } from '@/components/base/ui/button';
 import { Separator } from '@/components/base/ui/separator';
 import { useI18n } from '@/components/hooks/i18n';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 import PreviewOccurrenceDetailsCard from './preview-occurrence-details-card';
 import PreviewSheet from './preview-sheet';
@@ -73,11 +73,10 @@ function OccurrenceSheetContent({
   patientSelected,
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
-  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
-  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
+  const caseId = useCaseIdFromParam();
   const { patient, assay, expandResult, isLoading } = useOccurrenceAndCase(
-    caseIdParam!,
-    occurrence.seq_id.toString(),
+    caseId,
+    occurrence.seq_id,
     occurrence.locus_id.toString(),
     patientSelected,
   );

@@ -7,14 +7,14 @@ import { queryBuilderRemote } from '@/components/model/query-builder-core/query-
 import { occurrencesApi } from '@/utils/api';
 
 type AggregateContextProps = {
-  caseId: string;
-  seqId: string;
+  caseId: number;
+  seqId: number;
 };
-export const AggregateContext = React.createContext<AggregateContextProps>({ caseId: '1', seqId: '1' });
+export const AggregateContext = React.createContext<AggregateContextProps>({ caseId: 1, seqId: 1 });
 
 type OccurrenceAggregationInput = {
-  caseId: string;
-  seqId: string;
+  caseId: number;
+  seqId: number;
   aggregationBody: AggregationBodyWithSqon;
   withDictionary?: boolean;
 };

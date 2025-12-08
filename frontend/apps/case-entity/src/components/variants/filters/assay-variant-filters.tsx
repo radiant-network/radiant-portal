@@ -46,8 +46,8 @@ function AssayVariantFiltersSelectItem(assay: CaseAssay) {
 
 type AssayVariantFiltersProps = {
   assays?: CaseAssay[];
-  value?: string;
-  handleChange: (value: string) => void;
+  value?: number;
+  handleChange: (value: number) => void;
   isLoading: boolean;
   activeInterface: VariantInterface;
   onActiveInterfaceChange: (value: VariantInterface) => void;
@@ -71,7 +71,7 @@ function AssayVariantFilters({
 }: AssayVariantFiltersProps) {
   const { t } = useI18n();
 
-  const selectedAssay = assays.find(assay => assay.seq_id.toString() === value);
+  const selectedAssay = assays.find(assay => assay.seq_id === value);
 
   if (isLoading || assays.length === 0) {
     return (
@@ -90,9 +90,9 @@ function AssayVariantFilters({
     <div className="inline-flex gap-4 items-center border-b px-3 py-4">
       <span>{t('case_entity.variants.filters.assay')}</span>
       <Select
-        value={value}
+        value={`${value}`}
         onValueChange={value => {
-          handleChange(value);
+          handleChange(Number(value));
         }}
       >
         <SelectTrigger className="min-w-[125px] max-w-[200px] h-8">
@@ -100,7 +100,7 @@ function AssayVariantFilters({
         </SelectTrigger>
         <SelectContent>
           {assays.map(assay => (
-            <SelectItem key={`case-relation-${assay.seq_id}`} value={assay.seq_id.toString()}>
+            <SelectItem key={`case-relation-${assay.seq_id}`} value={`${assay.seq_id}`}>
               <AssayVariantFiltersSelectItem {...assay} />
             </SelectItem>
           ))}

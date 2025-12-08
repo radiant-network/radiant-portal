@@ -2244,7 +2244,7 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:
@@ -2280,7 +2280,7 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:
@@ -3258,13 +3258,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:
@@ -3314,13 +3314,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:
@@ -3368,13 +3368,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:
@@ -3424,13 +3424,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:
@@ -3478,13 +3478,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Locus ID
         in: path
         name: locus_id
@@ -3525,13 +3525,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Whether to include all possible facet values
         in: query
         name: with_dictionary
@@ -3587,13 +3587,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:
@@ -3641,13 +3641,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:
@@ -3697,13 +3697,13 @@ paths:
         name: case_id
         required: true
         schema:
-          type: string
+          type: integer
       - description: Sequence ID
         in: path
         name: seq_id
         required: true
         schema:
-          type: string
+          type: integer
       requestBody:
         content:
           application/json:

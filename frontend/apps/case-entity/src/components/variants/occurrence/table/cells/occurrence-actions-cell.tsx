@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useParams } from 'react-router';
 import { CellContext } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
@@ -8,14 +7,14 @@ import { ActionButton } from '@/components/base/buttons';
 import IGVDialog from '@/components/feature/igv/igv-dialog';
 import OccurrencePreviewSheet from '@/components/feature/preview/occurrence-preview-sheet';
 import { useI18n } from '@/components/hooks/i18n';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
   const { t } = useI18n();
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
 
-  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
-  const caseId = caseIdParam ? Number(caseIdParam) : undefined;
+  const caseId = useCaseIdFromParam();
 
   const { locus_id, chromosome, start, rsnumber, seq_id, locus } = row.original;
 

@@ -4659,12 +4659,12 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsFilters: async (caseId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseEntityDocumentsFilters: async (caseId: number, filtersBodyWithCriteria: FiltersBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('caseEntityDocumentsFilters', 'caseId', caseId)
             // verify required parameter 'filtersBodyWithCriteria' is not null or undefined
@@ -4703,12 +4703,12 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Search for DocumentResult list for a case entity
          * @summary Search DocumentResult list for a case entity
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsSearch: async (caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseEntityDocumentsSearch: async (caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('caseEntityDocumentsSearch', 'caseId', caseId)
             // verify required parameter 'listBodyWithCriteria' is not null or undefined
@@ -4864,12 +4864,12 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseEntityDocumentsFilters(caseId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
+        async caseEntityDocumentsFilters(caseId: number, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsFilters(caseId, filtersBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntityDocumentsFilters']?.[localVarOperationServerIndex]?.url;
@@ -4878,12 +4878,12 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Search for DocumentResult list for a case entity
          * @summary Search DocumentResult list for a case entity
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseEntityDocumentsSearch(caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentsSearchResponse>> {
+        async caseEntityDocumentsSearch(caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentsSearchResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntityDocumentsSearch']?.[localVarOperationServerIndex]?.url;
@@ -4949,23 +4949,23 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
         /**
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsFilters(caseId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
+        caseEntityDocumentsFilters(caseId: number, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
             return localVarFp.caseEntityDocumentsFilters(caseId, filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
          * Search for DocumentResult list for a case entity
          * @summary Search DocumentResult list for a case entity
-         * @param {string} caseId Case ID
+         * @param {number} caseId Case ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsSearch(caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
+        caseEntityDocumentsSearch(caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
             return localVarFp.caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5026,26 +5026,26 @@ export class CasesApi extends BaseAPI {
     /**
      * Retrieve DocumentFilters documents filters for a specific case
      * @summary Get DocumentFilters documents filters for a specific case
-     * @param {string} caseId Case ID
+     * @param {number} caseId Case ID
      * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseEntityDocumentsFilters(caseId: string, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
+    public caseEntityDocumentsFilters(caseId: number, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).caseEntityDocumentsFilters(caseId, filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Search for DocumentResult list for a case entity
      * @summary Search DocumentResult list for a case entity
-     * @param {string} caseId Case ID
+     * @param {number} caseId Case ID
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseEntityDocumentsSearch(caseId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+    public caseEntityDocumentsSearch(caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -6859,13 +6859,13 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Aggregate germline CNV occurrences for a given sequence ID
          * @summary Aggregate germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineCNVOccurrences: async (caseId: string, seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateGermlineCNVOccurrences: async (caseId: number, seqId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('aggregateGermlineCNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -6907,14 +6907,14 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Aggregate germline SNV occurrences for a given sequence ID
          * @summary Aggregate germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineSNVOccurrences: async (caseId: string, seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateGermlineSNVOccurrences: async (caseId: number, seqId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('aggregateGermlineSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -6960,13 +6960,13 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Counts germline CNV occurrences for a given sequence ID
          * @summary Count germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineCNVOccurrences: async (caseId: string, seqId: string, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        countGermlineCNVOccurrences: async (caseId: number, seqId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('countGermlineCNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -7008,13 +7008,13 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineSNVOccurrences: async (caseId: string, seqId: string, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        countGermlineSNVOccurrences: async (caseId: number, seqId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('countGermlineSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -7056,13 +7056,13 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
          * @summary Get a germline ExpandedGermlineSNVOccurrence
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpandedGermlineSNVOccurrence: async (caseId: string, seqId: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getExpandedGermlineSNVOccurrence: async (caseId: number, seqId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('getExpandedGermlineSNVOccurrence', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -7187,13 +7187,13 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * List germline CNV occurrences for a given sequence ID
          * @summary List germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineCNVOccurrences: async (caseId: string, seqId: string, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listGermlineCNVOccurrences: async (caseId: number, seqId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('listGermlineCNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -7235,13 +7235,13 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * List germline SNV occurrences for a given sequence ID
          * @summary List germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineSNVOccurrences: async (caseId: string, seqId: string, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listGermlineSNVOccurrences: async (caseId: number, seqId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('listGermlineSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -7283,13 +7283,13 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineCNVOccurrences: async (caseId: string, seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        statisticsGermlineCNVOccurrences: async (caseId: number, seqId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('statisticsGermlineCNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -7331,13 +7331,13 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineSNVOccurrences: async (caseId: string, seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        statisticsGermlineSNVOccurrences: async (caseId: number, seqId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('statisticsGermlineSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -7389,13 +7389,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Aggregate germline CNV occurrences for a given sequence ID
          * @summary Aggregate germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateGermlineCNVOccurrences(caseId: string, seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+        async aggregateGermlineCNVOccurrences(caseId: number, seqId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineCNVOccurrences(caseId, seqId, aggregationBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -7404,14 +7404,14 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Aggregate germline SNV occurrences for a given sequence ID
          * @summary Aggregate germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateGermlineSNVOccurrences(caseId: string, seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+        async aggregateGermlineSNVOccurrences(caseId: number, seqId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineSNVOccurrences(caseId, seqId, aggregationBodyWithSqon, withDictionary, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -7420,13 +7420,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Counts germline CNV occurrences for a given sequence ID
          * @summary Count germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countGermlineCNVOccurrences(caseId: string, seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+        async countGermlineCNVOccurrences(caseId: number, seqId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineCNVOccurrences(caseId, seqId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -7435,13 +7435,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countGermlineSNVOccurrences(caseId: string, seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+        async countGermlineSNVOccurrences(caseId: number, seqId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineSNVOccurrences(caseId, seqId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -7450,13 +7450,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
          * @summary Get a germline ExpandedGermlineSNVOccurrence
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getExpandedGermlineSNVOccurrence(caseId: string, seqId: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedGermlineSNVOccurrence>> {
+        async getExpandedGermlineSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedGermlineSNVOccurrence>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineSNVOccurrence(caseId, seqId, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedGermlineSNVOccurrence']?.[localVarOperationServerIndex]?.url;
@@ -7493,13 +7493,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * List germline CNV occurrences for a given sequence ID
          * @summary List germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listGermlineCNVOccurrences(caseId: string, seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineCNVOccurrence>>> {
+        async listGermlineCNVOccurrences(caseId: number, seqId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineCNVOccurrence>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineCNVOccurrences(caseId, seqId, listBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -7508,13 +7508,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * List germline SNV occurrences for a given sequence ID
          * @summary List germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listGermlineSNVOccurrences(caseId: string, seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineSNVOccurrence>>> {
+        async listGermlineSNVOccurrences(caseId: number, seqId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineSNVOccurrence>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineSNVOccurrences(caseId, seqId, listBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -7523,13 +7523,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async statisticsGermlineCNVOccurrences(caseId: string, seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
+        async statisticsGermlineCNVOccurrences(caseId: number, seqId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineCNVOccurrences(caseId, seqId, statisticsBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -7538,13 +7538,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async statisticsGermlineSNVOccurrences(caseId: string, seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
+        async statisticsGermlineSNVOccurrences(caseId: number, seqId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineSNVOccurrences(caseId, seqId, statisticsBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -7563,62 +7563,62 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
         /**
          * Aggregate germline CNV occurrences for a given sequence ID
          * @summary Aggregate germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineCNVOccurrences(caseId: string, seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+        aggregateGermlineCNVOccurrences(caseId: number, seqId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
             return localVarFp.aggregateGermlineCNVOccurrences(caseId, seqId, aggregationBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Aggregate germline SNV occurrences for a given sequence ID
          * @summary Aggregate germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
          * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineSNVOccurrences(caseId: string, seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+        aggregateGermlineSNVOccurrences(caseId: number, seqId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
             return localVarFp.aggregateGermlineSNVOccurrences(caseId, seqId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
         },
         /**
          * Counts germline CNV occurrences for a given sequence ID
          * @summary Count germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineCNVOccurrences(caseId: string, seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+        countGermlineCNVOccurrences(caseId: number, seqId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
             return localVarFp.countGermlineCNVOccurrences(caseId, seqId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {CountBodyWithSqon} countBodyWithSqon Count Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineSNVOccurrences(caseId: string, seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+        countGermlineSNVOccurrences(caseId: number, seqId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
             return localVarFp.countGermlineSNVOccurrences(caseId, seqId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
          * @summary Get a germline ExpandedGermlineSNVOccurrence
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpandedGermlineSNVOccurrence(caseId: string, seqId: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedGermlineSNVOccurrence> {
+        getExpandedGermlineSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedGermlineSNVOccurrence> {
             return localVarFp.getExpandedGermlineSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7646,49 +7646,49 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
         /**
          * List germline CNV occurrences for a given sequence ID
          * @summary List germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineCNVOccurrences(caseId: string, seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineCNVOccurrence>> {
+        listGermlineCNVOccurrences(caseId: number, seqId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineCNVOccurrence>> {
             return localVarFp.listGermlineCNVOccurrences(caseId, seqId, listBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * List germline SNV occurrences for a given sequence ID
          * @summary List germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {ListBodyWithSqon} listBodyWithSqon List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineSNVOccurrences(caseId: string, seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineSNVOccurrence>> {
+        listGermlineSNVOccurrences(caseId: number, seqId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineSNVOccurrence>> {
             return localVarFp.listGermlineSNVOccurrences(caseId, seqId, listBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline CNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineCNVOccurrences(caseId: string, seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
+        statisticsGermlineCNVOccurrences(caseId: number, seqId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
             return localVarFp.statisticsGermlineCNVOccurrences(caseId, seqId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline SNV occurrences
-         * @param {string} caseId Case ID
-         * @param {string} seqId Sequence ID
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
          * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineSNVOccurrences(caseId: string, seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
+        statisticsGermlineSNVOccurrences(caseId: number, seqId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
             return localVarFp.statisticsGermlineSNVOccurrences(caseId, seqId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
         },
     };
@@ -7704,71 +7704,71 @@ export class OccurrencesApi extends BaseAPI {
     /**
      * Aggregate germline CNV occurrences for a given sequence ID
      * @summary Aggregate germline CNV occurrences
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateGermlineCNVOccurrences(caseId: string, seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
+    public aggregateGermlineCNVOccurrences(caseId: number, seqId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).aggregateGermlineCNVOccurrences(caseId, seqId, aggregationBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Aggregate germline SNV occurrences for a given sequence ID
      * @summary Aggregate germline SNV occurrences
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
      * @param {boolean} [withDictionary] Whether to include all possible facet values
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateGermlineSNVOccurrences(caseId: string, seqId: string, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
+    public aggregateGermlineSNVOccurrences(caseId: number, seqId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).aggregateGermlineSNVOccurrences(caseId, seqId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Counts germline CNV occurrences for a given sequence ID
      * @summary Count germline CNV occurrences
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {CountBodyWithSqon} countBodyWithSqon Count Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public countGermlineCNVOccurrences(caseId: string, seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
+    public countGermlineCNVOccurrences(caseId: number, seqId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).countGermlineCNVOccurrences(caseId, seqId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Counts germline SNV occurrences for a given sequence ID
      * @summary Count germline SNV occurrences
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {CountBodyWithSqon} countBodyWithSqon Count Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public countGermlineSNVOccurrences(caseId: string, seqId: string, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
+    public countGermlineSNVOccurrences(caseId: number, seqId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).countGermlineSNVOccurrences(caseId, seqId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
      * @summary Get a germline ExpandedGermlineSNVOccurrence
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public getExpandedGermlineSNVOccurrence(caseId: string, seqId: string, locusId: string, options?: RawAxiosRequestConfig) {
+    public getExpandedGermlineSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -7801,56 +7801,56 @@ export class OccurrencesApi extends BaseAPI {
     /**
      * List germline CNV occurrences for a given sequence ID
      * @summary List germline CNV occurrences
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {ListBodyWithSqon} listBodyWithSqon List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listGermlineCNVOccurrences(caseId: string, seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
+    public listGermlineCNVOccurrences(caseId: number, seqId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listGermlineCNVOccurrences(caseId, seqId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * List germline SNV occurrences for a given sequence ID
      * @summary List germline SNV occurrences
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {ListBodyWithSqon} listBodyWithSqon List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listGermlineSNVOccurrences(caseId: string, seqId: string, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
+    public listGermlineSNVOccurrences(caseId: number, seqId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listGermlineSNVOccurrences(caseId, seqId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Return statistics about a field for a given sequence ID
      * @summary Statistics of germline CNV occurrences
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public statisticsGermlineCNVOccurrences(caseId: string, seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
+    public statisticsGermlineCNVOccurrences(caseId: number, seqId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).statisticsGermlineCNVOccurrences(caseId, seqId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Return statistics about a field for a given sequence ID
      * @summary Statistics of germline SNV occurrences
-     * @param {string} caseId Case ID
-     * @param {string} seqId Sequence ID
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
      * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public statisticsGermlineSNVOccurrences(caseId: string, seqId: string, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
+    public statisticsGermlineSNVOccurrences(caseId: number, seqId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).statisticsGermlineSNVOccurrences(caseId, seqId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 }

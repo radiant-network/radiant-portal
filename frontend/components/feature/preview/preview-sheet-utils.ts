@@ -5,14 +5,14 @@ import { PROBAND } from '@/components/feature/constants';
 import { caseApi, occurrencesApi } from '@/utils/api';
 
 export type OccurrenceExpandInput = {
-  caseId: string;
-  seqId: string;
+  caseId: number;
+  seqId: number;
   locusId: string;
 };
 
 export type CaseInput = {
   key: string;
-  caseId: any | undefined;
+  caseId: number;
 };
 
 export async function fetchOccurrenceExpand(input: OccurrenceExpandInput) {
@@ -32,7 +32,7 @@ export async function fetchCase(input: CaseInput) {
 /**
  * Hook to fetch occurrence and case data for preview sheets
  */
-export function useOccurrenceAndCase(caseId: string, seqId: string, locusId: string, patientSelected?: CaseAssay) {
+export function useOccurrenceAndCase(caseId: number, seqId: number, locusId: string, patientSelected?: CaseAssay) {
   const expandResult = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
       caseId: caseId,

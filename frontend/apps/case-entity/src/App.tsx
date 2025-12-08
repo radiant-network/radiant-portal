@@ -1,5 +1,5 @@
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { AudioWaveform, ClipboardList, FileIcon } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -11,6 +11,7 @@ import { Button } from '@/components/base/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi } from '@/utils/api';
+import { useCaseIdFromParam } from '@/utils/helper';
 
 import DetailsTab from './components/details/details-tab';
 import FilesTab from './components/files/files-tab';
@@ -24,7 +25,7 @@ const TAB_SEARCH_PARAM = 'tab';
 
 type CaseEntityInput = {
   key: string;
-  caseId: string;
+  caseId: number;
 };
 
 async function fetchCaseEntity(input: CaseEntityInput) {
@@ -34,7 +35,7 @@ async function fetchCaseEntity(input: CaseEntityInput) {
 
 export default function App() {
   const { t } = useI18n();
-  const params = useParams<{ caseId: string }>();
+  const caseId = useCaseIdFromParam();
   const mainRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<CaseEntityTabs>(
@@ -43,7 +44,7 @@ export default function App() {
   const { data, error, isLoading } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
     {
       key: 'case-entity',
-      caseId: params.caseId!,
+      caseId,
     },
     fetchCaseEntity,
     {

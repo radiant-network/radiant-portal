@@ -15,8 +15,8 @@ import (
 // @Description List germline CNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param			message	body		types.ListBodyWithSqon	true	"List Body"
 // @Accept json
 // @Produce json
@@ -70,8 +70,8 @@ func OccurrencesGermlineCNVListHandler(repo repository.GermlineCNVOccurrencesDAO
 // @Description Counts germline CNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param			message	body		types.CountBodyWithSqon	true	"Count Body"
 // @Accept json
 // @Produce json
@@ -124,8 +124,8 @@ func OccurrencesGermlineCNVCountHandler(repo repository.GermlineCNVOccurrencesDA
 // @Description Aggregate germline CNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
 // @Accept json
 // @Produce json
@@ -178,8 +178,8 @@ func OccurrencesGermlineCNVAggregateHandler(repo repository.GermlineCNVOccurrenc
 // @Description Return statistics about a field for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Sequence ID"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
 // @Param			message	body		types.StatisticsBodyWithSqon	true	"Statistics Body"
 // @Accept json
 // @Produce json
