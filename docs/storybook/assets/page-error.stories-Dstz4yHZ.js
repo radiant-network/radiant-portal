@@ -1,0 +1,7 @@
+import{j as o}from"./jsx-runtime-D_zvdyIk.js";import{P as i}from"./page-error-D8r08eI5.js";import{B as s}from"./button-pzkp80Kr.js";import"./utils-D-KgF5mV.js";import"./index-Dut9wsGU.js";import"./index-CBYaBgW8.js";import"./index-sTUCEGFJ.js";import"./index-BWnBDfn-.js";import"./action-button-KkvxmIWD.js";import"./dropdown-menu-BJyjb2OL.js";import"./index-Ba5mf8A5.js";import"./index-C6lL4ijz.js";import"./index-CJAxgcjH.js";import"./Combination-B-dCT06H.js";import"./index-DrGCp3O6.js";import"./index-BtWW-1ow.js";import"./index-BZEiv_1o.js";import"./index-ycEarWk3.js";import"./check-DSe_yRo5.js";import"./createLucideIcon-B119WVF5.js";import"./separator-B36Ht569.js";import"./button.variants-Du9eY_ux.js";import"./index-C66Dxnp2.js";import"./spinner-CKwzofCp.js";import"./tooltip-BjBxR1Ac.js";import"./index-BiH9rn-5.js";import"./i18n-D69N6MIH.js";import"./iframe-CBhLDB2j.js";import"./i18next-CYn7LYXT.js";const C={title:"Error/Page-Error",component:i,args:{status:"404",message:"Page not found",extra:o.jsx(s,{children:"Go to dashboard"})}},r={render:p=>o.jsx("div",{className:"flex justify-center p-24",children:o.jsx(i,{...p})})};var t,m,e;r.parameters={...r.parameters,docs:{...(t=r.parameters)==null?void 0:t.docs,source:{originalSource:`{
+  render: args => {
+    return <div className="flex justify-center p-24">
+        <PageError {...args} />
+      </div>;
+  }
+}`,...(e=(m=r.parameters)==null?void 0:m.docs)==null?void 0:e.source}}};const D=["NotFound404"];export{r as NotFound404,D as __namedExportsOrder,C as default};
