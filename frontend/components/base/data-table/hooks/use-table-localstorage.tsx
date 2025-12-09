@@ -1,4 +1,4 @@
-import { ColumnVisiblity, DefaultColumnTableState, TableColumnDef } from '@/components/base/data-table/data-table';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import {
   ColumnOrderState,
   ColumnPinningState,
@@ -7,7 +7,8 @@ import {
   RowPinningState,
   TableState,
 } from '@tanstack/react-table';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+
+import { ColumnVisiblity, DefaultColumnTableState } from '@/components/base/data-table/data-table';
 
 type TableCacheColumn = {
   id: string;
@@ -55,6 +56,16 @@ type useTableStateObserverProps = {
   previousTableCache: TableCacheProps;
 };
 
+/**
+ * Normalize item name
+ */
+function getCacheName(id: string) {
+  return `data-table-cache-${id}`;
+}
+
+/**
+ * Sync and create data-table locale storage to load use config localy
+ */
 export function useTableStateObserver({ id, state, rows, previousTableCache }: useTableStateObserverProps) {
   const [tableCache, setTableCache] = useState<TableCacheProps>(previousTableCache);
   const columnResizeRef = useRef<string | false>(false);
@@ -137,12 +148,16 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
 
   // save to locale storage
   useEffect(() => {
-    localStorage.setItem(id, JSON.stringify(tableCache));
+    localStorage.setItem(getCacheName(id), JSON.stringify(tableCache));
   }, [tableCache]);
 
   return { tableCache, setTableCache };
 }
 
+/**
+ * Helper to get locale storage
+ * - Will resync and sanitize storage if the table config has changed
+ */
 export function getTableLocaleStorage(
   id: string,
   columns: TableCacheColumn[],
@@ -151,7 +166,7 @@ export function getTableLocaleStorage(
   const storage = localStorage.getItem(id);
   if (storage == null) {
     const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState, columns: columns };
-    localStorage.setItem(id, JSON.stringify(defaultCache));
+    localStorage.setItem(getCacheName(id), JSON.stringify(defaultCache));
     return defaultCache;
   }
   // validate cache to the lastest version
@@ -164,7 +179,7 @@ export function getTableLocaleStorage(
 
   if (depreciatedColumns.length > 0 && newColumns.length > 0) {
     const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState, columns: columns };
-    localStorage.setItem(id, JSON.stringify(defaultCache));
+    localStorage.setItem(getCacheName(id), JSON.stringify(defaultCache));
     return defaultCache;
   }
 
@@ -174,11 +189,14 @@ export function getTableLocaleStorage(
   };
 }
 
+/**
+ * Reset local storage to default table config
+ */
 export function cleanTableLocaleStorage(
   id: string,
   defaultColumnTableState: DefaultColumnTableState,
   setTableCache: Dispatch<SetStateAction<TableCacheProps>>,
 ) {
-  localStorage.setItem(id, JSON.stringify({ ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState }));
+  localStorage.setItem(getCacheName(id), JSON.stringify({ ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState }));
   setTableCache({ ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState });
 }

@@ -349,7 +349,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
             <Card>
               <CardContent>
                 <DataTable
-                  id="snv-occurrence"
+                  id={appId}
                   columns={getSNVOccurrenceColumns(t)}
                   data={fetchOccurrencesList.data ?? []}
                   defaultColumnSettings={defaultSNVSettings}

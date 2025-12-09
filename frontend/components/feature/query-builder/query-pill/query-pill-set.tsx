@@ -1,15 +1,15 @@
-import QueryPillContainer from "./query-pill-container";
-import QueryPillValuesContainer from "./query-pill-values-container";
-import {
-  QueryPillLabelContainer,
-  QueryPillOperatorContainer,
-} from "./query-pill-label-operator";
-import capitalize from "lodash/capitalize";
-import { IValueFilter } from "@/components/model/sqon";
-import ElementOperatorIcon from "@/components/base/icons/element-operator-icon";
-import QueryPillValues from "./query-pill-values";
-import { useQueryBarContext } from "../query-bar/query-bar-context";
-import { useQueryBuilderDictContext } from "../query-builder-context";
+import capitalize from 'lodash/capitalize';
+
+import ElementOperatorIcon from '@/components/base/icons/element-operator-icon';
+import { IValueFilter } from '@/components/model/sqon';
+
+import { useQueryBarContext } from '../query-bar/query-bar-context';
+import { useQueryBuilderDictContext } from '../query-builder-context';
+
+import QueryPillContainer from './query-pill-container';
+import { QueryPillLabelContainer, QueryPillOperatorContainer } from './query-pill-label-operator';
+import QueryPillValues from './query-pill-values';
+import QueryPillValuesContainer from './query-pill-values-container';
 
 export type QueryPillSetProps = {
   valueFilter: IValueFilter;
@@ -20,11 +20,7 @@ function QueryPillSet({ valueFilter }: QueryPillSetProps) {
   const dict = useQueryBuilderDictContext();
 
   return (
-    <QueryPillContainer
-      onRemovePill={() =>
-        query.removePillByFieldOrIndex(valueFilter.content.field)
-      }
-    >
+    <QueryPillContainer onRemovePill={() => query.removePillByFieldOrIndex(valueFilter.content.field)}>
       <div className="flex items-center">
         <QueryPillLabelContainer>
           {valueFilter.content.index

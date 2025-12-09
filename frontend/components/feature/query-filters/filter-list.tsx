@@ -15,13 +15,11 @@ import { AggregationConfig, ApplicationId } from '@/components/model/application
 type FilterListContextProps = {
   appId: ApplicationId;
   aggregations: AggregationConfig;
-  clearUnappliedFilters: () => void;
 };
 
-const FilterConfigContext = createContext<FilterListContextProps>({
+export const FilterConfigContext = createContext<FilterListContextProps>({
   appId: ApplicationId.variant_entity,
   aggregations: {},
-  clearUnappliedFilters: () => {},
 });
 
 export const useFilterConfig = (): FilterListContextProps => {
@@ -87,7 +85,7 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
   }, [groupKey, prevGroupKey]);
 
   return (
-    <FilterConfigContext value={{ appId, aggregations, clearUnappliedFilters }}>
+    <FilterConfigContext value={{ appId, aggregations }}>
       <div>
         <div className="flex justify-end">
           <Button
