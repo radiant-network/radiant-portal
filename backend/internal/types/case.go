@@ -136,13 +136,15 @@ type CaseTask struct {
 }
 
 var CaseTable = Table{
-	Name:  "`radiant_jdbc`.`public`.`cases`",
-	Alias: "c",
+	Name:           "cases",
+	FederationName: "radiant_jdbc.public.cases",
+	Alias:          "c",
 }
 
 var CaseHasSequencingExperimentTable = Table{
-	Name:  "`radiant_jdbc`.`public`.`case_has_sequencing_experiment`",
-	Alias: "chseq",
+	Name:           "case_has_sequencing_experiment",
+	FederationName: "radiant_jdbc.public.case_has_sequencing_experiment",
+	Alias:          "chseq",
 }
 
 func (Case) TableName() string {

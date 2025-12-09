@@ -58,12 +58,12 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
 	}
 
-	txStg := r.db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.Name))
+	txStg := r.db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.FederationName))
 	txStg = txStg.Select("DISTINCT(chse.case_id)")
 	txStg = txStg.Where("se.ingested_at IS NOT NULL AND se.task_type = 'radiant_germline_annotation'")
 	txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.Name))
 
-	txMembersCount := r.db.Table(types.FamilyTable.Name).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
+	txMembersCount := r.db.Table(types.FamilyTable.FederationName).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
@@ -87,15 +87,15 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	*/
 	var autocompleteResult []AutocompleteResult
 	searchInput := fmt.Sprintf("%s%%", prefix)
-	subQueryCaseId := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	subQueryCaseId := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
 	subQueryCaseId = subQueryCaseId.Select("\"case_id\" as type, id as value")
 	subQueryCaseId = subQueryCaseId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryProbandId := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
+	subQueryProbandId := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.FederationName, types.PatientTable.Alias))
 	subQueryProbandId = subQueryProbandId.Select("\"patient_id\" as type, id as value")
 	subQueryProbandId = subQueryProbandId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryOrgPatID := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
+	subQueryOrgPatID := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.FederationName, types.PatientTable.Alias))
 	subQueryOrgPatID = subQueryOrgPatID.Select("submitter_patient_id_type as type, submitter_patient_id as value")
 	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(submitter_patient_id) LIKE ?", strings.ToLower(searchInput))
 
@@ -189,7 +189,7 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 }
 
 func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggregation, filterTable types.Table, casesJoinColumn string, filterJoinColumn string, filterLabelColumn string, filterCondition *string) error {
-	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.Name, filterTable.Alias))
+	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.FederationName, filterTable.Alias))
 	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct cases.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.%s = %s.%s", casesJoinColumn, filterTable.Alias, filterJoinColumn), txCases)
 
@@ -199,13 +199,13 @@ func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggreg
 		tx = tx.Where(*filterCondition)
 	}
 	if err := tx.Find(destination).Error; err != nil {
-		return fmt.Errorf("error fetching filter %s: %w", filterTable.Name, err)
+		return fmt.Errorf("error fetching filter %s: %w", filterTable.FederationName, err)
 	}
 	return nil
 }
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
 	tx = utils.JoinWithProband(tx, userQuery)
 	tx = utils.JoinWithAnalysisCatalog(tx)
 	tx = utils.JoinWithProject(tx)
@@ -234,7 +234,7 @@ func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error) {
 	var caseEntity CaseEntity
 
-	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
 	txCase = utils.JoinWithAnalysisCatalog(txCase)
 	txCase = utils.JoinWithMondoTerm(txCase)
 	txCase = utils.JoinWithDiagnosisLab(txCase)
@@ -252,7 +252,7 @@ func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error)
 func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 	var assays []CaseAssay
 
-	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.Name, types.CaseHasSequencingExperimentTable.Alias))
+	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias))
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON spl.patient_id = f.family_member_id AND chseq.case_id = f.case_id")
@@ -270,7 +270,7 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 	var members []CasePatientClinicalInformation
 	var phenotypeObsCategoricals []types.PhenotypeObsCategorical
 
-	txMembers := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
+	txMembers := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.FederationName, types.FamilyTable.Alias))
 	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = f.family_member_id")
 	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` mgmt_org on p.organization_id = mgmt_org.id")
 	txMembers = txMembers.Where("f.case_id = ?", caseId)
@@ -280,7 +280,7 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 		return nil, fmt.Errorf("error retrieving case members: %w", err)
 	}
 
-	txObservations := r.db.Table(fmt.Sprintf("%s %s", types.ObsCategoricalTable.Name, types.ObsCategoricalTable.Alias))
+	txObservations := r.db.Table(fmt.Sprintf("%s %s", types.ObsCategoricalTable.FederationName, types.ObsCategoricalTable.Alias))
 	txObservations = txObservations.Joins("LEFT JOIN hpo_term hpo ON obs.observation_code = 'phenotype' AND hpo.id = obs.code_value")
 	txObservations = txObservations.Where("obs.observation_code = 'phenotype' AND obs.case_id = ?", caseId)
 	txObservations = txObservations.Order("phenotype_name asc")
@@ -350,7 +350,7 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 
 func (r *CasesRepository) retrieveCasesFamilyMembersIds(caseId int) ([]int, error) {
 	var familyMembersIds []int
-	txFamilyMembersID := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.Name, types.FamilyTable.Alias))
+	txFamilyMembersID := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.FederationName, types.FamilyTable.Alias))
 	txFamilyMembersID = txFamilyMembersID.Where("f.case_id = ?", caseId)
 	if err := txFamilyMembersID.Distinct("f.family_member_id").Find(&familyMembersIds).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving family members ids: %w", err)

@@ -27,12 +27,12 @@ func (r *SequencingExperimentRepository) CreateSequencingExperiment(seqExp *Sequ
 
 func (r *SequencingExperimentRepository) GetSequencingExperimentBySampleID(sampleID int) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
-	result := r.db.Table(types.ClinicalSequencingExperimentTable.Name).Where("sample_id = ?", sampleID).Order("id").Find(&seqExps)
+	result := r.db.Table(types.SequencingExperimentTable.Name).Where("sample_id = ?", sampleID).Order("id").Find(&seqExps)
 	return seqExps, result.Error
 }
 
 func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(aliquot string) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
-	result := r.db.Table(types.ClinicalSequencingExperimentTable.Name).Where("aliquot = ?", aliquot).Order("id").Find(&seqExps)
+	result := r.db.Table(types.SequencingExperimentTable.Name).Where("aliquot = ?", aliquot).Order("id").Find(&seqExps)
 	return seqExps, result.Error
 }

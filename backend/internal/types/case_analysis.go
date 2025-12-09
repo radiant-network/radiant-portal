@@ -11,8 +11,9 @@ type AnalysisCatalog struct {
 }
 
 var AnalysisCatalogTable = Table{
-	Name:  "radiant_jdbc.public.analysis_catalog",
-	Alias: "ca",
+	FederationName: "radiant_jdbc.public.analysis_catalog",
+	Name:           "analysis_catalog",
+	Alias:          "ca",
 }
 
 func (AnalysisCatalog) TableName() string {

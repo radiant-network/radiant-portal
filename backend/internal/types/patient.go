@@ -18,13 +18,15 @@ type Patient struct {
 }
 
 var PatientTable = Table{
-	Name:  "radiant_jdbc.public.patient",
-	Alias: "p",
+	Name:           "patient",
+	FederationName: "radiant_jdbc.public.patient",
+	Alias:          "p",
 }
 
 var ProbandTable = Table{
-	Name:  "radiant_jdbc.public.patient",
-	Alias: "pro",
+	Name:           "patient",
+	FederationName: "radiant_jdbc.public.patient",
+	Alias:          "pro",
 }
 
 func (Patient) TableName() string {

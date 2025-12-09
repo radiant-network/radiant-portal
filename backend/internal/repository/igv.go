@@ -34,13 +34,13 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 
 	alignmentFilter := fmt.Sprintf("tctx.case_id=%d AND thd.type='output' AND (d.data_type_code IN ('alignment', 'alignment_variant_calling') AND d.format_code in ('cram', 'crai'))", caseID)
 
-	tx := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s tctx ON tctx.sequencing_experiment_id=se.id AND tctx.case_id=%d", types.TaskContextTable.Name, caseID))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s thd ON thd.task_id=tctx.task_id", types.TaskHasDocumentTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id=se.sample_id", types.SampleTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s d ON thd.document_id=d.id", types.DocumentTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON sa.patient_id=f.family_member_id AND f.case_id=tctx.case_id", types.FamilyTable.Name))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s p ON f.family_member_id=p.id", types.PatientTable.Name))
+	tx := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.FederationName))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s tctx ON tctx.sequencing_experiment_id=se.id AND tctx.case_id=%d", types.TaskContextTable.FederationName, caseID))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s thd ON thd.task_id=tctx.task_id", types.TaskHasDocumentTable.FederationName))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id=se.sample_id", types.SampleTable.FederationName))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s d ON thd.document_id=d.id", types.DocumentTable.FederationName))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON sa.patient_id=f.family_member_id AND f.case_id=tctx.case_id", types.FamilyTable.FederationName))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s p ON f.family_member_id=p.id", types.PatientTable.FederationName))
 	tx.Where(alignmentFilter)
 
 	columns := []string{
