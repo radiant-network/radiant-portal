@@ -15,6 +15,18 @@ export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canEx
   valueFilter: IValueFilter;
 };
 
+/**
+ * QueryPillValues display the selected values from the facets.
+ * - Display the first 3 selected values
+ * - Clicking on [>] or [ < ] change the expand state
+ *
+ * e.g.
+ * In the UI, QueryPillValues manage [ [1,2, 3 >] ]
+ * | ┌──────────────────────────────────────────┐ |
+ * | | Loremp Ipsum = [1,2, 3 >][X]      | 389K | |
+ * | └──────────────────────────────────────────┘ |
+ *
+ */
 function QueryPillValues({ valueFilter, ...props }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
   const { t, sanitize, lazyTranslate } = useI18n();

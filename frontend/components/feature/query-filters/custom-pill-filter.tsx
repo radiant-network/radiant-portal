@@ -11,6 +11,7 @@ import {
   TrashIcon,
 } from 'lucide-react';
 
+import { SavedFilterType } from '@/api/api';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/ui/button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/ui/hover-card';
@@ -22,7 +23,6 @@ import { useI18n } from '@/components/hooks/i18n';
 import { createSavedFilter, useQueryBuilder } from '@/components/model/query-builder-core';
 import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
 import { ISqonGroupFilter } from '@/components/model/sqon';
-import { SavedFilterType } from '@/api/api';
 
 export interface CustomPillFilterProps {
   customPills: IUserSavedFilter[];

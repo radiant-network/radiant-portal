@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 
+import { Sqon } from '@/api/api';
 import EditableText from '@/components/base/data-entry/editable-text';
 import { Button } from '@/components/base/ui/button';
 import {
@@ -20,7 +21,6 @@ import { QueryBarContext } from '../query-bar/query-bar-context';
 import { QueryBuilderContext, useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
 
 import QueryPillBoolean from './query-pill-boolean';
-import { Sqon } from '@/api/api';
 
 function QueryPillCustomEditDialog({
   open,
@@ -73,10 +73,10 @@ function QueryPillCustomEditDialog({
     (open: boolean) => {
       if (open) {
         onOpenChange(true);
-      } else {
-        customQueryBuilder.reset();
-        onOpenChange(false);
+        return;
       }
+      customQueryBuilder.reset();
+      onOpenChange(false);
     },
     [onOpenChange, customQueryBuilder],
   );

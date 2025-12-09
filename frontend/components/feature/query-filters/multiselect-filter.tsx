@@ -62,10 +62,15 @@ function isWithDictionaryEnabled(appId: ApplicationId, field: AggregationConfig)
 
 export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
-  const { appId, clearUnappliedFilters } = useFilterConfig();
+  const { appId } = useFilterConfig();
 
   // Unique key for all temporary selections
   const globalStorageKey = getGlobalStorageKey(appId);
+
+  // Simple function to clean all temporary selections
+  const clearUnappliedFilters = () => {
+    sessionStorage.removeItem(globalStorageKey);
+  };
 
   // State to manage the dictionary switch value
   const [withDictionaryToggle, setWithDictionaryToggle] = useState(isWithDictionaryEnabled(appId, field));

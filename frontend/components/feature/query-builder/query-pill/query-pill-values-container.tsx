@@ -1,5 +1,6 @@
-import { cn } from '@/components/lib/utils';
 import React from 'react';
+
+import { cn } from '@/components/lib/utils';
 
 export type QueryPillValuesContainerProps = React.HTMLAttributes<HTMLDivElement> & {
   canExpand?: boolean;
@@ -7,6 +8,16 @@ export type QueryPillValuesContainerProps = React.HTMLAttributes<HTMLDivElement>
   classNameContent?: string;
 };
 
+/**
+ * Wrapper for QueryPillValues
+ *
+ * e.g.
+ * Wrap [ [1,2, 3 >][X] ]
+ * | ┌──────────────────────────────────────────┐ |
+ * | | Loremp Ipsum = [1,2, 3 >][X]      | 389K | |
+ * | └──────────────────────────────────────────┘ |
+ *
+ */
 function QueryPillValuesContainer({
   canExpand,
   className,

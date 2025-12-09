@@ -20,7 +20,7 @@ import { SidebarProvider } from '@/components/base/ui/sidebar';
 import QueryBuilder from '@/components/feature/query-builder/query-builder';
 import UserSavedFiltersProps, { getUserSavedFilters } from '@/components/feature/query-builder/user-saved-filters';
 import { FilterComponent } from '@/components/feature/query-filters/filter-container';
-import { FilterList } from '@/components/feature/query-filters/filter-list';
+import { FilterConfigContext, FilterList } from '@/components/feature/query-filters/filter-list';
 import { SidebarGroups } from '@/components/feature/query-filters/sidebar-groups';
 import { AggregateContext } from '@/components/feature/query-filters/use-aggregation-builder';
 import { useI18n } from '@/components/hooks/i18n';
@@ -285,14 +285,18 @@ function CNVTab({ seqId }: CNVTabProps) {
                   enable: true,
                   blacklistedFacets: ['locus_id'],
                   onFacetClick: filter => (
-                    <FilterComponent field={getAggregationFromConfig(filter.content.field)} isOpen={true} />
+                    <>
+                      <FilterConfigContext value={{ appId, aggregations }}>
+                        <FilterComponent field={getAggregationFromConfig(filter.content.field)} isOpen={true} />
+                      </FilterConfigContext>
+                    </>
                   ),
                 }}
                 savedFilterType={SavedFilterType.GERMLINE_CNV_OCCURRENCE}
                 dictionary={{
                   queryPill: {
                     facet: (key: string) =>
-                      t(`common.filters.labels.${getAggregationFromConfig(key).translation_key}`, {
+                      t(`common.filters.labels.${getAggregationFromConfig(key)?.translation_key}`, {
                         defaultValue: key,
                       }),
                   },
@@ -303,7 +307,7 @@ function CNVTab({ seqId }: CNVTabProps) {
             <Card>
               <CardContent>
                 <DataTable
-                  id="cnv-occurrence"
+                  id={appId}
                   columns={getCNVOccurrenceColumns(t)}
                   data={fetchOccurrencesList.data ?? []}
                   defaultColumnSettings={defaultCNVSettings}

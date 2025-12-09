@@ -1,11 +1,22 @@
+import { XIcon } from 'lucide-react';
+
 import { Button } from '@/components/base/ui/button';
 import { cn } from '@/components/lib/utils';
-import { XIcon } from 'lucide-react';
 
 export type QueryPillContainerProps = React.HTMLAttributes<HTMLDivElement> & {
   onRemovePill: () => void;
 };
 
+/**
+ * Simple wrapper that X remove button
+ *
+ * e.g.
+ * In the UI, QueryPillContainer manage [ [....][X] ]
+ * | ┌──────────────────────────────────────────┐ |
+ * | | Loremp Ipsum = [1,2, 3 >][X]      | 389K | |
+ * | └──────────────────────────────────────────┘ |
+ *
+ */
 function QueryPillContainer({ children, className, onRemovePill, ...props }: QueryPillContainerProps) {
   return (
     <div
