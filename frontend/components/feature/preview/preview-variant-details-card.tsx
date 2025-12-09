@@ -326,7 +326,7 @@ const GeneCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
         )}
         <div className={cn('flex flex-col gap-2', { 'flex-1 grow': hasGene })}>
           {data.vep_impact && pickedConsequence && (
-            <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.occurrence')}>
+            <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.consequence')}>
               <ConsequenceIndicator vepImpact={data.vep_impact} consequence={pickedConsequence} size="sm" />
             </DescriptionRow>
           )}

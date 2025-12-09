@@ -1063,7 +1063,7 @@
           "no_data": "No clinical associations data reported"
         },
         "gene_card": {
-          "occurrence": "Occurrence",
+          "consequence": "Consequence",
           "cdna_change": "cDNA change",
           "transcript_id": "Transcript ID",
           "exon": "Exon",

@@ -1129,7 +1129,7 @@
           "no_data": "Aucune donnée d'associations cliniques rapportée"
         },
         "gene_card": {
-          "occurrence": "Occurrence",
+          "consequence": "Conséquence",
           "cdna_change": "Changement cDNA",
           "transcript_id": "ID Transcrit",
           "exon": "Exon",
