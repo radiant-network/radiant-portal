@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import PageError from '@/components/base/page/page-error';
-import { Button } from '@/components/base/ui/button';
+import { Button } from '@/components/base/shadcn/button';
 
 const meta = {
   title: 'Error/Page-Error',
@@ -17,11 +18,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const NotFound404: Story = {
-  render: args => {
-    return (
-      <div className="flex justify-center p-24">
-        <PageError {...args} />
-      </div>
-    );
-  },
+  render: args => (
+    <div className="flex justify-center p-24">
+      <PageError {...args} />
+    </div>
+  ),
 };

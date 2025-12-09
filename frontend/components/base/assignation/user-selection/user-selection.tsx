@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { User, X } from 'lucide-react';
 
-import { Avatar, AvatarFallback } from '@/components/base/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 

@@ -1,10 +1,9 @@
 import { Maximize, Minimize } from 'lucide-react';
 
-import { Button } from '@/components/base/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Button } from '@/components/base/shadcn/button';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-
-import { Skeleton } from '../ui/skeleton';
 
 type DataTableFullscreenButtonProps = {
   active: boolean;

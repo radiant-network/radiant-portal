@@ -2,8 +2,8 @@ import { type KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, XIcon } from 'lucide-react';
 
-import { CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/base/ui/command';
-import { Skeleton } from '@/components/base/ui/skeleton';
+import { CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/base/shadcn/command';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 

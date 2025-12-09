@@ -1,7 +1,7 @@
-import CaseEntity from 'case-entity/App';
+import CaseEntity from 'case/entity/case-entity';
 
-function CEntity () {
-	return <CaseEntity />;
+function CEntity() {
+  return <CaseEntity />;
 }
 
 export default CEntity;

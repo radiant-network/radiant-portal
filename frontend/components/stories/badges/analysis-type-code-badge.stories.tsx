@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import AnalysisTypeCodeBadge, { AnalysisTypeCode } from '@/components/base/badges/analysis-type-code-badge';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -46,11 +46,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {},
-  render: args => (
+  args: { code: 'somatic' as AnalysisTypeCode },
+  render: _args => (
     <div className="flex gap-2">
-      {['somatic', 'germline', 'germline_family'].map(code => (
-        <AnalysisTypeCodeBadge code={code as AnalysisTypeCode} />
+      {['somatic', 'germline', 'germline_family'].map((code, index) => (
+        <AnalysisTypeCodeBadge key={index} code={code as AnalysisTypeCode} />
       ))}
     </div>
   ),

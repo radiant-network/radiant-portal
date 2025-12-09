@@ -1,16 +1,17 @@
 import * as React from 'react';
-import type { Editor } from '@tiptap/react';
 import type { Level } from '@tiptap/extension-heading';
-import { cn } from '@/lib/utils';
+import type { Editor } from '@tiptap/react';
+import { ChevronDownIcon, Heading1Icon } from 'lucide-react';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/base/ui/dropdown-menu';
-import { Toggle } from '@/components/base/ui/toggle';
-import { ChevronDownIcon, Heading1Icon } from 'lucide-react';
+} from '@/components/base/shadcn/dropdown-menu';
+import { Toggle } from '@/components/base/shadcn/toggle';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/lib/utils';
 
 interface FormatAction {
   label: string;

@@ -1,8 +1,10 @@
 import React, { ReactNode } from 'react';
 import { Edit2Icon, Share2Icon, TrashIcon } from 'lucide-react';
+
+import { Button } from '@/components/base/shadcn/button';
 import { cn } from '@/components/lib/utils';
+
 import ConditionalWrapper from '../conditional-wrapper';
-import { Button } from '../ui/button';
 
 export type ListItemActionProps = Omit<React.LiHTMLAttributes<HTMLLIElement>, 'onClick'> & {
   title: ReactNode;

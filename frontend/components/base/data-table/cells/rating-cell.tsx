@@ -1,5 +1,6 @@
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+
 import Rating, { RatingProps } from '../../rating';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 
 type RatingCellProps = RatingProps & {
   tooltip?: string;

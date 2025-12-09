@@ -1,5 +1,6 @@
-import { Badge } from '../../ui/badge';
-import { Skeleton } from '../../ui/skeleton';
+import { Badge } from '@/components/base/shadcn/badge';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
+
 import AnchorLink from '../anchor-link';
 
 const MONDO_URL = 'http://purl.obolibrary.org/obo/MONDO';

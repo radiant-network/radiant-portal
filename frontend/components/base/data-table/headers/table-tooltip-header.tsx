@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { cn } from '@/components/lib/utils';
 
 type TooltipHeaderProps = {

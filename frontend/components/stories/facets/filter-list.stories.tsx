@@ -3,10 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { X } from 'lucide-react';
 import { delay, http, HttpResponse } from 'msw';
 
-import { SidebarProvider } from '@/components/base/ui/sidebar';
-import { FilterList } from '@/components/feature/query-filters/filter-list';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
-import { RangeOperators } from '@/components/model/sqon';
+import { FilterList } from '@/components/base/query-filters/filter-list';
+import { SidebarProvider } from '@/components/base/shadcn/sidebar';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { RangeOperators } from '@/components/cores/sqon';
 
 import {
   httpOccurrenceApiResponse,

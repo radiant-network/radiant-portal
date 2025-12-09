@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { LucideIcon, PlusCircle, Search } from 'lucide-react';
 
-import { Badge } from '@/components/base/ui/badge';
+import { Badge } from '@/components/base/shadcn/badge';
+import { Button } from '@/components/base/shadcn/button';
+import { Checkbox } from '@/components/base/shadcn/checkbox';
 import {
   Command,
   CommandEmpty,
@@ -10,14 +12,11 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/components/base/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/ui/popover';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
+} from '@/components/base/shadcn/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
-
-import { Button } from '../ui/button';
-import { Checkbox } from '../ui/checkbox';
 
 export type PopoverSize = 'sm' | 'lg' | 'md' | 'xs';
 

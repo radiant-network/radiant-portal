@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { SearchIcon } from 'lucide-react';
 
-import { Button, ButtonProps } from '@/components/base/ui/button';
-import { Input, InputProps } from '@/components/base/ui/input';
+import { Button, ButtonProps } from '@/components/base/shadcn/button';
+import { Input, InputProps } from '@/components/base/shadcn/input';
 import { cn } from '@/lib/utils';
 
 export type InputSearchProps = InputProps & {

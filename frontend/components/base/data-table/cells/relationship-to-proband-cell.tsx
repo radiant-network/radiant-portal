@@ -1,4 +1,4 @@
-import { Badge } from '@/components/base/ui/badge';
+import { Badge } from '@/components/base/shadcn/badge';
 
 import RelationshipToProbandField from '../../information/relationship-to-proband-field';
 

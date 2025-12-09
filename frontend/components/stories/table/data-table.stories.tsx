@@ -4,9 +4,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
-import TableFilters from '@/apps/case-exploration/src/components/table-filters/case-exploration-table-filters';
+import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
 import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 import { data, MockData } from './table-mock';
 

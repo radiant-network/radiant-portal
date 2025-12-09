@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { Car } from 'lucide-react';
 
-import { Input } from '@/components/base/ui/input';
+import { Input } from '@/components/base/shadcn/input';
 
 import { sizes } from './utils';
 

@@ -1,44 +1,41 @@
-import { Editor } from "@tiptap/react";
-import { Toggle } from "@/components/base/ui/toggle";
+import { useCallback } from 'react';
+import { Editor } from '@tiptap/react';
 import {
   BoldIcon,
   ItalicIcon,
+  Link2Icon,
   ListIcon,
   ListOrderedIcon,
   StrikethroughIcon,
-  Link2Icon,
   UnderlineIcon,
-} from "lucide-react";
-import { Separator } from "@/components/base/ui/separator";
-import { useCallback } from "react";
-import RichTextEditorLevelToggle from "./rich-text-editor-level-toggle";
-import { useI18n } from "@/components/hooks/i18n";
+} from 'lucide-react';
+
+import { Separator } from '@/components/base/shadcn/separator';
+import { Toggle } from '@/components/base/shadcn/toggle';
+import { useI18n } from '@/components/hooks/i18n';
+
+import RichTextEditorLevelToggle from './rich-text-editor-level-toggle';
 
 function RichTextEditorToolbar({ editor }: { editor: Editor }) {
   const { t } = useI18n();
-  
+
   const setLink = useCallback(() => {
     if (!editor) return;
 
-    const previousUrl = editor.getAttributes("link").href;
+    const previousUrl = editor.getAttributes('link').href;
     const url = window.prompt(t('common.editor.toolbar.urlPrompt'), previousUrl);
 
     if (url === null) {
       return;
     }
 
-    if (url === "") {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+    if (url === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
     }
 
     try {
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange("link")
-        .setLink({ href: url })
-        .run();
+      editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     } catch (e) {
       console.error(e);
     }
@@ -49,28 +46,28 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
       <RichTextEditorLevelToggle editor={editor} />
       <Toggle
         size="sm"
-        pressed={editor.isActive("bold")}
+        pressed={editor.isActive('bold')}
         onPressedChange={() => editor.chain().focus().toggleBold().run()}
       >
         <BoldIcon />
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive("italic")}
+        pressed={editor.isActive('italic')}
         onPressedChange={() => editor.chain().focus().toggleItalic().run()}
       >
         <ItalicIcon />
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive("underline")}
+        pressed={editor.isActive('underline')}
         onPressedChange={() => editor.chain().focus().toggleUnderline().run()}
       >
         <UnderlineIcon />
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive("strike")}
+        pressed={editor.isActive('strike')}
         onPressedChange={() => editor.chain().focus().toggleStrike().run()}
       >
         <StrikethroughIcon />
@@ -78,24 +75,20 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
       <Separator orientation="vertical" className="w-px h-8" />
       <Toggle
         size="sm"
-        pressed={editor.isActive("bulletList")}
+        pressed={editor.isActive('bulletList')}
         onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
       >
         <ListIcon />
       </Toggle>
       <Toggle
         size="sm"
-        pressed={editor.isActive("orderedList")}
+        pressed={editor.isActive('orderedList')}
         onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
       >
         <ListOrderedIcon />
       </Toggle>
       <Separator orientation="vertical" className="w-px h-8" />
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("link")}
-        onPressedChange={() => setLink()}
-      >
+      <Toggle size="sm" pressed={editor.isActive('link')} onPressedChange={() => setLink()}>
         <Link2Icon />
       </Toggle>
     </div>

@@ -1,4 +1,4 @@
-import { PortalConfig } from "@/components/model/applications-config";
+import { PortalConfig } from '@/components/cores/applications-config';
 
 export const config: PortalConfig = {
   admin: {
@@ -23,7 +23,7 @@ export const config: PortalConfig = {
       variant: undefined,
       profile: undefined,
       settings: undefined,
-      logout: undefined
-    }
-  }
+      logout: undefined,
+    },
+  },
 };

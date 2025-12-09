@@ -1,5 +1,6 @@
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+
 import AnchorLink, { AnchorLinkProps } from '../../navigation/anchor-link';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 
 import EmptyCell from './empty-cell';
 

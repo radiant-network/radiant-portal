@@ -157,8 +157,8 @@ You can also combine variables with HTML elements:
 The `Trans` component can work with any React component:
 
 ```typescript
-import { Badge } from '@/components/base/ui/badge';
-import { Button } from '@/components/base/ui/button';
+import { Badge } from '@/components/base/shadcn/badge';
+import { Button } from '@/components/base/shadcn/button';
 import { InfoIcon } from 'lucide-react';
 
 // With Badge

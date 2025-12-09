@@ -1,4 +1,4 @@
-import CaseExploration from 'case-exploration/App';
+import CaseExploration from 'case/exploration/case-exploration';
 
 const VCaseExploration = () => <CaseExploration />;
 

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import NumberBadge from '@/components/base/badges/number-badge';
+
 import { numberBadgeVariants } from './utils';
 
 const meta = {
@@ -19,8 +21,8 @@ export const Variants: Story = {
   args: {},
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {numberBadgeVariants.map(variant => (
-        <NumberBadge variant={variant} {...args}>
+      {numberBadgeVariants.map((variant, index) => (
+        <NumberBadge key={index} variant={variant} {...args}>
           {variant}
         </NumberBadge>
       ))}

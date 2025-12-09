@@ -1,11 +1,10 @@
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { tv, VariantProps } from 'tailwind-variants';
 
+import { Checkbox, checkboxVariants } from '@/components/base/shadcn/checkbox';
+import { Label } from '@/components/base/shadcn/label';
 import { numberFormat } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
-
-import { Checkbox, checkboxVariants } from '../ui/checkbox';
-import { Label } from '../ui/label';
 
 export const checkboxFilterVariants = tv({
   slots: {

@@ -1,10 +1,8 @@
 import { GroupingState, Table } from '@tanstack/react-table';
 import { CombineIcon } from 'lucide-react';
 
-import { useI18n } from '@/components/hooks/i18n';
-
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
+import { Badge } from '@/components/base/shadcn/badge';
+import { Button } from '@/components/base/shadcn/button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -12,8 +10,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+} from '@/components/base/shadcn/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
 
 import { ColumnSettings, TableColumnDef } from './data-table';
 

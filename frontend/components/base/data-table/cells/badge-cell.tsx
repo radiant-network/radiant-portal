@@ -1,5 +1,5 @@
-import { Badge, BadgeProps } from '../../ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
+import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 
 import EmptyCell from './empty-cell';
 

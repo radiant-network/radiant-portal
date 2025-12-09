@@ -1,12 +1,12 @@
 import { tv, VariantProps } from 'tailwind-variants';
 
+import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
+import { Button, ButtonProps } from '@/components/base/shadcn/button';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { cn } from '@/components/lib/utils';
 
 import Container from '../container';
-import { Badge, BadgeProps } from '../ui/badge';
-import { Button, ButtonProps } from '../ui/button';
-import { Skeleton } from '../ui/skeleton';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 const pageHeaderVariants = tv({
   slots: {

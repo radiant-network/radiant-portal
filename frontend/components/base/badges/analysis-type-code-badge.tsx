@@ -1,7 +1,8 @@
-import { Badge } from '@/components/base/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
-import { useI18n } from '@/components/hooks/i18n';
 import { Biohazard, User, Users } from 'lucide-react';
+
+import { Badge } from '@/components/base/shadcn/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
 
 export type AnalysisTypeCode = 'somatic' | 'germline' | 'germline_family';
 

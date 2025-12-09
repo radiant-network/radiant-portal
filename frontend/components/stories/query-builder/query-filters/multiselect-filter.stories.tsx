@@ -1,8 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
-import { MultiSelectFilter } from '@/components/feature/query-filters/multiselect-filter';
-import { ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import type { Meta, StoryObj } from '@storybook/react';
+
+import { MultiSelectFilter } from '@/components/base/query-filters/multiselect-filter';
+import { ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
+
 import { config as configMock } from './config-mock';
 
 const config: PortalConfig = {
@@ -46,13 +48,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: args => {
-    return (
-      <div className="space-y-3">
-        <MultiSelectFilter {...args} />
-      </div>
-    );
-  },
+  render: args => (
+    <div className="space-y-3">
+      <MultiSelectFilter {...args} />
+    </div>
+  ),
 };
 
 export const DataAppliedToQueryBuilder: Story = {
@@ -75,11 +75,9 @@ export const HiddenSearch: Story = {
   args: {
     searchVisible: false,
   },
-  render: args => {
-    return (
-      <div className="space-y-3">
-        <MultiSelectFilter {...args} />
-      </div>
-    );
-  },
+  render: args => (
+    <div className="space-y-3">
+      <MultiSelectFilter {...args} />
+    </div>
+  ),
 };

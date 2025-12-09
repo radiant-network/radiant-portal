@@ -1,7 +1,7 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import ManePlusBadge from '@/components/feature/variant/mane-plus-badge';
-import ManeSelectBadge from '@/components/feature/variant/mane-select-badge';
-import CanonicalBadge from '@/components/feature/variant/canonical-badge';
+import CanonicalBadge from '@/components/base/variant/canonical-badge';
+import ManePlusBadge from '@/components/base/variant/mane-plus-badge';
+import ManeSelectBadge from '@/components/base/variant/mane-select-badge';
 
 type ManeCellProps = {
   isCanonical?: boolean;
@@ -29,9 +29,7 @@ function ManeCell({ isCanonical, isManeSelect, isManePlus }: ManeCellProps) {
 
   return (
     <div className="inline-flex items-center gap-1">
-      {pills
-        .filter(({ condition }) => condition)
-        .map(({ icon }) => (icon))}
+      {pills.filter(({ condition }) => condition).map(({ icon }) => icon)}
     </div>
   );
 }

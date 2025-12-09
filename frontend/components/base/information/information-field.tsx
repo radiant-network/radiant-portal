@@ -1,6 +1,6 @@
 import { PropsWithChildren } from 'react';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 
 import EmptyField from './empty-field';
 

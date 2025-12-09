@@ -1,7 +1,8 @@
-import { SqonOpEnum } from '@/api/api';
-import { ISavedFilter, IUserSavedFilter } from '@/components/model/saved-filter';
-import { BooleanOperators, ISyntheticSqon } from '@/components/model/sqon';
 import { v4 } from 'uuid';
+
+import { SqonOpEnum } from '@/api/api';
+import { ISavedFilter, IUserSavedFilter } from '@/components/cores/saved-filter';
+import { BooleanOperators, ISyntheticSqon } from '@/components/cores/sqon';
 
 export function randomElement<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];

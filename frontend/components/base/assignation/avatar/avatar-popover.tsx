@@ -1,4 +1,4 @@
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/ui/hover-card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/shadcn/hover-card';
 
 import { AvatarUser } from './avatar.types';
 import { AvatarUserItem } from './avatar-user-item';

@@ -9,8 +9,8 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/base/ui/select';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+} from '@/components/base/shadcn/select';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 import { selectSizes } from './utils';
 

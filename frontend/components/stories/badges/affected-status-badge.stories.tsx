@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 const config: PortalConfig = {
   variant_entity: {
