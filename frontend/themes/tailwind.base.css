@@ -227,6 +227,7 @@
   /* Table Colors */
   --color-table-accent: var(--table-accent);
   --color-table-active: var(--table-active);
+  --color-table-header: var(--table-header);
 
   /* Alert Colors */
   --color-alert-default: var(--color-alert-default);

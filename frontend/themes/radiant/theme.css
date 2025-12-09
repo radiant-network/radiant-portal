@@ -61,6 +61,7 @@
 
   --table-accent: var(--color-slate-50);
   --table-active: var(--color-slate-100);
+  --table-header: var(--color-slate-100);
 }
 
 .dark {
@@ -112,4 +113,5 @@
 
   --table-accent: var(--color-slate-900);
   --table-active: var(--color-slate-800);
+  --table-header: var(--color-slate-800);
 }

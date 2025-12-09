@@ -32,7 +32,7 @@ function DisplayTable({ columns, variant = 'default', data }: SimpleTableProps<a
 
   return (
     <div className="rounded-md w-full overflow-auto" style={{ maxHeight: `${TABLE_MAX_HEIGHT}px` }}>
-      <Table className={cn('p-2', { 'border-collapse': variant == 'border' })}>
+      <Table className={cn({ 'border-collapse': variant == 'border' })}>
         <TableHeader>
           {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id} variant={variant}>
