@@ -50,12 +50,15 @@ type InterpretationPubmed struct {
 } // @name InterpretationPubmed
 
 var InterpretationGermlineTable = Table{
-	Name:  "interpretation_germline",
-	Alias: "ig",
+	Name:           "interpretation_germline",
+	FederationName: "radiant_jdbc.public.interpretation_germline",
+	Alias:          "ig",
 }
 
 var InterpretationSomaticTable = Table{
-	Name: "interpretation_somatic",
+	Name:           "interpretation_somatic",
+	FederationName: "radiant_jdbc.public.interpretation_somatic",
+	Alias:          "is",
 }
 
 type InterpretationCommonDAO struct {

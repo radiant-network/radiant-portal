@@ -2,12 +2,14 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/Goldziher/go-utils/sliceutils"
 )
 
 type Table struct {
-	Name  string // Name of the table
-	Alias string // Alias of the table to use in query
+	Name           string // Name of the table
+	Alias          string // Alias of the table to use in query
+	FederationName string // FederationName name through Starrocks federation
 }
 
 const (

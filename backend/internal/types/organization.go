@@ -9,23 +9,27 @@ type Organization struct {
 }
 
 var OrganizationTable = Table{
-	Name:  "radiant_jdbc.public.organization",
-	Alias: "org",
+	Name:           "organization",
+	FederationName: "radiant_jdbc.public.organization",
+	Alias:          "org",
 }
 
 var DiagnosisLabTable = Table{
-	Name:  OrganizationTable.Name,
-	Alias: "lab",
+	Name:           OrganizationTable.Name,
+	FederationName: OrganizationTable.FederationName,
+	Alias:          "lab",
 }
 
 var ManagingOrganizationTable = Table{
-	Name:  OrganizationTable.Name,
-	Alias: "mgmt_org",
+	Name:           OrganizationTable.Name,
+	FederationName: OrganizationTable.FederationName,
+	Alias:          "mgmt_org",
 }
 
 var OrderingOrganizationTable = Table{
-	Name:  OrganizationTable.Name,
-	Alias: "order_org",
+	Name:           OrganizationTable.Name,
+	FederationName: OrganizationTable.FederationName,
+	Alias:          "order_org",
 }
 
 func (Organization) TableName() string {

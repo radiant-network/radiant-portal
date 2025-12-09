@@ -138,8 +138,9 @@ var DocumentCreatedOnField = Field{
 }
 
 var DocumentTable = Table{
-	Name:  "radiant_jdbc.public.document",
-	Alias: "doc",
+	Name:           "document",
+	FederationName: "radiant_jdbc.public.document",
+	Alias:          "doc",
 }
 
 func (Document) TableName() string {

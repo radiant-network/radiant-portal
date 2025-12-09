@@ -6,7 +6,9 @@ type ValueSet struct {
 }
 
 var SexTable = Table{
-	Name: "radiant_jdbc.public.sex",
+	Name:           "sex",
+	FederationName: "radiant_jdbc.public.sex",
+	Alias:          "sex",
 }
 
 type Sex struct {
@@ -18,8 +20,9 @@ func (Sex) TableName() string {
 }
 
 var StatusTable = Table{
-	Name:  "radiant_jdbc.public.status",
-	Alias: "status",
+	Name:           "status",
+	FederationName: "radiant_jdbc.public.status",
+	Alias:          "status",
 }
 
 type Status struct {
@@ -31,8 +34,9 @@ func (Status) TableName() string {
 }
 
 var PriorityTable = Table{
-	Name:  "radiant_jdbc.public.priority",
-	Alias: "priority",
+	Name:           "priority",
+	FederationName: "radiant_jdbc.public.priority",
+	Alias:          "prio",
 }
 
 type Priority struct {
@@ -44,7 +48,9 @@ func (Priority) TableName() string {
 }
 
 var ExperimentalStrategyTable = Table{
-	Name: "radiant_jdbc.public.experimental_strategy",
+	Name:           "experimental_strategy",
+	FederationName: "radiant_jdbc.public.experimental_strategy",
+	Alias:          "exp_str",
 }
 
 type ExperimentalStrategy struct {
@@ -56,7 +62,9 @@ func (ExperimentalStrategy) TableName() string {
 }
 
 var PlatformTable = Table{
-	Name: "radiant_jdbc.public.platform",
+	Name:           "platform",
+	FederationName: "radiant_jdbc.public.platform",
+	Alias:          "platform",
 }
 
 type Platform struct {
@@ -68,8 +76,9 @@ func (Platform) TableName() string {
 }
 
 var FamilyRelationshipTable = Table{
-	Name:  "radiant_jdbc.public.family_relationship",
-	Alias: "fam_rel",
+	Name:           "family_relationship",
+	FederationName: "radiant_jdbc.public.family_relationship",
+	Alias:          "fam_rel",
 }
 
 type FamilyRelationship struct {
@@ -81,7 +90,9 @@ func (FamilyRelationship) TableName() string {
 }
 
 var ObservationInterpretationTable = Table{
-	Name: "radiant_jdbc.public.obs_interpretation",
+	Name:           "obs_interpretation",
+	FederationName: "radiant_jdbc.public.obs_interpretation",
+	Alias:          "obs_int",
 }
 
 type ObservationInterpretation struct {
@@ -93,7 +104,9 @@ func (ObservationInterpretation) TableName() string {
 }
 
 var SampleTypeTable = Table{
-	Name: "radiant_jdbc.public.sample_type",
+	Name:           "sample_type",
+	FederationName: "radiant_jdbc.public.sample_type",
+	Alias:          "spl_type",
 }
 
 type SampleType struct {
@@ -105,7 +118,9 @@ func (SampleType) TableName() string {
 }
 
 var HistologyTypeTable = Table{
-	Name: "radiant_jdbc.public.histology_type",
+	Name:           "histology_type",
+	FederationName: "radiant_jdbc.public.histology_type",
+	Alias:          "hist_type",
 }
 
 type HistologyType struct {
@@ -117,7 +132,9 @@ func (HistologyType) TableName() string {
 }
 
 var AffectedStatusTable = Table{
-	Name: "radiant_jdbc.public.affected_status",
+	Name:           "affected_status",
+	FederationName: "radiant_jdbc.public.affected_status",
+	Alias:          "affected_status",
 }
 
 type AffectedStatus struct {
@@ -129,7 +146,9 @@ func (AffectedStatus) TableName() string {
 }
 
 var DataCategoryTable = Table{
-	Name: "radiant_jdbc.public.data_category",
+	Name:           "data_category",
+	FederationName: "radiant_jdbc.public.data_category",
+	Alias:          "data_ctg",
 }
 
 type DataCategory struct {
@@ -141,7 +160,9 @@ func (DataCategory) TableName() string {
 }
 
 var ObservationTable = Table{
-	Name: "radiant_jdbc.public.observation",
+	Name:           "observation",
+	FederationName: "radiant_jdbc.public.observation",
+	Alias:          "obs_type",
 }
 
 type Observation struct {
@@ -154,7 +175,9 @@ func (Observation) TableName() string {
 }
 
 var OnsetTable = Table{
-	Name: "radiant_jdbc.public.onset",
+	Name:           "onset",
+	FederationName: "radiant_jdbc.public.onset",
+	Alias:          "onset",
 }
 
 type Onset struct {
@@ -166,8 +189,9 @@ func (Onset) TableName() string {
 }
 
 var DataTypeTable = Table{
-	Name:  "radiant_jdbc.public.data_type",
-	Alias: "data_type",
+	Name:           "data_type",
+	FederationName: "radiant_jdbc.public.data_type",
+	Alias:          "data_type",
 }
 
 type DataType struct {
@@ -179,8 +203,9 @@ func (DataType) TableName() string {
 }
 
 var FileFormatTable = Table{
-	Name:  "radiant_jdbc.public.file_format",
-	Alias: "format",
+	Name:           "file_format",
+	FederationName: "radiant_jdbc.public.file_format",
+	Alias:          "format",
 }
 
 type FileFormat struct {
@@ -192,7 +217,9 @@ func (FileFormat) TableName() string {
 }
 
 var TaskTypeTable = Table{
-	Name: "radiant_jdbc.public.task_type",
+	Name:           "task_type",
+	FederationName: "radiant_jdbc.public.task_type",
+	Alias:          "task_type",
 }
 
 type TaskType struct {
@@ -204,7 +231,9 @@ func (TaskType) TableName() string {
 }
 
 var OrganizationCategoryTable = Table{
-	Name: "radiant_jdbc.public.organization_category",
+	Name:           "organization_category",
+	FederationName: "radiant_jdbc.public.organization_category",
+	Alias:          "org_cat",
 }
 
 type OrganizationCategory struct {
@@ -216,7 +245,9 @@ func (OrganizationCategory) TableName() string {
 }
 
 var PanelTypeTable = Table{
-	Name: "radiant_jdbc.public.panel_type",
+	Name:           "panel_type",
+	FederationName: "radiant_jdbc.public.panel_type",
+	Alias:          "panel_type",
 }
 
 type PanelType struct {
@@ -228,7 +259,9 @@ func (PanelType) TableName() string {
 }
 
 var CaseCategoryTable = Table{
-	Name: "radiant_jdbc.public.case_category",
+	Name:           "case_category",
+	FederationName: "radiant_jdbc.public.case_category",
+	Alias:          "case_cat",
 }
 
 type CaseCategory struct {
@@ -240,7 +273,9 @@ func (CaseCategory) TableName() string {
 }
 
 var ResolutionStatusTable = Table{
-	Name: "radiant_jdbc.public.resolution_status",
+	Name:           "resolution_status",
+	FederationName: "radiant_jdbc.public.resolution_status",
+	Alias:          "resolution_status",
 }
 
 type ResolutionStatus struct {
@@ -252,7 +287,9 @@ func (ResolutionStatus) TableName() string {
 }
 
 var CaseTypeTable = Table{
-	Name: "radiant_jdbc.public.case_type",
+	Name:           "case_type",
+	FederationName: "radiant_jdbc.public.case_type",
+	Alias:          "case_type",
 }
 
 type CaseType struct {
@@ -264,7 +301,9 @@ func (CaseType) TableName() string {
 }
 
 var SequencingReadTechnologyTable = Table{
-	Name: "radiant_jdbc.public.sequencing_read_technology",
+	Name:           "sequencing_read_technology",
+	FederationName: "radiant_jdbc.public.sequencing_read_technology",
+	Alias:          "seq_read_tech",
 }
 
 type SequencingReadTechnology struct {

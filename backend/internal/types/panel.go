@@ -9,7 +9,9 @@ type Panel struct {
 }
 
 var PanelTable = Table{
-	Name: "radiant_jdbc.public.panel",
+	Name:           "panel",
+	FederationName: "radiant_jdbc.public.panel",
+	Alias:          "panel",
 }
 
 func (Panel) TableName() string {

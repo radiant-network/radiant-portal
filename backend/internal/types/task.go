@@ -23,18 +23,21 @@ var TaskHasDocumentTaskIdField = Field{
 }
 
 var TaskTable = Table{
-	Name:  "radiant_jdbc.public.task",
-	Alias: "task",
+	Name:           "task",
+	FederationName: "radiant_jdbc.public.task",
+	Alias:          "task",
 }
 
 var TaskHasDocumentTable = Table{
-	Name:  "radiant_jdbc.public.task_has_document",
-	Alias: "thd",
+	Name:           "task_has_document",
+	FederationName: "radiant_jdbc.public.task_has_document",
+	Alias:          "thd",
 }
 
 var TaskContextTable = Table{
-	Name:  "radiant_jdbc.public.task_context",
-	Alias: "tctx",
+	Name:           "task_context",
+	FederationName: "radiant_jdbc.public.task_context",
+	Alias:          "tctx",
 }
 
 func (Task) TableName() string {
