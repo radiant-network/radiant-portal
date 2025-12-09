@@ -15,6 +15,24 @@ import (
 	"gorm.io/gorm"
 )
 
+type BatchValidationContext struct {
+	RepoBatch        repository.BatchDAO
+	RepoOrganization repository.OrganizationDAO
+	RepoPatient      repository.PatientsDAO
+	RepoSample       repository.SamplesDAO
+	RepoSeqExp       repository.SequencingExperimentDAO
+}
+
+func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
+	return &BatchValidationContext{
+		RepoBatch:        repository.NewBatchRepository(db),
+		RepoOrganization: repository.NewOrganizationRepository(db),
+		RepoPatient:      repository.NewPatientsRepository(db),
+		RepoSample:       repository.NewSamplesRepository(db),
+		RepoSeqExp:       repository.NewSequencingExperimentRepository(db),
+	}
+}
+
 func main() {
 	flag.Parse()
 	defer glog.Flush()
@@ -30,15 +48,11 @@ func main() {
 		glog.Fatalf("Failed to initialize postgres database: %v", initDbErr)
 	}
 
-	repoBatch := repository.NewBatchRepository(dbPostgres)
-	repoOrganization := repository.NewOrganizationRepository(dbPostgres)
-	repoPatient := repository.NewPatientsRepository(dbPostgres)
-	repoSample := repository.NewSamplesRepository(dbPostgres)
-
+	context := NewBatchValidationContext(dbPostgres)
 	StartHealthProbe(dbPostgres)
 	glog.Info("Worker started...")
 	for {
-		processBatch(dbPostgres, repoBatch, repoOrganization, repoPatient, repoSample)
+		processBatch(dbPostgres, context)
 		time.Sleep(time.Duration(pollInterval) * time.Millisecond)
 	}
 }
@@ -51,8 +65,8 @@ func getEnvOrDefault(key, fallback string) string {
 	return value
 }
 
-func processBatch(db *gorm.DB, repoBatch repository.BatchDAO, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) {
-	nextBatch, err := repoBatch.ClaimNextBatch()
+func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
+	nextBatch, err := ctx.RepoBatch.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)
 	}
@@ -60,12 +74,14 @@ func processBatch(db *gorm.DB, repoBatch repository.BatchDAO, repoOrganization r
 		glog.Infof("Processing batch: %v", nextBatch.ID)
 		switch nextBatch.BatchType {
 		case types.PatientBatchType:
-			processPatientBatch(nextBatch, db, repoOrganization, repoPatient, repoBatch)
+			processPatientBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoPatient, ctx.RepoBatch)
 		case types.SampleBatchType:
-			processSampleBatch(nextBatch, db, repoOrganization, repoPatient, repoSample, repoBatch)
+			processSampleBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoPatient, ctx.RepoSample, ctx.RepoBatch)
+		case types.SequencingExperimentBatchType:
+			processSequencingExperimentBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoSample, ctx.RepoSeqExp, ctx.RepoBatch)
 		default:
 			notSupportedBatch := fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
-			processUnexpectedError(nextBatch, notSupportedBatch, repoBatch)
+			processUnexpectedError(nextBatch, notSupportedBatch, ctx.RepoBatch)
 		}
 	}
 }

@@ -1539,6 +1539,8 @@ components:
           example: "2023-10-01T00:00:00Z"
           format: date-time
           type: string
+        run_name:
+          type: string
         sample_organization_code:
           type: string
         sequencing_lab_code:
