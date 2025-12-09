@@ -122,10 +122,7 @@ TableRow.displayName = 'TableRow';
 function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
-      className={cn(
-        'relative text-left align-middle font-medium text-muted-foreground bg-background group-hover:bg-table-accent',
-        className,
-      )}
+      className={cn('relative text-left align-middle font-medium text-foreground bg-table-header', className)}
       {...props}
     />
   );

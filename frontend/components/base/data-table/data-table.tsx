@@ -212,7 +212,7 @@ function getColumnPinningExtraCN(column: Column<any>): string {
   const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
 
   return cn({
-    'sticky z-10 bg-background group-data-[state=selected]:bg-table-active': isPinned,
+    'sticky z-10 group-data-[state=selected]:bg-table-active': isPinned,
     'border-r-[3px]': isLastLeftPinnedColumn,
     'border-l-[3px]': isFirstRightPinnedColumn,
   });
