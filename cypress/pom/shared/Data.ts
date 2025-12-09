@@ -124,6 +124,11 @@ export const data = {
       date: '2021-09-12',
       status: 'In Progress',
     },
+    igv: {
+      proband: 'S13224',
+      father: 'S13226',
+      mother: 'S13225',
+    },
     sqon: '{"content":[{"content":{"field":"hgvsg","value":["chr10:g.99235506G>A"]},"op":"in"}],"op":"and"}',
   },
   cnvGermline: {
