@@ -197,6 +197,17 @@ const tableColumns = [
     position: 16,
     tooltip: null,
   },
+  {
+    id: 'actions',
+    name: '',
+    apiField: '',
+    isVisibleByDefault: true,
+    pinByDefault: 'right',
+    isSortable: false,
+    isPinnable: true,
+    position: 17,
+    tooltip: null,
+  },
 ];
 
 export const CaseEntity_Variants_SNV_Table = {
@@ -262,6 +273,23 @@ export const CaseEntity_Variants_SNV_Table = {
       );
     },
     /**
+     * Select an action with the table action button.
+     * @param dataVariant The variant object.
+     * @param action The action to do (Preview | Open Page | Open in IGV | UCSC | LitVar).
+     */
+    selectAction(dataVariant: any, action: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, 'actions').then(position => {
+          if (position !== -1) {
+            cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.actionButton).clickAndWait({ force: true });
+            cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(action)}`).clickAndWait({ force: true });
+          } else {
+            cy.handleColumnNotFound('actions');
+          }
+        })
+      );
+    },
+    /**
      * Shows all columns in the table.
      */
     showAllColumns() {
@@ -279,29 +307,10 @@ export const CaseEntity_Variants_SNV_Table = {
       cy.showColumn(getColumnName(tableColumns, columnID));
     },
     /**
-     * Unpins a specific column in the table.
-     * @param columnID The ID of the column to unpin.
-     */
-    unpinColumn(columnID: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
-          cy.unpinColumn(position);
-        })
-      );
-    },
-    /**
      * Shrink all columns in the table.
      */
     shrinkAllColumns() {
-      tableColumns.forEach(column => {
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
-          if (position !== -1) {
-            cy.get(CommonSelectors.tableHeadCell()).eq(position).invoke('css', 'width', '1px');
-          } else {
-            cy.handleColumnNotFound(column.id);
-          }
-        });
-      });
+      cy.get(CommonSelectors.tableHeadCell()).invoke('css', 'width', '1px');
     },
     /**
      * Sorts a column, optionally using an intercept.
@@ -320,6 +329,17 @@ export const CaseEntity_Variants_SNV_Table = {
           } else {
             cy.handleColumnNotFound(columnID);
           }
+        })
+      );
+    },
+    /**
+     * Unpins a specific column in the table.
+     * @param columnID The ID of the column to unpin.
+     */
+    unpinColumn(columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.unpinColumn(position);
         })
       );
     },
@@ -516,6 +536,10 @@ export const CaseEntity_Variants_SNV_Table = {
             case 'aa_change':
               cy.validateTableFirstRowContent(dataVariant.aa_change, position);
               break;
+            case 'type':
+              cy.validateTableFirstRowContent(dataVariant[columnID], position);
+              cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
+              break;
             case 'consequence':
               cy.validateTableFirstRowClass(dataVariant.consequenceImpact, position);
               cy.validateTableFirstRowContent(dataVariant[columnID], position);
@@ -536,7 +560,7 @@ export const CaseEntity_Variants_SNV_Table = {
               break;
             case 'omim':
               cy.validateTableFirstRowContent(dataVariant.omim.inheritance, position);
-              cy.validateTableFirstRowClass(CommonSelectors.tagLevel('primary'), position);
+              cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
               break;
             case 'clinvar':
               cy.validateTableFirstRowContent(dataVariant.clinvar.classification, position);
@@ -551,6 +575,10 @@ export const CaseEntity_Variants_SNV_Table = {
             case 'gnomad':
               cy.validateTableFirstRowContent(dataVariant[columnID], position);
               cy.validateTableFirstRowClass(CommonSelectors.gnomadRedIcon, position);
+              break;
+            case 'actions':
+              cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
+              cy.validateTableFirstRowClass(CommonSelectors.actionButton, position);
               break;
             default:
               cy.validateTableFirstRowContent(dataVariant[columnID], position);

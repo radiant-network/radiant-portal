@@ -42,7 +42,7 @@ const globalData = {
           field: 'biotype',
           value: 'protein_coding',
           op: 'in',
-          count: 2105126,
+          count: 2104144,
         },
         {
           field: 'gnomad_pli',

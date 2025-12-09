@@ -16,7 +16,15 @@ export const oneMinute = 60 * 1000;
 export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
   const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const keyOfCommonTextsId = commonTextsId as keyof typeof CommonTexts.en;
-  return new RegExp(`^(${escapeRegExp(CommonTexts.en[keyOfCommonTextsId])}|${escapeRegExp(CommonTexts.fr[keyOfCommonTextsId])})$`);
+
+  const enValue = CommonTexts.en[keyOfCommonTextsId];
+  const frValue = CommonTexts.fr[keyOfCommonTextsId];
+
+  if (typeof enValue === 'function' || typeof frValue === 'function') {
+    throw new Error(`buildBilingualRegExp does not support function values. Key: ${commonTextsId}`);
+  }
+
+  return new RegExp(`^(${escapeRegExp(enValue)}|${escapeRegExp(frValue)})$`);
 };
 
 /**
@@ -46,6 +54,8 @@ export const getColumnPosition = (tableHead: string, columns: any, columnID: str
       position = Array.from($cells).findIndex($cell => {
         return Cypress.$($cell).find(columnName).length > 0;
       });
+    } else if (columnName == '') {
+      position = columns.find((col: { id: string }) => col.id === columnID)?.position;
     } else {
       position = Array.from($cells).findIndex($cell => $cell.textContent?.match(stringToRegExp(columnName, true)));
     }

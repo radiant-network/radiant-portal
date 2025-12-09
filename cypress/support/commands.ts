@@ -25,7 +25,7 @@ Cypress.Commands.add('clickAndWait', { prevSubject: 'element' }, (subject, optio
  * @param column The column not found.
  */
 Cypress.Commands.add('handleColumnNotFound', (column: string) => {
-  cy.log(`Warning: Column ${column} not found`);
+  throw new Error(`Error: "Column ${column} not found"`);
 });
 
 /**
