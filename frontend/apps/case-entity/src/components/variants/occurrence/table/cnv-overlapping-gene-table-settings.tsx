@@ -3,9 +3,9 @@ import { TFunction } from 'i18next';
 
 import { CNVGeneOverlap } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { toKiloBases } from '@/components/lib/number-format';
 
 import OverlapTypeGeneCell from './cells/overlap-type-gene-cell';
 
@@ -59,7 +59,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
         // Length
         columnHelper.accessor(row => row.gene_length, {
           id: 'gene_length',
-          cell: info => <DocumentSizeCell value={info.getValue()} />,
+          cell: info => toKiloBases(info.getValue()),
 
           header: () => (
             <TooltipHeader tooltip={t('variant.headers.gene_length_tooltip')}>
