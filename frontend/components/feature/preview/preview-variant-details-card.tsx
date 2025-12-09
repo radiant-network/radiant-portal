@@ -1,3 +1,8 @@
+/* eslint-disable complexity */
+import { ReactNode, useCallback } from 'react';
+import { Link } from 'react-router';
+import { ArrowUpRight, AudioLines, Diamond } from 'lucide-react';
+
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
@@ -10,11 +15,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/to
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
-import { ArrowUpRight, AudioLines, Diamond } from 'lucide-react';
-import { ReactNode, useCallback } from 'react';
-import { Link } from 'react-router';
+
 import TranscriptIdLink from '../variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblTranscriptUrl, getOmimOrgUrl } from '../variant/utils';
+
 import { DescriptionRow, DescriptionSection } from './description';
 import PreviewCard from './preview-card';
 
@@ -253,7 +257,7 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
         <DescriptionSection title={t('preview_sheet.variant_details.sections.frequencies.title')}>
           <DescriptionRow label={affectedTitle}>{affectedValue}</DescriptionRow>
           <DescriptionRow label={nonAffectedTitle}>{nonAffectedValue}</DescriptionRow>
-          <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.revel')}>
+          <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
             {data.gnomad_v3_af ? (
               <AnchorLink
                 size="sm"

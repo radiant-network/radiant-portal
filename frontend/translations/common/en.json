@@ -1052,7 +1052,7 @@
         "frequencies": {
           "title": "Frequencies",
           "affected": "Affected",
-          "revel": "REVEL"
+          "gnomad": "gnomAD"
         },
         "functional_scores": {
           "title": "Functional Scores",
