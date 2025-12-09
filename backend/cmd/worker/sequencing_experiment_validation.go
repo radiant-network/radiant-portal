@@ -13,13 +13,11 @@ import (
 )
 
 const (
-	AliquotRegExp  = "^[A-Za-z0-9\\-_.]+$" // Alphanumeric characters, hyphens, underscores and periods
-	RunAliasRegExp = "^[A-Za-z0-9\\-_.]+$"
+	AlphanumericIdentifierRegExp = "^[A-Za-z0-9\\-_.]+$" // Alphanumeric characters, hyphens, underscores and periods
 )
 
 var (
-	AliquotRegExpCompiled  = regexp.MustCompile(AliquotRegExp)
-	RunAliasRegExpCompiled = AliquotRegExpCompiled
+	AlphanumericIdentifierRegExpCompiled = regexp.MustCompile(AlphanumericIdentifierRegExp)
 )
 
 var EMPTY = struct{}{}
@@ -140,7 +138,7 @@ func (r *SequencingExperimentValidationRecord) verifyStringField(value string, f
 }
 
 func (r *SequencingExperimentValidationRecord) validateAliquotField() {
-	r.verifyStringField(r.SequencingExperiment.Aliquot.String(), "aliquot", TextMaxLength, AliquotRegExpCompiled, AliquotRegExp, r.getResId(), true)
+	r.verifyStringField(r.SequencingExperiment.Aliquot.String(), "aliquot", TextMaxLength, AlphanumericIdentifierRegExpCompiled, AlphanumericIdentifierRegExp, r.getResId(), true)
 }
 
 func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeField() {
@@ -168,7 +166,7 @@ func (r *SequencingExperimentValidationRecord) validateCaptureKitField() {
 }
 
 func (r *SequencingExperimentValidationRecord) validateRunAliasField() {
-	r.verifyStringField(r.SequencingExperiment.RunAlias.String(), "run_alias", TextMaxLength, RunAliasRegExpCompiled, RunAliasRegExp, r.getResId(), false)
+	r.verifyStringField(r.SequencingExperiment.RunAlias.String(), "run_alias", TextMaxLength, AlphanumericIdentifierRegExpCompiled, AlphanumericIdentifierRegExp, r.getResId(), false)
 }
 
 func (r *SequencingExperimentValidationRecord) validateRunDateField() {
