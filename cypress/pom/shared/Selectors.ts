@@ -19,6 +19,7 @@ export const CommonSelectors = {
   familyIcon: '[class*="lucide-users"]',
   gnomadRedIcon: '[class*="text-red-500 bg-red-500"]',
   igvContainer: '[id="igvContainer"]',
+  igvIcon: '[class*="lucide-flip-vertical2"]',
   igvError: '[class*="igv-ui-alert-dialog"]:contains("Error")',
   igvTrack: '[class="igv-track-label"]',
   igvWindowSize: '[class="igv-windowsize-panel-container"]',
@@ -64,4 +65,5 @@ export const CommonSelectors = {
   underlineHeader: '[class*="decoration-dotted"]',
   unpinIcon: '[class*="lucide-pin-off"]',
   userIcon: 'button[aria-haspopup="menu"] [class*="rounded-full bg-cyan/20 text-cyan-foreground"]',
+  variantPreview: '[role="dialog"][class*="data-[state=open]:slide-in-from-right"]',
 };
