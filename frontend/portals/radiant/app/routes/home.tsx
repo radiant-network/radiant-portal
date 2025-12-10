@@ -1,5 +1,5 @@
 import VCaseExploration from './cases/list';
 
-const Home = () => <VCaseExploration />;
+const HomeRoute = () => <VCaseExploration />;
 
-export default Home;
+export default HomeRoute;

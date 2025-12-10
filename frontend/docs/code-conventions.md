@@ -2,32 +2,30 @@
 
 ## Files and Folders
 
-- Use PascalCase for component files: `UserProfile.tsx`
-- Use PascalCase for component directories: `AllProfile/UserProfile.tsx`
+- Use kebab-case for component files: `user-profile.tsx`
+- Use kebab-case for component directories: `all-profile/user-profile.tsx`
 - Use kebab-case for non-component files: `auth-utils.ts`
 - Use plural for folder names: `components/`, `utils/`
-- Name page components with "Page" suffix: `HomePage.tsx`, `UserProfilePage.tsx`
-- Name layout components with "Layout" suffix: `MainLayout.tsx`
 
 ## Code
 
-Source of thruth is the [ferlab code conventions](https://github.com/Ferlab-Ste-Justine/ferlab-ui/tree/master/packages/eslint-config) in eslint. Make sure it is up to date and active in your editor.
+Source of truth is the [ferlab code conventions](https://github.com/Ferlab-Ste-Justine/ferlab-ui/tree/master/packages/eslint-config) in eslint. Make sure it is up to date and active in your editor.
 
 ### Project Technologies
 - react, tailwindcss, typescript, shadcn
 
 ### Components
 
-- Use PascalCase for component names: `UserProfile`, `NavigationBar`
+- Use kebab-case for component names: `user-profile`, `navigation-bar`
 - Use suffix to indicate component type:
 
   ```tsx
   // Pages
   export default function HomePage() {}
-
+  
   // Layouts
   export default function DashboardLayout() {}
-
+  
   // Features
   export default function UserProfileCard() {}
   ```

@@ -268,7 +268,7 @@ import { InfoIcon } from 'lucide-react';
 	}
 }
 ```
-   - Use `snake_case` to match api's variable
+   - xxxxxxxxxx /* portals/radiant/app/app.css */@import '@styles/theme.css';@import '@styles/tailwind.css';​html,body {  height: 100vh;  margin: 0;  padding: 0;  overflow: hidden;​  @media (prefers-color-scheme: light) {    color-scheme: light;  }}css
 ```json
 {
 	"field": {
