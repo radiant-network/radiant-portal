@@ -139,8 +139,8 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 		return nil, err
 	}
 
-	isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.DiagnosisLabTable.Alias)
-	if err := r.getCasesFilter(txCases, &diagnosisLab, types.DiagnosisLabTable, "diagnosis_lab_id", "id", "name", &isDiagnosisLabCondition); err != nil {
+	isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.SequencingLabTable.Alias)
+	if err := r.getCasesFilter(txCases, &diagnosisLab, types.SequencingLabTable, "diagnosis_lab_id", "id", "name", &isDiagnosisLabCondition); err != nil {
 		return nil, err
 	}
 
@@ -206,26 +206,26 @@ func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggreg
 
 func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
-	tx = utils.JoinWithProband(tx, userQuery)
-	tx = utils.JoinWithAnalysisCatalog(tx)
-	tx = utils.JoinWithProject(tx)
+	tx = utils.JoinCaseWithProband(tx, userQuery)
+	tx = utils.JoinCaseWithAnalysisCatalog(tx)
+	tx = utils.JoinCaseWithProject(tx)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
 		if userQuery.HasFieldFromTables(types.OrderingOrganizationTable) {
-			tx = utils.JoinWithOrderingOrganization(tx)
+			tx = utils.JoinCaseWithOrderingOrganization(tx)
 		}
 
-		if userQuery.HasFieldFromTables(types.DiagnosisLabTable) {
-			tx = utils.JoinWithDiagnosisLab(tx)
+		if userQuery.HasFieldFromTables(types.SequencingLabTable) {
+			tx = utils.JoinCaseWithDiagnosisLab(tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.MondoTable) {
-			tx = utils.JoinWithMondoTerm(tx)
+			tx = utils.JoinCaseWithMondoTerm(tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.PatientTable) {
-			tx = utils.JoinWithPatients(tx)
+			tx = utils.JoinCaseWithPatients(tx)
 		}
 	}
 	return tx, nil
@@ -235,11 +235,11 @@ func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error)
 	var caseEntity CaseEntity
 
 	txCase := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
-	txCase = utils.JoinWithAnalysisCatalog(txCase)
-	txCase = utils.JoinWithMondoTerm(txCase)
-	txCase = utils.JoinWithDiagnosisLab(txCase)
-	txCase = utils.JoinWithOrderingOrganization(txCase)
-	txCase = utils.JoinWithProject(txCase)
+	txCase = utils.JoinCaseWithAnalysisCatalog(txCase)
+	txCase = utils.JoinCaseWithMondoTerm(txCase)
+	txCase = utils.JoinCaseWithDiagnosisLab(txCase)
+	txCase = utils.JoinCaseWithOrderingOrganization(txCase)
+	txCase = utils.JoinCaseWithProject(txCase)
 	txCase = txCase.Select("c.id as case_id, c.proband_id, c.case_type_code as case_type_code, ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.created_on, c.updated_on, c.note, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, c.status_code, order_org.code as ordering_organization_code, order_org.name as ordering_organization_name, c.priority_code, c.ordering_physician as prescriber, prj.code as project_code, prj.name as project_name")
 	txCase = txCase.Where("c.id = ?", caseId)
 	if err := txCase.Find(&caseEntity).Error; err != nil {
@@ -253,9 +253,9 @@ func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 	var assays []CaseAssay
 
 	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias))
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id")
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON spl.id = s.sample_id")
-	txSeqExp = txSeqExp.Joins("LEFT JOIN radiant_jdbc.public.family f ON spl.patient_id = f.family_member_id AND chseq.case_id = f.case_id")
+	txSeqExp = utils.JoinCaseHasSeqExpWithSequencingExperiment(txSeqExp)
+	txSeqExp = utils.JoinSeqExpWithSample(txSeqExp)
+	txSeqExp = utils.JoinSampleAndCaseHasSeqExpWithFamily(txSeqExp)
 	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null and se.task_type = 'radiant_germline_annotation'")
 	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
@@ -271,8 +271,8 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 	var phenotypeObsCategoricals []types.PhenotypeObsCategorical
 
 	txMembers := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.FederationName, types.FamilyTable.Alias))
-	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = f.family_member_id")
-	txMembers = txMembers.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` mgmt_org on p.organization_id = mgmt_org.id")
+	txMembers = utils.JoinFamilyWithPatient(txMembers)
+	txMembers = utils.JoinPatientWithManagingOrg(txMembers)
 	txMembers = txMembers.Where("f.case_id = ?", caseId)
 	txMembers = txMembers.Order("affected_status_code asc, relationship_to_proband_code desc")
 	txMembers = txMembers.Select("p.id as patient_id, f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, p.date_of_birth, p.sex_code, p.submitter_patient_id, mgmt_org.code as organization_code, mgmt_org.name as organization_name")
@@ -321,23 +321,21 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 
 func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	var tasks []CaseTask
-	tx := r.db.Table("radiant_jdbc.public.task_context tctx")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chseq ON tctx.sequencing_experiment_id = chseq.sequencing_experiment_id")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task t ON t.id = tctx.task_id")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.task_type tt ON t.task_type_code = tt.code")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = tctx.sequencing_experiment_id")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.sample spl ON s.sample_id = spl.id")
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.family f ON f.family_member_id = spl.patient_id AND f.case_id = ?", caseId)
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.TaskContextTable.FederationName, types.TaskContextTable.Alias))
+	tx = utils.JoinTaskContextWithCaseHasSeqExp(tx)
+	tx = utils.JoinTaskContextWithTask(tx)
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_type_code = %s.code", types.TaskTypeTable.FederationName, types.TaskTypeTable.Alias, types.TaskTable.Alias, types.TaskTypeTable.Alias))
+	tx = utils.JoinTaskContextWithSeqExp(tx)
+	tx = utils.JoinSeqExpWithSample(tx)
+	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
 	tx = tx.Where("(tctx.case_id = ? OR tctx.case_id IS NULL) AND chseq.case_id = ?", caseId, caseId)
-	tx = tx.Select("t.id, t.task_type_code as type_code, t.created_on, tt.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct spl.patient_id) as patient_count")
-	tx = tx.Group("t.id, t.task_type_code, t.created_on, tt.type_name")
-	tx = tx.Order("t.id asc")
+	tx = tx.Select("task.id, task.task_type_code as type_code, task.created_on, task_type.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct spl.patient_id) as patient_count")
+	tx = tx.Group("task.id, task.task_type_code, task.created_on, task_type.name_en")
+	tx = tx.Order("task.id asc")
 
 	if err := tx.Find(&tasks).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case tasks: %w", err)
 	}
-
-	println(len(tasks))
 
 	for i, task := range tasks {
 		patients := utils.SplitRemoveEmptyString(task.PatientsUnparsed, ",")

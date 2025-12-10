@@ -14,7 +14,7 @@ var OrganizationTable = Table{
 	Alias:          "org",
 }
 
-var DiagnosisLabTable = Table{
+var SequencingLabTable = Table{
 	Name:           OrganizationTable.Name,
 	FederationName: OrganizationTable.FederationName,
 	Alias:          "lab",

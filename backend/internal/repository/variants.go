@@ -97,7 +97,7 @@ func (r *VariantsRepository) GetVariantOverview(locusId int) (*VariantOverview, 
 }
 
 func (r *VariantsRepository) GetVariantConsequences(locusId int) (*[]VariantConsequence, error) {
-	tx := r.db.Table("germline__snv__consequence c")
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.ConsequenceTable.Name, types.ConsequenceTable.Alias))
 	tx = tx.Select("c.is_picked, c.symbol, c.biotype, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.transcript_id, c.vep_impact, c.is_canonical, c.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.dna_change, c.aa_change, c.consequences, c.sift_pred, c.sift_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.revel_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate")
 	tx = tx.Where("c.locus_id = ?", locusId)
 
@@ -123,16 +123,16 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 
 	txAggPhenotypes := utils.GetAggregatedPhenotypes(r.db)
 
-	tx := r.db.Table("`radiant_jdbc`.`public`.`interpretation_germline` ig")
-	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON ig.sequencing_id = o.seq_id and ig.locus_id = o.locus_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON ig.case_id = c.id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`sample` sa ON sa.id = s.sample_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = c.id and f.family_member_id= sa.patient_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`analysis_catalog` ca ON ca.id = c.analysis_catalog_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.diagnosis_lab_id")
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
+	tx = utils.JoinGermlineInterpretationWithSnvOccurrence(tx)
+	tx = utils.JoinGermlineSNVOccurrenceWithSeqExp(tx)
+	tx = utils.JoinGermlineInterpretationWithCase(tx)
+	tx = utils.JoinSeqExpWithSample(tx)
+	tx = utils.JoinSampleAndCaseWithFamily(tx)
+	tx = utils.JoinCaseWithAnalysisCatalog(tx)
+	tx = utils.JoinCaseWithDiagnosisLab(tx)
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = ig.condition")
-	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = sa.patient_id", txAggPhenotypes)
+	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
 
 	tx = tx.Where("o.locus_id = ?", locusId)
 	if userQuery != nil {
@@ -147,12 +147,12 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 		}
 	}
 
-	tx = tx.Select("s.id as seq_id, c.id as case_id, sa.patient_id as patient_id, ig.transcript_id as transcript_id, " +
+	tx = tx.Select("s.id as seq_id, c.id as case_id, spl.patient_id as patient_id, ig.transcript_id as transcript_id, " +
 		"ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, " +
 		"ig.classification as classification_code, o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, " +
 		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, " +
 		"agg_phenotypes.phenotypes_term as phenotypes_unparsed, " +
-		"sa.submitter_sample_id as submitter_sample_id, " +
+		"spl.submitter_sample_id as submitter_sample_id, " +
 		"f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code as affected_status")
 
 	utils.AddLimitAndSort(tx, userQuery)
@@ -190,17 +190,17 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 
 	locusIdString := fmt.Sprintf("%d", locusId)
 
-	tx := r.db.Table("`radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq")
-	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON chseq.sequencing_experiment_id = o.seq_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON c.id = chseq.case_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`analysis_catalog` ca ON ca.id = c.analysis_catalog_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`organization` lab ON lab.id = c.diagnosis_lab_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`sample` sa ON sa.id = s.sample_id")
-	tx = tx.Joins("LEFT JOIN `radiant_jdbc`.`public`.`family` f ON f.case_id = c.id and f.family_member_id= sa.patient_id")
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias))
+	tx = utils.JoinCaseHasSeqExpWithGermlineSnvOccurrence(tx)
+	tx = utils.JoinCaseHasSeqExpWithSequencingExperiment(tx)
+	tx = utils.JoinCaseHasSeqExpWithCase(tx)
+	tx = utils.JoinCaseWithAnalysisCatalog(tx)
+	tx = utils.JoinCaseWithDiagnosisLab(tx)
+	tx = utils.JoinSeqExpWithSample(tx)
+	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
-	tx = tx.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id = ? and i.sequencing_id = chseq.sequencing_experiment_id and i.case_id = chseq.case_id", locusIdString)
-	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = sa.patient_id", txAggPhenotypes)
+	tx = utils.AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(tx, locusIdString)
+	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
 	tx = tx.Where("o.locus_id = ?", locusId)
 
 	if userQuery != nil {
@@ -215,8 +215,8 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		}
 	}
 
-	tx = tx.Select("c.id as case_id, s.id as seq_id, sa.patient_id as patient_id, "+
-		"sa.submitter_sample_id as submitter_sample_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, "+
+	tx = tx.Select("c.id as case_id, s.id as seq_id, spl.patient_id as patient_id, "+
+		"spl.submitter_sample_id as submitter_sample_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, "+
 		"mondo.name as primary_condition_name, o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, "+
 		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, "+
 		"agg_phenotypes.phenotypes_term as phenotypes_unparsed, o.exomiser_acmg_classification, o.exomiser_acmg_evidence",
@@ -245,16 +245,16 @@ func (r *VariantsRepository) GetVariantExpandedInterpretedCase(locusId int, case
 	locusIdAsString := fmt.Sprintf("%d", locusId)
 	caseIdAsString := fmt.Sprintf("%d", caseId)
 	seqIdAsString := fmt.Sprintf("%d", seqId)
-	tx := r.db.Table("radiant_jdbc.public.interpretation_germline i")
-	tx = tx.Joins("INNER JOIN germline__snv__occurrence o ON i.sequencing_id = o.seq_id and o.locus_id = i.locus_id")
-	tx = tx.Joins("INNER JOIN germline__snv__variant v ON i.locus_id = v.locus_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sequencing_experiment` s ON s.id = o.seq_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`sample` sa ON s.sample_id = sa.id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq ON chseq.sequencing_experiment_id = o.seq_id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`cases` c ON chseq.case_id = c.id")
-	tx = tx.Joins("INNER JOIN `radiant_jdbc`.`public`.`patient` p ON p.id = c.proband_id")
-	tx = tx.Where("i.locus_id = ? AND i.case_id = ? AND i.sequencing_id = ? AND i.transcript_id = ?", locusIdAsString, caseIdAsString, seqIdAsString, transcriptId)
-	tx = tx.Select("sa.patient_id as patient_id, i.updated_by_name as interpreter_name, i.interpretation as interpretation, v.symbol as gene_symbol, i.classification_criterias as classification_criterias_string, i.transmission_modes as inheritances_string, i.pubmed as pubmed_ids_string, p.sex_code as patient_sex_code")
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
+	tx = utils.JoinGermlineInterpretationWithSnvOccurrence(tx)
+	tx = utils.JoinGermlineInterpretationWithVariant(tx)
+	tx = utils.JoinGermlineSNVOccurrenceWithSeqExp(tx)
+	tx = utils.JoinSeqExpWithSample(tx)
+	tx = utils.JoinGermlineSNVOccurrenceWithCaseHasSeqExp(tx)
+	tx = utils.JoinCaseHasSeqExpWithCase(tx)
+	tx = utils.JoinCaseWithProband(tx, nil)
+	tx = tx.Where("ig.locus_id = ? AND ig.case_id = ? AND ig.sequencing_id = ? AND ig.transcript_id = ?", locusIdAsString, caseIdAsString, seqIdAsString, transcriptId)
+	tx = tx.Select("spl.patient_id as patient_id, ig.updated_by_name as interpreter_name, ig.interpretation as interpretation, v.symbol as gene_symbol, ig.classification_criterias as classification_criterias_string, ig.transmission_modes as inheritances_string, ig.pubmed as pubmed_ids_string, pro.sex_code as patient_sex_code")
 
 	var variantExpandedInterpretedCase VariantExpandedInterpretedCase
 	if err := tx.Find(&variantExpandedInterpretedCase).Error; err != nil {
@@ -277,17 +277,16 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 	var countUnInterpreted int64
 
 	locusIdString := fmt.Sprintf("%d", locusId)
-	txInterpreted := r.db.Table("radiant_jdbc.public.interpretation_germline i")
-	txInterpreted = txInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq ON chseq.sequencing_experiment_id = i.sequencing_id AND chseq.case_id = i.case_id")
+	txInterpreted := r.db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
 	txInterpreted = txInterpreted.Select("COUNT(1)")
 	txInterpreted = txInterpreted.Where("locus_id = ?", locusIdString)
 	if err := txInterpreted.Find(&countInterpreted).Error; err != nil {
 		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
 	}
 
-	txUnInterpreted := r.db.Table("germline__snv__occurrence o")
-	txUnInterpreted = txUnInterpreted.Joins("INNER JOIN `radiant_jdbc`.`public`.`case_has_sequencing_experiment` chseq ON chseq.sequencing_experiment_id = o.seq_id")
-	txUnInterpreted = txUnInterpreted.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id = ? AND i.sequencing_id = chseq.sequencing_experiment_id AND i.case_id = chseq.case_id", locusIdString)
+	txUnInterpreted := r.db.Table(fmt.Sprintf("%s %s", types.GermlineSNVOccurrenceTable.Name, types.GermlineSNVOccurrenceTable.Alias))
+	txUnInterpreted = utils.JoinGermlineSNVOccurrenceWithCaseHasSeqExp(txUnInterpreted)
+	txUnInterpreted = utils.AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(txUnInterpreted, locusIdString)
 	txUnInterpreted = txUnInterpreted.Select("COUNT(DISTINCT CONCAT(chseq.case_id, chseq.sequencing_experiment_id))")
 	txUnInterpreted = txUnInterpreted.Where("o.locus_id = ?", locusId)
 
