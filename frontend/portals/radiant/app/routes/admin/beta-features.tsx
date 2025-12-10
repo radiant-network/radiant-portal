@@ -1,6 +1,8 @@
-import type { Route } from "../+types/home";
-import { logout, requireAuth } from "~/utils/auth.server";
-import HiddenFeaturesAdmin from "@/components/feature/admin/beta-features";
+import HiddenFeaturesAdmin from '@/components/base/admin/beta-features';
+
+import type { Route } from '../+types/home';
+
+import { logout, requireAuth } from '~/utils/auth.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
   if (await requireAuth(request)) {
@@ -8,8 +10,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
-const HiddenFeatures = () => {
-  return <HiddenFeaturesAdmin />;
-};
+const HiddenFeatures = () => <HiddenFeaturesAdmin />;
 
 export default HiddenFeatures;

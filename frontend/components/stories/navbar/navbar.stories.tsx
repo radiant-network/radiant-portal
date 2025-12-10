@@ -13,8 +13,8 @@ import {
   UsersIcon,
 } from 'lucide-react';
 
-import { SidebarProvider } from '@/components/base/ui/sidebar';
-import MainNavbar from '@/components/feature/navbar/main-navbar';
+import MainNavbar from '@/components/base/navbar/main-navbar';
+import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 
 const meta = {
   title: 'Navbar/Main Navbar',

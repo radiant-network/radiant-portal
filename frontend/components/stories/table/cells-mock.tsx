@@ -1,15 +1,15 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { Term, VepImpact } from '@/api/api';
-import ClingenCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/clingen-cell';
-import CNVNameCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/cnv-name-cell';
-import HgvsgCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/hgvsg-cell';
-import InterpretationCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/interpretation-cell';
-import OccurrenceActionsMenu from '@/apps/case-entity/src/components/variants/occurrence/table/cells/occurrence-actions-cell';
-import OverlapTypeGeneCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/overlap-type-gene-cell';
-import OverlappingGeneLinkCell from '@/apps/case-entity/src/components/variants/occurrence/table/cells/overlapping-gene-link-cell';
-import CaseActionsMenuCell from '@/apps/case-exploration/src/feature/cells/case-actions-menu-cell';
-import CasePreviewCell from '@/apps/variant-entity/src/components/cases/case-preview-cell';
+import ClingenCell from '@/apps/case/src/entity/variants/occurrence/table/cells/clingen-cell';
+import CNVNameCell from '@/apps/case/src/entity/variants/occurrence/table/cells/cnv-name-cell';
+import HgvsgCell from '@/apps/case/src/entity/variants/occurrence/table/cells/hgvsg-cell';
+import InterpretationCell from '@/apps/case/src/entity/variants/occurrence/table/cells/interpretation-cell';
+import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/occurrence/table/cells/occurrence-actions-cell';
+import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/occurrence/table/cells/overlap-type-gene-cell';
+import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/occurrence/table/cells/overlapping-gene-link-cell';
+import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
+import CasePreviewCell from '@/apps/variant/src/entity/cases/case-preview-cell';
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import AnalysisTypeCodeCell, {

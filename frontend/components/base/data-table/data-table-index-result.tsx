@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/base/ui/skeleton';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { numberWithCommas } from '@/components/lib/number-format';
 
 /**

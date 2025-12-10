@@ -9,8 +9,8 @@ import {
   AlertDescription,
   AlertIcon,
   AlertTitle,
-} from '@/components/base/ui/alert';
-import { Button } from '@/components/base/ui/button';
+} from '@/components/base/shadcn/alert';
+import { Button } from '@/components/base/shadcn/button';
 
 const meta = {
   title: 'Alerts/Alert',

@@ -5,7 +5,7 @@
 
 @source "../apps/*/src/**/*.{html,js,jsx,ts,tsx}";
 @source "../components/base/**/*.{html,js,ts,tsx,jsx}";
-@source "../components/feature/**/*.{html,js,ts,tsx,jsx}";
+@source "../components/base/**/*.{html,js,ts,tsx,jsx}";
 
 :root {
   /* Define colors/variable that are global for all portals */

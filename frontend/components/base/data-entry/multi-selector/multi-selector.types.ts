@@ -1,5 +1,6 @@
 import { Command as CommandPrimitive } from 'cmdk';
-import { Command } from '@/components/base/ui/command';
+
+import { Command } from '@/components/base/shadcn/command';
 
 export interface MultiSelectorOption {
   value: string;

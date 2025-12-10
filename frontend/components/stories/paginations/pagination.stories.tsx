@@ -13,8 +13,8 @@ import {
   PaginationNext,
   PaginationPageSize,
   PaginationPrevious,
-} from '@/components/base/ui/pagination';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+} from '@/components/base/shadcn/pagination';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -99,9 +99,7 @@ export const Ellipsis: Story = {
 };
 
 export const PageSize: Story = {
-  render: () => (
-    <PaginationPageSize pageSize={20} onPageSizeChange={size => console.log('Page size changed to:', size)} />
-  ),
+  render: () => <PaginationPageSize pageSize={20} onPageSizeChange={() => {}} />,
 };
 
 // Combined story showing all components together
@@ -179,10 +177,7 @@ export const CompletePagination: Story = {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPageSize
-                  pageSize={20}
-                  onPageSizeChange={size => console.log('Page size changed to:', size)}
-                />
+                <PaginationPageSize pageSize={20} onPageSizeChange={() => {}} />
               </PaginationItem>
               <PaginationItem>
                 <PaginationFirst />
@@ -228,7 +223,9 @@ export const CompletePagination: Story = {
 // Interactive story with state management
 export const InteractivePagination: Story = {
   render: () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [currentPage, setCurrentPage] = React.useState(5);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [pageSize, setPageSize] = React.useState(20);
     const totalPages = 62;
     const totalResults = 1234;

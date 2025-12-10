@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 
-import { Avatar, AvatarFallback } from '@/components/base/ui/avatar';
-import { Button } from '@/components/base/ui/button';
-import { Checkbox } from '@/components/base/ui/checkbox';
+import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
+import { Button } from '@/components/base/shadcn/button';
+import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 

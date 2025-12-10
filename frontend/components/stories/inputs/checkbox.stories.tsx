@@ -1,16 +1,16 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
 import { CheckedState } from '@radix-ui/react-checkbox';
 import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
 
-import { Checkbox } from '@/components/base/ui/checkbox';
+import { Checkbox } from '@/components/base/shadcn/checkbox';
 
 const meta = {
   title: 'Inputs/Checkbox',
   args: {
     size: 'default',
     checked: false,
-    onCheckedChange: fn(),
+    onCheckedChange: () => {},
   },
   component: Checkbox,
 } satisfies Meta<typeof Checkbox>;

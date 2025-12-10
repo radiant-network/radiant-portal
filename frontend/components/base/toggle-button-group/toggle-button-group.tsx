@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { VariantProps } from 'tailwind-variants';
 
-import { Button, buttonVariants } from '../ui/button';
-import { ButtonGroup, buttonGroupVariants } from '../ui/button-group';
+import { Button, buttonVariants } from '@/components/base/shadcn/button';
+import { ButtonGroup, buttonGroupVariants } from '@/components/base/shadcn/button-group';
 
 type ItemType = {
   label: string;

@@ -1,6 +1,6 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import { Badge } from '@/components/base/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Badge } from '@/components/base/shadcn/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 

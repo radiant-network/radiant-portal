@@ -2,12 +2,12 @@ import { PlusIcon } from 'lucide-react';
 
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import { Button } from '@/components/base/ui/button';
-import { getOmimOrgUrl } from '@/components/feature/variant/utils';
+import { Button } from '@/components/base/shadcn/button';
+import { getOmimOrgUrl } from '@/components/base/variant/utils';
+import { useConfig } from '@/components/cores/applications-config';
+import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
+import { MERGE_VALUES_STRATEGIES } from '@/components/cores/sqon';
 import { cn } from '@/components/lib/utils';
-import { useConfig } from '@/components/model/applications-config';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
-import { MERGE_VALUES_STRATEGIES } from '@/components/model/sqon';
 
 type GeneCellProps = {
   className?: string;

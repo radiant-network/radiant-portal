@@ -4,7 +4,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-import { type PortalConfig } from '../../components/model/applications-config';
+import { type PortalConfig } from '../../components/cores/applications-config';
 
 import kfConfig from './config/kf.json';
 import radiantConfig from './config/radiant.json';

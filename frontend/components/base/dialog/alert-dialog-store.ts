@@ -1,10 +1,8 @@
-import { ReactNode } from "react";
-import {
-  AlertDialogActionProps,
-  AlertDialogCancelProps,
-} from "../ui/alert-dialog";
+import { ReactNode } from 'react';
 
-export type AlertDialogType = "success" | "info" | "warning" | "error";
+import { AlertDialogActionProps, AlertDialogCancelProps } from '@/components/base/shadcn/alert-dialog';
+
+export type AlertDialogType = 'success' | 'info' | 'warning' | 'error';
 
 interface OpenAlertDialogBaseProps {
   title: string;
@@ -24,9 +22,7 @@ interface OpenAlertDialogWithoutCancelProps extends OpenAlertDialogBaseProps {
   cancelProps?: never;
 }
 
-export type OpenAlertDialogProps =
-  | OpenAlertDialogWithCancelProps
-  | OpenAlertDialogWithoutCancelProps;
+export type OpenAlertDialogProps = OpenAlertDialogWithCancelProps | OpenAlertDialogWithoutCancelProps;
 
 export type AlertDialogSubscriber = {
   open: (props: OpenAlertDialogProps) => void;
@@ -50,13 +46,11 @@ class AlertDialogObserver {
   };
 
   open = (props: OpenAlertDialogProps) => {
-    this.subscribers.forEach((subscriber) =>
-      subscriber.open({ type: "info", ...props })
-    );
+    this.subscribers.forEach(subscriber => subscriber.open({ type: 'info', ...props }));
   };
 
   close = () => {
-    this.subscribers.forEach((subscriber) => subscriber.close());
+    this.subscribers.forEach(subscriber => subscriber.close());
   };
 }
 

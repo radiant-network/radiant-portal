@@ -37,6 +37,8 @@ import {
   TableCacheProps,
   useTableStateObserver,
 } from '@/components/base/data-table/hooks/use-table-localstorage';
+import { Button } from '@/components/base/shadcn/button';
+import { Card } from '@/components/base/shadcn/card';
 import {
   Pagination,
   PaginationContent,
@@ -45,14 +47,20 @@ import {
   PaginationNext,
   PaginationPageSize,
   PaginationPrevious,
-} from '@/components/base/ui/pagination';
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
+} from '@/components/base/shadcn/pagination';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/base/shadcn/table';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
 import Empty from '../empty';
-import { Button } from '../ui/button';
-import { Card } from '../ui/card';
 
 import DataTableGroupBy from './data-table-group-by';
 import { getFilteredAdditionalFields, updateAdditionalField } from './utils';

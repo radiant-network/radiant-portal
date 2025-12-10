@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { SidebarProvider } from '@/components/base/ui/sidebar';
-import { SidebarGroups } from '@/components/feature/query-filters/sidebar-groups';
-import { RangeOperators } from '@/components/model/sqon';
+import { SidebarGroups } from '@/components/base/query-filters/sidebar-groups';
+import { SidebarProvider } from '@/components/base/shadcn/sidebar';
+import { RangeOperators } from '@/components/cores/sqon';
 
 const meta = {
   title: 'Sidebar/Sidebar Brand',

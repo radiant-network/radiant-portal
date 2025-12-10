@@ -1,6 +1,6 @@
 import ConditionalWrapper from '@/components/base/conditional-wrapper';
-import { Badge, BadgeProps } from '@/components/base/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 interface ClassificationBadgeProps extends BadgeProps {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { Button } from '@/components/base/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/ui/popover';
+import { Button } from '@/components/base/shadcn/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { AvatarUser } from '../avatar/avatar.types';

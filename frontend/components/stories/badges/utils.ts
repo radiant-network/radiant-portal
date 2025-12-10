@@ -1,8 +1,8 @@
 import { VariantProps } from 'tailwind-variants';
 
 import { numberBadgeVariants as BaseNumberBadgeVariants } from '@/components/base/badges/number-badge';
-import { badgeVariants as BaseBadgeVariants } from '@/components/base/ui/badge';
-import { IndicatorVariants } from '@/components/base/ui/indicator';
+import { badgeVariants as BaseBadgeVariants } from '@/components/base/shadcn/badge';
+import { IndicatorVariants } from '@/components/base/shadcn/indicator';
 
 export const badgeVariants: VariantProps<typeof BaseBadgeVariants>['variant'][] = [
   'default',

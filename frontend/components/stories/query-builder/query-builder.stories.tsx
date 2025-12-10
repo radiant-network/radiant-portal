@@ -4,10 +4,10 @@ import { fn } from '@storybook/test';
 import { UserIcon } from 'lucide-react';
 import { v4 } from 'uuid';
 
-import { Button } from '@/components/base/ui/button';
-import { defaultQueryReferenceColors } from '@/components/feature/query-builder/data';
-import QueryBuilder from '@/components/feature/query-builder/query-builder';
-import { queryBuilderRemote } from '@/components/model/query-builder-core/query-builder-remote';
+import { defaultQueryReferenceColors } from '@/components/base/query-builder/data';
+import QueryBuilder from '@/components/base/query-builder/query-builder';
+import { Button } from '@/components/base/shadcn/button';
+import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
 
 import { generateRandomQuery, generateRandomUserSavedFilter } from './utils';
 

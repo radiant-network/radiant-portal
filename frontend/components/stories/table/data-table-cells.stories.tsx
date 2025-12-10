@@ -5,7 +5,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 import {
   applicationCellData,

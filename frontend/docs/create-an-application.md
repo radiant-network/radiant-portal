@@ -4,7 +4,7 @@ A page application is an unique page in our infrastructure.
 # CLI
 Execute `cli/create-application/create-app.sh` to create a new page application.
 
-- The application name must be in camel-case. e.g. `variant`, `variant-entity`, `case-exploration`
+- The application name must be in camel-case. e.g. `variant`, `file-archive`
 - You must use node version v.20.18.0
 
 # Using the new Page Application
@@ -21,9 +21,8 @@ Once the CLI has been executed, a new folder should appear in `frontend/apps/%my
 	"@/lib/*": ["../../components/lib/*"],
 	"@/hooks/*": ["../../components/hooks/*"],
 	"@assets/*": ["../../themes/radiant/assets/*"],
-	"variant-exploration/*": ["../../apps/variant-exploration/src/*"],
-	"variant-entity/*": ["../../apps/variant-entity/src/*"],
-	"case-exploration/*": ["../../apps/case-exploration/src/*"],
+	"variant/*": ["../../apps/variant/src/*"],
+	"file-archive/*": ["../../apps/file-archive/src/*"],
 	"my-new-application/*": ["../../apps/my-new-application/src/*"], /* My New Application */
 	"~/*": ["./app/*"],
 	"react": ["./node_modules/@types/react"]

@@ -5,11 +5,11 @@ import React from 'react';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import type { Preview } from '@storybook/react';
 import { withThemeByClassName } from '@storybook/addon-themes';
-import { TooltipProvider } from '../base/ui/tooltip';
+import { TooltipProvider } from '../base/shadcn/tooltip';
 import { AlertDialogProvider } from '../base/dialog/alert-dialog-provider';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n'; // Use the Storybook-specific i18n instance
-import ThemeProvider from '../feature/theme-toggle/theme-provider';
+import ThemeProvider from '../base/theme-toggle/theme-provider';
 
 let options = {};
 if (location.hostname === 'radiant-network.github.io') {
@@ -41,7 +41,7 @@ const preview: Preview = {
       },
       defaultTheme: 'light',
     }),
-    (Story) => (
+    Story => (
       <I18nextProvider i18n={i18n}>
         <ThemeProvider>
           <TooltipProvider delayDuration={0}>

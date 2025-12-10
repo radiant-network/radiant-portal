@@ -1,8 +1,8 @@
 import { HeaderGroup, PaginationState } from '@tanstack/react-table';
 
 import { ColumnSettings } from '@/components/base/data-table/data-table';
-import { Skeleton } from '@/components/base/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/ui/table';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/shadcn/table';
 
 type DataTableSkeletonLoadingProps = {
   headerGroups: HeaderGroup<any>[];

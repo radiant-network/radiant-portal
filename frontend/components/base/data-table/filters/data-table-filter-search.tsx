@@ -11,7 +11,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/base/ui/command';
+} from '@/components/base/shadcn/command';
 import { useI18n } from '@/components/hooks/i18n';
 
 export type AutocompleteApiFn = (

@@ -1,13 +1,15 @@
+import { KeyboardEvent, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, XIcon } from 'lucide-react';
-import { useEffect, useCallback, useState, useImperativeHandle, KeyboardEvent, useRef } from 'react';
-import { Badge } from '@/components/base/ui/badge';
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/base/ui/command';
-import { cn } from '@/lib/utils';
+
+import { Badge } from '@/components/base/shadcn/badge';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/base/shadcn/command';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useDebounce } from '@/hooks/useDebounce';
+import { cn } from '@/lib/utils';
+
 import { MultipleSelectorProps, MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
 import { getSelectedOptionByValue, isOptionsExist, transToGroupOption } from './multi-selector.utils';
-import { Skeleton } from '@/components/base/ui/skeleton';
 
 function MultiSelector({
   value,
@@ -242,9 +244,7 @@ function MultiSelector({
     }
 
     if (creatable) {
-      return (value: string, search: string) => {
-        return value.toLowerCase().includes(search.toLowerCase()) ? 1 : -1;
-      };
+      return (value: string, search: string) => (value.toLowerCase().includes(search.toLowerCase()) ? 1 : -1);
     }
     // Using default filter in `cmdk`. We don't have to provide it.
     return undefined;
