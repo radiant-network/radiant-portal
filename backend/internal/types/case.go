@@ -260,14 +260,14 @@ var CaseDiagnosisLabCodeField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Table:           DiagnosisLabTable,
+	Table:           SequencingLabTable,
 }
 
 var CaseDiagnosisLabNameField = Field{
 	Name:          "name",
 	Alias:         "diagnosis_lab_name",
 	CanBeSelected: true,
-	Table:         DiagnosisLabTable,
+	Table:         SequencingLabTable,
 }
 
 var CasePrimaryConditionIdField = Field{

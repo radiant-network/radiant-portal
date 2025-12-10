@@ -32,30 +32,30 @@ func NewIGVRepository(db *gorm.DB) *IGVRepository {
 func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	var igvInternal []IGVTrack
 
-	alignmentFilter := fmt.Sprintf("tctx.case_id=%d AND thd.type='output' AND (d.data_type_code IN ('alignment', 'alignment_variant_calling') AND d.format_code in ('cram', 'crai'))", caseID)
+	alignmentFilter := fmt.Sprintf("tctx.case_id=%d AND thd.type='output' AND (doc.data_type_code IN ('alignment', 'alignment_variant_calling') AND doc.format_code in ('cram', 'crai'))", caseID)
 
-	tx := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.FederationName))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s tctx ON tctx.sequencing_experiment_id=se.id AND tctx.case_id=%d", types.TaskContextTable.FederationName, caseID))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s thd ON thd.task_id=tctx.task_id", types.TaskHasDocumentTable.FederationName))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id=se.sample_id", types.SampleTable.FederationName))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s d ON thd.document_id=d.id", types.DocumentTable.FederationName))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON sa.patient_id=f.family_member_id AND f.case_id=tctx.case_id", types.FamilyTable.FederationName))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s p ON f.family_member_id=p.id", types.PatientTable.FederationName))
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id AND %s.case_id=%d", types.TaskContextTable.FederationName, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.SequencingExperimentTable.Alias, types.TaskContextTable.Alias, caseID))
+	tx = utils.JoinTaskContextWithTaskHasDoc(tx)
+	tx = utils.JoinSeqExpWithSample(tx)
+	tx = utils.JoinTaskHasDocWithDocument(tx)
+	tx = utils.JoinSampleAndTaskContextWithFamily(tx)
+	tx = utils.JoinFamilyWithPatient(tx)
 	tx.Where(alignmentFilter)
 
 	columns := []string{
-		"se.id AS sequencing_experiment_id",
+		"s.id AS sequencing_experiment_id",
 		"p.id as patient_id",
-		"sa.submitter_sample_id AS sample_id",
+		"spl.submitter_sample_id AS sample_id",
 		"f.relationship_to_proband_code AS family_role",
 		"p.sex_code",
-		"d.data_type_code",
-		"d.format_code",
-		"d.url",
+		"doc.data_type_code",
+		"doc.format_code",
+		"doc.url",
 	}
 
 	tx.Select(columns)
-	tx.Order("se.id, d.data_type_code, d.format_code")
+	tx.Order("s.id, doc.data_type_code, doc.format_code")
 	if err := tx.Find(&igvInternal).Error; err != nil {
 		return []IGVTrack{}, err
 	}

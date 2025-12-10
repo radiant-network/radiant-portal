@@ -184,19 +184,19 @@ func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destinatio
 
 func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.DB {
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.FederationName, types.DocumentTable.Alias))
-	tx = utils.JoinWithTaskHasDocument(tx)
-	tx = utils.JoinWithTaskContext(tx)
-	tx = utils.JoinWithCaseHasSequencingExperiment(tx)
-	tx = utils.JoinWithSequencingExperiment(tx)
-	tx = utils.JoinWithCase(tx)
-	tx = utils.JoinWithDiagnosisLab(tx)
-	tx = utils.JoinWithSample(tx)
+	tx = utils.JoinDocumentWithTaskHasDocument(tx)
+	tx = utils.JoinTaskHasDocWithTaskContext(tx)
+	tx = utils.JoinTaskContextWithCaseHasSeqExp(tx)
+	tx = utils.JoinCaseHasSeqExpWithSequencingExperiment(tx)
+	tx = utils.JoinCaseHasSeqExpWithCase(tx)
+	tx = utils.JoinCaseWithDiagnosisLab(tx)
+	tx = utils.JoinSeqExpWithSample(tx)
 
 	if userQuery.HasFieldFromTables(types.ProjectTable) {
-		tx = utils.JoinWithProject(tx)
+		tx = utils.JoinCaseWithProject(tx)
 	}
 
-	tx = utils.JoinWithFamilyRelationship(tx)
+	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
 	if userQuery.Filters() != nil {
 		utils.AddWhere(userQuery, tx)
 	}
