@@ -6,14 +6,13 @@ import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-fema
 import PedigreeMaleNotAffectedIcon from '@/components/base/icons/pedigree-male-not-affected-icon';
 import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
 import IGVDialog from '@/components/base/igv/igv-dialog';
+import { DescriptionRow, DescriptionSection } from '@/components/base/preview/description';
+import PreviewCard from '@/components/base/preview/preview-card';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
-
-import { DescriptionRow, DescriptionSection } from './description';
-import PreviewCard from './preview-card';
 
 type PreviewOccurrenceDetailsCardProps = {
   caseId: number;

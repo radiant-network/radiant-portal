@@ -1,9 +1,9 @@
 import { useI18n } from '@/components/hooks/i18n';
 
-import AnalysisSelectFilter from './analysis-select-filter';
-import ClassificationSelectFilter from './classification-select-filter';
-import ConditionCasesFilter from './condition-cases-filter';
-import InstitutionSelectFilter from './institution-select-filter';
+import AnalysisSelectFilter from './filters/analysis-select-filter';
+import ClassificationSelectFilter from './filters/classification-select-filter';
+import ConditionCasesFilter from './filters/condition-cases-filter';
+import InstitutionSelectFilter from './filters/institution-select-filter';
 
 export interface InterpretedCasesFiltersState {
   mondo: string;

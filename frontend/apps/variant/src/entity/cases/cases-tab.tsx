@@ -9,7 +9,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { tabContentClassName } from '@/style';
 import { variantsApi } from '@/utils/api';
 
-import { CasesFiltersProvider } from './cases-filters-context';
+import { CasesFiltersProvider } from './table/filters/cases-filters-context';
 import InterpretedCasesTable from './interpreted-cases-table';
 import UninterpretedCasesTable from './uninterpreted-cases-table';
 

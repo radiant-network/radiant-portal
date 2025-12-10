@@ -76,3 +76,39 @@ export function useOccurrenceAndCase(caseId: number, seqId: number, locusId: str
     isLoading: expandResult.isLoading || !expandResult.data || caseResult.isLoading || !caseResult.data,
   };
 }
+
+/**
+ * Hook to fetch case data for preview sheets
+ */
+export function useCase(caseId: number, seqId: number, locusId: string) {
+  const expandResult = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
+    {
+      caseId: caseId,
+      locusId: locusId,
+      seqId: seqId,
+    },
+    fetchOccurrenceExpand,
+    {
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+    },
+  );
+
+  const caseResult = useSWR<CaseEntity | null, any, CaseInput>(
+    {
+      key: 'case-entity',
+      caseId: caseId,
+    },
+    fetchCase,
+    {
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+    },
+  );
+
+  return {
+    expandResult,
+    caseResult,
+    isLoading: expandResult.isLoading || !expandResult.data || caseResult.isLoading || !caseResult.data,
+  };
+}

@@ -1,8 +1,8 @@
 import { useI18n } from '@/components/hooks/i18n';
 
-import AnalysisSelectFilter from './analysis-select-filter';
-import InstitutionSelectFilter from './institution-select-filter';
-import PhenotypeCasesFilter from './phenotype-cases-filter';
+import AnalysisSelectFilter from './filters/analysis-select-filter';
+import InstitutionSelectFilter from './filters/institution-select-filter';
+import PhenotypeCasesFilter from './filters/phenotype-cases-filter';
 
 export interface UninterpretedCasesFiltersState {
   phenotype: string;
@@ -15,7 +15,7 @@ interface CasesFilterBarProps {
   onFiltersChange: (filters: UninterpretedCasesFiltersState) => void;
 }
 
-function OtherCasesFilters({ filters, onFiltersChange }: CasesFilterBarProps) {
+function UninterpretedCasesFilters({ filters, onFiltersChange }: CasesFilterBarProps) {
   const { t } = useI18n();
 
   const handleFilterChange = (field: keyof UninterpretedCasesFiltersState, value: string) => {
@@ -37,4 +37,4 @@ function OtherCasesFilters({ filters, onFiltersChange }: CasesFilterBarProps) {
   );
 }
 
-export default OtherCasesFilters;
+export default UninterpretedCasesFilters;

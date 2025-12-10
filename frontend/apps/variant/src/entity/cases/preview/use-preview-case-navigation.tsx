@@ -3,6 +3,7 @@ import { SetURLSearchParams } from 'react-router';
 
 interface CaseItem {
   case_id: number;
+  patient_id: number;
 }
 
 interface UsePreviewCaseNavigationParams<T extends CaseItem> {
@@ -25,6 +26,9 @@ interface UsePreviewCaseNavigationReturn<T extends CaseItem> {
   handleNextCase: () => void;
 }
 
+/**
+ * @DESCRIPTION: Patient_id is used to find valid row
+ */
 export function usePreviewCaseNavigation<T extends CaseItem>({
   casesData,
   searchParams,
@@ -32,11 +36,11 @@ export function usePreviewCaseNavigation<T extends CaseItem>({
   selectedCaseParamKey,
   setRowSelection,
 }: UsePreviewCaseNavigationParams<T>): UsePreviewCaseNavigationReturn<T> {
-  const selectedCaseId = searchParams.get(selectedCaseParamKey);
-  const selectedCase = casesData.find(caseItem => caseItem.case_id.toString() === selectedCaseId);
+  const selectedId = searchParams.get(selectedCaseParamKey);
+  const selectedCase = casesData.find(caseItem => caseItem.patient_id.toString() === selectedId);
 
-  const selectedCaseIndex = selectedCaseId
-    ? casesData.findIndex(caseItem => caseItem.case_id.toString() === selectedCaseId)
+  const selectedCaseIndex = selectedId
+    ? casesData.findIndex(caseItem => caseItem.patient_id.toString() === selectedId)
     : -1;
 
   const handleClosePreview = () => {
@@ -48,12 +52,11 @@ export function usePreviewCaseNavigation<T extends CaseItem>({
 
   const handlePreviousCase = () => {
     if (selectedCaseIndex > 0 && selectedCase) {
-      const currentCaseId = selectedCase.case_id;
-      // Find the first previous case with a different case_id
+      const currentId = selectedCase.patient_id;
       for (let i = selectedCaseIndex - 1; i >= 0; i--) {
-        if (casesData[i].case_id !== currentCaseId) {
+        if (casesData[i].patient_id !== currentId) {
           setSearchParams(prev => {
-            prev.set(selectedCaseParamKey, casesData[i].case_id.toString());
+            prev.set(selectedCaseParamKey, casesData[i].patient_id.toString());
             return prev;
           });
           return;
@@ -64,12 +67,12 @@ export function usePreviewCaseNavigation<T extends CaseItem>({
 
   const handleNextCase = () => {
     if (selectedCaseIndex >= 0 && selectedCaseIndex < casesData.length - 1 && selectedCase) {
-      const currentCaseId = selectedCase.case_id;
-      // Find the first next case with a different case_id
+      const currentId = selectedCase.patient_id;
+      // Find the first next case with a different patient_id
       for (let i = selectedCaseIndex + 1; i < casesData.length; i++) {
-        if (casesData[i].case_id !== currentCaseId) {
+        if (casesData[i].patient_id !== currentId) {
           setSearchParams(prev => {
-            prev.set(selectedCaseParamKey, casesData[i].case_id.toString());
+            prev.set(selectedCaseParamKey, casesData[i].patient_id.toString());
             return prev;
           });
           return;
@@ -78,24 +81,24 @@ export function usePreviewCaseNavigation<T extends CaseItem>({
     }
   };
 
-  // Check if there's a previous case with a different case_id
+  // Check if there's a previous case with a different patient_id
   const hasPrevious = useMemo(() => {
     if (selectedCaseIndex <= 0 || !selectedCase) return false;
-    const currentCaseId = selectedCase.case_id;
+    const currentId = selectedCase.patient_id;
     for (let i = selectedCaseIndex - 1; i >= 0; i--) {
-      if (casesData[i].case_id !== currentCaseId) {
+      if (casesData[i].patient_id !== currentId) {
         return true;
       }
     }
     return false;
   }, [selectedCaseIndex, selectedCase, casesData]);
 
-  // Check if there's a next case with a different case_id
+  // Check if there's a next case with a different patient_id
   const hasNext = useMemo(() => {
     if (selectedCaseIndex < 0 || selectedCaseIndex >= casesData.length - 1 || !selectedCase) return false;
-    const currentCaseId = selectedCase.case_id;
+    const currentId = selectedCase.patient_id;
     for (let i = selectedCaseIndex + 1; i < casesData.length; i++) {
-      if (casesData[i].case_id !== currentCaseId) {
+      if (casesData[i].patient_id !== currentId) {
         return true;
       }
     }
@@ -103,8 +106,8 @@ export function usePreviewCaseNavigation<T extends CaseItem>({
   }, [selectedCaseIndex, selectedCase, casesData]);
 
   useEffect(() => {
-    if (selectedCaseId && casesData.length > 0) {
-      const rowIndex = casesData.findIndex(caseItem => caseItem.case_id.toString() === selectedCaseId);
+    if (selectedId && casesData.length > 0) {
+      const rowIndex = casesData.findIndex(caseItem => caseItem.patient_id.toString() === selectedId);
       if (rowIndex !== -1) {
         setRowSelection({ [rowIndex]: true });
       } else {
@@ -113,7 +116,7 @@ export function usePreviewCaseNavigation<T extends CaseItem>({
     } else {
       setRowSelection({});
     }
-  }, [selectedCaseId, casesData, setRowSelection]);
+  }, [selectedId, casesData, setRowSelection]);
 
   return {
     selectedCase,

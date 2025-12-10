@@ -9,7 +9,7 @@ import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/occurrence/ta
 import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/occurrence/table/cells/overlap-type-gene-cell';
 import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/occurrence/table/cells/overlapping-gene-link-cell';
 import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
-import CasePreviewCell from '@/apps/variant/src/entity/cases/case-preview-cell';
+import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/cells/uninterpreted-case-preview-cell';
 import { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import AnalysisTypeCodeCell, {
@@ -154,6 +154,8 @@ export type BaseCellMockData = {
     name: string;
   }[];
   size?: number;
+  case_id?: number;
+  patient_id?: number;
 };
 
 const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
@@ -599,13 +601,6 @@ export const thirdSetCellColumns = [
     enableSorting: false,
   }),
   baseCellColumnHelper.accessor(row => row.sample_id, {
-    id: 'casePreviewCell',
-    cell: info => (
-      <CasePreviewCell caseId={info.getValue()} relationshipToProband={info.row.original.relationship_to_proband} />
-    ),
-    header: 'CasePreviewCell',
-  }),
-  baseCellColumnHelper.accessor(row => row.sample_id, {
     id: 'sample_id',
     cell: info => (
       <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband}>
@@ -890,6 +885,17 @@ export const applicationFirstSetCellColumns = [
     enableResizing: false,
     enablePinning: false,
   },
+  baseCellColumnHelper.accessor(row => row.case_id, {
+    id: 'UninterpretedCasePreviewCell',
+    cell: info => (
+      <UninterpretedCasePreviewCell
+        caseId={info.getValue() ?? 1}
+        patientId={info.row.original.patient_id ?? 1}
+        relationshipToProband={info.row.original.relationship_to_proband}
+      />
+    ),
+    header: 'CasePreviewCell',
+  }),
 ];
 
 export const applicationCellData = [
@@ -943,6 +949,8 @@ export const applicationCellData = [
       'IGLC1',
       'IGLV3-4',
     ],
+    case_id: 1,
+    patient_id: 1,
   },
   {
     locus_id: '-7485572602358923261',
@@ -965,6 +973,8 @@ export const applicationCellData = [
     type: 'full_gene',
     length: 10,
     symbol: ['MIR650', 'IGLV3-2', 'IGLV2-8', 'IGLV3-10', 'IGLC1', 'IGLV3-4'],
+    case_id: 2,
+    patient_id: 2,
   },
   {
     locus_id: '-7485572602358923261',
@@ -987,6 +997,8 @@ export const applicationCellData = [
     length: 100,
     type: 'full_gene',
     symbol: ['IGLV2-8', 'IGLV3-10', 'IGLC1', 'IGLV3-4'],
+    case_id: 3,
+    patient_id: 3,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1009,6 +1021,8 @@ export const applicationCellData = [
     length: 1000,
     type: 'partial',
     symbol: ['IGLV3-10', 'IGLC1', 'IGLV3-4'],
+    case_id: 4,
+    patient_id: 4,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1031,6 +1045,8 @@ export const applicationCellData = [
     length: 10000,
     type: 'partial',
     symbol: ['IGLC1', 'IGLV3-4'],
+    case_id: 5,
+    patient_id: 5,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1053,6 +1069,8 @@ export const applicationCellData = [
     length: 100000,
     type: 'full_cnv',
     symbol: ['IGLV3-4'],
+    case_id: 6,
+    patient_id: 6,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1074,5 +1092,7 @@ export const applicationCellData = [
     length: 100000,
     symbol: undefined,
     type: 'full_cnv',
+    case_id: undefined,
+    patient_id: undefined,
   },
 ];
