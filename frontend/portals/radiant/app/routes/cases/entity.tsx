@@ -1,7 +1,7 @@
 import CaseEntity from 'case/entity/case-entity';
 
-function CEntity() {
+function CaseEntityRoute() {
   return <CaseEntity />;
 }
 
-export default CEntity;
+export default CaseEntityRoute;

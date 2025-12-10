@@ -1,5 +1,5 @@
 import CaseExploration from 'case/exploration/case-exploration';
 
-const VCaseExploration = () => <CaseExploration />;
+const CaseExplorationRoute = () => <CaseExploration />;
 
-export default VCaseExploration;
+export default CaseExplorationRoute;

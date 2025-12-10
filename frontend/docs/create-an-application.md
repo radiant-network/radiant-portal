@@ -4,7 +4,7 @@ A page application is an unique page in our infrastructure.
 # CLI
 Execute `cli/create-application/create-app.sh` to create a new page application.
 
-- The application name must be in camel-case. e.g. `variant`, `file-archive`
+- The application name must be in kebab-case. e.g. `variant`, `file-archive`
 - You must use node version v.20.18.0
 
 # Using the new Page Application
