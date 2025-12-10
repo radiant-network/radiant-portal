@@ -23,7 +23,7 @@ import (
 // @Router /igv/{case_id} [get]
 func GetIGVHandler(repo repository.IGVRepositoryDAO, presigner utils.S3PreSigner) gin.HandlerFunc {
 	if presigner == nil {
-		presigner = &utils.DefaultS3PreSigner{}
+		presigner = utils.NewS3PreSigner()
 	}
 
 	return func(c *gin.Context) {

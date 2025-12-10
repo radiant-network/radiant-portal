@@ -2,8 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -12,7 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-const EXPIRE = 60 * time.Minute
+const DEFAULT_AWS_REGION = "us-east-1"
+const DEFAULT_S3_PRESIGNED_URL_EXPIRE = "60m"
 
 type PreSignedURL struct {
 	URL         string `json:"url"`
@@ -23,16 +24,39 @@ type S3PreSigner interface {
 	GenerateS3PreSignedURL(url string) (*PreSignedURL, error)
 }
 
-type DefaultS3PreSigner struct{}
+type DefaultS3PreSigner struct {
+	Config *aws.Config
+	Expire time.Duration
+}
 
 func NewS3PreSigner() *DefaultS3PreSigner {
-	return &DefaultS3PreSigner{}
+	endpoint := GetEnvOrPanic("AWS_ENDPOINT_URL")
+	region := GetEnvOrDefault("AWS_REGION", DEFAULT_AWS_REGION)
+	useSSL := GetEnvOrDefault("AWS_USE_SSL", "true") == "true"
+
+	expireStr := GetEnvOrDefault("S3_PRESIGNED_URL_EXPIRE", DEFAULT_S3_PRESIGNED_URL_EXPIRE)
+	expire, err := time.ParseDuration(expireStr)
+	if err != nil {
+		log.Fatalf("Invalid duration for S3_PRESIGNED_URL_EXPIRE: %v", err)
+	}
+
+	awsConfig := &aws.Config{
+		Region:           aws.String(region),
+		Endpoint:         aws.String(endpoint),
+		S3ForcePathStyle: aws.Bool(true),
+		DisableSSL:       aws.Bool(!useSSL),
+	}
+
+	return &DefaultS3PreSigner{
+		Config: awsConfig,
+		Expire: expire,
+	}
 }
 
 func (ps *DefaultS3PreSigner) extractS3BucketAndKey(s3URL string) (string, string, error) {
 	parsed, err := url.Parse(s3URL)
 	if err != nil {
-		return "", "", fmt.Errorf("Invalid URL: %w", err)
+		return "", "", fmt.Errorf("invalid URL: %w", err)
 	}
 
 	if parsed.Scheme != "s3" {
@@ -51,18 +75,7 @@ func (ps *DefaultS3PreSigner) GenerateS3PreSignedURL(url string) (*PreSignedURL,
 		return nil, err
 	}
 
-	endpoint := os.Getenv("AWS_ENDPOINT_URL")
-	region := os.Getenv("AWS_REGION")
-	useSSL := os.Getenv("AWS_USE_SSL") == "true"
-
-	awsConfig := &aws.Config{
-		Region:           aws.String(region),
-		Endpoint:         aws.String(endpoint),
-		S3ForcePathStyle: aws.Bool(true),
-		DisableSSL:       aws.Bool(!useSSL),
-	}
-
-	sess, err := session.NewSession(awsConfig)
+	sess, err := session.NewSession(ps.Config)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +86,8 @@ func (ps *DefaultS3PreSigner) GenerateS3PreSignedURL(url string) (*PreSignedURL,
 		Key:    aws.String(key),
 	})
 
-	expireAt := time.Now().Add(EXPIRE).Unix()
-	urlStr, err := req.Presign(EXPIRE)
+	expireAt := time.Now().Add(ps.Expire).Unix()
+	urlStr, err := req.Presign(ps.Expire)
 	if err != nil {
 		return nil, err
 	}
