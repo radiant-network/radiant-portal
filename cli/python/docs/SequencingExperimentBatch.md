@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **platform_code** | **str** |  | 
 **run_alias** | **str** |  | [optional] 
 **run_date** | **datetime** |  | [optional] 
+**run_name** | **str** |  | [optional] 
 **sample_organization_code** | **str** |  | 
 **sequencing_lab_code** | **str** |  | 
 **sequencing_read_technology_code** | **str** |  | 

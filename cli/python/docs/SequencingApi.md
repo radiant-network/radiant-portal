@@ -127,7 +127,7 @@ with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.SequencingApi(api_client)
     create_sequencing_experiment_batch_body = radiant_python.CreateSequencingExperimentBatchBody() # CreateSequencingExperimentBatchBody | Create Body
-    dry_run = True # bool | Dry Run (optional)
+    dry_run = False # bool | Dry Run (optional) (default to False)
 
     try:
         # Create a new sequencing experiment batch
@@ -146,7 +146,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **create_sequencing_experiment_batch_body** | [**CreateSequencingExperimentBatchBody**](CreateSequencingExperimentBatchBody.md)| Create Body | 
- **dry_run** | **bool**| Dry Run | [optional] 
+ **dry_run** | **bool**| Dry Run | [optional] [default to False]
 
 ### Return type
 

@@ -16,8 +16,11 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from typing import Any, Dict, Optional
+from pydantic import Field, StrictBool
+from typing import Optional
+from typing_extensions import Annotated
 from radiant_python.models.create_batch_response import CreateBatchResponse
+from radiant_python.models.create_patient_batch_body import CreatePatientBatchBody
 
 from radiant_python.api_client import ApiClient, RequestSerialized
 from radiant_python.api_response import ApiResponse
@@ -40,7 +43,8 @@ class PatientsApi:
     @validate_call
     def post_patient_batch(
         self,
-        body: Optional[Dict[str, Any]] = None,
+        create_patient_batch_body: Annotated[CreatePatientBatchBody, Field(description="Create Body")],
+        dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -58,8 +62,10 @@ class PatientsApi:
 
         Create a new patient batch
 
-        :param body:
-        :type body: object
+        :param create_patient_batch_body: Create Body (required)
+        :type create_patient_batch_body: CreatePatientBatchBody
+        :param dry_run: Dry Run
+        :type dry_run: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -83,7 +89,8 @@ class PatientsApi:
         """ # noqa: E501
 
         _param = self._post_patient_batch_serialize(
-            body=body,
+            create_patient_batch_body=create_patient_batch_body,
+            dry_run=dry_run,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -110,7 +117,8 @@ class PatientsApi:
     @validate_call
     def post_patient_batch_with_http_info(
         self,
-        body: Optional[Dict[str, Any]] = None,
+        create_patient_batch_body: Annotated[CreatePatientBatchBody, Field(description="Create Body")],
+        dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -128,8 +136,10 @@ class PatientsApi:
 
         Create a new patient batch
 
-        :param body:
-        :type body: object
+        :param create_patient_batch_body: Create Body (required)
+        :type create_patient_batch_body: CreatePatientBatchBody
+        :param dry_run: Dry Run
+        :type dry_run: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -153,7 +163,8 @@ class PatientsApi:
         """ # noqa: E501
 
         _param = self._post_patient_batch_serialize(
-            body=body,
+            create_patient_batch_body=create_patient_batch_body,
+            dry_run=dry_run,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -180,7 +191,8 @@ class PatientsApi:
     @validate_call
     def post_patient_batch_without_preload_content(
         self,
-        body: Optional[Dict[str, Any]] = None,
+        create_patient_batch_body: Annotated[CreatePatientBatchBody, Field(description="Create Body")],
+        dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -198,8 +210,10 @@ class PatientsApi:
 
         Create a new patient batch
 
-        :param body:
-        :type body: object
+        :param create_patient_batch_body: Create Body (required)
+        :type create_patient_batch_body: CreatePatientBatchBody
+        :param dry_run: Dry Run
+        :type dry_run: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -223,7 +237,8 @@ class PatientsApi:
         """ # noqa: E501
 
         _param = self._post_patient_batch_serialize(
-            body=body,
+            create_patient_batch_body=create_patient_batch_body,
+            dry_run=dry_run,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -245,7 +260,8 @@ class PatientsApi:
 
     def _post_patient_batch_serialize(
         self,
-        body,
+        create_patient_batch_body,
+        dry_run,
         _request_auth,
         _content_type,
         _headers,
@@ -268,11 +284,15 @@ class PatientsApi:
 
         # process the path parameters
         # process the query parameters
+        if dry_run is not None:
+            
+            _query_params.append(('dry_run', dry_run))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if create_patient_batch_body is not None:
+            _body_params = create_patient_batch_body
 
 
         # set the HTTP header `Accept`

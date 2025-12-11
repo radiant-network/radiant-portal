@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **affected_status** | **str** |  | [optional] 
 **analysis_type** | **str** |  | [optional] 
-**case_id** | **int** |  | [optional] 
 **created_at** | **str** |  | [optional] 
 **experimental_strategy** | **str** |  | [optional] 
 **family_role** | **str** |  | [optional] 

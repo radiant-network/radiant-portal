@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **post_patient_batch**
-> CreateBatchResponse post_patient_batch(body=body)
+> CreateBatchResponse post_patient_batch(create_patient_batch_body, dry_run=dry_run)
 
 Create a new patient batch
 
@@ -21,6 +21,7 @@ Create a new patient batch
 ```python
 import radiant_python
 from radiant_python.models.create_batch_response import CreateBatchResponse
+from radiant_python.models.create_patient_batch_body import CreatePatientBatchBody
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -44,11 +45,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.PatientsApi(api_client)
-    body = None # object |  (optional)
+    create_patient_batch_body = radiant_python.CreatePatientBatchBody() # CreatePatientBatchBody | Create Body
+    dry_run = False # bool | Dry Run (optional) (default to False)
 
     try:
         # Create a new patient batch
-        api_response = api_instance.post_patient_batch(body=body)
+        api_response = api_instance.post_patient_batch(create_patient_batch_body, dry_run=dry_run)
         print("The response of PatientsApi->post_patient_batch:\n")
         pprint(api_response)
     except Exception as e:
@@ -62,7 +64,8 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **body** | **object**|  | [optional] 
+ **create_patient_batch_body** | [**CreatePatientBatchBody**](CreatePatientBatchBody.md)| Create Body | 
+ **dry_run** | **bool**| Dry Run | [optional] [default to False]
 
 ### Return type
 
