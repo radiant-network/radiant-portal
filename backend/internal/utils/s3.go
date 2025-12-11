@@ -30,7 +30,7 @@ type DefaultS3PreSigner struct {
 }
 
 func NewS3PreSigner() *DefaultS3PreSigner {
-	endpoint := GetEnvOrPanic("AWS_ENDPOINT_URL")
+	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
 	region := GetEnvOrDefault("AWS_REGION", DEFAULT_AWS_REGION)
 	useSSL := GetEnvOrDefault("AWS_USE_SSL", "true") == "true"
 
@@ -40,10 +40,11 @@ func NewS3PreSigner() *DefaultS3PreSigner {
 		log.Fatalf("Invalid duration for S3_PRESIGNED_URL_EXPIRE: %v", err)
 	}
 
+	forcePathStyle := endpoint != "" // if endpoint is set, force path style
 	awsConfig := &aws.Config{
 		Region:           aws.String(region),
 		Endpoint:         aws.String(endpoint),
-		S3ForcePathStyle: aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(forcePathStyle),
 		DisableSSL:       aws.Bool(!useSSL),
 	}
 

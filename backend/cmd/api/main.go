@@ -179,6 +179,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.POST("/search", server.SearchDocumentsHandler(repoDocuments))
 	documentsGroup.GET("/autocomplete", server.DocumentsAutocompleteHandler(repoDocuments))
 	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
+	documentsGroup.GET("/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
 
 	dataManagerRoutes := privateRoutes.Group("/")
 	dataManagerRoutes.Use(server.RequireRole(auth, utils.DataManagerRole))

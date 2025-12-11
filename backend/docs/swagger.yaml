@@ -2096,6 +2096,13 @@ components:
       - LOW
       - MODERATE
       - HIGH
+    utils.PreSignedURL:
+      properties:
+        url:
+          type: string
+        urlExpireAt:
+          type: integer
+      type: object
   securitySchemes:
     bearerauth:
       bearerFormat: JWT
@@ -2414,6 +2421,41 @@ paths:
       summary: Search cases
       tags:
       - cases
+  /documents/{document_id}/download_url:
+    get:
+      description: Generate a pre-signed S3 download URL for a document
+      operationId: getDocumentDownloadUrl
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/utils.PreSignedURL'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get pre-signed S3 download URL for a document
+      tags:
+      - documents
   /documents/autocomplete:
     get:
       description: Retrieve AutocompleteResult list of ids matching prefix

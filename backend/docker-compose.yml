@@ -27,15 +27,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  s3:
-    image: adobe/s3mock:latest
-    container_name: s3
-    ports:
-      - "9090:9090"
-    environment:
-      - COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS=radiant-bucket
-      - COM_ADOBE_TESTING_S3MOCK_STORE_REGION=us-east-1
       
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -100,8 +91,8 @@ services:
       KEYCLOAK_REALM: CQDG
       KEYCLOAK_CLIENT: radiant
       KEYCLOAK_CLIENT_ROLE: radiant
-      AWS_ENDPOINT_URL: http://s3:9090
-      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: access
+      AWS_SECRET_ACCESS_KEY: secret
       PUBMED_BASE_URL: https://api.ncbi.nlm.nih.gov
     depends_on:
       init-schema:
