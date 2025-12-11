@@ -599,7 +599,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_filters(
         self,
-        case_id: Annotated[StrictStr, Field(description="Case ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
@@ -619,7 +619,7 @@ class CasesApi:
         Retrieve DocumentFilters documents filters for a specific case
 
         :param case_id: Case ID (required)
-        :type case_id: str
+        :type case_id: int
         :param filters_body_with_criteria: Filters Body (required)
         :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -671,7 +671,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_filters_with_http_info(
         self,
-        case_id: Annotated[StrictStr, Field(description="Case ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
@@ -691,7 +691,7 @@ class CasesApi:
         Retrieve DocumentFilters documents filters for a specific case
 
         :param case_id: Case ID (required)
-        :type case_id: str
+        :type case_id: int
         :param filters_body_with_criteria: Filters Body (required)
         :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -743,7 +743,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_filters_without_preload_content(
         self,
-        case_id: Annotated[StrictStr, Field(description="Case ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
@@ -763,7 +763,7 @@ class CasesApi:
         Retrieve DocumentFilters documents filters for a specific case
 
         :param case_id: Case ID (required)
-        :type case_id: str
+        :type case_id: int
         :param filters_body_with_criteria: Filters Body (required)
         :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -891,7 +891,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_search(
         self,
-        case_id: Annotated[StrictStr, Field(description="Case ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -911,7 +911,7 @@ class CasesApi:
         Search for DocumentResult list for a case entity
 
         :param case_id: Case ID (required)
-        :type case_id: str
+        :type case_id: int
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -964,7 +964,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_search_with_http_info(
         self,
-        case_id: Annotated[StrictStr, Field(description="Case ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -984,7 +984,7 @@ class CasesApi:
         Search for DocumentResult list for a case entity
 
         :param case_id: Case ID (required)
-        :type case_id: str
+        :type case_id: int
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -1037,7 +1037,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_search_without_preload_content(
         self,
-        case_id: Annotated[StrictStr, Field(description="Case ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -1057,7 +1057,7 @@ class CasesApi:
         Search for DocumentResult list for a case entity
 
         :param case_id: Case ID (required)
-        :type case_id: str
+        :type case_id: int
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one

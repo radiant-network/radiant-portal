@@ -11,7 +11,6 @@ Name | Type | Description | Notes
 **af** | **float** | TODO | [optional] 
 **cadd_phred** | **float** |  | [optional] 
 **cadd_score** | **float** |  | [optional] 
-**case_id** | **int** |  | 
 **chromosome** | **str** |  | [optional] 
 **clinvar** | **List[str]** |  | [optional] 
 **dann_score** | **float** |  | [optional] 

@@ -53,6 +53,7 @@ class VariantApi:
     def get_expanded_germline_variant_interpreted_case(
         self,
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        case_id: Annotated[StrictStr, Field(description="Case ID")],
         seq_id: Annotated[StrictStr, Field(description="Seq ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
         _request_timeout: Union[
@@ -74,6 +75,8 @@ class VariantApi:
 
         :param locus_id: Locus ID (required)
         :type locus_id: str
+        :param case_id: Case ID (required)
+        :type case_id: str
         :param seq_id: Seq ID (required)
         :type seq_id: str
         :param transcript_id: Transcript ID (required)
@@ -102,6 +105,7 @@ class VariantApi:
 
         _param = self._get_expanded_germline_variant_interpreted_case_serialize(
             locus_id=locus_id,
+            case_id=case_id,
             seq_id=seq_id,
             transcript_id=transcript_id,
             _request_auth=_request_auth,
@@ -130,6 +134,7 @@ class VariantApi:
     def get_expanded_germline_variant_interpreted_case_with_http_info(
         self,
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        case_id: Annotated[StrictStr, Field(description="Case ID")],
         seq_id: Annotated[StrictStr, Field(description="Seq ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
         _request_timeout: Union[
@@ -151,6 +156,8 @@ class VariantApi:
 
         :param locus_id: Locus ID (required)
         :type locus_id: str
+        :param case_id: Case ID (required)
+        :type case_id: str
         :param seq_id: Seq ID (required)
         :type seq_id: str
         :param transcript_id: Transcript ID (required)
@@ -179,6 +186,7 @@ class VariantApi:
 
         _param = self._get_expanded_germline_variant_interpreted_case_serialize(
             locus_id=locus_id,
+            case_id=case_id,
             seq_id=seq_id,
             transcript_id=transcript_id,
             _request_auth=_request_auth,
@@ -207,6 +215,7 @@ class VariantApi:
     def get_expanded_germline_variant_interpreted_case_without_preload_content(
         self,
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        case_id: Annotated[StrictStr, Field(description="Case ID")],
         seq_id: Annotated[StrictStr, Field(description="Seq ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
         _request_timeout: Union[
@@ -228,6 +237,8 @@ class VariantApi:
 
         :param locus_id: Locus ID (required)
         :type locus_id: str
+        :param case_id: Case ID (required)
+        :type case_id: str
         :param seq_id: Seq ID (required)
         :type seq_id: str
         :param transcript_id: Transcript ID (required)
@@ -256,6 +267,7 @@ class VariantApi:
 
         _param = self._get_expanded_germline_variant_interpreted_case_serialize(
             locus_id=locus_id,
+            case_id=case_id,
             seq_id=seq_id,
             transcript_id=transcript_id,
             _request_auth=_request_auth,
@@ -279,6 +291,7 @@ class VariantApi:
     def _get_expanded_germline_variant_interpreted_case_serialize(
         self,
         locus_id,
+        case_id,
         seq_id,
         transcript_id,
         _request_auth,
@@ -304,6 +317,8 @@ class VariantApi:
         # process the path parameters
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         if transcript_id is not None:
@@ -330,7 +345,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/cases/interpreted/{seq_id}/{transcript_id}',
+            resource_path='/variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
