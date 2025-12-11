@@ -11,8 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shad
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { useI18n } from '@/components/hooks/i18n';
 
-import BioinformaticsSection from './bioinformatics-section';
-
 function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
   const { t } = useI18n();
 
@@ -187,9 +185,6 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
             </div>
           </div>
         </div>
-
-        {/* Bioinformatics section */}
-        <BioinformaticsSection tasks={data.tasks} />
       </CardContent>
     </Card>
   );

@@ -110,7 +110,7 @@ function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
  */
 const cardContentVariants = tv({
   slots: {
-    base: 'py-2',
+    base: '',
   },
   variants: {
     variant: {
