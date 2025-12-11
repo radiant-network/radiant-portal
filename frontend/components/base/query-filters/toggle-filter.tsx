@@ -10,6 +10,7 @@ import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { useFilterConfig } from './filter-list';
+import { useAggregationBuilder } from './use-aggregation-builder';
 
 interface IProps {
   data?: Aggregation[];
@@ -18,10 +19,26 @@ interface IProps {
 
 export function ToggleFilter({ data, field }: IProps) {
   const { t } = useI18n();
-  const [items, setItems] = useState<Aggregation[]>(data || []);
+  const { appId } = useFilterConfig();
+
+  // Use the aggregation builder hook to fetch data automatically
+  const { data: aggregationData } = useAggregationBuilder(
+    field.key,
+    undefined,
+    true,
+    false, // withDictionary false for boolean filters
+    appId,
+  );
+
+  // Use data from props or from the aggregation builder
+  const [items, setItems] = useState<Aggregation[]>(data || aggregationData || []);
   // items that are include in the search
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const { appId } = useFilterConfig();
+
+  useEffect(() => {
+    // Update items when data changes (either from props or aggregation builder)
+    setItems(data || aggregationData || []);
+  }, [data, aggregationData]);
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
@@ -37,9 +54,7 @@ export function ToggleFilter({ data, field }: IProps) {
     } else {
       setSelectedItem(null);
     }
-
-    setItems(data || []);
-  }, [data]);
+  }, [appId, field.key]);
 
   // Memoize these functions with useCallback
   const onSelect = useCallback(

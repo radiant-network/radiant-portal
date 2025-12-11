@@ -3,7 +3,22 @@ import { HttpResponse } from 'msw';
 export const occurrenceApi = '/api/occurrences/germline/snv/1/1/aggregate';
 export const statisticApi = '/api/occurrences/germline/snv/1/1/statistics';
 
-export function httpOccurrenceApiResponse() {
+export async function httpOccurrenceApiResponse({ request }: any) {
+  const body = await request.clone().json();
+
+  if (body.field.includes('toggle filter')) {
+    return HttpResponse.json([
+      {
+        key: 'true',
+        count: 150,
+      },
+      {
+        key: 'false',
+        count: 85,
+      },
+    ]);
+  }
+
   return HttpResponse.json([
     {
       key: 'lorem_ipsum',
