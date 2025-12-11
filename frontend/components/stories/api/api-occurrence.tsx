@@ -1,7 +1,7 @@
 import { HttpResponse } from 'msw';
 
-export const occurrenceApi = '/api/occurrences/germline/snv/1/aggregate';
-export const statisticApi = '/api/occurrences/germline/snv/1/statistics';
+export const occurrenceApi = '/api/occurrences/germline/snv/1/1/aggregate';
+export const statisticApi = '/api/occurrences/germline/snv/1/1/statistics';
 
 export function httpOccurrenceApiResponse() {
   return HttpResponse.json([
@@ -50,6 +50,14 @@ export function httpOccurrenceApiResponse() {
 
 export async function httpStatisticsApiResponse({ request }: any) {
   const body = await request.clone().json();
+
+  if (body.field.includes('no data')) {
+    return HttpResponse.json({
+      avg: 50,
+      count: 1000,
+      type: 'decimal',
+    });
+  }
 
   if (body.field.includes('integer')) {
     return HttpResponse.json({
