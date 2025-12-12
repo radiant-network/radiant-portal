@@ -47,7 +47,22 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
-function isWithDictionaryEnabled(appId: ApplicationId, field: AggregationConfig): boolean {
+function isWithDictionaryEnabled(appId: ApplicationId, field: AggregationConfig, globalStorageKey: string): boolean {
+  // Try sessionStorage first
+  try {
+    const stored = sessionStorage.getItem(globalStorageKey);
+    if (stored) {
+      const allTempSelections = JSON.parse(stored);
+      const dictionaryKey = `${field.key}_withDictionary`;
+      if (Object.prototype.hasOwnProperty.call(allTempSelections, dictionaryKey)) {
+        return allTempSelections[dictionaryKey];
+      }
+    }
+  } catch (error) {
+    console.warn(`Failed to read dictionary toggle state from sessionStorage for ${field.key}:`, error);
+  }
+
+  // Fall back to query builder state
   const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
     .getResolvedActiveQuery(appId)
     // @ts-ignore
@@ -73,7 +88,9 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   };
 
   // State to manage the dictionary switch value
-  const [withDictionaryToggle, setWithDictionaryToggle] = useState(isWithDictionaryEnabled(appId, field));
+  const [withDictionaryToggle, setWithDictionaryToggle] = useState(
+    isWithDictionaryEnabled(appId, field, globalStorageKey),
+  );
 
   // Use the hook directly instead of receiving data as a prop
   const { data: aggregationData, isLoading } = useAggregationBuilder(
@@ -246,6 +263,21 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       console.warn(`Failed to save filter state to sessionStorage for ${field.key}:`, error);
     }
   }, [selectedItems, globalStorageKey, field.key]);
+
+  // Save withDictionaryToggle state to sessionStorage
+  useEffect(() => {
+    if (field.withDictionary) {
+      try {
+        const stored = sessionStorage.getItem(globalStorageKey) || '{}';
+        const allTempSelections = JSON.parse(stored);
+        const dictionaryKey = `${field.key}_withDictionary`;
+        allTempSelections[dictionaryKey] = withDictionaryToggle;
+        sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
+      } catch (error) {
+        console.warn(`Failed to save dictionary toggle state to sessionStorage for ${field.key}:`, error);
+      }
+    }
+  }, [withDictionaryToggle, globalStorageKey, field.key, field.withDictionary]);
 
   // Clean sessionStorage on page reload
   useEffect(() => {
