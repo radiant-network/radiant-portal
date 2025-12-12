@@ -11,7 +11,7 @@ import { Label } from '@/components/base/shadcn/label';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Switch } from '@/components/base/shadcn/switch';
-import { type Aggregation as AggregationConfig, ApplicationId } from '@/components/cores/applications-config';
+import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
 import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
@@ -47,14 +47,19 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
 
-function isWithDictionaryEnabled(appId: ApplicationId, field: AggregationConfig): boolean {
-  const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
-    .getResolvedActiveQuery(appId)
-    // @ts-ignore
-    .content.find((x: IValueFilter) => x.content.field === field.key);
-
-  if (prevSelectedItems && field.withDictionary) {
-    return true;
+function isWithDictionaryEnabled(field: AggregationConfig, globalStorageKey: string): boolean {
+  // Try sessionStorage first
+  try {
+    const stored = sessionStorage.getItem(globalStorageKey);
+    if (stored) {
+      const allTempSelections = JSON.parse(stored);
+      const dictionaryKey = `${field.key}_withDictionary`;
+      if (Object.prototype.hasOwnProperty.call(allTempSelections, dictionaryKey)) {
+        return allTempSelections[dictionaryKey];
+      }
+    }
+  } catch (error) {
+    console.warn(`Failed to read dictionary toggle state from sessionStorage for ${field.key}:`, error);
   }
 
   return false;
@@ -73,7 +78,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
   };
 
   // State to manage the dictionary switch value
-  const [withDictionaryToggle, setWithDictionaryToggle] = useState(isWithDictionaryEnabled(appId, field));
+  const [withDictionaryToggle, setWithDictionaryToggle] = useState(isWithDictionaryEnabled(field, globalStorageKey));
 
   // Use the hook directly instead of receiving data as a prop
   const { data: aggregationData, isLoading } = useAggregationBuilder(
@@ -246,6 +251,43 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       console.warn(`Failed to save filter state to sessionStorage for ${field.key}:`, error);
     }
   }, [selectedItems, globalStorageKey, field.key]);
+
+  // Save withDictionaryToggle state to sessionStorage
+  useEffect(() => {
+    if (field.withDictionary) {
+      try {
+        const stored = sessionStorage.getItem(globalStorageKey) || '{}';
+        const allTempSelections = JSON.parse(stored);
+        const dictionaryKey = `${field.key}_withDictionary`;
+        allTempSelections[dictionaryKey] = withDictionaryToggle;
+        sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
+      } catch (error) {
+        console.warn(`Failed to save dictionary toggle state to sessionStorage for ${field.key}:`, error);
+      }
+    }
+  }, [withDictionaryToggle, globalStorageKey, field.key, field.withDictionary]);
+
+  useEffect(() => {
+    if (!field.withDictionary || !aggregationData) return;
+
+    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+      .getResolvedActiveQuery(appId)
+      // @ts-ignore
+      .content.find((x: IValueFilter) => x.content.field === field.key);
+
+    const appliedFilters = (prevSelectedItems?.content.value as string[]) || [];
+
+    if (appliedFilters.length === 0) return;
+
+    const hasZeroCountFilter = appliedFilters.some(filterKey => {
+      const matchingAgg = aggregationData.find(agg => agg.key === filterKey);
+      return matchingAgg && matchingAgg.count === 0;
+    });
+
+    if (hasZeroCountFilter && !withDictionaryToggle) {
+      setWithDictionaryToggle(true);
+    }
+  }, [aggregationData, appId, field.key, field.withDictionary, withDictionaryToggle]);
 
   // Clean sessionStorage on page reload
   useEffect(() => {
