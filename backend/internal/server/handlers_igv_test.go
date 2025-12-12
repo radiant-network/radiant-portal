@@ -8,18 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
-
-type MockS3PreSigner struct{}
-
-func (m *MockS3PreSigner) GenerateS3PreSignedURL(url string) (*utils.PreSignedURL, error) {
-	return &utils.PreSignedURL{
-		URL:         "presigned." + url,
-		URLExpireAt: 1234567890,
-	}, nil
-}
 
 func (r *MockRepository) GetIGV(caseID int) ([]types.IGVTrack, error) {
 	return []types.IGVTrack{{
@@ -46,7 +37,7 @@ func (r *MockRepository) GetIGV(caseID int) ([]types.IGVTrack, error) {
 func Test_IGVGetHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/igv/:case_id", GetIGVHandler(repo, &MockS3PreSigner{}))
+	router.GET("/igv/:case_id", GetIGVHandler(repo, &testutils.MockS3PreSigner{}))
 
 	req, _ := http.NewRequest("GET", "/igv/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()

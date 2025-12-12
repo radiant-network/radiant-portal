@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -63,6 +64,23 @@ func (m *MockRepository) GetDocumentsFilters(query types.AggQuery, withLabAndPro
 		},
 	}
 	return &result, nil
+}
+
+func (m *MockRepository) GetById(id int) (*types.Document, error) {
+	if id == 999999 {
+		return nil, nil
+	}
+	return &types.Document{
+		ID:               203,
+		Name:             "FI0037905.S14786.vcf.gz",
+		DataCategoryCode: "genomic_data",
+		DataTypeCode:     "snv",
+		FileFormatCode:   "vcf",
+		Size:             325362647,
+		Url:              "https://example.com/document/203/download",
+		Hash:             "5d41402abc4b2a76b9719d911017c794",
+		CreatedOn:        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+	}, nil
 }
 
 func Test_SearchDocumentsHandler(t *testing.T) {
@@ -150,4 +168,47 @@ func Test_DocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"father", "label":"Father"}, 
 			{"count":0, "key":"mother", "label":"Mother"}
 		]}`, w.Body.String())
+}
+
+func Test_GetDocumentsDownloadUrlHandler_Success(t *testing.T) {
+	repo := &MockRepository{}
+	presigner := &testutils.MockS3PreSigner{}
+	router := gin.Default()
+	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
+
+	req, _ := http.NewRequest("GET", "/documents/203/download_url", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"pre_signed_url": "presigned.https://example.com/document/203/download",
+		"expires_at": 1234567890
+	}`, w.Body.String())
+}
+
+func Test_GetDocumentsDownloadUrlHandler_InvalidDocumentId(t *testing.T) {
+	repo := &MockRepository{}
+	presigner := &testutils.MockS3PreSigner{}
+	router := gin.Default()
+	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
+
+	req, _ := http.NewRequest("GET", "/documents/invalid/download_url", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_GetDocumentsDownloadUrlHandler_DocumentNotFound(t *testing.T) {
+	repo := &MockRepository{}
+	presigner := &testutils.MockS3PreSigner{}
+	router := gin.Default()
+	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
+
+	req, _ := http.NewRequest("GET", "/documents/999999/download_url", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }

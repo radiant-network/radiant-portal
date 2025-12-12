@@ -6,6 +6,7 @@ import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell'
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
+import DownloadFileCell from '@/components/base/data-table/cells/download-file-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
@@ -153,6 +154,16 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
     }),
+    columnHelper.display({
+      id: 'actions',
+      cell: ({ row }) => <DownloadFileCell documentId={row.original.document_id} />,
+      header: '',
+      size: 56,
+      minSize: 56,
+      maxSize: 56,
+      enableSorting: false,
+      enableHiding: false,
+    }),
   ] as TableColumnDef<DocumentResult, any>[];
 }
 
@@ -229,5 +240,10 @@ export const defaultSettings = createColumnSettings([
     visible: false,
     label: 'file_entity.run_alias',
     additionalFieldIds: ['run_alias'],
+  },
+  {
+    id: 'actions',
+    visible: true,
+    label: '',
   },
 ]);

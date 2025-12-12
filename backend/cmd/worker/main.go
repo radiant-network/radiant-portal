@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -37,7 +37,7 @@ func main() {
 	flag.Parse()
 	defer glog.Flush()
 
-	pollIntervalStr := getEnvOrDefault("POLL_INTERVAL_MS", "1000")
+	pollIntervalStr := utils.GetEnvOrDefault("POLL_INTERVAL_MS", "1000")
 	pollInterval, pollIntervalErr := strconv.Atoi(pollIntervalStr)
 	if pollIntervalErr != nil {
 		glog.Fatalf("Polling interval defined in env var POLL_INTERVAL_MS (%v) must be an integer ", pollIntervalStr)
@@ -55,14 +55,6 @@ func main() {
 		processBatch(dbPostgres, context)
 		time.Sleep(time.Duration(pollInterval) * time.Millisecond)
 	}
-}
-
-func getEnvOrDefault(key, fallback string) string {
-	value, exists := os.LookupEnv(key)
-	if !exists || value == "" { // Check if not exists OR if the value is empty
-		return fallback
-	}
-	return value
 }
 
 func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
@@ -87,7 +79,7 @@ func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
 }
 
 func StartHealthProbe(db *gorm.DB) {
-	port := getEnvOrDefault("PROBE_PORT", "9999")
+	port := utils.GetEnvOrDefault("PROBE_PORT", "9999")
 	if _, err := strconv.Atoi(port); err != nil {
 		glog.Fatalf("Probe port defined in env var PROBE_PORT (%v) must be an integer ", port)
 	}
