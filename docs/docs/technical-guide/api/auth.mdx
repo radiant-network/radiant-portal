@@ -18,6 +18,20 @@ In the future, support for the **Device Authorization Flow** will be added to fa
 This method uses the Client Credentials grant for machine-to-machine authentication. The client authenticates using its own credentials and receives a JWT token.
 Note that token obtained with this method will expired after a certain period (e.g., 5 minutes) and needs to be refreshed by requesting a new token.
 
+Here's a sequence diagram illustrating the flow:
+```mermaid
+sequenceDiagram
+    participant Script as External Script / Service
+    participant KC as Keycloak
+    participant API as Backend API
+
+    Script->>KC: POST /token (grant_type=client_credentials<br>client_id + client_secret)
+    KC-->>Script: 200 OK (access_token)
+    Script->>API: GET /resource (Authorization: Bearer token)
+    API-->>Script: 200 OK
+```
+
+Here are code examples in different languages to obtain a JWT token using the Client Credentials grant:
 <Tabs groupId="languages">
 <TabItem value="bash" label="Bash + cURL">
 ```bash
