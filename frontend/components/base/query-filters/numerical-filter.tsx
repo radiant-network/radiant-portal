@@ -159,7 +159,7 @@ function getNumericalValue(
   statistics?: Statistics,
 ) {
   let hasUnappliedItems: boolean = false;
-  let selectedRange: RangeOperators = RangeOperators.LessThan;
+  let selectedRange: RangeOperators = aggConfig?.defaultOperator ?? RangeOperators.LessThan;
   let minValue: string = '0';
   let maxValue: string = '0';
   let numericalValue: string = '';
@@ -433,7 +433,7 @@ export function NumericalFilter({ field }: IProps) {
               <Select value={selectedRange} onValueChange={onRangeValueChanged}>
                 <SelectTrigger size="sm">
                   <SelectValue placeholder={t('common.filters.operators.select_operator')}>
-                    {RANGE_OPERATOR_LABELS[selectedRange].display}
+                    {RANGE_OPERATOR_LABELS[selectedRange]?.display || t('common.filters.operators.unknown')}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>{RangeChoices}</SelectContent>
@@ -502,7 +502,7 @@ export function NumericalFilter({ field }: IProps) {
           </div>
 
           {aggConfig?.rangeTypes && aggConfig.rangeTypes.length > 0 && (
-            <div id={`${fieldKey}_range_type_container`}>
+            <div id={`${fieldKey}_range_type_container`} className="mt-3">
               {isLoadingStats ? (
                 <>
                   <Skeleton className="h-5 w-16 mb-1" id={`${fieldKey}_unit_label_skeleton`} />
@@ -534,7 +534,7 @@ export function NumericalFilter({ field }: IProps) {
           )}
 
           {noDataInputOption && !hasInterval && (
-            <label className="flex items-center space-x-2 overflow-hidden" id={`${fieldKey}_no_data_label`}>
+            <label className="flex items-center space-x-2 overflow-hidden mt-3" id={`${fieldKey}_no_data_label`}>
               <Checkbox checked={hasNoData} onCheckedChange={onNoDataChanged} id={`${fieldKey}_no_data`} />
               <span>{t('common.filters.labels.no_data')}</span>
             </label>

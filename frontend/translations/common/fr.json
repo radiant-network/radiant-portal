@@ -605,7 +605,8 @@
         "greater_than_or_equal": "Plus grand ou égal à",
         "less_than_or_equal": "Plus petit ou égal à",
         "in": "Dans",
-        "select_operator": "Sélectionner un opérateur"
+        "select_operator": "Sélectionner un opérateur",
+        "unknown": "Opérateur inconnu"
       },
       "buttons": {
         "clear": "Effacer",
