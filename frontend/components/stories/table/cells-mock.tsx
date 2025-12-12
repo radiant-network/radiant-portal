@@ -894,7 +894,13 @@ export const applicationFirstSetCellColumns = [
         relationshipToProband={info.row.original.relationship_to_proband}
       />
     ),
-    header: 'CasePreviewCell',
+    header: () => (
+      <TooltipHeader
+        tooltip={"Preview won't work in storybook since mock page doesn't meet the dependencies to make preview works"}
+      >
+        UninterpretedCasePreviewCell
+      </TooltipHeader>
+    ),
   }),
 ];
 
