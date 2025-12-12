@@ -1,6 +1,5 @@
 import { VepImpact } from '@/api/api';
-
-import { Indicator, IndicatorProps } from '../ui/indicator';
+import { Indicator, IndicatorProps } from '@/components/base/shadcn/indicator';
 
 interface ImpactIndicatorProps extends Omit<IndicatorProps, 'variant'> {
   value: VepImpact;

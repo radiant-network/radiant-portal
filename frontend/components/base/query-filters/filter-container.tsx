@@ -1,0 +1,131 @@
+import React from 'react';
+
+import { MultiSelectFilter } from '@/components/base/query-filters/multiselect-filter';
+import { NumericalFilter } from '@/components/base/query-filters/numerical-filter';
+import { ToggleFilter } from '@/components/base/query-filters/toggle-filter';
+import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
+import { Card, CardHeader } from '@/components/base/shadcn/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
+import { useI18n } from '@/components/hooks/i18n';
+
+interface FilterContainerProps {
+  field: AggregationConfig;
+  isOpen: boolean;
+  searchHandler?: (_e: React.MouseEvent<SVGElement, MouseEvent>) => void;
+}
+
+interface AccordionContainerProps extends FilterContainerProps {
+  searchHandler?: (_e: React.MouseEvent<SVGElement, MouseEvent>) => void;
+  children?: React.ReactNode;
+}
+
+export function AccordionContainer({ field, children }: AccordionContainerProps) {
+  const { t } = useI18n();
+
+  const label = t(`common.filters.labels.${field.translation_key}`, { defaultValue: field.key });
+  const tooltipKey = `common.filters.labels.${field.translation_key}_tooltip`;
+  const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
+
+  function renderTrigger() {
+    return (
+      <div className="flex items-center justify-between w-full text-xs">
+        <span>{label}</span>
+      </div>
+    );
+  }
+
+  return (
+    <Card size="sm">
+      <AccordionItem key={field.key} value={field.key} className="border-none">
+        <CardHeader size="sm">
+          <AccordionTrigger>
+            {tooltipContent ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>{renderTrigger()}</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>{tooltipContent}</span>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              renderTrigger()
+            )}
+          </AccordionTrigger>
+        </CardHeader>
+        <AccordionContent className="pb-0">{children}</AccordionContent>
+      </AccordionItem>
+    </Card>
+  );
+}
+
+/**
+ * To be used when only the Filter is needed
+ */
+export function FilterComponent({ field }: FilterContainerProps) {
+  const { t } = useI18n();
+  let filterElement;
+
+  switch (field.type) {
+    case 'multiple':
+      filterElement = <MultiSelectFilter field={field} />;
+      break;
+    case 'numerical':
+      filterElement = <NumericalFilter field={field} />;
+      break;
+    case 'boolean':
+      filterElement = <ToggleFilter field={field} />;
+      break;
+    default:
+      filterElement = <div>{t('common.filters.unsupported_type', { type: field.type })}</div>;
+  }
+
+  return filterElement;
+}
+
+/**
+ * To be use when the filter needs to be inside an Accordion component
+ */
+export function FilterContainer({ field, isOpen }: FilterContainerProps) {
+  const { t } = useI18n();
+  const fieldType = field.type;
+
+  if (fieldType === 'divider') {
+    return (
+      <h4 className="px-2 h-8 text-sidebar-foreground/70 text-xs font-medium line-height-xs text-ellipsis overflow-hidden flex justify-between items-center">
+        {t(`common.filters.${field.key}`)}
+      </h4>
+    );
+  }
+
+  let filterElement;
+
+  switch (fieldType) {
+    case 'multiple':
+      filterElement = (
+        <AccordionContainer field={field} isOpen={isOpen}>
+          <MultiSelectFilter field={field} />
+        </AccordionContainer>
+      );
+      break;
+    case 'numerical':
+      filterElement = (
+        <AccordionContainer field={field} isOpen={isOpen}>
+          <NumericalFilter field={field} />
+        </AccordionContainer>
+      );
+      break;
+    case 'boolean':
+      filterElement = (
+        <AccordionContainer field={field} isOpen={isOpen}>
+          <ToggleFilter field={field} />
+        </AccordionContainer>
+      );
+      break;
+    default:
+      filterElement = <div>{t('common.filters.unsupported_type', { type: field.type })}</div>;
+  }
+
+  return filterElement;
+}

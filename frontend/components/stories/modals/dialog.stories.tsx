@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { Button } from '@/components/base/ui/button';
+import { Button } from '@/components/base/shadcn/button';
 import {
   Dialog,
   DialogBody,
@@ -11,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/base/ui/dialog';
+} from '@/components/base/shadcn/dialog';
 
 const meta = {
   title: 'Modals/Dialog',
@@ -25,7 +26,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
-  render: args => {
+  render: _args => {
     const [open, setOpen] = useState<boolean>(false);
 
     return (
@@ -54,7 +55,7 @@ export const Default: Story = {
 
 export const Sizes: Story = {
   args: {},
-  render: args => {
+  render: _args => {
     const [openSm, setOpenSm] = useState<boolean>(false);
     const [openMd, setOpenMd] = useState<boolean>(false);
     const [openLg, setOpenLg] = useState<boolean>(false);
@@ -169,7 +170,7 @@ export const Sizes: Story = {
 
 export const StickyHeader: Story = {
   args: {},
-  render: args => {
+  render: _args => {
     const [open, setOpen] = useState<boolean>(false);
 
     return (
@@ -200,7 +201,7 @@ export const StickyHeader: Story = {
 
 export const StickyFooter: Story = {
   args: {},
-  render: args => {
+  render: _args => {
     const [open, setOpen] = useState<boolean>(false);
 
     return (
@@ -231,7 +232,7 @@ export const StickyFooter: Story = {
 
 export const StickyBoth: Story = {
   args: {},
-  render: args => {
+  render: _args => {
     const [open, setOpen] = useState<boolean>(false);
 
     return (

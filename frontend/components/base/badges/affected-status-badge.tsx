@@ -1,6 +1,5 @@
+import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
-
-import { Badge } from '../ui/badge';
 
 export type AffectedStatusProps = 'affected' | 'non_affected' | 'unknown' | undefined;
 

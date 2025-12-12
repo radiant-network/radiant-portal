@@ -53,7 +53,8 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_cnv_occurrences(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         _request_timeout: Union[
             None,
@@ -72,8 +73,10 @@ class OccurrencesApi:
 
         Aggregate germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -99,6 +102,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             _request_auth=_request_auth,
@@ -127,7 +131,8 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_cnv_occurrences_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         _request_timeout: Union[
             None,
@@ -146,8 +151,10 @@ class OccurrencesApi:
 
         Aggregate germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -173,6 +180,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             _request_auth=_request_auth,
@@ -201,7 +209,8 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_cnv_occurrences_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         _request_timeout: Union[
             None,
@@ -220,8 +229,10 @@ class OccurrencesApi:
 
         Aggregate germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -247,6 +258,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             _request_auth=_request_auth,
@@ -270,6 +282,7 @@ class OccurrencesApi:
 
     def _aggregate_germline_cnv_occurrences_serialize(
         self,
+        case_id,
         seq_id,
         aggregation_body_with_sqon,
         _request_auth,
@@ -293,6 +306,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -332,7 +347,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{seq_id}/aggregate',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/aggregate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -351,7 +366,8 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_snv_occurrences(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -371,8 +387,10 @@ class OccurrencesApi:
 
         Aggregate germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -400,6 +418,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
@@ -429,7 +448,8 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_snv_occurrences_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -449,8 +469,10 @@ class OccurrencesApi:
 
         Aggregate germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -478,6 +500,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
@@ -507,7 +530,8 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_snv_occurrences_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -527,8 +551,10 @@ class OccurrencesApi:
 
         Aggregate germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -556,6 +582,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
@@ -580,6 +607,7 @@ class OccurrencesApi:
 
     def _aggregate_germline_snv_occurrences_serialize(
         self,
+        case_id,
         seq_id,
         aggregation_body_with_sqon,
         with_dictionary,
@@ -604,6 +632,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -647,7 +677,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{seq_id}/aggregate',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/aggregate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -666,7 +696,8 @@ class OccurrencesApi:
     @validate_call
     def count_germline_cnv_occurrences(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -685,8 +716,10 @@ class OccurrencesApi:
 
         Counts germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -712,6 +745,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
@@ -740,7 +774,8 @@ class OccurrencesApi:
     @validate_call
     def count_germline_cnv_occurrences_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -759,8 +794,10 @@ class OccurrencesApi:
 
         Counts germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -786,6 +823,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
@@ -814,7 +852,8 @@ class OccurrencesApi:
     @validate_call
     def count_germline_cnv_occurrences_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -833,8 +872,10 @@ class OccurrencesApi:
 
         Counts germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -860,6 +901,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
@@ -883,6 +925,7 @@ class OccurrencesApi:
 
     def _count_germline_cnv_occurrences_serialize(
         self,
+        case_id,
         seq_id,
         count_body_with_sqon,
         _request_auth,
@@ -906,6 +949,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -945,7 +990,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{seq_id}/count',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -964,7 +1009,8 @@ class OccurrencesApi:
     @validate_call
     def count_germline_snv_occurrences(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -983,8 +1029,10 @@ class OccurrencesApi:
 
         Counts germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1010,6 +1058,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
@@ -1038,7 +1087,8 @@ class OccurrencesApi:
     @validate_call
     def count_germline_snv_occurrences_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1057,8 +1107,10 @@ class OccurrencesApi:
 
         Counts germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1084,6 +1136,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
@@ -1112,7 +1165,8 @@ class OccurrencesApi:
     @validate_call
     def count_germline_snv_occurrences_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1131,8 +1185,10 @@ class OccurrencesApi:
 
         Counts germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1158,6 +1214,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
@@ -1181,6 +1238,7 @@ class OccurrencesApi:
 
     def _count_germline_snv_occurrences_serialize(
         self,
+        case_id,
         seq_id,
         count_body_with_sqon,
         _request_auth,
@@ -1204,6 +1262,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -1243,7 +1303,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{seq_id}/count',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1262,7 +1322,8 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_germline_snv_occurrence(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1281,8 +1342,10 @@ class OccurrencesApi:
 
         Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1308,6 +1371,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_germline_snv_occurrence_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
@@ -1335,7 +1399,8 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_germline_snv_occurrence_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1354,8 +1419,10 @@ class OccurrencesApi:
 
         Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1381,6 +1448,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_germline_snv_occurrence_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
@@ -1408,7 +1476,8 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_germline_snv_occurrence_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1427,8 +1496,10 @@ class OccurrencesApi:
 
         Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1454,6 +1525,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_germline_snv_occurrence_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
@@ -1476,6 +1548,7 @@ class OccurrencesApi:
 
     def _get_expanded_germline_snv_occurrence_serialize(
         self,
+        case_id,
         seq_id,
         locus_id,
         _request_auth,
@@ -1499,6 +1572,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         if locus_id is not None:
@@ -1525,7 +1600,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/germline/snv/{seq_id}/{locus_id}/expanded',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1817,6 +1892,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_genes_overlap(
         self,
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         cnv_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
@@ -1836,6 +1912,8 @@ class OccurrencesApi:
 
         List genes overlapping a CNV with a given ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
         :param cnv_id: Locus ID (required)
@@ -1863,6 +1941,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_genes_overlap_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             cnv_id=cnv_id,
             _request_auth=_request_auth,
@@ -1890,6 +1969,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_genes_overlap_with_http_info(
         self,
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         cnv_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
@@ -1909,6 +1989,8 @@ class OccurrencesApi:
 
         List genes overlapping a CNV with a given ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
         :param cnv_id: Locus ID (required)
@@ -1936,6 +2018,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_genes_overlap_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             cnv_id=cnv_id,
             _request_auth=_request_auth,
@@ -1963,6 +2046,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_genes_overlap_without_preload_content(
         self,
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         cnv_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
@@ -1982,6 +2066,8 @@ class OccurrencesApi:
 
         List genes overlapping a CNV with a given ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
         :param cnv_id: Locus ID (required)
@@ -2009,6 +2095,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_genes_overlap_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             cnv_id=cnv_id,
             _request_auth=_request_auth,
@@ -2031,6 +2118,7 @@ class OccurrencesApi:
 
     def _list_germline_cnv_genes_overlap_serialize(
         self,
+        case_id,
         seq_id,
         cnv_id,
         _request_auth,
@@ -2054,6 +2142,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         if cnv_id is not None:
@@ -2080,7 +2170,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/germline/cnv/{seq_id}/{cnv_id}/genes_overlap',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2099,7 +2189,8 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_occurrences(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2118,8 +2209,10 @@ class OccurrencesApi:
 
         List germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2145,6 +2238,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
@@ -2173,7 +2267,8 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_occurrences_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2192,8 +2287,10 @@ class OccurrencesApi:
 
         List germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2219,6 +2316,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
@@ -2247,7 +2345,8 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_occurrences_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2266,8 +2365,10 @@ class OccurrencesApi:
 
         List germline CNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2293,6 +2394,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
@@ -2316,6 +2418,7 @@ class OccurrencesApi:
 
     def _list_germline_cnv_occurrences_serialize(
         self,
+        case_id,
         seq_id,
         list_body_with_sqon,
         _request_auth,
@@ -2339,6 +2442,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -2378,7 +2483,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{seq_id}/list',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2397,7 +2502,8 @@ class OccurrencesApi:
     @validate_call
     def list_germline_snv_occurrences(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2416,8 +2522,10 @@ class OccurrencesApi:
 
         List germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2443,6 +2551,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
@@ -2471,7 +2580,8 @@ class OccurrencesApi:
     @validate_call
     def list_germline_snv_occurrences_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2490,8 +2600,10 @@ class OccurrencesApi:
 
         List germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2517,6 +2629,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
@@ -2545,7 +2658,8 @@ class OccurrencesApi:
     @validate_call
     def list_germline_snv_occurrences_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2564,8 +2678,10 @@ class OccurrencesApi:
 
         List germline SNV occurrences for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2591,6 +2707,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
@@ -2614,6 +2731,7 @@ class OccurrencesApi:
 
     def _list_germline_snv_occurrences_serialize(
         self,
+        case_id,
         seq_id,
         list_body_with_sqon,
         _request_auth,
@@ -2637,6 +2755,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -2676,7 +2796,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{seq_id}/list',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2695,7 +2815,8 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_cnv_occurrences(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -2714,8 +2835,10 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2741,6 +2864,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
@@ -2769,7 +2893,8 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_cnv_occurrences_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -2788,8 +2913,10 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2815,6 +2942,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
@@ -2843,7 +2971,8 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_cnv_occurrences_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -2862,8 +2991,10 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -2889,6 +3020,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_cnv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
@@ -2912,6 +3044,7 @@ class OccurrencesApi:
 
     def _statistics_germline_cnv_occurrences_serialize(
         self,
+        case_id,
         seq_id,
         statistics_body_with_sqon,
         _request_auth,
@@ -2935,6 +3068,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -2974,7 +3109,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{seq_id}/statistics',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/statistics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2993,7 +3128,8 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_snv_occurrences(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -3012,8 +3148,10 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3039,6 +3177,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
@@ -3067,7 +3206,8 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_snv_occurrences_with_http_info(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -3086,8 +3226,10 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3113,6 +3255,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
@@ -3141,7 +3284,8 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_snv_occurrences_without_preload_content(
         self,
-        seq_id: Annotated[StrictStr, Field(description="Sequence ID")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -3160,8 +3304,10 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param case_id: Case ID (required)
+        :type case_id: int
         :param seq_id: Sequence ID (required)
-        :type seq_id: str
+        :type seq_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3187,6 +3333,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_snv_occurrences_serialize(
+            case_id=case_id,
             seq_id=seq_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
@@ -3210,6 +3357,7 @@ class OccurrencesApi:
 
     def _statistics_germline_snv_occurrences_serialize(
         self,
+        case_id,
         seq_id,
         statistics_body_with_sqon,
         _request_auth,
@@ -3233,6 +3381,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -3272,7 +3422,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{seq_id}/statistics',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/statistics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

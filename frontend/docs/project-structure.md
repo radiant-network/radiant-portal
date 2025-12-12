@@ -18,13 +18,13 @@ Instead of working by portals, now we work by applications and we have to make s
 frontend/
 ├── apps/                # Full applications for a domain (e.g., Variant, Prescription)
 ├── components/
-│   ├── base/           # Simple, first level Reusable components
-|   │   ├──ui           # Shadcn imported primitive components (keep name lowercase so that shadcn import doesn't re-import)
-│   ├── features/       # Feature-specific components
+│   ├── base/           # Reusable components
+|   │   ├──shadcn       # Shadcn imported primitive components (keep name lowercase so that shadcn import doesn't re-import)
 │   ├── layout/         # Layout components
-│   └── models/         # Models, types and headless features
-│   └── stories/         # Component stories for storybook
-├── docs/                # General documentation
+│   └── cores/         	# Models, types and headless features
+│   └── hooks/         	# Sharable hooks
+│   └── stories/        # Component stories for storybook
+├── docs/               # General documentation
 ├── portals/             #
 │   ├── radiant/        # Portal build. Get a configuration an build a portal (e.g., Radiant, kf, include)
 ├── storybook/           #
@@ -32,7 +32,7 @@ frontend/
 │   ├── themesX/        # Theme-specific assets
 │   |   └── assets/     #
 │   utils/              # Shared utils
-└── types/               # TypeScript types/interfaces
+└── types/              # TypeScript types/interfaces
 ```
 
 ---

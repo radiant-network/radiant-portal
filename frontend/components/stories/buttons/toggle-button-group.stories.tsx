@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import ToggleButtonGroup from '@/components/base/toggle-button-group/toggle-button-group';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 import { buttonSizes } from './utils';
 
@@ -50,7 +50,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     defaultValue: 'Button 1',
-    onValueChange: (_value: String) => { },
+    onValueChange: (_value: String) => {},
   },
   render: args => (
     <div className="flex flex-col gap-2">

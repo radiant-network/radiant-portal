@@ -1,6 +1,7 @@
-import { Button } from '@/components/base/ui/button';
 import { CellContext } from '@tanstack/react-table';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+
+import { Button } from '@/components/base/shadcn/button';
 
 function RowExpandCell({ row }: CellContext<any, any>) {
   return (

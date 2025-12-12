@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from '@/components/base/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import { cn } from '@/components/lib/utils';
 
 import { ASSIGNATION_CONSTANTS } from '../constants';

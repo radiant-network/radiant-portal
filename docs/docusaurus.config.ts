@@ -15,6 +15,9 @@ const config: Config = {
         v4: true, // Improve compatibility with the upcoming Docusaurus v4
     },
 
+    markdown: {
+        mermaid: true,
+    },
     // Set the production url of your site here
     url: 'https://radiant-network.github.io',
     // Set the /<baseUrl>/ pathname under which your site is served
@@ -145,6 +148,7 @@ const config: Config = {
     ],
     themes: [
         'docusaurus-theme-openapi-docs',
+        '@docusaurus/theme-mermaid'
     ],
 };
 

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { Button } from '@/components/base/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/base/ui/card';
-import { Input } from '@/components/base/ui/input';
-import { Label } from '@/components/base/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/ui/select';
+import { Button } from '@/components/base/shadcn/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Input } from '@/components/base/shadcn/input';
+import { Label } from '@/components/base/shadcn/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 
 const meta = {
   title: 'Cards/Card',

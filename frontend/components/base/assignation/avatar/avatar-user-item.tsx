@@ -1,5 +1,5 @@
 import { CopyButton } from '@/components/base/buttons/copy-button';
-import { Avatar, AvatarFallback } from '@/components/base/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import { cn } from '@/components/lib/utils';
 
 import { avatarStyles } from './avatar.styles';

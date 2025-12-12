@@ -26,6 +26,8 @@ docs/ColumnPinningConfig.md
 docs/Count.md
 docs/CountBodyWithSqon.md
 docs/CreateBatchResponse.md
+docs/CreatePatientBatchBody.md
+docs/CreateSampleBatchBody.md
 docs/CreateSequencingExperimentBatchBody.md
 docs/DocumentFilters.md
 docs/DocumentResult.md
@@ -56,9 +58,11 @@ docs/MondoApi.md
 docs/OccurrencesApi.md
 docs/OmimGenePanel.md
 docs/PaginationConfig.md
+docs/PatientBatch.md
 docs/PatientsApi.md
 docs/PubmedCitation.md
 docs/PubmedCitationDetails.md
+docs/SampleBatch.md
 docs/SamplesApi.md
 docs/SavedFilter.md
 docs/SavedFilterCreationInput.md
@@ -142,6 +146,8 @@ radiant_python/models/column_pinning_config.py
 radiant_python/models/count.py
 radiant_python/models/count_body_with_sqon.py
 radiant_python/models/create_batch_response.py
+radiant_python/models/create_patient_batch_body.py
+radiant_python/models/create_sample_batch_body.py
 radiant_python/models/create_sequencing_experiment_batch_body.py
 radiant_python/models/document_filters.py
 radiant_python/models/document_result.py
@@ -165,8 +171,10 @@ radiant_python/models/list_body_with_criteria.py
 radiant_python/models/list_body_with_sqon.py
 radiant_python/models/omim_gene_panel.py
 radiant_python/models/pagination_config.py
+radiant_python/models/patient_batch.py
 radiant_python/models/pubmed_citation.py
 radiant_python/models/pubmed_citation_details.py
+radiant_python/models/sample_batch.py
 radiant_python/models/saved_filter.py
 radiant_python/models/saved_filter_creation_input.py
 radiant_python/models/saved_filter_type.py

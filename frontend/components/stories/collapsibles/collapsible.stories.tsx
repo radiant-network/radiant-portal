@@ -1,9 +1,9 @@
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { Button } from '@/components/base/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/ui/collapsible';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { Button } from '@/components/base/shadcn/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/shadcn/collapsible';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 const config: PortalConfig = {
   variant_entity: {

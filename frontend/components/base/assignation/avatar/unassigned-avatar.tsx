@@ -1,7 +1,7 @@
 import { User } from 'lucide-react';
 
-import { Avatar, AvatarFallback } from '@/components/base/ui/avatar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 

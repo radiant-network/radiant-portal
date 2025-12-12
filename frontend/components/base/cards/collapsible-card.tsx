@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Collapsible, CollapsibleTrigger } from '@radix-ui/react-collapsible';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { CollapsibleContent } from '../ui/collapsible';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { CollapsibleContent } from '@/components/base/shadcn/collapsible';
 
 type CollapsibleCardProps = {
   defaultOpen?: boolean;

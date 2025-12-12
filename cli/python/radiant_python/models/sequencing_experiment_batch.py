@@ -33,12 +33,13 @@ class SequencingExperimentBatch(BaseModel):
     platform_code: StrictStr
     run_alias: Optional[StrictStr] = None
     run_date: Optional[datetime] = None
+    run_name: Optional[StrictStr] = None
     sample_organization_code: StrictStr
     sequencing_lab_code: StrictStr
     sequencing_read_technology_code: StrictStr
     status_code: StrictStr
     submitter_sample_id: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "capture_kit", "experimental_strategy_code", "platform_code", "run_alias", "run_date", "sample_organization_code", "sequencing_lab_code", "sequencing_read_technology_code", "status_code", "submitter_sample_id"]
+    __properties: ClassVar[List[str]] = ["aliquot", "capture_kit", "experimental_strategy_code", "platform_code", "run_alias", "run_date", "run_name", "sample_organization_code", "sequencing_lab_code", "sequencing_read_technology_code", "status_code", "submitter_sample_id"]
 
     @field_validator('experimental_strategy_code')
     def experimental_strategy_code_validate_enum(cls, value):
@@ -118,6 +119,7 @@ class SequencingExperimentBatch(BaseModel):
             "platform_code": obj.get("platform_code"),
             "run_alias": obj.get("run_alias"),
             "run_date": obj.get("run_date"),
+            "run_name": obj.get("run_name"),
             "sample_organization_code": obj.get("sample_organization_code"),
             "sequencing_lab_code": obj.get("sequencing_lab_code"),
             "sequencing_read_technology_code": obj.get("sequencing_read_technology_code"),

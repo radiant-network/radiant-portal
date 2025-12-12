@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { TestTubeDiagonalIcon } from 'lucide-react';
 
 import ChecboxFilter from '@/components/base/checkboxes/checkbox-filter';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/model/applications-config';
+import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -53,6 +53,7 @@ export const Default: Story = {
     label: 'Loremp ipsum',
   },
   render: args => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [checked, setChecked] = useState<string[]>([]);
     const handleOnCheckedChange = (id: string) => (value: boolean) => {
       if (value) {

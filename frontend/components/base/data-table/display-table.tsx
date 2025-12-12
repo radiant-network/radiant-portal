@@ -1,11 +1,11 @@
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { SearchIcon } from 'lucide-react';
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/shadcn/table';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
 import Empty from '../empty';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 import { HEADER_HEIGHT, ROW_HEIGHT, TableColumnDef } from './data-table';
 

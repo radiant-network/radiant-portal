@@ -4,14 +4,14 @@ import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-ta
 import { TFunction } from 'i18next';
 import { ArrowDown, ArrowDownUp, ArrowUp, Pin, PinIcon, PinOff } from 'lucide-react';
 
-import { Button } from '@/components/base/ui/button';
+import { Button } from '@/components/base/shadcn/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuPortal,
-} from '@/components/base/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+} from '@/components/base/shadcn/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
@@ -20,22 +20,22 @@ const PIN_COLUMN_ACTIONS: {
   position: ColumnPinningPosition;
   icon: React.ReactNode;
 }[] = [
-    {
-      key: 'common.table.pin.left',
-      position: 'left',
-      icon: <PinIcon className="rotate-90" />,
-    },
-    {
-      key: 'common.table.pin.right',
-      position: 'right',
-      icon: <PinIcon className="ransform -rotate-90" />,
-    },
-    {
-      key: 'common.table.pin.unpin',
-      position: false,
-      icon: <PinOff />,
-    },
-  ];
+  {
+    key: 'common.table.pin.left',
+    position: 'left',
+    icon: <PinIcon className="rotate-90" />,
+  },
+  {
+    key: 'common.table.pin.right',
+    position: 'right',
+    icon: <PinIcon className="ransform -rotate-90" />,
+  },
+  {
+    key: 'common.table.pin.unpin',
+    position: false,
+    icon: <PinOff />,
+  },
+];
 
 /**
  * Use header.column.getNextSortingOrder() to display the next action on sort

@@ -1,10 +1,14 @@
 import { MoreVerticalIcon } from 'lucide-react';
 import { VariantProps } from 'tailwind-variants';
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/base/shadcn/dropdown-menu';
+import { Separator } from '@/components/base/shadcn/separator';
 import { cn } from '@/lib/utils';
-
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { Separator } from '../ui/separator';
 
 import { actionButtonVariants } from './button.variants';
 

@@ -1,5 +1,3 @@
-import { useI18n } from '@/components/hooks/i18n';
-
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -8,8 +6,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTrigger,
-} from '../../ui/alert-dialog';
-import { Button } from '../../ui/button';
+} from '@/components/base/shadcn/alert-dialog';
+import { Button } from '@/components/base/shadcn/button';
+import { useI18n } from '@/components/hooks/i18n';
 
 import EmptyCell from './empty-cell';
 

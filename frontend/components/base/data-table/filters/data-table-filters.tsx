@@ -3,11 +3,10 @@ import { ListFilter, X } from 'lucide-react';
 
 import { SearchCriterion } from '@/api/api';
 import FilterButton, { IFilterButton, IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
-import { Button } from '@/components/base/ui/button';
+import { Button } from '@/components/base/shadcn/button';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 import { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-
-import { Skeleton } from '../../ui/skeleton';
 
 import TableFiltersSearch, { AutocompleteApiFn } from './data-table-filter-search';
 

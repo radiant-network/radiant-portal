@@ -1,15 +1,15 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
 
-import { Switch } from '@/components/base/ui/switch';
+import { Switch } from '@/components/base/shadcn/switch';
 
 const meta = {
   title: 'Inputs/Switch',
   args: {
     size: 'default',
     checked: false,
-    onCheckedChange: fn(),
+    onCheckedChange: () => {},
   },
   component: Switch,
 } satisfies Meta<typeof Switch>;

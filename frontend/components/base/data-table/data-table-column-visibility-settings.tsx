@@ -1,6 +1,7 @@
-import { Checkbox } from '@/components/base/ui/checkbox';
-import { useI18n } from '@/components/hooks/i18n';
 import { UniqueIdentifier } from '@dnd-kit/core';
+
+import { Checkbox } from '@/components/base/shadcn/checkbox';
+import { useI18n } from '@/components/hooks/i18n';
 
 type VisibilityColumnSettingProps = {
   id: UniqueIdentifier;

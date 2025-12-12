@@ -12,7 +12,6 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-
 # import models into model package
 from radiant_python.models.aggregation import Aggregation
 from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
@@ -37,6 +36,8 @@ from radiant_python.models.column_pinning_config import ColumnPinningConfig
 from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 from radiant_python.models.create_batch_response import CreateBatchResponse
+from radiant_python.models.create_patient_batch_body import CreatePatientBatchBody
+from radiant_python.models.create_sample_batch_body import CreateSampleBatchBody
 from radiant_python.models.create_sequencing_experiment_batch_body import CreateSequencingExperimentBatchBody
 from radiant_python.models.document_filters import DocumentFilters
 from radiant_python.models.document_result import DocumentResult
@@ -60,8 +61,10 @@ from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
 from radiant_python.models.omim_gene_panel import OmimGenePanel
 from radiant_python.models.pagination_config import PaginationConfig
+from radiant_python.models.patient_batch import PatientBatch
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
+from radiant_python.models.sample_batch import SampleBatch
 from radiant_python.models.saved_filter import SavedFilter
 from radiant_python.models.saved_filter_creation_input import SavedFilterCreationInput
 from radiant_python.models.saved_filter_type import SavedFilterType
@@ -90,3 +93,4 @@ from radiant_python.models.variant_overview import VariantOverview
 from radiant_python.models.variant_uninterpreted_case import VariantUninterpretedCase
 from radiant_python.models.variant_uninterpreted_cases_search_response import VariantUninterpretedCasesSearchResponse
 from radiant_python.models.vep_impact import VepImpact
+

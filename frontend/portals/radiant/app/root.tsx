@@ -1,13 +1,13 @@
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from 'react-router';
 
 import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
-import { Toaster } from '@/components/base/ui/sonner';
-import { TooltipProvider } from '@/components/base/ui/tooltip';
-import ThemeProvider from '@/components/feature/theme-toggle/theme-provider';
+import { Toaster } from '@/components/base/shadcn/sonner';
+import { TooltipProvider } from '@/components/base/shadcn/tooltip';
+import ThemeProvider from '@/components/base/theme-toggle/theme-provider';
+import { ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
 import { detectLanguageFromRequest } from '@/components/hooks/i18n.server';
 import { I18nProvider } from '@/components/hooks/I18nProvider';
-import { ConfigProvider, type PortalConfig } from '@/components/model/applications-config';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';

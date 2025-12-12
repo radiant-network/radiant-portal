@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,9 +10,11 @@ import {
   AlertDialogHeader,
   AlertDialogIcon,
   AlertDialogTitle,
-} from '../ui/alert-dialog';
-import { alertDialog, OpenAlertDialogProps } from './alert-dialog-store';
+} from '@/components/base/shadcn/alert-dialog';
+
 import { Spinner } from '../spinner';
+
+import { alertDialog, OpenAlertDialogProps } from './alert-dialog-store';
 
 export type AlertDialogProps = OpenAlertDialogProps & {
   isOpen: boolean;
@@ -80,21 +83,13 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
             </div>
             <AlertDialogFooter>
               {activeAlertDialog.hideCancel ? null : (
-                <AlertDialogCancel
-                  {...activeAlertDialog.cancelProps}
-                  variant="outline"
-                  children={activeAlertDialog.cancelProps?.children || 'Cancel'}
-                />
+                <AlertDialogCancel {...activeAlertDialog.cancelProps} variant="outline">
+                  {activeAlertDialog.cancelProps?.children || 'Cancel'}
+                </AlertDialogCancel>
               )}
               <AlertDialogAction
                 {...activeAlertDialog.actionProps}
                 disabled={activeAlertDialog.actionProps.disabled || loading}
-                children={
-                  <>
-                    {loading && <Spinner />}
-                    {activeAlertDialog.actionProps.children}
-                  </>
-                }
                 onClick={async e => {
                   e.preventDefault();
                   setLoading(true);
@@ -102,7 +97,12 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
                   setLoading(false);
                   close();
                 }}
-              />
+              >
+                <>
+                  {loading && <Spinner />}
+                  {activeAlertDialog.actionProps.children}
+                </>
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

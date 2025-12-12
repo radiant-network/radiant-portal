@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Badge } from '@/components/base/ui/badge';
 import { fn } from '@storybook/test';
-import { badgeVariants } from './utils';
 import { User } from 'lucide-react';
+
+import { Badge } from '@/components/base/shadcn/badge';
+
+import { badgeVariants } from './utils';
 
 const meta = {
   title: 'Badges/Badge',
@@ -18,8 +20,8 @@ export const Variants: Story = {
   args: {},
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map(variant => (
-        <Badge variant={variant} {...args}>
+      {badgeVariants.map((variant, index) => (
+        <Badge key={index} variant={variant} {...args}>
           {variant}
         </Badge>
       ))}
@@ -34,8 +36,8 @@ export const Closable: Story = {
   },
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map(variant => (
-        <Badge variant={variant} {...args}>
+      {badgeVariants.map((variant, index) => (
+        <Badge key={index} variant={variant} {...args}>
           {variant}
         </Badge>
       ))}
@@ -50,8 +52,8 @@ export const Clickable: Story = {
   },
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map(variant => (
-        <Badge variant={variant} {...args}>
+      {badgeVariants.map((variant, index) => (
+        <Badge key={index} variant={variant} {...args}>
           {variant}
         </Badge>
       ))}
@@ -65,8 +67,8 @@ export const WithIcon: Story = {
   },
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map(variant => (
-        <Badge variant={variant} {...args}>
+      {badgeVariants.map((variant, index) => (
+        <Badge key={index} variant={variant} {...args}>
           {variant} <User />
         </Badge>
       ))}
@@ -81,8 +83,8 @@ export const IconOnly: Story = {
   },
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map(variant => (
-        <Badge variant={variant} {...args}>
+      {badgeVariants.map((variant, index) => (
+        <Badge key={index} variant={variant} {...args}>
           <User />
         </Badge>
       ))}
@@ -97,8 +99,8 @@ export const WithCount: Story = {
   },
   render: args => (
     <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map(variant => (
-        <Badge variant={variant} {...args}>
+      {badgeVariants.map((variant, index) => (
+        <Badge key={index} variant={variant} {...args}>
           {variant}
         </Badge>
       ))}

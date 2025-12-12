@@ -43,7 +43,6 @@
     "feature/**/*",
     "utils/**/*",
     "types/**/*",
-    "stories/**/*"
-, "../apps/variant-exploration/src/feature/occurrence-table/table-settings.tsx"  ],
+    "stories/**/*"],
   "exclude": ["node_modules", "dist"]
 }

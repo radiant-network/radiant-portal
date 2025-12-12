@@ -611,7 +611,8 @@
         "greater_than_or_equal": "Plus grand ou égal à",
         "less_than_or_equal": "Plus petit ou égal à",
         "in": "Dans",
-        "select_operator": "Sélectionner un opérateur"
+        "select_operator": "Sélectionner un opérateur",
+        "unknown": "Opérateur inconnu"
       },
       "buttons": {
         "clear": "Effacer",
@@ -1310,7 +1311,7 @@
       "phenotypes_observed": "Observé",
       "phenotypes_non_observed": "Non-observé",
       "clinical_note": "Note Clinique",
-      "created_on": "Créé le",
+      "created_on": "Créée le",
       "last_update": "Dernière mise à jour",
       "prescriber": "Prescripteur",
       "prescribing_inst": "Inst. prescriptrice",
@@ -1336,7 +1337,7 @@
       "status": "Statut",
       "assigned_to": "Assigné à",
       "bioinformatics": "Bio-informatique",
-      "task_id": "ID de tâche",
+      "task_id": "Analyse",
       "patient": "Patient",
       "no_task_found": "Aucune tâche trouvée",
       "status_options": {

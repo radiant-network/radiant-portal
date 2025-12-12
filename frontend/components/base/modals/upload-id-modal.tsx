@@ -4,12 +4,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { uniqBy } from 'lodash';
 import { Paperclip, UploadIcon } from 'lucide-react';
 
-import { useI18n } from '@/components/hooks/i18n';
-
-import CollapsibleCard from '../cards/collapsible-card';
-import { TableColumnDef } from '../data-table/data-table';
-import DisplayTable from '../data-table/display-table';
-import { Button } from '../ui/button';
+import { Button } from '@/components/base/shadcn/button';
 import {
   Dialog,
   DialogBody,
@@ -19,12 +14,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog';
-import { Form, FormItem, FormLabel } from '../ui/form';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Textarea } from '../ui/textarea';
+} from '@/components/base/shadcn/dialog';
+import { Form, FormItem, FormLabel } from '@/components/base/shadcn/form';
+import { Input } from '@/components/base/shadcn/input';
+import { Label } from '@/components/base/shadcn/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
+import { Textarea } from '@/components/base/shadcn/textarea';
+import { useI18n } from '@/components/hooks/i18n';
+
+import CollapsibleCard from '../cards/collapsible-card';
+import { TableColumnDef } from '../data-table/data-table';
+import DisplayTable from '../data-table/display-table';
 
 type UploadIdTableEntry = {
   entry: string;
@@ -32,7 +32,7 @@ type UploadIdTableEntry = {
   omim_gene_id: string;
 };
 
-const data = [{ entry: 'entry', symbol: 'symbol', omim_gene_id: 'omim_gene_id' }];
+// const data = [{ entry: 'entry', symbol: 'symbol', omim_gene_id: 'omim_gene_id' }];
 
 const columnHelper = createColumnHelper<UploadIdTableEntry>();
 
@@ -111,7 +111,7 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
 
     Promise.all(uploadedFiles.map(readFile)).then(filesContent => {
       // @TODO: use result to get files content
-      const result = filesContent
+      const _result = filesContent
         .flatMap(
           content =>
             content

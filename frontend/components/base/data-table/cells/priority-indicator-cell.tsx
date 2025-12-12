@@ -1,5 +1,5 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 import PriorityIndicator, { PriorityIndicatorCode } from '../../indicators/priority-indicator';

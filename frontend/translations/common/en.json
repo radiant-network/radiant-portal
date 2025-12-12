@@ -619,7 +619,8 @@
         "greater_than_or_equal": "Greater than or equal to",
         "less_than_or_equal": "Less than or equal to",
         "in": "In",
-        "select_operator": "Select operator"
+        "select_operator": "Select operator",
+        "unknown": "Unknown operator"
       },
       "buttons": {
         "clear": "Clear",
@@ -1276,7 +1277,7 @@
       "assigned_to": "Assigned to",
       "bioinformatics": "Bioinformatics",
       "task_id": "Task ID",
-      "patient": "Patients",
+      "patient": "Patient",
       "no_task_found": "No Task Found",
       "status_options": {
         "unknown": "Unknown",

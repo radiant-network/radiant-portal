@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**get_expanded_germline_variant_interpreted_case**](VariantApi.md#get_expanded_germline_variant_interpreted_case) | **GET** /variants/germline/{locus_id}/cases/interpreted/{seq_id}/{transcript_id} | Get expanded germline interpreted case for a given locus, sequencing and transcript
+[**get_expanded_germline_variant_interpreted_case**](VariantApi.md#get_expanded_germline_variant_interpreted_case) | **GET** /variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id} | Get expanded germline interpreted case for a given locus, sequencing and transcript
 [**get_germline_variant_cases_count**](VariantApi.md#get_germline_variant_cases_count) | **GET** /variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
 [**get_germline_variant_cases_filters**](VariantApi.md#get_germline_variant_cases_filters) | **GET** /variants/germline/cases/filters | Get cases filters for germline variant entity
 [**get_germline_variant_conditions**](VariantApi.md#get_germline_variant_conditions) | **GET** /variants/germline/{locus_id}/conditions/{panel_type} | Get conditions for germline variant entity for a specific gene panel
@@ -17,7 +17,7 @@ Method | HTTP request | Description
 
 
 # **get_expanded_germline_variant_interpreted_case**
-> VariantExpandedInterpretedCase get_expanded_germline_variant_interpreted_case(locus_id, seq_id, transcript_id)
+> VariantExpandedInterpretedCase get_expanded_germline_variant_interpreted_case(locus_id, case_id, seq_id, transcript_id)
 
 Get expanded germline interpreted case for a given locus, sequencing and transcript
 
@@ -54,12 +54,13 @@ with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
+    case_id = 'case_id_example' # str | Case ID
     seq_id = 'seq_id_example' # str | Seq ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
 
     try:
         # Get expanded germline interpreted case for a given locus, sequencing and transcript
-        api_response = api_instance.get_expanded_germline_variant_interpreted_case(locus_id, seq_id, transcript_id)
+        api_response = api_instance.get_expanded_germline_variant_interpreted_case(locus_id, case_id, seq_id, transcript_id)
         print("The response of VariantApi->get_expanded_germline_variant_interpreted_case:\n")
         pprint(api_response)
     except Exception as e:
@@ -74,6 +75,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **locus_id** | **str**| Locus ID | 
+ **case_id** | **str**| Case ID | 
  **seq_id** | **str**| Seq ID | 
  **transcript_id** | **str**| Transcript ID | 
 

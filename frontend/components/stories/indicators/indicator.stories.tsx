@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { Card, CardContent } from '@/components/base/ui/card';
-import { Indicator } from '@/components/base/ui/indicator';
+import { Indicator } from '@/components/base/shadcn/indicator';
 
 import { indicatorVariants } from '../badges/utils';
 

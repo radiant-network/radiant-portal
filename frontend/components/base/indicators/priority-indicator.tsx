@@ -1,4 +1,4 @@
-import { Indicator, IndicatorProps } from '@/components/base/ui/indicator';
+import { Indicator, IndicatorProps } from '@/components/base/shadcn/indicator';
 import { useI18n } from '@/components/hooks/i18n';
 
 export type PriorityIndicatorCode = 'asap' | 'routine' | 'stat' | 'urgent';

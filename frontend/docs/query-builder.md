@@ -18,15 +18,15 @@ Under `feature/query-builder`, you can find the UI portion of the query builder,
 
 - **QueryBuilder State**: This is where we store all dynamic properties that a user or the application can modify after the initial render.
 - **QueryBuilder Core Props**: Core props are the essential, usually stable inputs required to define the QueryBuilder itself. These values typically do not change frequently during the QueryBuilder’s lifecycle. If they do change, they are managed externally and passed down as stable references.
-- **model/query-builder-core/query-builder**: Contains the code to create and instantiate a QueryBuilder object. This query builder object contains everything required to manage the QueryBuilder state (callbacks, queries, saved filters, etc.).
-- **model/query-builder-core/saved-filter**: Contains the code to create and instantiate a SavedFilter object. This is used by the QueryBuilder instance.
+- **cores/query-builder/query-builder**: Contains the code to create and instantiate a QueryBuilder object. This query builder object contains everything required to manage the QueryBuilder state (callbacks, queries, saved filters, etc.).
+- **cores/query-builder/saved-filter**: Contains the code to create and instantiate a SavedFilter object. This is used by the QueryBuilder instance.
   - **SavedFilter Instance**: The object that exposes functions to manage a SavedFilter.
   - **SavedFilter Raw**: The raw JSON object representing a saved filter (what we save in the database).
-- **model/query-builder-core/query**: Contains the code to create and instantiate a Query object. This is used by the QueryBuilder and SavedFilter instances.
+- **cores/query-builder/query**: Contains the code to create and instantiate a Query object. This is used by the QueryBuilder and SavedFilter instances.
   - **Query Instance**: The object that exposes functions to manage a Query.
   - **Query Raw**: The raw JSON object representing a query (what we save in the database).
-- **model/query-builder-core/use-query-builder**: This is the entry point for using the query builder. It is used to instantiate a new QueryBuilder, initialize the query builder state, set the initial core props values, and set up listeners for the QueryBuilder remote.
-- **model/query-builder-core/query-builder-remote**: The QueryBuilder remote is used to modify, update, and interact with an existing QueryBuilder from anywhere in the application. How does it work? Every remote utility function requires a `queryBuilderId` and dispatches a `QUERY_BUILDER_STATE` event. These events are listened to by the `useQueryBuilder` hook mentioned above.
+- **cores/query-builder/use-query-builder**: This is the entry point for using the query builder. It is used to instantiate a new QueryBuilder, initialize the query builder state, set the initial core props values, and set up listeners for the QueryBuilder remote.
+- **cores/query-builder/query-builder-remote**: The QueryBuilder remote is used to modify, update, and interact with an existing QueryBuilder from anywhere in the application. How does it work? Every remote utility function requires a `queryBuilderId` and dispatches a `QUERY_BUILDER_STATE` event. These events are listened to by the `useQueryBuilder` hook mentioned above.
 
 ## Important
 

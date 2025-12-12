@@ -1,5 +1,6 @@
-import { Checkbox } from '@/components/base/ui/checkbox';
 import { Row } from '@tanstack/react-table';
+
+import { Checkbox } from '@/components/base/shadcn/checkbox';
 
 type TableRowSelectionCellProps = {
   row: Row<any>;

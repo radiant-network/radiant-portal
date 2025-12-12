@@ -157,8 +157,8 @@ You can also combine variables with HTML elements:
 The `Trans` component can work with any React component:
 
 ```typescript
-import { Badge } from '@/components/base/ui/badge';
-import { Button } from '@/components/base/ui/button';
+import { Badge } from '@/components/base/shadcn/badge';
+import { Button } from '@/components/base/shadcn/button';
 import { InfoIcon } from 'lucide-react';
 
 // With Badge
@@ -268,7 +268,7 @@ import { InfoIcon } from 'lucide-react';
 	}
 }
 ```
-   - Use `snake_case` to match api's variable
+   - xxxxxxxxxx /* portals/radiant/app/app.css */@import '@styles/theme.css';@import '@styles/tailwind.css';​html,body {  height: 100vh;  margin: 0;  padding: 0;  overflow: hidden;​  @media (prefers-color-scheme: light) {    color-scheme: light;  }}css
 ```json
 {
 	"field": {

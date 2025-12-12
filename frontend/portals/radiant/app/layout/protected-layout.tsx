@@ -4,8 +4,8 @@ import logo from '@assets/logo/header.svg';
 import { FileIcon, FolderIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 
-import { SidebarProvider } from '@/components/base/ui/sidebar';
-import MainNavbar from '@/components/feature/navbar/main-navbar';
+import MainNavbar from '@/components/base/navbar/main-navbar';
+import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
 import { useI18n } from '@/components/hooks/i18n';
 

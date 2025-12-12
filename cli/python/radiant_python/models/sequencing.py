@@ -28,7 +28,6 @@ class Sequencing(BaseModel):
     """ # noqa: E501
     affected_status: Optional[StrictStr] = None
     analysis_type: Optional[StrictStr] = None
-    case_id: Optional[StrictInt] = None
     created_at: Optional[StrictStr] = None
     experimental_strategy: Optional[StrictStr] = None
     family_role: Optional[StrictStr] = None
@@ -41,7 +40,7 @@ class Sequencing(BaseModel):
     task_id: Optional[StrictInt] = None
     updated_at: Optional[StrictStr] = None
     vcf_filepath: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["affected_status", "analysis_type", "case_id", "created_at", "experimental_strategy", "family_role", "part", "patient_id", "request_priority", "sample_id", "seq_id", "sex", "task_id", "updated_at", "vcf_filepath"]
+    __properties: ClassVar[List[str]] = ["affected_status", "analysis_type", "created_at", "experimental_strategy", "family_role", "part", "patient_id", "request_priority", "sample_id", "seq_id", "sex", "task_id", "updated_at", "vcf_filepath"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,7 +95,6 @@ class Sequencing(BaseModel):
         _obj = cls.model_validate({
             "affected_status": obj.get("affected_status"),
             "analysis_type": obj.get("analysis_type"),
-            "case_id": obj.get("case_id"),
             "created_at": obj.get("created_at"),
             "experimental_strategy": obj.get("experimental_strategy"),
             "family_role": obj.get("family_role"),

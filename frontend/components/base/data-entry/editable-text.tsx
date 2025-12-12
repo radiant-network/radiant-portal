@@ -1,7 +1,8 @@
-import { LucideProps, PencilLineIcon } from 'lucide-react';
 import React, { useState } from 'react';
-import { Input } from '@/components/base/ui/input';
-import { Button } from '../ui/button';
+import { LucideProps, PencilLineIcon } from 'lucide-react';
+
+import { Button } from '@/components/base/shadcn/button';
+import { Input } from '@/components/base/shadcn/input';
 
 export type EditableTextProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> & {
   icon?: React.ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>>;

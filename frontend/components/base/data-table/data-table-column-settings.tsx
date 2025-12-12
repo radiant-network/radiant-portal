@@ -18,7 +18,7 @@ import {
 import { ColumnOrderState, ColumnPinningState } from '@tanstack/react-table';
 import { SettingsIcon } from 'lucide-react';
 
-import { Button } from '@/base/ui/button';
+import { Button } from '@/base/shadcn/button';
 import { ColumnSettings } from '@/components/base/data-table/data-table';
 import TableSortableColumnSetting from '@/components/base/data-table/data-table-sortable-column-setting';
 import {
@@ -26,11 +26,10 @@ import {
   DropdownMenuContent,
   DropdownMenuPortal,
   DropdownMenuTrigger,
-} from '@/components/base/ui/dropdown-menu';
+} from '@/components/base/shadcn/dropdown-menu';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-
-import { Skeleton } from '../ui/skeleton';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 /**
  * Read user config to return column order (in asc)

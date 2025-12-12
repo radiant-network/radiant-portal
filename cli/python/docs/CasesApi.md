@@ -211,7 +211,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
-    case_id = 'case_id_example' # str | Case ID
+    case_id = 56 # int | Case ID
     filters_body_with_criteria = radiant_python.FiltersBodyWithCriteria() # FiltersBodyWithCriteria | Filters Body
 
     try:
@@ -230,7 +230,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **case_id** | **str**| Case ID | 
+ **case_id** | **int**| Case ID | 
  **filters_body_with_criteria** | [**FiltersBodyWithCriteria**](FiltersBodyWithCriteria.md)| Filters Body | 
 
 ### Return type
@@ -293,7 +293,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
-    case_id = 'case_id_example' # str | Case ID
+    case_id = 56 # int | Case ID
     list_body_with_criteria = radiant_python.ListBodyWithCriteria() # ListBodyWithCriteria | List Body
 
     try:
@@ -312,7 +312,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **case_id** | **str**| Case ID | 
+ **case_id** | **int**| Case ID | 
  **list_body_with_criteria** | [**ListBodyWithCriteria**](ListBodyWithCriteria.md)| List Body | 
 
 ### Return type
