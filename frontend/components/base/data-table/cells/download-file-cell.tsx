@@ -35,7 +35,7 @@ function DownloadFileCell({ documentId }: DownloadFileCellProps) {
         window.open(url, '_blank');
       }
     } catch (error) {
-      console.error('Error downloading file:', error);
+      console.error(`Error downloading file with id ${documentId}:`, error);
       setShowError(true);
     } finally {
       setIsDownloading(false);
@@ -61,22 +61,24 @@ function DownloadFileCell({ documentId }: DownloadFileCellProps) {
         <TooltipContent>{t('common.download.tooltip')}</TooltipContent>
       </Tooltip>
 
-      <AlertDialog open={showError} onOpenChange={setShowError}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <div className="flex items-center gap-2">
-              <AlertDialogIcon type="error" />
-              <AlertDialogTitle>{t('common.download.error_title')}</AlertDialogTitle>
-            </div>
-            <AlertDialogDescription>{t('common.download.error_description')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowError(false)}>
-              {t('common.download.error_close')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {showError && (
+        <AlertDialog open={showError} onOpenChange={setShowError}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <div className="flex items-center gap-2">
+                <AlertDialogIcon type="error" />
+                <AlertDialogTitle>{t('common.download.error_title')}</AlertDialogTitle>
+              </div>
+              <AlertDialogDescription>{t('common.download.error_description')}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setShowError(false)}>
+                {t('common.download.error_close')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </>
   );
 }
