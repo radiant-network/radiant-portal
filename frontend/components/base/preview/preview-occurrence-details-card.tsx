@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { FlipVertical2, Triangle, Users } from 'lucide-react';
 
-import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-female-not-affected-icon';
 import PedigreeMaleNotAffectedIcon from '@/components/base/icons/pedigree-male-not-affected-icon';
 import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
@@ -13,6 +12,8 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
+
+import EmptyField from '../information/empty-field';
 
 type PreviewOccurrenceDetailsCardProps = {
   caseId: number;
@@ -29,10 +30,11 @@ type PreviewOccurrenceDetailsCardProps = {
   mother_calls?: number[];
   ad_alt?: number;
   ad_total?: number;
+  enableIGV?: boolean;
 };
 
 const getFilterValue = (filter: string | undefined, t: (key: string) => string): React.ReactNode => {
-  if (!filter) return <EmptyCell />;
+  if (!filter) return <EmptyField />;
 
   if (filter === 'PASS') {
     return <Badge variant="green">{t('preview_sheet.occurrence_details.sections.metrics.pass')}</Badge>;
@@ -55,13 +57,10 @@ const PreviewOccurrenceDetailsCard = ({
   mother_calls,
   ad_alt,
   ad_total,
+  enableIGV = false,
 }: PreviewOccurrenceDetailsCardProps) => {
   const { t } = useI18n();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
-
-  const zygosity = zygosityProp ? zygosityProp : <EmptyCell />;
-  const inheritance = transmission ? titleCase(replaceUnderscore(transmission)) : <EmptyCell />;
-  const parentalOrigin = parental_origin ? titleCase(replaceUnderscore(parental_origin)) : <EmptyCell />;
 
   const genotypeQualityValue = (
     <span className="inline-flex gap-1 items-center">
@@ -70,47 +69,56 @@ const PreviewOccurrenceDetailsCard = ({
       ) : (
         <ShapeTriangleUpIcon className="w-[13px] h-[13px] text-destructive" />
       )}
-      {genotype_quality ? genotype_quality : <EmptyCell />}
+      {genotype_quality ? genotype_quality : <EmptyField />}
     </span>
   );
 
   const filterValue = getFilterValue(filter, t);
 
+  let actions = undefined;
+  if (enableIGV) {
+    actions = (
+      <IGVDialog
+        open={igvOpen}
+        setOpen={setIGVOpen}
+        caseId={caseId}
+        seqId={seqId}
+        locus={locus}
+        start={start}
+        chromosome={chromosome}
+        renderTrigger={handleOpen => (
+          <Button variant="outline" size="xs" onClick={handleOpen}>
+            <FlipVertical2 />
+            {t('preview_sheet.occurrence_details.actions.view_in_igv')}
+          </Button>
+        )}
+      />
+    );
+  }
+
   return (
-    <PreviewCard
-      icon={Users}
-      title={t('preview_sheet.occurrence_details.title')}
-      actions={
-        <IGVDialog
-          open={igvOpen}
-          setOpen={setIGVOpen}
-          caseId={caseId}
-          seqId={seqId}
-          locus={locus}
-          start={start}
-          chromosome={chromosome}
-          renderTrigger={handleOpen => (
-            <Button variant="outline" size="xs" onClick={handleOpen}>
-              <FlipVertical2 />
-              {t('preview_sheet.occurrence_details.actions.view_in_igv')}
-            </Button>
-          )}
-        />
-      }
-    >
+    <PreviewCard icon={Users} title={t('preview_sheet.occurrence_details.title')} actions={actions}>
       <div className="rounded-md w-full border">
         <div className="size-full">
           <div className="flex flex-wrap gap-4 sm:gap-20 items-start p-3 w-full">
             <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
               <DescriptionSection title={t('preview_sheet.occurrence_details.sections.inheritance.title')}>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.zygosity')}>
-                  {zygosity}
+                  {zygosityProp ? <Badge variant="outline">{zygosityProp}</Badge> : <EmptyField />}
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.inheritance')}>
-                  {inheritance}
+                  {transmission ? (
+                    <Badge variant="outline">{titleCase(replaceUnderscore(transmission))}</Badge>
+                  ) : (
+                    <EmptyField />
+                  )}
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.parental_origin')}>
-                  {parentalOrigin}
+                  {parental_origin ? (
+                    <Badge variant="outline">{titleCase(replaceUnderscore(parental_origin))}</Badge>
+                  ) : (
+                    <EmptyField />
+                  )}
                 </DescriptionRow>
               </DescriptionSection>
               <DescriptionSection title="Family">
@@ -157,13 +165,13 @@ const PreviewOccurrenceDetailsCard = ({
             <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
               <DescriptionSection title="Metrics">
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.quality_depth')}>
-                  <span className="font-mono">-</span>
+                  <EmptyField />
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.allele_depth_alt')}>
-                  <span className="font-mono">{ad_alt ? ad_alt : <EmptyCell />}</span>
+                  <span className="font-mono">{ad_alt ? ad_alt : <EmptyField />}</span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.total_depth_alt_ref')}>
-                  <span className="font-mono">{ad_total ? ad_total : <EmptyCell />}</span>
+                  <span className="font-mono">{ad_total ? ad_total : <EmptyField />}</span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
                   {genotypeQualityValue}
