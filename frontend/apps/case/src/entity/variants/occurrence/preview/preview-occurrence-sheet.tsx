@@ -133,6 +133,7 @@ function OccurrenceSheetContent({
           mother_calls={expandResult.data.mother_calls}
           ad_alt={expandResult.data.ad_alt}
           ad_total={expandResult.data.ad_total}
+          enableIGV
         />
       )}
       <PreviewVariantDetailsCard data={expandResult.data} />
