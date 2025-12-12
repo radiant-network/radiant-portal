@@ -10,6 +10,10 @@ const sidebar: SidebarsConfig = {
             type: "doc",
             id: "technical-guide/api/auth",
         },
+        {
+            type: "doc",
+            id: "technical-guide/api/clients",
+        },
     ]
 }
 
