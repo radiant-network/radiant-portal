@@ -1270,7 +1270,7 @@
       "assigned_to": "Assigned to",
       "bioinformatics": "Bioinformatics",
       "task_id": "Task ID",
-      "patient": "Patients",
+      "patient": "Patient",
       "no_task_found": "No Task Found",
       "status_options": {
         "unknown": "Unknown",

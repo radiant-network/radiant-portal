@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 
 import AnalysisCard from './analysis-card';
 import AssayInformationsCard from './assay-informations-card';
+import BioinformaticsCard from './bioinformatics-card';
 import ClinicalCard from './clinical-card';
 import PatientInformationCard from './patient-information-card';
 
@@ -37,6 +38,10 @@ function DetailsTab({ caseEntity, isLoading }: DetailsTabProps) {
         <AssayInformationsCard
           className="lg:col-span-3 border-0 rounded-none md:border md:rounded-xl"
           data={caseEntity}
+        />
+        <BioinformaticsCard
+          className="lg:col-span-3 border-0 rounded-none md:border md:rounded-xl"
+          tasks={caseEntity.tasks}
         />
       </div>
     </div>

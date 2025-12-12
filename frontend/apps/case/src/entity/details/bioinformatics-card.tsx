@@ -1,3 +1,4 @@
+import { ComponentProps } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
@@ -18,9 +19,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/base/shadcn/alert-dialog';
 import { Button } from '@/components/base/shadcn/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
-
-const MAX_TASKS = 4;
 
 const columnHelper = createColumnHelper<CaseTask>();
 
@@ -31,12 +31,8 @@ function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewA
       header: t('case_entity.details.task_id'),
       maxSize: 80,
     }),
-    columnHelper.accessor('type_code', {
-      cell: info => (
-        <BadgeCell variant="secondary" tooltip={info.row.original.type_name}>
-          {info.getValue()}
-        </BadgeCell>
-      ),
+    columnHelper.accessor('type_name', {
+      cell: info => <BadgeCell variant="secondary">{info.getValue()}</BadgeCell>,
       header: t('case_entity.details.type'),
       maxSize: 200,
     }),
@@ -60,7 +56,7 @@ function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewA
     columns.push(
       columnHelper.display({
         id: 'action',
-        header: () => <AlertDialogBioinformaticsSection tasks={tasks} />,
+        header: () => <AlertDialogBioinformaticsCard tasks={tasks} />,
         size: 64,
       }) as TableColumnDef<CaseTask, any>,
     );
@@ -69,28 +65,26 @@ function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewA
   return columns;
 }
 
-type BioinformaticsSectionProps = {
+type BioinformaticsCardProps = ComponentProps<'div'> & {
   tasks: CaseTask[];
 };
 
-function BioinformaticsSection({ tasks }: BioinformaticsSectionProps) {
+function BioinformaticsCard({ tasks, ...props }: BioinformaticsCardProps) {
   const { t } = useI18n();
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold">{t('case_entity.details.bioinformatics')}</span>
-      </div>
-      <DisplayTable
-        variant="borderless"
-        data={tasks.slice(0, MAX_TASKS)}
-        columns={getColumns(t, tasks, tasks.length > MAX_TASKS)}
-      />
-    </div>
+    <Card {...props}>
+      <CardHeader className="border-b [.border-b]:pb-4">
+        <CardTitle size="xl">{t('case_entity.details.bioinformatics')}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <DisplayTable variant="borderless" data={tasks} columns={getColumns(t, tasks, false)} />
+      </CardContent>
+    </Card>
   );
 }
 
-function AlertDialogBioinformaticsSection({ tasks }: BioinformaticsSectionProps) {
+function AlertDialogBioinformaticsCard({ tasks }: BioinformaticsCardProps) {
   const { t } = useI18n();
 
   return (
@@ -113,4 +107,4 @@ function AlertDialogBioinformaticsSection({ tasks }: BioinformaticsSectionProps)
   );
 }
 
-export default BioinformaticsSection;
+export default BioinformaticsCard;
