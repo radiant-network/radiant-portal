@@ -3,8 +3,9 @@ import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 import { tv, VariantProps } from 'tailwind-variants';
 
 import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group';
+import { cn } from '@/components/lib/utils';
 
-export const radioGroupVariants = tv({
+export const radioGroupFieldVariants = tv({
   slots: {
     base: 'flex gap-2 w-full max-w-[228px] cursor-pointer justify-between',
     label: 'text-sm font-medium text-foreground',
@@ -28,14 +29,14 @@ export const radioGroupVariants = tv({
   },
 });
 
-type RadioGroupProps = React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> &
-  VariantProps<typeof radioGroupVariants> & {
+type RadioGroupFieldProps = React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> &
+  VariantProps<typeof radioGroupFieldVariants> & {
     data: { id: string; label: string; description?: string }[];
     box?: boolean;
   };
 
-function RadioGroupCustom({ align = 'start', className, data, box, ...props }: RadioGroupProps) {
-  const styles = radioGroupVariants({ align });
+function RadioGroupField({ align = 'start', className, data, box, ...props }: RadioGroupFieldProps) {
+  const styles = radioGroupFieldVariants({ align });
   const [selectedValue, setSelectedValue] = useState<string | undefined>(props.defaultValue);
 
   return (
@@ -43,17 +44,18 @@ function RadioGroupCustom({ align = 'start', className, data, box, ...props }: R
       <RadioGroup
         onValueChange={value => {
           setSelectedValue(value);
+          props.onValueChange?.(value);
         }}
         {...props}
       >
         {data.map(item => {
           const isChecked = selectedValue === item.id;
-          const boxClassName = box
-            ? `${styles.box({ className })} ${isChecked && styles.boxChecked({ className })}`
-            : '';
 
           return (
-            <div key={item.id} className={boxClassName}>
+            <div
+              key={item.id}
+              className={cn(box && styles.box({ className }), box && isChecked && styles.boxChecked({ className }))}
+            >
               <div className={styles.itemContainer()}>
                 <RadioGroupItem id={item.id} value={item.id} />
                 <div className="flex flex-col flex-1 gap-1.5">
@@ -71,4 +73,4 @@ function RadioGroupCustom({ align = 'start', className, data, box, ...props }: R
   );
 }
 
-export default RadioGroupCustom;
+export default RadioGroupField;

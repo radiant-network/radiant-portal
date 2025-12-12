@@ -433,7 +433,7 @@ export function NumericalFilter({ field }: IProps) {
               <Select value={selectedRange} onValueChange={onRangeValueChanged}>
                 <SelectTrigger size="sm">
                   <SelectValue placeholder={t('common.filters.operators.select_operator')}>
-                    {RANGE_OPERATOR_LABELS[selectedRange]?.display || 'Unknown operator'}
+                    {RANGE_OPERATOR_LABELS[selectedRange]?.display || t('common.filters.operators.unknown')}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>{RangeChoices}</SelectContent>
