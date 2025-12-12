@@ -5,14 +5,17 @@ import useSWR from 'swr';
 
 import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
-import CasePreviewSheet from '@/components/base/preview/case-preview-sheet';
-import { usePreviewCaseNavigation } from '@/components/base/preview/use-preview-case-navigation';
 import { useI18n } from '@/components/hooks/i18n';
+import CasePreviewSheet from '@/entity/cases/preview/preview-case-sheet';
+import { usePreviewCaseNavigation } from '@/entity/cases/preview/use-preview-case-navigation';
 import { variantsApi } from '@/utils/api';
 
-import { SELECTED_CASE_PARAM } from './constants';
-import { getOtherCasesColumns, otherCasesDefaultSettings } from './table-settings';
-import OtherCasesFilters, { UninterpretedCasesFiltersState } from './uninterpreted-cases-filters';
+import UninterpretedCasesFilters, { UninterpretedCasesFiltersState } from './table/uninterpreted-cases-filters';
+import {
+  getUninterpretedCasesColumns,
+  uninterpretedCasesDefaultSettings,
+} from './table/uninterpreted-cases-table-settings';
+import { SELECTED_UNINTERPRETED_CASE_PARAM } from './constants';
 
 type UninterpretedCasesSearchInput = {
   key: string;
@@ -102,18 +105,18 @@ function UninterpretedCasesTable() {
       casesData,
       searchParams,
       setSearchParams,
-      selectedCaseParamKey: SELECTED_CASE_PARAM,
+      selectedCaseParamKey: SELECTED_UNINTERPRETED_CASE_PARAM,
       setRowSelection,
     });
 
   return (
     <div className="space-y-6 mt-2">
-      <OtherCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
+      <UninterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="uninterpreted-cases"
-        columns={getOtherCasesColumns(t)}
+        columns={getUninterpretedCasesColumns(t)}
         data={casesData}
-        defaultColumnSettings={otherCasesDefaultSettings}
+        defaultColumnSettings={uninterpretedCasesDefaultSettings}
         loadingStates={{
           total: isLoading,
           list: isLoading,

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -132,11 +132,18 @@ const meta = {
   },
   decorators: [
     Story => (
-      <BrowserRouter>
-        <ConfigProvider config={config}>
-          <Story />
-        </ConfigProvider>
-      </BrowserRouter>
+      <MemoryRouter initialEntries={['/case/entity/1']}>
+        <Routes>
+          <Route
+            path="/case/entity/:caseId"
+            element={
+              <ConfigProvider config={config}>
+                <Story />
+              </ConfigProvider>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
     ),
   ],
 } satisfies Meta<typeof DataTable<any>>;

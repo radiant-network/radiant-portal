@@ -15,12 +15,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
-
-import TranscriptIdLink from '../variant/transcript-id-link';
-import { getDbSnpUrl, getEnsemblTranscriptUrl, getOmimOrgUrl } from '../variant/utils';
-
-import { DescriptionRow, DescriptionSection } from './description';
-import PreviewCard from './preview-card';
+import { DescriptionRow, DescriptionSection } from 'components/base/preview/description';
+import PreviewCard from 'components/base/preview/preview-card';
+import TranscriptIdLink from 'components/base/variant/transcript-id-link';
+import { getDbSnpUrl, getEnsemblTranscriptUrl, getOmimOrgUrl } from 'components/base/variant/utils';
 
 type PreviewVariantDetailsCardProps = {
   data: ExpandedGermlineSNVOccurrence;

@@ -8,9 +8,9 @@ import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { variantsApi } from '@/utils/api';
 
+import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './table/interpreted-cases-filters';
+import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table/interpreted-cases-table-settings';
 import InterpretedCasesExpand from './interpreted-cases-expand';
-import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './interpreted-cases-filters';
-import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table-settings';
 
 type InterpretedCasesSearchInput = {
   key: string;

@@ -4,17 +4,15 @@ import { ArrowUpRight } from 'lucide-react';
 import { VariantUninterpretedCase } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import Empty from '@/components/base/empty';
+import PreviewOccurrenceSubHeader from '@/components/base/preview/preview-occurrence-sub-header';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import { useCaseIdFromParam } from '@/utils/helper';
-
-import PreviewCaseDetailsCard from './preview-case-details-card';
-import OccurrenceSheetDetailsCard from './preview-occurrence-details-card';
-import PreviewSheet from './preview-sheet';
-import PreviewSheetHeader from './preview-sheet-header';
-import PreviewSheetSkeleton from './preview-sheet-skeleton';
-import PreviewSheetSubHeader from './preview-sheet-sub-header';
-import { useOccurrenceAndCase } from './preview-sheet-utils';
+import PreviewCaseDetailsCard from 'components/base/preview/preview-case-details-card';
+import OccurrenceSheetDetailsCard from 'components/base/preview/preview-occurrence-details-card';
+import PreviewSheet from 'components/base/preview/preview-sheet';
+import PreviewSheetHeader from 'components/base/preview/preview-sheet-header';
+import PreviewSheetSkeleton from 'components/base/preview/preview-sheet-skeleton';
+import { useCase } from 'components/base/preview/preview-sheet-utils';
 
 type CasePreviewSheetProps = {
   case?: VariantUninterpretedCase;
@@ -66,15 +64,11 @@ type CaseSheetContentProps = {
 
 function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }: CaseSheetContentProps) {
   const { t } = useI18n();
-  const caseId = useCaseIdFromParam();
+
   const params = useParams<{ locusId: string }>();
   const locusId = params.locusId!;
 
-  const { expandResult, caseResult, patient, assay, isLoading } = useOccurrenceAndCase(
-    caseId,
-    caseData.seq_id,
-    locusId,
-  );
+  const { expandResult, caseResult, isLoading } = useCase(caseData.case_id, caseData.seq_id, locusId);
 
   if (isLoading || !expandResult.data || !caseResult.data) {
     return <PreviewSheetSkeleton />;
@@ -91,9 +85,10 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
         locusId={locusId}
       />
       <Separator />
-      <PreviewSheetSubHeader
-        patientId={patient?.patient_id}
-        seqId={assay?.seq_id}
+      <PreviewOccurrenceSubHeader
+        patientId={caseData.patient_id}
+        seqId={caseData.seq_id}
+        relationshipToProband={caseData.relationship_to_proband}
         actions={
           <ActionButton
             actions={[

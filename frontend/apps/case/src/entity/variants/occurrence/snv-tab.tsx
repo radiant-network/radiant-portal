@@ -22,9 +22,9 @@ import { useConfig } from '@/components/cores/applications-config';
 import { ISyntheticSqon } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
+import { usePreviewOccurrenceNavigation } from '@/entity/variants/occurrence/preview/hooks/use-preview-occurrence-navigation';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
-import { usePreviewOccurrenceNavigation } from 'components/base/preview/use-preview-occurrence-navigation';
 import QueryBuilder from 'components/base/query-builder/query-builder';
 import UserSavedFiltersProps, { getUserSavedFilters } from 'components/base/query-builder/user-saved-filters';
 import { FilterComponent } from 'components/base/query-filters/filter-container';
@@ -37,8 +37,8 @@ import { queryBuilderRemote } from 'components/cores/query-builder/query-builder
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { getVisibleAggregations } from '../utils';
 
+import OccurrencePreviewSheet from './preview/preview-occurrence-sheet';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
-import OccurrencePreviewSheet from './occurrence-preview-sheet';
 
 const DEFAULT_SORTING = [
   {
