@@ -10,9 +10,9 @@ import {
   AlertDialogHeader,
   AlertDialogIcon,
   AlertDialogTitle,
-} from '@/base/ui/alert-dialog';
-import { Button } from '@/base/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/base/ui/tooltip';
+} from '@/components/base/shadcn/alert-dialog';
+import { Button } from '@/components/base/shadcn/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/hooks/i18n';
 import { documentApi } from '@/utils/api';
 
