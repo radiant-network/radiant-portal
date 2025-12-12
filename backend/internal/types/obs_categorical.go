@@ -26,8 +26,9 @@ type PhenotypeObsCategorical struct {
 }
 
 var ObsCategoricalTable = Table{
-	Name:  "radiant_jdbc.public.obs_categorical",
-	Alias: "obs",
+	Name:           "obs_categorical",
+	FederationName: "radiant_jdbc.public.obs_categorical",
+	Alias:          "obs",
 }
 
 var ObsCategoricalAggregatedTmpTable = Table{

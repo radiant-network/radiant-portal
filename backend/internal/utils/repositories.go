@@ -82,65 +82,129 @@ func GetSequencingPart(seqId int, db *gorm.DB) (int, error) {
 	return part, nil
 }
 
-func JoinWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
-	joinWithProbandSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.ProbandTable.Name, types.ProbandTable.Alias, types.CaseTable.Alias, types.ProbandTable.Alias)
-	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.Name, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
+func JoinCaseWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
+	joinWithProbandSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.ProbandTable.FederationName, types.ProbandTable.Alias, types.CaseTable.Alias, types.ProbandTable.Alias)
+	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.FederationName, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
 	if userQuery != nil && userQuery.HasFieldFromTables(types.ManagingOrganizationTable) {
 		return tx.Joins(joinWithProbandSql).Joins(joinWithProbandManagingOrganizationSql)
 	}
 	return tx.Joins(joinWithProbandSql)
 }
 
-func JoinWithPatients(tx *gorm.DB) *gorm.DB {
-	joinWithFamily := fmt.Sprintf("LEFT JOIN %s %s ON %s.case_id=%s.id", types.FamilyTable.Name, types.FamilyTable.Alias, types.FamilyTable.Alias, types.CaseTable.Alias)
-	joinWithPatientSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.id", types.PatientTable.Name, types.PatientTable.Alias, types.FamilyTable.Alias, types.PatientTable.Alias)
+func JoinCaseWithPatients(tx *gorm.DB) *gorm.DB {
+	joinWithFamily := fmt.Sprintf("LEFT JOIN %s %s ON %s.case_id=%s.id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.CaseTable.Alias)
+	joinWithPatientSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.id", types.PatientTable.FederationName, types.PatientTable.Alias, types.FamilyTable.Alias, types.PatientTable.Alias)
 	return tx.Joins(joinWithFamily).Joins(joinWithPatientSql)
 }
 
-func JoinWithAnalysisCatalog(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.analysis_catalog_id=%s.id", types.AnalysisCatalogTable.Name, types.AnalysisCatalogTable.Alias, types.CaseTable.Alias, types.AnalysisCatalogTable.Alias))
+func JoinCaseWithAnalysisCatalog(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.analysis_catalog_id=%s.id", types.AnalysisCatalogTable.FederationName, types.AnalysisCatalogTable.Alias, types.CaseTable.Alias, types.AnalysisCatalogTable.Alias))
 }
 
-func JoinWithProject(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.project_id=%s.id", types.ProjectTable.Name, types.ProjectTable.Alias, types.CaseTable.Alias, types.ProjectTable.Alias))
+func JoinCaseWithProject(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.project_id=%s.id", types.ProjectTable.FederationName, types.ProjectTable.Alias, types.CaseTable.Alias, types.ProjectTable.Alias))
 }
 
-func JoinWithDiagnosisLab(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.diagnosis_lab_id=%s.id", types.DiagnosisLabTable.Name, types.DiagnosisLabTable.Alias, types.CaseTable.Alias, types.DiagnosisLabTable.Alias))
+func JoinCaseWithDiagnosisLab(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.diagnosis_lab_id=%s.id", types.SequencingLabTable.FederationName, types.SequencingLabTable.Alias, types.CaseTable.Alias, types.SequencingLabTable.Alias))
 }
 
-func JoinWithMondoTerm(tx *gorm.DB) *gorm.DB {
+func JoinCaseWithMondoTerm(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.primary_condition=%s.id", types.MondoTable.Name, types.MondoTable.Alias, types.CaseTable.Alias, types.MondoTable.Alias))
 }
 
-func JoinWithTaskHasDocument(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.document_id=%s.id AND %s.type = 'output'", types.TaskHasDocumentTable.Name, types.TaskHasDocumentTable.Alias, types.TaskHasDocumentTable.Alias, types.DocumentTable.Alias, types.TaskHasDocumentTable.Alias))
+func JoinDocumentWithTaskHasDocument(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.document_id=%s.id AND %s.type = 'output'", types.TaskHasDocumentTable.FederationName, types.TaskHasDocumentTable.Alias, types.TaskHasDocumentTable.Alias, types.DocumentTable.Alias, types.TaskHasDocumentTable.Alias))
 }
 
-func JoinWithCase(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.case_id=%s.id", types.CaseTable.Name, types.CaseTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.CaseTable.Alias))
+func JoinCaseHasSeqExpWithCase(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.case_id=%s.id", types.CaseTable.FederationName, types.CaseTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.CaseTable.Alias))
 }
 
-func JoinWithSample(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sample_id=%s.id", types.SampleTable.Name, types.SampleTable.Alias, types.SequencingExperimentTable.Alias, types.SampleTable.Alias))
+func JoinSeqExpWithSample(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sample_id=%s.id", types.SampleTable.FederationName, types.SampleTable.Alias, types.SequencingExperimentTable.Alias, types.SampleTable.Alias))
 }
 
-func JoinWithFamilyRelationship(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.Name, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
+func JoinSampleAndCaseHasSeqExpWithFamily(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
 }
 
-func JoinWithOrderingOrganization(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_id=%s.id", types.OrderingOrganizationTable.Name, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias))
+func JoinSampleAndTaskContextWithFamily(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.TaskContextTable.Alias))
 }
 
-func JoinWithTaskContext(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id=%s.task_id", types.TaskContextTable.Name, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.TaskHasDocumentTable.Alias))
+func JoinSampleAndCaseWithFamily(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseTable.Alias))
 }
 
-func JoinWithCaseHasSequencingExperiment(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.sequencing_experiment_id", types.CaseHasSequencingExperimentTable.Name, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.TaskContextTable.Alias))
+func JoinCaseWithOrderingOrganization(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_id=%s.id", types.OrderingOrganizationTable.FederationName, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias))
 }
 
-func JoinWithSequencingExperiment(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
+func JoinSeqExpWithSequencingLab(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_lab_id=%s.id", types.SequencingLabTable.FederationName, types.SequencingLabTable.Alias, types.SequencingExperimentTable.Alias, types.SequencingLabTable.Alias))
+}
+
+func JoinTaskHasDocWithTaskContext(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id=%s.task_id", types.TaskContextTable.FederationName, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.TaskHasDocumentTable.Alias))
+}
+
+func JoinTaskContextWithTaskHasDoc(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id=%s.task_id", types.TaskHasDocumentTable.FederationName, types.TaskHasDocumentTable.Alias, types.TaskContextTable.Alias, types.TaskHasDocumentTable.Alias))
+}
+
+func JoinTaskContextWithCaseHasSeqExp(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.sequencing_experiment_id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.TaskContextTable.Alias))
+}
+
+func JoinTaskContextWithSeqExp(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias, types.TaskContextTable.Alias, types.SequencingExperimentTable.Alias))
+}
+
+func JoinTaskContextWithTask(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id=%s.id", types.TaskTable.FederationName, types.TaskTable.Alias, types.TaskContextTable.Alias, types.TaskTable.Alias))
+}
+
+func JoinCaseHasSeqExpWithSequencingExperiment(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
+}
+
+func JoinTaskHasDocWithDocument(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.document_id=%s.id", types.DocumentTable.FederationName, types.DocumentTable.Alias, types.TaskHasDocumentTable.Alias, types.DocumentTable.Alias))
+}
+
+func JoinFamilyWithPatient(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.id", types.PatientTable.FederationName, types.PatientTable.Alias, types.FamilyTable.Alias, types.PatientTable.Alias))
+}
+
+func JoinPatientWithManagingOrg(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.FederationName, types.ManagingOrganizationTable.Alias, types.PatientTable.Alias, types.ManagingOrganizationTable.Alias))
+}
+
+func JoinGermlineInterpretationWithSnvOccurrence(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_id = %s.seq_id and %s.locus_id = %s.locus_id", types.GermlineSNVOccurrenceTable.Name, types.GermlineSNVOccurrenceTable.Alias, types.InterpretationGermlineTable.Alias, types.GermlineSNVOccurrenceTable.Alias, types.InterpretationGermlineTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
+}
+
+func JoinGermlineInterpretationWithCase(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.case_id = %s.id", types.CaseTable.FederationName, types.CaseTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseTable.Alias))
+}
+
+func JoinGermlineSNVOccurrenceWithSeqExp(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.id = %s.seq_id", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
+}
+
+func JoinGermlineSNVOccurrenceWithCaseHasSeqExp(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id = %s.seq_id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
+}
+
+func JoinCaseHasSeqExpWithGermlineSnvOccurrence(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id = %s.seq_id", types.GermlineSNVOccurrenceTable.Name, types.GermlineSNVOccurrenceTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
+}
+
+func JoinGermlineInterpretationWithVariant(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.locus_id = %s.locus_id", types.VariantTable.Name, types.VariantTable.Alias, types.VariantTable.Alias, types.InterpretationGermlineTable.Alias))
+}
+
+func AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(tx *gorm.DB, locusIdString string) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT ANTI JOIN %s %s ON %s.locus_id = ? AND %s.sequencing_id = %s.sequencing_experiment_id AND %s.case_id = %s.case_id", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias, types.InterpretationGermlineTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseHasSequencingExperimentTable.Alias), locusIdString)
 }
