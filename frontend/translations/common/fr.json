@@ -337,6 +337,12 @@
       "cancel": "Annuler",
       "upload": "Télécharger"
     },
+    "download": {
+      "tooltip": "Télécharger le fichier",
+      "error_title": "Erreur de téléchargement",
+      "error_description": "Un problème est survenu lors du téléchargement du fichier. Veuillez réessayer ou vérifier votre connexion.",
+      "error_close": "Fermer"
+    },
     "languages": {
       "en": "Anglais",
       "fr": "Français",
