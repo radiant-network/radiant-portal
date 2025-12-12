@@ -22,8 +22,6 @@ func Test_SecureRoutes(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		os.Setenv("AWS_ENDPOINT_URL", "localhost:9090")
-
 		router := setupRouter(starrocks, postgres)
 		randomPort := 10000 + rand.Intn(50000)
 
