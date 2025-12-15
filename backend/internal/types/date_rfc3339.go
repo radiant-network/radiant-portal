@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -11,6 +12,15 @@ import (
 // This wrapper exists solely to customize the error message shown to users
 // when date parsing fails, making it clearer what format is expected.
 type DateRFC3339 time.Time
+
+// MarshalJSON converts a DateRFC3339 object to a JSON-encoded string in RFC3339 format.
+//
+// Returns:
+// - A byte slice containing the JSON-encoded date string.
+// - An error if the marshaling process fails.
+func (d *DateRFC3339) MarshalJSON() ([]byte, error) {
+	return json.Marshal(time.Time(*d))
+}
 
 // UnmarshalJSON parses a JSON-encoded string into a DateRFC3339 object.
 // It expects the date string to be in RFC3339 format (e.g., "2020-01-02T15:04:05Z").
