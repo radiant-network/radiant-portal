@@ -230,6 +230,8 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 		assert.Equal(t, "WGA", (*caseEntity).AnalysisCatalogCode)
 		assert.Equal(t, "Whole Genome Analysis", (*caseEntity).AnalysisCatalogName)
 		assert.Equal(t, "germline", (*caseEntity).CaseTypeCode)
+		assert.Equal(t, "postnatal", (*caseEntity).CaseCategoryCode)
+		assert.Equal(t, "Postnatal", (*caseEntity).CaseCategoryName)
 		assert.Equal(t, "2021-09-12 13:08:00 +0000 UTC", (*caseEntity).CreatedOn.String())
 		assert.Equal(t, "2021-09-12 13:08:00 +0000 UTC", (*caseEntity).UpdatedOn.String())
 		assert.Equal(t, "Felix Laflamme", (*caseEntity).Prescriber)
@@ -244,6 +246,8 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 		assert.Equal(t, "Administrative comment", (*caseEntity).Note)
 		assert.Equal(t, "N1", (*caseEntity).ProjectCode)
 		assert.Equal(t, "NeuroDev Phase I", (*caseEntity).ProjectName)
+		assert.Equal(t, "EPILEP", (*caseEntity).PanelCode)
+		assert.Equal(t, "Epilepsy", (*caseEntity).PanelName)
 	})
 }
 

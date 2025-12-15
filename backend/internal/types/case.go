@@ -71,6 +71,8 @@ type CaseEntity struct {
 	AnalysisCatalogCode      string                                    `json:"analysis_catalog_code,omitempty"`
 	AnalysisCatalogName      string                                    `json:"analysis_catalog_name,omitempty"`
 	CaseTypeCode             string                                    `json:"-"`
+	CaseCategoryCode         string                                    `json:"case_category_code" validate:"required"`
+	CaseCategoryName         string                                    `json:"case_category_name" validate:"required"`
 	CreatedOn                time.Time                                 `json:"created_on" validate:"required"`
 	UpdatedOn                time.Time                                 `json:"updated_on" validate:"required"`
 	Prescriber               string                                    `json:"prescriber,omitempty"`
@@ -85,6 +87,8 @@ type CaseEntity struct {
 	Note                     string                                    `json:"note,omitempty"`
 	ProjectCode              string                                    `json:"project_code,omitempty"`
 	ProjectName              string                                    `json:"project_name,omitempty"`
+	PanelCode                string                                    `json:"panel_code,omitempty"`
+	PanelName                string                                    `json:"panel_name,omitempty"`
 	Assays                   JsonArray[CaseAssay]                      `json:"assays" validate:"required"`
 	Members                  JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
 	Tasks                    JsonArray[CaseTask]                       `json:"tasks" validate:"required"`

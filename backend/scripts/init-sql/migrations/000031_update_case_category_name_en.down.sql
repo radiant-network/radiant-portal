@@ -1,0 +1,1 @@
+UPDATE case_category set name_en = 'postnatal' where code = 'postnatal';
