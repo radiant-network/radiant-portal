@@ -306,6 +306,7 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 
 	txCaseAnalysis := r.db.Table(fmt.Sprintf("%s %s", types.AnalysisCatalogTable.FederationName, types.AnalysisCatalogTable.Alias))
 	txCaseAnalysis = txCaseAnalysis.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.AnalysisCatalogTable.Alias, types.AnalysisCatalogTable.Alias))
+	txCaseAnalysis = txCaseAnalysis.Order("bucket asc")
 	if err := txCaseAnalysis.Find(&caseAnalysis).Error; err != nil {
 		return nil, fmt.Errorf("error fetching case_analysis: %w", err)
 	}
@@ -313,6 +314,7 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 	txDiagnosisLab := r.db.Table(fmt.Sprintf("%s %s", types.OrganizationTable.FederationName, types.OrganizationTable.Alias))
 	txDiagnosisLab = txDiagnosisLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.OrganizationTable.Alias, types.OrganizationTable.Alias))
 	txDiagnosisLab = txDiagnosisLab.Where(fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.OrganizationTable.Alias))
+	txDiagnosisLab = txDiagnosisLab.Order("bucket asc")
 	if err := txDiagnosisLab.Find(&diagnosisLab).Error; err != nil {
 		return nil, fmt.Errorf("error fetching diagnosis lab: %w", err)
 	}

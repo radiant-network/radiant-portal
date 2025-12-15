@@ -92,6 +92,8 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 		AnalysisCatalogCode: "WGA",
 		AnalysisCatalogName: "Whole Genome Analysis",
 		CaseType:            "germline_family",
+		CaseCategoryCode:    "postnatal",
+		CaseCategoryName:    "Postnatal",
 		CreatedOn: time.Date(
 			2000, 1, 1, 0, 0, 0, 0, time.UTC),
 		UpdatedOn: time.Date(
@@ -105,6 +107,8 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 		OrderingOrganizationName: "Centre hospitalier universitaire Sainte-Justine",
 		ProjectCode:              "N1",
 		ProjectName:              "NeuroDev Phase I",
+		PanelCode:                "EPILEP",
+		PanelName:                "Epilepsy",
 		Assays: types.JsonArray[types.CaseAssay]{
 			{SeqID: 1, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
 			{SeqID: 2, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
@@ -232,6 +236,8 @@ func Test_CaseEntityHandler(t *testing.T) {
 		],
 		"analysis_catalog_code":"WGA",
 		"analysis_catalog_name":"Whole Genome Analysis",
+		"case_category_code": "postnatal",
+		"case_category_name": "Postnatal",
 		"case_id":1,
 		"case_type":"germline_family", 
 		"created_on":"2000-01-01T00:00:00Z", 
@@ -269,6 +275,8 @@ func Test_CaseEntityHandler(t *testing.T) {
 		], 
 		"diagnosis_lab_code":"CQGC", 
 		"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
+		"panel_code": "EPILEP",
+		"panel_name": "Epilepsy",		
 		"prescriber":"Felix Laflamme", 
 		"primary_condition_id":"MONDO:0700092", 
 		"primary_condition_name":"neurodevelopmental disorder", 

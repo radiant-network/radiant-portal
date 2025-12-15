@@ -101,6 +101,14 @@ func JoinCaseWithAnalysisCatalog(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.analysis_catalog_id=%s.id", types.AnalysisCatalogTable.FederationName, types.AnalysisCatalogTable.Alias, types.CaseTable.Alias, types.AnalysisCatalogTable.Alias))
 }
 
+func JoinCaseWithCaseCategory(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.case_category_code=%s.code", types.CaseCategoryTable.FederationName, types.CaseCategoryTable.Alias, types.CaseTable.Alias, types.CaseCategoryTable.Alias))
+}
+
+func JoinAnalysisCatalogWithPanel(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.panel_id=%s.id", types.PanelTable.FederationName, types.PanelTable.Alias, types.AnalysisCatalogTable.Alias, types.PanelTable.Alias))
+}
+
 func JoinCaseWithProject(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.project_id=%s.id", types.ProjectTable.FederationName, types.ProjectTable.Alias, types.CaseTable.Alias, types.ProjectTable.Alias))
 }

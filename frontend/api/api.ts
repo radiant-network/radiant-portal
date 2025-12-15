@@ -535,6 +535,18 @@ export interface CaseEntity {
     'assays': Array<CaseAssay>;
     /**
      * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_category_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_category_name': string;
+    /**
+     * 
      * @type {number}
      * @memberof CaseEntity
      */
@@ -587,6 +599,18 @@ export interface CaseEntity {
      * @memberof CaseEntity
      */
     'ordering_organization_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'panel_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'panel_name'?: string;
     /**
      * 
      * @type {string}
