@@ -119,9 +119,13 @@ type CasePatientClinicalInformation struct {
 	RelationshipToProband string            `json:"relationship_to_proband" validate:"required"`
 	AffectedStatusCode    string            `json:"affected_status_code" validate:"required"`
 	PatientID             int               `json:"patient_id" validate:"required"`
+	FirstName             string            `json:"first_name,omitempty"`
+	LastName              string            `json:"last_name,omitempty"`
 	DateOfBirth           time.Time         `json:"date_of_birth"`
+	LifeStatusCode        string            `json:"life_status_code" validate:"required"`
 	SexCode               string            `json:"sex_code" validate:"required"`
 	SubmitterPatientId    string            `json:"submitter_patient_id,omitempty"`
+	Jhn                   string            `json:"jhn,omitempty"`
 	OrganizationCode      string            `json:"organization_code,omitempty"`
 	OrganizationName      string            `json:"organization_name,omitempty"`
 	EthnicityCodes        JsonArray[string] `json:"ethnicity_codes,omitempty"` // TODO

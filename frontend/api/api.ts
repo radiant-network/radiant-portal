@@ -735,6 +735,30 @@ export interface CasePatientClinicalInformation {
     'ethnicity_codes'?: Array<string>;
     /**
      * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'first_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'jhn'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'last_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'life_status_code': string;
+    /**
+     * 
      * @type {Array<Term>}
      * @memberof CasePatientClinicalInformation
      */
