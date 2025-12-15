@@ -27,6 +27,7 @@ type Case struct {
 	OrderingOrganization   Organization `gorm:"foreignKey:ID;references:OrderingOrganizationID"`
 	DiagnosisLabID         int
 	DiagnosisLab           Organization `gorm:"foreignKey:ID;references:diagnosisLabID"`
+	SubmitterCaseID        string
 	Note                   string
 	CreatedOn              time.Time
 	UpdatedOn              time.Time
