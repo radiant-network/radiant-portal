@@ -80,6 +80,16 @@ export const HEADER_HEIGHT = 43;
 export const ROW_HEIGHT = 41;
 
 /**
+ * Used for some use case
+ * when we need specific class for
+ * <TableHead /> and <TableCell />
+ */
+enum ColumnType {
+  Head,
+  Data,
+}
+
+/**
  * Interface and types
  */
 type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
@@ -213,7 +223,7 @@ function getPageCount(pagination: PaginationState, total: number) {
  * Return the needed tailwind class to pin a column. Must be applied to <TableCell />
  *
  */
-function getColumnPinningExtraCN(column: Column<any>): string {
+function getColumnPinningExtraCN(column: Column<any>, type: ColumnType): string {
   const isPinned = column.getIsPinned();
   if (!isPinned) return '';
   const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
@@ -221,6 +231,7 @@ function getColumnPinningExtraCN(column: Column<any>): string {
 
   return cn({
     'sticky z-10 group-data-[state=selected]:bg-table-active': isPinned,
+    'bg-background': type == ColumnType.Data,
     'border-r-[3px]': isLastLeftPinnedColumn,
     'border-l-[3px]': isFirstRightPinnedColumn,
   });
@@ -337,7 +348,7 @@ function getRowFlexRender<T>({
               key={cell.id}
               className={cn(
                 'overflow-hidden truncate text-nowrap',
-                getColumnPinningExtraCN(cell.column),
+                getColumnPinningExtraCN(cell.column, ColumnType.Data),
                 getRowPinningCellExtraCN(cell.row),
               )}
               style={{
@@ -936,7 +947,7 @@ function TranstackTable<T>({
                   {headerGroup.headers.map(header => (
                     <TableHead
                       key={header.id}
-                      className={cn('group/header', getColumnPinningExtraCN(header.column))}
+                      className={cn('group/header', getColumnPinningExtraCN(header.column, ColumnType.Head))}
                       style={{
                         width: `calc(var(--header-${header?.id}-size) * 1px)`,
                         ...getColumnPinningExtraStyles(header.column),
