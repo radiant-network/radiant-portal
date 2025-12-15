@@ -107,7 +107,6 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
         </TooltipHeader>
       ),
       size: 225,
-      enableSorting: false,
       minSize: 40,
     }),
     // Mane
