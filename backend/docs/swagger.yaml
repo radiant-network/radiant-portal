@@ -347,6 +347,14 @@ components:
             type: string
           type: array
           uniqueItems: false
+        first_name:
+          type: string
+        jhn:
+          type: string
+        last_name:
+          type: string
+        life_status_code:
+          type: string
         non_observed_phenotypes:
           items:
             $ref: '#/components/schemas/Term'
@@ -371,6 +379,7 @@ components:
           type: string
       required:
       - affected_status_code
+      - life_status_code
       - patient_id
       - relationship_to_proband
       - sex_code

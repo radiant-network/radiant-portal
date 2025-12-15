@@ -277,7 +277,7 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 	txMembers = utils.JoinPatientWithManagingOrg(txMembers)
 	txMembers = txMembers.Where("f.case_id = ?", caseId)
 	txMembers = txMembers.Order("affected_status_code asc, relationship_to_proband_code desc")
-	txMembers = txMembers.Select("p.id as patient_id, f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, p.date_of_birth, p.sex_code, p.submitter_patient_id, mgmt_org.code as organization_code, mgmt_org.name as organization_name")
+	txMembers = txMembers.Select("p.id as patient_id, p.last_name, p.first_name, f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, p.date_of_birth, p.life_status_code, p.sex_code, p.submitter_patient_id, p.jhn, mgmt_org.code as organization_code, mgmt_org.name as organization_name")
 	if err := txMembers.Find(&members).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case members: %w", err)
 	}

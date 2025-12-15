@@ -118,9 +118,9 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 			{ID: 1, TypeCode: "alignment", TypeName: "Alignment", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "proband, mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
 		},
 		Members: types.JsonArray[types.CasePatientClinicalInformation]{
-			{PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SubmitterPatientId: "MRN-283775", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
-			{PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SubmitterPatientId: "MRN-283773", SexCode: "female", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC)},
-			{PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SubmitterPatientId: "MRN-283774", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC)},
+			{PatientID: 3, FirstName: "Marie", LastName: "Lambert", RelationshipToProband: "proband", AffectedStatusCode: "affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283775", Jhn: "LAM7303233380", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
+			{PatientID: 1, FirstName: "Juliette", LastName: "Gagnon", RelationshipToProband: "mother", AffectedStatusCode: "affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283773", Jhn: "GAG1202030277", SexCode: "female", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC)},
+			{PatientID: 2, FirstName: "Antoine", LastName: "Lefebvre", RelationshipToProband: "father", AffectedStatusCode: "non_affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283774", Jhn: "LEF7001303889", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC)},
 		},
 	}, nil
 }
@@ -250,7 +250,11 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"submitter_patient_id":"MRN-283775", 
 				"patient_id":3, 
 				"relationship_to_proband":"proband",
-				"sex_code":"male", 
+				"sex_code":"male",
+				"first_name":"Marie",
+				"jhn":"LAM7303233380",
+				"last_name":"Lambert",
+				"life_status_code":"alive",
 				"non_observed_phenotypes": [{"id": "HP:0000717", "name": "Autism", "onset_code": "childhood"}, {"id": "HP:0001263", "name": "Global developmental delay", "onset_code": "childhood"}]
 			},
 			{
@@ -260,7 +264,12 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
 				"submitter_patient_id":"MRN-283773", 
 				"patient_id":1, 
-				"relationship_to_proband":"mother", "sex_code":"female"
+				"relationship_to_proband":"mother", 
+				"sex_code":"female",
+				"first_name":"Juliette",
+				"jhn":"GAG1202030277",
+				"last_name":"Gagnon",
+				"life_status_code":"alive"
 			},
 			{
 				"affected_status_code":"non_affected", 
@@ -270,7 +279,11 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"submitter_patient_id":"MRN-283774", 
 				"patient_id":2, 
 				"relationship_to_proband":"father", 
-				"sex_code":"male"
+				"sex_code":"male",
+				"first_name":"Antoine",
+				"jhn":"LEF7001303889",
+				"last_name":"Lefebvre",
+				"life_status_code":"alive"
 			}
 		], 
 		"diagnosis_lab_code":"CQGC", 
