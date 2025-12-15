@@ -76,7 +76,7 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
 
             {/* Created On */}
             <InformationField
-              label={t('case_entity.details.created_on')}
+              label={t('case_entity.details.created_on_male')}
               tooltipText={t('case_entity.details.date_format_tooltip')}
             >
               {data?.created_on && <>{formatDate(data.created_on, t('common.date'))}</>}

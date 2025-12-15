@@ -5,6 +5,7 @@ import AssayStatusBadge, { AssayStatus } from '@/components/base/badges/assay-st
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import PageHeader from '@/components/base/page/page-header';
 import { Badge } from '@/components/base/shadcn/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 export default function Header({ data, isLoading }: { data?: CaseEntity | null; isLoading: boolean }) {
@@ -33,14 +34,20 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
         },
       ]}
       statuses={[
-        <Badge key="priority" variant="outline" className="px-3 py-2">
-          <PriorityIndicator code={(data?.priority_code as PriorityIndicatorCode) || 'routine'} />
-        </Badge>,
-        <AssayStatusBadge
-          key="status"
-          className="px-3 py-2"
-          status={(data?.status_code as AssayStatus) || 'unknown'}
-        />,
+        <Tooltip key="priority">
+          <TooltipTrigger>
+            <Badge variant="outline" className="px-3 py-2">
+              <PriorityIndicator code={(data?.priority_code as PriorityIndicatorCode) || 'routine'} />
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>{t(`case_entity.header.priority_tooltip`)}</TooltipContent>
+        </Tooltip>,
+        <Tooltip key="status">
+          <TooltipTrigger>
+            <AssayStatusBadge className="px-3 py-2" status={(data?.status_code as AssayStatus) || 'unknown'} />
+          </TooltipTrigger>
+          <TooltipContent>{t(`case_entity.header.status_tooltip`)}</TooltipContent>
+        </Tooltip>,
       ]}
     />
   );

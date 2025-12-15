@@ -45,7 +45,7 @@ function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewA
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('case_entity.details.date_format_tooltip')}>
-          {t('case_entity.details.created_on')}
+          {t('case_entity.details.created_on_female')}
         </TooltipHeader>
       ),
       size: 80,
