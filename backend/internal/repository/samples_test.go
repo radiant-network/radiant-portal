@@ -53,3 +53,15 @@ func Test_GetSampleBySubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
 		assert.Nil(t, sample)
 	})
 }
+
+func Test_GetTypeCodes(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewSamplesRepository(db)
+
+		typeCodes, err := repo.GetTypeCodes()
+
+		assert.NoError(t, err)
+		assert.NotNil(t, typeCodes)
+		assert.Greater(t, len(typeCodes), 0)
+	})
+}

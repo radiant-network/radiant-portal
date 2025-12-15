@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"slices"
+	"strings"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -301,6 +303,23 @@ func (r *SampleValidationRecord) validateTissueSite() {
 	r.validateFieldWithRegexp("tissue_site", r.Sample.TissueSite.String(), TissueSiteRegExpCompiled, TissueSiteRegExp, false)
 }
 
+func (r *SampleValidationRecord) validateTypeCode(repoSample repository.SamplesDAO) {
+	allowedTypeCodes, err := repoSample.GetTypeCodes()
+	if err != nil {
+		glog.Errorf("error retrieving sample type codes: %v", err)
+		return
+	}
+	typeCodeIsValid := false
+	if slices.Contains(allowedTypeCodes, r.Sample.TypeCode) {
+		typeCodeIsValid = true
+	}
+	if !typeCodeIsValid {
+		path := formatPath(r, "type_code")
+		message := formatInvalidField(r, "type_code", fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		r.addErrors(message, SampleInvalidValueCode, path)
+	}
+}
+
 func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
@@ -317,6 +336,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		record.validateSubmitterSampleId()
 		record.validateSubmitterParentSampleId()
 		record.validateTissueSite()
+		record.validateTypeCode(repoSample)
 
 		// 2. Validate duplicates in batch
 		validateUniquenessInBatch(
