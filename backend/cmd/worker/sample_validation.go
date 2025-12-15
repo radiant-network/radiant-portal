@@ -303,21 +303,18 @@ func (r *SampleValidationRecord) validateTissueSite() {
 	r.validateFieldWithRegexp("tissue_site", r.Sample.TissueSite.String(), TissueSiteRegExpCompiled, TissueSiteRegExp, false)
 }
 
-func (r *SampleValidationRecord) validateTypeCode(repoSample repository.SamplesDAO) {
+func (r *SampleValidationRecord) validateTypeCode(repoSample repository.SamplesDAO) error {
 	allowedTypeCodes, err := repoSample.GetTypeCodes()
 	if err != nil {
-		glog.Errorf("error retrieving sample type codes: %v", err)
-		return
+		return fmt.Errorf("error retrieving sample type codes: %v", err)
 	}
-	typeCodeIsValid := false
-	if slices.Contains(allowedTypeCodes, r.Sample.TypeCode) {
-		typeCodeIsValid = true
-	}
-	if !typeCodeIsValid {
-		path := formatPath(r, "type_code")
-		message := formatInvalidField(r, "type_code", fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+	if !slices.Contains(allowedTypeCodes, r.Sample.TypeCode) {
+		fieldName := "type_code"
+		path := formatPath(r, fieldName)
+		message := formatInvalidField(r, fieldName, fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
 		r.addErrors(message, SampleInvalidValueCode, path)
 	}
+	return nil
 }
 
 func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]*SampleValidationRecord, error) {
@@ -336,7 +333,10 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		record.validateSubmitterSampleId()
 		record.validateSubmitterParentSampleId()
 		record.validateTissueSite()
-		record.validateTypeCode(repoSample)
+		err := record.validateTypeCode(repoSample)
+		if err != nil {
+			return nil, err
+		}
 
 		// 2. Validate duplicates in batch
 		validateUniquenessInBatch(
