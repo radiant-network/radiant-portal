@@ -7,7 +7,7 @@ import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
-function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
+function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
   const { t } = useI18n();
 
   return (
@@ -115,4 +115,4 @@ function AnalysisCard({ data, ...props }: { data: CaseEntity } & ComponentProps<
   );
 }
 
-export default AnalysisCard;
+export default CaseOverviewCard;
