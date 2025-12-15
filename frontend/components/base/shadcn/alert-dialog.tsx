@@ -88,13 +88,37 @@ export type AlertDialogType = 'success' | 'info' | 'warning' | 'error';
 const AlertDialogIcon = ({ type }: { type: AlertDialogType }) => {
   switch (type) {
     case 'info':
-      return <InfoIcon />; // TODO add info color
+      return (
+        <div>
+          <div className="w-7 h-7 bg-alert-info/20 rounded-full flex items-center justify-center">
+            <InfoIcon className="text-alert-info-foreground" />
+          </div>
+        </div>
+      );
     case 'warning':
-      return <CircleAlertIcon />; // TODO add warning color
+      return (
+        <div>
+          <div className="w-7 h-7 bg-alert-warning/20 rounded-full flex items-center justify-center">
+            <CircleAlertIcon className="text-alert-warning-foreground" />
+          </div>
+        </div>
+      );
     case 'error':
-      return <CircleXIcon className="stroke-destructive" />;
+      return (
+        <div>
+          <div className="w-7 h-7 bg-alert-error/20 rounded-full flex items-center justify-center">
+            <CircleXIcon className="text-alert-error-foreground" />
+          </div>
+        </div>
+      );
     case 'success':
-      return <CircleCheckIcon />; // TODO add success color
+      return (
+        <div>
+          <div className="w-7 h-7 bg-alert-success/20 rounded-full flex items-center justify-center">
+            <CircleCheckIcon className="text-alert-success-foreground" />
+          </div>
+        </div>
+      );
     default:
       return null;
   }

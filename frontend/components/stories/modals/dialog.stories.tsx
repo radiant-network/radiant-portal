@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { CandyCane } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
 import {
@@ -250,6 +251,38 @@ export const StickyBoth: Story = {
               Slot (swap it with your content)
             </div>
           </div>
+          <DialogFooter>
+            <Button onClick={() => setOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  },
+};
+
+export const HeaderIcon: Story = {
+  args: {},
+  render: _args => {
+    const [open, setOpen] = useState<boolean>(false);
+
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger>
+          <Button onClick={() => setOpen(true)}>Open</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader icon={<CandyCane />}>
+            <DialogTitle>Dialog Title</DialogTitle>
+            <DialogDescription>
+              Dialog Description Description Description Description Description Description Description Description
+              Description Description Description Description
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="flex items-center justify-center text-sm border border-dashed border-primary bg-primary/10 rounded h-40">
+              Slot (swap it with your content)
+            </div>
+          </DialogBody>
           <DialogFooter>
             <Button onClick={() => setOpen(false)}>Close</Button>
           </DialogFooter>

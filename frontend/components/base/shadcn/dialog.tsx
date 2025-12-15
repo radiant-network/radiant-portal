@@ -11,11 +11,13 @@ const dialogVariants = tv({
     base: 'fixed left-[50%] top-[50%] z-50 grid w-full max-h-[96vh] translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg outline-none',
     close:
       'absolute right-4 top-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:size-4',
-    header: 'flex flex-col space-y-1.5 px-6 pt-6 text-center sm:text-left',
+    header: 'flex flex-row space-y-1.5 px-6 pt-6 text-center sm:text-left items-start self-stretch gap-6',
     body: 'p-6',
     footer: 'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 px-6 pb-6',
+    titleWrapper: 'flex flex-col gap-0.5',
     title: 'text-lg font-semibold leading-none tracking-tight',
     description: 'text-sm text-muted-foreground',
+    icon: 'text-foreground',
   },
   variants: {
     variant: {
@@ -112,11 +114,18 @@ const DialogBody = ({ className, children, ...props }: React.HTMLAttributes<HTML
 };
 DialogBody.displayName = 'DialogBody';
 
-const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
+export type DialogHeaderProps = React.HTMLAttributes<HTMLDivElement> & { icon?: React.ReactNode };
+
+const DialogHeader = ({ className, icon, ...props }: DialogHeaderProps) => {
   const { variant } = useDialogContext();
   const styles = dialogVariants({ variant });
 
-  return <div className={styles.header({ className })} {...props} />;
+  return (
+    <div className={styles.header({ className })} {...props}>
+      {icon && <div className={styles.icon({ className })}>{icon}</div>}
+      <div className={styles.titleWrapper({ className })}>{props.children}</div>
+    </div>
+  );
 };
 DialogHeader.displayName = 'DialogHeader';
 
