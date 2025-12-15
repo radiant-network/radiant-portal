@@ -27,6 +27,10 @@ func (m *mockSampleDAO) CreateSample(*types.Sample) (*types.Sample, error) {
 	return nil, nil
 }
 
+func (m *mockSampleDAO) GetTypeCodes() ([]string, error) {
+	return nil, nil
+}
+
 func (m *mockSampleDAO) GetSampleBySubmitterSampleId(orgID int, submitterID string) (*types.Sample, error) {
 	args := m.Called(orgID, submitterID)
 	if s, ok := args.Get(0).(*types.Sample); ok {
