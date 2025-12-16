@@ -10,13 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// func (m *MockS3PreSigner) GeneratePreSignedURL(url string) (*utils.PreSignedURL, error) {
-// 	return &utils.PreSignedURL{
-// 		URL:         "presigned." + url,
-// 		URLExpireAt: 1234567890,
-// 	}, nil
-// }
-
 func Test_IGVInternal_GetIGV(t *testing.T) {
 	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		repo := NewIGVRepository(starrocks)
