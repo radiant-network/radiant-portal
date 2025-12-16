@@ -1,0 +1,22 @@
+[
+  {
+    "type": "case_id",
+    "value": "Mock case_id"
+  },
+  {
+    "type": "patient_id",
+    "value": "Mock patient_id"
+  },
+  {
+    "type": "assay_id",
+    "value": "Mock assay_id"
+  },
+  {
+    "type": "mrn",
+    "value": "Mock mrn"
+  },
+  {
+    "type": "other field",
+    "value": "Mock other field"
+  }
+]
