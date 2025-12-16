@@ -79,7 +79,7 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 	assert.Equal(t, types.BatchStatusPending, response.Status)
 }
 
-func TestPostCaseBatchHandler_ValidationError_MissingRequiredFields(t *testing.T) {
+func TestPostCaseBatchHandler_MissingRequiredFields(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
@@ -126,7 +126,7 @@ func TestPostCaseBatchHandler_ValidationError_MissingRequiredFields(t *testing.T
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func TestPostCaseBatchHandler_ValidationError_InvalidType(t *testing.T) {
+func TestPostCaseBatchHandler_InvalidType(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
@@ -173,7 +173,7 @@ func TestPostCaseBatchHandler_ValidationError_InvalidType(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func TestPostCaseBatchHandler_ValidationError_InvalidCategory(t *testing.T) {
+func TestPostCaseBatchHandler_InvalidCategory(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
