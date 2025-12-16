@@ -254,6 +254,23 @@ const tableColumns = {
 
 const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
   /**
+   * Clicks the link in a specific table cell for a given column.
+   * @param columnID The ID of the column.
+   */
+  clickTableCellLink(columnID: string) {
+    getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      if (position !== -1) {
+        switch (columnID) {
+          default:
+            cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
+            break;
+        }
+      } else {
+        cy.handleColumnNotFound(columnID);
+      }
+    });
+  },
+  /**
    * Pins a column in the table by its ID.
    * @param columnID The ID of the column to pin.
    */
@@ -293,6 +310,13 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
 });
 
 const generateTableValidationsFunctions = (tableId: string, columns: any[], customColumnContent?: (columnID: string, data: any, position: number) => void) => ({
+  /**
+   * Checks that the drawer is displayed.
+   * @param dataVariant The variant object.
+   */
+  shouldDrawerOpen(dataVariant: any) {
+    cy.get(CommonSelectors.animateIn).contains(dataVariant.variant).should('exist');
+  },
   /**
    * Validates the value of the first row for a given column.
    * @param value The expected value (string or RegExp).

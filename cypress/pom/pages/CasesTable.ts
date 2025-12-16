@@ -1,9 +1,11 @@
 /// <reference types="cypress"/>
+import { data } from 'pom/shared/Data';
 import { CommonSelectors } from '../shared/Selectors';
 import { getPriorityColor, getStatusColor, getStatusIcon, getUrlLink, stringToRegExp } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
+  filtersId: 'table-filters',
   tableCell: (dataCase: any) => `${CommonSelectors.tableRow()}:contains("${dataCase.case}") ${CommonSelectors.tableCellData}`,
 };
 
@@ -248,6 +250,14 @@ export const CasesTable = {
       );
     },
     /**
+     * Select a suggestion in the list.
+     * @param field The field of the suggestion to select.
+     * @param value The value of the suggestion to select.
+     */
+    selectSuggestion(field: string, value: string) {
+      cy.get(`${CommonSelectors.suggestionList(selectors.filtersId)} ${CommonSelectors.suggestionItem(field, value)}`).clickAndWait({ force: true });
+    },
+    /**
      * Shows all columns in the table.
      */
     showAllColumns() {
@@ -283,6 +293,20 @@ export const CasesTable = {
           }
         })
       );
+    },
+    /**
+     * Types in the search input.
+     * @param text The text to search.
+     * @param needIntercept Whether to use an intercept (default: true).
+     */
+    typeSearch(text: string, needIntercept: boolean = true) {
+      if (needIntercept) {
+        cy.intercept('GET', `**/cases/autocomplete?prefix=${text}**`).as('autocompleteRequest');
+        cy.get(CommonSelectors.searchInput(selectors.filtersId)).type(text);
+        cy.wait('@autocompleteRequest');
+      } else {
+        cy.get(CommonSelectors.searchInput(selectors.filtersId)).type(text);
+      }
     },
     /**
      * Unpins a specific column in the table.
@@ -388,6 +412,42 @@ export const CasesTable = {
       );
     },
     /**
+     * Validates the request sent to api on search selecting functionality.
+     */
+    shouldRequestOnSearchSelect() {
+      const caseField = tableColumns.find(col => col.id === 'case')?.apiField || '';
+      const caseValue = data.case.case;
+      CasesTable.actions.typeSearch(caseValue);
+      cy.intercept('POST', '**/cases/search', req => {
+        expect(req.body.search_criteria).to.have.length(1);
+        expect(req.body.search_criteria).to.deep.include({ field: caseField, value: [caseValue] });
+      }).as('searchRequest');
+      CasesTable.actions.selectSuggestion(caseField, caseValue);
+      cy.wait('@searchRequest');
+    },
+    /**
+     * Validates the request sent to api on search typing functionality.
+     */
+    shouldRequestOnSearchTyping() {
+      const caseValue = data.case.case;
+      cy.intercept('GET', `**/cases/autocomplete?prefix=${caseValue}**`).as('autocompleteRequest');
+      CasesTable.actions.typeSearch(caseValue, false /*needIntercept*/);
+      cy.wait('@autocompleteRequest');
+    },
+    /**
+     * Validates the request sent to api on sorting functionality of a column.
+     * @param columnID The ID of the column to sort.
+     */
+    shouldRequestOnSort(columnID: string) {
+      CasesTable.actions.showAllColumns();
+      cy.intercept('POST', '**/cases/search', req => {
+        expect(req.body.sort).to.have.length(1);
+        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
+      }).as('sortRequest');
+      CasesTable.actions.sortColumn(columnID, false /*needIntercept*/);
+      cy.wait('@sortRequest');
+    },
+    /**
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
@@ -490,28 +550,22 @@ export const CasesTable = {
       });
     },
     /**
-     * Validates that a specific column is unpinned.
-     * @param columnID The ID of the column to check.
+     * Validates the content of the suggestion list from mock api response.
      */
-    shouldUnpinnedColumn(columnID: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
-          cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned(null);
-        })
-      );
-    },
-    /**
-     * Validates the request sent to api on sorting functionality of a column.
-     * @param columnID The ID of the column to sort.
-     */
-    shouldRequestOnSort(columnID: string) {
-      CasesTable.actions.showAllColumns();
-      cy.intercept('POST', '**/cases/search', req => {
-        expect(req.body.sort).to.have.length(1);
-        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
-      }).as('sortRequest');
-      CasesTable.actions.sortColumn(columnID, false /*needIntercept*/);
-      cy.wait('@sortRequest');
+    shouldShowSuggestionListFromMock() {
+      cy.fixture('ResponseBody/AutocompleteCase.json').then(mockResponseBody => {
+        cy.intercept('GET', `**/cases/autocomplete?prefix=1**`, req => {
+          req.alias = 'autocompleteResponse';
+          req.reply(mockResponseBody);
+        });
+
+        CasesTable.actions.typeSearch('1', false /*needIntercept*/);
+        cy.wait('@autocompleteResponse');
+
+        mockResponseBody.forEach((item: any) => {
+          cy.get(`${CommonSelectors.suggestionList(selectors.filtersId)} ${CommonSelectors.suggestionItem(item.type, item.value)}`).should('exist');
+        });
+      });
     },
     /**
      * Validates the sorting functionality of a column with mocked data.
@@ -551,6 +605,17 @@ export const CasesTable = {
           });
         });
       });
+    },
+    /**
+     * Validates that a specific column is unpinned.
+     * @param columnID The ID of the column to check.
+     */
+    shouldUnpinnedColumn(columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned(null);
+        })
+      );
     },
   },
 };
