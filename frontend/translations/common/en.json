@@ -1206,21 +1206,19 @@
       "unknown": "Unknown"
     },
     "patient_information": {
-      "title": "Patient Information",
-      "proband": "Proband",
-      "mother": "Mother",
-      "father": "Father",
-      "relationships": {
-        "proband": "Proband"
-      },
-      "id": "ID",
-      "name": "Name (First / Last)",
       "dob": "DOB",
-      "sex": "Sex",
+      "father": "Father",
+      "id": "ID",
       "jhn": "JHN",
-      "submitter_patient_id": "MRN",
+      "life_status": "Vital Status",
       "managing_org": "Managing Org.",
-      "managing_org_tooltip": "Organization managing the patient’s file"
+      "managing_org_tooltip": "Organization managing the patient’s file",
+      "mother": "Mother",
+      "name": "Name (First / Last)",
+      "sex": "Sex",
+      "submitter_patient_id": "Org. patient ID",
+      "submitter_patient_id_tooltip": "Organisation patient ID",
+      "title": "Patient Information"
     },
     "details": {
       "aliquot": "Aliquot",
