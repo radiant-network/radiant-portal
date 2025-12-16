@@ -502,8 +502,10 @@ function getRowFlexRender<T>({
  * 
  * @DESCRIPTION: additional fields are managed by the table to be able to request extra data from server
  *              based on the column visibility.
+ *              In defaultColumnSettings, you can enter the IDs of the relevant columns in additionalFieldIds.
+ *              In API the fields is named additional_fields.
  * @EXAMPLE: {
- *   additional_fields: ['field1', 'field2'],
+ *   additionalFieldIds: ['fieldId1', 'fieldId2'],
  * }
  */
 // eslint-disable-next-line complexity
@@ -587,7 +589,7 @@ function TranstackTable<T>({
     setIsFullscreen(false);
   };
 
-  // Set only additional fields displayed in the table
+  // Set only additional fields displayed in the table from additionalFieldIds
   const filteredAdditionalFields = useMemo(
     () =>
       getFilteredAdditionalFields({
