@@ -52,15 +52,11 @@ var SequencingExperimentRunNameField = Field{
 }
 
 var SequencingExperimentTable = Table{
-	Name:  "radiant_jdbc.public.sequencing_experiment",
-	Alias: "s",
-}
-
-var ClinicalSequencingExperimentTable = Table{
-	Name:  "sequencing_experiment",
-	Alias: "s",
+	Name:           "sequencing_experiment",
+	FederationName: "radiant_jdbc.public.sequencing_experiment",
+	Alias:          "s",
 }
 
 func (SequencingExperiment) TableName() string {
-	return ClinicalSequencingExperimentTable.Name // We only create when we are in clinical context
+	return SequencingExperimentTable.Name // We only create when we are in clinical context
 }

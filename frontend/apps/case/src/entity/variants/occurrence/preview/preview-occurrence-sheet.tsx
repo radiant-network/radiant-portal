@@ -2,19 +2,19 @@ import { ClipboardPen } from 'lucide-react';
 
 import { CaseAssay, GermlineSNVOccurrence } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
-import PreviewOccurrenceDetailsCard from '@/components/base/preview/preview-occurrence-details-card';
+import PreviewOccurrenceSubHeader from '@/components/base/preview/preview-occurrence-sub-header';
 import PreviewSheet from '@/components/base/preview/preview-sheet';
 import PreviewSheetHeader from '@/components/base/preview/preview-sheet-header';
 import PreviewSheetSkeleton from '@/components/base/preview/preview-sheet-skeleton';
-import PreviewSheetSubHeader from '@/components/base/preview/preview-sheet-sub-header';
 import { useOccurrenceAndCase } from '@/components/base/preview/preview-sheet-utils';
-import PreviewVariantDetailsCard from '@/components/base/preview/preview-variant-details-card';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useI18n } from '@/components/hooks/i18n';
+import PreviewVariantDetailsCard from '@/entity/variants/occurrence/preview/preview-variant-details-card';
 import { useCaseIdFromParam } from '@/utils/helper';
+import PreviewOccurrenceDetailsCard from 'components/base/preview/preview-occurrence-details-card';
 
-import InterpretationDialog from '../interpretation/interpretation-dialog';
+import InterpretationDialog from '../../interpretation/interpretation-dialog';
 
 type OccurrencePreviewSheetProps = {
   occurrence?: GermlineSNVOccurrence;
@@ -96,7 +96,7 @@ function OccurrenceSheetContent({
         hasNext={hasNext}
       />
       <Separator />
-      <PreviewSheetSubHeader
+      <PreviewOccurrenceSubHeader
         patientId={patient?.patient_id}
         relationshipToProband={patient?.relationship_to_proband}
         seqId={assay?.seq_id}
@@ -133,6 +133,7 @@ function OccurrenceSheetContent({
           mother_calls={expandResult.data.mother_calls}
           ad_alt={expandResult.data.ad_alt}
           ad_total={expandResult.data.ad_total}
+          enableIGV
         />
       )}
       <PreviewVariantDetailsCard data={expandResult.data} />

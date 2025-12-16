@@ -13,8 +13,9 @@ type Family struct {
 }
 
 var FamilyTable = Table{
-	Name:  "radiant_jdbc.public.family",
-	Alias: "f",
+	Name:           "family",
+	FederationName: "radiant_jdbc.public.family",
+	Alias:          "f",
 }
 
 var FamilyRelationshipToProbandCodeField = Field{

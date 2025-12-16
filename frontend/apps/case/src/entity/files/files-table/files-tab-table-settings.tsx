@@ -192,19 +192,19 @@ export const defaultSettings = createColumnSettings([
     id: 'seq_id',
     visible: false,
     label: 'file_entity.seq_id',
-    additionalFieldIds: ['seq_id'],
+    additionalFields: ['seq_id'],
   },
   {
     id: 'hash',
     visible: false,
     label: 'file_entity.hash',
-    additionalFieldIds: ['hash'],
+    additionalFields: ['hash'],
   },
   {
     id: 'run_alias',
     visible: false,
     label: 'file_entity.run_alias',
-    additionalFieldIds: ['run_alias'],
+    additionalFields: ['run_alias'],
   },
   {
     id: 'actions',

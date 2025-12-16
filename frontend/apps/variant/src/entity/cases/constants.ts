@@ -1,1 +1,1 @@
-export const SELECTED_CASE_PARAM = 'selectedCase';
+export const SELECTED_UNINTERPRETED_CASE_PARAM = 'nonInterpretedCase';

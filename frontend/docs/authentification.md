@@ -1,8 +1,14 @@
-# Proxy API
+# Authentification
 
-## The proxy API is to be used by apps
+## Code architecture
 
-#### Adding a GET request endpoint
+![authentification](./media/authentification.png)
+
+## Proxy API
+
+### The proxy API is to be used by apps
+
+##### Adding a GET request endpoint
 
 ```typescript
 /**
@@ -18,7 +24,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 ```
 
-#### Adding a PUT, PATCH, POST or DELETE endpoint
+##### Adding a PUT, PATCH, POST or DELETE endpoint
 
 ```typescript
 /**
@@ -46,7 +52,7 @@ export function action({ request }: Route.ActionArgs) {
 }
 ```
 
-### Making the endpoint avaiable
+#### Making the endpoint avaiable
 
 In order to make the endpoint available, you need to add it to the `routes.ts` file in the prefix api route list `prefix("api", [...])`
 

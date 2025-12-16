@@ -45,7 +45,7 @@ function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewA
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('case_entity.details.date_format_tooltip')}>
-          {t('case_entity.details.created_on')}
+          {t('case_entity.details.created_on_female')}
         </TooltipHeader>
       ),
       size: 80,
@@ -78,7 +78,7 @@ function BioinformaticsCard({ tasks, ...props }: BioinformaticsCardProps) {
         <CardTitle size="xl">{t('case_entity.details.bioinformatics')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <DisplayTable variant="borderless" data={tasks} columns={getColumns(t, tasks, false)} />
+        <DisplayTable data={tasks} columns={getColumns(t, tasks, false)} />
       </CardContent>
     </Card>
   );
@@ -97,7 +97,7 @@ function AlertDialogBioinformaticsCard({ tasks }: BioinformaticsCardProps) {
       <AlertDialogContent className="min-w-auto md:min-w-[800px]">
         <AlertDialogHeader>{t('case_entity.details.bioinformatics')}</AlertDialogHeader>
         <AlertDialogDescription>
-          <DisplayTable variant="borderless" data={tasks} columns={getColumns(t, tasks, false)} />
+          <DisplayTable data={tasks} columns={getColumns(t, tasks, false)} />
         </AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('common.close')}</AlertDialogCancel>

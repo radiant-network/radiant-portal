@@ -38,8 +38,9 @@ var SamplePatientIdField = Field{
 }
 
 var SampleTable = Table{
-	Name:  "radiant_jdbc.public.sample",
-	Alias: "spl",
+	Name:           "sample",
+	FederationName: "radiant_jdbc.public.sample",
+	Alias:          "spl",
 }
 
 func (Sample) TableName() string {

@@ -4,8 +4,7 @@ import { Info } from 'lucide-react';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
-
-import AssayInformationsDialog from '../assays/assay-information-dialog';
+import AssayInformationsDialog from 'components/base/assays/assay-information-dialog';
 
 export type PreviewSheetAssayDetailsProps = {
   patientId: number | undefined;
@@ -24,9 +23,11 @@ function PreviewSheetAssayDetails({ patientId, relationshipToProband, seqId }: P
           <h4 className="font-semibold">{t('preview_sheet.occurrence_details.patient')}</h4>
           <div className="flex gap-2 items-center">
             <p className="text-muted-foreground font-mono">{patientId}</p>
-            <Badge variant="outline" className="bg-background">
-              {relationshipToProband}
-            </Badge>
+            {relationshipToProband && (
+              <Badge variant="outline" className="bg-background">
+                {relationshipToProband}
+              </Badge>
+            )}
           </div>
         </div>
         <div className="flex flex-col items-start justify-center">

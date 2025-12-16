@@ -142,6 +142,12 @@ export interface Assay {
     'histology_code'?: string;
     /**
      * 
+     * @type {number}
+     * @memberof Assay
+     */
+    'patient_id': number;
+    /**
+     * 
      * @type {string}
      * @memberof Assay
      */
@@ -535,6 +541,18 @@ export interface CaseEntity {
     'assays': Array<CaseAssay>;
     /**
      * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_category_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_category_name': string;
+    /**
+     * 
      * @type {number}
      * @memberof CaseEntity
      */
@@ -587,6 +605,18 @@ export interface CaseEntity {
      * @memberof CaseEntity
      */
     'ordering_organization_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'panel_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'panel_name'?: string;
     /**
      * 
      * @type {string}
@@ -709,6 +739,30 @@ export interface CasePatientClinicalInformation {
      * @memberof CasePatientClinicalInformation
      */
     'ethnicity_codes'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'first_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'jhn'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'last_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'life_status_code': string;
     /**
      * 
      * @type {Array<Term>}

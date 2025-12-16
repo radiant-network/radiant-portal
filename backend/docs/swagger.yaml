@@ -48,6 +48,8 @@ components:
           type: string
         histology_code:
           type: string
+        patient_id:
+          type: integer
         platform_code:
           type: string
         run_alias:
@@ -78,6 +80,8 @@ components:
           type: string
         updated_on:
           type: string
+      required:
+      - patient_id
       type: object
     AutoCompleteGene:
       properties:
@@ -233,6 +237,10 @@ components:
             $ref: '#/components/schemas/CaseAssay'
           type: array
           uniqueItems: false
+        case_category_code:
+          type: string
+        case_category_name:
+          type: string
         case_id:
           type: integer
         case_type:
@@ -253,6 +261,10 @@ components:
         ordering_organization_code:
           type: string
         ordering_organization_name:
+          type: string
+        panel_code:
+          type: string
+        panel_name:
           type: string
         prescriber:
           type: string
@@ -277,6 +289,8 @@ components:
           type: string
       required:
       - assays
+      - case_category_code
+      - case_category_name
       - case_id
       - created_on
       - members
@@ -337,6 +351,14 @@ components:
             type: string
           type: array
           uniqueItems: false
+        first_name:
+          type: string
+        jhn:
+          type: string
+        last_name:
+          type: string
+        life_status_code:
+          type: string
         non_observed_phenotypes:
           items:
             $ref: '#/components/schemas/Term'
@@ -361,6 +383,7 @@ components:
           type: string
       required:
       - affected_status_code
+      - life_status_code
       - patient_id
       - relationship_to_proband
       - sex_code

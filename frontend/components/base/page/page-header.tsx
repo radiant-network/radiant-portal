@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { tv, VariantProps } from 'tailwind-variants';
 
 import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
@@ -33,11 +34,12 @@ interface EntityHeaderProps extends VariantProps<typeof pageHeaderVariants> {
   isLoading?: boolean;
   badges?: PageHeaderBadge[];
   buttons?: ButtonProps[];
+  statuses?: ReactNode[];
   title?: string;
   description?: string;
 }
 
-function PageHeader({ title, badges, buttons, description, isLoading = true, variant }: EntityHeaderProps) {
+function PageHeader({ title, badges, buttons, statuses, description, isLoading = true, variant }: EntityHeaderProps) {
   const style = pageHeaderVariants({ variant });
 
   if (isLoading) {
@@ -79,9 +81,10 @@ function PageHeader({ title, badges, buttons, description, isLoading = true, var
               <h2 className="text-sm text-muted-foreground">{description}</h2>
             </div>
             <div className="flex items-center gap-2">
-              {(buttons ?? []).map((buttonProps, index) => (
-                <Button key={buttonProps.key ?? index} {...buttonProps} />
-              ))}
+              {statuses && statuses.length > 0 && statuses.map((status, index) => <div key={index}>{status}</div>)}
+              {buttons &&
+                buttons.length > 0 &&
+                buttons.map((buttonProps, index) => <Button key={buttonProps.key ?? index} {...buttonProps} />)}
             </div>
           </div>
         </div>

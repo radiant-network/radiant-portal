@@ -82,37 +82,37 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 	var autocompleteResult []AutocompleteResult
 	searchInput := fmt.Sprintf("%s%%", prefix)
 
-	subQueryDocumentId := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
+	subQueryDocumentId := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.FederationName, types.DocumentTable.Alias))
 	subQueryDocumentId = subQueryDocumentId.Select("\"document_id\" as type, id as value")
 	subQueryDocumentId = subQueryDocumentId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 	filterOutIndexFiles(subQueryDocumentId)
 
-	subQueryDocumentName := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
+	subQueryDocumentName := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.FederationName, types.DocumentTable.Alias))
 	subQueryDocumentName = subQueryDocumentName.Select("\"name\" as type, name as value")
 	subQueryDocumentName = subQueryDocumentName.Where("name LIKE ?", searchInput)
 	filterOutIndexFiles(subQueryDocumentName)
 
-	subQueryRunName := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
+	subQueryRunName := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
 	subQueryRunName = subQueryRunName.Select("\"run_name\" as type, run_name as value")
 	subQueryRunName = subQueryRunName.Where("LOWER(run_name) LIKE ?", strings.ToLower(searchInput))
 
-	subQuerySampleId := r.db.Table(fmt.Sprintf("%s %s", types.SampleTable.Name, types.SampleTable.Alias))
+	subQuerySampleId := r.db.Table(fmt.Sprintf("%s %s", types.SampleTable.FederationName, types.SampleTable.Alias))
 	subQuerySampleId = subQuerySampleId.Select("\"sample_id\" as type, id as value")
 	subQuerySampleId = subQuerySampleId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryPatientId := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.Name, types.PatientTable.Alias))
+	subQueryPatientId := r.db.Table(fmt.Sprintf("%s %s", types.PatientTable.FederationName, types.PatientTable.Alias))
 	subQueryPatientId = subQueryPatientId.Select("\"patient_id\" as type, id as value")
 	subQueryPatientId = subQueryPatientId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryCaseId := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	subQueryCaseId := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
 	subQueryCaseId = subQueryCaseId.Select("\"case_id\" as type, id as value")
 	subQueryCaseId = subQueryCaseId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQuerySeqId := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.Name, types.SequencingExperimentTable.Alias))
+	subQuerySeqId := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
 	subQuerySeqId = subQuerySeqId.Select("\"seq_id\" as type, id as value")
 	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryTaskId := r.db.Table(fmt.Sprintf("%s %s", types.TaskTable.Name, types.TaskTable.Alias))
+	subQueryTaskId := r.db.Table(fmt.Sprintf("%s %s", types.TaskTable.FederationName, types.TaskTable.Alias))
 	subQueryTaskId = subQueryTaskId.Select("\"task_id\" as type, id as value")
 	subQueryTaskId = subQueryTaskId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
@@ -170,7 +170,7 @@ func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProj
 }
 
 func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destination *[]Aggregation, filterTable types.Table, documentsJoinColumn string, filterJoinColumn string, filterLabelColumn string, filterCondition *string) error {
-	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.Name, filterTable.Alias))
+	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.FederationName, filterTable.Alias))
 	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct doc.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) doc ON doc.%s = %s.%s", documentsJoinColumn, filterTable.Alias, filterJoinColumn), txDocument)
 	tx = tx.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
@@ -180,26 +180,26 @@ func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destinatio
 	}
 
 	if err := tx.Find(destination).Error; err != nil {
-		return fmt.Errorf("error fetching filter %s: %w", filterTable.Name, err)
+		return fmt.Errorf("error fetching filter %s: %w", filterTable.FederationName, err)
 	}
 	return nil
 }
 
 func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.DB {
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias))
-	tx = utils.JoinWithTaskHasDocument(tx)
-	tx = utils.JoinWithTaskContext(tx)
-	tx = utils.JoinWithCaseHasSequencingExperiment(tx)
-	tx = utils.JoinWithSequencingExperiment(tx)
-	tx = utils.JoinWithCase(tx)
-	tx = utils.JoinWithDiagnosisLab(tx)
-	tx = utils.JoinWithSample(tx)
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.DocumentTable.FederationName, types.DocumentTable.Alias))
+	tx = utils.JoinDocumentWithTaskHasDocument(tx)
+	tx = utils.JoinTaskHasDocWithTaskContext(tx)
+	tx = utils.JoinTaskContextWithCaseHasSeqExp(tx)
+	tx = utils.JoinCaseHasSeqExpWithSequencingExperiment(tx)
+	tx = utils.JoinCaseHasSeqExpWithCase(tx)
+	tx = utils.JoinCaseWithDiagnosisLab(tx)
+	tx = utils.JoinSeqExpWithSample(tx)
 
 	if userQuery.HasFieldFromTables(types.ProjectTable) {
-		tx = utils.JoinWithProject(tx)
+		tx = utils.JoinCaseWithProject(tx)
 	}
 
-	tx = utils.JoinWithFamilyRelationship(tx)
+	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
 	if userQuery.Filters() != nil {
 		utils.AddWhere(userQuery, tx)
 	}

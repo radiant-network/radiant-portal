@@ -71,6 +71,8 @@ type CaseEntity struct {
 	AnalysisCatalogCode      string                                    `json:"analysis_catalog_code,omitempty"`
 	AnalysisCatalogName      string                                    `json:"analysis_catalog_name,omitempty"`
 	CaseTypeCode             string                                    `json:"-"`
+	CaseCategoryCode         string                                    `json:"case_category_code" validate:"required"`
+	CaseCategoryName         string                                    `json:"case_category_name" validate:"required"`
 	CreatedOn                time.Time                                 `json:"created_on" validate:"required"`
 	UpdatedOn                time.Time                                 `json:"updated_on" validate:"required"`
 	Prescriber               string                                    `json:"prescriber,omitempty"`
@@ -85,6 +87,8 @@ type CaseEntity struct {
 	Note                     string                                    `json:"note,omitempty"`
 	ProjectCode              string                                    `json:"project_code,omitempty"`
 	ProjectName              string                                    `json:"project_name,omitempty"`
+	PanelCode                string                                    `json:"panel_code,omitempty"`
+	PanelName                string                                    `json:"panel_name,omitempty"`
 	Assays                   JsonArray[CaseAssay]                      `json:"assays" validate:"required"`
 	Members                  JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
 	Tasks                    JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
@@ -115,9 +119,13 @@ type CasePatientClinicalInformation struct {
 	RelationshipToProband string            `json:"relationship_to_proband" validate:"required"`
 	AffectedStatusCode    string            `json:"affected_status_code" validate:"required"`
 	PatientID             int               `json:"patient_id" validate:"required"`
+	FirstName             string            `json:"first_name,omitempty"`
+	LastName              string            `json:"last_name,omitempty"`
 	DateOfBirth           time.Time         `json:"date_of_birth"`
+	LifeStatusCode        string            `json:"life_status_code" validate:"required"`
 	SexCode               string            `json:"sex_code" validate:"required"`
 	SubmitterPatientId    string            `json:"submitter_patient_id,omitempty"`
+	Jhn                   string            `json:"jhn,omitempty"`
 	OrganizationCode      string            `json:"organization_code,omitempty"`
 	OrganizationName      string            `json:"organization_name,omitempty"`
 	EthnicityCodes        JsonArray[string] `json:"ethnicity_codes,omitempty"` // TODO
@@ -136,13 +144,15 @@ type CaseTask struct {
 }
 
 var CaseTable = Table{
-	Name:  "`radiant_jdbc`.`public`.`cases`",
-	Alias: "c",
+	Name:           "cases",
+	FederationName: "radiant_jdbc.public.cases",
+	Alias:          "c",
 }
 
 var CaseHasSequencingExperimentTable = Table{
-	Name:  "`radiant_jdbc`.`public`.`case_has_sequencing_experiment`",
-	Alias: "chseq",
+	Name:           "case_has_sequencing_experiment",
+	FederationName: "radiant_jdbc.public.case_has_sequencing_experiment",
+	Alias:          "chseq",
 }
 
 func (Case) TableName() string {
@@ -155,6 +165,7 @@ var CasesFields = []Field{
 	PatientIdField,
 	SubmitterPatientIdField,
 	SubmitterProbandIdField,
+	PatientMrnField,
 	CasePriorityCodeField,
 	CaseStatusCodeField,
 	CaseTypeCodeField,
@@ -258,14 +269,14 @@ var CaseDiagnosisLabCodeField = Field{
 	CanBeFiltered:   true,
 	CanBeSorted:     true,
 	CanBeAggregated: true,
-	Table:           DiagnosisLabTable,
+	Table:           SequencingLabTable,
 }
 
 var CaseDiagnosisLabNameField = Field{
 	Name:          "name",
 	Alias:         "diagnosis_lab_name",
 	CanBeSelected: true,
-	Table:         DiagnosisLabTable,
+	Table:         SequencingLabTable,
 }
 
 var CasePrimaryConditionIdField = Field{

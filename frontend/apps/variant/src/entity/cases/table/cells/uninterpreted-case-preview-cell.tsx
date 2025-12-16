@@ -3,30 +3,34 @@ import { useSearchParams } from 'react-router';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
-import { SELECTED_CASE_PARAM } from './constants';
+import { SELECTED_UNINTERPRETED_CASE_PARAM } from '../../constants';
 
 type CasePreviewCellProps = {
   caseId: number;
+  patientId: number;
   relationshipToProband: string | undefined;
 };
 
-function CasePreviewCell({ caseId, relationshipToProband }: CasePreviewCellProps) {
-  const [, setSearchParams] = useSearchParams();
+/**
+ * @DESCRIPTION: Use patient_id as unique id since case_id can be present multiple times
+ */
+function UninterpretedCasePreviewCell({ caseId, patientId, relationshipToProband }: CasePreviewCellProps) {
+  const [_, setSearchParams] = useSearchParams();
 
   const handleClick = () => {
     setSearchParams(prev => {
-      prev.set(SELECTED_CASE_PARAM, caseId.toString());
+      prev.set(SELECTED_UNINTERPRETED_CASE_PARAM, patientId.toString());
       return prev;
     });
   };
 
   return (
     <RelationshipToProbandCell relationship={relationshipToProband}>
-      <AnchorLink mono size="xs" variant="secondary" onClick={handleClick}>
+      <AnchorLink mono size="xs" onClick={handleClick}>
         {caseId}
       </AnchorLink>
     </RelationshipToProbandCell>
   );
 }
 
-export default CasePreviewCell;
+export default UninterpretedCasePreviewCell;

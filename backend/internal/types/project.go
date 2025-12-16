@@ -8,8 +8,9 @@ type Project struct {
 }
 
 var ProjectTable = Table{
-	Name:  "radiant_jdbc.public.project",
-	Alias: "prj",
+	Name:           "project",
+	FederationName: "radiant_jdbc.public.project",
+	Alias:          "prj",
 }
 
 func (Project) TableName() string {

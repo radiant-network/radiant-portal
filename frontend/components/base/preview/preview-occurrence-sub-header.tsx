@@ -4,7 +4,7 @@ type PreviewSheetSubHeaderProps = PreviewSheetAssayDetailsProps & {
   actions: React.ReactNode;
 };
 
-function PreviewSheetSubHeader({ patientId, relationshipToProband, seqId, actions }: PreviewSheetSubHeaderProps) {
+function PreviewOccurrenceSubHeader({ patientId, relationshipToProband, seqId, actions }: PreviewSheetSubHeaderProps) {
   return (
     <div className="flex flex-wrap gap-4 items-center justify-between w-full">
       <PreviewSheetAssayDetails patientId={patientId} relationshipToProband={relationshipToProband} seqId={seqId} />
@@ -13,4 +13,4 @@ function PreviewSheetSubHeader({ patientId, relationshipToProband, seqId, action
   );
 }
 
-export default PreviewSheetSubHeader;
+export default PreviewOccurrenceSubHeader;

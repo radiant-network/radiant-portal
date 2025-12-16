@@ -71,7 +71,7 @@ const tableColumns = [
     apiField: 'picked_consequences',
     isVisibleByDefault: true,
     pinByDefault: null,
-    isSortable: false,
+    isSortable: true,
     isPinnable: true,
     position: 5,
     tooltip: 'Most deleterious consequence annotated using VEP',

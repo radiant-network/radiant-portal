@@ -18,13 +18,15 @@ type Patient struct {
 }
 
 var PatientTable = Table{
-	Name:  "radiant_jdbc.public.patient",
-	Alias: "p",
+	Name:           "patient",
+	FederationName: "radiant_jdbc.public.patient",
+	Alias:          "p",
 }
 
 var ProbandTable = Table{
-	Name:  "radiant_jdbc.public.patient",
-	Alias: "pro",
+	Name:           "patient",
+	FederationName: "radiant_jdbc.public.patient",
+	Alias:          "pro",
 }
 
 func (Patient) TableName() string {
@@ -48,6 +50,13 @@ var PatientIdField = Field{
 
 var SubmitterPatientIdField = Field{
 	Name:          "submitter_patient_id",
+	CanBeFiltered: true,
+	Table:         PatientTable,
+}
+
+var PatientMrnField = Field{
+	Name:          "submitter_patient_id",
+	Alias:         "mrn",
 	CanBeFiltered: true,
 	Table:         PatientTable,
 }
