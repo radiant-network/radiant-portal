@@ -187,6 +187,14 @@
         }
       }
     },
+    "relationships": {
+      "proband": "Proband",
+      "mother": "Mère",
+      "father": "Père",
+      "sister": "Sœur",
+      "brother": "Frère",
+      "sibling": "Fratrie"
+    },
     "toolbar": {
       "combine": "Combiner",
       "newQuery": "Nouvelle requête",
@@ -1267,21 +1275,20 @@
       "title": "Fichiers"
     },
     "patient_information": {
-      "title": "Information du Patient",
-      "proband": "Proband",
-      "mother": "Mère",
-      "father": "Père",
-      "relationships": {
-        "proband": "Proband"
-      },
-      "id": "ID",
-      "name": "Nom (Prénom / Nom)",
       "dob": "Date de naissance",
+      "father": "Père",
+      "id": "ID",
+      "jhn": "RAMQ",
+      "life_status": "Statut vital",
+      "managing_org": "Organisation Resp.",
+      "managing_org_tooltip": "Organisation responsable du dossier du patient",
+      "mother": "Mère",
+      "name": "Nom (Prénom / Nom de famille)",
+      "proband": "Proband",
       "sex": "Sexe",
-      "jhn": "JHN",
-      "submitter_patient_id": "Dossier",
-      "managing_org": "Organisation resp.",
-      "managing_org_tooltip": "Organisation responsable du dossier du patient"
+      "submitter_patient_id": "ID patient org.",
+      "submitter_patient_id_tooltip": "ID patient de l’organisation",
+      "title": "Information du patient"
     },
     "details": {
       "aliquot": "Aliquot",
