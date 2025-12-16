@@ -184,6 +184,7 @@ var CasesFields = []Field{
 	CaseDiagnosisLabNameField,
 	PatientOrganizationCodeField,
 	PatientOrganizationNameField,
+	CaseSequencingExperimentIdField,
 }
 
 var CasesDefaultFields = []Field{
@@ -330,6 +331,13 @@ var CaseOrderingOrganizationNameField = Field{
 	Alias:         "ordering_organization_name",
 	CanBeSelected: true,
 	Table:         OrderingOrganizationTable,
+}
+
+var CaseSequencingExperimentIdField = Field{
+	Name:          "sequencing_experiment_id",
+	Alias:         "sequencing_experiment_id",
+	CanBeFiltered: true,
+	Table:         CaseHasSequencingExperimentTable,
 }
 
 type CaseFilters struct {

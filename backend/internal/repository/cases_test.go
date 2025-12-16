@@ -156,6 +156,24 @@ func Test_SearchCases_OnPatientID(t *testing.T) {
 	})
 }
 
+func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseSequencingExperimentIdField.GetAlias(),
+				Value:     []interface{}{"1"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		cases, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
+		assert.Len(t, *cases, 1)
+		assert.Equal(t, 1, (*cases)[0].CaseID)
+	})
+}
+
 func Test_Cases_SearchById(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
@@ -164,9 +182,9 @@ func Test_Cases_SearchById(t *testing.T) {
 		assert.Equal(t, len(*autocompleteResult), 5)
 		assert.Equal(t, "1", (*autocompleteResult)[0].Value)
 		assert.Equal(t, "1", (*autocompleteResult)[1].Value)
-		assert.Equal(t, "10", (*autocompleteResult)[2].Value)
+		assert.Equal(t, "1", (*autocompleteResult)[2].Value)
 		assert.Equal(t, "10", (*autocompleteResult)[3].Value)
-		assert.Equal(t, "11", (*autocompleteResult)[4].Value)
+		assert.Equal(t, "10", (*autocompleteResult)[4].Value)
 	})
 }
 

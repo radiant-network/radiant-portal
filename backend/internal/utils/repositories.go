@@ -129,6 +129,10 @@ func JoinCaseHasSeqExpWithCase(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.case_id=%s.id", types.CaseTable.FederationName, types.CaseTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.CaseTable.Alias))
 }
 
+func JoinCaseWithCaseHasSeqExp(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.id=%s.case_id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
+}
+
 func JoinSeqExpWithSample(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sample_id=%s.id", types.SampleTable.FederationName, types.SampleTable.Alias, types.SequencingExperimentTable.Alias, types.SampleTable.Alias))
 }

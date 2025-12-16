@@ -304,7 +304,8 @@
           "submitter_patient_id": "MRN",
           "run_name": "Run Name",
           "sample_id": "Sample ID",
-          "task_id": "Task"
+          "task_id": "Task",
+          "sequencing_experiment_id": "Sequencing"
         }
       },
       "reset": "Reset",
@@ -682,7 +683,7 @@
       "priority_code": "Priority",
       "status_code": "Status",
       "analysis_catalog_code": "Analysis",
-      "search_placeholder": "Case, assay, patient, or MRN",
+      "search_placeholder": "Case, sequencing, patient, or MRN",
       "project_code": "Project",
       "diagnosis_lab": "Diagnostic Lab",
       "ordering_organization": "Prescribing Institution"

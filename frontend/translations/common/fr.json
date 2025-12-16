@@ -298,8 +298,9 @@
           "patient_id": "Patient",
           "submitter_patient_id": "MRN",
           "run_name": "Nom du lot",
-          "sample_id": "Sample ID",
-          "task_id": "Tâche"
+          "sample_id": "Échantillon",
+          "task_id": "Tâche",
+          "sequencing_experiment_id": "Séquençage"
         }
       },
       "sort": {
@@ -682,7 +683,7 @@
       "priority_code": "Priorité",
       "status_code": "Statut",
       "analysis_catalog_code": "Analyse",
-      "search_placeholder": "Cas, analyse, patient, analyse ou MRN",
+      "search_placeholder": "Cas, séquençage, patient, ou MRN",
       "project_code": "Projet",
       "diagnosis_lab": "Laboratoire de diagnostic",
       "ordering_organization": "Établissement prescripteur"
