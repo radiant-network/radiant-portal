@@ -14,8 +14,8 @@ export const getFilteredAdditionalFields = ({
   const filteredAdditionalFields: string[] = [];
   for (const [key, value] of Object.entries(columnVisibility)) {
     const colSettings = defaultColumnSettings.find(setting => setting.id === key);
-    if (value === true && colSettings?.additionalFieldIds) {
-      filteredAdditionalFields.push(...colSettings.additionalFieldIds);
+    if (value === true && colSettings?.additionalFields) {
+      filteredAdditionalFields.push(...colSettings.additionalFields);
     }
   }
   return filteredAdditionalFields;
