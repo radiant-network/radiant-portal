@@ -83,6 +83,8 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	    (SELECT "patient_id" as type, proband_id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(proband_id AS TEXT) LIKE '1%')
 	    UNION
 	    (SELECT "mrn" as type, submitter_patient_id as value from `radiant_jdbc`.`public`.`patient` WHERE submitter_patient_id LIKE '1%')
+		UNION
+		(SELECT "sequencing_experiment_id" as type, id as value from radiant_jdbc.public.sequencing_experiment WHERE CAST(id AS TEXT) LIKE '1%')
 	    ORDER BY value asc;
 	*/
 	var autocompleteResult []AutocompleteResult
@@ -99,7 +101,11 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	subQueryOrgPatID = subQueryOrgPatID.Select("submitter_patient_id_type as type, submitter_patient_id as value")
 	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(submitter_patient_id) LIKE ?", strings.ToLower(searchInput))
 
-	tx := r.db.Table("(? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID)
+	subQuerySeqId := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
+	subQuerySeqId = subQuerySeqId.Select("\"sequencing_experiment_id\" as type, id as value")
+	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
+
+	tx := r.db.Table("(? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId)
 	tx = tx.Order("value asc, type asc")
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {
@@ -226,6 +232,10 @@ func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 
 		if userQuery.HasFieldFromTables(types.PatientTable) {
 			tx = utils.JoinCaseWithPatients(tx)
+		}
+
+		if userQuery.HasFieldFromTables(types.CaseHasSequencingExperimentTable) {
+			tx = utils.JoinCaseWithCaseHasSeqExp(tx)
 		}
 	}
 	return tx, nil

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AxiosResponse, RawAxiosRequestConfig } from 'axios';
-import { Barcode, FolderOpen, Search, User, X } from 'lucide-react';
+import { Barcode, FolderOpen, Search, TestTubeDiagonal, User, X } from 'lucide-react';
 import useSWR from 'swr';
 
 import { AutocompleteResult } from '@/api/api';
@@ -37,6 +37,7 @@ function getTypeIcon(type: string) {
     case_id: FolderOpen,
     patient_id: User,
     submitter_patient_id: Barcode,
+    sequencing_experiment_id: TestTubeDiagonal,
   };
   return iconMap[type.toLowerCase()] || FolderOpen;
 }
