@@ -2098,10 +2098,10 @@ components:
       - HIGH
     utils.PreSignedURL:
       properties:
+        expires_at:
+          type: integer
         url:
           type: string
-        urlExpireAt:
-          type: integer
       type: object
   securitySchemes:
     bearerauth:

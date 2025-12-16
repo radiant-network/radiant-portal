@@ -14,7 +14,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
-	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -272,14 +272,14 @@ func Test_GetDocumentsDownloadUrl(t *testing.T) {
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var actual types.GetDocDownloadUrlResponse
+		var actual utils.PreSignedURL
 		if err := json.Unmarshal(w.Body.Bytes(), &actual); err != nil {
 			assert.NoError(t, err)
 		}
-		assert.NotEmpty(t, actual.PreSignedURL)
-		assert.Greater(t, actual.ExpiresAt, int64(0))
+		assert.NotEmpty(t, actual.URL)
+		assert.Greater(t, actual.URLExpireAt, int64(0))
 
 		expectedURLPrefix := fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/", endpoint)
-		assert.True(t, strings.HasPrefix(actual.PreSignedURL, expectedURLPrefix))
+		assert.True(t, strings.HasPrefix(actual.URL, expectedURLPrefix))
 	})
 }

@@ -77,7 +77,7 @@ func (m *MockRepository) GetById(id int) (*types.Document, error) {
 		DataTypeCode:     "snv",
 		FileFormatCode:   "vcf",
 		Size:             325362647,
-		Url:              "https://example.com/document/203/download",
+		Url:              "s3://example.com/document/203/download",
 		Hash:             "5d41402abc4b2a76b9719d911017c794",
 		CreatedOn:        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
 	}, nil
@@ -172,7 +172,7 @@ func Test_DocumentsFiltersHandler(t *testing.T) {
 
 func Test_GetDocumentsDownloadUrlHandler_Success(t *testing.T) {
 	repo := &MockRepository{}
-	presigner := &testutils.MockS3PreSigner{}
+	presigner := testutils.NewMockS3PreSigner()
 	router := gin.Default()
 	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
 
@@ -182,14 +182,14 @@ func Test_GetDocumentsDownloadUrlHandler_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"pre_signed_url": "presigned.https://example.com/document/203/download",
+		"url": "presigned.s3://example.com/document/203/download",
 		"expires_at": 1234567890
 	}`, w.Body.String())
 }
 
 func Test_GetDocumentsDownloadUrlHandler_InvalidDocumentId(t *testing.T) {
 	repo := &MockRepository{}
-	presigner := &testutils.MockS3PreSigner{}
+	presigner := testutils.NewMockS3PreSigner()
 	router := gin.Default()
 	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
 
@@ -202,7 +202,7 @@ func Test_GetDocumentsDownloadUrlHandler_InvalidDocumentId(t *testing.T) {
 
 func Test_GetDocumentsDownloadUrlHandler_DocumentNotFound(t *testing.T) {
 	repo := &MockRepository{}
-	presigner := &testutils.MockS3PreSigner{}
+	presigner := testutils.NewMockS3PreSigner()
 	router := gin.Default()
 	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
 

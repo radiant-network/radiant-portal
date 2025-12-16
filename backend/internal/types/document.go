@@ -153,10 +153,3 @@ type DocumentFilters struct {
 	Format                []Aggregation `json:"format" validate:"required"`
 	DataType              []Aggregation `json:"data_type" validate:"required"`
 }
-
-// GetDocDownloadUrlResponse represents the response containing a pre-signed S3 download URL for a document
-// @Description GetDocDownloadUrlResponse represents the response containing a pre-signed S3 download URL for a document
-type GetDocDownloadUrlResponse struct {
-	PreSignedURL string `json:"pre_signed_url"`
-	ExpiresAt    int64  `json:"expires_at"`
-} //@Name GetDocDownloadUrlResponse

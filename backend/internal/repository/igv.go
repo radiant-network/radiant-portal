@@ -63,7 +63,7 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	return igvInternal, nil
 }
 
-func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.S3PreSigner) (*types.IGVTracks, error) {
+func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
 	result := types.IGVTracks{}
 
 	grouped := map[string]types.IGVTrackEnriched{}
@@ -84,7 +84,7 @@ func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.S3PreSigner) (*
 			}
 		}
 
-		presigned, err := presigner.GenerateS3PreSignedURL(r.URL)
+		presigned, err := presigner.GeneratePreSignedURL(r.URL)
 		if err != nil {
 			return nil, err
 		}

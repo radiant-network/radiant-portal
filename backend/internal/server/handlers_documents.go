@@ -130,7 +130,7 @@ func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /documents/{document_id}/download_url [get]
-func GetDocumentsDownloadUrlHandler(repo repository.DocumentsDAO, presigner utils.S3PreSigner) gin.HandlerFunc {
+func GetDocumentsDownloadUrlHandler(repo repository.DocumentsDAO, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = utils.NewS3PreSigner()
 	}
@@ -152,16 +152,12 @@ func GetDocumentsDownloadUrlHandler(repo repository.DocumentsDAO, presigner util
 			return
 		}
 
-		url, err := presigner.GenerateS3PreSignedURL(document.Url)
+		preSignedUrl, err := presigner.GeneratePreSignedURL(document.Url)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
 
-		response := types.GetDocDownloadUrlResponse{
-			PreSignedURL: url.URL,
-			ExpiresAt:    url.URLExpireAt,
-		}
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, preSignedUrl)
 	}
 }

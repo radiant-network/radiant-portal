@@ -3636,16 +3636,16 @@ export interface UserSet {
 export interface UtilsPreSignedURL {
     /**
      * 
+     * @type {number}
+     * @memberof UtilsPreSignedURL
+     */
+    'expires_at'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof UtilsPreSignedURL
      */
     'url'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof UtilsPreSignedURL
-     */
-    'urlExpireAt'?: number;
 }
 /**
  * 

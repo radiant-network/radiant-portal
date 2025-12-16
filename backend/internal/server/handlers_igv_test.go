@@ -37,7 +37,7 @@ func (r *MockRepository) GetIGV(caseID int) ([]types.IGVTrack, error) {
 func Test_IGVGetHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/igv/:case_id", GetIGVHandler(repo, &testutils.MockS3PreSigner{}))
+	router.GET("/igv/:case_id", GetIGVHandler(repo, testutils.NewMockS3PreSigner()))
 
 	req, _ := http.NewRequest("GET", "/igv/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
