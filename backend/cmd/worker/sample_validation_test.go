@@ -38,6 +38,7 @@ func (m *MockPatientsRepository) CreatePatient(newPatient *types.Patient) error 
 type MockSamplesRepository struct {
 	GetSampleBySubmitterSampleIdFunc func(organizationId int, submitterSampleId string) (*types.Sample, error)
 	CreateSampleFunc                 func(newSample *types.Sample) (*types.Sample, error)
+	GetTypeCodesFunc                 func() ([]string, error)
 }
 
 func (m *MockSamplesRepository) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {
@@ -50,6 +51,13 @@ func (m *MockSamplesRepository) GetSampleBySubmitterSampleId(organizationId int,
 func (m *MockSamplesRepository) CreateSample(newSample *types.Sample) (*types.Sample, error) {
 	if m.CreateSampleFunc != nil {
 		return m.CreateSampleFunc(newSample)
+	}
+	return nil, nil
+}
+
+func (m *MockSamplesRepository) GetTypeCodes() ([]string, error) {
+	if m.GetTypeCodesFunc != nil {
+		return m.GetTypeCodesFunc()
 	}
 	return nil, nil
 }
@@ -142,6 +150,32 @@ func Test_ValidateTissueSite_Invalid(t *testing.T) {
 	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
 }
 
+func Test_ValidateTypeCode_Valid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood"}
+	rec := SampleValidationRecord{Sample: sample}
+	mockSampleRepo := &MockSamplesRepository{
+		GetTypeCodesFunc: func() ([]string, error) {
+			return []string{"blood", "dna"}, nil
+		},
+	}
+	rec.validateTypeCode(mockSampleRepo)
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateTypeCode_Invalid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "invalid_type"}
+	rec := SampleValidationRecord{Sample: sample}
+	mockSampleRepo := &MockSamplesRepository{
+		GetTypeCodesFunc: func() ([]string, error) {
+			return []string{"blood", "dna"}, nil
+		},
+	}
+	rec.validateTypeCode(mockSampleRepo)
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
+	assert.Contains(t, rec.Errors[0].Message, "must be one of: blood, dna")
+}
+
 func Test_ValidatePatient_NotFound(t *testing.T) {
 	sample := types.SampleBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", SubmitterSampleId: "S1"}
 	rec := SampleValidationRecord{Sample: sample}
@@ -161,8 +195,8 @@ func Test_ValidateOrganization_NotFound(t *testing.T) {
 }
 
 func Test_ValidateExistingSampleInDb_DifferentValues(t *testing.T) {
-	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "normal", TissueSite: "blood", HistologyCode: "9000/0"}
-	existing := &types.Sample{TypeCode: "tumoral", TissueSite: "dna", HistologyCode: "8041/3"}
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", TissueSite: "blood", HistologyCode: "9000/0"}
+	existing := &types.Sample{TypeCode: "dna", TissueSite: "dna", HistologyCode: "8041/3"}
 	rec := SampleValidationRecord{Sample: sample}
 	rec.validateExistingSampleInDb(existing)
 
@@ -187,7 +221,7 @@ func Test_ValidateParentSample_DifferentPatient(t *testing.T) {
 func Test_ValidateSamplesBatch(t *testing.T) {
 	org := &types.Organization{ID: 1, Code: "CHUSJ"}
 	patient := &types.Patient{ID: 10, SubmitterPatientId: "P1"}
-	existingSampleInDb := &types.Sample{SubmitterSampleId: "S2", TypeCode: "tumoral", PatientID: 10}
+	existingSampleInDb := &types.Sample{SubmitterSampleId: "S2", TypeCode: "blood", PatientID: 10}
 	parentInDb := &types.Sample{SubmitterSampleId: "P-DB", PatientID: 10}
 
 	mockOrgRepo := &MockOrganizationRepository{
@@ -218,16 +252,19 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 			}
 			return nil, nil
 		},
+		GetTypeCodesFunc: func() ([]string, error) {
+			return []string{"blood", "dna", "rna", "solid_tissue"}, nil
+		},
 	}
 
 	samples := []types.SampleBatch{
-		{SubmitterSampleId: "S1", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                           // 1. Valid new sample
-		{SubmitterSampleId: "S2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                           // 2. Conflict with DB
-		{SubmitterSampleId: "S3", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-BATCH"},       // 3. Parent in batch
-		{SubmitterSampleId: "S4", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-DB"},          // 4. Parent in DB
-		{SubmitterSampleId: "S5", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-NONE"},        // 5. Parent not found
-		{SubmitterSampleId: "P-BATCH", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal", SubmitterParentSampleId: "P-BATCH2"}, // 6. The parent for S3
-		{SubmitterSampleId: "P-BATCH2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "normal"},                                     // 7. The grandparent for S3
+		{SubmitterSampleId: "S1", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna"},                                           // 1. Valid new sample
+		{SubmitterSampleId: "S2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna"},                                           // 2. Conflict with DB
+		{SubmitterSampleId: "S3", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-BATCH"},       // 3. Parent in batch
+		{SubmitterSampleId: "S4", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-DB"},          // 4. Parent in DB
+		{SubmitterSampleId: "S5", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-NONE"},        // 5. Parent not found
+		{SubmitterSampleId: "P-BATCH", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-BATCH2"}, // 6. The parent for S3
+		{SubmitterSampleId: "P-BATCH2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna"},                                     // 7. The grandparent for S3
 	}
 
 	records, err := validateSamplesBatch(samples, mockOrgRepo, mockPatientRepo, mockSampleRepo)

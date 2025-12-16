@@ -1,4 +1,4 @@
-import { ComponentProps, useCallback, useEffect, useState } from 'react';
+import { ComponentProps, useEffect, useState } from 'react';
 import { formatDate } from 'date-fns';
 
 import { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
@@ -30,30 +30,53 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
       <div className="flex flex-col gap-2 flex-1">
         <InformationField label={t('case_entity.patient_information.id')}>{member.patient_id}</InformationField>
 
-        <InformationField
-          label={t('case_entity.patient_information.dob')}
-          labelTooltipText={t('case_entity.details.date_format_tooltip')}
-        >
-          {member.date_of_birth && formatDate(member.date_of_birth, t('common.date'))}
-        </InformationField>
+        {(member.first_name || member.last_name) && (
+          <InformationField label={t('case_entity.patient_information.name')}>
+            {member.first_name} <span className="uppercase">{member.last_name}</span>
+          </InformationField>
+        )}
+
+        {member.life_status_code && (
+          <InformationField label={t('case_entity.patient_information.life_status')}>
+            {member.life_status_code}
+          </InformationField>
+        )}
+
+        {member.date_of_birth && (
+          <InformationField
+            label={t('case_entity.patient_information.dob')}
+            labelTooltipText={t('case_entity.details.date_format_tooltip')}
+          >
+            {formatDate(member.date_of_birth, t('common.date'))}
+          </InformationField>
+        )}
 
         <InformationField label={t('case_entity.patient_information.sex')}>
           {titleCase(member.sex_code)}
         </InformationField>
 
-        <InformationField label={t('case_entity.patient_information.submitter_patient_id')}>
-          {member.submitter_patient_id && (
+        {member.submitter_patient_id && (
+          <InformationField
+            label={t('case_entity.patient_information.submitter_patient_id')}
+            labelTooltipText={t('case_entity.patient_information.submitter_patient_id_tooltip')}
+          >
             <CopyButton value={member.submitter_patient_id} label={member.submitter_patient_id} className="-m-2" />
-          )}
-        </InformationField>
+          </InformationField>
+        )}
 
-        <InformationField
-          label={t('case_entity.patient_information.managing_org')}
-          labelTooltipText={t('case_entity.patient_information.managing_org_tooltip')}
-          tooltipText={member.organization_name}
-        >
-          {member.organization_code}
-        </InformationField>
+        {member.jhn && (
+          <InformationField label={t('case_entity.patient_information.jhn')}>{member.jhn}</InformationField>
+        )}
+
+        {member.organization_code && (
+          <InformationField
+            label={t('case_entity.patient_information.managing_org')}
+            labelTooltipText={t('case_entity.patient_information.managing_org_tooltip')}
+            tooltipText={member.organization_name}
+          >
+            {member.organization_code}
+          </InformationField>
+        )}
       </div>
     </div>
   );
@@ -72,15 +95,6 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
     }
   }, [members, activeTab]);
 
-  const getRelationshipLabel = useCallback(
-    (relationship: string) =>
-      t(
-        `case_entity.patientInformation.relationships.${relationship}`,
-        relationship.charAt(0).toUpperCase() + relationship.slice(1),
-      ),
-    [t],
-  );
-
   if (isFamilyCase && members.length > 1) {
     return (
       <Card {...props}>
@@ -92,7 +106,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
             <TabsList className="w-full">
               {members.map(member => (
                 <TabsTrigger key={member.patient_id} value={member.patient_id.toString()}>
-                  {getRelationshipLabel(member.relationship_to_proband)}
+                  {t(`common.relationships.${member.relationship_to_proband}`)}
                 </TabsTrigger>
               ))}
             </TabsList>

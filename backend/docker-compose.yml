@@ -91,6 +91,8 @@ services:
       KEYCLOAK_REALM: CQDG
       KEYCLOAK_CLIENT: radiant
       KEYCLOAK_CLIENT_ROLE: radiant
+      AWS_ACCESS_KEY_ID: access
+      AWS_SECRET_ACCESS_KEY: secret
       PUBMED_BASE_URL: https://api.ncbi.nlm.nih.gov
     depends_on:
       init-schema:

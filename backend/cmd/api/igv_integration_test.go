@@ -28,6 +28,7 @@ func Test_GetIGVBySeqIdHandler(t *testing.T) {
 		_ = os.Setenv("AWS_ENDPOINT_URL", client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
+		_ = os.Setenv("AWS_USE_SSL", "false")
 
 		repo := repository.NewIGVRepository(starrocks)
 		router := gin.Default()

@@ -38,6 +38,7 @@ func (m *MockRepository) GetAssayBySeqId(seqId int) (*types.Assay, error) {
 		TissueSite:                   "",
 		HistologyCode:                "normal",
 		SubmitterSampleID:            "S13224",
+		PatientID:                    3,
 	}, nil
 }
 
@@ -60,6 +61,7 @@ func Test_GetAssayBySeqIdHandler(t *testing.T) {
 		"histology_code":"normal", 
 		"sequencing_lab_code":"CQGC", 
 		"sequencing_lab_name":"Quebec Clinical Genomic Center", 
+		"patient_id": 3,
 		"platform_code":"illumina", 
 		"run_alias":"A00516_0169", 
 		"run_date":"2021-08-17T00:00:00Z", 

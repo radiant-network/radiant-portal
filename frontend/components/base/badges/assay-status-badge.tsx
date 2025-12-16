@@ -7,6 +7,7 @@ export type AssayStatus = 'unknown' | 'draft' | 'in_progress' | 'revoke' | 'subm
 
 type AssayStatusBadgeProps = {
   status: AssayStatus;
+  className?: string;
 };
 
 const colors: Record<string, BadgeProps['variant']> = {
@@ -33,14 +34,14 @@ const icons = {
   incomplete: CircleDashed,
 };
 
-function AssayStatusBadge({ status }: AssayStatusBadgeProps) {
+function AssayStatusBadge({ status, className }: AssayStatusBadgeProps) {
   const { t } = useI18n();
 
   const color = colors[status];
   const Icon = icons[status];
 
   return (
-    <Badge variant={color ?? 'neutral'}>
+    <Badge variant={color ?? 'neutral'} className={className}>
       <Icon />
       {t(`case_exploration.status.${status}`)}
     </Badge>

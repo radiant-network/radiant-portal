@@ -181,7 +181,8 @@ const badgeVariants = tv({
 });
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     Omit<VariantProps<typeof badgeVariants>, 'showCount' | 'clickable' | 'closable'> {
   onClose?: () => void;
   count?: number;

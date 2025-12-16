@@ -243,10 +243,11 @@ func assertGetVariantCasesFilters(t *testing.T, data string, expected string) {
 func Test_GetVariantCasesFilters(t *testing.T) {
 	expected := `{
 		"case_analysis":[
-			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"},
 			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
 			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"},
-			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"}], 
+			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}
+		], 
 		"classification": [
 			{"count": 0, "key":"LA6668-3", "label":"pathogenic"}, 
 			{"count": 0, "key":"LA26332-9", "label":"likelyPathogenic"}, 
@@ -255,8 +256,9 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 			{"count": 0, "key":"LA6675-8", "label":"benign"} 
 		],
 		"diagnosis_lab":[
-			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 			
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}]
+			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
+			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}			
+		]
 	}`
 	assertGetVariantCasesFilters(t, "simple", expected)
 }

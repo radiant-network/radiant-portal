@@ -436,3 +436,37 @@ func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
 		assert.Equal(t, 15, len((*filters).DataType))
 	})
 }
+
+func Test_GetById_Success(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		document, err := repo.GetById(264)
+		assert.NoError(t, err)
+		assert.NotNil(t, document)
+		assert.Equal(t, 264, document.ID)
+		assert.Equal(t, "FI0005568.S14359.vcf.gz", document.Name)
+		assert.Equal(t, "vcf", document.FileFormatCode)
+	})
+}
+
+func Test_GetById_NotFound(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		document, err := repo.GetById(999999)
+		assert.NoError(t, err)
+		assert.Nil(t, document)
+	})
+}
+
+func Test_GetById_FilteredIndexFile(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		var indexDoc Document
+		db.Table("document doc").Where("doc.format_code IN ('crai', 'tbi')").First(&indexDoc)
+		if indexDoc.ID > 0 {
+			document, err := repo.GetById(indexDoc.ID)
+			assert.NoError(t, err)
+			assert.Nil(t, document)
+		}
+	})
+}

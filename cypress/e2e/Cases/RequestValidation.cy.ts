@@ -8,6 +8,16 @@ describe('Cases - Request Validation', () => {
     cy.visitCasesPage();
   };
 
+  it('Autocomplete', () => {
+    setupTest();
+    CasesTable.validations.shouldRequestOnSearchTyping();
+  });
+
+  it('Search', () => {
+    setupTest();
+    CasesTable.validations.shouldRequestOnSearchSelect();
+  });
+
   it('Sort [SJRA-661]', () => {
     setupTest();
     CasesTable.validations.shouldRequestOnSort('case');

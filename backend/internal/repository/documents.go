@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 type DocumentResult = types.DocumentResult
 type DocumentFilters = types.DocumentFilters
+type Document = types.Document
 
 var INDEX_FORMATS = "('crai', 'tbi')"
 
@@ -24,6 +26,7 @@ type DocumentsDAO interface {
 	SearchDocuments(userQuery types.ListQuery) (*[]DocumentResult, *int64, error)
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 	GetDocumentsFilters(userQuery types.AggQuery, withProjectAndLab bool) (*DocumentFilters, error)
+	GetById(id int) (*Document, error)
 }
 
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
@@ -207,4 +210,20 @@ func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.
 
 func filterOutIndexFiles(tx *gorm.DB) {
 	tx.Where(fmt.Sprintf("%s.format_code not in %s", types.DocumentTable.Alias, INDEX_FORMATS))
+}
+
+func (r *DocumentsRepository) GetById(id int) (*Document, error) {
+	var document Document
+	err := r.db.Table(types.DocumentTable.FederationName).
+		Where("id = ?", id).
+		Where("format_code not in ?", []string{"crai", "tbi"}).
+		First(&document).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error while fetching document: %w", err)
+	}
+	return &document, nil
 }

@@ -17,6 +17,7 @@ type SamplesRepository struct {
 type SamplesDAO interface {
 	GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*Sample, error)
 	CreateSample(newSample *Sample) (*Sample, error)
+	GetTypeCodes() ([]string, error)
 }
 
 func NewSamplesRepository(db *gorm.DB) *SamplesRepository {
@@ -41,4 +42,16 @@ func (r *SamplesRepository) GetSampleBySubmitterSampleId(organizationId int, sub
 func (r *SamplesRepository) CreateSample(newSample *Sample) (*Sample, error) {
 	err := r.db.Table("sample").Create(newSample).Error
 	return newSample, err
+}
+
+func (r *SamplesRepository) GetTypeCodes() ([]string, error) {
+	var typeCodes []string
+	tx := r.db.
+		Table("sample_type").
+		Select("code").
+		Order("code asc")
+	if err := tx.Find(&typeCodes).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving sample type codes: %w", err)
+	}
+	return typeCodes, nil
 }

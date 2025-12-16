@@ -26,6 +26,7 @@ type PreviewOccurrenceDetailsCardProps = {
   parental_origin?: string;
   genotype_quality?: number;
   filter?: string;
+  relationshipToProband?: string;
   father_calls?: number[];
   mother_calls?: number[];
   ad_alt?: number;
@@ -33,14 +34,29 @@ type PreviewOccurrenceDetailsCardProps = {
   enableIGV?: boolean;
 };
 
-const getFilterValue = (filter: string | undefined, t: (key: string) => string): React.ReactNode => {
+function getFilterValue(filter: string | undefined, t: (key: string) => string): React.ReactNode {
   if (!filter) return <EmptyField />;
 
   if (filter === 'PASS') {
     return <Badge variant="green">{t('preview_sheet.occurrence_details.sections.metrics.pass')}</Badge>;
   }
   return <Badge variant="red">{t('preview_sheet.occurrence_details.sections.metrics.fail')}</Badge>;
-};
+}
+
+function getGenotypeQuality(genotypeQuality?: number): React.ReactNode {
+  if (!genotypeQuality || genotypeQuality <= 0) return <EmptyField />;
+
+  return (
+    <span className="inline-flex gap-1 items-center">
+      {genotypeQuality >= 20 ? (
+        <Triangle strokeWidth={1.5} className={`w-[13px] h-[13px] text-opacity-50`} />
+      ) : (
+        <ShapeTriangleUpIcon className="w-[13px] h-[13px] text-destructive" />
+      )}
+      {genotypeQuality}
+    </span>
+  );
+}
 
 const PreviewOccurrenceDetailsCard = ({
   caseId,
@@ -48,10 +64,11 @@ const PreviewOccurrenceDetailsCard = ({
   locus,
   start,
   chromosome,
-  zygosity: zygosityProp,
+  zygosity,
   transmission,
   parental_origin,
   genotype_quality,
+  relationshipToProband,
   filter,
   father_calls,
   mother_calls,
@@ -61,17 +78,6 @@ const PreviewOccurrenceDetailsCard = ({
 }: PreviewOccurrenceDetailsCardProps) => {
   const { t } = useI18n();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
-
-  const genotypeQualityValue = (
-    <span className="inline-flex gap-1 items-center">
-      {genotype_quality && genotype_quality >= 20 ? (
-        <Triangle strokeWidth={1.5} className={`w-[13px] h-[13px] text-opacity-50`} />
-      ) : (
-        <ShapeTriangleUpIcon className="w-[13px] h-[13px] text-destructive" />
-      )}
-      {genotype_quality ? genotype_quality : <EmptyField />}
-    </span>
-  );
 
   const filterValue = getFilterValue(filter, t);
 
@@ -102,9 +108,12 @@ const PreviewOccurrenceDetailsCard = ({
         <div className="size-full">
           <div className="flex flex-wrap gap-4 sm:gap-20 items-start p-3 w-full">
             <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
-              <DescriptionSection title={t('preview_sheet.occurrence_details.sections.inheritance.title')}>
+              <DescriptionSection
+                title={t('preview_sheet.occurrence_details.sections.inheritance.title')}
+                values={[zygosity, transmission, parental_origin]}
+              >
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.zygosity')}>
-                  {zygosityProp ? <Badge variant="outline">{zygosityProp}</Badge> : <EmptyField />}
+                  {zygosity ? <Badge variant="outline">{zygosity}</Badge> : <EmptyField />}
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.inheritance')}>
                   {transmission ? (
@@ -121,49 +130,62 @@ const PreviewOccurrenceDetailsCard = ({
                   )}
                 </DescriptionRow>
               </DescriptionSection>
-              <DescriptionSection title="Family">
-                <DescriptionRow
-                  label={
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="inline-flex gap-1 items-center">
-                          {t('preview_sheet.occurrence_details.sections.family.father_genotype')}{' '}
-                          <PedigreeMaleNotAffectedIcon size={13} />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {father_calls && father_calls[0] > 0
-                          ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
-                          : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
-                      </TooltipContent>
-                    </Tooltip>
-                  }
-                >
-                  <span className="font-mono">0/1</span>
-                </DescriptionRow>
-                <DescriptionRow
-                  label={
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="inline-flex gap-1 items-center">
-                          {t('preview_sheet.occurrence_details.sections.family.mother_genotype')}{' '}
-                          <PedigreeFemaleNotAffectedIcon size={13} />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {mother_calls && mother_calls[0] > 0
-                          ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
-                          : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
-                      </TooltipContent>
-                    </Tooltip>
-                  }
-                >
-                  <span className="font-mono">0/0</span>
-                </DescriptionRow>
-              </DescriptionSection>
+
+              {/* only proband has father and mother call */}
+              {relationshipToProband === 'proband' && (
+                <DescriptionSection title="Family" values={[father_calls, mother_calls]}>
+                  <DescriptionRow
+                    label={
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex gap-1 items-center">
+                            {t('preview_sheet.occurrence_details.sections.family.father_genotype')}{' '}
+                            <PedigreeMaleNotAffectedIcon size={13} />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {father_calls && father_calls[0] > 0
+                            ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
+                            : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
+                        </TooltipContent>
+                      </Tooltip>
+                    }
+                  >
+                    {father_calls ? (
+                      <span className="font-mono">{`${father_calls[0]}/${father_calls[1]}`}</span>
+                    ) : (
+                      <EmptyField />
+                    )}
+                  </DescriptionRow>
+                  <DescriptionRow
+                    label={
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex gap-1 items-center">
+                            {t('preview_sheet.occurrence_details.sections.family.mother_genotype')}{' '}
+                            <PedigreeFemaleNotAffectedIcon size={13} />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {mother_calls && mother_calls[0] > 0
+                            ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
+                            : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
+                        </TooltipContent>
+                      </Tooltip>
+                    }
+                  >
+                    {mother_calls ? (
+                      <span className="font-mono">{`${mother_calls[0]}/${mother_calls[1]}`}</span>
+                    ) : (
+                      <EmptyField />
+                    )}
+                  </DescriptionRow>
+                </DescriptionSection>
+              )}
             </div>
+
             <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
-              <DescriptionSection title="Metrics">
+              <DescriptionSection title="Metrics" values={[ad_alt, ad_total, genotype_quality, filter]}>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.quality_depth')}>
                   <EmptyField />
                 </DescriptionRow>
@@ -174,7 +196,7 @@ const PreviewOccurrenceDetailsCard = ({
                   <span className="font-mono">{ad_total ? ad_total : <EmptyField />}</span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
-                  {genotypeQualityValue}
+                  {getGenotypeQuality(genotype_quality)}
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.filter')}>
                   {filterValue}

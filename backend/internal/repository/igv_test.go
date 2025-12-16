@@ -5,20 +5,10 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
-
-type MockS3PreSigner struct{}
-
-func (m *MockS3PreSigner) GenerateS3PreSignedURL(url string) (*utils.PreSignedURL, error) {
-	return &utils.PreSignedURL{
-		URL:         "presigned." + url,
-		URLExpireAt: 1234567890,
-	}, nil
-}
 
 func Test_IGVInternal_GetIGV(t *testing.T) {
 	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
@@ -52,7 +42,7 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 func Test_IGV_PrepareTracks_handlesEmptyInputTracks(t *testing.T) {
 	var internalTracks []IGVTrack
 
-	result, err := PrepareIgvTracks(internalTracks, &MockS3PreSigner{})
+	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -66,7 +56,7 @@ func Test_IGV_PrepareTracks_groupsTracksByDataTypeAndPatientId(t *testing.T) {
 		{PatientId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file2.cram"},
 		{PatientId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file2.crai"},
 	}
-	result, err := PrepareIgvTracks(internalTracks, &MockS3PreSigner{})
+	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -101,13 +91,13 @@ func Test_IGV_PrepareTracks_groupsTracksByDataTypeAndPatientId(t *testing.T) {
 
 func Test_IGV_PrepareTracks_enrichesTracksWithPreSignedURLs(t *testing.T) {
 	internalTracks := []IGVTrack{
-		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "http://example.com/file1.cram"},
+		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file1.cram"},
 	}
-	result, err := PrepareIgvTracks(internalTracks, &MockS3PreSigner{})
+	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, "presigned.http://example.com/file1.cram", result.Alignment[0].URL)
+	assert.Equal(t, "presigned.s3://example.com/file1.cram", result.Alignment[0].URL)
 	assert.NotZero(t, result.Alignment[0].URLExpireAt)
 }
 
@@ -115,7 +105,7 @@ func Test_IGV_PrepareTracks_returnsErrorOnInvalidPreSignedURL(t *testing.T) {
 	internalTracks := []IGVTrack{
 		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "invalid-url"},
 	}
-	result, err := PrepareIgvTracks(internalTracks, &utils.DefaultS3PreSigner{})
+	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
@@ -123,7 +113,7 @@ func Test_IGV_PrepareTracks_returnsErrorOnInvalidPreSignedURL(t *testing.T) {
 	internalTracks = []IGVTrack{
 		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "http://not-an-s3.url"},
 	}
-	result, err = PrepareIgvTracks(internalTracks, &utils.DefaultS3PreSigner{})
+	result, err = PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.Error(t, err)
 	assert.Nil(t, result)

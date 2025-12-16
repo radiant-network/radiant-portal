@@ -55,21 +55,6 @@ const DEFAULT_SORTING = [
   },
 ];
 
-const ADDITIONAL_FIELDS = [
-  'rsnumber',
-  'symbol',
-  'vep_impact',
-  'is_mane_select',
-  'is_canonical',
-  'omim_inheritance_code',
-  'clinvar',
-  'exomiser_gene_combined_score',
-  'exomiser_acmg_classification',
-  'pf_wgs',
-  'transcript_id',
-  'has_interpretation',
-];
-
 async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
   const response = await occurrencesApi.countGermlineSNVOccurrences(input.caseId, input.seqId, input.countBody);
   return response.data;
@@ -106,7 +91,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
   const [isQBLoading, setQbLoading] = useState<boolean>(true);
   const [isQBInitialized, setQBInitialized] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [additionalFields, setAdditionalFields] = useState<string[]>(ADDITIONAL_FIELDS);
+  const [additionalFields, setAdditionalFields] = useState<string[]>([]);
 
   const [qbState, setQbState] = useState<QueryBuilderState>();
   const [activeSqon, setActiveSqon] = useState<Sqon>({

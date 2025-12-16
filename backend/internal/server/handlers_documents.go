@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 // SearchDocumentsHandler handles search of documents
@@ -114,5 +115,49 @@ func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, filters)
+	}
+}
+
+// GetDocumentsDownloadUrlHandler handles generating a pre-signed S3 download URL for a document
+// @Summary Get pre-signed S3 download URL for a document
+// @Id getDocumentDownloadUrl
+// @Description Generate a pre-signed S3 download URL for a document
+// @Tags documents
+// @Security bearerauth
+// @Param document_id path string true "Document ID"
+// @Produce json
+// @Success 200 {object} utils.PreSignedURL
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /documents/{document_id}/download_url [get]
+func GetDocumentsDownloadUrlHandler(repo repository.DocumentsDAO, presigner utils.PreSigner) gin.HandlerFunc {
+	if presigner == nil {
+		presigner = utils.NewS3PreSigner()
+	}
+
+	return func(c *gin.Context) {
+		documentId, err := strconv.Atoi(c.Param("document_id"))
+		if err != nil {
+			HandleNotFoundError(c, "document_id")
+			return
+		}
+
+		document, err := repo.GetById(documentId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if document == nil {
+			HandleNotFoundError(c, "document_id")
+			return
+		}
+
+		preSignedUrl, err := presigner.GeneratePreSignedURL(document.Url)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, preSignedUrl)
 	}
 }

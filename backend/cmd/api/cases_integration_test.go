@@ -167,6 +167,8 @@ func Test_CaseEntityHandler(t *testing.T) {
 		],
 		"analysis_catalog_code":"WGA",
 		"analysis_catalog_name":"Whole Genome Analysis",
+		"case_category_code": "postnatal",
+		"case_category_name": "Postnatal",
 		"case_id":1,
 		"case_type":"germline_family", 
 		"created_on":"2021-09-12T13:08:00Z", 
@@ -180,6 +182,10 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"patient_id":3, 
 				"relationship_to_proband":"proband",
 				"sex_code":"male", 
+				"first_name":"Marie",
+				"jhn":"LAM7303233380",
+				"last_name":"Lambert",
+				"life_status_code":"alive",
 				"non_observed_phenotypes": [{"id": "HP:0000717", "name": "Autism", "onset_code": "childhood"}, {"id": "HP:0001263", "name": "Global developmental delay", "onset_code": "childhood"}]
 			},
 			{
@@ -189,7 +195,12 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
 				"submitter_patient_id":"MRN-283773", 
 				"patient_id":1, 
-				"relationship_to_proband":"mother", "sex_code":"female"
+				"relationship_to_proband":"mother",
+				"sex_code":"female",
+				"first_name":"Juliette",
+				"jhn":"GAG1202030277",
+				"last_name":"Gagnon",
+				"life_status_code":"alive"
 			},
 			{
 				"affected_status_code":"non_affected", 
@@ -199,12 +210,18 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"submitter_patient_id":"MRN-283774", 
 				"patient_id":2, 
 				"relationship_to_proband":"father", 
-				"sex_code":"male"
+				"sex_code":"male",
+				"first_name":"Antoine",
+				"jhn":"LEF7001303889",
+				"last_name":"Lefebvre",
+				"life_status_code":"alive"
 			}
 		], 
 		"note": "Administrative comment",
 		"diagnosis_lab_code": "CQGC",
 		"diagnosis_lab_name": "Quebec Clinical Genomic Center",
+		"panel_code": "EPILEP",
+		"panel_name": "Epilepsy",		
 		"prescriber": "Felix Laflamme",
 		"primary_condition_id": "MONDO:0700092",
 		"primary_condition_name": "neurodevelopmental disorder",

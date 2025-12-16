@@ -24,4 +24,5 @@ type Assay = struct {
 	TissueSite                   string    `json:"tissue_site,omitempty"`
 	HistologyCode                string    `json:"histology_code,omitempty"`
 	SubmitterSampleID            string    `json:"submitter_sample_id,omitempty"`
+	PatientID                    int       `json:"patient_id" validate:"required"`
 } //@Name Assay

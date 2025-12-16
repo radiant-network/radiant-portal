@@ -142,6 +142,12 @@ export interface Assay {
     'histology_code'?: string;
     /**
      * 
+     * @type {number}
+     * @memberof Assay
+     */
+    'patient_id': number;
+    /**
+     * 
      * @type {string}
      * @memberof Assay
      */
@@ -535,6 +541,18 @@ export interface CaseEntity {
     'assays': Array<CaseAssay>;
     /**
      * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_category_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'case_category_name': string;
+    /**
+     * 
      * @type {number}
      * @memberof CaseEntity
      */
@@ -587,6 +605,18 @@ export interface CaseEntity {
      * @memberof CaseEntity
      */
     'ordering_organization_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'panel_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'panel_name'?: string;
     /**
      * 
      * @type {string}
@@ -709,6 +739,30 @@ export interface CasePatientClinicalInformation {
      * @memberof CasePatientClinicalInformation
      */
     'ethnicity_codes'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'first_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'jhn'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'last_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'life_status_code': string;
     /**
      * 
      * @type {Array<Term>}
@@ -3631,6 +3685,25 @@ export interface UserSet {
 /**
  * 
  * @export
+ * @interface UtilsPreSignedURL
+ */
+export interface UtilsPreSignedURL {
+    /**
+     * 
+     * @type {number}
+     * @memberof UtilsPreSignedURL
+     */
+    'expires_at'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof UtilsPreSignedURL
+     */
+    'url'?: string;
+}
+/**
+ * 
+ * @export
  * @interface VariantCasesCount
  */
 export interface VariantCasesCount {
@@ -5175,6 +5248,44 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
+         * Generate a pre-signed S3 download URL for a document
+         * @summary Get pre-signed S3 download URL for a document
+         * @param {string} documentId Document ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getDocumentDownloadUrl: async (documentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'documentId' is not null or undefined
+            assertParamExists('getDocumentDownloadUrl', 'documentId', documentId)
+            const localVarPath = `/documents/{document_id}/download_url`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Search documents
          * @summary Search documents
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -5252,6 +5363,19 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Generate a pre-signed S3 download URL for a document
+         * @summary Get pre-signed S3 download URL for a document
+         * @param {string} documentId Document ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getDocumentDownloadUrl(documentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UtilsPreSignedURL>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getDocumentDownloadUrl(documentId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DocumentsApi.getDocumentDownloadUrl']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Search documents
          * @summary Search documents
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -5296,6 +5420,16 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
             return localVarFp.documentsFilters(filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
+         * Generate a pre-signed S3 download URL for a document
+         * @summary Get pre-signed S3 download URL for a document
+         * @param {string} documentId Document ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getDocumentDownloadUrl(documentId: string, options?: RawAxiosRequestConfig): AxiosPromise<UtilsPreSignedURL> {
+            return localVarFp.getDocumentDownloadUrl(documentId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Search documents
          * @summary Search documents
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -5338,6 +5472,18 @@ export class DocumentsApi extends BaseAPI {
      */
     public documentsFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return DocumentsApiFp(this.configuration).documentsFilters(filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Generate a pre-signed S3 download URL for a document
+     * @summary Get pre-signed S3 download URL for a document
+     * @param {string} documentId Document ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public getDocumentDownloadUrl(documentId: string, options?: RawAxiosRequestConfig) {
+        return DocumentsApiFp(this.configuration).getDocumentDownloadUrl(documentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

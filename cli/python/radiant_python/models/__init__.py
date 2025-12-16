@@ -12,6 +12,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
+
 # import models into model package
 from radiant_python.models.aggregation import Aggregation
 from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
@@ -93,4 +94,3 @@ from radiant_python.models.variant_overview import VariantOverview
 from radiant_python.models.variant_uninterpreted_case import VariantUninterpretedCase
 from radiant_python.models.variant_uninterpreted_cases_search_response import VariantUninterpretedCasesSearchResponse
 from radiant_python.models.vep_impact import VepImpact
-
