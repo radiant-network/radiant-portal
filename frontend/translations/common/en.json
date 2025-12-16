@@ -1,6 +1,7 @@
 {
   "common": {
     "date": "yyyy-MM-dd",
+    "empty_section": "No {{title}} data reported",
     "unspecified": "Unspecified",
     "no_data_available": "No data available",
     "not_available_yet": "Not available yet",
