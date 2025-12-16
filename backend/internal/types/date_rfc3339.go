@@ -1,7 +1,6 @@
 package types
 
 import (
-	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -19,7 +18,7 @@ type DateRFC3339 time.Time
 // - A byte slice containing the JSON-encoded date string.
 // - An error if the marshaling process fails.
 func (d *DateRFC3339) MarshalJSON() ([]byte, error) {
-	return json.Marshal(time.Time(*d))
+	return time.Time(*d).MarshalJSON()
 }
 
 // UnmarshalJSON parses a JSON-encoded string into a DateRFC3339 object.
