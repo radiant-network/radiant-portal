@@ -195,6 +195,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 		sequencingGroup := dataManagerRoutes.Group("/sequencing")
 		sequencingGroup.POST("/batch", server.PostSequencingExperimentBatchHandler(repoBatches, auth))
+
+		casesGroup := dataManagerRoutes.Group("/cases")
+		casesGroup.POST("/batch", server.PostCaseBatchHandler(repoBatches, auth))
 	}
 
 	r.Use(gin.Recovery())
