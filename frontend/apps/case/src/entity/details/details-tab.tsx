@@ -3,9 +3,9 @@ import { Card, CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 
-import AnalysisCard from './analysis-card';
 import AssayInformationsCard from './assay-informations-card';
 import BioinformaticsCard from './bioinformatics-card';
+import CaseOverviewCard from './case-overview-card';
 import ClinicalCard from './clinical-card';
 import PatientInformationCard from './patient-information-card';
 
@@ -26,7 +26,7 @@ function DetailsTab({ caseEntity, isLoading }: DetailsTabProps) {
   return (
     <div className="max-w-8xl mx-auto w-full">
       <div className="gap-y-2 md:gap-3 grid grid-cols-1 lg:grid-cols-3 lg:grid-cols-[1fr_minmax(auto,480px)] justify-center">
-        <AnalysisCard
+        <CaseOverviewCard
           className="lg:col-span-2 min-w-0 border-0 rounded-none md:border md:rounded-xl"
           data={caseEntity}
         />
