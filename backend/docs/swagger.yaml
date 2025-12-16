@@ -48,6 +48,8 @@ components:
           type: string
         histology_code:
           type: string
+        patient_id:
+          type: integer
         platform_code:
           type: string
         run_alias:
@@ -78,6 +80,8 @@ components:
           type: string
         updated_on:
           type: string
+      required:
+      - patient_id
       type: object
     AutoCompleteGene:
       properties:
