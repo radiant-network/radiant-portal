@@ -137,7 +137,7 @@ export interface BaseColumnSettings {
   pinningPosition?: ColumnPinningPosition;
   header?: string;
   label?: string;
-  additionalFieldIds?: string[];
+  additionalFields?: string[];
 }
 
 export interface ColumnSettings extends BaseColumnSettings {
@@ -502,8 +502,9 @@ function getRowFlexRender<T>({
  * 
  * @DESCRIPTION: additional fields are managed by the table to be able to request extra data from server
  *              based on the column visibility.
+ *              In defaultColumnSettings, you can enter the IDs of the relevant columns in additionalFields.
  * @EXAMPLE: {
- *   additional_fields: ['field1', 'field2'],
+ *   additionalFields: ['field1', 'field2'],
  * }
  */
 // eslint-disable-next-line complexity
@@ -587,7 +588,7 @@ function TranstackTable<T>({
     setIsFullscreen(false);
   };
 
-  // Set only additional fields displayed in the table
+  // Set only additional fields displayed in the table from additionalFields
   const filteredAdditionalFields = useMemo(
     () =>
       getFilteredAdditionalFields({

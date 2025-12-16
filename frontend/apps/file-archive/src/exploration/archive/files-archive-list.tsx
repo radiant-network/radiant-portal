@@ -24,8 +24,6 @@ const DEFAULT_SORTING = [
   },
 ];
 
-const ADDITIONAL_FIELDS = ['seq_id', 'hash', 'run_alias'];
-
 type DocumentInput = {
   body: ListBodyWithCriteria;
 };
@@ -43,7 +41,7 @@ function FilesArchiveList() {
     pageIndex: 0,
     pageSize: 20,
   });
-  const [additionalFields, setAdditionalFields] = useState<string[]>(ADDITIONAL_FIELDS);
+  const [additionalFields, setAdditionalFields] = useState<string[]>([]);
 
   const { data, error, isLoading } = useSWR<DocumentsSearchResponse, ApiError, DocumentInput>(
     {

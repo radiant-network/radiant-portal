@@ -227,7 +227,7 @@ const defaultSettings = createColumnSettings([
     id: 'case_type',
     visible: true,
     label: 'case_exploration.case.headers.case_type',
-    additionalFieldIds: ['case_type'],
+    additionalFields: ['case_type'],
   },
   {
     id: 'analysis_catalog_code',
@@ -238,7 +238,7 @@ const defaultSettings = createColumnSettings([
     id: 'primary_condition',
     visible: false,
     label: 'case_exploration.case.headers.primary_condition',
-    additionalFieldIds: ['primary_condition_id', 'primary_condition_name'],
+    additionalFields: ['primary_condition_id', 'primary_condition_name'],
   },
   {
     id: 'ordering_organization_code',
@@ -264,19 +264,19 @@ const defaultSettings = createColumnSettings([
     id: 'prescriber',
     visible: false,
     label: 'case_exploration.case.headers.prescriber',
-    additionalFieldIds: ['prescriber'],
+    additionalFields: ['prescriber'],
   },
   {
     id: 'diagnostic_lab',
     visible: false,
     label: 'case_exploration.case.headers.diagnostic_lab',
-    additionalFieldIds: ['diagnosis_lab_code', 'diagnosis_lab_name'],
+    additionalFields: ['diagnosis_lab_code', 'diagnosis_lab_name'],
   },
   {
     id: 'managing_organization',
     visible: false,
     label: 'case_exploration.case.headers.managing_organization',
-    additionalFieldIds: ['organization_code', 'organization_name'],
+    additionalFields: ['organization_code', 'organization_name'],
   },
   {
     id: 'actions',

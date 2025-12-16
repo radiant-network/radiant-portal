@@ -278,31 +278,31 @@ const defaultCNVSettings = createColumnSettings([
     id: 'calls',
     visible: false,
     label: 'variant.headers.calls',
-    additionalFieldIds: ['calls'],
+    additionalFields: ['calls'],
   },
   {
     id: 'filter',
     visible: false,
     label: 'variant.headers.filter',
-    additionalFieldIds: ['filter'],
+    additionalFields: ['filter'],
   },
   {
     id: 'quality',
     visible: false,
     label: 'variant.headers.quality',
-    additionalFieldIds: ['quality'],
+    additionalFields: ['quality'],
   },
   {
     id: 'bc',
     visible: false,
     label: 'variant.headers.bc',
-    additionalFieldIds: ['bc'],
+    additionalFields: ['bc'],
   },
   {
     id: 'pe',
     visible: false,
     label: 'variant.headers.pe',
-    additionalFieldIds: ['pe'],
+    additionalFields: ['pe'],
   },
 ]);
 
