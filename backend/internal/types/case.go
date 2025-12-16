@@ -165,6 +165,7 @@ var CasesFields = []Field{
 	PatientIdField,
 	SubmitterPatientIdField,
 	SubmitterProbandIdField,
+	PatientMrnField,
 	CasePriorityCodeField,
 	CaseStatusCodeField,
 	CaseTypeCodeField,

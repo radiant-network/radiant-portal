@@ -54,6 +54,13 @@ var SubmitterPatientIdField = Field{
 	Table:         PatientTable,
 }
 
+var PatientMrnField = Field{
+	Name:          "submitter_patient_id",
+	Alias:         "mrn",
+	CanBeFiltered: true,
+	Table:         PatientTable,
+}
+
 var PatientOrganizationCodeField = Field{
 	Name:          "code",
 	Alias:         "organization_code",
