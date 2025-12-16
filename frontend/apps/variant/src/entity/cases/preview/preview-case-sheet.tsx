@@ -95,7 +95,11 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
               {
                 icon: <ArrowUpRight />,
                 label: t('preview_sheet.actions.view_all_variants'),
-                onClick: () => window.open(`/case/entity/${caseResult.data?.case_id}?tab=variants`, '_blank'),
+                onClick: () =>
+                  window.open(
+                    `/case/entity/${caseResult.data?.case_id}?tab=variants&seq_id=${caseData.seq_id}`,
+                    '_blank',
+                  ),
               },
             ]}
             onDefaultAction={() => window.open(`/case/entity/${caseResult.data?.case_id}`, '_blank')}
@@ -109,6 +113,7 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
       <OccurrenceSheetDetailsCard
         caseId={caseData.case_id}
         seqId={caseData.seq_id}
+        relationshipToProband={caseData.relationship_to_proband}
         locus={expandResult.data.locus || locusId}
         start={expandResult.data.start || 0}
         chromosome={expandResult.data.chromosome || ''}
