@@ -8,8 +8,8 @@ type Document struct {
 	DataCategoryCode string
 	DataCategory     DataCategory `gorm:"foreignKey:code;references:DataCategoryCode"`
 	DataTypeCode     string
-	DataType         DataType `gorm:"foreignKey:code;references:DataTypeCode"`
-	FileFormatCode   string
+	DataType         DataType   `gorm:"foreignKey:code;references:DataTypeCode"`
+	FileFormatCode   string     `gorm:"column:format_code"`
 	FileFormat       FileFormat `gorm:"foreignKey:code;references:FileFormatCode"`
 	Size             int
 	Url              string

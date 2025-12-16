@@ -2,14 +2,19 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -248,4 +253,33 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"count":0, "key":"sister", "label":"Sister"}
 		]}`
 	assertGetDocumentsFilters(t, "simple", body, expected)
+}
+
+func Test_GetDocumentsDownloadUrl(t *testing.T) {
+	testutils.ParallelTestWithAll(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, postgres *gorm.DB, starrocks *gorm.DB) {
+		_ = os.Setenv("AWS_REGION", "us-east-1")
+		_ = os.Setenv("AWS_ENDPOINT_URL", client.EndpointURL().String())
+		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
+		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
+		_ = os.Setenv("AWS_USE_SSL", "false")
+
+		repo := repository.NewDocumentsRepository(starrocks)
+		router := gin.Default()
+		router.GET("/documents/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repo, nil))
+
+		req, _ := http.NewRequest("GET", "/documents/1/download_url", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var actual utils.PreSignedURL
+		if err := json.Unmarshal(w.Body.Bytes(), &actual); err != nil {
+			assert.NoError(t, err)
+		}
+		assert.NotEmpty(t, actual.URL)
+		assert.Greater(t, actual.URLExpireAt, int64(0))
+
+		expectedURLPrefix := fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/", endpoint)
+		assert.True(t, strings.HasPrefix(actual.URL, expectedURLPrefix))
+	})
 }
