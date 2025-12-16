@@ -142,6 +142,12 @@ export interface Assay {
     'histology_code'?: string;
     /**
      * 
+     * @type {number}
+     * @memberof Assay
+     */
+    'patient_id': number;
+    /**
+     * 
      * @type {string}
      * @memberof Assay
      */

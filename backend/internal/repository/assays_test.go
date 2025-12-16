@@ -34,5 +34,6 @@ func Test_GetAssayBySeqId(t *testing.T) {
 		assert.Equal(t, "", assay.TissueSite)
 		assert.Equal(t, "normal", assay.HistologyCode)
 		assert.Equal(t, "S13224", assay.SubmitterSampleID)
+		assert.Equal(t, 3, assay.PatientID)
 	})
 }
