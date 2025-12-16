@@ -214,7 +214,7 @@ func filterOutIndexFiles(tx *gorm.DB) {
 
 func (r *DocumentsRepository) GetById(id int) (*Document, error) {
 	var document Document
-	err := r.db.Table(types.DocumentTable.Name).
+	err := r.db.Table(types.DocumentTable.FederationName).
 		Where("id = ?", id).
 		Where("format_code not in ?", []string{"crai", "tbi"}).
 		First(&document).Error
