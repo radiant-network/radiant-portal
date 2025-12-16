@@ -516,6 +516,129 @@ export interface CaseAssay {
     'updated_on': string;
 }
 /**
+ * 
+ * @export
+ * @interface CaseBatch
+ */
+export interface CaseBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'analysis_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'category_code': CaseBatchCategoryCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'diagnostic_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'note'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'ordering_organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'ordering_physician'?: string;
+    /**
+     * 
+     * @type {Array<CasePatientBatch>}
+     * @memberof CaseBatch
+     */
+    'patients': Array<CasePatientBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'primary_condition_code_system'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'primary_condition_value'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'priority_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'project_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'resolution_status_code'?: string;
+    /**
+     * 
+     * @type {Array<CaseSequencingExperimentBatch>}
+     * @memberof CaseBatch
+     */
+    'sequencing_experiments': Array<CaseSequencingExperimentBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'submitter_case_id': string;
+    /**
+     * 
+     * @type {Array<CaseTaskBatch>}
+     * @memberof CaseBatch
+     */
+    'tasks': Array<CaseTaskBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'type': CaseBatchTypeEnum;
+}
+
+export const CaseBatchCategoryCodeEnum = {
+    Prenatal: 'prenatal',
+    Postnatal: 'postnatal'
+} as const;
+
+export type CaseBatchCategoryCodeEnum = typeof CaseBatchCategoryCodeEnum[keyof typeof CaseBatchCategoryCodeEnum];
+export const CaseBatchTypeEnum = {
+    Germline: 'germline',
+    Somatic: 'somatic'
+} as const;
+
+export type CaseBatchTypeEnum = typeof CaseBatchTypeEnum[keyof typeof CaseBatchTypeEnum];
+
+/**
  * Data for Case Entity Page
  * @export
  * @interface CaseEntity
@@ -714,6 +837,55 @@ export interface CaseFilters {
      * @memberof CaseFilters
      */
     'status': Array<Aggregation>;
+}
+/**
+ * 
+ * @export
+ * @interface CasePatientBatch
+ */
+export interface CasePatientBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientBatch
+     */
+    'affected_status_code': string;
+    /**
+     * 
+     * @type {Array<FamilyHistoryBatch>}
+     * @memberof CasePatientBatch
+     */
+    'family_history'?: Array<FamilyHistoryBatch>;
+    /**
+     * 
+     * @type {Array<ObservationCategoricalBatch>}
+     * @memberof CasePatientBatch
+     */
+    'observations_categorical'?: Array<ObservationCategoricalBatch>;
+    /**
+     * 
+     * @type {Array<ObservationTextBatch>}
+     * @memberof CasePatientBatch
+     */
+    'observations_text'?: Array<ObservationTextBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientBatch
+     */
+    'patient_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientBatch
+     */
+    'relation_to_proband_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientBatch
+     */
+    'submitter_patient_id': string;
 }
 /**
  * Patient clinical information to display in Case Entity
@@ -954,6 +1126,31 @@ export interface CaseResult {
 /**
  * 
  * @export
+ * @interface CaseSequencingExperimentBatch
+ */
+export interface CaseSequencingExperimentBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperimentBatch
+     */
+    'aliquot': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperimentBatch
+     */
+    'sample_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperimentBatch
+     */
+    'submitter_sample_id': string;
+}
+/**
+ * 
+ * @export
  * @interface CaseTask
  */
 export interface CaseTask {
@@ -987,6 +1184,55 @@ export interface CaseTask {
      * @memberof CaseTask
      */
     'type_name': string;
+}
+/**
+ * 
+ * @export
+ * @interface CaseTaskBatch
+ */
+export interface CaseTaskBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'aliquot'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'genome_build'?: string;
+    /**
+     * 
+     * @type {Array<InputDocumentBatch>}
+     * @memberof CaseTaskBatch
+     */
+    'input_documents'?: Array<InputDocumentBatch>;
+    /**
+     * 
+     * @type {Array<OutputDocumentBatch>}
+     * @memberof CaseTaskBatch
+     */
+    'output_documents': Array<OutputDocumentBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'pipeline_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'pipeline_version': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'type_code': string;
 }
 /**
  * 
@@ -1167,6 +1413,19 @@ export interface CreateBatchResponse {
      * @memberof CreateBatchResponse
      */
     'username'?: string;
+}
+/**
+ * CreateCaseBatchBody represents the body required to create a case batch
+ * @export
+ * @interface CreateCaseBatchBody
+ */
+export interface CreateCaseBatchBody {
+    /**
+     * 
+     * @type {Array<CaseBatch>}
+     * @memberof CreateCaseBatchBody
+     */
+    'cases': Array<CaseBatch>;
 }
 /**
  * CreatePatientBatchBody represents the body required to create a patient batch
@@ -1735,6 +1994,25 @@ export interface Facet {
      * @memberof Facet
      */
     'values'?: Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface FamilyHistoryBatch
+ */
+export interface FamilyHistoryBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof FamilyHistoryBatch
+     */
+    'condition': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof FamilyHistoryBatch
+     */
+    'family_member_code': string;
 }
 /**
  * 
@@ -2343,6 +2621,19 @@ export interface IGVTracks {
 /**
  * 
  * @export
+ * @interface InputDocumentBatch
+ */
+export interface InputDocumentBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof InputDocumentBatch
+     */
+    'url': string;
+}
+/**
+ * 
+ * @export
  * @interface InterpretationGermline
  */
 export interface InterpretationGermline {
@@ -2722,6 +3013,68 @@ export interface ListBodyWithSqon {
 /**
  * 
  * @export
+ * @interface ObservationCategoricalBatch
+ */
+export interface ObservationCategoricalBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationCategoricalBatch
+     */
+    'code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationCategoricalBatch
+     */
+    'interpretation_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationCategoricalBatch
+     */
+    'note'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationCategoricalBatch
+     */
+    'onset_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationCategoricalBatch
+     */
+    'system': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationCategoricalBatch
+     */
+    'value': string;
+}
+/**
+ * 
+ * @export
+ * @interface ObservationTextBatch
+ */
+export interface ObservationTextBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationTextBatch
+     */
+    'code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationTextBatch
+     */
+    'note': string;
+}
+/**
+ * 
+ * @export
  * @interface OmimGenePanel
  */
 export interface OmimGenePanel {
@@ -2743,6 +3096,55 @@ export interface OmimGenePanel {
      * @memberof OmimGenePanel
      */
     'panel'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface OutputDocumentBatch
+ */
+export interface OutputDocumentBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'data_category_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'data_type_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'format_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'hash'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof OutputDocumentBatch
+     */
+    'size': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'url': string;
 }
 /**
  * 
@@ -4864,6 +5266,51 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Create a new case batch
+         * @summary Create a new case batch
+         * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postCaseBatch: async (createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createCaseBatchBody' is not null or undefined
+            assertParamExists('postCaseBatch', 'createCaseBatchBody', createCaseBatchBody)
+            const localVarPath = `/cases/batch`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createCaseBatchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Search cases
          * @summary Search cases
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -4982,6 +5429,20 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Create a new case batch
+         * @summary Create a new case batch
+         * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async postCaseBatch(createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postCaseBatch(createCaseBatchBody, dryRun, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.postCaseBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Search cases
          * @summary Search cases
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -5056,6 +5517,17 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          */
         casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<CaseFilters> {
             return localVarFp.casesFilters(filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new case batch
+         * @summary Create a new case batch
+         * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postCaseBatch(createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postCaseBatch(createCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
         /**
          * Search cases
@@ -5138,6 +5610,19 @@ export class CasesApi extends BaseAPI {
      */
     public casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).casesFilters(filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new case batch
+     * @summary Create a new case batch
+     * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
+     * @param {boolean} [dryRun] Dry Run
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public postCaseBatch(createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).postCaseBatch(createCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

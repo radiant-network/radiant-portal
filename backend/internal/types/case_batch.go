@@ -1,5 +1,7 @@
 package types
 
+const CaseBatchType = "case"
+
 type CaseBatch struct {
 	SubmitterCaseId            string                           `json:"submitter_case_id" binding:"required"`
 	Type                       string                           `json:"type" binding:"required,oneof=germline somatic"`
@@ -15,9 +17,9 @@ type CaseBatch struct {
 	Note                       string                           `json:"note,omitempty"`
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code,omitempty"`
-	Patients                   []*CasePatientBatch              `json:"patients" binding:"required,dive"`
-	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments" binding:"required,dive"`
-	Tasks                      []*CaseTaskBatch                 `json:"tasks" binding:"required,dive"`
+	Patients                   []*CasePatientBatch              `json:"patients" validate:"required,min=1,dive,required" binding:"required,min=1,dive,required"`
+	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments" validate:"required,min=1,dive,required" binding:"required,min=1,dive,required"`
+	Tasks                      []*CaseTaskBatch                 `json:"tasks" validate:"required,min=1,dive,required" binding:"required,min=1,dive,required"`
 }
 
 type CasePatientBatch struct {
@@ -78,3 +80,9 @@ type OutputDocumentBatch struct {
 	Size             int64  `json:"size" binding:"required"`
 	Url              string `json:"url" binding:"required"`
 }
+
+// CreateCaseBatchBody represents the body required to create a case batch
+// @Description CreateCaseBatchBody represents the body required to create a case batch
+type CreateCaseBatchBody struct {
+	Cases []*CaseBatch `json:"cases" validate:"required,min=1,dive,required" binding:"required,min=1,dive,required"`
+} //@Name CreateCaseBatchBody
