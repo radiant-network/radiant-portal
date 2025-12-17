@@ -8,15 +8,30 @@ export const apiMessages = {
   ParsingError: (field: string) => `error parsing ${field}`,
   ParsingErrorDateFormat: 'invalid date format, expected RFC3339 (e.g. 2020-01-02T15:04:05Z)',
   Patient005: (orgType: string, code: string, id: string) => `Organization type (${orgType}) defined for patient (${code} / ${id}) is not in this list : healthcare_provider, research_institute.`,
-  ProcessWorkerError001: (type: string, code: string, id: string) => `${type} (${code} / ${id}) already exists, skipped.`,
-  ProcessWorkerError002: (type: string, code: string, id: string, field: string, originValue: string, newValue: string) => `A ${type} with same ids (${code} / ${id}) has been found but with a different ${field} (${originValue} <> ${newValue}).`,
-  ProcessWorkerError003: (type: string, value: string, id: string) => `Organization ${value} for ${type} ${id} does not exist.`,
-  ProcessWorkerErrorMultiple: (type: string, code: string, id: string) => `${type} (${code} / ${id}) appears multiple times in the batch.`,
+  ProcessWorkerError001: (type: string, code: string, id: string, aliquot?: string) => {
+    const identifier = aliquot ? `${code} / ${id} / ${aliquot}` : `${code} / ${id}`;
+    return `${type} (${identifier}) already exists, skipped.`;
+  },
+  ProcessWorkerError003: (field: string, type: string, value: string, id: string) => `${field} ${value} for ${type} ${id} does not exist.`,
+  ProcessWorkerErrorDiffField: (type: string, field: string, originValue: string, newValue: string, code: string, id: string, aliquot?: string) => {
+    const identifier = aliquot ? `${code} / ${id} / ${aliquot}` : `${code} / ${id}`;
+    return `A ${type} with same ids (${identifier}) has been found but with a different ${field} (${originValue} <> ${newValue}).`;
+  },
+  ProcessWorkerErrorMultiple: (type: string, code: string, id: string, aliquot?: string) => {
+    const identifier = aliquot ? `${code} / ${id} / ${aliquot}` : `${code} / ${id}`;
+    return `${type} (${identifier}) appears multiple times in the batch.`;
+  },
   ProcessWorkerErrorNotSamePatient: (type: string, field: string, code: string, id: string, parentId: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: Invalid parent ${type} ${parentId} for this ${type}.`,
+  ProcessWorkerErrorPastDate: (type: string, field: string, code: string, id: string, aliquot: string) => `Invalid field ${field} for ${type} (${code} / ${id} / ${aliquot}). Reason: must be a past date.`,
   ProcessWorkerErrorRegExp: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- .'À-ÿ]*$.`,
   ProcessWorkerErrorRegExpId: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.`,
+  ProcessWorkerErrorRegExpAliquot: (type: string, field: string, code: string, id: string, aliquot: string) => `Invalid field ${field} for ${type} (${code} / ${id} / ${aliquot}). Reason: does not match the regular expression ^[A-Za-z0-9\\-_.]+$.`,
   ProcessWorkerErrorRegExpTissue: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[A-Za-z\\- ]+$.`,
-  ProcessWorkerErrorTooLong: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: field is too long, maximum length allowed is 100.`,
+  ProcessWorkerErrorTooLong: (type: string, field: string, code: string, id: string, aliquot?: string) => {
+    const identifier = aliquot ? `${code} / ${id} / ${aliquot}` : `${code} / ${id}`;
+    return `Invalid field ${field} for ${type} (${identifier}). Reason: field is too long, maximum length allowed is 100.`;
+  },
   Sample004: (code: string, patientId: string, SampleId: string) => `Patient (${code} / ${patientId}) for sample ${SampleId} does not exist.`,
   Sample005: (id: string) => `Sample ${id} does not exist.`,
+  Sequencing005: (code: string, id: string) => `Sample (${code} / ${id}) does not exist.`,
 };
