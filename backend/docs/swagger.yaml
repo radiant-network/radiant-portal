@@ -261,6 +261,7 @@ components:
         sequencing_experiments:
           items:
             $ref: '#/components/schemas/CaseSequencingExperimentBatch'
+          minItems: 1
           type: array
           uniqueItems: false
         status_code:
@@ -276,6 +277,7 @@ components:
       - category_code
       - patients
       - project_code
+      - sequencing_experiments
       - status_code
       - submitter_case_id
       - type

@@ -18,7 +18,7 @@ type CaseBatch struct {
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code,omitempty"`
 	Patients                   []*CasePatientBatch              `json:"patients" binding:"required,min=1,dive,required"`
-	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" binding:"dive"`
+	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments" binding:"required,min=1,dive,required"`
 	// Tasks                      []*CaseTaskBatch                 `json:"tasks" binding:"required,min=1,dive,required"`
 }
 
