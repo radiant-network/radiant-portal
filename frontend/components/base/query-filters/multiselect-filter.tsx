@@ -235,7 +235,6 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     });
 
     setItems(aggregationData || []);
-    setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));
   }, [aggregationData, appId, field.key, maxVisibleItems, selectedItems]);
 
   // Save temporarily in global sessionStorage
