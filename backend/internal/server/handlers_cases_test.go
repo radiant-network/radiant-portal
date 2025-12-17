@@ -125,6 +125,8 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 	}, nil
 }
 
+func (m *MockRepository) CreateCase(*types.Case) error { return nil }
+
 func Test_SearchCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
