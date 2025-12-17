@@ -49,10 +49,6 @@ const DEFAULT_SORTING = [
     field: 'max_impact_score',
     order: SortBodyOrderEnum.Desc,
   },
-  {
-    field: 'hgvsg',
-    order: SortBodyOrderEnum.Asc,
-  },
 ];
 
 async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
