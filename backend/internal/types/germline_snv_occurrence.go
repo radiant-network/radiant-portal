@@ -352,7 +352,7 @@ var GermlineSNVOccurrencesDefaultFields = []Field{
 	GermlineSNVExomiserVariantScoreField,
 }
 
-var GermlineSNVOccurrencesDefaultSort = []SortField{{Field: PickedImpactScoreField, Order: "desc"}}
+var GermlineSNVOccurrencesDefaultSort = []SortField{{Field: GermlineSNVExomiserGeneCombinedScoreField, Order: "desc"}, {Field: PickedImpactScoreField, Order: "desc"}}
 
 var GermlineSNVOccurrencesQueryConfig = QueryConfig{
 	AllFields:     GermlineSNVOccurrencesFields,

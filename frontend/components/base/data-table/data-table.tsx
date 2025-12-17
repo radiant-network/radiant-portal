@@ -774,12 +774,10 @@ function TranstackTable<T>({
       serverOptions.onSortingChange(serverOptions.defaultSorting);
     } else {
       serverOptions.onSortingChange(
-        sorting
-          .map(s => ({
-            field: s.id,
-            order: s.desc ? SortBodyOrderEnum.Desc : SortBodyOrderEnum.Asc,
-          }))
-          .reverse(),
+        sorting.map(s => ({
+          field: s.id,
+          order: s.desc ? SortBodyOrderEnum.Desc : SortBodyOrderEnum.Asc,
+        })),
       );
     }
 
