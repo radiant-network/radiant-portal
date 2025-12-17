@@ -66,11 +66,13 @@ func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
 		glog.Infof("Processing batch: %v", nextBatch.ID)
 		switch nextBatch.BatchType {
 		case types.PatientBatchType:
-			processPatientBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoPatient, ctx.RepoBatch)
+			processPatientBatch(nextBatch, db, ctx)
 		case types.SampleBatchType:
-			processSampleBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoPatient, ctx.RepoSample, ctx.RepoBatch)
+			processSampleBatch(nextBatch, db, ctx)
 		case types.SequencingExperimentBatchType:
-			processSequencingExperimentBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoSample, ctx.RepoSeqExp, ctx.RepoBatch)
+			processSequencingExperimentBatch(nextBatch, db, ctx)
+		case types.CaseBatchType:
+			processCaseBatch(nextBatch, db, ctx)
 		default:
 			notSupportedBatch := fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
 			processUnexpectedError(nextBatch, notSupportedBatch, ctx.RepoBatch)

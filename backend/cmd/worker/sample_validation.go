@@ -130,18 +130,18 @@ func validateExistingSampleField[T comparable](
 	}
 }
 
-func processSampleBatch(batch *types.Batch, db *gorm.DB, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO, repoBatch repository.BatchDAO) {
+func processSampleBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationContext) {
 	payload := []byte(batch.Payload)
 	var samplesbatch []types.SampleBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &samplesbatch); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), repoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), context.RepoBatch)
 		return
 	}
 
-	records, unexpectedErr := validateSamplesBatch(samplesbatch, repoOrganization, repoPatient, repoSample)
+	records, unexpectedErr := validateSamplesBatch(samplesbatch, context.RepoOrganization, context.RepoPatient, context.RepoSample)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), repoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), context.RepoBatch)
 		return
 	}
 
@@ -149,7 +149,7 @@ func processSampleBatch(batch *types.Batch, db *gorm.DB, repoOrganization reposi
 
 	err := persistBatchAndSampleRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing sample batch records: %v", err), repoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error processing sample batch records: %v", err), context.RepoBatch)
 		return
 	}
 }

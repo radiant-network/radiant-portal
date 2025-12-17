@@ -82,18 +82,18 @@ func (r *SequencingExperimentValidationRecord) getResId() []string {
 	return []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 }
 
-func processSequencingExperimentBatch(batch *types.Batch, db *gorm.DB, repoOrganization repository.OrganizationDAO, repoSample repository.SamplesDAO, repoSequencingExperiment repository.SequencingExperimentDAO, repoBatch repository.BatchDAO) {
+func processSequencingExperimentBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationContext) {
 	payload := []byte(batch.Payload)
 	var experimentsBatch []types.SequencingExperimentBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), repoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), context.RepoBatch)
 		return
 	}
 
-	records, unexpectedErr := validateSequencingExperimentBatch(experimentsBatch, repoOrganization, repoSample, repoSequencingExperiment)
+	records, unexpectedErr := validateSequencingExperimentBatch(experimentsBatch, context.RepoOrganization, context.RepoSample, context.RepoSeqExp)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), repoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), context.RepoBatch)
 		return
 	}
 
@@ -101,7 +101,7 @@ func processSequencingExperimentBatch(batch *types.Batch, db *gorm.DB, repoOrgan
 
 	err := persistBatchAndSequencingExperimentRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), repoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), context.RepoBatch)
 		return
 	}
 }
