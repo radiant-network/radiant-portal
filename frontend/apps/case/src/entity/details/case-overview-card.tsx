@@ -73,7 +73,12 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
           <div className="flex w-full justify-between gap-4">
             <div className="flex flex-col gap-2 flex-1">
               {data.prescriber && (
-                <InformationField label={t('case_entity.details.prescriber')}>{data.prescriber}</InformationField>
+                <InformationField
+                  label={t('case_entity.details.prescriber')}
+                  labelTooltipText={t('case_entity.details.prescriber_tooltip')}
+                >
+                  {data.prescriber}
+                </InformationField>
               )}
 
               {data.ordering_organization_code && (
