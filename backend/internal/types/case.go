@@ -60,6 +60,14 @@ type CaseResult struct {
 	OrganizationCode         string    `json:"organization_code,omitempty"`
 	OrganizationName         string    `json:"organization_name,omitempty"`
 	HasVariants              bool      `json:"has_variants" validate:"required"`
+	PanelCode                string    `json:"panel_code,omitempty"`
+	PanelName                string    `json:"panel_name,omitempty"`
+	ResolutionStatusCode     string    `json:"resolution_status_code,omitempty"`
+	CaseCategoryCode         string    `json:"case_category_code,omitempty"`
+	ProbandJhn               string    `json:"proband_jhn,omitempty"`
+	ProbandLifeStatusCode    string    `json:"proband_life_status_code,omitempty"`
+	ProbandFirstName         string    `json:"proband_first_name,omitempty"`
+	ProbandLastName          string    `json:"proband_last_name,omitempty"`
 }
 
 // CaseEntity - Case Entity data
@@ -186,6 +194,14 @@ var CasesFields = []Field{
 	PatientOrganizationCodeField,
 	PatientOrganizationNameField,
 	CaseSequencingExperimentIdField,
+	PanelCodeField,
+	PanelNameField,
+	CaseCategoryCodeField,
+	CaseResolutionStatusCodeField,
+	ProbandJhnField,
+	ProbandLifeStatusCodeField,
+	ProbandFirstNameField,
+	ProbandLastNameField,
 }
 
 var CasesDefaultFields = []Field{
@@ -339,6 +355,24 @@ var CaseSequencingExperimentIdField = Field{
 	Alias:         "sequencing_experiment_id",
 	CanBeFiltered: true,
 	Table:         CaseHasSequencingExperimentTable,
+}
+
+var CaseCategoryCodeField = Field{
+	Name:          "case_category_code",
+	Alias:         "case_category_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         CaseTable,
+}
+
+var CaseResolutionStatusCodeField = Field{
+	Name:          "resolution_status_code",
+	Alias:         "resolution_status_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         CaseTable,
 }
 
 type CaseFilters struct {

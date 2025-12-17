@@ -75,9 +75,18 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		assert.Equal(t, "MONDO:0700092", (*cases)[0].PrimaryConditionID)
 		assert.Equal(t, "neurodevelopmental disorder", (*cases)[0].PrimaryConditionName)
 		assert.Equal(t, "germline_family", (*cases)[0].CaseType)
+		assert.Equal(t, "germline", (*cases)[0].CaseTypeCode)
 		assert.Equal(t, true, (*cases)[0].HasVariants)
 		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*cases)[0].OrganizationName)
 		assert.Equal(t, "CHUSJ", (*cases)[0].OrganizationCode)
+		assert.Equal(t, "LAM7303233380", (*cases)[0].ProbandJhn)
+		assert.Equal(t, "alive", (*cases)[0].ProbandLifeStatusCode)
+		assert.Equal(t, "Marie", (*cases)[0].ProbandFirstName)
+		assert.Equal(t, "Lambert", (*cases)[0].ProbandLastName)
+		assert.Equal(t, "EPILEP", (*cases)[0].PanelCode)
+		assert.Equal(t, "Epilepsy", (*cases)[0].PanelName)
+		assert.Equal(t, "postnatal", (*cases)[0].CaseCategoryCode)
+		assert.Equal(t, "unsolved", (*cases)[0].ResolutionStatusCode)
 	})
 }
 
@@ -206,6 +215,157 @@ func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
 		assert.Equal(t, int64(1), *count)
 		assert.Len(t, *cases, 1)
 		assert.Equal(t, 1, (*cases)[0].CaseID)
+	})
+}
+
+func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseResolutionStatusCodeField.GetAlias(),
+				Value:     []interface{}{"unsolved"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(22), *count)
+
+		searchCriteria = []types.SearchCriterion{
+			{
+				FieldName: types.CaseResolutionStatusCodeField.GetAlias(),
+				Value:     []interface{}{"solved"},
+			},
+		}
+		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err = repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
+	})
+}
+
+func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CasePrimaryConditionIdField.GetAlias(),
+				Value:     []interface{}{"MONDO:0700092"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(22), *count)
+
+		searchCriteria = []types.SearchCriterion{
+			{
+				FieldName: types.CasePrimaryConditionIdField.GetAlias(),
+				Value:     []interface{}{"MONDO:0700099"},
+			},
+		}
+		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err = repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
+	})
+}
+
+func Test_SearchCases_OnPanelCode(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.PanelCodeField.GetAlias(),
+				Value:     []interface{}{"EPILEP"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(17), *count)
+	})
+}
+
+func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.ProbandLifeStatusCodeField.GetAlias(),
+				Value:     []interface{}{"alive"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(22), *count)
+
+		searchCriteria = []types.SearchCriterion{
+			{
+				FieldName: types.ProbandLifeStatusCodeField.GetAlias(),
+				Value:     []interface{}{"deceased"},
+			},
+		}
+		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err = repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
+	})
+}
+
+func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseCategoryCodeField.GetAlias(),
+				Value:     []interface{}{"postnatal"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(22), *count)
+
+		searchCriteria = []types.SearchCriterion{
+			{
+				FieldName: types.CaseCategoryCodeField.GetAlias(),
+				Value:     []interface{}{"prenatal"},
+			},
+		}
+		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err = repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
+	})
+}
+
+func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseTypeCodeField.GetAlias(),
+				Value:     []interface{}{"germline"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err := repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(22), *count)
+
+		searchCriteria = []types.SearchCriterion{
+			{
+				FieldName: types.CaseTypeCodeField.GetAlias(),
+				Value:     []interface{}{"somatic"},
+			},
+		}
+		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		_, count, err = repo.SearchCases(query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
 	})
 }
 

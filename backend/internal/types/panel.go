@@ -17,3 +17,20 @@ var PanelTable = Table{
 func (Panel) TableName() string {
 	return PanelTable.Name
 }
+
+var PanelCodeField = Field{
+	Name:          "code",
+	Alias:         "panel_code",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         PanelTable,
+}
+
+var PanelNameField = Field{
+	Name:          "name",
+	Alias:         "panel_name",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         PanelTable,
+}

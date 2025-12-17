@@ -41,6 +41,39 @@ var SubmitterProbandIdField = Field{
 	Table:         ProbandTable,
 }
 
+var ProbandJhnField = Field{
+	Name:          "jhn",
+	Alias:         "proband_jhn",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         ProbandTable,
+}
+
+var ProbandLifeStatusCodeField = Field{
+	Name:          "life_status_code",
+	Alias:         "proband_life_status_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         ProbandTable,
+}
+
+var ProbandFirstNameField = Field{
+	Name:          "first_name",
+	Alias:         "proband_first_name",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         ProbandTable,
+}
+
+var ProbandLastNameField = Field{
+	Name:          "last_name",
+	Alias:         "proband_last_name",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         ProbandTable,
+}
+
 var PatientIdField = Field{
 	Name:          "id",
 	Alias:         "patient_id",

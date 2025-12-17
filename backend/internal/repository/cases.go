@@ -223,6 +223,10 @@ func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
+		if userQuery.HasFieldFromTables(types.PanelTable) {
+			tx = utils.JoinAnalysisCatalogWithPanel(tx)
+		}
+
 		if userQuery.HasFieldFromTables(types.OrderingOrganizationTable) {
 			tx = utils.JoinCaseWithOrderingOrganization(tx)
 		}

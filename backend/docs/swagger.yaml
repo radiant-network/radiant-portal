@@ -490,6 +490,8 @@ components:
           type: string
         analysis_catalog_name:
           type: string
+        case_category_code:
+          type: string
         case_id:
           type: integer
         case_type:
@@ -510,6 +512,10 @@ components:
           type: string
         organization_name:
           type: string
+        panel_code:
+          type: string
+        panel_name:
+          type: string
         prescriber:
           type: string
         primary_condition_id:
@@ -518,11 +524,21 @@ components:
           type: string
         priority_code:
           type: string
+        proband_first_name:
+          type: string
         proband_id:
           type: integer
+        proband_jhn:
+          type: string
+        proband_last_name:
+          type: string
+        proband_life_status_code:
+          type: string
         project_code:
           type: string
         project_name:
+          type: string
+        resolution_status_code:
           type: string
         status_code:
           type: string
