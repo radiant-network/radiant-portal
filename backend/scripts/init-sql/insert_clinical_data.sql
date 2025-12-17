@@ -1139,30 +1139,30 @@ VALUES (1, 27, 'output'),
        (73, 28, 'output')
 ON CONFLICT(task_id, document_id, type) DO NOTHING;
 
-INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_id, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_id)
+INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_id, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_id, submitter_case_id)
 VALUES
-    (1, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Felix Laflamme', 3),
-    (2, 4, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 3),
-    (3, 8, 1, 1, 'incomplete', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Christopher Watson', 1),
-    (4, 10, 1, 1, 'incomplete', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 1),
-    (5, 15, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Antoine Paré', 1),
-    (6, 16, 1, 1, 'draft', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Jonathan Frye', 1),
-    (7, 20, 1, 1, 'revoke', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Dawn Taylor', 1),
-    (8, 22, 1, 1, 'submitted', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Lauren Maxwell', 1),
-    (9, 23, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Elliot Duchesne', 1),
-    (10, 27, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Alex Williams', 1),
-    (11, 30, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Arthur Séguin', 3),
-    (12, 34, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Raphaelle Veilleux', 3),
-    (13, 37, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Louis Stevens', 3),
-    (14, 39, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Sarah Gervais', 3),
-    (15, 42, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Xavier Peterson', 3),
-    (16, 44, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Jeanne Laroche', 3),
-    (17, 47, 2, 2, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Arnaud Morissette', 3),
-    (18, 50, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Sophia Charron', 3),
-    (19, 55, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Fadi Hamdan', 3),
-    (20, 58, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 3),
-    (21, 60, 2, 2, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 3),
-    (70, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Isabella Murphy', 1)
+    (1, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Felix Laflamme', 3, '1:1'),
+    (2, 4, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 3, '1:2'),
+    (3, 8, 1, 1, 'incomplete', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Christopher Watson', 1, '1:3'),
+    (4, 10, 1, 1, 'incomplete', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 1, '1:4'),
+    (5, 15, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Antoine Paré', 1, '1:5'),
+    (6, 16, 1, 1, 'draft', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Jonathan Frye', 1, '1:6'),
+    (7, 20, 1, 1, 'revoke', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Dawn Taylor', 1, '1:7'),
+    (8, 22, 1, 1, 'submitted', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Lauren Maxwell', 1, '1:8'),
+    (9, 23, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Elliot Duchesne', 1, '1:9'),
+    (10, 27, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Alex Williams', 1, '2:10'),
+    (11, 30, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Arthur Séguin', 3, '2:11'),
+    (12, 34, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Raphaelle Veilleux', 3, '2:12'),
+    (13, 37, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Louis Stevens', 3, '2:13'),
+    (14, 39, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Sarah Gervais', 3, '2:14'),
+    (15, 42, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Xavier Peterson', 3, '2:15'),
+    (16, 44, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Jeanne Laroche', 3, '2:16'),
+    (17, 47, 2, 2, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Arnaud Morissette', 3, '2:17'),
+    (18, 50, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Sophia Charron', 3, '2:18'),
+    (19, 55, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Fadi Hamdan', 3, '2:19'),
+    (20, 58, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 3, '2:20'),
+    (21, 60, 2, 2, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 3, '2:21'),
+    (70, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Isabella Murphy', 1, '1:70')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "family" (id, case_id, family_member_id, relationship_to_proband_code, affected_status_code)
