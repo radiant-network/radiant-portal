@@ -1,7 +1,7 @@
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 import { X } from 'lucide-react';
-import { http } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 
 import { FilterConfigContext, FilterList } from '@/components/base/query-filters/filter-list';
 import { AggregateContext } from '@/components/base/query-filters/use-aggregation-builder';
@@ -14,7 +14,7 @@ import {
   httpStatisticsApiResponse,
   occurrenceApi,
   statisticApi,
-} from '../api/api-occurrence';
+} from '../../api/api-occurrence';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -152,7 +152,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Facets/FilterList',
+  title: 'QueryBuilder/Facets/FilterList',
   component: FilterList,
   args: {
     appId: config.snv_occurrence.app_id,
@@ -204,6 +204,21 @@ export const Default: Story = {
       handlers: [
         http.post(occurrenceApi, httpOccurrenceApiResponse),
         http.post(statisticApi, httpStatisticsApiResponse),
+      ],
+    },
+  },
+};
+
+export const Error: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(occurrenceApi, async () => {
+          await delay(800);
+          return new HttpResponse(null, {
+            status: 403,
+          });
+        }),
       ],
     },
   },
