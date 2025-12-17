@@ -13,7 +13,7 @@ const AlertContext = React.createContext<VariantProps<typeof alertVariants>>({
 const alertVariants = tv({
   slots: {
     base: 'flex items-start gap-3 self-stretch relative w-full p-3',
-    border: 'border border-solid rounded-lg',
+    border: 'border border-solid rounded-md',
     icon: '[&>svg]:w-5 [&>svg]:h-5',
     content: 'flex flex-col items-start gap-3 flex-1',
     title: 'text-sm font-semibold leading-5',
