@@ -49,14 +49,14 @@ describe('Samples - Batch - Process worker - Sample002', () => {
   });
 
   it('Validate report sample[0].type_code', () => {
-    cy.validateReport(response, 'warn', 'SAMPLE-002', apiMessages.ProcessWorkerError002('sample', 'CQGC', 'S13224', 'type_code', 'dna', 'rna'), 'sample[0].type_code');
+    cy.validateReport(response, 'warn', 'SAMPLE-002', apiMessages.ProcessWorkerErrorDiffField('sample', 'type_code', 'dna', 'rna', 'CQGC', 'S13224'), 'sample[0].type_code');
   });
 
   it('Validate report sample[0].tissue_site', () => {
-    cy.validateReport(response, 'warn', 'SAMPLE-002', apiMessages.ProcessWorkerError002('sample', 'CQGC', 'S13224', 'tissue_site', '', 'rna'), 'sample[0].tissue_site');
+    cy.validateReport(response, 'warn', 'SAMPLE-002', apiMessages.ProcessWorkerErrorDiffField('sample', 'tissue_site', '', 'rna', 'CQGC', 'S13224'), 'sample[0].tissue_site');
   });
 
   it('Validate report sample[0].histology_code', () => {
-    cy.validateReport(response, 'warn', 'SAMPLE-002', apiMessages.ProcessWorkerError002('sample', 'CQGC', 'S13224', 'histology_code', 'normal', 'tumoral'), 'sample[0].histology_code');
+    cy.validateReport(response, 'warn', 'SAMPLE-002', apiMessages.ProcessWorkerErrorDiffField('sample', 'histology_code', 'normal', 'tumoral', 'CQGC', 'S13224'), 'sample[0].histology_code');
   });
 });
