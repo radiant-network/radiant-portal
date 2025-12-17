@@ -1,7 +1,7 @@
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 import { X } from 'lucide-react';
-import { delay, http, HttpResponse } from 'msw';
+import { http } from 'msw';
 
 import { FilterConfigContext, FilterList } from '@/components/base/query-filters/filter-list';
 import { AggregateContext } from '@/components/base/query-filters/use-aggregation-builder';
@@ -204,21 +204,6 @@ export const Default: Story = {
       handlers: [
         http.post(occurrenceApi, httpOccurrenceApiResponse),
         http.post(statisticApi, httpStatisticsApiResponse),
-      ],
-    },
-  },
-};
-
-export const Error: Story = {
-  parameters: {
-    msw: {
-      handlers: [
-        http.post(occurrenceApi, async () => {
-          await delay(800);
-          return new HttpResponse(null, {
-            status: 403,
-          });
-        }),
       ],
     },
   },
