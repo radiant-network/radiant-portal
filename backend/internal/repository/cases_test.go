@@ -29,8 +29,8 @@ var CasesQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_CreateCases(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
-		repo := NewCasesRepository(postgres)
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
 		newCase := &types.Case{
 			ID:                     999,
 			ProbandID:              3,
@@ -58,6 +58,8 @@ func Test_CreateCases(t *testing.T) {
 		assert.Equal(t, 999, c.ID)
 		assert.Equal(t, 3, c.ProbandID)
 		assert.Equal(t, "Dr. Test", c.OrderingPhysician)
+
+		db.Exec("DELETE FROM cases WHERE id = 999")
 	})
 }
 
