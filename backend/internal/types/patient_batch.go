@@ -17,5 +17,5 @@ type PatientBatch struct {
 // CreatePatientBatchBody represents the body required to create a patient batch
 // @Description CreatePatientBatchBody represents the body required to create a patient batch
 type CreatePatientBatchBody struct {
-	Patients []*PatientBatch `json:"patients" validate:"required,min=1,dive,required" binding:"required,min=1,dive,required"`
+	Patients []*PatientBatch `json:"patients" binding:"required,min=1,dive,required"`
 } //@Name CreatePatientBatchBody

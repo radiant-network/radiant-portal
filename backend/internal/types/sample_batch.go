@@ -16,5 +16,5 @@ type SampleBatch struct {
 // CreateSampleBatchBody represents the body required to create a sample batch
 // @Description CreateSampleBatchBody represents the body required to create a sample batch
 type CreateSampleBatchBody struct {
-	Samples []*SampleBatch `json:"samples" validate:"required,min=1,dive,required" binding:"required,min=1,dive,required"`
+	Samples []*SampleBatch `json:"samples" binding:"required,min=1,dive,required"`
 } //@Name CreateSampleBatchBody

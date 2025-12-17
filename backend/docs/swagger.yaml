@@ -225,6 +225,63 @@ components:
       - status_code
       - updated_on
       type: object
+    CaseBatch:
+      properties:
+        analysis_code:
+          type: string
+        category_code:
+          enum:
+          - prenatal
+          - postnatal
+          type: string
+        diagnostic_lab_code:
+          type: string
+        note:
+          type: string
+        ordering_organization_code:
+          type: string
+        ordering_physician:
+          type: string
+        patients:
+          items:
+            $ref: '#/components/schemas/CasePatientBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+        primary_condition_code_system:
+          type: string
+        primary_condition_value:
+          type: string
+        priority_code:
+          type: string
+        project_code:
+          type: string
+        resolution_status_code:
+          type: string
+        sequencing_experiments:
+          items:
+            $ref: '#/components/schemas/CaseSequencingExperimentBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+        status_code:
+          type: string
+        submitter_case_id:
+          type: string
+        type:
+          enum:
+          - germline
+          - somatic
+          type: string
+      required:
+      - category_code
+      - patients
+      - project_code
+      - sequencing_experiments
+      - status_code
+      - submitter_case_id
+      - type
+      type: object
     CaseEntity:
       description: Data for Case Entity Page
       properties:
@@ -338,6 +395,37 @@ components:
       - project
       - status
       type: object
+    CasePatientBatch:
+      properties:
+        affected_status_code:
+          type: string
+        family_history:
+          items:
+            $ref: '#/components/schemas/FamilyHistoryBatch'
+          type: array
+          uniqueItems: false
+        observations_categorical:
+          items:
+            $ref: '#/components/schemas/ObservationCategoricalBatch'
+          type: array
+          uniqueItems: false
+        observations_text:
+          items:
+            $ref: '#/components/schemas/ObservationTextBatch'
+          type: array
+          uniqueItems: false
+        patient_organization_code:
+          type: string
+        relation_to_proband_code:
+          type: string
+        submitter_patient_id:
+          type: string
+      required:
+      - affected_status_code
+      - patient_organization_code
+      - relation_to_proband_code
+      - submitter_patient_id
+      type: object
     CasePatientClinicalInformation:
       description: Patient clinical information to display in Case Entity
       properties:
@@ -441,6 +529,19 @@ components:
       - has_variants
       - status_code
       - updated_on
+      type: object
+    CaseSequencingExperimentBatch:
+      properties:
+        aliquot:
+          type: string
+        sample_organization_code:
+          type: string
+        submitter_sample_id:
+          type: string
+      required:
+      - aliquot
+      - sample_organization_code
+      - submitter_sample_id
       type: object
     CaseTask:
       properties:
@@ -562,6 +663,19 @@ components:
           - BatchStatusError
         username:
           type: string
+      type: object
+    CreateCaseBatchBody:
+      description: CreateCaseBatchBody represents the body required to create a case
+        batch
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - cases
       type: object
     CreatePatientBatchBody:
       description: CreatePatientBatchBody represents the body required to create a
@@ -850,6 +964,16 @@ components:
             type: string
           type: array
           uniqueItems: false
+      type: object
+    FamilyHistoryBatch:
+      properties:
+        condition:
+          type: string
+        family_member_code:
+          type: string
+      required:
+      - condition
+      - family_member_code
       type: object
     FiltersBodyWithCriteria:
       properties:
@@ -1318,6 +1442,37 @@ components:
           uniqueItems: false
         sqon:
           $ref: '#/components/schemas/Sqon'
+      type: object
+    ObservationCategoricalBatch:
+      properties:
+        code:
+          type: string
+        interpretation_code:
+          type: string
+        note:
+          type: string
+        onset_code:
+          type: string
+        system:
+          type: string
+        value:
+          type: string
+      required:
+      - code
+      - interpretation_code
+      - onset_code
+      - system
+      - value
+      type: object
+    ObservationTextBatch:
+      properties:
+        code:
+          type: string
+        note:
+          type: string
+      required:
+      - code
+      - note
       type: object
     OmimGenePanel:
       properties:
@@ -2378,6 +2533,54 @@ paths:
       security:
       - bearerauth: []
       summary: Get AutocompleteResult list of matching prefix
+      tags:
+      - cases
+  /cases/batch:
+    post:
+      description: Create a new case batch
+      operationId: postCaseBatch
+      parameters:
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCaseBatchBody'
+        description: Create Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create a new case batch
       tags:
       - cases
   /cases/filters:
