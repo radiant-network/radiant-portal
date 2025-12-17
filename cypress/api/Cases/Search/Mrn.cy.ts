@@ -34,11 +34,11 @@ describe('Cases - Search - Mrn', () => {
     });
   });
 
-  it('Request status [SJRA-987]', () => {
+  it('Request status', () => {
     expect(response.status).to.eq(200);
   });
 
-  it('Return content [SJRA-987]', () => {
+  it('Return content', () => {
     expect(response.body.count).to.eq(1);
   });
 });

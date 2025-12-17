@@ -1,8 +1,8 @@
 /// <reference types="cypress"/>
 import { data } from 'pom/shared/Data';
 
-describe('Cases - Search - Assay', () => {
-  const assayId = data.case.assay.assay_id;
+describe('Cases - Search - Sequencing experiment', () => {
+  const seqExpId = data.case.assay.assay_id;
   let response: any;
 
   before(() => {
@@ -13,9 +13,9 @@ describe('Cases - Search - Assay', () => {
       ],
       "search_criteria": [
         {
-          "field": "assay_id",
+          "field": "sequencing_experiment_id",
           "value": [
-            "${assayId}"
+            "${seqExpId}"
           ]
         }
       ],
@@ -34,11 +34,11 @@ describe('Cases - Search - Assay', () => {
     });
   });
 
-  it('Request status [SJRA-913]', () => {
+  it('Request status', () => {
     expect(response.status).to.eq(200);
   });
 
-  it('Return content [SJRA-913]', () => {
+  it('Return content', () => {
     expect(response.body.count).to.eq(1);
   });
 });
