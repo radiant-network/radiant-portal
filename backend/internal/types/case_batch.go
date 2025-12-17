@@ -18,8 +18,8 @@ type CaseBatch struct {
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code,omitempty"`
 	Patients                   []*CasePatientBatch              `json:"patients" binding:"required,min=1,dive,required"`
-	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments" binding:"required,min=1,dive,required"`
-	Tasks                      []*CaseTaskBatch                 `json:"tasks" binding:"required,min=1,dive,required"`
+	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" binding:"dive"`
+	// Tasks                      []*CaseTaskBatch                 `json:"tasks" binding:"required,min=1,dive,required"`
 }
 
 type CasePatientBatch struct {
@@ -57,6 +57,7 @@ type CaseSequencingExperimentBatch struct {
 	SubmitterSampleId      string `json:"submitter_sample_id" binding:"required"`
 }
 
+// TODO: Review this struct
 type CaseTaskBatch struct {
 	TypeCode        string                 `json:"type_code" binding:"required"`
 	Aliquot         string                 `json:"aliquot,omitempty"`
@@ -67,10 +68,12 @@ type CaseTaskBatch struct {
 	GenomeBuild     string                 `json:"genome_build,omitempty"`
 }
 
+// TODO: Review this struct
 type InputDocumentBatch struct {
 	Url string `json:"url" binding:"required"`
 }
 
+// TODO: Review this struct
 type OutputDocumentBatch struct {
 	DataCategoryCode string `json:"data_category_code" binding:"required"`
 	DataTypeCode     string `json:"data_type_code" binding:"required"`
