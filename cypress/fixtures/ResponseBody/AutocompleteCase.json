@@ -8,8 +8,8 @@
     "value": "Mock patient_id"
   },
   {
-    "type": "assay_id",
-    "value": "Mock assay_id"
+    "type": "sequencing_experiment_id",
+    "value": "Mock sequencing_experiment_id"
   },
   {
     "type": "mrn",
