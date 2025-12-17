@@ -348,7 +348,7 @@
       "upload": "Upload"
     },
     "download": {
-      "tooltip": "Download file",
+      "tooltip": "Download File",
       "error_title": "Download Error",
       "error_description": "Something went wrong while downloading the file. Please try again or check your connection.",
       "error_close": "Close"
