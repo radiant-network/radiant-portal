@@ -9,6 +9,12 @@ import { useQueryBuilderDictContext } from '../query-builder-context';
 import { useQueryBarContext } from './query-bar-context';
 import QueryBarSaveDialog from './query-bar-save-dialog';
 
+/**
+ * Will be display only if customPillConfig is enabled
+ * - Will displayed beside the query (not the saved filter at the top)
+ *
+ * @TODO: What are custom pill? In witch context to we need them?
+ */
 function QueryBarSaveAction() {
   const { query } = useQueryBarContext();
   const dict = useQueryBuilderDictContext();

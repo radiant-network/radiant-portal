@@ -7,6 +7,9 @@ import { SavedFilterTypeEnum } from '@/components/cores/saved-filter';
 
 import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
 
+/**
+ * Save query builder filter
+ */
 function SavedFiltersSaveAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();

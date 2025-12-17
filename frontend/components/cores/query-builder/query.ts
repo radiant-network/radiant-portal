@@ -32,7 +32,7 @@ export type CoreQuery = {
   id: string;
 
   /**
-   * SyntheticSqon representing the query
+   * SyntheticSqon representing the query before serialization
    */
   raw(): ISyntheticSqon;
 

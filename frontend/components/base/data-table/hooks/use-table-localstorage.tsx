@@ -79,7 +79,6 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
   }, [state.columnPinning]);
 
   // pagination
-  /** @fixme doesn't works, usefull ? How to make it works before the first call */
   useEffect(() => {
     setTableCache({
       ...tableCache,
@@ -172,7 +171,7 @@ export function getTableLocaleStorage(
   // validate cache to the lastest version
   const cache: TableCacheProps = JSON.parse(storage);
 
-  // if table-settings is changed for a tab, the localStorage is resetted to use the table-settings
+  // sync with default settings, remove depreciated columns and add new one
   const columnIds = columns.map(column => column.id);
   const depreciatedColumns = cache.columnOrder.filter(id => !columnIds.includes(id));
   const newColumns = columnIds.filter(id => !cache.columnOrder.includes(id));

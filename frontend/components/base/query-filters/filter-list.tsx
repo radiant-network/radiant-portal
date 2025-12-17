@@ -94,6 +94,7 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
             onClick={() => {
               const newToggleExpandAll = !toggleExpandAll;
               setToggleExpandAll(newToggleExpandAll);
+
               if (newToggleExpandAll) {
                 setExpandedFilters(fields.map(field => field.key));
               } else {

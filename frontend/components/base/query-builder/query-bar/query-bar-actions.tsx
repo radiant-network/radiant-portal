@@ -4,6 +4,9 @@ import QueryBarDeleteAction from './query-bar-delete-action';
 import QueryBarDuplicateAction from './query-bar-duplicate-action';
 import QueryBarSaveAction from './query-bar-save-action';
 
+/**
+ * [+] [💾] [⧉] [🗑] [share]    [ 📁 My Filters ▾ ]
+ */
 function QueryBarActions() {
   const { customPillConfig } = useQueryBuilderContext();
 
