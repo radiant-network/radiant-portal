@@ -26,14 +26,14 @@ function InterpretationCard({ data, ...props }: InterpretationCardProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <ClassificationSection
-          href={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`}
+          href={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`}
           title={t('variant_entity.overview.my_network')}
           counts={data.interpretation_classification_counts ?? {}}
           emptyText={t('variant_entity.overview.no_interpretation_network')}
         />
         {/*
         <ClassificationSection
-          href={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
+          href={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
           title={t('variant_entity.overview.clin_var')}
           counts={data.interpretation_classification_counts ?? {}}
           emptyText={t('variant_entity.overview.no_clin_var_interpretation')}
