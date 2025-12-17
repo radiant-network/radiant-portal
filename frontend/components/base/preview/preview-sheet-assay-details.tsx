@@ -4,7 +4,7 @@ import { Info } from 'lucide-react';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
-import AssayInformationsDialog from 'components/base/assays/assay-information-dialog';
+import SequencingInformationsDialog from 'components/base/sequencing/sequencing-information-dialog';
 
 export type PreviewSheetAssayDetailsProps = {
   patientId: number | undefined;
@@ -41,7 +41,7 @@ function PreviewSheetAssayDetails({ patientId, relationshipToProband, seqId }: P
         </div>
       </div>
       {seqId && (
-        <AssayInformationsDialog
+        <SequencingInformationsDialog
           open={assayDialogOpen}
           onClose={() => setAssayDialogOpen(false)}
           seqId={seqId.toString()}

@@ -716,7 +716,6 @@
       "title": "Cases",
       "actions": {
         "view_case": "View Case",
-        "view_assay": "Assay Details",
         "view_variant": "View Variants"
       },
       "filters": {
@@ -1222,10 +1221,6 @@
     },
     "details": {
       "aliquot": "Aliquot",
-      "assay": "Assay",
-      "assay_details_dialog": "Assays Details",
-      "assay_id": "Assay ID",
-      "assay_informations_overview": "Assays",
       "assigned_to": "Assigned to",
       "bioinformatics": "Bioinformatics",
       "capture_kit": "Capture Kit",
@@ -1252,6 +1247,7 @@
       "no_variants": "No variants for this case",
       "panel": "Panel",
       "patient": "Patient",
+      "patient_id": "Patient ID",
       "phenotypes": "Phenotypes",
       "phenotypes_non_observed": "Non-Observed",
       "phenotypes_observed": "Observed",
@@ -1263,6 +1259,7 @@
       "primary_condition": "Primary Condition",
       "priority": "Priority",
       "project_code": "Project",
+      "read_technology": "Read Technology",
       "requested_analysis": "Requested Analysis",
       "run_alias": "Run Alias",
       "run_date": "Run Date",
@@ -1270,9 +1267,15 @@
       "sample": "Sample",
       "sample_id": "Sample ID",
       "sample_type_code": "Sample Type",
-      "sequencing_read_technology": "Read Length",
+      "sequencing": "Sequencing",
+      "sequencing_details": "Details",
+      "sequencing_details_dialog": "Sequencing Details",
+      "sequencing_id": "Seq. ID",
+      "sequencing_id_tooltip": "Sequencing Experiment ID",
+      "sequencing_overview": "Sequencing",
       "status": "Status",
-      "status_code": "Assay Status",
+      "status_code": "Seq. Status",
+      "status_code_tooltip": "Sequencing Experiment Status",
       "status_options": {
         "unknown": "Unknown",
         "draft": "Draft",
