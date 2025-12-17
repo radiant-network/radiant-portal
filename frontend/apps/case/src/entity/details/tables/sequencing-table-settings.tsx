@@ -6,34 +6,45 @@ import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cel
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import ExperimentalStrategyCell from '@/components/base/data-table/cells/experimental-strategy-code-cell';
-import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
-import ActionsMenuCell from './cells/actions-menu-cell';
+import SequencingActionsCell from './cells/sequencing-actions-cell';
 
 const columnHelper = createColumnHelper<CaseAssay>();
 
 function getColumns(t: TFunction<string, undefined>) {
   return [
-    // Assay ID
+    // Sequencing ID
     columnHelper.accessor(row => row.seq_id, {
       id: 'seq_id',
       cell: info => info.getValue(),
-      header: t('case_entity.details.assay_id'),
+      header: () => (
+        <TooltipHeader tooltip={t('case_entity.details.sequencing_id_tooltip')}>
+          {t('case_entity.details.sequencing_id')}
+        </TooltipHeader>
+      ),
       size: 124,
       minSize: 40,
     }),
     // Sample ID
-    columnHelper.accessor(row => row.sample_id, {
+    columnHelper.accessor(row => row.sample_submitter_id, {
       id: 'sample_id',
-      cell: info => (
-        <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband}>
-          <>{info.getValue()}</>
-        </RelationshipToProbandCell>
-      ),
+      cell: info => info.getValue(),
       header: t('case_entity.details.sample_id'),
       size: 124,
+      minSize: 40,
+    }),
+    // Patient
+    columnHelper.accessor(row => row.relationship_to_proband, {
+      id: 'relation_to_proband',
+      cell: info => (
+        <BadgeCell className="capitalize" variant="outline">
+          {info.getValue()}
+        </BadgeCell>
+      ),
+      header: t('case_entity.details.patient'),
+      size: 110,
       minSize: 40,
     }),
     // Sample Type
@@ -52,7 +63,7 @@ function getColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.histology_code, {
       id: 'histology_code',
       cell: info => (
-        <BadgeCell className="capitalize" variant="secondary">
+        <BadgeCell className="capitalize" variant="outline">
           {info.getValue()}
         </BadgeCell>
       ),
@@ -72,11 +83,15 @@ function getColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
     }),
-    // Assay status
+    // Sequencing status
     columnHelper.accessor(row => row.status_code, {
       id: 'status_code',
       cell: info => <AssayStatusCell status={info.getValue()} />,
-      header: t('case_entity.details.status_code'),
+      header: () => (
+        <TooltipHeader tooltip={t('case_entity.details.status_code_tooltip')}>
+          {t('case_entity.details.status_code')}
+        </TooltipHeader>
+      ),
       size: 124,
       minSize: 40,
     }),
@@ -92,12 +107,12 @@ function getColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
     }),
-    // Actions Buttons
+    // Action Buttons
     {
       id: 'actions',
-      cell: ActionsMenuCell,
-      size: 44,
-      maxSize: 44,
+      cell: SequencingActionsCell,
+      size: 60,
+      maxSize: 60,
       enableResizing: false,
       enablePinning: true,
     },
@@ -114,6 +129,11 @@ const defaultSettings = createColumnSettings([
     id: 'sample_id',
     visible: true,
     label: 'caseEntity.details.sample_id',
+  },
+  {
+    id: 'relation_to_proband',
+    visible: true,
+    label: 'caseEntity.details.patient',
   },
   {
     id: 'sample_type_code',

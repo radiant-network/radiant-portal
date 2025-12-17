@@ -3,11 +3,11 @@ import { Card, CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 
-import AssayInformationsCard from './assay-informations-card';
 import BioinformaticsCard from './bioinformatics-card';
 import CaseOverviewCard from './case-overview-card';
 import ClinicalCard from './clinical-card';
 import PatientInformationCard from './patient-information-card';
+import SequencingInformationsCard from './sequencing-informations-card';
 
 type DetailsTabProps = {
   caseEntity?: CaseEntity;
@@ -35,7 +35,7 @@ function DetailsTab({ caseEntity, isLoading }: DetailsTabProps) {
           data={caseEntity}
         />
         <ClinicalCard className="lg:col-span-3 border-0 rounded-none md:border md:rounded-xl" data={caseEntity} />
-        <AssayInformationsCard
+        <SequencingInformationsCard
           className="lg:col-span-3 border-0 rounded-none md:border md:rounded-xl"
           data={caseEntity}
         />

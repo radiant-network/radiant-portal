@@ -24,35 +24,35 @@ type AssayInput = {
   seqId: string;
 };
 
-export function useAssayHelper(input: AssayInput) {
-  const fetchAssayHelper = useCallback(
+export function useSequencingHelper(input: AssayInput) {
+  const fetchSequencingHelper = useCallback(
     async () => assayApi.getAssayBySeqId(input.seqId).then(response => response.data),
     [input],
   );
 
-  return fetchAssayHelper;
+  return fetchSequencingHelper;
 }
 
-type AssayInformationsDialogProps = {
+type SequencingInformationsDialogProps = {
   seqId: string;
   open: boolean;
   onClose: (value: boolean) => void;
 };
 
-function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDialogProps) {
+function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInformationsDialogProps) {
   const { t } = useI18n();
 
-  const fetchAssay = useSWR<Assay>('fetch-assay', useAssayHelper({ seqId }), {
+  const fetchSequencing = useSWR<Assay>('fetch-assay', useSequencingHelper({ seqId }), {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,
   });
 
-  const { data } = fetchAssay;
+  const { data } = fetchSequencing;
 
   useEffect(() => {
     if (open) {
-      fetchAssay.mutate();
+      fetchSequencing.mutate();
     }
   }, [open, seqId]);
 
@@ -60,14 +60,14 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
     <Dialog open={open} onOpenChange={(value: boolean) => onClose(value)}>
       <DialogContent className="md:min-w-[800px] lg:min-w-[1050px]">
         <DialogHeader>
-          <DialogTitle>{t('case_entity.details.assay_details_dialog')}</DialogTitle>
+          <DialogTitle>{t('case_entity.details.sequencing_details_dialog')}</DialogTitle>
         </DialogHeader>
 
         {/* Status */}
         <DialogBody className="flex flex-col w-full md:justify-between md:flex-row">
           <div className="flex flex-col gap-2 flex-1">
             <h2 className="text-sm font-semibold">
-              {t('case_entity.details.assay')} {data?.seq_id}
+              {t('case_entity.details.sequencing')} {data?.seq_id}
             </h2>
 
             <InformationField label={t('case_entity.details.status')}>
@@ -91,7 +91,11 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             </InformationField>
 
             {/* Diag. Lab. */}
-            <InformationField label={t('case_entity.details.diag_lab')} tooltipText={data?.sequencing_lab_name}>
+            <InformationField
+              label={t('case_entity.details.diag_lab')}
+              labelTooltipText={t('case_entity.details.diag_lab_tooltip')}
+              tooltipText={data?.sequencing_lab_name}
+            >
               {data?.sequencing_lab_code}
             </InformationField>
 
@@ -123,8 +127,15 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
               tooltipText={data?.experimental_strategy_name}
             >
               {data?.experimental_strategy_code && (
-                <Badge variant="secondary">{data?.experimental_strategy_code}</Badge>
+                <Badge className="uppercase" variant="secondary">
+                  {data?.experimental_strategy_code}
+                </Badge>
               )}
+            </InformationField>
+
+            {/* Read technology */}
+            <InformationField label={t('case_entity.details.read_technology')}>
+              {data?.sequencing_read_technology_name}
             </InformationField>
 
             {/* Platform */}
@@ -132,11 +143,6 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
 
             {/* Capture Kit */}
             <InformationField label={t('case_entity.details.capture_kit')}>{data?.capture_kit}</InformationField>
-
-            {/* Read Lenght */}
-            <InformationField label={t('case_entity.details.sequencing_read_technology')}>
-              {data?.sequencing_read_technology_name?.toString()}
-            </InformationField>
           </div>
           <Separator orientation="vertical" className="hidden mx-8 md:block" />
           <Separator className="block my-8 md:hidden" />
@@ -158,6 +164,9 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
             <InformationField label={t('case_entity.details.submitter_id')}>
               {data?.submitter_sample_id}
             </InformationField>
+
+            {/* Patient ID */}
+            <InformationField label={t('case_entity.details.patient_id')}>{data?.patient_id}</InformationField>
           </div>
         </DialogBody>
         <DialogFooter>
@@ -168,4 +177,4 @@ function AssayInformationsDialog({ open, seqId, onClose }: AssayInformationsDial
   );
 }
 
-export default AssayInformationsDialog;
+export default SequencingInformationsDialog;

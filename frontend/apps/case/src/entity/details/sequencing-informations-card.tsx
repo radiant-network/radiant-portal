@@ -5,7 +5,7 @@ import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { defaultSettings, getColumns } from './tables/assays-table-settings';
+import { defaultSettings, getColumns } from './tables/sequencing-table-settings';
 
 const DEFAULT_SORTING = [
   {
@@ -23,7 +23,7 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
   return (
     <Card {...props}>
       <CardHeader className="border-b [.border-b]:pb-4">
-        <CardTitle size="xl">{t('case_entity.details.assay_informations_overview')}</CardTitle>
+        <CardTitle size="xl">{t('case_entity.details.sequencing_overview')}</CardTitle>
       </CardHeader>
       <CardContent>
         <DataTable
