@@ -30,6 +30,7 @@ type CasesDAO interface {
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 	GetCasesFilters(userQuery types.AggQuery) (*CaseFilters, error)
 	GetCaseEntity(caseId int) (*CaseEntity, error)
+	CreateCase(*Case) error
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
@@ -38,6 +39,10 @@ func NewCasesRepository(db *gorm.DB) *CasesRepository {
 		return nil
 	}
 	return &CasesRepository{db: db}
+}
+
+func (r *CasesRepository) CreateCase(c *Case) error {
+	return r.db.Create(c).Error
 }
 
 func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult, *int64, error) {

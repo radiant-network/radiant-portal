@@ -28,6 +28,39 @@ var CasesQueryConfigForTest = types.QueryConfig{
 	IdField:       types.CaseIdField,
 }
 
+func Test_CreateCases(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
+		repo := NewCasesRepository(postgres)
+		newCase := &types.Case{
+			ID:                     999,
+			ProbandID:              3,
+			ProjectID:              1,
+			StatusCode:             "in_progress",
+			PrimaryCondition:       "MONDO:0000001",
+			DiagnosisLabID:         6,
+			Note:                   "This is a test",
+			AnalysisCatalogID:      1,
+			AnalysisCatalog:        types.AnalysisCatalog{},
+			PriorityCode:           "routine",
+			CaseTypeCode:           "germline",
+			CaseCategoryCode:       "postnatal",
+			ConditionCodeSystem:    "MONDO",
+			ResolutionStatusCode:   "unsolved",
+			OrderingPhysician:      "Dr. Test",
+			OrderingOrganizationID: 1,
+		}
+		err := repo.CreateCase(newCase)
+		assert.NoError(t, err)
+
+		var c types.Case
+		err = repo.db.Raw(`SELECT * FROM cases WHERE id = 999;`).First(&c).Error
+		assert.NoError(t, err)
+		assert.Equal(t, 999, c.ID)
+		assert.Equal(t, 3, c.ProbandID)
+		assert.Equal(t, "Dr. Test", c.OrderingPhysician)
+	})
+}
+
 func Test_SearchCasesNoFilters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)

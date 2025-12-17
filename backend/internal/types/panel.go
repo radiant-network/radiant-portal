@@ -5,7 +5,7 @@ type Panel struct {
 	Code     string
 	Name     string
 	TypeCode string
-	Type     PanelType `gorm:"foreignKey:Code;references:CaseTypeCode"`
+	Type     PanelType `gorm:"foreignKey:Code;references:TypeCode"`
 }
 
 var PanelTable = Table{
