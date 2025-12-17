@@ -94,7 +94,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
     }),
     // Consequence
     columnHelper.accessor(row => row, {
-      id: 'picked_consequences',
+      id: 'max_impact_score',
       cell: info => (
         <MostDeleteriousConsequenceCell
           vepImpact={info.getValue().vep_impact}
@@ -295,7 +295,7 @@ const defaultSNVSettings = createColumnSettings([
     label: 'variant.headers.variant_class',
   },
   {
-    id: 'picked_consequences',
+    id: 'max_impact_score',
     visible: true,
     label: 'variant.headers.picked_consequences',
     additionalFields: ['vep_impact'],
