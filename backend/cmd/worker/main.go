@@ -76,6 +76,7 @@ func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
 		return
 	}
 
+	glog.Infof("Processing batch: %v", nextBatch.ID)
 	processFn, ok := supportedProcessors[nextBatch.BatchType]
 	if !ok {
 		err = fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
