@@ -21,10 +21,6 @@ import FilesTableFilters from './files-table/files-table-filters';
 
 const DEFAULT_SORTING = [
   {
-    field: 'document_id',
-    order: SortBodyOrderEnum.Desc,
-  },
-  {
     field: 'relationship_to_proband_code',
     order: SortBodyOrderEnum.Desc,
   },
