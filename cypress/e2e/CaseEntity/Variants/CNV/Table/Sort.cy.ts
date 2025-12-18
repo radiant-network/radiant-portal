@@ -8,24 +8,22 @@ describe('Case Entity - Variants - CNV - Table - Sort', () => {
     cy.visitCaseVariantsPage('1', 'CNV');
   };
 
-  it('Alphanumeric [SJRA-819]', () => {
+  it('Alphanumeric', () => {
     setupTest();
     CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('cnv_variant');
   });
 
-  // Activate after SJRA-661
-  it.skip('Number', () => {
+  it('Number', () => {
     setupTest();
     CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('nb_snv');
   });
 
-  // Activate after SJRA-661
-  it.skip('Scientific number', () => {
+  it('Scientific number', () => {
     setupTest();
     CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('gnomad');
   });
 
-  it('Multiple [SJRA-661]', () => {
+  it('Multiple', () => {
     setupTest();
     CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
     CaseEntity_Variants_CNV_Table.actions.sortColumn('type');

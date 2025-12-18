@@ -13,8 +13,7 @@ describe('CaseEntity - Files - Sort', () => {
     FilesTable.validations.shouldSortColumn('sample');
   });
 
-  // Activate after SJRA-661
-  it.skip('Number', () => {
+  it('Number [SJRA-1004]', () => {
     setupTest();
     FilesTable.validations.shouldSortColumn('patient');
   });
@@ -29,12 +28,12 @@ describe('CaseEntity - Files - Sort', () => {
     FilesTable.validations.shouldSortColumn('created_on');
   });
 
-  it('Size', () => {
+  it('Size [SJRA-1004]', () => {
     setupTest();
     FilesTable.validations.shouldSortColumn('size');
   });
 
-  it('Multiple [SJRA-661]', () => {
+  it('Multiple', () => {
     setupTest();
     FilesTable.actions.sortColumn('name');
     FilesTable.actions.sortColumn('patient');

@@ -5,6 +5,7 @@ export const CommonSelectors = {
   anchorIcon: '[class*="lucide-arrow-up-right"]',
   animateIn: '[class*="data-[state=open]:animate-in"]',
   colorIndicator: (color: string) => `[class*="text-indicator-${color}"]`,
+  detailsButton: 'button:contains("Details")',
   expandIcon: '[class*="lucide-chevron-righ"]',
   expandCollapseButton: (text: string) => `button[data-variant="link"]:contains("${text}")`,
   facetDictionaryButton: '[data-slot="card-content"] button[id="with-dictionary-switch"]',

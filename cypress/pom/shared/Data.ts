@@ -26,14 +26,14 @@ export const data = {
     managing_org: 'CHUSJ',
     has_variants: true,
     search_criteria: `[{"field": "case_id","value": ["${CASE_VALUE}"]}]`,
-    assay: {
-      assay_id: '1',
-      sample_id: '1',
+    seq: {
+      seq_id: '1',
+      sample_id: 'S13224',
       relationship: REL_VALUE,
       sample_type: 'dna',
       histology: 'normal',
       exp_strat: 'wgs',
-      assay_status: 'Completed',
+      seq_status: 'Completed',
       last_update: '2021-10-12',
     },
   },

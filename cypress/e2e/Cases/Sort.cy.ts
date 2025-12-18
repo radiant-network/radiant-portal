@@ -13,7 +13,7 @@ describe('Cases - Sort', () => {
     CasesTable.validations.shouldSortColumn('mrn');
   });
 
-  it('Number', () => {
+  it('Number [SJRA-1004]', () => {
     setupTest();
     CasesTable.validations.shouldSortColumn('case');
   });
@@ -28,7 +28,7 @@ describe('Cases - Sort', () => {
     CasesTable.validations.shouldSortColumn('updated_on');
   });
 
-  it('Multiple [SJRA-661]', () => {
+  it('Multiple', () => {
     setupTest();
     CasesTable.actions.sortColumn('analysis');
     CasesTable.actions.sortColumn('mrn');
