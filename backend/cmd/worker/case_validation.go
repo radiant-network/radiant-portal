@@ -16,7 +16,7 @@ const (
 
 type CaseKey struct {
 	ProjectCode     string
-	SubmitterCaseId string
+	SubmitterCaseID string
 }
 
 type CaseValidationRecord struct {
@@ -34,37 +34,39 @@ func (r *CaseValidationRecord) GetResourceType() string {
 	return types.CaseBatchType
 }
 
-func (r *CaseValidationRecord) preFetchValidationInfo(repoProject repository.ProjectDAO) error {
-	prj, err := repoProject.GetProjectByCode(r.Case.ProjectCode)
+func (r *CaseValidationRecord) preFetchValidationInfo(projects repository.ProjectDAO) error {
+	p, err := projects.GetProjectByCode(r.Case.ProjectCode)
 	if err != nil {
-		return err
+		return fmt.Errorf("get project by code %q: %w", r.Case.ProjectCode, err)
 	}
-	if prj != nil {
-		r.ProjectID = &prj.ID
+	if p != nil {
+		r.ProjectID = &p.ID
 	}
 	return nil
 }
 
-func validateCaseBatch(cases []types.CaseBatch, project repository.ProjectDAO) ([]*CaseValidationRecord, error) {
+func validateCaseBatch(cases []types.CaseBatch, projects repository.ProjectDAO) ([]*CaseValidationRecord, error) {
 	var records []*CaseValidationRecord
 	visited := map[CaseKey]struct{}{}
 
-	for index, c := range cases {
+	for idx, c := range cases {
 		key := CaseKey{
 			ProjectCode:     c.ProjectCode,
-			SubmitterCaseId: c.SubmitterCaseId,
+			SubmitterCaseID: c.SubmitterCaseId,
 		}
-		record, err := validateCaseRecord(c, index, project)
+
+		record, err := validateCaseRecord(c, idx, projects)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
+
 		validateUniquenessInBatch(record, key, visited, IdenticalCaseInBatchCode, []string{c.ProjectCode, c.SubmitterCaseId})
 		records = append(records, record)
 	}
 	return records, nil
 }
 
-func validateCaseRecord(c types.CaseBatch, index int, project repository.ProjectDAO) (*CaseValidationRecord, error) {
+func validateCaseRecord(c types.CaseBatch, index int, projects repository.ProjectDAO) (*CaseValidationRecord, error) {
 	// FIXME: Not Implemented, will be implemented in follow-up tasks
 	cr := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: index},
@@ -72,6 +74,13 @@ func validateCaseRecord(c types.CaseBatch, index int, project repository.Project
 		ProjectID:            nil,
 		SubmitterCaseID:      "",
 	}
+
+	if unexpectedErr := cr.preFetchValidationInfo(projects); unexpectedErr != nil {
+		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", unexpectedErr)
+	}
+
+	// TODO: Add field-level validations here
+
 	return &cr, nil
 }
 
@@ -80,13 +89,13 @@ func processCaseBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationC
 	var caseBatches []types.CaseBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), context.RepoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), context.BatchRepo)
 		return
 	}
 
-	records, unexpectedErr := validateCaseBatch(caseBatches, context.RepoProject)
+	records, unexpectedErr := validateCaseBatch(caseBatches, context.ProjectRepo)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), context.RepoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), context.BatchRepo)
 		return
 	}
 
@@ -94,12 +103,12 @@ func processCaseBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationC
 
 	err := persistBatchAndCaseRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), context.RepoBatch)
+		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), context.BatchRepo)
 		return
 	}
 }
 
-func insertCaseRecords(records []*CaseValidationRecord, repo repository.CasesDAO) error {
+func insertCaseRecords(records []*CaseValidationRecord, cases repository.CasesDAO) error {
 	// FIXME: Not Implemented, will be implemented in follow-up ticket
 	return nil
 }

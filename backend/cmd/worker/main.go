@@ -16,22 +16,22 @@ import (
 )
 
 type BatchValidationContext struct {
-	RepoBatch        repository.BatchDAO
-	RepoOrganization repository.OrganizationDAO
-	RepoPatient      repository.PatientsDAO
-	RepoProject      repository.ProjectDAO
-	RepoSample       repository.SamplesDAO
-	RepoSeqExp       repository.SequencingExperimentDAO
+	BatchRepo   repository.BatchDAO
+	OrgRepo     repository.OrganizationDAO
+	PatientRepo repository.PatientsDAO
+	ProjectRepo repository.ProjectDAO
+	SampleRepo  repository.SamplesDAO
+	SeqExpRepo  repository.SequencingExperimentDAO
 }
 
 func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 	return &BatchValidationContext{
-		RepoBatch:        repository.NewBatchRepository(db),
-		RepoOrganization: repository.NewOrganizationRepository(db),
-		RepoPatient:      repository.NewPatientsRepository(db),
-		RepoProject:      repository.NewProjectRepository(db),
-		RepoSample:       repository.NewSamplesRepository(db),
-		RepoSeqExp:       repository.NewSequencingExperimentRepository(db),
+		BatchRepo:   repository.NewBatchRepository(db),
+		OrgRepo:     repository.NewOrganizationRepository(db),
+		PatientRepo: repository.NewPatientsRepository(db),
+		ProjectRepo: repository.NewProjectRepository(db),
+		SampleRepo:  repository.NewSamplesRepository(db),
+		SeqExpRepo:  repository.NewSequencingExperimentRepository(db),
 	}
 }
 
@@ -60,7 +60,7 @@ func main() {
 }
 
 func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
-	nextBatch, err := ctx.RepoBatch.ClaimNextBatch()
+	nextBatch, err := ctx.BatchRepo.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)
 	}
@@ -77,7 +77,7 @@ func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
 			processCaseBatch(nextBatch, db, ctx)
 		default:
 			notSupportedBatch := fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
-			processUnexpectedError(nextBatch, notSupportedBatch, ctx.RepoBatch)
+			processUnexpectedError(nextBatch, notSupportedBatch, ctx.BatchRepo)
 		}
 	}
 }
