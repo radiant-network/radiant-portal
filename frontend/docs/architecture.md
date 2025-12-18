@@ -8,7 +8,7 @@ The frontend architecture is designed to support multiple portals (e.g., Radiant
 
 ## ADR Index
 
-### [ADR-0001: Multi-Portal Configurable Frontend Architecture](https://github.com/radiant-network/architecture/blob/main/decisions/0001-multi-portal-configurable-frontend-architecture.md)
+### [ADR-0004: Multi-Portal Configurable Frontend Architecture](https://github.com/radiant-network/architecture/blob/main/decisions/0004-frontend-multi-portal-configurable-frontend-architecture.md)
 
 This ADR describes the overall multi-portal architecture approach, including the layered structure (Portal Layer, Applications Layer, Components Layer, Tech Stack) and the configuration-driven portal generation strategy.
 
@@ -18,7 +18,7 @@ This ADR describes the overall multi-portal architecture approach, including the
 - Theme system with portal-specific customization
 - Context-based configuration management
 
-### [ADR-0002: Component and Application Modularity](https://github.com/radiant-network/architecture/blob/main/decisions/0002-component-and-application-modularity.md)
+### [ADR-0005: Component and Application Modularity with Workspace-Based Sharing](https://github.com/radiant-network/architecture/blob/main/decisions/0005-frontend-component-and-application-modularity.md)
 
 This ADR focuses on the modular component and application architecture that enables maximum code reuse through workspace-based sharing.
 
@@ -28,7 +28,7 @@ This ADR focuses on the modular component and application architecture that enab
 - Shared component library with base and feature components
 - Configuration-driven application composition
 
-### [ADR-0003: Build and Deployment Strategy](https://github.com/radiant-network/architecture/blob/main/decisions/0003-build-and-deployment-strategy.md)
+### [ADR-0006: Build and Deployment Strategy](https://github.com/radiant-network/architecture/blob/main/decisions/0006-frontend-build-and-deployment-strategy.md)
 
 This ADR describes the build and deployment strategy that supports multiple portal configurations while optimizing for performance and maintainability.
 
