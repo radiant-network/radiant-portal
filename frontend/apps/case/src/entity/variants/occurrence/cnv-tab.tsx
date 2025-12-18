@@ -198,7 +198,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   }, [activeSqon]);
 
   return (
-    seqId && (
+    seqId !== -1 && (
       <div className="bg-muted w-full">
         <div className="flex flex-1 h-screen overflow-hidden">
           <aside className="w-auto min-w-fit h-full shrink-0">
@@ -243,7 +243,7 @@ function CNVTab({ seqId }: CNVTabProps) {
                 loading={isQBLoading}
                 queryCountIcon={<VariantIcon size={14} />}
                 fetchQueryCount={async resolvedSqon => {
-                  if (!seqId) {
+                  if (seqId === -1) {
                     return Promise.resolve(0);
                   }
 
