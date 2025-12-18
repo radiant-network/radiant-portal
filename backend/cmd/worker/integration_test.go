@@ -1095,6 +1095,64 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "DOESNTEXIST-1",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "DOESNTEXIST-2",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_slow_progress"
+			}	
+		]
+		`
+		var id string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		RETURNING id;
+		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		context := NewBatchValidationContext(db)
+		processBatch(db, context)
+		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		resultBatch := repository.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 3)
+	})
+}
+
 func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 

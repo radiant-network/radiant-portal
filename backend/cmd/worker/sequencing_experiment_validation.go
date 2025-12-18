@@ -358,14 +358,15 @@ func (r *SequencingExperimentValidationRecord) preFetchValidationInfo(repoOrg re
 	}
 	if soc != nil {
 		r.SubmitterOrganizationID = &soc.ID
+		sample, err := repoSample.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
+		if err != nil {
+			return err
+		}
+		if sample != nil {
+			r.SampleID = &sample.ID
+		}
 	}
-	sample, err := repoSample.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
-	if err != nil {
-		return err
-	}
-	if sample != nil {
-		r.SampleID = &sample.ID
-	}
+
 	sequencingLab, err := repoOrg.GetOrganizationByCode(r.SequencingExperiment.SequencingLabCode)
 	if err != nil {
 		return err
