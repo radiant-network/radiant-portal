@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -22,7 +21,9 @@ type CaseKey struct {
 
 type CaseValidationRecord struct {
 	BaseValidationRecord
-	Case types.CaseBatch
+	Case            types.CaseBatch
+	ProjectID       *int
+	SubmitterCaseID string
 }
 
 func (r *CaseValidationRecord) GetBase() *BaseValidationRecord {
@@ -33,32 +34,18 @@ func (r *CaseValidationRecord) GetResourceType() string {
 	return types.CaseBatchType
 }
 
-func (r *CaseValidationRecord) preFetchValidationInfo(repoOrg repository.OrganizationDAO, repoSample repository.SamplesDAO) error {
-	soc, err := repoOrg.GetPro(r.Case.)
+func (r *CaseValidationRecord) preFetchValidationInfo(repoProject repository.ProjectDAO) error {
+	prj, err := repoProject.GetProjectByCode(r.Case.ProjectCode)
 	if err != nil {
 		return err
 	}
-	if soc != nil {
-		r.SubmitterOrganizationID = &soc.ID
-	}
-	sample, err := repoSample.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
-	if err != nil {
-		return err
-	}
-	if sample != nil {
-		r.SampleID = &sample.ID
-	}
-	sequencingLab, err := repoOrg.GetOrganizationByCode(r.SequencingExperiment.SequencingLabCode)
-	if err != nil {
-		return err
-	}
-	if sequencingLab != nil {
-		r.SequencingLabID = &sequencingLab.ID
+	if prj != nil {
+		r.ProjectID = &prj.ID
 	}
 	return nil
 }
 
-func validateCaseBatch(cases []types.CaseBatch, repoOrganization repository.OrganizationDAO, repoSample repository.SamplesDAO, repoSeqExp repository.SequencingExperimentDAO) ([]*CaseValidationRecord, error) {
+func validateCaseBatch(cases []types.CaseBatch, project repository.ProjectDAO) ([]*CaseValidationRecord, error) {
 	var records []*CaseValidationRecord
 	visited := map[CaseKey]struct{}{}
 
@@ -67,7 +54,7 @@ func validateCaseBatch(cases []types.CaseBatch, repoOrganization repository.Orga
 			ProjectCode:     c.ProjectCode,
 			SubmitterCaseId: c.SubmitterCaseId,
 		}
-		record, err := validateCaseRecord(c, index, repoOrganization, repoSample, repoSeqExp)
+		record, err := validateCaseRecord(c, index, project)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
@@ -77,9 +64,15 @@ func validateCaseBatch(cases []types.CaseBatch, repoOrganization repository.Orga
 	return records, nil
 }
 
-func validateCaseRecord(c types.CaseBatch, index int, organization repository.OrganizationDAO, sample repository.SamplesDAO, exp repository.SequencingExperimentDAO) (*CaseValidationRecord, error) {
+func validateCaseRecord(c types.CaseBatch, index int, project repository.ProjectDAO) (*CaseValidationRecord, error) {
 	// FIXME: Not Implemented, will be implemented in follow-up tasks
-	return nil, nil
+	cr := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: index},
+		Case:                 types.CaseBatch{},
+		ProjectID:            nil,
+		SubmitterCaseID:      "",
+	}
+	return &cr, nil
 }
 
 func processCaseBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationContext) {
@@ -91,7 +84,7 @@ func processCaseBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationC
 		return
 	}
 
-	records, unexpectedErr := validateCaseBatch(caseBatches, context.RepoOrganization, context.RepoSample, context.RepoSeqExp)
+	records, unexpectedErr := validateCaseBatch(caseBatches, context.RepoProject)
 	if unexpectedErr != nil {
 		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), context.RepoBatch)
 		return
@@ -107,19 +100,7 @@ func processCaseBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationC
 }
 
 func insertCaseRecords(records []*CaseValidationRecord, repo repository.CasesDAO) error {
-	for _, record := range records {
-		if !record.Skipped {
-			c := types.Case{
-				ProjectCode:     record.Case.ProjectCode,
-				SubmitterCaseId: record.Case.SubmitterCaseId,
-			}
-
-			err := repo.CreateCase(&c)
-			if err != nil {
-				return fmt.Errorf("create sequencing experiment :%w", err)
-			}
-		}
-	}
+	// FIXME: Not Implemented, will be implemented in follow-up ticket
 	return nil
 }
 

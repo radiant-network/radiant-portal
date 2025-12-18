@@ -19,6 +19,7 @@ type BatchValidationContext struct {
 	RepoBatch        repository.BatchDAO
 	RepoOrganization repository.OrganizationDAO
 	RepoPatient      repository.PatientsDAO
+	RepoProject      repository.ProjectDAO
 	RepoSample       repository.SamplesDAO
 	RepoSeqExp       repository.SequencingExperimentDAO
 }
@@ -28,6 +29,7 @@ func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 		RepoBatch:        repository.NewBatchRepository(db),
 		RepoOrganization: repository.NewOrganizationRepository(db),
 		RepoPatient:      repository.NewPatientsRepository(db),
+		RepoProject:      repository.NewProjectRepository(db),
 		RepoSample:       repository.NewSamplesRepository(db),
 		RepoSeqExp:       repository.NewSequencingExperimentRepository(db),
 	}
