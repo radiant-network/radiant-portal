@@ -16,21 +16,30 @@ import (
 )
 
 type BatchValidationContext struct {
-	RepoBatch        repository.BatchDAO
-	RepoOrganization repository.OrganizationDAO
-	RepoPatient      repository.PatientsDAO
-	RepoSample       repository.SamplesDAO
-	RepoSeqExp       repository.SequencingExperimentDAO
+	BatchRepo   repository.BatchDAO
+	OrgRepo     repository.OrganizationDAO
+	PatientRepo repository.PatientsDAO
+	ProjectRepo repository.ProjectDAO
+	SampleRepo  repository.SamplesDAO
+	SeqExpRepo  repository.SequencingExperimentDAO
 }
 
 func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 	return &BatchValidationContext{
-		RepoBatch:        repository.NewBatchRepository(db),
-		RepoOrganization: repository.NewOrganizationRepository(db),
-		RepoPatient:      repository.NewPatientsRepository(db),
-		RepoSample:       repository.NewSamplesRepository(db),
-		RepoSeqExp:       repository.NewSequencingExperimentRepository(db),
+		BatchRepo:   repository.NewBatchRepository(db),
+		OrgRepo:     repository.NewOrganizationRepository(db),
+		PatientRepo: repository.NewPatientsRepository(db),
+		ProjectRepo: repository.NewProjectRepository(db),
+		SampleRepo:  repository.NewSamplesRepository(db),
+		SeqExpRepo:  repository.NewSequencingExperimentRepository(db),
 	}
+}
+
+var supportedProcessors = map[string]func(*BatchValidationContext, *types.Batch, *gorm.DB){
+	types.PatientBatchType:              processPatientBatch,
+	types.SampleBatchType:               processSampleBatch,
+	types.SequencingExperimentBatchType: processSequencingExperimentBatch,
+	types.CaseBatchType:                 processCaseBatch,
 }
 
 func main() {
@@ -58,24 +67,24 @@ func main() {
 }
 
 func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
-	nextBatch, err := ctx.RepoBatch.ClaimNextBatch()
+	nextBatch, err := ctx.BatchRepo.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)
+		return
 	}
-	if nextBatch != nil {
-		glog.Infof("Processing batch: %v", nextBatch.ID)
-		switch nextBatch.BatchType {
-		case types.PatientBatchType:
-			processPatientBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoPatient, ctx.RepoBatch)
-		case types.SampleBatchType:
-			processSampleBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoPatient, ctx.RepoSample, ctx.RepoBatch)
-		case types.SequencingExperimentBatchType:
-			processSequencingExperimentBatch(nextBatch, db, ctx.RepoOrganization, ctx.RepoSample, ctx.RepoSeqExp, ctx.RepoBatch)
-		default:
-			notSupportedBatch := fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
-			processUnexpectedError(nextBatch, notSupportedBatch, ctx.RepoBatch)
-		}
+	if nextBatch == nil {
+		return
 	}
+
+	glog.Infof("Processing batch: %v", nextBatch.ID)
+	processFn, ok := supportedProcessors[nextBatch.BatchType]
+	if !ok {
+		err = fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
+		processUnexpectedError(nextBatch, err, ctx.BatchRepo)
+		return
+	}
+
+	processFn(ctx, nextBatch, db)
 }
 
 func StartHealthProbe(db *gorm.DB) {
