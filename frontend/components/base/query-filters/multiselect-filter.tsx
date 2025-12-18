@@ -342,7 +342,14 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     });
 
     setItems(augmentedData || []);
-    setVisibleItemsCount(getVisibleItemsCount(augmentedData?.length || 0, maxVisibleItems));
+
+    // Preserve expanded state when user has explicitly expanded the list
+    const isCurrentlyExpanded = visibleItemsCount > maxVisibleItems;
+    if (isCurrentlyExpanded && augmentedData) {
+      setVisibleItemsCount(augmentedData.length);
+    } else {
+      setVisibleItemsCount(getVisibleItemsCount(augmentedData?.length || 0, maxVisibleItems));
+    }
   }, [
     aggregationData,
     appId,
@@ -353,6 +360,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     hasBeenReset,
     hasUnappliedItems,
     isFromSessionStorage,
+    visibleItemsCount,
   ]);
 
   // Save temporarily in global sessionStorage
@@ -442,11 +450,11 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
 
   const showMore = useCallback(() => {
     setVisibleItemsCount(items.length);
-  }, [visibleItemsCount, items]);
+  }, [items]);
 
   const showLess = useCallback(() => {
     setVisibleItemsCount(maxVisibleItems);
-  }, [visibleItemsCount]);
+  }, [maxVisibleItems]);
 
   const selectAll = useCallback(() => {
     if (selectedItems.length === items.length) {
