@@ -65,6 +65,7 @@ The `Components` directory holds all basic to advanced UI components required to
 
 - **Generic Components**: Built using [shadcn](https://shadcn.dev), leveraging pre-made, highly customizable components.
 - **Custom Components**: Created with React and TailwindCSS for unique design and behavior tailored to application needs.
+- **Headless Components**: Regroupment of function to be used by multiple components. No style only logic.
 
 #### Key Features:
 
