@@ -35,6 +35,13 @@ func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 	}
 }
 
+var supportedProcessors = map[string]func(*types.Batch, *gorm.DB, *BatchValidationContext){
+	types.PatientBatchType:              processPatientBatch,
+	types.SampleBatchType:               processSampleBatch,
+	types.SequencingExperimentBatchType: processSequencingExperimentBatch,
+	types.CaseBatchType:                 processCaseBatch,
+}
+
 func main() {
 	flag.Parse()
 	defer glog.Flush()
@@ -63,23 +70,20 @@ func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
 	nextBatch, err := ctx.BatchRepo.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)
+		return
 	}
-	if nextBatch != nil {
-		glog.Infof("Processing batch: %v", nextBatch.ID)
-		switch nextBatch.BatchType {
-		case types.PatientBatchType:
-			processPatientBatch(nextBatch, db, ctx)
-		case types.SampleBatchType:
-			processSampleBatch(nextBatch, db, ctx)
-		case types.SequencingExperimentBatchType:
-			processSequencingExperimentBatch(nextBatch, db, ctx)
-		case types.CaseBatchType:
-			processCaseBatch(nextBatch, db, ctx)
-		default:
-			notSupportedBatch := fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
-			processUnexpectedError(nextBatch, notSupportedBatch, ctx.BatchRepo)
-		}
+	if nextBatch == nil {
+		return
 	}
+
+	processFn, ok := supportedProcessors[nextBatch.BatchType]
+	if !ok {
+		err = fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
+		processUnexpectedError(nextBatch, err, ctx.BatchRepo)
+		return
+	}
+
+	processFn(nextBatch, db, ctx)
 }
 
 func StartHealthProbe(db *gorm.DB) {
