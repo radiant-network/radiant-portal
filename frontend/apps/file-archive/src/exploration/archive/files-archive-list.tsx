@@ -2,14 +2,7 @@ import { useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import {
-  ApiError,
-  DocumentsSearchResponse,
-  ListBodyWithCriteria,
-  SearchCriterion,
-  SortBody,
-  SortBodyOrderEnum,
-} from '@/api/api';
+import { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { documentApi } from '@/utils/api';
@@ -17,12 +10,7 @@ import { documentApi } from '@/utils/api';
 import FilesTableFilters from './files-archive-list-table-filters';
 import { defaultSettings, getFilesArchiveColumns } from './files-archive-table-settings';
 
-const DEFAULT_SORTING = [
-  {
-    field: 'document_id',
-    order: SortBodyOrderEnum.Desc,
-  },
-];
+const DEFAULT_SORTING: SortBody[] = [];
 
 type DocumentInput = {
   body: ListBodyWithCriteria;
