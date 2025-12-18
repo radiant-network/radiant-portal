@@ -82,18 +82,18 @@ func (r *SequencingExperimentValidationRecord) getResId() []string {
 	return []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 }
 
-func processSequencingExperimentBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationContext) {
+func processSequencingExperimentBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var experimentsBatch []types.SequencingExperimentBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
-	records, unexpectedErr := validateSequencingExperimentBatch(experimentsBatch, context.OrgRepo, context.SampleRepo, context.SeqExpRepo)
+	records, unexpectedErr := validateSequencingExperimentBatch(experimentsBatch, ctx.OrgRepo, ctx.SampleRepo, ctx.SeqExpRepo)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
@@ -101,7 +101,7 @@ func processSequencingExperimentBatch(batch *types.Batch, db *gorm.DB, context *
 
 	err := persistBatchAndSequencingExperimentRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }

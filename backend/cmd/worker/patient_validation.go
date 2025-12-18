@@ -154,18 +154,18 @@ func validateExistingPatientField[T comparable](
 	}
 }
 
-func processPatientBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationContext) {
+func processPatientBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var patients []types.PatientBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &patients); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling patient batch: %v", unexpectedErr), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling patient batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
-	records, unexpectedErr := validatePatientsBatch(patients, context.OrgRepo, context.PatientRepo)
+	records, unexpectedErr := validatePatientsBatch(patients, ctx.OrgRepo, ctx.PatientRepo)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error patient batch validation: %v", unexpectedErr), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error patient batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
@@ -173,7 +173,7 @@ func processPatientBatch(batch *types.Batch, db *gorm.DB, context *BatchValidati
 
 	err := persistBatchAndPatientRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing patient batch records: %v", err), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error processing patient batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }

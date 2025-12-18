@@ -84,18 +84,18 @@ func validateCaseRecord(c types.CaseBatch, index int, projects repository.Projec
 	return &cr, nil
 }
 
-func processCaseBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationContext) {
+func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var caseBatches []types.CaseBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
-	records, unexpectedErr := validateCaseBatch(caseBatches, context.ProjectRepo)
+	records, unexpectedErr := validateCaseBatch(caseBatches, ctx.ProjectRepo)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
@@ -103,7 +103,7 @@ func processCaseBatch(batch *types.Batch, db *gorm.DB, context *BatchValidationC
 
 	err := persistBatchAndCaseRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), context.BatchRepo)
+		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }

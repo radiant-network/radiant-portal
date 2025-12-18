@@ -35,7 +35,7 @@ func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 	}
 }
 
-var supportedProcessors = map[string]func(*types.Batch, *gorm.DB, *BatchValidationContext){
+var supportedProcessors = map[string]func(*BatchValidationContext, *types.Batch, *gorm.DB){
 	types.PatientBatchType:              processPatientBatch,
 	types.SampleBatchType:               processSampleBatch,
 	types.SequencingExperimentBatchType: processSequencingExperimentBatch,
@@ -84,7 +84,7 @@ func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
 		return
 	}
 
-	processFn(nextBatch, db, ctx)
+	processFn(ctx, nextBatch, db)
 }
 
 func StartHealthProbe(db *gorm.DB) {
