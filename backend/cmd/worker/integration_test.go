@@ -1112,7 +1112,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_slow_progress"
-			}	
+			}
 		]
 		`
 		var id string
@@ -1184,7 +1184,7 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
-			}		
+			}
 		]
 		`
 		var id string
