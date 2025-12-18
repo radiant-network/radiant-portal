@@ -268,6 +268,12 @@ components:
           type: string
         submitter_case_id:
           type: string
+        tasks:
+          items:
+            $ref: '#/components/schemas/CaseTaskBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
         type:
           enum:
           - germline
@@ -280,6 +286,7 @@ components:
       - sequencing_experiments
       - status_code
       - submitter_case_id
+      - tasks
       - type
       type: object
     CaseEntity:
@@ -564,6 +571,33 @@ components:
       - patients
       - type_code
       - type_name
+      type: object
+    CaseTaskBatch:
+      properties:
+        aliquot:
+          type: string
+        genome_build:
+          type: string
+        input_documents:
+          items:
+            $ref: '#/components/schemas/InputDocumentBatch'
+          type: array
+          uniqueItems: false
+        output_documents:
+          items:
+            $ref: '#/components/schemas/OutputDocumentBatch'
+          type: array
+          uniqueItems: false
+        pipeline_name:
+          type: string
+        pipeline_version:
+          type: string
+        type_code:
+          type: string
+      required:
+      - output_documents
+      - pipeline_version
+      - type_code
       type: object
     CasesSearchResponse:
       properties:
@@ -1266,6 +1300,13 @@ components:
           type: array
           uniqueItems: false
       type: object
+    InputDocumentBatch:
+      properties:
+        url:
+          type: string
+      required:
+      - url
+      type: object
     InterpretationGermline:
       properties:
         case_id:
@@ -1485,6 +1526,30 @@ components:
           type: string
         panel:
           type: string
+      type: object
+    OutputDocumentBatch:
+      properties:
+        data_category_code:
+          type: string
+        data_type_code:
+          type: string
+        format_code:
+          type: string
+        hash:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+        url:
+          type: string
+      required:
+      - data_category_code
+      - data_type_code
+      - format_code
+      - name
+      - size
+      - url
       type: object
     PaginationConfig:
       properties:

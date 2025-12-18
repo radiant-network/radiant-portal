@@ -50,6 +50,18 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 				"aliquot": "alq1",
 				"sample_organization_code": "org1",
 				"submitter_sample_id": "s1"
+			}],
+			"tasks": [{
+				"type_code": "analysis",
+				"output_documents": [{
+					"data_category_code": "variant",
+					"data_type_code": "vcf",
+					"format_code": "vcf",
+					"name": "output.vcf",
+					"size": 1024,
+					"url": "https://example.com/output.vcf"
+				}],
+				"pipeline_version": "v1.0.0"
 			}]
 		}]
 	}`
@@ -327,73 +339,73 @@ func TestPostCaseBatchHandler_EmptySequencingExperiments(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// func TestPostCaseBatchHandler_MissingTasks(t *testing.T) {
-// 	gin.SetMode(gin.TestMode)
-// 	repo := &MockBatchRepository{}
-// 	auth := &testutils.MockAuth{}
+func TestPostCaseBatchHandler_MissingTasks(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{}
+	auth := &testutils.MockAuth{}
 
-// 	router := gin.Default()
-// 	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
-// 	body := `{
-// 		"cases": [{
-// 			"submitter_case_id": "case1",
-// 			"type": "germline",
-// 			"status_code": "active",
-// 			"project_code": "proj1",
-// 			"category_code": "postnatal",
-// 			"patients": [{
-// 				"affected_status_code": "affected",
-// 				"submitter_patient_id": "p1",
-// 				"patient_organization_code": "org1",
-// 				"relation_to_proband_code": "proband"
-// 			}],
-// 			"sequencing_experiments": [{
-// 				"aliquot": "alq1",
-// 				"sample_organization_code": "org1",
-// 				"submitter_sample_id": "s1"
-// 			}]
-// 		}]
-// 	}`
-// 	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
-// 	req.Header.Set("Content-Type", "application/json")
-// 	w := httptest.NewRecorder()
-// 	router.ServeHTTP(w, req)
+	router := gin.Default()
+	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"project_code": "proj1",
+			"category_code": "postnatal",
+			"patients": [{
+				"affected_status_code": "affected",
+				"submitter_patient_id": "p1",
+				"patient_organization_code": "org1",
+				"relation_to_proband_code": "proband"
+			}],
+			"sequencing_experiments": [{
+				"aliquot": "alq1",
+				"sample_organization_code": "org1",
+				"submitter_sample_id": "s1"
+			}]
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
 
-// 	assert.Equal(t, http.StatusBadRequest, w.Code)
-// }
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
 
-// func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
-// 	gin.SetMode(gin.TestMode)
-// 	repo := &MockBatchRepository{}
-// 	auth := &testutils.MockAuth{}
+func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{}
+	auth := &testutils.MockAuth{}
 
-// 	router := gin.Default()
-// 	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
-// 	body := `{
-// 		"cases": [{
-// 			"submitter_case_id": "case1",
-// 			"type": "germline",
-// 			"status_code": "active",
-// 			"project_code": "proj1",
-// 			"category_code": "postnatal",
-// 			"patients": [{
-// 				"affected_status_code": "affected",
-// 				"submitter_patient_id": "p1",
-// 				"patient_organization_code": "org1",
-// 				"relation_to_proband_code": "proband"
-// 			}],
-// 			"sequencing_experiments": [{
-// 				"aliquot": "alq1",
-// 				"sample_organization_code": "org1",
-// 				"submitter_sample_id": "s1"
-// 			}],
-// 			"tasks": []
-// 		}]
-// 	}`
-// 	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
-// 	req.Header.Set("Content-Type", "application/json")
-// 	w := httptest.NewRecorder()
-// 	router.ServeHTTP(w, req)
+	router := gin.Default()
+	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"project_code": "proj1",
+			"category_code": "postnatal",
+			"patients": [{
+				"affected_status_code": "affected",
+				"submitter_patient_id": "p1",
+				"patient_organization_code": "org1",
+				"relation_to_proband_code": "proband"
+			}],
+			"sequencing_experiments": [{
+				"aliquot": "alq1",
+				"sample_organization_code": "org1",
+				"submitter_sample_id": "s1"
+			}],
+			"tasks": []
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
 
-// 	assert.Equal(t, http.StatusBadRequest, w.Code)
-// }
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
