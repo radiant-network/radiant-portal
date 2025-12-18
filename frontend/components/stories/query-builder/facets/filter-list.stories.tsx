@@ -14,7 +14,7 @@ import {
   httpStatisticsApiResponse,
   occurrenceApi,
   statisticApi,
-} from '../api/api-occurrence';
+} from '../../api/api-occurrence';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -152,7 +152,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Facets/FilterList',
+  title: 'QueryBuilder/Facets/FilterList',
   component: FilterList,
   args: {
     appId: config.snv_occurrence.app_id,
