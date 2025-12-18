@@ -13,7 +13,7 @@ describe('Files - Sort', () => {
     FilesTable.validations.shouldSortColumn('sample');
   });
 
-  it('Number', () => {
+  it('Number [SJRA-1004]', () => {
     setupTest();
     FilesTable.validations.shouldSortColumn('case');
   });
@@ -28,12 +28,12 @@ describe('Files - Sort', () => {
     FilesTable.validations.shouldSortColumn('created_on');
   });
 
-  it('Size', () => {
+  it('Size [SJRA-1004]', () => {
     setupTest();
     FilesTable.validations.shouldSortColumn('size');
   });
 
-  it('Multiple [SJRA-661]', () => {
+  it('Multiple', () => {
     setupTest();
     FilesTable.actions.sortColumn('name');
     FilesTable.actions.sortColumn('patient');

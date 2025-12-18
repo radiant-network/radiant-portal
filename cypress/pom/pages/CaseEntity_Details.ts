@@ -5,24 +5,24 @@ import { getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from
 const selectors = {
   tab: '[class*= "lucide-clipboard-list"]',
 
-  assaysCard: {
-    tableCell: (dataAssay: any) => `${CommonSelectors.tableRow(selectors.assaysCard.tableId)}:contains("${dataAssay.relationship}") ${CommonSelectors.tableCellData}`,
+  sequencingCard: {
+    tableCell: (dataSeq: any) => `${CommonSelectors.tableRow(selectors.sequencingCard.tableId)}:contains("${dataSeq.relationship}") ${CommonSelectors.tableCellData}`,
     tableId: '[id="sequencing-and-assays"]',
   },
 };
 
 const tableColumns = {
-  assaysCard: [
+  sequencingCard: [
     {
-      id: 'assay_id',
-      name: 'Assay ID',
-      apiField: 'assay_id',
+      id: 'seq_id',
+      name: 'Seq. ID',
+      apiField: 'seq_id',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 0,
-      tooltip: null,
+      tooltip: 'Sequencing Experiment ID',
     },
     {
       id: 'sample_id',
@@ -36,6 +36,17 @@ const tableColumns = {
       tooltip: null,
     },
     {
+      id: 'relationship',
+      name: 'Patient',
+      apiField: 'relationship_to_proband',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: true,
+      isPinnable: true,
+      position: 2,
+      tooltip: null,
+    },
+    {
       id: 'sample_type',
       name: 'Sample Type',
       apiField: 'sample_type',
@@ -43,7 +54,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
-      position: 2,
+      position: 3,
       tooltip: null,
     },
     {
@@ -54,7 +65,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
-      position: 3,
+      position: 4,
       tooltip: null,
     },
     {
@@ -65,19 +76,19 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
-      position: 4,
+      position: 5,
       tooltip: 'Experimental Strategy',
     },
     {
-      id: 'assay_status',
-      name: 'Assay Status',
-      apiField: 'assay_status',
+      id: 'seq_status',
+      name: 'Seq. Status',
+      apiField: 'seq_status',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
-      position: 5,
-      tooltip: null,
+      position: 6,
+      tooltip: 'Sequencing Experiment Status',
     },
     {
       id: 'last_update',
@@ -87,7 +98,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
-      position: 6,
+      position: 7,
       tooltip: 'yyyy-mm-dd',
     },
     {
@@ -98,7 +109,7 @@ const tableColumns = {
       pinByDefault: 'right',
       isSortable: false,
       isPinnable: true,
-      position: 7,
+      position: 8,
       tooltip: null,
     },
   ],
@@ -108,17 +119,17 @@ export const CaseEntity_Details = {
   validations: {
     /**
      * Checks that the tab is active.
-     * @param dataAssay The assay object.
+     * @param dataSeq The seq object.
      */
     shouldHaveActiveTab() {
       cy.get(selectors.tab).shouldBeActiveTab();
     },
     /**
      * Validates the title of the page.
-     * @param dataAssay The assay object.
+     * @param dataSeq The seq object.
      */
-    shouldHaveAssayDetailsModal(dataAssay: any) {
-      cy.get(CommonSelectors.modal).contains(`Assay ${dataAssay.assay_id}`).should('exist');
+    shouldHaveSeqDetailsModal(dataSeq: any) {
+      cy.get(CommonSelectors.modal).contains(`Sequencing ${dataSeq.seq_id}`).should('exist');
     },
     /**
      * Validates the title of the page.
@@ -129,19 +140,17 @@ export const CaseEntity_Details = {
     },
   },
 
-  assaysCard: {
+  sequencingCard: {
     actions: {
       /**
        * Select an object view with the table action button.
-       * @param dataAssay The assay object.
-       * @param object The object to view (Variants | Assay).
+       * @param dataSeq The seq object.
        */
-      selectAction(dataAssay: any, object: string) {
+      clickDetailsButton(dataSeq: any) {
         cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, 'actions').then(position => {
+          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, 'actions').then(position => {
             if (position !== -1) {
-              cy.get(selectors.assaysCard.tableCell(dataAssay)).eq(position).find('button').clickAndWait({ force: true });
-              cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
+              cy.get(selectors.sequencingCard.tableCell(dataSeq)).eq(position).find(CommonSelectors.detailsButton).clickAndWait({ force: true });
             } else {
               cy.handleColumnNotFound('actions');
             }
@@ -154,8 +163,8 @@ export const CaseEntity_Details = {
        */
       pinColumn(columnID: string) {
         cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
-            cy.pinColumn(position, selectors.assaysCard.tableId);
+          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
+            cy.pinColumn(position, selectors.sequencingCard.tableId);
           })
         );
       },
@@ -165,9 +174,9 @@ export const CaseEntity_Details = {
        */
       sortColumn(columnID: string) {
         cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
+          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
             if (position !== -1) {
-              cy.sortTableAndWait(position, selectors.assaysCard.tableId);
+              cy.sortTableAndWait(position, selectors.sequencingCard.tableId);
             } else {
               cy.handleColumnNotFound(columnID);
             }
@@ -180,8 +189,8 @@ export const CaseEntity_Details = {
        */
       unpinColumn(columnID: string) {
         cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
-            cy.unpinColumn(position, selectors.assaysCard.tableId);
+          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
+            cy.unpinColumn(position, selectors.sequencingCard.tableId);
           })
         );
       },
@@ -194,8 +203,8 @@ export const CaseEntity_Details = {
        */
       shouldHaveFirstRowValue(value: string | RegExp, columnID: string) {
         cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
-            cy.validateTableFirstRowContent(value, position, selectors.assaysCard.tableId);
+          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
+            cy.validateTableFirstRowContent(value, position, selectors.sequencingCard.tableId);
           })
         );
       },
@@ -203,12 +212,12 @@ export const CaseEntity_Details = {
        * Validates the default visibility of each column.
        */
       shouldMatchDefaultColumnVisibility() {
-        tableColumns.assaysCard.forEach(column => {
+        tableColumns.sequencingCard.forEach(column => {
           const expectedExist = column.isVisibleByDefault ? 'exist' : 'not.exist';
           if (column.name.startsWith('[')) {
-            cy.get(CommonSelectors.tableHead(selectors.assaysCard.tableId)).find(column.name).should(expectedExist);
+            cy.get(CommonSelectors.tableHead(selectors.sequencingCard.tableId)).find(column.name).should(expectedExist);
           } else {
-            cy.get(CommonSelectors.tableHead(selectors.assaysCard.tableId)).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+            cy.get(CommonSelectors.tableHead(selectors.sequencingCard.tableId)).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
           }
         });
       },
@@ -216,11 +225,11 @@ export const CaseEntity_Details = {
        * Validates the default pin state of each column.
        */
       shouldMatchDefaultPinnedColumns() {
-        tableColumns.assaysCard.forEach(column => {
+        tableColumns.sequencingCard.forEach(column => {
           cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, column.id).then(position => {
+            getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, column.id).then(position => {
               if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId))
+                cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId))
                   .eq(position)
                   .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
               } else {
@@ -234,46 +243,45 @@ export const CaseEntity_Details = {
        * Validates that all columns are displayed in the correct order in the table.
        */
       shouldShowAllColumns() {
-        tableColumns.assaysCard.forEach(column => {
+        tableColumns.sequencingCard.forEach(column => {
           if (column.name.startsWith('[')) {
-            cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(column.position).find(column.name).should('exist');
+            cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(column.position).find(column.name).should('exist');
           } else {
-            cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+            cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
           }
         });
       },
       /**
-       * Validates the content of a specific column in the table for a given Assay.
+       * Validates the content of a specific column in the table for a given Seq.
        * @param columnID The ID of the column to validate.
-       * @param dataAssay The Assay object containing the expected values.
+       * @param dataSeq The Seq object containing the expected values.
        */
-      shouldShowColumnContent(columnID: string, dataAssay: any) {
-        CaseEntity_Details.assaysCard.actions.sortColumn('assay_id');
-        CaseEntity_Details.assaysCard.actions.sortColumn('assay_id');
-        getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
+      shouldShowColumnContent(columnID: string, dataSeq: any) {
+        CaseEntity_Details.sequencingCard.actions.sortColumn('seq_id');
+        CaseEntity_Details.sequencingCard.actions.sortColumn('seq_id');
+        getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
           if (position !== -1) {
             switch (columnID) {
-              case 'sample_id':
-                cy.validateTableFirstRowContent(dataAssay[columnID], position, selectors.assaysCard.tableId);
-                cy.validateTableFirstRowContent(dataAssay.relationship, position, selectors.assaysCard.tableId);
-                cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position, selectors.assaysCard.tableId);
+              case 'relationship':
+              case 'histology':
+                cy.validateTableFirstRowContent(dataSeq[columnID], position, selectors.sequencingCard.tableId);
+                cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
                 break;
               case 'sample_type':
-              case 'histology':
               case 'exp_strat':
-                cy.validateTableFirstRowContent(dataAssay[columnID], position, selectors.assaysCard.tableId);
-                cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, selectors.assaysCard.tableId);
+                cy.validateTableFirstRowContent(dataSeq[columnID], position, selectors.sequencingCard.tableId);
+                cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, selectors.sequencingCard.tableId);
                 break;
-              case 'assay_status':
-                cy.validateTableFirstRowContent(dataAssay[columnID], position, selectors.assaysCard.tableId);
-                cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(dataAssay[columnID])), position, selectors.assaysCard.tableId);
-                cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataAssay[columnID])), position, selectors.assaysCard.tableId);
+              case 'seq_status':
+                cy.validateTableFirstRowContent(dataSeq[columnID], position, selectors.sequencingCard.tableId);
+                cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(dataSeq[columnID])), position, selectors.sequencingCard.tableId);
+                cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataSeq[columnID])), position, selectors.sequencingCard.tableId);
                 break;
               case 'actions':
-                cy.validateTableFirstRowClass(CommonSelectors.actionButton, position, selectors.assaysCard.tableId);
+                cy.validateTableFirstRowClass(CommonSelectors.detailsButton, position, selectors.sequencingCard.tableId);
                 break;
               default:
-                cy.validateTableFirstRowContent(dataAssay[columnID], position, selectors.assaysCard.tableId);
+                cy.validateTableFirstRowContent(dataSeq[columnID], position, selectors.sequencingCard.tableId);
                 break;
             }
           } else {
@@ -285,11 +293,11 @@ export const CaseEntity_Details = {
        * Validates the tooltips on columns.
        */
       shouldShowColumnTooltips() {
-        tableColumns.assaysCard.forEach(column => {
+        tableColumns.sequencingCard.forEach(column => {
           cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, column.id).then(position => {
+            getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, column.id).then(position => {
               if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldHaveTooltip(column);
+                cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldHaveTooltip(column);
               } else {
                 cy.handleColumnNotFound(column.id);
               }
@@ -301,11 +309,11 @@ export const CaseEntity_Details = {
        * Validates that pinnable columns are correctly marked as pinnable.
        */
       shouldShowPinnableColumns() {
-        tableColumns.assaysCard.forEach(column => {
+        tableColumns.sequencingCard.forEach(column => {
           cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, column.id).then(position => {
+            getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, column.id).then(position => {
               if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldBePinnable(column.isPinnable);
+                cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldBePinnable(column.isPinnable);
               } else {
                 cy.handleColumnNotFound(column.id);
               }
@@ -319,8 +327,8 @@ export const CaseEntity_Details = {
        */
       shouldPinnedColumn(columnID: string) {
         cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
-            cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldBePinned('left');
+          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
+            cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldBePinned('left');
           })
         );
       },
@@ -328,11 +336,11 @@ export const CaseEntity_Details = {
        * Validates that sortable columns are correctly marked as sortable.
        */
       shouldShowSortableColumns() {
-        tableColumns.assaysCard.forEach(column => {
+        tableColumns.sequencingCard.forEach(column => {
           cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, column.id).then(position => {
+            getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, column.id).then(position => {
               if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldBeSortable(column.isSortable);
+                cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldBeSortable(column.isSortable);
               } else {
                 cy.handleColumnNotFound(column.id);
               }
@@ -346,8 +354,8 @@ export const CaseEntity_Details = {
        */
       shouldUnpinnedColumn(columnID: string) {
         cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
-            cy.get(CommonSelectors.tableHeadCell(selectors.assaysCard.tableId)).eq(position).shouldBePinned(null);
+          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
+            cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldBePinned(null);
           })
         );
       },
@@ -357,10 +365,10 @@ export const CaseEntity_Details = {
        */
       shouldSortColumn(columnID: string) {
         cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.assaysCard.tableId), tableColumns.assaysCard, columnID).then(position => {
+          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
             if (position !== -1) {
-              CaseEntity_Details.assaysCard.actions.sortColumn(columnID);
-              cy.get(CommonSelectors.tableRow(selectors.assaysCard.tableId))
+              CaseEntity_Details.sequencingCard.actions.sortColumn(columnID);
+              cy.get(CommonSelectors.tableRow(selectors.sequencingCard.tableId))
                 .eq(0)
                 .find(CommonSelectors.tableCellData)
                 .eq(position)
@@ -368,8 +376,8 @@ export const CaseEntity_Details = {
                 .then(biggestValue => {
                   const biggest = biggestValue.trim();
 
-                  CaseEntity_Details.assaysCard.actions.sortColumn(columnID);
-                  cy.get(CommonSelectors.tableRow(selectors.assaysCard.tableId))
+                  CaseEntity_Details.sequencingCard.actions.sortColumn(columnID);
+                  cy.get(CommonSelectors.tableRow(selectors.sequencingCard.tableId))
                     .eq(0)
                     .find(CommonSelectors.tableCellData)
                     .eq(position)

@@ -584,7 +584,7 @@ export const CaseEntity_Variants_CNV_Table = {
       CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
 
-      cy.fixture('RequestBody/SortCNV.json').then(mockRequestBody => {
+      cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
         cy.intercept('POST', '**/list', req => {
           const mockBody = { ...mockRequestBody };
           mockBody.sort.field = apiField;
@@ -596,7 +596,7 @@ export const CaseEntity_Variants_CNV_Table = {
         cy.wait('@sortRequestAsc').then(interceptionAsc => {
           const smallest = interceptionAsc.response?.body[0][apiField];
 
-          cy.fixture('RequestBody/SortCNV.json').then(mockRequestBody => {
+          cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
             cy.intercept('POST', '**/list', req => {
               const mockBody = { ...mockRequestBody };
               mockBody.sort.field = apiField;

@@ -2,7 +2,7 @@
 import { data } from 'pom/shared/Data';
 
 describe('Cases - Autocomplete - Sequencing experiment', () => {
-  const seqExpId = data.case.assay.assay_id;
+  const seqExpId = data.case.seq.seq_id;
   let response: any;
 
   before(() => {
