@@ -74,41 +74,44 @@ function FamilyMemberCard({ member }: { member: CasePatientClinicalInformation }
         )}
         <div className="space-y-1">
           <h4 className="font-semibold">{t('preview_sheet.case.details.phenotypes')}</h4>
-          {member.observed_phenotypes ? (
-            <ExpandableList
-              className="space-y-1"
-              items={member.observed_phenotypes ?? []}
-              renderItem={item => (
-                <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} showCode={false} />
-              )}
-              visibleCount={PHENOTYPES_VISIBLE_COUNT}
-            />
-          ) : (
-            <p className="text-muted-foreground text-xs">{t('preview_sheet.case.details.no_phenotype')}</p>
-          )}
+          <ExpandableList
+            items={(member.observed_phenotypes ?? []).map(item => (
+              <PhenotypeConditionLink
+                key={item.id}
+                code={item.id}
+                name={item.name}
+                onsetCode={item.onset_code}
+                showCode={false}
+              />
+            ))}
+            visibleCount={PHENOTYPES_VISIBLE_COUNT}
+            size="md"
+            emptyMessage={
+              <p className="text-muted-foreground text-xs">{t('preview_sheet.case.details.no_phenotype')}</p>
+            }
+          />
         </div>
         {isProband && (
           <div className="space-y-1">
             <h4 className="font-semibold">{t('preview_sheet.case.details.non_observed_phenotypes')}</h4>
-            {member.non_observed_phenotypes ? (
-              <ExpandableList
-                items={member.non_observed_phenotypes ?? []}
-                className="space-y-1"
-                renderItem={item => (
-                  <PhenotypeConditionLink
-                    code={item.id}
-                    name={item.name}
-                    onsetCode={item.onset_code}
-                    showCode={false}
-                  />
-                )}
-                visibleCount={PHENOTYPES_VISIBLE_COUNT}
-              />
-            ) : (
-              <p className="text-muted-foreground text-xs">
-                {t('preview_sheet.case.details.no_non_observed_phenotype')}
-              </p>
-            )}
+            <ExpandableList
+              items={(member.non_observed_phenotypes ?? []).map(item => (
+                <PhenotypeConditionLink
+                  key={item.id}
+                  code={item.id}
+                  name={item.name}
+                  onsetCode={item.onset_code}
+                  showCode={false}
+                />
+              ))}
+              size="md"
+              visibleCount={PHENOTYPES_VISIBLE_COUNT}
+              emptyMessage={
+                <p className="text-muted-foreground text-xs">
+                  {t('preview_sheet.case.details.no_non_observed_phenotype')}
+                </p>
+              }
+            />
           </div>
         )}
       </div>
