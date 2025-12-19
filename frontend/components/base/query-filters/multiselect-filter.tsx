@@ -554,7 +554,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
           size="xs"
           type="text"
           placeholder={t('common.filters.search.placeholder')}
-          className="w-full text-xs py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full text-xs mt-3 py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => updateSearch(e.target.value)}
           autoFocus
         />

@@ -32,6 +32,7 @@ import { QueryBuilderState, resolveSyntheticSqon } from 'components/cores/query-
 import { queryBuilderRemote } from 'components/cores/query-builder/query-builder-remote';
 
 import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/cnv-occurrence-table-settings';
+import { isValidSeqId } from './snv-tab';
 
 const DEFAULT_SORTING = [
   {
@@ -198,7 +199,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   }, [activeSqon]);
 
   return (
-    seqId !== -1 && (
+    isValidSeqId(seqId) && (
       <div className="bg-muted w-full">
         <div className="flex flex-1 h-screen overflow-hidden">
           <aside className="w-auto min-w-fit h-full shrink-0">
@@ -243,11 +244,7 @@ function CNVTab({ seqId }: CNVTabProps) {
                 loading={isQBLoading}
                 queryCountIcon={<VariantIcon size={14} />}
                 fetchQueryCount={async resolvedSqon => {
-                  if (seqId === -1) {
-                    return Promise.resolve(0);
-                  }
-
-                  if (!caseId) {
+                  if (!isValidSeqId(seqId) || !caseId) {
                     return Promise.resolve(0);
                   }
 

@@ -56,6 +56,10 @@ async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
   return response.data;
 }
 
+export function isValidSeqId(seqId: number) {
+  return seqId > -1;
+}
+
 type SnvOccurrenceListInput = {
   caseId: number;
   seqId: number;
@@ -229,7 +233,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
   }, [activeSqon]);
 
   return (
-    seqId !== -1 && (
+    isValidSeqId(seqId) && (
       <div className="bg-muted w-full">
         <div className="flex flex-1 h-screen overflow-hidden">
           <aside className="w-auto min-w-fit h-full shrink-0">
@@ -274,10 +278,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
                 loading={isQBLoading}
                 queryCountIcon={<VariantIcon size={14} />}
                 fetchQueryCount={async resolvedSqon => {
-                  if (seqId === -1) {
-                    return Promise.resolve(0);
-                  }
-                  if (!caseId) {
+                  if (!isValidSeqId(seqId) || !caseId) {
                     return Promise.resolve(0);
                   }
 
