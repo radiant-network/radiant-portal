@@ -20,7 +20,7 @@ type TaskDAO interface {
 	CreateTaskContext(tc *TaskContext) error
 	CreateTaskHasDocument(thd *TaskHasDocument) error
 
-	GetTaskById(obsId int) (*Task, error)
+	GetTaskById(taskId int) (*Task, error)
 	GetTaskContextByTaskId(taskId int) (*TaskContext, error)
 	GetTaskHasDocumentByTaskId(taskId int) (*TaskHasDocument, error)
 }

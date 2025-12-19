@@ -34,7 +34,7 @@ func Test_CreateAndGetTask_OK(t *testing.T) {
 		assert.Equal(t, "4.4.4", result.PipelineVersion)
 		assert.Equal(t, "GRch38", result.GenomeBuild)
 
-		db.Exec("DELETE FROM tasks WHERE id = 8888")
+		db.Exec("DELETE FROM task WHERE id = 8888")
 	})
 }
 
