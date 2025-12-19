@@ -32,7 +32,8 @@ describe('Case Entity - Variants - SNV - Table - Sort', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.actions.unsortAllColumns();
     CaseEntity_Variants_SNV_Table.actions.sortColumn('gnomad');
-    CaseEntity_Variants_SNV_Table.actions.sortColumn('type');
-    CaseEntity_Variants_SNV_Table.validations.shouldHaveFirstRowValue('Deletion', 'type');
+    CaseEntity_Variants_SNV_Table.actions.sortColumn('gq');
+    CaseEntity_Variants_SNV_Table.actions.sortColumn('gq');
+    CaseEntity_Variants_SNV_Table.validations.shouldHaveFirstRowValue('3.00', 'gq');
   });
 });

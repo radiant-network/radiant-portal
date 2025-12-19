@@ -8,7 +8,7 @@ describe('CaseEntity - Files - Request Validation', () => {
     cy.visitFilesPage();
   };
 
-  it('Sort [SJRA-661]', () => {
+  it('Sort', () => {
     setupTest();
     FilesTable.validations.shouldRequestOnSort('name');
   });

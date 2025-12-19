@@ -8,7 +8,7 @@ describe('Case Entity - Variants - SNV - Table - Request Validation', () => {
     cy.visitCaseVariantsPage('1', 'SNV');
   };
 
-  it('Sort [SJRA-661]', () => {
+  it('Sort', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.validations.shouldRequestOnSort('variant');
   });
