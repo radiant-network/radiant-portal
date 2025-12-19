@@ -24,11 +24,10 @@ describe('CaseEntity - Details - Sequencing - Sort', () => {
     CaseEntity_Details.sequencingCard.validations.shouldSortColumn('last_update');
   });
 
-  it('Multiple [SJRA-1004]', () => {
+  it('Multiple', () => {
     setupTest();
     CaseEntity_Details.sequencingCard.actions.sortColumn('sample_id');
     CaseEntity_Details.sequencingCard.actions.sortColumn('seq_id');
-    CaseEntity_Details.sequencingCard.actions.sortColumn('seq_id');
-    CaseEntity_Details.sequencingCard.validations.shouldHaveFirstRowValue('3', 'seq_id');
+    CaseEntity_Details.sequencingCard.validations.shouldHaveFirstRowValue('1', 'seq_id');
   });
 });

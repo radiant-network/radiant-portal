@@ -18,7 +18,7 @@ describe('Cases - Request Validation', () => {
     CasesTable.validations.shouldRequestOnSearchSelect();
   });
 
-  it('Sort [SJRA-661]', () => {
+  it('Sort [SJRA-1018]', () => {
     setupTest();
     CasesTable.validations.shouldRequestOnSort('case');
   });
