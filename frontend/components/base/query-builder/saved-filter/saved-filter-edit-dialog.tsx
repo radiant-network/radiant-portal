@@ -24,6 +24,11 @@ const formSchema = z.object({
   name: z.string().min(2, 'Min 2 characters').max(50, 'Max 50 characters'),
 });
 
+/**
+ * Saved Filters edit dialog
+ * - Allow the use to change filter name
+ * - Display a notification on success or error
+ */
 function SavedFiltersEditDialog({
   open,
   onOpenChange,
@@ -54,7 +59,14 @@ function SavedFiltersEditDialog({
           toast.error(dict.savedFilter.notifications.errors.updated);
         });
     } else {
-      queryBuilder.saveNewFilter({ name: values.name });
+      queryBuilder
+        .saveNewFilter({ name: values.name })
+        .then(() => {
+          toast.success(dict.savedFilter.notifications.created);
+        })
+        .catch(() => {
+          toast.error(dict.savedFilter.notifications.errors.created);
+        });
     }
 
     onOpenChange(false);

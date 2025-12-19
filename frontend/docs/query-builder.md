@@ -47,6 +47,18 @@ These props allow the `QueryBuilder` to manage custom filters when needed. Howev
 
 For more specific interactions with saved filters, see `model/query-builder-core/saved-filter`.
 
+### UI
+
+Saved Filter have multiple states
+- `isDirty` (has been modified and is unsaved)
+- `isNew` (created but unsaved on the server-side)
+
+Those state impact the behavior of the saved-filter-save-action button.
+
+![saved_filter_workflow](./media/saved_filter_workflow.png)
+
+
+
 ## Queries
 
 The QueryBuilder exposes several callbacks for queries so you can manage them. The following callbacks are available:

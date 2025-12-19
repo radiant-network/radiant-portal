@@ -7,6 +7,10 @@ import { useQueryBuilderContext } from '../query-builder-context';
 
 import SavedFiltersEditDialog from './saved-filter-edit-dialog';
 
+/**
+ * Pencils icon that allow to edit a filter's name
+ * - Open saved-filter-edit-dialog
+ */
 function SavedFiltersEditAction() {
   const { queryBuilder } = useQueryBuilderContext();
 

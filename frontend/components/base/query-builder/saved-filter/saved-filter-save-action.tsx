@@ -8,19 +8,28 @@ import { SavedFilterTypeEnum } from '@/components/cores/saved-filter';
 import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
 
 /**
- * Save query builder filter
+ * Save button for query-builder savedfilter
+ * - Detect state of the filter to change the color of the button to indicat between saved and unsaved changes
  */
 function SavedFiltersSaveAction() {
   const dict = useQueryBuilderDictContext();
   const { queryBuilder } = useQueryBuilderContext();
 
   const selectedSavedFilter = queryBuilder.getSelectedSavedFilter();
+
   const isDisabled =
     selectedSavedFilter && !selectedSavedFilter.isNew() ? !selectedSavedFilter.isDirty() : queryBuilder.isEmpty();
 
   const handleSave = () => {
     if (selectedSavedFilter && !selectedSavedFilter.isNew()) {
-      selectedSavedFilter.save(SavedFilterTypeEnum.Filter);
+      selectedSavedFilter
+        .save(SavedFilterTypeEnum.Filter)
+        .then(() => {
+          toast.success(dict.savedFilter.notifications.updated);
+        })
+        .catch(() => {
+          toast.error(dict.savedFilter.notifications.errors.updated);
+        });
     } else {
       queryBuilder
         .saveNewFilter(selectedSavedFilter?.raw())
