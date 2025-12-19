@@ -242,7 +242,7 @@ func assertGetVariantCasesFilters(t *testing.T, data string, expected string) {
 
 func Test_GetVariantCasesFilters(t *testing.T) {
 	expected := `{
-		"case_analysis":[
+		"analysis_catalog_code":[
 			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"},
 			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
 			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"},
@@ -255,7 +255,7 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 			{"count": 0, "key":"LA26334-5", "label":"likelyBenign"}, 
 			{"count": 0, "key":"LA6675-8", "label":"benign"} 
 		],
-		"diagnosis_lab":[
+		"diagnosis_lab_code":[
 			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}			
 		]

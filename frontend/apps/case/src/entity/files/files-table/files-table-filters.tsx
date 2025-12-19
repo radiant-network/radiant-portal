@@ -11,7 +11,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
 
-const DEFAULT_VISIBLE_FILTERS = ['format', 'data_type', 'relationship_to_proband'];
+const DEFAULT_VISIBLE_FILTERS = ['format_code', 'data_type_code', 'relationship_to_proband_code'];
 
 type FilesTableFilters = {
   caseId: number;
@@ -24,15 +24,15 @@ type DocumentFiltersInput = {
 };
 
 export const FILTER_DEFAULTS = {
-  format: [],
-  data_type: [],
-  relationship_to_proband: [],
+  format_code: [],
+  data_type_code: [],
+  relationship_to_proband_code: [],
 };
 
 const CRITERIAS = {
-  format: { key: 'format_code', weight: 1, visible: true },
-  data_type: { key: 'data_type_code', weight: 2, visible: true },
-  relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3, visible: true },
+  format_code: { key: 'format_code', weight: 1, visible: true },
+  data_type_code: { key: 'data_type_code', weight: 2, visible: true },
+  relationship_to_proband_code: { key: 'relationship_to_proband_code', weight: 3, visible: true },
 };
 
 async function fetchFilters(caseId: number, searchCriteria: DocumentFiltersInput) {
@@ -72,19 +72,19 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
       };
 
       switch (key) {
-        case 'data_type':
+        case 'data_type_code':
           return {
             ...baseOption,
             popoverSize: 'md' as PopoverSize,
             options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
           };
-        case 'relationship_to_proband':
+        case 'relationship_to_proband_code':
           return {
             ...baseOption,
             popoverSize: 'xs' as PopoverSize,
             options: sortOptions(getRelationshipOptions(apiFilters[key]) || []),
           };
-        case 'format':
+        case 'format_code':
           return {
             ...baseOption,
             options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),

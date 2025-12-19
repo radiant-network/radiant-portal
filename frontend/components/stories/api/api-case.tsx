@@ -494,7 +494,7 @@ export async function httpCaseSearchApiResponse() {
 
 export async function httpCaseFiltersApiResponse() {
   return HttpResponse.json({
-    status: [
+    status_code: [
       {
         key: 'incomplete',
         label: 'Incomplete',
@@ -531,7 +531,7 @@ export async function httpCaseFiltersApiResponse() {
         count: 0,
       },
     ],
-    priority: [
+    priority_code: [
       {
         key: 'routine',
         label: 'Routine',
@@ -553,7 +553,7 @@ export async function httpCaseFiltersApiResponse() {
         count: 0,
       },
     ],
-    case_analysis: [
+    analysis_catalog_code: [
       {
         key: 'WGA',
         label: 'Whole Genome Analysis',
@@ -575,7 +575,7 @@ export async function httpCaseFiltersApiResponse() {
         count: 0,
       },
     ],
-    project: [
+    project_code: [
       {
         key: 'N2',
         label: 'NeuroDev Phase II',
@@ -587,7 +587,7 @@ export async function httpCaseFiltersApiResponse() {
         count: 9,
       },
     ],
-    diagnosis_lab: [
+    diagnosis_lab_code: [
       {
         key: 'CQGC',
         label: 'Quebec Clinical Genomic Center',
@@ -619,7 +619,7 @@ export async function httpCaseFiltersApiResponse() {
         count: 0,
       },
     ],
-    ordering_organization: [
+    ordering_organization_code: [
       {
         key: 'CHUSJ',
         label: 'Centre hospitalier universitaire Sainte-Justine',

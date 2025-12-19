@@ -150,7 +150,7 @@ func (m *MockRepository) GetVariantCasesFilters() (*types.VariantCasesFilters, e
 			{Bucket: "LA26334-5", Label: "likelyBenign"},
 			{Bucket: "LA6675-8", Label: "benign"},
 		},
-		CaseAnalysis: []types.Aggregation{
+		AnalysisCatalog: []types.Aggregation{
 			{Bucket: "WGA", Label: "Whole Genome Analysis"},
 			{Bucket: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
 		},
@@ -524,7 +524,7 @@ func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"case_analysis":[
+		"analysis_catalog_code":[
 			{"count": 0, "key":"WGA", "label":"Whole Genome Analysis"}, 
 			{"count": 0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
 		],
@@ -535,7 +535,7 @@ func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {
 			{"count": 0, "key":"LA26334-5", "label":"likelyBenign"}, 
 			{"count": 0, "key":"LA6675-8", "label":"benign"} 
 		],
-		"diagnosis_lab":[
+		"diagnosis_lab_code":[
 			{"count": 0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
 			{"count": 0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		]

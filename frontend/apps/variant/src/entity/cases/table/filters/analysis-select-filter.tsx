@@ -19,7 +19,7 @@ function AnalysisSelectFilter({ value = 'all', onChange }: AnalysisSelectFilterP
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">{t('variant_entity.cases.common_filters.tests.all_tests')}</SelectItem>
-        {filters?.case_analysis.map(analysis => (
+        {filters?.analysis_catalog_code.map(analysis => (
           <SelectItem key={analysis.key} value={analysis.key!}>
             {analysis.label}
           </SelectItem>

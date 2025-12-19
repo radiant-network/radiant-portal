@@ -301,14 +301,14 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 }
 
 func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, error) {
-	var caseAnalysis []Aggregation
+	var analysisCatalog []Aggregation
 	var diagnosisLab []Aggregation
 
-	txCaseAnalysis := r.db.Table(fmt.Sprintf("%s %s", types.AnalysisCatalogTable.FederationName, types.AnalysisCatalogTable.Alias))
-	txCaseAnalysis = txCaseAnalysis.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.AnalysisCatalogTable.Alias, types.AnalysisCatalogTable.Alias))
-	txCaseAnalysis = txCaseAnalysis.Order("bucket asc")
-	if err := txCaseAnalysis.Find(&caseAnalysis).Error; err != nil {
-		return nil, fmt.Errorf("error fetching case_analysis: %w", err)
+	txAnalysisCatalog := r.db.Table(fmt.Sprintf("%s %s", types.AnalysisCatalogTable.FederationName, types.AnalysisCatalogTable.Alias))
+	txAnalysisCatalog = txAnalysisCatalog.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.AnalysisCatalogTable.Alias, types.AnalysisCatalogTable.Alias))
+	txAnalysisCatalog = txAnalysisCatalog.Order("bucket asc")
+	if err := txAnalysisCatalog.Find(&analysisCatalog).Error; err != nil {
+		return nil, fmt.Errorf("error fetching analysis catalog: %w", err)
 	}
 
 	txDiagnosisLab := r.db.Table(fmt.Sprintf("%s %s", types.OrganizationTable.FederationName, types.OrganizationTable.Alias))
@@ -320,8 +320,8 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 	}
 
 	return &VariantCasesFilters{
-		Classification: types.MapToAggregationArray(),
-		CaseAnalysis:   caseAnalysis,
-		DiagnosisLab:   diagnosisLab,
+		Classification:  types.MapToAggregationArray(),
+		AnalysisCatalog: analysisCatalog,
+		DiagnosisLab:    diagnosisLab,
 	}, nil
 }

@@ -23,19 +23,19 @@ type DocumentFiltersInput = {
   search_criteria: Array<SearchCriterion>;
 };
 const FILTER_DEFAULTS = {
-  data_type: [],
-  format: [],
-  project: [],
-  diagnosis_lab: [],
-  relationship_to_proband: [],
+  data_type_code: [],
+  format_code: [],
+  project_code: [],
+  diagnosis_lab_code: [],
+  relationship_to_proband_code: [],
 };
 
 const CRITERIAS = {
-  project: { key: 'project_code', weight: 1, visible: true },
-  diagnosis_lab: { key: 'diagnosis_lab_code', weight: 2, visible: true },
-  relationship_to_proband: { key: 'relationship_to_proband_code', weight: 3, visible: true },
-  format: { key: 'format_code', weight: 4, visible: true },
-  data_type: { key: 'data_type_code', weight: 5, visible: true },
+  project_code: { key: 'project_code', weight: 1, visible: true },
+  diagnosis_lab_code: { key: 'diagnosis_lab_code', weight: 2, visible: true },
+  relationship_to_proband_code: { key: 'relationship_to_proband_code', weight: 3, visible: true },
+  format_code: { key: 'format_code', weight: 4, visible: true },
+  data_type_code: { key: 'data_type_code', weight: 5, visible: true },
 };
 
 async function fetchFilters(searchCriteria: DocumentFiltersInput) {
@@ -75,26 +75,26 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
       };
 
       switch (key) {
-        case 'diagnosis_lab':
+        case 'diagnosis_lab_code':
           return {
             ...baseOption,
             popoverSize: 'lg' as PopoverSize,
             withTooltip: true,
             options: sortOptions(apiFilters[key] || []),
           };
-        case 'data_type':
+        case 'data_type_code':
           return {
             ...baseOption,
             popoverSize: 'md' as PopoverSize,
             options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
           };
-        case 'relationship_to_proband':
+        case 'relationship_to_proband_code':
           return {
             ...baseOption,
             popoverSize: 'xs' as PopoverSize,
             options: sortOptions(getRelationshipOptions(apiFilters[key]) || []),
           };
-        case 'format':
+        case 'format_code':
           return {
             ...baseOption,
             options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),

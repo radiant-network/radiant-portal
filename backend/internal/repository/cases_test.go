@@ -413,10 +413,15 @@ func Test_GetCasesFilters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, len((*filters).Status), 7)
 		assert.Equal(t, len((*filters).Priority), 4)
-		assert.Equal(t, len((*filters).CaseAnalysis), 4)
+		assert.Equal(t, len((*filters).AnalysisCatalog), 4)
 		assert.Equal(t, len((*filters).Project), 2)
 		assert.Equal(t, len((*filters).DiagnosisLab), 2)
 		assert.Equal(t, len((*filters).OrderingOrganization), 6)
+		assert.Equal(t, 3, len((*filters).ResolutionStatus))
+		assert.Equal(t, 3, len((*filters).LifeStatus))
+		assert.Equal(t, 2, len((*filters).CaseCategory))
+		assert.Equal(t, 2, len((*filters).Panel))
+		assert.Equal(t, 2, len((*filters).CaseType))
 	})
 }
 

@@ -800,37 +800,67 @@ export interface CaseFilters {
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'case_analysis': Array<Aggregation>;
+    'analysis_catalog_code': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'diagnosis_lab': Array<Aggregation>;
+    'case_category_code': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'ordering_organization': Array<Aggregation>;
+    'case_type_code': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'priority': Array<Aggregation>;
+    'diagnosis_lab_code': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'project': Array<Aggregation>;
+    'life_status_code': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof CaseFilters
      */
-    'status': Array<Aggregation>;
+    'ordering_organization_code': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
+    'panel_code': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
+    'priority_code': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
+    'project_code': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
+    'resolution_status_code': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof CaseFilters
+     */
+    'status_code': Array<Aggregation>;
 }
 /**
  * 
@@ -1470,31 +1500,31 @@ export interface DocumentFilters {
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'data_type': Array<Aggregation>;
+    'data_type_code': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'diagnosis_lab'?: Array<Aggregation>;
+    'diagnosis_lab_code'?: Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'format': Array<Aggregation>;
+    'format_code': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'project'?: Array<Aggregation>;
+    'project_code'?: Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
      * @memberof DocumentFilters
      */
-    'relationship_to_proband': Array<Aggregation>;
+    'relationship_to_proband_code': Array<Aggregation>;
 }
 /**
  * 
@@ -4064,7 +4094,7 @@ export interface VariantCasesFilters {
      * @type {Array<Aggregation>}
      * @memberof VariantCasesFilters
      */
-    'case_analysis': Array<Aggregation>;
+    'analysis_catalog_code': Array<Aggregation>;
     /**
      * 
      * @type {Array<Aggregation>}
@@ -4076,7 +4106,7 @@ export interface VariantCasesFilters {
      * @type {Array<Aggregation>}
      * @memberof VariantCasesFilters
      */
-    'diagnosis_lab': Array<Aggregation>;
+    'diagnosis_lab_code': Array<Aggregation>;
 }
 /**
  * 

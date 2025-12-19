@@ -376,10 +376,15 @@ var CaseResolutionStatusCodeField = Field{
 }
 
 type CaseFilters struct {
-	Status               []Aggregation `json:"status" validate:"required"`
-	Priority             []Aggregation `json:"priority" validate:"required"`
-	CaseAnalysis         []Aggregation `json:"case_analysis" validate:"required"`
-	Project              []Aggregation `json:"project" validate:"required"`
-	DiagnosisLab         []Aggregation `json:"diagnosis_lab" validate:"required"`
-	OrderingOrganization []Aggregation `json:"ordering_organization" validate:"required"`
+	Status               []Aggregation `json:"status_code" validate:"required"`
+	Priority             []Aggregation `json:"priority_code" validate:"required"`
+	AnalysisCatalog      []Aggregation `json:"analysis_catalog_code" validate:"required"`
+	Project              []Aggregation `json:"project_code" validate:"required"`
+	DiagnosisLab         []Aggregation `json:"diagnosis_lab_code" validate:"required"`
+	OrderingOrganization []Aggregation `json:"ordering_organization_code" validate:"required"`
+	ResolutionStatus     []Aggregation `json:"resolution_status_code" validate:"required"`
+	Panel                []Aggregation `json:"panel_code" validate:"required"`
+	LifeStatus           []Aggregation `json:"life_status_code" validate:"required"`
+	CaseCategory         []Aggregation `json:"case_category_code" validate:"required"`
+	CaseType             []Aggregation `json:"case_type_code" validate:"required"`
 }

@@ -727,12 +727,12 @@
         "view_variant": "View Variants"
       },
       "filters": {
-        "priority": "Priority",
-        "status": "Status",
-        "case_analysis": "Analysis",
-        "project": "Project",
-        "diagnosis_lab": "Diagnostic Lab",
-        "ordering_organization": "Prescribing Institution"
+        "priority_code": "Priority",
+        "status_code": "Status",
+        "analysis_catalog_code": "Analysis",
+        "project_code": "Project",
+        "diagnosis_lab_code": "Diagnostic Lab",
+        "ordering_organization_code": "Prescribing Institution"
       },
       "headers": {
         "case_id": "Case",
@@ -765,11 +765,11 @@
   },
   "files": {
     "filters": {
-      "data_type": "Type",
-      "format": "Format",
-      "project": "Project",
-      "diagnosis_lab": "Diagnostic Lab",
-      "relationship_to_proband": "Relationship"
+      "data_type_code": "Type",
+      "format_code": "Format",
+      "project_code": "Project",
+      "diagnosis_lab_code": "Diagnostic Lab",
+      "relationship_to_proband_code": "Relationship"
     }
   },
   "interpretation": {

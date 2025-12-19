@@ -146,24 +146,24 @@ func Test_DocumentsFiltersHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"data_type":[
+		"data_type_code":[
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"ssnv", "label":"Somatic SNV"}
 		], 
-		"format":[
+		"format_code":[
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
 			{"count":0, "key":"vcf", "label":"VCF File"}
 		], 
-		"diagnosis_lab":[
+		"diagnosis_lab_code":[
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], 
-		"project":[
+		"project_code":[
 			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
 			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
 		], 
-		"relationship_to_proband":[
+		"relationship_to_proband_code":[
 			{"count":0, "key":"proband", "label":"Proband"}, 
 			{"count":0, "key":"father", "label":"Father"}, 
 			{"count":0, "key":"mother", "label":"Mother"}

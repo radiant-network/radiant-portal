@@ -108,37 +108,54 @@ func Test_GetCasesFilters(t *testing.T) {
 			"search_criteria":[{"field": "status_code", "value": ["draft"]}]
 		}`
 	expected := `{
-		"case_analysis":[
-			{"count":1, "key":"WGA", "label":"Whole Genome Analysis"}, 
+		"analysis_catalog_code":[
 			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"},
 			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
-			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"}], 
-		"diagnosis_lab":[
+			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"},
+			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}], 
+		"diagnosis_lab_code":[
 			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}],
-		"priority":[
-			{"count":1, "key":"routine", "label":"Routine"}, 
+		"priority_code":[
 			{"count":0, "key":"asap", "label":"Asap"},
+			{"count":0, "key":"routine", "label":"Routine"},
 			{"count":0, "key":"stat", "label":"Stat"},
 			{"count":0, "key":"urgent", "label":"Urgent"}], 
-		"project":[
-			{"count":1, "key":"N1", "label":"NeuroDev Phase I"}, 
+		"project_code":[
+			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
 			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}], 
-		"ordering_organization":[
-			{"count":1, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}, 
+		"ordering_organization_code":[
+			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"},
 			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"},
 			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
 			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}], 
-		"status":[
-			{"count":1, "key":"draft", "label":"Draft"}, 
+		"status_code":[
 			{"count":0, "key":"completed", "label":"Completed"},
+			{"count":0, "key":"draft", "label":"Draft"}, 
 			{"count":0, "key":"in_progress", "label":"In Progress"}, 
 			{"count":0, "key":"incomplete", "label":"Incomplete"}, 
 			{"count":0, "key":"revoke", "label":"Revoke"},
 			{"count":0, "key":"submitted", "label":"Submitted"},
-			{"count":0, "key":"unknown", "label":"Unknown"}]	
+			{"count":0, "key":"unknown", "label":"Unknown"}],
+		"resolution_status_code":[
+			{"count":0, "key":"inconclusive", "label":"Inconclusive"},
+			{"count":0, "key":"solved", "label":"Solved"},
+			{"count":0, "key":"unsolved", "label":"Unsolved"}],
+		"life_status_code":[
+			{"count":0, "key":"alive", "label":"Alive"},
+			{"count":0, "key":"deceased", "label":"Deceased"},
+			{"count":0, "key":"unknown", "label":"Unknown"}],
+		"case_category_code":[
+			{"count":0, "key":"postnatal", "label":"Postnatal"},
+			{"count":0, "key":"prenatal", "label":"Prenatal"}],
+		"panel_code":[
+			{"count":0, "key":"EPILEP", "label":"Epilepsy"},
+			{"count":0, "key":"HEART", "label":"Heart diseases"}],
+		"case_type_code":[
+			{"count":0, "key":"germline", "label":"Germline"},
+			{"count":0, "key":"somatic", "label":"Somatic"}]
 		}`
 	assertGetCasesFilters(t, "simple", body, expected)
 }
@@ -323,7 +340,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			"search_criteria":[{"field": "format_code", "value": ["vcf"]}]
 		}`
 	expected := `{
-		"data_type":[
+		"data_type_code":[
 			{"count":3, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
@@ -340,7 +357,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"ssup", "label":"Sequencing Data Supplement"}, 
 			{"count":0, "key":"ssv", "label":"Somatic SV"}
 		], 
-		"format":[
+		"format_code":[
 			{"count":3, "key":"vcf", "label":"VCF File"}, 
 			{"count":0, "key":"bed", "label":"BED File"}, 
 			{"count":0, "key":"bw", "label":"BW File"}, 
@@ -355,7 +372,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"tsv", "label":"TSV File"}, 
 			{"count":0, "key":"txt", "label":"Text File"}
 		], 
-		"relationship_to_proband":[
+		"relationship_to_proband_code":[
 			{"count":1, "key":"father", "label":"Father"}, 
 			{"count":1, "key":"mother", "label":"Mother"},
 			{"count":1, "key":"proband", "label":"Proband"}, 

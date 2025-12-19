@@ -23,21 +23,21 @@ type FiltersGroupFormProps = {
 };
 
 const CRITERIAS = {
-  priority: { key: 'priority_code', weight: 1, visible: true },
-  status: { key: 'status_code', weight: 2, visible: true },
-  case_analysis: { key: 'analysis_catalog_code', weight: 3, visible: true },
-  project: { key: 'project_code', visible: false },
-  diagnosis_lab: { key: 'diagnosis_lab_code', visible: false },
-  ordering_organization: { key: 'ordering_organization_code', visible: false },
+  priority_code: { key: 'priority_code', weight: 1, visible: true },
+  status_code: { key: 'status_code', weight: 2, visible: true },
+  analysis_catalog_code: { key: 'analysis_catalog_code', weight: 3, visible: true },
+  project_code: { key: 'project_code', visible: false },
+  diagnosis_lab_code: { key: 'diagnosis_lab_code', visible: false },
+  ordering_organization_code: { key: 'ordering_organization_code', visible: false },
 };
 
 export const FILTER_DEFAULTS = {
-  priority: [],
-  status: [],
-  case_analysis: [],
-  project: [],
-  diagnosis_lab: [],
-  ordering_organization: [],
+  priority_code: [],
+  status_code: [],
+  analysis_catalog_code: [],
+  project_code: [],
+  diagnosis_lab_code: [],
+  ordering_organization_code: [],
 };
 
 async function fetchFilters(searchCriteria: CaseFiltersInput) {
@@ -75,14 +75,14 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       };
 
       switch (key) {
-        case 'status':
+        case 'status_code':
           return {
             ...baseOption,
             options: sortOptions(getItemStatus(apiFilters[key] || [], t)),
           };
-        case 'project':
-        case 'diagnosis_lab':
-        case 'ordering_organization':
+        case 'project_code':
+        case 'diagnosis_lab_code':
+        case 'ordering_organization_code':
           return {
             ...baseOption,
             popoverSize: 'lg' as PopoverSize,
@@ -90,12 +90,12 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
             options: sortOptions(apiFilters[key] || []),
             withTooltip: true,
           };
-        case 'priority':
+        case 'priority_code':
           return {
             ...baseOption,
             options: getItemPriority(apiFilters[key] || []),
           };
-        case 'case_analysis':
+        case 'analysis_catalog_code':
           return {
             ...baseOption,
             options: sortOptions(apiFilters[key] || []),
