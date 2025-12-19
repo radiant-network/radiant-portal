@@ -15,7 +15,7 @@ type FamilyRepository struct {
 
 type FamilyDAO interface {
 	GetFamilyById(familyId int) (*Family, error)
-	CreateFamily(family *types.Family) error
+	CreateFamily(family *Family) error
 }
 
 func NewFamilyRepository(db *gorm.DB) *FamilyRepository {
@@ -34,6 +34,6 @@ func (r *FamilyRepository) GetFamilyById(familyId int) (*Family, error) {
 	return &family, nil
 }
 
-func (r *FamilyRepository) CreateFamily(family *types.Family) error {
+func (r *FamilyRepository) CreateFamily(family *Family) error {
 	return r.db.Create(family).Error
 }

@@ -68,3 +68,11 @@ func Test_CreateObservationCategorical_OK(t *testing.T) {
 		db.Exec("DELETE FROM obs_categorical WHERE id=9999")
 	})
 }
+
+func Test_CreateObservationCategorical_NilError(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewObservationCategoricalRepository(db)
+		err := repo.CreateObservationCategorical(nil)
+		assert.Error(t, err)
+	})
+}

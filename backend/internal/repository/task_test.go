@@ -38,6 +38,14 @@ func Test_CreateAndGetTask_OK(t *testing.T) {
 	})
 }
 
+func Test_CreateTask_NilError(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewTaskRepository(db)
+		err := repo.CreateTask(nil)
+		assert.Error(t, err)
+	})
+}
+
 func Test_GetTaskById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
@@ -73,6 +81,14 @@ func Test_CreateAndGetTaskContext_OK(t *testing.T) {
 	})
 }
 
+func Test_CreateTaskContext_NilError(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewTaskRepository(db)
+		err := repo.CreateTaskContext(nil)
+		assert.Error(t, err)
+	})
+}
+
 func Test_GetTaskContextByTaskId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
@@ -104,6 +120,14 @@ func Test_CreateAndGetTaskHasDocument_OK(t *testing.T) {
 
 		// Clean up
 		db.Exec("DELETE FROM task_has_document WHERE task_id = 1 AND document_id = 265")
+	})
+}
+
+func Test_CreateTaskHasDocument_NilError(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewTaskRepository(db)
+		err := repo.CreateTaskHasDocument(nil)
+		assert.Error(t, err)
 	})
 }
 

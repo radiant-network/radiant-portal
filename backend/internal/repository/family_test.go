@@ -57,3 +57,11 @@ func Test_CreateFamily_OK(t *testing.T) {
 		db.Exec("DELETE FROM family WHERE id=999")
 	})
 }
+
+func Test_CreateFamily_NilError(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewFamilyRepository(db)
+		err := repo.CreateFamily(nil)
+		assert.Error(t, err)
+	})
+}
