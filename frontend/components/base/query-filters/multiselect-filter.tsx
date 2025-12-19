@@ -343,6 +343,9 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
 
     setItems(augmentedData || []);
 
+    // Update visibleItemsCount when data changes
+    setVisibleItemsCount(getVisibleItemsCount(augmentedData?.length || 0, maxVisibleItems));
+
     // Preserve expanded state when user has explicitly expanded the list
     const isCurrentlyExpanded = visibleItemsCount > maxVisibleItems;
     if (isCurrentlyExpanded && augmentedData) {
