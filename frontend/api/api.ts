@@ -613,6 +613,12 @@ export interface CaseBatch {
     'submitter_case_id': string;
     /**
      * 
+     * @type {Array<CaseTaskBatch>}
+     * @memberof CaseBatch
+     */
+    'tasks': Array<CaseTaskBatch>;
+    /**
+     * 
      * @type {string}
      * @memberof CaseBatch
      */
@@ -1256,6 +1262,55 @@ export interface CaseTask {
      * @memberof CaseTask
      */
     'type_name': string;
+}
+/**
+ * 
+ * @export
+ * @interface CaseTaskBatch
+ */
+export interface CaseTaskBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'aliquot'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'genome_build'?: string;
+    /**
+     * 
+     * @type {Array<InputDocumentBatch>}
+     * @memberof CaseTaskBatch
+     */
+    'input_documents'?: Array<InputDocumentBatch>;
+    /**
+     * 
+     * @type {Array<OutputDocumentBatch>}
+     * @memberof CaseTaskBatch
+     */
+    'output_documents': Array<OutputDocumentBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'pipeline_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'pipeline_version': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseTaskBatch
+     */
+    'type_code': string;
 }
 /**
  * 
@@ -2644,6 +2699,19 @@ export interface IGVTracks {
 /**
  * 
  * @export
+ * @interface InputDocumentBatch
+ */
+export interface InputDocumentBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof InputDocumentBatch
+     */
+    'url': string;
+}
+/**
+ * 
+ * @export
  * @interface InterpretationGermline
  */
 export interface InterpretationGermline {
@@ -3106,6 +3174,55 @@ export interface OmimGenePanel {
      * @memberof OmimGenePanel
      */
     'panel'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface OutputDocumentBatch
+ */
+export interface OutputDocumentBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'data_category_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'data_type_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'format_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'hash'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof OutputDocumentBatch
+     */
+    'size': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof OutputDocumentBatch
+     */
+    'url': string;
 }
 /**
  * 

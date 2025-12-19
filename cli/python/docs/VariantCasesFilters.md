@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**case_analysis** | [**List[Aggregation]**](Aggregation.md) |  | 
+**analysis_catalog_code** | [**List[Aggregation]**](Aggregation.md) |  | 
 **classification** | [**List[Aggregation]**](Aggregation.md) |  | 
-**diagnosis_lab** | [**List[Aggregation]**](Aggregation.md) |  | 
+**diagnosis_lab_code** | [**List[Aggregation]**](Aggregation.md) |  | 
 
 ## Example
 

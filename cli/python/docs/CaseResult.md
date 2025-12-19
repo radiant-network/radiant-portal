@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **analysis_catalog_code** | **str** |  | [optional] 
 **analysis_catalog_name** | **str** |  | [optional] 
+**case_category_code** | **str** |  | [optional] 
 **case_id** | **int** |  | 
 **case_type** | **str** |  | [optional] 
 **created_on** | **str** |  | 
@@ -18,13 +19,20 @@ Name | Type | Description | Notes
 **ordering_organization_name** | **str** |  | [optional] 
 **organization_code** | **str** |  | [optional] 
 **organization_name** | **str** |  | [optional] 
+**panel_code** | **str** |  | [optional] 
+**panel_name** | **str** |  | [optional] 
 **prescriber** | **str** |  | [optional] 
 **primary_condition_id** | **str** |  | [optional] 
 **primary_condition_name** | **str** |  | [optional] 
 **priority_code** | **str** |  | [optional] 
+**proband_first_name** | **str** |  | [optional] 
 **proband_id** | **int** |  | [optional] 
+**proband_jhn** | **str** |  | [optional] 
+**proband_last_name** | **str** |  | [optional] 
+**proband_life_status_code** | **str** |  | [optional] 
 **project_code** | **str** |  | [optional] 
 **project_name** | **str** |  | [optional] 
+**resolution_status_code** | **str** |  | [optional] 
 **status_code** | **str** |  | 
 **submitter_proband_id** | **str** |  | [optional] 
 **updated_on** | **str** |  | 

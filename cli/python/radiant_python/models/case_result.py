@@ -28,6 +28,7 @@ class CaseResult(BaseModel):
     """ # noqa: E501
     analysis_catalog_code: Optional[StrictStr] = None
     analysis_catalog_name: Optional[StrictStr] = None
+    case_category_code: Optional[StrictStr] = None
     case_id: StrictInt
     case_type: Optional[StrictStr] = None
     created_on: StrictStr
@@ -38,17 +39,24 @@ class CaseResult(BaseModel):
     ordering_organization_name: Optional[StrictStr] = None
     organization_code: Optional[StrictStr] = None
     organization_name: Optional[StrictStr] = None
+    panel_code: Optional[StrictStr] = None
+    panel_name: Optional[StrictStr] = None
     prescriber: Optional[StrictStr] = None
     primary_condition_id: Optional[StrictStr] = None
     primary_condition_name: Optional[StrictStr] = None
     priority_code: Optional[StrictStr] = None
+    proband_first_name: Optional[StrictStr] = None
     proband_id: Optional[StrictInt] = None
+    proband_jhn: Optional[StrictStr] = None
+    proband_last_name: Optional[StrictStr] = None
+    proband_life_status_code: Optional[StrictStr] = None
     project_code: Optional[StrictStr] = None
     project_name: Optional[StrictStr] = None
+    resolution_status_code: Optional[StrictStr] = None
     status_code: StrictStr
     submitter_proband_id: Optional[StrictStr] = None
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_variants", "ordering_organization_code", "ordering_organization_name", "organization_code", "organization_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "proband_id", "project_code", "project_name", "status_code", "submitter_proband_id", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_variants", "ordering_organization_code", "ordering_organization_name", "organization_code", "organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "proband_first_name", "proband_id", "proband_jhn", "proband_last_name", "proband_life_status_code", "project_code", "project_name", "resolution_status_code", "status_code", "submitter_proband_id", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -103,6 +111,7 @@ class CaseResult(BaseModel):
         _obj = cls.model_validate({
             "analysis_catalog_code": obj.get("analysis_catalog_code"),
             "analysis_catalog_name": obj.get("analysis_catalog_name"),
+            "case_category_code": obj.get("case_category_code"),
             "case_id": obj.get("case_id"),
             "case_type": obj.get("case_type"),
             "created_on": obj.get("created_on"),
@@ -113,13 +122,20 @@ class CaseResult(BaseModel):
             "ordering_organization_name": obj.get("ordering_organization_name"),
             "organization_code": obj.get("organization_code"),
             "organization_name": obj.get("organization_name"),
+            "panel_code": obj.get("panel_code"),
+            "panel_name": obj.get("panel_name"),
             "prescriber": obj.get("prescriber"),
             "primary_condition_id": obj.get("primary_condition_id"),
             "primary_condition_name": obj.get("primary_condition_name"),
             "priority_code": obj.get("priority_code"),
+            "proband_first_name": obj.get("proband_first_name"),
             "proband_id": obj.get("proband_id"),
+            "proband_jhn": obj.get("proband_jhn"),
+            "proband_last_name": obj.get("proband_last_name"),
+            "proband_life_status_code": obj.get("proband_life_status_code"),
             "project_code": obj.get("project_code"),
             "project_name": obj.get("project_name"),
+            "resolution_status_code": obj.get("resolution_status_code"),
             "status_code": obj.get("status_code"),
             "submitter_proband_id": obj.get("submitter_proband_id"),
             "updated_on": obj.get("updated_on")

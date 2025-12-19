@@ -5,12 +5,17 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**case_analysis** | [**List[Aggregation]**](Aggregation.md) |  | 
-**diagnosis_lab** | [**List[Aggregation]**](Aggregation.md) |  | 
-**ordering_organization** | [**List[Aggregation]**](Aggregation.md) |  | 
-**priority** | [**List[Aggregation]**](Aggregation.md) |  | 
-**project** | [**List[Aggregation]**](Aggregation.md) |  | 
-**status** | [**List[Aggregation]**](Aggregation.md) |  | 
+**analysis_catalog_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**case_category_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**case_type_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**diagnosis_lab_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**life_status_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**ordering_organization_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**panel_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**priority_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**project_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**resolution_status_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**status_code** | [**List[Aggregation]**](Aggregation.md) |  | 
 
 ## Example
 
