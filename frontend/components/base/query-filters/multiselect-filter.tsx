@@ -171,10 +171,19 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     return queryBuilderItems;
   };
 
+  // All items (augmented data)
+  const [allItems, setAllItems] = useState<Aggregation[]>(aggregationData || []);
+  // Currently displayed items (filtered or all)
   const [items, setItems] = useState<Aggregation[]>(aggregationData || []);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   // items that are currently checked
   const [selectedItems, setSelectedItems] = useState<string[]>(getInitialSelectedItems());
-  const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
+  // Number of items currently displayed in the list (controls show more/less functionality)
+  const [visibleItemsCount, setVisibleItemsCount] = useState(
+    getVisibleItemsCount((aggregationData || []).length, maxVisibleItems),
+  );
+  // Track if user manually expanded
+  const [isManuallyExpanded, setIsManuallyExpanded] = useState<boolean>(false);
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
   const [hasBeenReset, setHasBeenReset] = useState(false);
   const [lastQueryBuilderState, setLastQueryBuilderState] = useState<string>(() => {
@@ -341,17 +350,29 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       });
     });
 
-    setItems(augmentedData || []);
+    setAllItems(augmentedData || []);
+
+    // Apply search filter if there's a search term
+    const filteredItems = searchTerm.trim() ? searchOptions(searchTerm, augmentedData || []) : augmentedData || [];
+
+    setItems(filteredItems);
 
     // Update visibleItemsCount when data changes
-    setVisibleItemsCount(getVisibleItemsCount(augmentedData?.length || 0, maxVisibleItems));
+    const targetLength = filteredItems.length;
 
-    // Preserve expanded state when user has explicitly expanded the list
-    const isCurrentlyExpanded = visibleItemsCount > maxVisibleItems;
-    if (isCurrentlyExpanded && augmentedData) {
-      setVisibleItemsCount(augmentedData.length);
+    // If user manually expanded, preserve the expanded state
+    if (isManuallyExpanded && targetLength > maxVisibleItems) {
+      setVisibleItemsCount(targetLength);
     } else {
-      setVisibleItemsCount(getVisibleItemsCount(augmentedData?.length || 0, maxVisibleItems));
+      const newVisibleCount = getVisibleItemsCount(targetLength, maxVisibleItems);
+      // Only update if different to avoid infinite loops
+      if (visibleItemsCount !== newVisibleCount) {
+        setVisibleItemsCount(newVisibleCount);
+      }
+      // Reset manually expanded state if we're back to default size
+      if (isManuallyExpanded && newVisibleCount <= maxVisibleItems) {
+        setIsManuallyExpanded(false);
+      }
     }
   }, [
     aggregationData,
@@ -363,7 +384,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     hasBeenReset,
     hasUnappliedItems,
     isFromSessionStorage,
-    visibleItemsCount,
+    searchTerm,
   ]);
 
   // Save temporarily in global sessionStorage
@@ -395,68 +416,38 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     }
   }, [withDictionaryToggle, globalStorageKey, field.key, field.withDictionary]);
 
-  /**
-   * Updates the filter list based on the search query.
-   *
-   * This function:
-   * 1. Retrieves currently applied filter values from the query builder
-   * 2. Augments the aggregation data by adding any applied values that have count 0
-   *    (ensures applied values remain visible even when dictionary is disabled)
-   * 3. If no search term is provided, displays all augmented data
-   * 4. If search term is provided, filters the augmented data using searchOptions
-   * 5. Updates the visible items list and count accordingly
-   *
-   * @param search - The search term to filter by
-   */
   const updateSearch = useCallback(
     (search: string) => {
-      // Get applied filter items
-      const appliedFilterItems: string[] = (() => {
-        const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
-          .getResolvedActiveQuery(appId)
-          // @ts-ignore
-          .content.find((x: IValueFilter) => x.content.field === field.key);
-        return (prevSelectedItems?.content.value as string[]) || [];
-      })();
-
-      // Augment data with applied values that have count 0
-      const augmentedData = [...(aggregationData || [])];
-      if (appliedFilterItems.length > 0) {
-        appliedFilterItems.forEach(appliedValue => {
-          const existsInData = augmentedData.some(item => item.key === appliedValue);
-          if (!existsInData) {
-            augmentedData.push({
-              key: appliedValue,
-              count: 0,
-              label: appliedValue,
-            });
-          }
-        });
-      }
+      setSearchTerm(search);
+      // Reset manual expansion state when searching
+      setIsManuallyExpanded(false);
 
       if (!search.trim()) {
-        setItems(augmentedData);
-        setVisibleItemsCount(getVisibleItemsCount(augmentedData.length, maxVisibleItems));
+        setItems(allItems);
+        setVisibleItemsCount(getVisibleItemsCount(allItems.length, maxVisibleItems));
         return;
       }
 
-      const results = searchOptions(search, augmentedData);
+      const results = searchOptions(search, allItems);
+      setItems(results);
+
       if (maxVisibleItems > results.length) {
         setVisibleItemsCount(results.length);
       } else if (results.length > maxVisibleItems) {
         setVisibleItemsCount(maxVisibleItems);
       }
-      setItems(results);
     },
-    [aggregationData, appId, field.key, maxVisibleItems],
+    [allItems, maxVisibleItems],
   );
 
   const showMore = useCallback(() => {
     setVisibleItemsCount(items.length);
+    setIsManuallyExpanded(true);
   }, [items]);
 
   const showLess = useCallback(() => {
     setVisibleItemsCount(maxVisibleItems);
+    setIsManuallyExpanded(false);
   }, [maxVisibleItems]);
 
   const selectAll = useCallback(() => {
