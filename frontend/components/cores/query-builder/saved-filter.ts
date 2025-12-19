@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 import { Sqon } from '@/api/api';
 
 import { ISavedFilter, SavedFilterTypeEnum } from '../saved-filter';
-import { ISyntheticSqon } from '../sqon';
+import { ISyntheticSqon, sanitizeSqonContent } from '../sqon';
 
 import { getNewSavedFilter } from './utils/saved-filter';
 import { formatQueriesWithPill } from './utils/sqon';
@@ -263,10 +263,9 @@ export const createSavedFilter = (
 
       return !rawSavedFilter.queries.every(savedFilterQuery => {
         const foundQuery = queryBuilder.getRawQueries().find(query => query.id == savedFilterQuery.id);
-
         if (foundQuery) {
           return isEqual(
-            { content: foundQuery.content, id: foundQuery.id, op: foundQuery.op },
+            { content: sanitizeSqonContent(foundQuery.content), id: foundQuery.id, op: foundQuery.op },
             { content: savedFilterQuery.content, id: savedFilterQuery.id, op: savedFilterQuery.op },
           );
         }

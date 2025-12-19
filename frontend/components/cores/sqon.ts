@@ -150,3 +150,73 @@ export type ResolveSyntheticSqonFunc = (
   syntheticSqon: ISyntheticSqon | TSyntheticSqonContentValue,
   sqonsList: ISyntheticSqon[],
 ) => ISqonGroupFilter;
+
+/**
+ * Sqon's content is a TSyntheticSqonContentValue.
+ * - ISqonGroupFilter
+ * - IValueFilter
+ * - IValueQuery
+ * - IValueFilterQuery
+ * - IWildCardValueFilter
+ * - number;
+ *
+ * But some type can have undefined values and they can false negative on object equality check.
+ * We needs to sanitize (remove undefined) the value to allow the comparaison.
+ *
+ * @EXAMPLE: IValueContent can have multiple undefined values. Those values aren't manage
+ *  by the api. So event if both those Sqon are equal, if we do not remove the undefined values
+ *  the equal will creates a false positive
+ * {
+ *   "field": "chromosome",
+ *   index : undefined,
+ *   isUploadedList : undefined,
+ *   overrideValuesName : undefined,
+ *   remoteComponent : undefined,
+ *   "value": [
+ *       "2",
+ *       "1"
+ *   ]
+ * }
+ *
+ * Will not equal
+ * {
+ *   "field": "chromosome",
+ *   "value": [
+ *       "2",
+ *       "1"
+ *   ]
+ * }
+ */
+export function sanitizeSqonContent(contents: TSyntheticSqonContentValue[]) {
+  return contents.map(c => {
+    // Number
+    if (typeof c === 'number') {
+      return c;
+    }
+    // IWildCarValueContent
+    if ('fields' in c) {
+      return {
+        fields: c.fields,
+      };
+    }
+
+    // IValueFilter, IValueQuery, IValueFilterQuery
+    if ('content' in c) {
+      const sanitizedContent = { ...c.content };
+
+      // content is IValueContent
+      Object.keys(sanitizedContent).forEach(key => {
+        if (sanitizedContent[key as keyof TSyntheticSqonContentValue] === undefined) {
+          delete c.content[key as keyof TSyntheticSqonContentValue];
+        }
+      });
+
+      return {
+        content: sanitizedContent,
+        op: c.op,
+      };
+    }
+
+    return c;
+  });
+}
