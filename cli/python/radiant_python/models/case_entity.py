@@ -32,6 +32,8 @@ class CaseEntity(BaseModel):
     analysis_catalog_code: Optional[StrictStr] = None
     analysis_catalog_name: Optional[StrictStr] = None
     assays: List[CaseAssay]
+    case_category_code: StrictStr
+    case_category_name: StrictStr
     case_id: StrictInt
     case_type: Optional[StrictStr] = None
     created_on: StrictStr
@@ -41,6 +43,8 @@ class CaseEntity(BaseModel):
     note: Optional[StrictStr] = None
     ordering_organization_code: Optional[StrictStr] = None
     ordering_organization_name: Optional[StrictStr] = None
+    panel_code: Optional[StrictStr] = None
+    panel_name: Optional[StrictStr] = None
     prescriber: Optional[StrictStr] = None
     primary_condition_id: Optional[StrictStr] = None
     primary_condition_name: Optional[StrictStr] = None
@@ -50,7 +54,7 @@ class CaseEntity(BaseModel):
     status_code: StrictStr
     tasks: List[CaseTask]
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "assays", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "members", "note", "ordering_organization_code", "ordering_organization_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "status_code", "tasks", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "assays", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "status_code", "tasks", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -127,6 +131,8 @@ class CaseEntity(BaseModel):
             "analysis_catalog_code": obj.get("analysis_catalog_code"),
             "analysis_catalog_name": obj.get("analysis_catalog_name"),
             "assays": [CaseAssay.from_dict(_item) for _item in obj["assays"]] if obj.get("assays") is not None else None,
+            "case_category_code": obj.get("case_category_code"),
+            "case_category_name": obj.get("case_category_name"),
             "case_id": obj.get("case_id"),
             "case_type": obj.get("case_type"),
             "created_on": obj.get("created_on"),
@@ -136,6 +142,8 @@ class CaseEntity(BaseModel):
             "note": obj.get("note"),
             "ordering_organization_code": obj.get("ordering_organization_code"),
             "ordering_organization_name": obj.get("ordering_organization_name"),
+            "panel_code": obj.get("panel_code"),
+            "panel_name": obj.get("panel_name"),
             "prescriber": obj.get("prescriber"),
             "primary_condition_id": obj.get("primary_condition_id"),
             "primary_condition_name": obj.get("primary_condition_name"),

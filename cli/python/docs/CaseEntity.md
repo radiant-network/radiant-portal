@@ -9,6 +9,8 @@ Name | Type | Description | Notes
 **analysis_catalog_code** | **str** |  | [optional] 
 **analysis_catalog_name** | **str** |  | [optional] 
 **assays** | [**List[CaseAssay]**](CaseAssay.md) |  | 
+**case_category_code** | **str** |  | 
+**case_category_name** | **str** |  | 
 **case_id** | **int** |  | 
 **case_type** | **str** |  | [optional] 
 **created_on** | **str** |  | 
@@ -18,6 +20,8 @@ Name | Type | Description | Notes
 **note** | **str** |  | [optional] 
 **ordering_organization_code** | **str** |  | [optional] 
 **ordering_organization_name** | **str** |  | [optional] 
+**panel_code** | **str** |  | [optional] 
+**panel_name** | **str** |  | [optional] 
 **prescriber** | **str** |  | [optional] 
 **primary_condition_id** | **str** |  | [optional] 
 **primary_condition_name** | **str** |  | [optional] 

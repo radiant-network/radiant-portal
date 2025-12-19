@@ -9,6 +9,10 @@ Name | Type | Description | Notes
 **affected_status_code** | **str** |  | 
 **date_of_birth** | **str** |  | [optional] 
 **ethnicity_codes** | **List[str]** | TODO | [optional] 
+**first_name** | **str** |  | [optional] 
+**jhn** | **str** |  | [optional] 
+**last_name** | **str** |  | [optional] 
+**life_status_code** | **str** |  | 
 **non_observed_phenotypes** | [**List[Term]**](Term.md) |  | [optional] 
 **observed_phenotypes** | [**List[Term]**](Term.md) |  | [optional] 
 **organization_code** | **str** |  | [optional] 
