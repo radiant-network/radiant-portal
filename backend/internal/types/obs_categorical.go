@@ -8,7 +8,7 @@ type ObsCategorical struct {
 	Patient            Patient `gorm:"foreignKey:ID;references:PatientID"`
 	ObservationCode    string
 	Observation        Observation `gorm:"foreignKey:code;references:ObservationCode"`
-	CodeSystem         string
+	CodingSystem       string
 	CodeValue          string
 	OnsetCode          string
 	Onset              Onset `gorm:"foreignKey:code;references:OnsetCode"`
