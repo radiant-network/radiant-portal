@@ -35,31 +35,31 @@ class TestDocumentFilters(unittest.TestCase):
         model = DocumentFilters()
         if include_optional:
             return DocumentFilters(
-                data_type = [
+                data_type_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                diagnosis_lab = [
+                diagnosis_lab_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                format = [
+                format_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                project = [
+                project_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                relationship_to_proband = [
+                relationship_to_proband_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
@@ -68,19 +68,19 @@ class TestDocumentFilters(unittest.TestCase):
             )
         else:
             return DocumentFilters(
-                data_type = [
+                data_type_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                format = [
+                format_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                relationship_to_proband = [
+                relationship_to_proband_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 

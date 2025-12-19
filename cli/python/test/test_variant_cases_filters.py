@@ -35,7 +35,7 @@ class TestVariantCasesFilters(unittest.TestCase):
         model = VariantCasesFilters()
         if include_optional:
             return VariantCasesFilters(
-                case_analysis = [
+                analysis_catalog_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
@@ -47,7 +47,7 @@ class TestVariantCasesFilters(unittest.TestCase):
                         key = '', 
                         label = '', )
                     ],
-                diagnosis_lab = [
+                diagnosis_lab_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
@@ -56,7 +56,7 @@ class TestVariantCasesFilters(unittest.TestCase):
             )
         else:
             return VariantCasesFilters(
-                case_analysis = [
+                analysis_catalog_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
@@ -68,7 +68,7 @@ class TestVariantCasesFilters(unittest.TestCase):
                         key = '', 
                         label = '', )
                     ],
-                diagnosis_lab = [
+                diagnosis_lab_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
