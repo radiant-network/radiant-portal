@@ -21,8 +21,8 @@ type TaskDAO interface {
 	CreateTaskHasDocument(thd *TaskHasDocument) error
 
 	GetTaskById(taskId int) (*Task, error)
-	GetTaskContextByTaskId(taskId int) (*TaskContext, error)
-	GetTaskHasDocumentByTaskId(taskId int) (*TaskHasDocument, error)
+	GetTaskContextByTaskId(taskId int) ([]*TaskContext, error)
+	GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocument, error)
 }
 
 func NewTaskRepository(db *gorm.DB) *TaskRepository {
