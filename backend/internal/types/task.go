@@ -14,6 +14,23 @@ type Task struct {
 	CreatedOn       time.Time
 }
 
+type TaskContext struct {
+	TaskID                 int
+	Task                   Task `gorm:"foreignKey:TaskID;references:ID"`
+	CaseID                 *int
+	Case                   Case `gorm:"foreignKey:CaseID;references:ID"`
+	SequencingExperimentID *int
+	SequencingExperiment   SequencingExperiment `gorm:"foreignKey:SequencingExperimentID;references:ID"`
+}
+
+type TaskHasDocument struct {
+	TaskID     int
+	Task       Task `gorm:"foreignKey:TaskID;references:ID"`
+	DocumentID int
+	Document   Document `gorm:"foreignKey:DocumentID;references:ID"`
+	Type       string
+}
+
 var TaskHasDocumentTaskIdField = Field{
 	Name:          "task_id",
 	CanBeSelected: true,
@@ -42,4 +59,12 @@ var TaskContextTable = Table{
 
 func (Task) TableName() string {
 	return TaskTable.Name
+}
+
+func (TaskContext) TableName() string {
+	return TaskContextTable.Name
+}
+
+func (TaskHasDocument) TableName() string {
+	return TaskHasDocumentTable.Name
 }
