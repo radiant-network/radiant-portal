@@ -459,6 +459,77 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 	sampleDAO.AssertExpectations(t)
 }
 
+func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
+	orgDAO := &mockOrgDAO{}
+	sampleDAO := &mockSampleDAO{}
+
+	// Input batch record
+	r := &SequencingExperimentValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		SequencingExperiment: types.SequencingExperimentBatch{
+			SampleOrganizationCode: "ORG",
+			SubmitterSampleId:      "S1",
+			SequencingLabCode:      "LAB1",
+		},
+	}
+
+	// Mocked orgs and sample
+	orgDAO.
+		On("GetOrganizationByCode", "ORG").
+		Return(nil, nil)
+	orgDAO.
+		On("GetOrganizationByCode", "LAB1").
+		Return(&types.Organization{ID: 2}, nil)
+
+	err := r.preFetchValidationInfo(orgDAO, sampleDAO)
+
+	assert.NoError(t, err)
+	assert.Nil(t, r.SubmitterOrganizationID)
+	assert.Nil(t, r.SampleID)
+	assert.NotNil(t, r.SequencingLabID)
+
+	orgDAO.AssertExpectations(t)
+}
+
+func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
+	orgDAO := &mockOrgDAO{}
+	sampleDAO := &mockSampleDAO{}
+
+	// Input batch record
+	r := &SequencingExperimentValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		SequencingExperiment: types.SequencingExperimentBatch{
+			SampleOrganizationCode: "ORG",
+			SubmitterSampleId:      "S1",
+			SequencingLabCode:      "LAB1",
+		},
+	}
+
+	// Mocked orgs and sample
+	orgDAO.
+		On("GetOrganizationByCode", "ORG").
+		Return(&types.Organization{ID: 1}, nil)
+	orgDAO.
+		On("GetOrganizationByCode", "LAB1").
+		Return(nil, nil)
+
+	sampleDAO.
+		On("GetSampleBySubmitterSampleId", 1, "S1").
+		Return(&types.Sample{ID: 10}, nil)
+
+	err := r.preFetchValidationInfo(orgDAO, sampleDAO)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, r.SubmitterOrganizationID)
+	assert.Equal(t, 1, *r.SubmitterOrganizationID)
+	assert.NotNil(t, r.SampleID)
+	assert.Equal(t, 10, *r.SampleID)
+	assert.Nil(t, r.SequencingLabID)
+
+	orgDAO.AssertExpectations(t)
+	sampleDAO.AssertExpectations(t)
+}
+
 func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 	sampleDAO := &mockSampleDAO{}
