@@ -349,8 +349,8 @@ export const CaseEntity_Variants_SNV_Table = {
     unsortAllColumns() {
       CaseEntity_Variants_SNV_Table.actions.sortColumn('exomiser');
       CaseEntity_Variants_SNV_Table.actions.sortColumn('exomiser');
-      CaseEntity_Variants_SNV_Table.actions.sortColumn('variant');
-      CaseEntity_Variants_SNV_Table.actions.sortColumn('variant');
+      CaseEntity_Variants_SNV_Table.actions.sortColumn('consequence');
+      CaseEntity_Variants_SNV_Table.actions.sortColumn('consequence');
     },
   },
 

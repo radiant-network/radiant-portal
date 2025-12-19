@@ -60,7 +60,7 @@ describe('Patients - Batch - Process worker - Patient006', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report patient[1] [SJRA-902]', () => {
+  it('Validate report patient[1]', () => {
     cy.validateReport(response, 'error', 'PATIENT-006', apiMessages.ProcessWorkerErrorMultiple('Patient', 'CHUSJ', 'Cypress0001'), 'patient[1]');
   });
 });
