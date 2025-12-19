@@ -50,7 +50,7 @@ func Test_GetTaskById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 		result, err := repo.GetTaskById(999999)
-		assert.Equal(t, gorm.ErrRecordNotFound, err)
+		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
 }
@@ -93,7 +93,7 @@ func Test_GetTaskContextByTaskId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 		result, err := repo.GetTaskContextByTaskId(999999)
-		assert.Equal(t, gorm.ErrRecordNotFound, err)
+		assert.NoError(t, err)
 		assert.Empty(t, result)
 	})
 }
@@ -135,7 +135,7 @@ func Test_GetTaskHasDocumentByTaskId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 		result, err := repo.GetTaskHasDocumentByTaskId(999999)
-		assert.Equal(t, gorm.ErrRecordNotFound, err)
+		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
 }

@@ -26,11 +26,11 @@ func Test_GetObservationCategoricalById_OK(t *testing.T) {
 	})
 }
 
-func Test_GetObservationCategoricalById_HandlesError(t *testing.T) {
+func Test_GetObservationCategoricalById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewObservationCategoricalRepository(db)
 		result, err := repo.GetById(999)
-		assert.Equal(t, gorm.ErrRecordNotFound, err)
+		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
 }
@@ -74,5 +74,14 @@ func Test_CreateObservationCategorical_NilError(t *testing.T) {
 		repo := NewObservationCategoricalRepository(db)
 		err := repo.CreateObservationCategorical(nil)
 		assert.Error(t, err)
+	})
+}
+
+func Test_CreateObservationCategorical_NotFound(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewObservationCategoricalRepository(db)
+		results, err := repo.GetById(99999)
+		assert.NoError(t, err)
+		assert.Nil(t, results)
 	})
 }

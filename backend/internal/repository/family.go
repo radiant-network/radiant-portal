@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -29,7 +31,11 @@ func NewFamilyRepository(db *gorm.DB) *FamilyRepository {
 func (r *FamilyRepository) GetFamilyById(familyId int) (*Family, error) {
 	var family Family
 	if err := r.db.Table(types.FamilyTable.Name).First(&family, familyId).Error; err != nil {
-		return nil, err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching family: %w", err)
+		} else {
+			return nil, nil
+		}
 	}
 	return &family, nil
 }

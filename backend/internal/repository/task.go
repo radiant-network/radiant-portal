@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -48,7 +50,11 @@ func (r *TaskRepository) CreateTaskHasDocument(thd *TaskHasDocument) error {
 func (r *TaskRepository) GetTaskById(taskId int) (*Task, error) {
 	var task Task
 	if err := r.db.Table(types.TaskTable.Name).First(&task, taskId).Error; err != nil {
-		return nil, err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching task: %w", err)
+		} else {
+			return nil, nil
+		}
 	}
 	return &task, nil
 }
@@ -59,7 +65,7 @@ func (r *TaskRepository) GetTaskContextByTaskId(taskId int) ([]*TaskContext, err
 		return nil, err
 	}
 	if len(tc) == 0 {
-		return nil, gorm.ErrRecordNotFound
+		return nil, nil
 	}
 	return tc, nil
 }
@@ -70,7 +76,7 @@ func (r *TaskRepository) GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocum
 		return nil, err
 	}
 	if len(thd) == 0 {
-		return nil, gorm.ErrRecordNotFound
+		return nil, nil
 	}
 	return thd, nil
 }

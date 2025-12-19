@@ -27,11 +27,11 @@ func Test_GetFamilyById_OK(t *testing.T) {
 	})
 }
 
-func Test_GetFamilyById_HandlesError(t *testing.T) {
+func Test_GetFamilyById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewFamilyRepository(db)
-		result, err := repo.GetFamilyById(999)
-		assert.Equal(t, gorm.ErrRecordNotFound, err)
+		result, err := repo.GetFamilyById(9999)
+		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
 }

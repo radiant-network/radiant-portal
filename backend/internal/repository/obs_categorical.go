@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -29,7 +31,11 @@ func NewObservationCategoricalRepository(db *gorm.DB) *ObservationCategoricalRep
 func (r *ObservationCategoricalRepository) GetById(observationId int) (*ObservationCategorical, error) {
 	var obs ObservationCategorical
 	if err := r.db.Table(types.ObsCategoricalTable.Name).First(&obs, observationId).Error; err != nil {
-		return nil, err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching observation_categorical: %w", err)
+		} else {
+			return nil, nil
+		}
 	}
 	return &obs, nil
 }
