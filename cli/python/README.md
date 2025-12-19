@@ -101,9 +101,11 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **POST** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
 *CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **POST** /cases/filters | Get CaseFilters cases filters
+*CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /cases/search | Search cases
 *DocumentsApi* | [**autocomplete_documents**](docs/DocumentsApi.md#autocomplete_documents) | **GET** /documents/autocomplete | Get AutocompleteResult list of matching prefix
 *DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **POST** /documents/filters | Get DocumentFilters documents filters
+*DocumentsApi* | [**get_document_download_url**](docs/DocumentsApi.md#get_document_download_url) | **GET** /documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
 *DocumentsApi* | [**search_documents**](docs/DocumentsApi.md#search_documents) | **POST** /documents/search | Search documents
 *GenesApi* | [**gene_auto_complete**](docs/GenesApi.md#gene_auto_complete) | **GET** /genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
 *HpoApi* | [**hpo_term_auto_complete**](docs/HpoApi.md#hpo_term_auto_complete) | **GET** /hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
@@ -170,17 +172,22 @@ Class | Method | HTTP request | Description
  - [BatchSummary](docs/BatchSummary.md)
  - [CNVGeneOverlap](docs/CNVGeneOverlap.md)
  - [CaseAssay](docs/CaseAssay.md)
+ - [CaseBatch](docs/CaseBatch.md)
  - [CaseEntity](docs/CaseEntity.md)
  - [CaseFilters](docs/CaseFilters.md)
+ - [CasePatientBatch](docs/CasePatientBatch.md)
  - [CasePatientClinicalInformation](docs/CasePatientClinicalInformation.md)
  - [CaseResult](docs/CaseResult.md)
+ - [CaseSequencingExperimentBatch](docs/CaseSequencingExperimentBatch.md)
  - [CaseTask](docs/CaseTask.md)
+ - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)
  - [ColumnPinningConfig](docs/ColumnPinningConfig.md)
  - [Count](docs/Count.md)
  - [CountBodyWithSqon](docs/CountBodyWithSqon.md)
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
+ - [CreateCaseBatchBody](docs/CreateCaseBatchBody.md)
  - [CreatePatientBatchBody](docs/CreatePatientBatchBody.md)
  - [CreateSampleBatchBody](docs/CreateSampleBatchBody.md)
  - [CreateSequencingExperimentBatchBody](docs/CreateSequencingExperimentBatchBody.md)
@@ -189,6 +196,7 @@ Class | Method | HTTP request | Description
  - [DocumentsSearchResponse](docs/DocumentsSearchResponse.md)
  - [ExpandedGermlineSNVOccurrence](docs/ExpandedGermlineSNVOccurrence.md)
  - [Facet](docs/Facet.md)
+ - [FamilyHistoryBatch](docs/FamilyHistoryBatch.md)
  - [FiltersBodyWithCriteria](docs/FiltersBodyWithCriteria.md)
  - [GenePanelCondition](docs/GenePanelCondition.md)
  - [GenePanelConditions](docs/GenePanelConditions.md)
@@ -197,6 +205,7 @@ Class | Method | HTTP request | Description
  - [GetBatchResponse](docs/GetBatchResponse.md)
  - [IGVTrackEnriched](docs/IGVTrackEnriched.md)
  - [IGVTracks](docs/IGVTracks.md)
+ - [InputDocumentBatch](docs/InputDocumentBatch.md)
  - [InterpretationGermline](docs/InterpretationGermline.md)
  - [InterpretationMetadata](docs/InterpretationMetadata.md)
  - [InterpretationPubmed](docs/InterpretationPubmed.md)
@@ -204,7 +213,10 @@ Class | Method | HTTP request | Description
  - [LeafContent](docs/LeafContent.md)
  - [ListBodyWithCriteria](docs/ListBodyWithCriteria.md)
  - [ListBodyWithSqon](docs/ListBodyWithSqon.md)
+ - [ObservationCategoricalBatch](docs/ObservationCategoricalBatch.md)
+ - [ObservationTextBatch](docs/ObservationTextBatch.md)
  - [OmimGenePanel](docs/OmimGenePanel.md)
+ - [OutputDocumentBatch](docs/OutputDocumentBatch.md)
  - [PaginationConfig](docs/PaginationConfig.md)
  - [PatientBatch](docs/PatientBatch.md)
  - [PubmedCitation](docs/PubmedCitation.md)
@@ -227,6 +239,7 @@ Class | Method | HTTP request | Description
  - [Transcript](docs/Transcript.md)
  - [UserPreference](docs/UserPreference.md)
  - [UserSet](docs/UserSet.md)
+ - [UtilsPreSignedURL](docs/UtilsPreSignedURL.md)
  - [VariantCasesCount](docs/VariantCasesCount.md)
  - [VariantCasesFilters](docs/VariantCasesFilters.md)
  - [VariantConsequence](docs/VariantConsequence.md)

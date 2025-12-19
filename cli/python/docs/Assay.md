@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **experimental_strategy_code** | **str** |  | [optional] 
 **experimental_strategy_name** | **str** |  | [optional] 
 **histology_code** | **str** |  | [optional] 
+**patient_id** | **int** |  | 
 **platform_code** | **str** |  | [optional] 
 **run_alias** | **str** |  | [optional] 
 **run_date** | **str** |  | [optional] 
