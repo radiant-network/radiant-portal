@@ -1,18 +1,13 @@
 import { ComponentProps } from 'react';
 
-import { CaseEntity, SortBodyOrderEnum } from '@/api/api';
+import { CaseEntity, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { defaultSettings, getColumns } from './tables/sequencing-table-settings';
 
-const DEFAULT_SORTING = [
-  {
-    field: 'created_at',
-    order: SortBodyOrderEnum.Asc,
-  },
-];
+const DEFAULT_SORTING: SortBody[] = [];
 
 type AssayInformationsCardProps = ComponentProps<'div'> & {
   data: CaseEntity;

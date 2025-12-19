@@ -74,7 +74,7 @@ var DocumentDefaultFields = []Field{
 	TaskHasDocumentTaskIdField,
 }
 
-var DocumentsDefaultSort = []SortField{{Field: DocumentIdField, Order: "desc"}, {Field: FamilyRelationshipToProbandCodeField, Order: "desc"}}
+var DocumentsDefaultSort = []SortField{{Field: DocumentIdField, Order: "desc"}}
 
 var DocumentsQueryConfig = QueryConfig{
 	AllFields:     DocumentFields,
