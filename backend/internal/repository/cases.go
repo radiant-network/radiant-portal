@@ -55,7 +55,7 @@ func (r *CasesRepository) CreateCaseHasSequencingExperiment(caseHasSeqExp *types
 
 func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error) {
 	var analysisCatalog AnalysisCatalog
-	tx := r.db.Table(types.AnalysisCatalogTable.Name).Where("code = ?", code).First(&analysisCatalog)
+	tx := r.db.Table(types.AnalysisCatalogTable.Name).Where("code = ?", code)
 	if err := tx.First(&analysisCatalog).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

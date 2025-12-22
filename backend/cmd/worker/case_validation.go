@@ -25,6 +25,18 @@ type CaseKey struct {
 	SubmitterCaseID string
 }
 
+type StorageContext struct {
+	CasesRepo   *repository.CasesRepository
+	OrgRepo     *repository.OrganizationRepository
+	PatientRepo *repository.PatientsRepository
+	ProjectRepo *repository.ProjectRepository
+	SeqExpRepo  *repository.SequencingExperimentRepository
+	DocRepo     *repository.DocumentsRepository
+	ObsCat      *repository.ObservationCategoricalRepository
+	FamilyRepo  *repository.FamilyRepository
+	TaskRepo    *repository.TaskRepository
+}
+
 type CaseValidationRecord struct {
 	BaseValidationRecord
 	Context                *BatchValidationContext
@@ -100,6 +112,9 @@ func (r *CaseValidationRecord) preFetchValidationInfo(
 		if err != nil {
 			return fmt.Errorf("failed to get sequencing experiment by aliquot, submitter sample id and sample organization code %q: %w", se.Aliquot, err)
 		}
+		if seqExp == nil {
+			continue
+		}
 		r.SequencingExperiments = append(r.SequencingExperiments, seqExp)
 	}
 
@@ -137,6 +152,8 @@ func validateCaseRecord(
 		Case:                 c,
 		ProjectID:            nil,
 		SubmitterCaseID:      "",
+		Patients:             make(map[string]*types.Patient),
+		Context:              ctx,
 	}
 
 	if unexpectedErr := cr.preFetchValidationInfo(ctx); unexpectedErr != nil {
@@ -190,7 +207,7 @@ func getProbandPatient(caseRecord *CaseValidationRecord) (*types.Patient, error)
 	return nil, nil
 }
 
-func persistCase(ctx *BatchValidationContext, cr *CaseValidationRecord) error {
+func persistCase(sctx *StorageContext, cr *CaseValidationRecord) error {
 	if cr == nil {
 		return nil
 	}
@@ -237,7 +254,7 @@ func persistCase(ctx *BatchValidationContext, cr *CaseValidationRecord) error {
 		Note:                   cr.Case.Note,
 	}
 
-	if err := ctx.CasesRepo.CreateCase(&c); err != nil {
+	if err := sctx.CasesRepo.CreateCase(&c); err != nil {
 		return fmt.Errorf("failed to persist case %w", err)
 	}
 
@@ -248,7 +265,7 @@ func persistCase(ctx *BatchValidationContext, cr *CaseValidationRecord) error {
 }
 
 func insertCaseRecords(
-	ctx *BatchValidationContext,
+	ctx *StorageContext,
 	records []*CaseValidationRecord,
 ) error {
 	for _, record := range records {
@@ -278,13 +295,11 @@ func insertCaseRecords(
 func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
-		txCtx := BatchValidationContext{
-			BatchRepo:   batchRepo,
+		txCtx := StorageContext{
 			CasesRepo:   repository.NewCasesRepository(tx),
-			OrgRepo:     nil,
-			PatientRepo: nil,
-			ProjectRepo: nil,
-			SampleRepo:  nil,
+			OrgRepo:     repository.NewOrganizationRepository(tx),
+			PatientRepo: repository.NewPatientsRepository(tx),
+			ProjectRepo: repository.NewProjectRepository(tx),
 			SeqExpRepo:  repository.NewSequencingExperimentRepository(tx),
 			DocRepo:     repository.NewDocumentsRepository(tx),
 			ObsCat:      repository.NewObservationCategoricalRepository(tx),

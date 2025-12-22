@@ -372,7 +372,7 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 		Return([]types.SequencingExperiment{}, nil)
 	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
 		Return([]types.SequencingExperiment{}, nil)
-	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1").
+	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG").
 		Return([]types.SequencingExperiment{}, nil)
 
 	record, err := validateSequencingExperimentRecord(seq, 0, orgDAO, sampleDAO, seqDAO)
