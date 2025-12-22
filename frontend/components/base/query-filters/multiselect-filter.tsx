@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { useCallback, useEffect, useState } from 'react';
 import { SearchIcon } from 'lucide-react';
 
@@ -107,7 +108,44 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
 
   // Initialize selectedItems with query builder + global sessionStorage
   const getInitialSelectedItems = (): string[] => {
-    // Try sessionStorage first
+    // Check if this is a true page refresh (full reload)
+    // We use a flag on window object which doesn't persist across page reloads
+    const windowKey = `appLoaded_${appId}`;
+    const hasAppLoaded = (window as any)[windowKey];
+
+    if (!hasAppLoaded) {
+      // This is a fresh page load - clear all unapplied filters first
+      try {
+        const stored = sessionStorage.getItem(globalStorageKey);
+        if (stored) {
+          const allTempSelections = JSON.parse(stored);
+          Object.keys(allTempSelections).forEach(key => {
+            if (!key.endsWith('_withDictionary')) {
+              delete allTempSelections[key];
+            }
+          });
+          if (Object.keys(allTempSelections).length > 0) {
+            sessionStorage.setItem(globalStorageKey, JSON.stringify(allTempSelections));
+          } else {
+            sessionStorage.removeItem(globalStorageKey);
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to clear unapplied filters on page refresh:', error);
+      }
+
+      // Set flag to indicate app has been loaded
+      (window as any)[windowKey] = true;
+
+      // Use query builder values for fresh page load
+      const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+        .getResolvedActiveQuery(appId)
+        // @ts-ignore
+        .content.find((x: IValueFilter) => x.content.field === field.key);
+      return (prevSelectedItems?.content.value as string[]) || [];
+    }
+
+    // Try sessionStorage first (for normal navigation)
     try {
       const stored = sessionStorage.getItem(globalStorageKey);
       if (stored) {
@@ -115,7 +153,6 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
         // Check if this field exists in sessionStorage (even if empty array)
         if (Object.prototype.hasOwnProperty.call(allTempSelections, field.key)) {
           const fieldSelections = allTempSelections[field.key];
-          console.error(`[${field.key}] Found in sessionStorage:`, fieldSelections);
           return fieldSelections; // Can be empty array if user unchecked all
         }
       }
@@ -134,10 +171,19 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     return queryBuilderItems;
   };
 
+  // All items (augmented data)
+  const [allItems, setAllItems] = useState<Aggregation[]>(aggregationData || []);
+  // Currently displayed items (filtered or all)
   const [items, setItems] = useState<Aggregation[]>(aggregationData || []);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   // items that are currently checked
   const [selectedItems, setSelectedItems] = useState<string[]>(getInitialSelectedItems());
-  const [visibleItemsCount, setVisibleItemsCount] = useState(getVisibleItemsCount(items.length, maxVisibleItems));
+  // Number of items currently displayed in the list (controls show more/less functionality)
+  const [visibleItemsCount, setVisibleItemsCount] = useState(
+    getVisibleItemsCount((aggregationData || []).length, maxVisibleItems),
+  );
+  // Track if user manually expanded
+  const [isManuallyExpanded, setIsManuallyExpanded] = useState<boolean>(false);
   const [hasUnappliedItems, setHasUnappliedItems] = useState(false);
   const [hasBeenReset, setHasBeenReset] = useState(false);
   const [lastQueryBuilderState, setLastQueryBuilderState] = useState<string>(() => {
@@ -165,7 +211,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     const currentQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
     const currentQueryString = JSON.stringify(currentQuery);
 
-    // If query builder has changed since last time
+    // If query builder has changed since last time (and this is not the initial render)
     if (lastQueryBuilderState && lastQueryBuilderState !== currentQueryString) {
       // Clear sessionStorage as query builder state was modified by external action
       clearUnappliedFilters();
@@ -181,7 +227,46 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     }
 
     setLastQueryBuilderState(currentQueryString);
-  }, [appId, field.key, clearUnappliedFilters, lastQueryBuilderState]);
+  }, [appId, field.key, clearUnappliedFilters, selectedItems]);
+
+  // Additional effect to ensure synchronization when query builder changes
+  useEffect(() => {
+    // Check if there are values in sessionStorage for this field
+    let hasSessionStorageValues = false;
+    try {
+      const stored = sessionStorage.getItem(globalStorageKey);
+      if (stored) {
+        const allTempSelections = JSON.parse(stored);
+        hasSessionStorageValues = Object.prototype.hasOwnProperty.call(allTempSelections, field.key);
+      }
+    } catch (error) {
+      // SessionStorage error - continue with synchronization
+      console.warn(`Failed to check sessionStorage values for ${field.key}:`, error);
+    }
+
+    // Don't synchronize if we have sessionStorage values (user has unapplied changes)
+    if (hasSessionStorageValues) {
+      return;
+    }
+
+    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+      .getResolvedActiveQuery(appId)
+      // @ts-ignore
+      .content.find((x: IValueFilter) => x.content.field === field.key);
+
+    const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
+
+    // Check if current selectedItems differ from query builder
+    const currentSorted = [...selectedItems].sort();
+    const queryBuilderSorted = [...queryBuilderItems].sort();
+
+    if (JSON.stringify(currentSorted) !== JSON.stringify(queryBuilderSorted)) {
+      // Only update if we don't have pending unapplied changes
+      if (!hasUnappliedItems) {
+        setSelectedItems(queryBuilderItems);
+      }
+    }
+  }, [appId, field.key, selectedItems, hasUnappliedItems, globalStorageKey]);
 
   useEffect(() => {
     // Check if there are items in the query builder
@@ -189,16 +274,13 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       .getResolvedActiveQuery(appId)
       // @ts-ignore
       .content.find((x: IValueFilter) => x.content.field === field.key);
-
-    // Determine if there are unapplied items
     const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
+
     const hasUnapplied = JSON.stringify([...selectedItems].sort()) !== JSON.stringify([...queryBuilderItems].sort());
 
     setHasUnappliedItems(hasUnapplied);
 
-    // Synchronize only if selectedItems is empty and there are items in query builder
-    // AND it's not following a reset AND user hasn't made any changes yet
-    // AND values didn't come from sessionStorage initially
+    // Handle synchronization logic
     if (
       selectedItems.length === 0 &&
       queryBuilderItems.length > 0 &&
@@ -209,7 +291,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       setSelectedItems(queryBuilderItems);
     }
 
-    // Reset the sessionStorage flag after first effect run
+    // Reset flags
     if (isFromSessionStorage) {
       setIsFromSessionStorage(false);
     }
@@ -219,40 +301,91 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       setHasBeenReset(false);
     }
 
-    // Get only applied filters from query builder for ordering
-    const appliedFilterItems: string[] = (() => {
-      const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
-        .getResolvedActiveQuery(appId)
-        // @ts-ignore
-        .content.find((x: IValueFilter) => x.content.field === field.key);
-      return (prevSelectedItems?.content.value as string[]) || [];
-    })();
+    // Get unapplied values from sessionStorage
+    let unappliedSessionStorageValues: string[] = [];
+    try {
+      const stored = sessionStorage.getItem(globalStorageKey);
+      if (stored) {
+        const allTempSelections = JSON.parse(stored);
+        if (Object.prototype.hasOwnProperty.call(allTempSelections, field.key)) {
+          unappliedSessionStorageValues = allTempSelections[field.key] || [];
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to read unapplied values from sessionStorage for ${field.key}:`, error);
+    }
 
-    aggregationData?.sort((a, b) => {
-      const aApplied = a.key && appliedFilterItems.includes(a.key);
-      const bApplied = b.key && appliedFilterItems.includes(b.key);
+    // Augment aggregation data
+    const augmentedData = [...(aggregationData || [])];
+    const allValuesToShow = [...new Set([...queryBuilderItems, ...unappliedSessionStorageValues])];
+
+    if (allValuesToShow.length > 0) {
+      allValuesToShow.forEach(value => {
+        const existsInData = augmentedData.some(item => item.key === value);
+        if (!existsInData) {
+          augmentedData.push({
+            key: value,
+            count: 0,
+            label: value,
+          });
+        }
+      });
+    }
+
+    // Sort and translate
+    augmentedData?.sort((a, b) => {
+      const aApplied = a.key && queryBuilderItems.includes(a.key);
+      const bApplied = b.key && queryBuilderItems.includes(b.key);
 
       if (aApplied === bApplied) {
-        return b.count! - a.count!; // Then sort by count
+        return b.count! - a.count!;
       }
 
       return aApplied ? -1 : 1;
     });
 
-    /**
-     * Lowercase the result
-     * Capitalize the First word
-     * Ignore word in parenthese
-     */
-    aggregationData?.forEach(item => {
+    augmentedData?.forEach(item => {
       item.label = t(`common.filters.values.${field.key}.${sanitize(item.key)}`, {
         defaultValue: lazyTranslate(item.key),
       });
     });
 
-    setItems(aggregationData || []);
-    setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));
-  }, [aggregationData, appId, field.key, maxVisibleItems]);
+    setAllItems(augmentedData || []);
+
+    // Apply search filter if there's a search term
+    const filteredItems = searchTerm.trim() ? searchOptions(searchTerm, augmentedData || []) : augmentedData || [];
+
+    setItems(filteredItems);
+
+    // Update visibleItemsCount when data changes
+    const targetLength = filteredItems.length;
+
+    // If user manually expanded, preserve the expanded state
+    if (isManuallyExpanded && targetLength > maxVisibleItems) {
+      setVisibleItemsCount(targetLength);
+    } else {
+      const newVisibleCount = getVisibleItemsCount(targetLength, maxVisibleItems);
+      // Only update if different to avoid infinite loops
+      if (visibleItemsCount !== newVisibleCount) {
+        setVisibleItemsCount(newVisibleCount);
+      }
+      // Reset manually expanded state if we're back to default size
+      if (isManuallyExpanded && newVisibleCount <= maxVisibleItems) {
+        setIsManuallyExpanded(false);
+      }
+    }
+  }, [
+    aggregationData,
+    appId,
+    field.key,
+    maxVisibleItems,
+    globalStorageKey,
+    selectedItems,
+    hasBeenReset,
+    hasUnappliedItems,
+    isFromSessionStorage,
+    searchTerm,
+  ]);
 
   // Save temporarily in global sessionStorage
   useEffect(() => {
@@ -283,33 +416,39 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     }
   }, [withDictionaryToggle, globalStorageKey, field.key, field.withDictionary]);
 
-  // Memoize these functions with useCallback
   const updateSearch = useCallback(
     (search: string) => {
+      setSearchTerm(search);
+      // Reset manual expansion state when searching
+      setIsManuallyExpanded(false);
+
       if (!search.trim()) {
-        setItems(aggregationData || []);
-        setVisibleItemsCount(getVisibleItemsCount(aggregationData?.length || 0, maxVisibleItems));
+        setItems(allItems);
+        setVisibleItemsCount(getVisibleItemsCount(allItems.length, maxVisibleItems));
         return;
       }
 
-      const results = searchOptions(search, aggregationData!);
+      const results = searchOptions(search, allItems);
+      setItems(results);
+
       if (maxVisibleItems > results.length) {
         setVisibleItemsCount(results.length);
       } else if (results.length > maxVisibleItems) {
         setVisibleItemsCount(maxVisibleItems);
       }
-      setItems(results);
     },
-    [aggregationData, maxVisibleItems],
+    [allItems, maxVisibleItems],
   );
 
   const showMore = useCallback(() => {
     setVisibleItemsCount(items.length);
-  }, [visibleItemsCount, items]);
+    setIsManuallyExpanded(true);
+  }, [items]);
 
   const showLess = useCallback(() => {
     setVisibleItemsCount(maxVisibleItems);
-  }, [visibleItemsCount]);
+    setIsManuallyExpanded(false);
+  }, [maxVisibleItems]);
 
   const selectAll = useCallback(() => {
     if (selectedItems.length === items.length) {
@@ -406,7 +545,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
           size="xs"
           type="text"
           placeholder={t('common.filters.search.placeholder')}
-          className="w-full text-xs py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full text-xs mt-3 py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => updateSearch(e.target.value)}
           autoFocus
         />
