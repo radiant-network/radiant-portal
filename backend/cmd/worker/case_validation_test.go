@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -11,6 +12,9 @@ import (
 type CaseValidationMockRepo struct{}
 
 func (m *CaseValidationMockRepo) GetOrganizationByCode(organizationCode string) (*types.Organization, error) {
+	if organizationCode == "LAB-1" || organizationCode == "LAB-2" {
+		return &types.Organization{ID: 10, Code: organizationCode, Name: "Diagnostic Lab"}, nil
+	}
 	return nil, nil
 }
 
@@ -46,6 +50,12 @@ func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(code string) (*r
 }
 
 func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*repository.SequencingExperiment, error) {
+	if aliquot == "ALIQUOT-1" && submitterSampleId == "SAMPLE-1" && sampleOrganizationCode == "LAB-1" {
+		return &repository.SequencingExperiment{
+			ID:      200,
+			Aliquot: aliquot,
+		}, nil
+	}
 	return nil, nil
 }
 
@@ -54,6 +64,13 @@ func (m *CaseValidationMockRepo) GetPatientBySubmitterPatientId(organizationId i
 }
 
 func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*repository.Patient, error) {
+	if organizationCode == "LAB-1" && submitterPatientId == "PAT-1" {
+		return &repository.Patient{
+			ID:                 100,
+			SubmitterPatientId: submitterPatientId,
+			OrganizationId:     10,
+		}, nil
+	}
 	return nil, nil
 }
 
@@ -65,7 +82,7 @@ func (m *CaseValidationMockRepo) GetProjectByCode(code string) (*types.Project, 
 	if code == "PROJ-1" {
 		return &types.Project{ID: 42, Code: code, Name: "PROJ-1", Description: "Project #1"}, nil
 	}
-	return nil, nil
+	return nil, fmt.Errorf("error fetching project by code")
 }
 
 func (m *CaseValidationMockRepo) CreateSequencingExperiment(experiment *repository.SequencingExperiment) error {
@@ -92,27 +109,39 @@ func Test_preFetchValidationInfo_OK(t *testing.T) {
 		ProjectRepo: &mockRepo,
 		PatientRepo: &mockRepo,
 		SeqExpRepo:  &mockRepo,
+		OrgRepo:     &mockRepo,
 	}
 	record := CaseValidationRecord{}
 	record.Case.ProjectCode = "PROJ-1"
 	record.Case.AnalysisCode = "WGA"
+	record.Case.DiagnosticLabCode = "LAB-2"
+	record.Case.OrderingOrganizationCode = "LAB-1"
+	record.Case.SequencingExperiments = []*types.CaseSequencingExperimentBatch{
+		{
+			Aliquot:                "ALIQUOT-1",
+			SubmitterSampleId:      "SAMPLE-1",
+			SampleOrganizationCode: "LAB-1",
+		},
+	}
+	record.Case.Patients = []*types.CasePatientBatch{
+		{
+			SubmitterPatientId: "PAT-1",
+		},
+	}
 	err := record.preFetchValidationInfo(&mockContext)
 	assert.NoError(t, err)
 	assert.Equal(t, 42, *record.ProjectID)
 }
 
-func Test_preFetchValidationInfo_UnknownProject(t *testing.T) {
+func Test_preFetchValidationInfo_Error(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := BatchValidationContext{
-		CasesRepo:   &mockRepo,
 		ProjectRepo: &mockRepo,
-		PatientRepo: &mockRepo,
-		SeqExpRepo:  &mockRepo,
 	}
 	record := CaseValidationRecord{}
 	record.Case.ProjectCode = "UNKNOWN-PROJ"
 	err := record.preFetchValidationInfo(&mockContext)
-	assert.NoError(t, err)
+	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
 }
 
@@ -123,21 +152,34 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 		ProjectRepo: &mockRepo,
 		PatientRepo: &mockRepo,
 		SeqExpRepo:  &mockRepo,
+		OrgRepo:     &mockRepo,
 	}
 
 	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{
 		{
 			ProjectCode:                "PROJ-1",
+			AnalysisCode:               "WGA",
 			SubmitterCaseId:            "CASE-1",
 			Type:                       "germline",
 			StatusCode:                 "in_progress",
-			DiagnosticLabCode:          "LAB-1",
+			OrderingOrganizationCode:   "LAB-1",
+			DiagnosticLabCode:          "LAB-2",
 			PrimaryConditionCodeSystem: "MONDO",
 			PrimaryConditionValue:      "0001234",
 			PriorityCode:               "routine",
 			CategoryCode:               "postnatal",
-			Patients:                   []*types.CasePatientBatch{},
-			SequencingExperiments:      []*types.CaseSequencingExperimentBatch{},
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+				{
+					Aliquot:                "ALIQUOT-1",
+					SubmitterSampleId:      "SAMPLE-1",
+					SampleOrganizationCode: "LAB-1",
+				},
+			},
+			Patients: []*types.CasePatientBatch{
+				{
+					SubmitterPatientId: "PAT-1",
+				},
+			},
 		},
 	})
 	assert.NoError(t, err)
@@ -153,35 +195,35 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		ProjectRepo: &mockRepo,
 		PatientRepo: &mockRepo,
 		SeqExpRepo:  &mockRepo,
+		OrgRepo:     &mockRepo,
 	}
-	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{
-		{
-			ProjectCode:                "PROJ-1",
-			SubmitterCaseId:            "CASE-1",
-			Type:                       "germline",
-			StatusCode:                 "in_progress",
-			DiagnosticLabCode:          "LAB-1",
-			PrimaryConditionCodeSystem: "MONDO",
-			PrimaryConditionValue:      "0001234",
-			PriorityCode:               "routine",
-			CategoryCode:               "postnatal",
-			Patients:                   []*types.CasePatientBatch{},
-			SequencingExperiments:      []*types.CaseSequencingExperimentBatch{},
+	batch := types.CaseBatch{
+		ProjectCode:                "PROJ-1",
+		AnalysisCode:               "WGA",
+		SubmitterCaseId:            "CASE-1",
+		Type:                       "germline",
+		StatusCode:                 "in_progress",
+		OrderingOrganizationCode:   "LAB-1",
+		DiagnosticLabCode:          "LAB-2",
+		PrimaryConditionCodeSystem: "MONDO",
+		PrimaryConditionValue:      "0001234",
+		PriorityCode:               "routine",
+		CategoryCode:               "postnatal",
+		SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+			{
+				Aliquot:                "ALIQUOT-1",
+				SubmitterSampleId:      "SAMPLE-1",
+				SampleOrganizationCode: "LAB-1",
+			},
 		},
-		{
-			ProjectCode:                "PROJ-1",
-			SubmitterCaseId:            "CASE-1",
-			Type:                       "somatic",
-			StatusCode:                 "completed",
-			DiagnosticLabCode:          "LAB-2",
-			PrimaryConditionCodeSystem: "MONDO",
-			PrimaryConditionValue:      "0001235",
-			PriorityCode:               "routine",
-			CategoryCode:               "postnatal",
-			Patients:                   []*types.CasePatientBatch{},
-			SequencingExperiments:      []*types.CaseSequencingExperimentBatch{},
+		Patients: []*types.CasePatientBatch{
+			{
+				SubmitterPatientId: "PAT-1",
+			},
 		},
-	})
+	}
+
+	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{batch, batch})
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)

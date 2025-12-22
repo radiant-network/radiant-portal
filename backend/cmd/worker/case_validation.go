@@ -50,15 +50,6 @@ func (r *CaseValidationRecord) GetResourceType() string {
 	return types.CaseBatchType
 }
 
-func NewCaseValidationRecord(index int, c types.CaseBatch) *CaseValidationRecord {
-	return &CaseValidationRecord{
-		BaseValidationRecord:  BaseValidationRecord{Index: index},
-		Case:                  c,
-		Patients:              make(map[string]*types.Patient),
-		SequencingExperiments: make([]*types.SequencingExperiment, 0),
-	}
-}
-
 func (r *CaseValidationRecord) preFetchValidationInfo(
 	ctx *BatchValidationContext,
 ) error {
@@ -141,10 +132,9 @@ func validateCaseRecord(
 	c types.CaseBatch,
 	index int,
 ) (*CaseValidationRecord, error) {
-	// FIXME: Not Implemented, will be implemented in follow-up tasks
 	cr := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: index},
-		Case:                 types.CaseBatch{},
+		Case:                 c,
 		ProjectID:            nil,
 		SubmitterCaseID:      "",
 	}
