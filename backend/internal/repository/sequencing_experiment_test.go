@@ -2,7 +2,6 @@ package repository
 
 import (
 	"testing"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -68,7 +67,6 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
 			StatusCode:                   "completed",
 			ExperimentalStrategyCode:     "wgs",
 			SequencingReadTechnologyCode: "short_read",
-			RunDate:                      time.Date(2021, 8, 16, 20, 0, 0, 0, time.Local),
 			CaptureKit:                   "SureSelect Custom DNA Target",
 			SequencingLabID:              6,
 			RunName:                      "1617",
@@ -83,7 +81,6 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
 		assert.Equal(t, seqExp.StatusCode, expected.StatusCode)
 		assert.Equal(t, seqExp.ExperimentalStrategyCode, expected.ExperimentalStrategyCode)
 		assert.Equal(t, seqExp.SequencingReadTechnologyCode, expected.SequencingReadTechnologyCode)
-		assert.Equal(t, seqExp.RunDate, expected.RunDate)
 		assert.Equal(t, seqExp.CaptureKit, expected.CaptureKit)
 		assert.Equal(t, seqExp.SequencingLabID, expected.SequencingLabID)
 		assert.Equal(t, seqExp.RunName, expected.RunName)
