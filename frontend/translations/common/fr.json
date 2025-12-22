@@ -727,12 +727,12 @@
         "view_variant": "Voir variants"
       },
       "filters": {
-        "priority": "Priorité",
-        "status": "Statut",
-        "case_analysis": "Analyse",
-        "project": "Projet",
-        "diagnosis_lab": "Laboratoire de diagnostic",
-        "ordering_organization": "Établissement prescripteur"
+        "priority_code": "Priorité",
+        "status_code": "Statut",
+        "analysis_catalog_code": "Analyse",
+        "project_code": "Projet",
+        "diagnosis_lab_code": "Laboratoire de diagnostic",
+        "ordering_organization_code": "Établissement prescripteur"
       },
       "headers": {
         "case_id": "Cas",
@@ -765,11 +765,11 @@
   },
   "files": {
     "filters": {
-      "data_type": "Type",
-      "format": "Format",
-      "project": "Projet",
-      "diagnosis_lab": "Laboratoire de diagnostic",
-      "relationship_to_proband": "Parenté"
+      "data_type_code": "Type",
+      "format_code": "Format",
+      "project_code": "Projet",
+      "diagnosis_lab_code": "Laboratoire de diagnostic",
+      "relationship_to_proband_code": "Parenté"
     }
   },
   "interpretation": {

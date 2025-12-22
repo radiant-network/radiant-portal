@@ -27,10 +27,10 @@ class VariantCasesFilters(BaseModel):
     """
     VariantCasesFilters
     """ # noqa: E501
-    case_analysis: List[Aggregation]
+    analysis_catalog_code: List[Aggregation]
     classification: List[Aggregation]
-    diagnosis_lab: List[Aggregation]
-    __properties: ClassVar[List[str]] = ["case_analysis", "classification", "diagnosis_lab"]
+    diagnosis_lab_code: List[Aggregation]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "classification", "diagnosis_lab_code"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -71,13 +71,13 @@ class VariantCasesFilters(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in case_analysis (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in analysis_catalog_code (list)
         _items = []
-        if self.case_analysis:
-            for _item_case_analysis in self.case_analysis:
-                if _item_case_analysis:
-                    _items.append(_item_case_analysis.to_dict())
-            _dict['case_analysis'] = _items
+        if self.analysis_catalog_code:
+            for _item_analysis_catalog_code in self.analysis_catalog_code:
+                if _item_analysis_catalog_code:
+                    _items.append(_item_analysis_catalog_code.to_dict())
+            _dict['analysis_catalog_code'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in classification (list)
         _items = []
         if self.classification:
@@ -85,13 +85,13 @@ class VariantCasesFilters(BaseModel):
                 if _item_classification:
                     _items.append(_item_classification.to_dict())
             _dict['classification'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in diagnosis_lab (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in diagnosis_lab_code (list)
         _items = []
-        if self.diagnosis_lab:
-            for _item_diagnosis_lab in self.diagnosis_lab:
-                if _item_diagnosis_lab:
-                    _items.append(_item_diagnosis_lab.to_dict())
-            _dict['diagnosis_lab'] = _items
+        if self.diagnosis_lab_code:
+            for _item_diagnosis_lab_code in self.diagnosis_lab_code:
+                if _item_diagnosis_lab_code:
+                    _items.append(_item_diagnosis_lab_code.to_dict())
+            _dict['diagnosis_lab_code'] = _items
         return _dict
 
     @classmethod
@@ -104,9 +104,9 @@ class VariantCasesFilters(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "case_analysis": [Aggregation.from_dict(_item) for _item in obj["case_analysis"]] if obj.get("case_analysis") is not None else None,
+            "analysis_catalog_code": [Aggregation.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
             "classification": [Aggregation.from_dict(_item) for _item in obj["classification"]] if obj.get("classification") is not None else None,
-            "diagnosis_lab": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab"]] if obj.get("diagnosis_lab") is not None else None
+            "diagnosis_lab_code": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None
         })
         return _obj
 

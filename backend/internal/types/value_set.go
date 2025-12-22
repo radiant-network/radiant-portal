@@ -313,3 +313,17 @@ type SequencingReadTechnology struct {
 func (SequencingReadTechnology) TableName() string {
 	return SequencingReadTechnologyTable.Name
 }
+
+var LifeStatusTable = Table{
+	Name:           "life_status",
+	FederationName: "radiant_jdbc.public.life_status",
+	Alias:          "life_status",
+}
+
+type LifeStatus struct {
+	ValueSet
+} // @name LifeStatus
+
+func (LifeStatus) TableName() string {
+	return LifeStatusTable.Name
+}

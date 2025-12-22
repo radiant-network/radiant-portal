@@ -204,7 +204,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			"search_criteria":[{"field": "format_code", "value": ["vcf"]}]
 		}`
 	expected := `{
-		"data_type":[
+		"data_type_code":[
 			{"count":65, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
@@ -221,7 +221,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"count":0, "key":"ssup", "label":"Sequencing Data Supplement"}, 
 			{"count":0, "key":"ssv", "label":"Somatic SV"}
 		], 
-		"format":[
+		"format_code":[
 			{"count":65, "key":"vcf", "label":"VCF File"}, 
 			{"count":0, "key":"bed", "label":"BED File"}, 
 			{"count":0, "key":"bw", "label":"BW File"}, 
@@ -236,15 +236,15 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"count":0, "key":"tsv", "label":"TSV File"}, 
 			{"count":0, "key":"txt", "label":"Text File"}
 		], 
-		"diagnosis_lab":[
+		"diagnosis_lab_code":[
 			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}
 		], 
-		"project":[
+		"project_code":[
 			{"count":36, "key":"N2", "label":"NeuroDev Phase II"}, 
 			{"count":29, "key":"N1", "label":"NeuroDev Phase I"}
 		], 
-		"relationship_to_proband":[
+		"relationship_to_proband_code":[
 			{"count":25, "key":"proband", "label":"Proband"}, 
 			{"count":22, "key":"father", "label":"Father"}, 
 			{"count":22, "key":"mother", "label":"Mother"}, 

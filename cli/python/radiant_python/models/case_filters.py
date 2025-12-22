@@ -27,13 +27,18 @@ class CaseFilters(BaseModel):
     """
     CaseFilters
     """ # noqa: E501
-    case_analysis: List[Aggregation]
-    diagnosis_lab: List[Aggregation]
-    ordering_organization: List[Aggregation]
-    priority: List[Aggregation]
-    project: List[Aggregation]
-    status: List[Aggregation]
-    __properties: ClassVar[List[str]] = ["case_analysis", "diagnosis_lab", "ordering_organization", "priority", "project", "status"]
+    analysis_catalog_code: List[Aggregation]
+    case_category_code: List[Aggregation]
+    case_type_code: List[Aggregation]
+    diagnosis_lab_code: List[Aggregation]
+    life_status_code: List[Aggregation]
+    ordering_organization_code: List[Aggregation]
+    panel_code: List[Aggregation]
+    priority_code: List[Aggregation]
+    project_code: List[Aggregation]
+    resolution_status_code: List[Aggregation]
+    status_code: List[Aggregation]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "case_category_code", "case_type_code", "diagnosis_lab_code", "life_status_code", "ordering_organization_code", "panel_code", "priority_code", "project_code", "resolution_status_code", "status_code"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -74,48 +79,83 @@ class CaseFilters(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in case_analysis (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in analysis_catalog_code (list)
         _items = []
-        if self.case_analysis:
-            for _item_case_analysis in self.case_analysis:
-                if _item_case_analysis:
-                    _items.append(_item_case_analysis.to_dict())
-            _dict['case_analysis'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in diagnosis_lab (list)
+        if self.analysis_catalog_code:
+            for _item_analysis_catalog_code in self.analysis_catalog_code:
+                if _item_analysis_catalog_code:
+                    _items.append(_item_analysis_catalog_code.to_dict())
+            _dict['analysis_catalog_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in case_category_code (list)
         _items = []
-        if self.diagnosis_lab:
-            for _item_diagnosis_lab in self.diagnosis_lab:
-                if _item_diagnosis_lab:
-                    _items.append(_item_diagnosis_lab.to_dict())
-            _dict['diagnosis_lab'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in ordering_organization (list)
+        if self.case_category_code:
+            for _item_case_category_code in self.case_category_code:
+                if _item_case_category_code:
+                    _items.append(_item_case_category_code.to_dict())
+            _dict['case_category_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in case_type_code (list)
         _items = []
-        if self.ordering_organization:
-            for _item_ordering_organization in self.ordering_organization:
-                if _item_ordering_organization:
-                    _items.append(_item_ordering_organization.to_dict())
-            _dict['ordering_organization'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in priority (list)
+        if self.case_type_code:
+            for _item_case_type_code in self.case_type_code:
+                if _item_case_type_code:
+                    _items.append(_item_case_type_code.to_dict())
+            _dict['case_type_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in diagnosis_lab_code (list)
         _items = []
-        if self.priority:
-            for _item_priority in self.priority:
-                if _item_priority:
-                    _items.append(_item_priority.to_dict())
-            _dict['priority'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in project (list)
+        if self.diagnosis_lab_code:
+            for _item_diagnosis_lab_code in self.diagnosis_lab_code:
+                if _item_diagnosis_lab_code:
+                    _items.append(_item_diagnosis_lab_code.to_dict())
+            _dict['diagnosis_lab_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in life_status_code (list)
         _items = []
-        if self.project:
-            for _item_project in self.project:
-                if _item_project:
-                    _items.append(_item_project.to_dict())
-            _dict['project'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in status (list)
+        if self.life_status_code:
+            for _item_life_status_code in self.life_status_code:
+                if _item_life_status_code:
+                    _items.append(_item_life_status_code.to_dict())
+            _dict['life_status_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in ordering_organization_code (list)
         _items = []
-        if self.status:
-            for _item_status in self.status:
-                if _item_status:
-                    _items.append(_item_status.to_dict())
-            _dict['status'] = _items
+        if self.ordering_organization_code:
+            for _item_ordering_organization_code in self.ordering_organization_code:
+                if _item_ordering_organization_code:
+                    _items.append(_item_ordering_organization_code.to_dict())
+            _dict['ordering_organization_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in panel_code (list)
+        _items = []
+        if self.panel_code:
+            for _item_panel_code in self.panel_code:
+                if _item_panel_code:
+                    _items.append(_item_panel_code.to_dict())
+            _dict['panel_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in priority_code (list)
+        _items = []
+        if self.priority_code:
+            for _item_priority_code in self.priority_code:
+                if _item_priority_code:
+                    _items.append(_item_priority_code.to_dict())
+            _dict['priority_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in project_code (list)
+        _items = []
+        if self.project_code:
+            for _item_project_code in self.project_code:
+                if _item_project_code:
+                    _items.append(_item_project_code.to_dict())
+            _dict['project_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in resolution_status_code (list)
+        _items = []
+        if self.resolution_status_code:
+            for _item_resolution_status_code in self.resolution_status_code:
+                if _item_resolution_status_code:
+                    _items.append(_item_resolution_status_code.to_dict())
+            _dict['resolution_status_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in status_code (list)
+        _items = []
+        if self.status_code:
+            for _item_status_code in self.status_code:
+                if _item_status_code:
+                    _items.append(_item_status_code.to_dict())
+            _dict['status_code'] = _items
         return _dict
 
     @classmethod
@@ -128,12 +168,17 @@ class CaseFilters(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "case_analysis": [Aggregation.from_dict(_item) for _item in obj["case_analysis"]] if obj.get("case_analysis") is not None else None,
-            "diagnosis_lab": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab"]] if obj.get("diagnosis_lab") is not None else None,
-            "ordering_organization": [Aggregation.from_dict(_item) for _item in obj["ordering_organization"]] if obj.get("ordering_organization") is not None else None,
-            "priority": [Aggregation.from_dict(_item) for _item in obj["priority"]] if obj.get("priority") is not None else None,
-            "project": [Aggregation.from_dict(_item) for _item in obj["project"]] if obj.get("project") is not None else None,
-            "status": [Aggregation.from_dict(_item) for _item in obj["status"]] if obj.get("status") is not None else None
+            "analysis_catalog_code": [Aggregation.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
+            "case_category_code": [Aggregation.from_dict(_item) for _item in obj["case_category_code"]] if obj.get("case_category_code") is not None else None,
+            "case_type_code": [Aggregation.from_dict(_item) for _item in obj["case_type_code"]] if obj.get("case_type_code") is not None else None,
+            "diagnosis_lab_code": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
+            "life_status_code": [Aggregation.from_dict(_item) for _item in obj["life_status_code"]] if obj.get("life_status_code") is not None else None,
+            "ordering_organization_code": [Aggregation.from_dict(_item) for _item in obj["ordering_organization_code"]] if obj.get("ordering_organization_code") is not None else None,
+            "panel_code": [Aggregation.from_dict(_item) for _item in obj["panel_code"]] if obj.get("panel_code") is not None else None,
+            "priority_code": [Aggregation.from_dict(_item) for _item in obj["priority_code"]] if obj.get("priority_code") is not None else None,
+            "project_code": [Aggregation.from_dict(_item) for _item in obj["project_code"]] if obj.get("project_code") is not None else None,
+            "resolution_status_code": [Aggregation.from_dict(_item) for _item in obj["resolution_status_code"]] if obj.get("resolution_status_code") is not None else None,
+            "status_code": [Aggregation.from_dict(_item) for _item in obj["status_code"]] if obj.get("status_code") is not None else None
         })
         return _obj
 

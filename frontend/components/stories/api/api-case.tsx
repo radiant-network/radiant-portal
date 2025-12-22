@@ -494,31 +494,31 @@ export async function httpCaseSearchApiResponse() {
 
 export async function httpCaseFiltersApiResponse() {
   return HttpResponse.json({
-    status: [
+    status_code: [
       {
-        key: 'incomplete',
-        label: 'Incomplete',
-        count: 10,
+        key: 'completed',
+        label: 'Completed',
+        count: 0,
       },
       {
         key: 'draft',
         label: 'Draft',
-        count: 5,
-      },
-      {
-        key: 'revoke',
-        label: 'Revoke',
-        count: 4,
-      },
-      {
-        key: 'completed',
-        label: 'Completed',
-        count: 1,
+        count: 0,
       },
       {
         key: 'in_progress',
         label: 'In Progress',
-        count: 1,
+        count: 0,
+      },
+      {
+        key: 'incomplete',
+        label: 'Incomplete',
+        count: 0,
+      },
+      {
+        key: 'revoke',
+        label: 'Revoke',
+        count: 0,
       },
       {
         key: 'submitted',
@@ -531,15 +531,15 @@ export async function httpCaseFiltersApiResponse() {
         count: 0,
       },
     ],
-    priority: [
-      {
-        key: 'routine',
-        label: 'Routine',
-        count: 21,
-      },
+    priority_code: [
       {
         key: 'asap',
         label: 'Asap',
+        count: 0,
+      },
+      {
+        key: 'routine',
+        label: 'Routine',
         count: 0,
       },
       {
@@ -553,20 +553,15 @@ export async function httpCaseFiltersApiResponse() {
         count: 0,
       },
     ],
-    case_analysis: [
+    analysis_catalog_code: [
       {
-        key: 'WGA',
-        label: 'Whole Genome Analysis',
-        count: 13,
+        key: 'HYPM',
+        label: 'Malignant Hyperthermia',
+        count: 0,
       },
       {
         key: 'IDGD',
         label: 'Intellectual Deficiency and Global Developmental Delay',
-        count: 8,
-      },
-      {
-        key: 'HYPM',
-        label: 'Malignant Hyperthermia',
         count: 0,
       },
       {
@@ -574,35 +569,25 @@ export async function httpCaseFiltersApiResponse() {
         label: 'Congenital Myopathies',
         count: 0,
       },
-    ],
-    project: [
       {
-        key: 'N2',
-        label: 'NeuroDev Phase II',
-        count: 12,
+        key: 'WGA',
+        label: 'Whole Genome Analysis',
+        count: 0,
       },
+    ],
+    project_code: [
       {
         key: 'N1',
         label: 'NeuroDev Phase I',
-        count: 9,
+        count: 0,
+      },
+      {
+        key: 'N2',
+        label: 'NeuroDev Phase II',
+        count: 0,
       },
     ],
-    diagnosis_lab: [
-      {
-        key: 'CQGC',
-        label: 'Quebec Clinical Genomic Center',
-        count: 21,
-      },
-      {
-        key: 'CHOP',
-        label: 'Children Hospital of Philadelphia',
-        count: 0,
-      },
-      {
-        key: 'CHUSJ',
-        label: 'Centre hospitalier universitaire Sainte-Justine',
-        count: 0,
-      },
+    diagnosis_lab_code: [
       {
         key: 'LDM-CHOP',
         label: 'Molecular Diagnostic Laboratory, CHOP',
@@ -613,21 +598,16 @@ export async function httpCaseFiltersApiResponse() {
         label: 'Laboratoire de diagnostic moléculaire, CHU Sainte-Justine',
         count: 0,
       },
-      {
-        key: 'UCSF',
-        label: 'University of California San-Francisco',
-        count: 0,
-      },
     ],
-    ordering_organization: [
-      {
-        key: 'CHUSJ',
-        label: 'Centre hospitalier universitaire Sainte-Justine',
-        count: 21,
-      },
+    ordering_organization_code: [
       {
         key: 'CHOP',
         label: 'Children Hospital of Philadelphia',
+        count: 0,
+      },
+      {
+        key: 'CHUSJ',
+        label: 'Centre hospitalier universitaire Sainte-Justine',
         count: 0,
       },
       {
@@ -648,6 +628,65 @@ export async function httpCaseFiltersApiResponse() {
       {
         key: 'UCSF',
         label: 'University of California San-Francisco',
+        count: 0,
+      },
+    ],
+    resolution_status_code: [
+      {
+        key: 'inconclusive',
+        label: 'Inconclusive',
+        count: 0,
+      },
+      {
+        key: 'solved',
+        label: 'Solved',
+        count: 0,
+      },
+      {
+        key: 'unsolved',
+        label: 'Unsolved',
+        count: 0,
+      },
+    ],
+    panel_code: [],
+    life_status_code: [
+      {
+        key: 'alive',
+        label: 'Alive',
+        count: 0,
+      },
+      {
+        key: 'deceased',
+        label: 'Deceased',
+        count: 0,
+      },
+      {
+        key: 'unknown',
+        label: 'Unknown',
+        count: 0,
+      },
+    ],
+    case_category_code: [
+      {
+        key: 'postnatal',
+        label: 'Postnatal',
+        count: 0,
+      },
+      {
+        key: 'prenatal',
+        label: 'Prenatal',
+        count: 0,
+      },
+    ],
+    case_type_code: [
+      {
+        key: 'germline',
+        label: 'Germline',
+        count: 0,
+      },
+      {
+        key: 'somatic',
+        label: 'Somatic',
         count: 0,
       },
     ],

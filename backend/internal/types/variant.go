@@ -150,9 +150,9 @@ type VariantExpandedInterpretedCase = struct {
 } // @name VariantExpandedInterpretedCase
 
 type VariantCasesFilters = struct {
-	Classification []Aggregation `json:"classification" validate:"required"`
-	CaseAnalysis   []Aggregation `json:"case_analysis" validate:"required"`
-	DiagnosisLab   []Aggregation `json:"diagnosis_lab" validate:"required"`
+	Classification  []Aggregation `json:"classification" validate:"required"`
+	AnalysisCatalog []Aggregation `json:"analysis_catalog_code" validate:"required"`
+	DiagnosisLab    []Aggregation `json:"diagnosis_lab_code" validate:"required"`
 } // @name VariantCasesFilters
 
 type VariantCasesCount struct {

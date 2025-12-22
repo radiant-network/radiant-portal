@@ -123,49 +123,73 @@ func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, e
 
 	var status []Aggregation
 	var priority []Aggregation
-	var caseAnalysis []Aggregation
+	var analysisCatalog []Aggregation
 	var project []Aggregation
 	var orderingOrg []Aggregation
 	var diagnosisLab []Aggregation
+	var caseCategory []Aggregation
+	var resolution []Aggregation
+	var caseType []Aggregation
+	var lifeStatus []Aggregation
+	var panel []Aggregation
 
-	txCases, err := prepareQuery(query, r)
-	if err != nil {
-		return nil, fmt.Errorf("error during query preparation %w", err)
-	}
-	txCases = txCases.Select("c.id, c.status_code, c.priority_code, c.analysis_catalog_id, c.project_id, c.diagnosis_lab_id, c.ordering_organization_id")
-
-	if err := r.getCasesFilter(txCases, &status, types.StatusTable, "status_code", "code", "name_en", nil); err != nil {
+	if err := r.getCasesFilter(&status, types.StatusTable, "name_en", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &priority, types.PriorityTable, "priority_code", "code", "name_en", nil); err != nil {
+	if err := r.getCasesFilter(&priority, types.PriorityTable, "name_en", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &caseAnalysis, types.AnalysisCatalogTable, "analysis_catalog_id", "id", "name", nil); err != nil {
+	if err := r.getCasesFilter(&analysisCatalog, types.AnalysisCatalogTable, "name", nil); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &project, types.ProjectTable, "project_id", "id", "name", nil); err != nil {
+	if err := r.getCasesFilter(&project, types.ProjectTable, "name", nil); err != nil {
+		return nil, err
+	}
+
+	if err := r.getCasesFilter(&caseCategory, types.CaseCategoryTable, "name_en", nil); err != nil {
+		return nil, err
+	}
+
+	if err := r.getCasesFilter(&resolution, types.ResolutionStatusTable, "name_en", nil); err != nil {
+		return nil, err
+	}
+
+	if err := r.getCasesFilter(&caseType, types.CaseTypeTable, "name_en", nil); err != nil {
 		return nil, err
 	}
 
 	isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.SequencingLabTable.Alias)
-	if err := r.getCasesFilter(txCases, &diagnosisLab, types.SequencingLabTable, "diagnosis_lab_id", "id", "name", &isDiagnosisLabCondition); err != nil {
+	if err := r.getCasesFilter(&diagnosisLab, types.SequencingLabTable, "name", &isDiagnosisLabCondition); err != nil {
 		return nil, err
 	}
 
-	if err := r.getCasesFilter(txCases, &orderingOrg, types.OrderingOrganizationTable, "ordering_organization_id", "id", "name", nil); err != nil {
+	if err := r.getCasesFilter(&orderingOrg, types.OrderingOrganizationTable, "name", nil); err != nil {
+		return nil, err
+	}
+
+	if err := r.getCasesFilter(&lifeStatus, types.LifeStatusTable, "name_en", nil); err != nil {
+		return nil, err
+	}
+
+	if err := r.getCasesFilter(&panel, types.PanelTable, "name", nil); err != nil {
 		return nil, err
 	}
 
 	return &CaseFilters{
 		Status:               status,
 		Priority:             priority,
-		CaseAnalysis:         caseAnalysis,
+		AnalysisCatalog:      analysisCatalog,
 		Project:              project,
 		DiagnosisLab:         diagnosisLab,
 		OrderingOrganization: orderingOrg,
+		CaseCategory:         caseCategory,
+		ResolutionStatus:     resolution,
+		CaseType:             caseType,
+		LifeStatus:           lifeStatus,
+		Panel:                panel,
 	}, nil
 }
 
@@ -199,13 +223,11 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 	return caseEntity, nil
 }
 
-func (r *CasesRepository) getCasesFilter(txCases *gorm.DB, destination *[]Aggregation, filterTable types.Table, casesJoinColumn string, filterJoinColumn string, filterLabelColumn string, filterCondition *string) error {
+func (r *CasesRepository) getCasesFilter(destination *[]Aggregation, filterTable types.Table, filterLabelColumn string, filterCondition *string) error {
 	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.FederationName, filterTable.Alias))
-	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct cases.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) cases ON cases.%s = %s.%s", casesJoinColumn, filterTable.Alias, filterJoinColumn), txCases)
+	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label", filterTable.Alias, filterTable.Alias, filterLabelColumn))
 
-	tx = tx.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	tx = tx.Order("count desc, bucket asc")
+	tx = tx.Order("bucket asc")
 	if filterCondition != nil {
 		tx = tx.Where(*filterCondition)
 	}
@@ -222,6 +244,10 @@ func prepareQuery(userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	tx = utils.JoinCaseWithProject(tx)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
+
+		if userQuery.HasFieldFromTables(types.PanelTable) {
+			tx = utils.JoinAnalysisCatalogWithPanel(tx)
+		}
 
 		if userQuery.HasFieldFromTables(types.OrderingOrganizationTable) {
 			tx = utils.JoinCaseWithOrderingOrganization(tx)

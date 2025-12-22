@@ -35,37 +35,67 @@ class TestCaseFilters(unittest.TestCase):
         model = CaseFilters()
         if include_optional:
             return CaseFilters(
-                case_analysis = [
+                analysis_catalog_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                diagnosis_lab = [
+                diagnosis_lab_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                ordering_organization = [
+                ordering_organization_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                priority = [
+                priority_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                project = [
+                project_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                status = [
+                status_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                panel_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                life_status_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                case_category_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                resolution_status_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                case_type_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
@@ -74,42 +104,72 @@ class TestCaseFilters(unittest.TestCase):
             )
         else:
             return CaseFilters(
-                case_analysis = [
+                analysis_catalog_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                diagnosis_lab = [
+                diagnosis_lab_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                ordering_organization = [
+                ordering_organization_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                priority = [
+                priority_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                project = [
+                project_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
-                status = [
+                status_code = [
                     radiant_python.models.aggregation.Aggregation(
                         count = 56, 
                         key = '', 
                         label = '', )
                     ],
+                panel_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                life_status_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                case_category_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                resolution_status_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ],
+                case_type_code = [
+                    radiant_python.models.aggregation.Aggregation(
+                        count = 56, 
+                        key = '', 
+                        label = '', )
+                    ]
         )
         """
 

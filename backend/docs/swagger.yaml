@@ -364,43 +364,73 @@ components:
       type: object
     CaseFilters:
       properties:
-        case_analysis:
+        analysis_catalog_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        diagnosis_lab:
+        case_category_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        ordering_organization:
+        case_type_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        priority:
+        diagnosis_lab_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        project:
+        life_status_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        status:
+        ordering_organization_code:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        panel_code:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        priority_code:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        project_code:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        resolution_status_code:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        status_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
       required:
-      - case_analysis
-      - diagnosis_lab
-      - ordering_organization
-      - priority
-      - project
-      - status
+      - analysis_catalog_code
+      - case_category_code
+      - case_type_code
+      - diagnosis_lab_code
+      - life_status_code
+      - ordering_organization_code
+      - panel_code
+      - priority_code
+      - project_code
+      - resolution_status_code
+      - status_code
       type: object
     CasePatientBatch:
       properties:
@@ -490,6 +520,8 @@ components:
           type: string
         analysis_catalog_name:
           type: string
+        case_category_code:
+          type: string
         case_id:
           type: integer
         case_type:
@@ -510,6 +542,10 @@ components:
           type: string
         organization_name:
           type: string
+        panel_code:
+          type: string
+        panel_name:
+          type: string
         prescriber:
           type: string
         primary_condition_id:
@@ -518,11 +554,21 @@ components:
           type: string
         priority_code:
           type: string
+        proband_first_name:
+          type: string
         proband_id:
           type: integer
+        proband_jhn:
+          type: string
+        proband_last_name:
+          type: string
+        proband_life_status_code:
+          type: string
         project_code:
           type: string
         project_name:
+          type: string
+        resolution_status_code:
           type: string
         status_code:
           type: string
@@ -752,35 +798,35 @@ components:
       type: object
     DocumentFilters:
       properties:
-        data_type:
+        data_type_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        diagnosis_lab:
+        diagnosis_lab_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        format:
+        format_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        project:
+        project_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        relationship_to_proband:
+        relationship_to_proband_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
       required:
-      - data_type
-      - format
-      - relationship_to_proband
+      - data_type_code
+      - format_code
+      - relationship_to_proband_code
       type: object
     DocumentResult:
       properties:
@@ -1991,7 +2037,7 @@ components:
       type: object
     VariantCasesFilters:
       properties:
-        case_analysis:
+        analysis_catalog_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
@@ -2001,15 +2047,15 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
-        diagnosis_lab:
+        diagnosis_lab_code:
           items:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
       required:
-      - case_analysis
+      - analysis_catalog_code
       - classification
-      - diagnosis_lab
+      - diagnosis_lab_code
       type: object
     VariantConsequence:
       properties:

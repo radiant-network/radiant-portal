@@ -66,7 +66,7 @@ func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilte
 			{Bucket: "asap", Label: "Asap"},
 			{Bucket: "stat", Label: "Stat"},
 		},
-		CaseAnalysis: []types.Aggregation{
+		AnalysisCatalog: []types.Aggregation{
 			{Bucket: "WGA", Label: "Whole Genome Analysis"},
 			{Bucket: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
 		},
@@ -81,6 +81,28 @@ func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilte
 		OrderingOrganization: []types.Aggregation{
 			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
 			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		},
+		Panel: []types.Aggregation{
+			{Bucket: "EPILEP", Label: "Epilepsy"},
+			{Bucket: "HEART", Label: "Heart diseases"},
+		},
+		LifeStatus: []types.Aggregation{
+			{Bucket: "alive", Label: "Alive"},
+			{Bucket: "deceased", Label: "Deceased"},
+			{Bucket: "unknown", Label: "Unknown"},
+		},
+		ResolutionStatus: []types.Aggregation{
+			{Bucket: "inconclusive", Label: "Inconclusive"},
+			{Bucket: "solved", Label: "Solved"},
+			{Bucket: "unsolved", Label: "Unsolved"},
+		},
+		CaseCategory: []types.Aggregation{
+			{Bucket: "prenatal", Label: "Prenatal"},
+			{Bucket: "postnatal", Label: "Postnatal"},
+		},
+		CaseType: []types.Aggregation{
+			{Bucket: "germline", Label: "Germline"},
+			{Bucket: "somatic", Label: "Somatic"},
 		},
 	}
 	return &result, nil
@@ -196,26 +218,43 @@ func Test_CasesFiltersHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"case_analysis":[
+		"analysis_catalog_code":[
 			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}, 
 			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
-		], "diagnosis_lab":[
+		], "diagnosis_lab_code":[
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
-		], "priority":[
+		], "priority_code":[
 			{"count":0, "key":"routine", "label":"Routine"},
 			{"count":0, "key":"asap", "label":"Asap"},
 			{"count":0, "key":"stat", "label":"Stat"}
-		], "project":[
+		], "project_code":[
 			{"count":0, "key":"N1", "label":"NeuroDev Phase I"},
 			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
-		], "ordering_organization":[
+		], "ordering_organization_code":[
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
-		], "status":[
+		], "status_code":[
 			{"count":0, "key":"draft", "label":"Draft"},
 			{"count":0, "key":"in_progress", "label":"In Progress"},
 			{"count":0, "key":"revoke", "label":"Revoke"}
+		], "resolution_status_code":[
+			{"count":0, "key":"inconclusive", "label":"Inconclusive"},
+			{"count":0, "key":"solved", "label":"Solved"},
+			{"count":0, "key":"unsolved", "label":"Unsolved"}
+		], "life_status_code":[
+			{"count":0, "key":"alive", "label":"Alive"},
+			{"count":0, "key":"deceased", "label":"Deceased"},
+			{"count":0, "key":"unknown", "label":"Unknown"}
+		], "case_category_code":[
+			{"count":0, "key":"prenatal", "label":"Prenatal"},
+			{"count":0, "key":"postnatal", "label":"Postnatal"}
+		], "panel_code":[
+			{"count":0, "key":"EPILEP", "label":"Epilepsy"},
+			{"count":0, "key":"HEART", "label":"Heart diseases"}
+		], "case_type_code":[
+			{"count":0, "key":"germline", "label":"Germline"},
+			{"count":0, "key":"somatic", "label":"Somatic"}
 		]
 	}`, w.Body.String())
 }
@@ -353,24 +392,24 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"data_type":[
+		"data_type_code":[
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"ssnv", "label":"Somatic SNV"}
 		], 
-		"format":[
+		"format_code":[
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
 			{"count":0, "key":"vcf", "label":"VCF File"}
 		], 
-		"diagnosis_lab":[
+		"diagnosis_lab_code":[
 			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
 			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], 
-		"project":[
+		"project_code":[
 			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
 			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
 		], 
-		"relationship_to_proband":[
+		"relationship_to_proband_code":[
 			{"count":0, "key":"proband", "label":"Proband"}, 
 			{"count":0, "key":"father", "label":"Father"}, 
 			{"count":0, "key":"mother", "label":"Mother"}

@@ -60,6 +60,14 @@ type CaseResult struct {
 	OrganizationCode         string    `json:"organization_code,omitempty"`
 	OrganizationName         string    `json:"organization_name,omitempty"`
 	HasVariants              bool      `json:"has_variants" validate:"required"`
+	PanelCode                string    `json:"panel_code,omitempty"`
+	PanelName                string    `json:"panel_name,omitempty"`
+	ResolutionStatusCode     string    `json:"resolution_status_code,omitempty"`
+	CaseCategoryCode         string    `json:"case_category_code,omitempty"`
+	ProbandJhn               string    `json:"proband_jhn,omitempty"`
+	ProbandLifeStatusCode    string    `json:"proband_life_status_code,omitempty"`
+	ProbandFirstName         string    `json:"proband_first_name,omitempty"`
+	ProbandLastName          string    `json:"proband_last_name,omitempty"`
 }
 
 // CaseEntity - Case Entity data
@@ -186,6 +194,14 @@ var CasesFields = []Field{
 	PatientOrganizationCodeField,
 	PatientOrganizationNameField,
 	CaseSequencingExperimentIdField,
+	PanelCodeField,
+	PanelNameField,
+	CaseCategoryCodeField,
+	CaseResolutionStatusCodeField,
+	ProbandJhnField,
+	ProbandLifeStatusCodeField,
+	ProbandFirstNameField,
+	ProbandLastNameField,
 }
 
 var CasesDefaultFields = []Field{
@@ -341,11 +357,34 @@ var CaseSequencingExperimentIdField = Field{
 	Table:         CaseHasSequencingExperimentTable,
 }
 
+var CaseCategoryCodeField = Field{
+	Name:          "case_category_code",
+	Alias:         "case_category_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         CaseTable,
+}
+
+var CaseResolutionStatusCodeField = Field{
+	Name:          "resolution_status_code",
+	Alias:         "resolution_status_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         CaseTable,
+}
+
 type CaseFilters struct {
-	Status               []Aggregation `json:"status" validate:"required"`
-	Priority             []Aggregation `json:"priority" validate:"required"`
-	CaseAnalysis         []Aggregation `json:"case_analysis" validate:"required"`
-	Project              []Aggregation `json:"project" validate:"required"`
-	DiagnosisLab         []Aggregation `json:"diagnosis_lab" validate:"required"`
-	OrderingOrganization []Aggregation `json:"ordering_organization" validate:"required"`
+	Status               []Aggregation `json:"status_code" validate:"required"`
+	Priority             []Aggregation `json:"priority_code" validate:"required"`
+	AnalysisCatalog      []Aggregation `json:"analysis_catalog_code" validate:"required"`
+	Project              []Aggregation `json:"project_code" validate:"required"`
+	DiagnosisLab         []Aggregation `json:"diagnosis_lab_code" validate:"required"`
+	OrderingOrganization []Aggregation `json:"ordering_organization_code" validate:"required"`
+	ResolutionStatus     []Aggregation `json:"resolution_status_code" validate:"required"`
+	Panel                []Aggregation `json:"panel_code" validate:"required"`
+	LifeStatus           []Aggregation `json:"life_status_code" validate:"required"`
+	CaseCategory         []Aggregation `json:"case_category_code" validate:"required"`
+	CaseType             []Aggregation `json:"case_type_code" validate:"required"`
 }

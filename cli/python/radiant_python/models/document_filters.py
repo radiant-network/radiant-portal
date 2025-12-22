@@ -27,12 +27,12 @@ class DocumentFilters(BaseModel):
     """
     DocumentFilters
     """ # noqa: E501
-    data_type: List[Aggregation]
-    diagnosis_lab: Optional[List[Aggregation]] = None
-    format: List[Aggregation]
-    project: Optional[List[Aggregation]] = None
-    relationship_to_proband: List[Aggregation]
-    __properties: ClassVar[List[str]] = ["data_type", "diagnosis_lab", "format", "project", "relationship_to_proband"]
+    data_type_code: List[Aggregation]
+    diagnosis_lab_code: Optional[List[Aggregation]] = None
+    format_code: List[Aggregation]
+    project_code: Optional[List[Aggregation]] = None
+    relationship_to_proband_code: List[Aggregation]
+    __properties: ClassVar[List[str]] = ["data_type_code", "diagnosis_lab_code", "format_code", "project_code", "relationship_to_proband_code"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -73,41 +73,41 @@ class DocumentFilters(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in data_type (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in data_type_code (list)
         _items = []
-        if self.data_type:
-            for _item_data_type in self.data_type:
-                if _item_data_type:
-                    _items.append(_item_data_type.to_dict())
-            _dict['data_type'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in diagnosis_lab (list)
+        if self.data_type_code:
+            for _item_data_type_code in self.data_type_code:
+                if _item_data_type_code:
+                    _items.append(_item_data_type_code.to_dict())
+            _dict['data_type_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in diagnosis_lab_code (list)
         _items = []
-        if self.diagnosis_lab:
-            for _item_diagnosis_lab in self.diagnosis_lab:
-                if _item_diagnosis_lab:
-                    _items.append(_item_diagnosis_lab.to_dict())
-            _dict['diagnosis_lab'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in format (list)
+        if self.diagnosis_lab_code:
+            for _item_diagnosis_lab_code in self.diagnosis_lab_code:
+                if _item_diagnosis_lab_code:
+                    _items.append(_item_diagnosis_lab_code.to_dict())
+            _dict['diagnosis_lab_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in format_code (list)
         _items = []
-        if self.format:
-            for _item_format in self.format:
-                if _item_format:
-                    _items.append(_item_format.to_dict())
-            _dict['format'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in project (list)
+        if self.format_code:
+            for _item_format_code in self.format_code:
+                if _item_format_code:
+                    _items.append(_item_format_code.to_dict())
+            _dict['format_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in project_code (list)
         _items = []
-        if self.project:
-            for _item_project in self.project:
-                if _item_project:
-                    _items.append(_item_project.to_dict())
-            _dict['project'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in relationship_to_proband (list)
+        if self.project_code:
+            for _item_project_code in self.project_code:
+                if _item_project_code:
+                    _items.append(_item_project_code.to_dict())
+            _dict['project_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in relationship_to_proband_code (list)
         _items = []
-        if self.relationship_to_proband:
-            for _item_relationship_to_proband in self.relationship_to_proband:
-                if _item_relationship_to_proband:
-                    _items.append(_item_relationship_to_proband.to_dict())
-            _dict['relationship_to_proband'] = _items
+        if self.relationship_to_proband_code:
+            for _item_relationship_to_proband_code in self.relationship_to_proband_code:
+                if _item_relationship_to_proband_code:
+                    _items.append(_item_relationship_to_proband_code.to_dict())
+            _dict['relationship_to_proband_code'] = _items
         return _dict
 
     @classmethod
@@ -120,11 +120,11 @@ class DocumentFilters(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "data_type": [Aggregation.from_dict(_item) for _item in obj["data_type"]] if obj.get("data_type") is not None else None,
-            "diagnosis_lab": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab"]] if obj.get("diagnosis_lab") is not None else None,
-            "format": [Aggregation.from_dict(_item) for _item in obj["format"]] if obj.get("format") is not None else None,
-            "project": [Aggregation.from_dict(_item) for _item in obj["project"]] if obj.get("project") is not None else None,
-            "relationship_to_proband": [Aggregation.from_dict(_item) for _item in obj["relationship_to_proband"]] if obj.get("relationship_to_proband") is not None else None
+            "data_type_code": [Aggregation.from_dict(_item) for _item in obj["data_type_code"]] if obj.get("data_type_code") is not None else None,
+            "diagnosis_lab_code": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
+            "format_code": [Aggregation.from_dict(_item) for _item in obj["format_code"]] if obj.get("format_code") is not None else None,
+            "project_code": [Aggregation.from_dict(_item) for _item in obj["project_code"]] if obj.get("project_code") is not None else None,
+            "relationship_to_proband_code": [Aggregation.from_dict(_item) for _item in obj["relationship_to_proband_code"]] if obj.get("relationship_to_proband_code") is not None else None
         })
         return _obj
 
