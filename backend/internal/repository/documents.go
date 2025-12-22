@@ -27,6 +27,8 @@ type DocumentsDAO interface {
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 	GetDocumentsFilters(userQuery types.AggQuery, withProjectAndLab bool) (*DocumentFilters, error)
 	GetById(id int) (*Document, error)
+	GetByUrl(url string) (*Document, error)
+	CreateDocument(document *Document) error
 }
 
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
@@ -35,6 +37,22 @@ func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
 		return nil
 	}
 	return &DocumentsRepository{db: db}
+}
+
+func (r *DocumentsRepository) CreateDocument(document *Document) error {
+	return r.db.Create(&document).Error
+}
+
+func (r *DocumentsRepository) GetByUrl(url string) (*Document, error) {
+	var document Document
+	txUrl := r.db.Table(types.DocumentTable.Name).Where("url = ?", url)
+	if err := txUrl.First(&document).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error while fetching document by url: %w", err)
+	}
+	return &document, nil
 }
 
 func (r *DocumentsRepository) SearchDocuments(userQuery types.ListQuery) (*[]DocumentResult, *int64, error) {

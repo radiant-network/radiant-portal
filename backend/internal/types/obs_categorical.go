@@ -1,7 +1,7 @@
 package types
 
 type ObsCategorical struct {
-	ID                 int
+	ID                 int `gorm:"unique;primaryKey;autoIncrement"`
 	CaseID             int
 	Case               Case `gorm:"foreignKey:ID;references:CaseID"`
 	PatientID          int

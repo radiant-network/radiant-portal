@@ -3,7 +3,7 @@ package types
 import "time"
 
 type Document struct {
-	ID               int
+	ID               int `gorm:"unique;primaryKey;autoIncrement"`
 	Name             string
 	DataCategoryCode string
 	DataCategory     DataCategory `gorm:"foreignKey:code;references:DataCategoryCode"`
@@ -11,7 +11,7 @@ type Document struct {
 	DataType         DataType   `gorm:"foreignKey:code;references:DataTypeCode"`
 	FileFormatCode   string     `gorm:"column:format_code"`
 	FileFormat       FileFormat `gorm:"foreignKey:code;references:FileFormatCode"`
-	Size             int
+	Size             int64
 	Url              string
 	Hash             string
 	CreatedOn        time.Time

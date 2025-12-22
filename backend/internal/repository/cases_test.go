@@ -63,6 +63,25 @@ func Test_CreateCases(t *testing.T) {
 	})
 }
 
+func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode("WGA")
+		assert.NoError(t, err)
+		assert.Equal(t, 1, analysisCatalog.ID)
+		assert.Equal(t, "WGA", analysisCatalog.Code)
+	})
+}
+
+func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode("NON_EXISTENT_CODE")
+		assert.NoError(t, err)
+		assert.Nil(t, analysisCatalog)
+	})
+}
+
 func Test_SearchCasesNoFilters(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
