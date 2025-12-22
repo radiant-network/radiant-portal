@@ -845,7 +845,7 @@
       "overlapping_cnv_percent_tooltip": "% overlapped CNV length",
       "overlap_type": "Type",
       "overlap_type_tooltip": "Gene and CNV overlapping type",
-      "panels": "Panels",
+      "panels": "Overlapping with CNV",
       "pe": "PE",
       "pe_tooltip": "Number of improperly paired end reads at start and stop breakpoints",
       "pf_wgs": "Freq.",

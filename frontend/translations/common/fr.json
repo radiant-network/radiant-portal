@@ -844,7 +844,7 @@
       "overlapping_cnv_percent_tooltip": "% de la longueur du CNV chevauché",
       "overlap_type": "Type",
       "overlap_type_tooltip": "Type de chevauchement entre le gène et le CNV",
-      "panels": "Panels",
+      "panels": "Chevauchement avec le CNV",
       "pe": "PE",
       "pe_tooltip": "Nombre de fragments incorrectement appariés au début et à la fin des points de cassure",
       "pf_wgs": "Fréq.",
