@@ -1487,7 +1487,7 @@
         "tests": {
           "all_tests": "All Analyses"
         },
-        "created_at": {
+        "created_on": {
           "most_recent": "Most recent",
           "least_recent": "Least recent"
         }

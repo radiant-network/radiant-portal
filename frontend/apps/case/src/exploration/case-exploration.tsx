@@ -18,7 +18,7 @@ type CaseListInput = {
 
 const DEFAULT_SORTING = [
   {
-    field: 'created_at',
+    field: 'created_on',
     order: SortBodyOrderEnum.Asc,
   },
 ];
