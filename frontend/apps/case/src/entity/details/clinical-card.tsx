@@ -74,16 +74,14 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             </CardTitle>
 
             <ExpandableList
-              items={proband.observed_phenotypes ?? []}
-              renderItem={item => (
-                <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
-              )}
+              items={(proband.observed_phenotypes ?? []).map(item => (
+                <PhenotypeConditionLink key={item.id} code={item.id} name={item.name} onsetCode={item.onset_code} />
+              ))}
               visibleCount={PHENOTYPES_VISIBLE_COUNT}
+              emptyMessage={
+                <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
+              }
             />
-
-            {!proband.observed_phenotypes && (
-              <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
-            )}
 
             {/* Phenotypes Non-Observed */}
             <CardTitle size="xs" className="font-bold">
@@ -91,16 +89,14 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             </CardTitle>
 
             <ExpandableList
-              items={proband.non_observed_phenotypes ?? []}
-              renderItem={item => (
-                <PhenotypeConditionLink code={item.id} name={item.name} onsetCode={item.onset_code} />
-              )}
+              items={(proband.non_observed_phenotypes ?? []).map(item => (
+                <PhenotypeConditionLink key={item.id} code={item.id} name={item.name} onsetCode={item.onset_code} />
+              ))}
               visibleCount={PHENOTYPES_VISIBLE_COUNT}
+              emptyMessage={
+                <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
+              }
             />
-
-            {!proband.non_observed_phenotypes && (
-              <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
-            )}
           </div>
 
           {/* Clinical Note */}

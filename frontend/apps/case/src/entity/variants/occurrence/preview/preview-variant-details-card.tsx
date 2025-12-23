@@ -8,6 +8,7 @@ import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import EmptyField from '@/components/base/information/empty-field';
+import ExpandableList from '@/components/base/list/expandable-list';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
@@ -18,7 +19,7 @@ import { cn } from '@/components/lib/utils';
 import { DescriptionRow, DescriptionSection } from 'components/base/preview/description';
 import PreviewCard from 'components/base/preview/preview-card';
 import TranscriptIdLink from 'components/base/variant/transcript-id-link';
-import { getDbSnpUrl, getEnsemblTranscriptUrl, getOmimOrgUrl } from 'components/base/variant/utils';
+import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from 'components/base/variant/utils';
 
 type PreviewVariantDetailsCardProps = {
   data: ExpandedGermlineSNVOccurrence;
@@ -173,6 +174,51 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
     </Tooltip>
   );
 
+  const functionalScores = [];
+
+  // revel score
+  if (data.revel_score) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.gene.revel')}>{data.revel_score}</DescriptionRow>,
+    );
+  }
+
+  // sift
+  if (data.sift_pred) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.sift')}>
+        {data.sift_pred} ({data.sift_score})
+      </DescriptionRow>,
+    );
+  }
+
+  // fathmm
+  if (data.fathmm_pred) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.fathmm')}>
+        {data.fathmm_pred} ({data.fathmm_score})
+      </DescriptionRow>,
+    );
+  }
+
+  // caddphred
+  if (data.cadd_phred) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_phred')}>
+        {data.cadd_phred.toExponential(2)}
+      </DescriptionRow>,
+    );
+  }
+
+  // cadd score
+  if (data.cadd_score) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_raw')}>
+        {data.cadd_score.toExponential(2)}
+      </DescriptionRow>,
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-4 rounded-md border border-border p-3 sm:gap-20 w-full">
       <div className="flex flex-1 flex-col gap-4">
@@ -203,7 +249,7 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
           )}
         </DescriptionSection>
         <DescriptionSection title={t('preview_sheet.variant_details.sections.gene.title')}>
-          <DescriptionRow label={t('occurrence_expand.gene.title')}>
+          <DescriptionRow label={t('occurrence_expand.gene.pli')}>
             {data.gnomad_pli ? (
               <AnchorLink
                 href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`}
@@ -231,7 +277,7 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
               <EmptyField />
             )}
           </DescriptionRow>
-          <DescriptionRow label={t('occurrence_expand.gene.revel')}>
+          <DescriptionRow label={t('occurrence_expand.gene.splice_ai')}>
             {data.spliceai_type ? (
               <AnchorLink
                 href={`https://spliceailookup.broadinstitute.org/#variant=${data.hgvsg}&hg=38`}
@@ -270,31 +316,17 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
           </DescriptionRow>
         </DescriptionSection>
         <DescriptionSection title={t('preview_sheet.variant_details.sections.functional_scores.title')}>
-          {!data.sift_pred && !data.fathmm_pred && !data.cadd_score && !data.cadd_phred && (
-            <div className="text-muted-foreground text-xs">
-              {t('preview_sheet.variant_details.sections.functional_scores.no_data')}
-            </div>
-          )}
-          {data.sift_pred && (
-            <DescriptionRow label={t('occurrence_expand.functional_scores.sift')}>
-              {data.sift_pred} (${data.sift_score})
-            </DescriptionRow>
-          )}
-          {data.fathmm_pred && (
-            <DescriptionRow label={t('occurrence_expand.functional_scores.fathmm')}>
-              {data.fathmm_pred} (${data.fathmm_score})
-            </DescriptionRow>
-          )}
-          {data.cadd_score && (
-            <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_raw')}>
-              {data.cadd_score.toExponential(2)}
-            </DescriptionRow>
-          )}
-          {data.cadd_phred && (
-            <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_phred')}>
-              {data.cadd_phred.toExponential(2)}
-            </DescriptionRow>
-          )}
+          <ExpandableList
+            className="w-full"
+            items={functionalScores}
+            visibleCount={4}
+            size="lg"
+            emptyMessage={
+              <div className="text-muted-foreground text-xs">
+                {t('preview_sheet.variant_details.sections.functional_scores.no_data')}
+              </div>
+            }
+          />
         </DescriptionSection>
       </div>
     </div>
@@ -315,8 +347,8 @@ const GeneCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
               {data.symbol}
             </AnchorLink>
             {data.aa_change && <div className="font-mono font-semibold text-sm">{data.aa_change}</div>}
-            {data.transcript_id && (
-              <AnchorLink className="text-sm" external href={getEnsemblTranscriptUrl(data.transcript_id)}>
+            {data.ensembl_gene_id && (
+              <AnchorLink target="_blank" className="text-sm" external href={getEnsemblUrl(data.ensembl_gene_id)}>
                 {t('preview_sheet.variant_details.actions.ensembl')}
               </AnchorLink>
             )}
