@@ -680,6 +680,8 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "T001", expandedOccurrence.TranscriptId)
 		assert.Equal(t, "LA6668-3", expandedOccurrence.InterpretationClassificationCode)
 		assert.Equal(t, "pathogenic", expandedOccurrence.InterpretationClassification)
+		assert.Equal(t, "BRAF", expandedOccurrence.Symbol)
+		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
 	})
 }
 

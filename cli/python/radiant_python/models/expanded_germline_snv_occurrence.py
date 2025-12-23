@@ -39,6 +39,7 @@ class ExpandedGermlineSNVOccurrence(BaseModel):
     dann_score: Optional[Union[StrictFloat, StrictInt]] = None
     dna_change: Optional[StrictStr] = None
     end: Optional[StrictInt] = None
+    ensembl_gene_id: Optional[StrictStr] = None
     exomiser_acmg_classification: Optional[StrictStr] = None
     exomiser_acmg_classification_counts: Optional[Dict[str, StrictInt]] = None
     exomiser_acmg_evidence: List[StrictStr]
@@ -85,7 +86,7 @@ class ExpandedGermlineSNVOccurrence(BaseModel):
     transmission: Optional[StrictStr] = None
     vep_impact: Optional[VepImpact] = None
     zygosity: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_total", "af", "cadd_phred", "cadd_score", "chromosome", "clinvar", "dann_score", "dna_change", "end", "exomiser_acmg_classification", "exomiser_acmg_classification_counts", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exon_rank", "exon_total", "father_calls", "fathmm_pred", "fathmm_score", "filter", "genotype_quality", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "mother_calls", "omim_conditions", "parental_origin", "pc_wgs_affected", "pc_wgs_not_affected", "pf_wgs", "pf_wgs_affected", "pf_wgs_not_affected", "picked_consequences", "pn_wgs_affected", "pn_wgs_not_affected", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "spliceai_ds", "spliceai_type", "start", "symbol", "transcript_id", "transmission", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_total", "af", "cadd_phred", "cadd_score", "chromosome", "clinvar", "dann_score", "dna_change", "end", "ensembl_gene_id", "exomiser_acmg_classification", "exomiser_acmg_classification_counts", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exon_rank", "exon_total", "father_calls", "fathmm_pred", "fathmm_score", "filter", "genotype_quality", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "mother_calls", "omim_conditions", "parental_origin", "pc_wgs_affected", "pc_wgs_not_affected", "pf_wgs", "pf_wgs_affected", "pf_wgs_not_affected", "picked_consequences", "pn_wgs_affected", "pn_wgs_not_affected", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "spliceai_ds", "spliceai_type", "start", "symbol", "transcript_id", "transmission", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -156,6 +157,7 @@ class ExpandedGermlineSNVOccurrence(BaseModel):
             "dann_score": obj.get("dann_score"),
             "dna_change": obj.get("dna_change"),
             "end": obj.get("end"),
+            "ensembl_gene_id": obj.get("ensembl_gene_id"),
             "exomiser_acmg_classification": obj.get("exomiser_acmg_classification"),
             "exomiser_acmg_classification_counts": obj.get("exomiser_acmg_classification_counts"),
             "exomiser_acmg_evidence": obj.get("exomiser_acmg_evidence"),

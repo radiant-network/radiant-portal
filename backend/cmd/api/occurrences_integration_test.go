@@ -402,6 +402,7 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		"cadd_score":0.1, 
 		"chromosome":"1", 
 		"clinvar":["Benign", "Pathogenic"], 
+		"ensembl_gene_id": "ENSG00000157764",
 		"exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", 
 		"exomiser_acmg_evidence":["PS1", "PVS2"], 
 		"exomiser_gene_combined_score":0.7, 
