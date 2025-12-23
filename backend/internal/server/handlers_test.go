@@ -15,7 +15,7 @@ import (
 
 type MockRepository struct{}
 
-func (m *MockRepository) GetByUrl(url string) (*repository.Document, error) {
+func (m *MockRepository) GetDocumentByUrl(url string) (*repository.Document, error) {
 	return nil, nil
 }
 

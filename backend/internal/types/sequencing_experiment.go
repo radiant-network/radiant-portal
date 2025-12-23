@@ -5,7 +5,7 @@ import (
 )
 
 type SequencingExperiment struct {
-	ID                           int
+	ID                           int `gorm:"unique;primaryKey;autoIncrement"`
 	SampleID                     int
 	Sample                       Sample `gorm:"foreignKey:ID;references:SampleID"`
 	StatusCode                   string
