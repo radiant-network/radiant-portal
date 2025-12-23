@@ -435,6 +435,10 @@ components:
     CasePatientBatch:
       properties:
         affected_status_code:
+          enum:
+          - affected
+          - unaffected
+          - unknown
           type: string
         family_history:
           items:
@@ -454,6 +458,13 @@ components:
         patient_organization_code:
           type: string
         relation_to_proband_code:
+          enum:
+          - mother
+          - father
+          - brother
+          - sister
+          - sibling
+          - proband
           type: string
         submitter_patient_id:
           type: string

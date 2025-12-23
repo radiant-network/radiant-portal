@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -10,8 +11,25 @@ import (
 	"gorm.io/gorm"
 )
 
+// FamilyMemberCodeRegExp defines a regular expression pattern that matches strings containing
+// uppercase and lowercase letters (A-Z, a-z) and hyphens.
+const FamilyMemberCodeRegExp = `^[A-Za-z\- ]+$`
+
+var FamilyMemberCodeRegExpCompiled = regexp.MustCompile(FamilyMemberCodeRegExp)
+
+// ConditionRegExp defines a regular expression pattern that matches strings containing
+// alphanumeric characters (A-Z, a-z, 0-9), hyphens, underscores, periods, commas, and spaces.
+const ConditionRegExp = `^[A-Za-z0-9\-\_\.\, ]+$`
+
+var ConditionRegExpCompiled = regexp.MustCompile(ConditionRegExp)
+
 const (
 	IdenticalCaseInBatchCode = "CASE-001"
+)
+
+// Patients error codes
+const (
+	InvalidFieldPatientsCode = "PATIENT-004"
 )
 
 type CaseKey struct {
@@ -66,6 +84,79 @@ func validateCaseBatch(cases []types.CaseBatch, projects repository.ProjectDAO) 
 	return records, nil
 }
 
+func (cr *CaseValidationRecord) validateFamilyMemberCode(patientIndex int, fhIndex int) {
+	p := cr.Case.Patients[patientIndex]
+	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
+
+	fieldName := "family_member_code"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{p.PatientOrganizationCode, p.SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].family_history[%d].%s", cr.Index, patientIndex, fhIndex, fieldName)
+
+	if !FamilyMemberCodeRegExpCompiled.MatchString(fh.FamilyMemberCode) {
+		message := fmt.Sprintf("%s does not match the regular expression %s.",
+			message,
+			FamilyMemberCodeRegExp,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+
+	if len(fh.FamilyMemberCode) > TextMaxLength {
+		message := fmt.Sprintf("%s field is too long, maximum length allowed is %d.",
+			message,
+			TextMaxLength,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateCondition(patientIndex int, fhIndex int) {
+	p := cr.Case.Patients[patientIndex]
+	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
+
+	fieldName := "condition"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{p.PatientOrganizationCode, p.SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].family_history[%d].%s", cr.Index, patientIndex, fhIndex, fieldName)
+
+	if !ConditionRegExpCompiled.MatchString(fh.Condition) {
+		message := fmt.Sprintf("%s does not match the regular expression %s.",
+			message,
+			ConditionRegExp,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+
+	if len(fh.Condition) > TextMaxLength {
+		message := fmt.Sprintf("%s field is too long, maximum length allowed is %d.",
+			message,
+			TextMaxLength,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateFamilyHistory(patientIndex int) {
+	for fhIndex := range cr.Case.Patients[patientIndex].FamilyHistory {
+		cr.validateFamilyMemberCode(patientIndex, fhIndex)
+		cr.validateCondition(patientIndex, fhIndex)
+	}
+}
+
+func (cr *CaseValidationRecord) validateCasePatients(patients []*types.CasePatientBatch) error {
+	for patientIndex := range patients {
+		// Validate family history
+		cr.validateFamilyHistory(patientIndex)
+	}
+	return nil
+}
+
 func validateCaseRecord(c types.CaseBatch, index int, projects repository.ProjectDAO) (*CaseValidationRecord, error) {
 	// FIXME: Not Implemented, will be implemented in follow-up tasks
 	cr := CaseValidationRecord{
@@ -79,7 +170,12 @@ func validateCaseRecord(c types.CaseBatch, index int, projects repository.Projec
 		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", unexpectedErr)
 	}
 
-	// TODO: Add field-level validations here
+	// 1. Validate Case Fields
+
+	// 2. Validate Case Patients
+	if unexpectedErr := cr.validateCasePatients(c.Patients); unexpectedErr != nil {
+		return nil, fmt.Errorf("error during case patients validation: %v", unexpectedErr)
+	}
 
 	return &cr, nil
 }

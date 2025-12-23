@@ -23,13 +23,13 @@ type CaseBatch struct {
 }
 
 type CasePatientBatch struct {
-	AffectedStatusCode      string                         `json:"affected_status_code" binding:"required"`
+	AffectedStatusCode      string                         `json:"affected_status_code" binding:"required,oneof=affected unaffected unknown"`
 	FamilyHistory           []*FamilyHistoryBatch          `json:"family_history,omitempty" binding:"dive"`
 	ObservationsCategorical []*ObservationCategoricalBatch `json:"observations_categorical,omitempty" binding:"dive"`
 	ObservationsText        []*ObservationTextBatch        `json:"observations_text,omitempty" binding:"dive"`
 	SubmitterPatientId      string                         `json:"submitter_patient_id" binding:"required"`
 	PatientOrganizationCode string                         `json:"patient_organization_code" binding:"required"`
-	RelationToProbandCode   string                         `json:"relation_to_proband_code" binding:"required"`
+	RelationToProbandCode   string                         `json:"relation_to_proband_code" binding:"required,oneof=mother father brother sister sibling proband"`
 }
 
 type FamilyHistoryBatch struct {
