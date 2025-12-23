@@ -455,7 +455,9 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Documents: make(map[string]*types.Document),
+		Documents:             make(map[string]*types.Document),
+		SequencingExperiments: make(map[int]*types.SequencingExperiment),
+		Patients:              make(map[string]*types.Patient),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-TASK-TEST",
 			Tasks: []*types.CaseTaskBatch{
@@ -472,7 +474,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	err := record.fetchFromTasks(&mockContext)
 	assert.NoError(t, err)
 	assert.Len(t, record.SequencingExperiments, 1)
-	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[0].Aliquot)
+	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
 	assert.Len(t, record.Documents, 1)
 	assert.Contains(t, record.Documents, "file://bucket/file.bam")
 	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
@@ -486,7 +488,9 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Documents: make(map[string]*types.Document),
+		Documents:             make(map[string]*types.Document),
+		SequencingExperiments: make(map[int]*types.SequencingExperiment),
+		Patients:              make(map[string]*types.Patient),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-FAIL",
 			Tasks: []*types.CaseTaskBatch{
@@ -564,7 +568,7 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 	assert.Equal(t, 20, *record.DiagnosisLabID)
 	assert.Len(t, record.Documents, 0)
 	assert.Len(t, record.SequencingExperiments, 1)
-	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[0].Aliquot)
+	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
 	assert.Len(t, record.Patients, 1)
 	validKey := "LAB-1/PAT-1"
 	assert.Contains(t, record.Patients, validKey)
@@ -586,7 +590,7 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 	assert.Nil(t, record.OrderingOrganizationID)
 	assert.Nil(t, record.DiagnosisLabID)
 	assert.Empty(t, record.Documents)
-	assert.Nil(t, record.SequencingExperiments)
+	assert.Empty(t, record.SequencingExperiments)
 	assert.Empty(t, record.Patients)
 }
 

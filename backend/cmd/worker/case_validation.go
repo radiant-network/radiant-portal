@@ -82,7 +82,7 @@ type CaseValidationRecord struct {
 
 	// Necessary to persist the case
 	Patients              map[string]*types.Patient
-	SequencingExperiments []*types.SequencingExperiment
+	SequencingExperiments map[int]*types.SequencingExperiment
 	Documents             map[string]*types.Document
 }
 
@@ -91,10 +91,11 @@ func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, ind
 		BaseValidationRecord: BaseValidationRecord{
 			Index: index,
 		},
-		Case:      c,
-		Context:   ctx,
-		Patients:  make(map[string]*types.Patient),
-		Documents: make(map[string]*types.Document),
+		Case:                  c,
+		Context:               ctx,
+		Patients:              make(map[string]*types.Patient),
+		SequencingExperiments: make(map[int]*types.SequencingExperiment),
+		Documents:             make(map[string]*types.Document),
 	}
 }
 
@@ -111,9 +112,8 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 		if p.RelationToProbandCode == "proband" {
 			if patient, ok := r.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]; ok {
 				return patient, nil
-			} else {
-				return nil, fmt.Errorf("failed to find proband patient for case %q", r.Case.SubmitterCaseId)
 			}
+			return nil, fmt.Errorf("failed to find proband patient for case %q", r.Case.SubmitterCaseId)
 		}
 	}
 	return nil, nil
@@ -177,35 +177,36 @@ func (r *CaseValidationRecord) fetchFromSequencingExperiments(ctx *BatchValidati
 	for _, se := range r.Case.SequencingExperiments {
 		seqExp, err := ctx.SeqExpRepo.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
 		if err != nil {
-			return fmt.Errorf("failed to get sequencing experiment by aliquot, submitter sample id and sample organization code %q: %w", se.Aliquot, err)
+			return fmt.Errorf("failed to get sequencing experiment: %w", err)
 		}
-		if seqExp == nil {
-			continue
+
+		if seqExp != nil {
+			if _, exists := r.SequencingExperiments[seqExp.ID]; !exists {
+				r.SequencingExperiments[seqExp.ID] = seqExp
+			}
 		}
-		r.SequencingExperiments = append(r.SequencingExperiments, seqExp)
 	}
 	return nil
 }
 
 func (r *CaseValidationRecord) fetchFromTasks(ctx *BatchValidationContext) error {
 	for _, t := range r.Case.Tasks {
-		aliquot := t.Aliquot
-		seqs, err := ctx.SeqExpRepo.GetSequencingExperimentByAliquot(aliquot)
+		seqs, err := ctx.SeqExpRepo.GetSequencingExperimentByAliquot(t.Aliquot)
 		if err != nil {
-			return fmt.Errorf("failed to get sequencing experiment by aliquot %q for task %q: %w", aliquot, r.Case.SubmitterCaseId, err)
-		}
-		if seqs == nil {
-			continue
+			return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", t.Aliquot, err)
 		}
 
-		for _, se := range seqs {
-			r.SequencingExperiments = append(r.SequencingExperiments, &se)
+		for i := range seqs {
+			se := &seqs[i]
+			if _, exists := r.SequencingExperiments[se.ID]; !exists {
+				r.SequencingExperiments[se.ID] = se
+			}
 		}
 
 		for _, doc := range t.InputDocuments {
 			d, err := ctx.DocRepo.GetDocumentByUrl(doc.Url)
 			if err != nil {
-				return fmt.Errorf("failed to get document by url %q for task %q: %w", doc.Url, r.Case.SubmitterCaseId, err)
+				return fmt.Errorf("failed to get document by url %q: %w", doc.Url, err)
 			}
 			if d != nil {
 				r.Documents[doc.Url] = d
@@ -241,7 +242,7 @@ func (r *CaseValidationRecord) fetchValidationInfos() error {
 func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
-		txCtx := NewStorageContext(db)
+		txCtx := NewStorageContext(tx)
 		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, batchRepo)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
@@ -619,7 +620,7 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 
 		err := ctx.CasesRepo.CreateCaseHasSequencingExperiment(&chse)
 		if err != nil {
-			return fmt.Errorf("failed to persist case has sequencing experiment for case %q and sequencing experiment %q: %w", cr.SubmitterCaseID, se.ID, err)
+			return fmt.Errorf("failed to persist case has sequencing experiment for case %q and sequencing experiment %q: %w", cr.Case.SubmitterCaseId, se.ID, err)
 		}
 	}
 
@@ -760,20 +761,14 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 		}
 
 		for _, doc := range t.InputDocuments {
-			var documentID *int
-			for _, d := range cr.Documents {
-				if d.Url == doc.Url {
-					documentID = &d.ID
-					break
-				}
-			}
-			if documentID == nil {
+			d, ok := cr.Documents[doc.Url]
+			if !ok {
 				return fmt.Errorf("failed to find input document by url %q for task %q in case %q", doc.Url, t.TypeCode, cr.Case.SubmitterCaseId)
 			}
 
 			err := ctx.TaskRepo.CreateTaskHasDocument(&types.TaskHasDocument{
 				TaskID:     task.ID,
-				DocumentID: *documentID,
+				DocumentID: d.ID,
 				Type:       "input",
 			})
 			if err != nil {
