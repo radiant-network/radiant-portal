@@ -61,6 +61,10 @@ func (m *mockSeqExpDAO) GetSequencingExperimentByAliquot(aliquot string) ([]type
 	return nil, args.Error(1)
 }
 
+func (m *mockSeqExpDAO) GetSequencingExperimentByAliquotAndSubmitterSample(string, string, string) (*types.SequencingExperiment, error) {
+	return nil, nil
+}
+
 type mockBatchDAO struct{ mock.Mock }
 
 func (m *mockBatchDAO) CreateBatch(payload any, batchType string, username string, dryRun bool) (*repository.Batch, error) {
@@ -367,6 +371,8 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 	seqDAO.On("GetSequencingExperimentBySampleID", 10).
 		Return([]types.SequencingExperiment{}, nil)
 	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
+		Return([]types.SequencingExperiment{}, nil)
+	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG").
 		Return([]types.SequencingExperiment{}, nil)
 
 	record, err := validateSequencingExperimentRecord(seq, 0, orgDAO, sampleDAO, seqDAO)

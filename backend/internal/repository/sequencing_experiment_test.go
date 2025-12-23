@@ -50,3 +50,54 @@ func Test_GetSequencingExperimentByAliquotNotFound(t *testing.T) {
 		assert.Empty(t, sequencing)
 	})
 }
+
+func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewSequencingExperimentRepository(db)
+
+		organizationCode := "CQGC"
+		aliquot := "NA12892"
+		submitterSampleId := "S13224"
+
+		expected := SequencingExperiment{
+			ID:                           1,
+			SampleID:                     1,
+			Aliquot:                      aliquot,
+			PlatformCode:                 "illumina",
+			StatusCode:                   "completed",
+			ExperimentalStrategyCode:     "wgs",
+			SequencingReadTechnologyCode: "short_read",
+			CaptureKit:                   "SureSelect Custom DNA Target",
+			SequencingLabID:              6,
+			RunName:                      "1617",
+			RunAlias:                     "A00516_0169",
+		}
+
+		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(aliquot, submitterSampleId, organizationCode)
+		assert.NoError(t, err)
+		assert.Equal(t, seqExp.ID, expected.ID)
+		assert.Equal(t, seqExp.Aliquot, expected.Aliquot)
+		assert.Equal(t, seqExp.PlatformCode, expected.PlatformCode)
+		assert.Equal(t, seqExp.StatusCode, expected.StatusCode)
+		assert.Equal(t, seqExp.ExperimentalStrategyCode, expected.ExperimentalStrategyCode)
+		assert.Equal(t, seqExp.SequencingReadTechnologyCode, expected.SequencingReadTechnologyCode)
+		assert.Equal(t, seqExp.CaptureKit, expected.CaptureKit)
+		assert.Equal(t, seqExp.SequencingLabID, expected.SequencingLabID)
+		assert.Equal(t, seqExp.RunName, expected.RunName)
+		assert.Equal(t, seqExp.RunAlias, expected.RunAlias)
+	})
+}
+
+func Test_GetSequencingExperimentByAliquotAndSubmitterSampleNotFound(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewSequencingExperimentRepository(db)
+
+		organizationCode := "CHUSJ"
+		aliquot := "NA12892"
+		submitterSampleId := "S13224"
+
+		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(aliquot, submitterSampleId, organizationCode)
+		assert.NoError(t, err)
+		assert.Nil(t, seqExp)
+	})
+}

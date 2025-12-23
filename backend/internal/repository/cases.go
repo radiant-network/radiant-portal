@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -20,6 +21,7 @@ type CaseEntity = types.CaseEntity
 type CaseAssay = types.CaseAssay
 type CasePatientClinicalInformation = types.CasePatientClinicalInformation
 type CaseTask = types.CaseTask
+type AnalysisCatalog = types.AnalysisCatalog
 
 type CasesRepository struct {
 	db *gorm.DB
@@ -31,6 +33,8 @@ type CasesDAO interface {
 	GetCasesFilters(userQuery types.AggQuery) (*CaseFilters, error)
 	GetCaseEntity(caseId int) (*CaseEntity, error)
 	CreateCase(*Case) error
+	CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error
+	GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error)
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
@@ -43,6 +47,22 @@ func NewCasesRepository(db *gorm.DB) *CasesRepository {
 
 func (r *CasesRepository) CreateCase(c *Case) error {
 	return r.db.Create(c).Error
+}
+
+func (r *CasesRepository) CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error {
+	return r.db.Create(caseHasSeqExp).Error
+}
+
+func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error) {
+	var analysisCatalog AnalysisCatalog
+	tx := r.db.Table(types.AnalysisCatalogTable.Name).Where("code = ?", code)
+	if err := tx.First(&analysisCatalog).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &analysisCatalog, nil
 }
 
 func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult, *int64, error) {
