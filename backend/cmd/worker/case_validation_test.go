@@ -12,6 +12,22 @@ import (
 
 type CaseValidationMockRepo struct{}
 
+func (m *CaseValidationMockRepo) SearchDocuments(userQuery types.ListQuery) (*[]repository.DocumentResult, *int64, error) {
+	return nil, nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetDocumentsFilters(userQuery types.AggQuery, withProjectAndLab bool) (*repository.DocumentFilters, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetById(id int) (*repository.Document, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) CreateDocument(document *repository.Document) error {
+	return nil
+}
+
 func (m *CaseValidationMockRepo) GetOrganizationByCode(organizationCode string) (*types.Organization, error) {
 	if organizationCode == "LAB-1" || organizationCode == "LAB-2" {
 		return &types.Organization{ID: 10, Code: organizationCode, Name: "Diagnostic Lab"}, nil
@@ -95,7 +111,25 @@ func (m *CaseValidationMockRepo) GetSequencingExperimentBySampleID(sampleID int)
 }
 
 func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(aliquot string) ([]repository.SequencingExperiment, error) {
-	return nil, nil
+	if aliquot == "ALIQUOT-1" {
+		return []repository.SequencingExperiment{
+			{ID: 200, Aliquot: "ALIQUOT-1"},
+		}, nil
+	}
+	if aliquot == "ALIQUOT-ERROR" {
+		return nil, fmt.Errorf("database connection failed")
+	}
+	return nil, nil // Not found
+}
+
+func (m *CaseValidationMockRepo) GetDocumentByUrl(url string) (*types.Document, error) {
+	if url == "file://bucket/file.bam" {
+		return &types.Document{ID: 500, Url: url, Name: "file.bam"}, nil
+	}
+	if url == "file://bucket/error.bam" {
+		return nil, fmt.Errorf("document service unavailable")
+	}
+	return nil, nil // Not found
 }
 
 type ObservationsMockRepo struct{}
@@ -140,7 +174,132 @@ func Test_GetResourceType_OK(t *testing.T) {
 	assert.Equal(t, "case", record.GetResourceType())
 }
 
-func Test_preFetchValidationInfo_OK(t *testing.T) {
+func Test_fetchPatients_PartialSuccess(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		PatientRepo: &mockRepo,
+	}
+
+	record := CaseValidationRecord{
+		Patients: make(map[string]*types.Patient),
+		Case: types.CaseBatch{
+			Patients: []*types.CasePatientBatch{
+				{PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"},
+				{PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-NOT-EXIST"},
+			},
+		},
+	}
+
+	err := record.fetchPatients(&mockContext)
+	assert.NoError(t, err)
+
+	assert.Len(t, record.Patients, 1)
+
+	validKey := "LAB-1/PAT-1"
+	assert.Contains(t, record.Patients, validKey)
+	assert.Equal(t, 100, record.Patients[validKey].ID)
+}
+
+func Test_fetchFromTasks_Success(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		SeqExpRepo: &mockRepo,
+		DocRepo:    &mockRepo,
+	}
+
+	record := CaseValidationRecord{
+		Documents: make(map[string]*types.Document),
+		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-TASK-TEST",
+			Tasks: []*types.CaseTaskBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+					InputDocuments: []*types.InputDocumentBatch{
+						{Url: "file://bucket/file.bam"},
+					},
+				},
+			},
+		},
+	}
+
+	err := record.fetchFromTasks(&mockContext)
+	assert.NoError(t, err)
+	assert.Len(t, record.SequencingExperiments, 1)
+	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[0].Aliquot)
+	assert.Len(t, record.Documents, 1)
+	assert.Contains(t, record.Documents, "file://bucket/file.bam")
+	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
+}
+
+func Test_fetchFromTasks_DocumentError(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		SeqExpRepo: &mockRepo,
+		DocRepo:    &mockRepo,
+	}
+
+	record := CaseValidationRecord{
+		Documents: make(map[string]*types.Document),
+		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-FAIL",
+			Tasks: []*types.CaseTaskBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+					InputDocuments: []*types.InputDocumentBatch{
+						{Url: "file://bucket/error.bam"},
+					},
+				},
+			},
+		},
+	}
+
+	err := record.fetchFromTasks(&mockContext)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to get document by url")
+}
+
+func Test_fetchFromTasks_SeqExpError(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		SeqExpRepo: &mockRepo,
+		DocRepo:    &mockRepo,
+	}
+
+	record := CaseValidationRecord{
+		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-FAIL",
+			Tasks: []*types.CaseTaskBatch{
+				{
+					Aliquot: "ALIQUOT-ERROR",
+				},
+			},
+		},
+	}
+
+	err := record.fetchFromTasks(&mockContext)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to get sequencing experiment by aliquot")
+}
+
+func Test_fetchValidationInfos_FailFast(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		ProjectRepo: &mockRepo,
+	}
+
+	record := CaseValidationRecord{
+		Case: types.CaseBatch{
+			ProjectCode: "ERROR-PROJ",
+		},
+	}
+
+	record.Case.ProjectCode = "INVALID-CODE"
+	err := record.fetchValidationInfos(&mockContext)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to resolve project")
+}
+
+func Test_fetchValidationInfos_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := BatchValidationContext{
 		CasesRepo:   &mockRepo,
@@ -166,19 +325,19 @@ func Test_preFetchValidationInfo_OK(t *testing.T) {
 			SubmitterPatientId: "PAT-1",
 		},
 	}
-	err := record.preFetchValidationInfo(&mockContext)
+	err := record.fetchValidationInfos(&mockContext)
 	assert.NoError(t, err)
 	assert.Equal(t, 42, *record.ProjectID)
 }
 
-func Test_preFetchValidationInfo_Error(t *testing.T) {
+func Test_fetchValidationInfos_Error(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := BatchValidationContext{
 		ProjectRepo: &mockRepo,
 	}
 	record := CaseValidationRecord{}
 	record.Case.ProjectCode = "UNKNOWN-PROJ"
-	err := record.preFetchValidationInfo(&mockContext)
+	err := record.fetchValidationInfos(&mockContext)
 	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
 }

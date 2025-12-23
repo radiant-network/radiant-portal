@@ -44,7 +44,6 @@ const (
 var CaseRelatedTaskTypes = map[string]struct{}{
 	"family_variant_calling":     {},
 	"tumor_only_variant_calling": {},
-	//"alignment_somatic_variant_calling": {}, // NOT SUPPORTED YET
 }
 
 type CaseKey struct {
@@ -53,15 +52,21 @@ type CaseKey struct {
 }
 
 type StorageContext struct {
-	CasesRepo   *repository.CasesRepository
-	OrgRepo     *repository.OrganizationRepository
-	PatientRepo *repository.PatientsRepository
-	ProjectRepo *repository.ProjectRepository
-	SeqExpRepo  *repository.SequencingExperimentRepository
-	DocRepo     *repository.DocumentsRepository
-	ObsCat      *repository.ObservationCategoricalRepository
-	FamilyRepo  *repository.FamilyRepository
-	TaskRepo    *repository.TaskRepository
+	CasesRepo  *repository.CasesRepository
+	DocRepo    *repository.DocumentsRepository
+	ObsCatRepo *repository.ObservationCategoricalRepository
+	FamilyRepo *repository.FamilyRepository
+	TaskRepo   *repository.TaskRepository
+}
+
+func NewStorageContext(db *gorm.DB) *StorageContext {
+	return &StorageContext{
+		CasesRepo:  repository.NewCasesRepository(db),
+		DocRepo:    repository.NewDocumentsRepository(db),
+		ObsCatRepo: repository.NewObservationCategoricalRepository(db),
+		FamilyRepo: repository.NewFamilyRepository(db),
+		TaskRepo:   repository.NewTaskRepository(db),
+	}
 }
 
 type CaseValidationRecord struct {
@@ -78,7 +83,7 @@ type CaseValidationRecord struct {
 	// Necessary to persist the case
 	Patients              map[string]*types.Patient
 	SequencingExperiments []*types.SequencingExperiment
-	TaskHasDocuments      []*types.TaskHasDocument
+	Documents             map[string]*types.Document
 }
 
 func (r *CaseValidationRecord) GetBase() *BaseValidationRecord {
@@ -89,9 +94,7 @@ func (r *CaseValidationRecord) GetResourceType() string {
 	return types.CaseBatchType
 }
 
-func (r *CaseValidationRecord) preFetchValidationInfo(
-	ctx *BatchValidationContext,
-) error {
+func (r *CaseValidationRecord) fetchProject(ctx *BatchValidationContext) error {
 	p, err := ctx.ProjectRepo.GetProjectByCode(r.Case.ProjectCode)
 	if err != nil {
 		return fmt.Errorf("get project by code %q: %w", r.Case.ProjectCode, err)
@@ -99,7 +102,10 @@ func (r *CaseValidationRecord) preFetchValidationInfo(
 	if p != nil {
 		r.ProjectID = &p.ID
 	}
+	return nil
+}
 
+func (r *CaseValidationRecord) fetchAnalysisCatalog(ctx *BatchValidationContext) error {
 	a, err := ctx.CasesRepo.GetCaseAnalysisCatalogIdByCode(r.Case.AnalysisCode)
 	if err != nil {
 		return fmt.Errorf("get analysis catalog by code %q: %w", r.Case.AnalysisCode, err)
@@ -107,7 +113,10 @@ func (r *CaseValidationRecord) preFetchValidationInfo(
 	if a != nil {
 		r.AnalysisCatalogID = &a.ID
 	}
+	return nil
+}
 
+func (r *CaseValidationRecord) fetchOrganizations(ctx *BatchValidationContext) error {
 	org, err := ctx.OrgRepo.GetOrganizationByCode(r.Case.OrderingOrganizationCode)
 	if err != nil {
 		return fmt.Errorf("get organization by code %q: %w", r.Case.OrderingOrganizationCode, err)
@@ -123,7 +132,10 @@ func (r *CaseValidationRecord) preFetchValidationInfo(
 	if diagnosisLabOrg != nil {
 		r.DiagnosisLabID = &diagnosisLabOrg.ID
 	}
+	return nil
+}
 
+func (r *CaseValidationRecord) fetchPatients(ctx *BatchValidationContext) error {
 	for _, cp := range r.Case.Patients {
 		patients, err := ctx.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(cp.PatientOrganizationCode, cp.SubmitterPatientId)
 		if err != nil {
@@ -133,7 +145,10 @@ func (r *CaseValidationRecord) preFetchValidationInfo(
 			r.Patients[fmt.Sprintf("%s/%s", cp.PatientOrganizationCode, cp.SubmitterPatientId)] = patients
 		}
 	}
+	return nil
+}
 
+func (r *CaseValidationRecord) fetchFromSequencingExperiments(ctx *BatchValidationContext) error {
 	for _, se := range r.Case.SequencingExperiments {
 		seqExp, err := ctx.SeqExpRepo.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
 		if err != nil {
@@ -144,7 +159,59 @@ func (r *CaseValidationRecord) preFetchValidationInfo(
 		}
 		r.SequencingExperiments = append(r.SequencingExperiments, seqExp)
 	}
+	return nil
+}
 
+func (r *CaseValidationRecord) fetchFromTasks(ctx *BatchValidationContext) error {
+	for _, t := range r.Case.Tasks {
+		aliquot := t.Aliquot
+		seqs, err := ctx.SeqExpRepo.GetSequencingExperimentByAliquot(aliquot)
+		if err != nil {
+			return fmt.Errorf("failed to get sequencing experiment by aliquot %q for task %q: %w", aliquot, r.Case.SubmitterCaseId, err)
+		}
+		if seqs == nil {
+			continue
+		}
+
+		for _, se := range seqs {
+			r.SequencingExperiments = append(r.SequencingExperiments, &se)
+		}
+
+		for _, doc := range t.InputDocuments {
+			d, err := ctx.DocRepo.GetDocumentByUrl(doc.Url)
+			if err != nil {
+				return fmt.Errorf("failed to get document by url %q for task %q: %w", doc.Url, r.Case.SubmitterCaseId, err)
+			}
+			if d != nil {
+				r.Documents[doc.Url] = d
+			}
+		}
+	}
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchValidationInfos(
+	ctx *BatchValidationContext,
+) error {
+
+	if err := r.fetchProject(ctx); err != nil {
+		return fmt.Errorf("failed to resolve project: %w", err)
+	}
+	if err := r.fetchAnalysisCatalog(ctx); err != nil {
+		return fmt.Errorf("failed to resolve analysis catalog: %w", err)
+	}
+	if err := r.fetchOrganizations(ctx); err != nil {
+		return fmt.Errorf("failed to resolve organizations: %w", err)
+	}
+	if err := r.fetchPatients(ctx); err != nil {
+		return fmt.Errorf("failed to resolve patients: %w", err)
+	}
+	if err := r.fetchFromSequencingExperiments(ctx); err != nil {
+		return fmt.Errorf("failed to resolve sequencing experiments: %w", err)
+	}
+	if err := r.fetchFromTasks(ctx); err != nil {
+		return fmt.Errorf("failed to resolve tasks: %w", err)
+	}
 	return nil
 }
 
@@ -419,7 +486,7 @@ func validateCaseRecord(
 		Context:              ctx,
 	}
 
-	if unexpectedErr := cr.preFetchValidationInfo(ctx); unexpectedErr != nil {
+	if unexpectedErr := cr.fetchValidationInfos(ctx); unexpectedErr != nil {
 		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", unexpectedErr)
 	}
 
@@ -457,7 +524,7 @@ func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.
 	}
 }
 
-func getProbandPatient(caseRecord *CaseValidationRecord) (*types.Patient, error) {
+func getProbandFromPatients(caseRecord *CaseValidationRecord) (*types.Patient, error) {
 	if caseRecord == nil {
 		return nil, nil
 	}
@@ -471,11 +538,10 @@ func getProbandPatient(caseRecord *CaseValidationRecord) (*types.Patient, error)
 			}
 		}
 	}
-
 	return nil, nil
 }
 
-func persistCase(sctx *StorageContext, cr *CaseValidationRecord) error {
+func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 	if cr == nil {
 		return nil
 	}
@@ -496,7 +562,7 @@ func persistCase(sctx *StorageContext, cr *CaseValidationRecord) error {
 		return fmt.Errorf("diagnosis lab ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
 
-	proband, err := getProbandPatient(cr)
+	proband, err := getProbandFromPatients(cr)
 	if err != nil {
 		return fmt.Errorf("failed to get proband patient %w", err)
 	}
@@ -522,17 +588,182 @@ func persistCase(sctx *StorageContext, cr *CaseValidationRecord) error {
 		Note:                   cr.Case.Note,
 	}
 
-	if err := sctx.CasesRepo.CreateCase(&c); err != nil {
+	if err := ctx.CasesRepo.CreateCase(&c); err != nil {
 		return fmt.Errorf("failed to persist case %w", err)
 	}
 
 	// Gorm automatically sets the ID on the struct after creation
 	cr.CaseID = &c.ID
 
+	// Persist CaseHasSequencingExperiment relationships
+	for _, se := range cr.SequencingExperiments {
+		chse := types.CaseHasSequencingExperiment{
+			CaseID:                 *cr.CaseID,
+			SequencingExperimentID: se.ID,
+		}
+
+		err := ctx.CasesRepo.CreateCaseHasSequencingExperiment(&chse)
+		if err != nil {
+			return fmt.Errorf("failed to persist case has sequencing experiment for case %q and sequencing experiment %q: %w", cr.SubmitterCaseID, se.ID, err)
+		}
+	}
+
 	return nil
 }
 
-func insertCaseRecords(
+func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
+	if cr == nil {
+		return nil
+	}
+
+	if cr.CaseID == nil {
+		return fmt.Errorf("case ID is nil for case %q", cr.Case.SubmitterCaseId)
+	}
+
+	for _, p := range cr.Case.Patients {
+		patient, ok := cr.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]
+		if !ok {
+			return fmt.Errorf("failed to find patient for family member %q in case %q", p.SubmitterPatientId, cr.Case.SubmitterCaseId)
+		}
+		familyMember := types.Family{
+			CaseID:                    *cr.CaseID,
+			FamilyMemberID:            patient.ID,
+			RelationshipToProbandCode: p.RelationToProbandCode,
+			AffectedStatusCode:        p.AffectedStatusCode,
+		}
+		if err := ctx.FamilyRepo.CreateFamily(&familyMember); err != nil {
+			return fmt.Errorf("failed to persist family member %q for case %q: %w", p.SubmitterPatientId, cr.Case.SubmitterCaseId, err)
+		}
+	}
+	return nil
+}
+
+func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord) error {
+	if cr == nil {
+		return nil
+	}
+
+	if cr.CaseID == nil {
+		return fmt.Errorf("case ID is nil for case %q", cr.Case.SubmitterCaseId)
+	}
+
+	for _, p := range cr.Case.Patients {
+
+		patient, ok := cr.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]
+		if !ok {
+			return fmt.Errorf("failed to find patient for observations for patient %q in case %q", p.SubmitterPatientId, cr.Case.SubmitterCaseId)
+		}
+
+		for _, o := range p.ObservationsCategorical {
+			obs := types.ObsCategorical{
+				CaseID:             *cr.CaseID,
+				PatientID:          patient.ID,
+				ObservationCode:    o.Code,
+				CodingSystem:       o.System,
+				CodeValue:          o.Value,
+				OnsetCode:          o.OnsetCode,
+				InterpretationCode: o.InterpretationCode,
+				Note:               o.Note,
+			}
+
+			if err := ctx.ObsCatRepo.CreateObservationCategorical(&obs); err != nil {
+				return fmt.Errorf("failed to persist observation categorical for patient %q in case %q: %w", p.SubmitterPatientId, cr.Case.SubmitterCaseId, err)
+			}
+		}
+	}
+	return nil
+}
+
+func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
+	if cr == nil {
+		return nil
+	}
+
+	for _, t := range cr.Case.Tasks {
+		task := types.Task{
+			TaskTypeCode:    t.TypeCode,
+			PipelineName:    t.PipelineName,
+			PipelineVersion: t.PipelineVersion,
+			GenomeBuild:     t.GenomeBuild,
+		}
+		err := ctx.TaskRepo.CreateTask(&task)
+		if err != nil {
+			return fmt.Errorf("failed to persist task for case %q: %w", cr.Case.SubmitterCaseId, err)
+		}
+
+		for _, se := range cr.SequencingExperiments {
+
+			// Aliquot must match to create TaskContext relationship with SequencingExperiment and Task
+			if se.Aliquot != t.Aliquot {
+				continue
+			}
+
+			var c *int
+			if _, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]; isCaseRelated {
+				c = cr.CaseID
+			}
+
+			err := ctx.TaskRepo.CreateTaskContext(&types.TaskContext{
+				TaskID:                 task.ID,
+				SequencingExperimentID: &se.ID,
+				CaseID:                 c,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to persist task context for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+			}
+		}
+
+		for _, doc := range t.InputDocuments {
+			var documentID *int
+			for _, d := range cr.Documents {
+				if d.Url == doc.Url {
+					documentID = &d.ID
+					break
+				}
+			}
+			if documentID == nil {
+				return fmt.Errorf("failed to find input document by url %q for task %q in case %q", doc.Url, t.TypeCode, cr.Case.SubmitterCaseId)
+			}
+
+			err := ctx.TaskRepo.CreateTaskHasDocument(&types.TaskHasDocument{
+				TaskID:     task.ID,
+				DocumentID: *documentID,
+				Type:       "input",
+			})
+			if err != nil {
+				return fmt.Errorf("failed to persist task has document for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+			}
+		}
+
+		for _, doc := range t.OutputDocuments {
+			d := types.Document{
+				Name:             doc.Name,
+				DataCategoryCode: doc.DataCategoryCode,
+				DataTypeCode:     doc.DataTypeCode,
+				FileFormatCode:   doc.FormatCode,
+				Size:             doc.Size,
+				Url:              doc.Url,
+				Hash:             doc.Hash,
+			}
+			err := ctx.DocRepo.CreateDocument(&d)
+			if err != nil {
+				return fmt.Errorf("failed to persist document %q for case %q: %w", doc.Name, cr.Case.SubmitterCaseId, err)
+			}
+
+			err = ctx.TaskRepo.CreateTaskHasDocument(&types.TaskHasDocument{
+				TaskID:     task.ID,
+				DocumentID: d.ID,
+				Type:       "output",
+			})
+			if err != nil {
+				return fmt.Errorf("failed to persist task has document for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+			}
+		}
+	}
+	return nil
+}
+
+func persistCaseRecords(
 	ctx *StorageContext,
 	records []*CaseValidationRecord,
 ) error {
@@ -544,18 +775,15 @@ func insertCaseRecords(
 		if err := persistCase(ctx, record); err != nil {
 			return fmt.Errorf("failed to persist case for case %q: %w", record.Case.SubmitterCaseId, err)
 		}
-		//if err := persistFamily(ctx, record); err != nil {
-		//	return fmt.Errorf("failed to persist family for case %q: %w", record.Case.SubmitterCaseId, err)
-		//}
-		//if err := persistObservationCategorical(ctx, record); err != nil {
-		//	return fmt.Errorf("failed to persist observations for case %q: %w", record.Case.SubmitterCaseId, err)
-		//}
-		//if err := persistCaseHasSequencingExperiment(ctx, record); err != nil {
-		//	return fmt.Errorf("failed to persist sequencing experiments for case %q: %w", record.Case.SubmitterCaseId, err)
-		//}
-		//if err := persistTask(ctx, record); err != nil {
-		//	return fmt.Errorf("failed to persist tasks for case %q: %w", record.Case.SubmitterCaseId, err)
-		//}
+		if err := persistFamily(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist family for case %q: %w", record.Case.SubmitterCaseId, err)
+		}
+		if err := persistObservationCategorical(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist observations for case %q: %w", record.Case.SubmitterCaseId, err)
+		}
+		if err := persistTask(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist tasks for case %q: %w", record.Case.SubmitterCaseId, err)
+		}
 	}
 	return nil
 }
@@ -563,17 +791,7 @@ func insertCaseRecords(
 func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
-		txCtx := StorageContext{
-			CasesRepo:   repository.NewCasesRepository(tx),
-			OrgRepo:     repository.NewOrganizationRepository(tx),
-			PatientRepo: repository.NewPatientsRepository(tx),
-			ProjectRepo: repository.NewProjectRepository(tx),
-			SeqExpRepo:  repository.NewSequencingExperimentRepository(tx),
-			DocRepo:     repository.NewDocumentsRepository(tx),
-			ObsCat:      repository.NewObservationCategoricalRepository(tx),
-			FamilyRepo:  repository.NewFamilyRepository(tx),
-			TaskRepo:    repository.NewTaskRepository(tx),
-		}
+		txCtx := NewStorageContext(db)
 		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, batchRepo)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
@@ -585,7 +803,7 @@ func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*Case
 			return nil
 		}
 
-		if err := insertCaseRecords(&txCtx, records); err != nil {
+		if err := persistCaseRecords(txCtx, records); err != nil {
 			return fmt.Errorf("error during case insertion %w", err)
 		}
 		return nil

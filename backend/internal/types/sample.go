@@ -1,7 +1,7 @@
 package types
 
 type Sample struct {
-	ID                int
+	ID                int `gorm:"unique;primaryKey;autoIncrement"`
 	TypeCode          string
 	Type              SampleType `gorm:"foreignKey:code;references:TypeCode"`
 	ParentSampleID    *int
