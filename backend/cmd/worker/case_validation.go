@@ -561,10 +561,6 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 }
 
 func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
-	if cr == nil {
-		return nil
-	}
-
 	if cr.ProjectID == nil {
 		return fmt.Errorf("project ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
@@ -662,9 +658,11 @@ func persistCaseRecords(
 		if record.Skipped {
 			continue
 		}
-
 		if err := persistCase(ctx, record); err != nil {
 			return fmt.Errorf("failed to persist case for case %q: %w", record.Case.SubmitterCaseId, err)
+		}
+		if record.CaseID == nil {
+			return fmt.Errorf("case ID is nil after persisting case for case %q", record.Case.SubmitterCaseId)
 		}
 		if err := persistFamily(ctx, record); err != nil {
 			return fmt.Errorf("failed to persist family for case %q: %w", record.Case.SubmitterCaseId, err)
@@ -680,14 +678,6 @@ func persistCaseRecords(
 }
 
 func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
-	if cr == nil {
-		return nil
-	}
-
-	if cr.CaseID == nil {
-		return fmt.Errorf("case ID is nil for case %q", cr.Case.SubmitterCaseId)
-	}
-
 	for _, p := range cr.Case.Patients {
 		patient, ok := cr.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]
 		if !ok {
@@ -707,14 +697,6 @@ func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
 }
 
 func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord) error {
-	if cr == nil {
-		return nil
-	}
-
-	if cr.CaseID == nil {
-		return fmt.Errorf("case ID is nil for case %q", cr.Case.SubmitterCaseId)
-	}
-
 	for _, p := range cr.Case.Patients {
 
 		patient, ok := cr.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]
@@ -743,10 +725,6 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 }
 
 func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
-	if cr == nil {
-		return nil
-	}
-
 	for _, t := range cr.Case.Tasks {
 		task := types.Task{
 			TaskTypeCode:    t.TypeCode,
