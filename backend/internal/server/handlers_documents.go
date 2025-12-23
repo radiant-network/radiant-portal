@@ -104,12 +104,7 @@ func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewAggregationQueryFromCriteria(body.SearchCriteria, types.DocumentFields)
-		if err != nil {
-			HandleValidationError(c, err)
-			return
-		}
-		filters, err := repo.GetDocumentsFilters(query, true)
+		filters, err := repo.GetDocumentsFilters(true)
 		if err != nil {
 			HandleError(c, err)
 			return

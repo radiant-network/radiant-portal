@@ -216,11 +216,6 @@ func CaseEntityDocumentsFiltersHandler(repo repository.DocumentsDAO) gin.Handler
 		var (
 			body types.FiltersBodyWithCriteria
 		)
-		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
-		if errCaseId != nil {
-			HandleNotFoundError(c, "case_id")
-			return
-		}
 
 		// Bind JSON to the struct
 		if err := c.ShouldBindJSON(&body); err != nil {
@@ -228,14 +223,7 @@ func CaseEntityDocumentsFiltersHandler(repo repository.DocumentsDAO) gin.Handler
 			HandleValidationError(c, err)
 			return
 		}
-		var caseIdFilter = types.SearchCriterion{FieldName: types.CaseIdField.Alias, Value: []interface{}{caseId}}
-		var criteria = append(body.SearchCriteria, caseIdFilter)
-		query, err := types.NewAggregationQueryFromCriteria(criteria, types.DocumentFields)
-		if err != nil {
-			HandleValidationError(c, err)
-			return
-		}
-		filters, err := repo.GetDocumentsFilters(query, false)
+		filters, err := repo.GetDocumentsFilters(false)
 		if err != nil {
 			HandleError(c, err)
 			return

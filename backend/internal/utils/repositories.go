@@ -82,6 +82,21 @@ func GetSequencingPart(seqId int, db *gorm.DB) (int, error) {
 	return part, nil
 }
 
+func GetFilter(db *gorm.DB, filterTable types.Table, filterLabelColumn string, filterCondition *string) ([]types.Aggregation, error) {
+	var filter []types.Aggregation
+	tx := db.Table(fmt.Sprintf("%s %s", filterTable.FederationName, filterTable.Alias))
+	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	tx = tx.Order("bucket asc")
+	if filterCondition != nil {
+		tx = tx.Where(*filterCondition)
+	}
+
+	if err := tx.Find(&filter).Error; err != nil {
+		return nil, fmt.Errorf("error fetching filter %s: %w", filterTable.FederationName, err)
+	}
+	return filter, nil
+}
+
 func JoinCaseWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
 	joinWithProbandSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.ProbandTable.FederationName, types.ProbandTable.Alias, types.CaseTable.Alias, types.ProbandTable.Alias)
 	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.FederationName, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)

@@ -341,7 +341,6 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 		}`
 	expected := `{
 		"data_type_code":[
-			{"count":3, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
 			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
 			{"count":0, "key":"covgene", "label":"Coverage by Gene Report"}, 
@@ -352,13 +351,13 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"igv", "label":"IGV Track"}, 
 			{"count":0, "key":"qcrun", "label":"Sequencing Run QC Report"}, 
 			{"count":0, "key":"scnv", "label":"Somatic CNV"}, 
+			{"count":0, "key":"snv", "label":"Germline SNV"}, 
 			{"count":0, "key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
 			{"count":0, "key":"ssnv", "label":"Somatic SNV"}, 
 			{"count":0, "key":"ssup", "label":"Sequencing Data Supplement"}, 
 			{"count":0, "key":"ssv", "label":"Somatic SV"}
 		], 
 		"format_code":[
-			{"count":3, "key":"vcf", "label":"VCF File"}, 
 			{"count":0, "key":"bed", "label":"BED File"}, 
 			{"count":0, "key":"bw", "label":"BW File"}, 
 			{"count":0, "key":"cram", "label":"CRAM File"}, 
@@ -370,13 +369,14 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"count":0, "key":"png", "label":"PNG File"}, 
 			{"count":0, "key":"tgz", "label":"TGZ Archive File"}, 
 			{"count":0, "key":"tsv", "label":"TSV File"}, 
-			{"count":0, "key":"txt", "label":"Text File"}
+			{"count":0, "key":"txt", "label":"Text File"},
+			{"count":0, "key":"vcf", "label":"VCF File"} 
 		], 
 		"relationship_to_proband_code":[
-			{"count":1, "key":"father", "label":"Father"}, 
-			{"count":1, "key":"mother", "label":"Mother"},
-			{"count":1, "key":"proband", "label":"Proband"}, 
 			{"count":0, "key":"brother", "label":"Brother"}, 
+			{"count":0, "key":"father", "label":"Father"}, 
+			{"count":0, "key":"mother", "label":"Mother"},
+			{"count":0, "key":"proband", "label":"Proband"}, 
 			{"count":0, "key":"sibling", "label":"Sibling"}, 
 			{"count":0, "key":"sister", "label":"Sister"}
 		]}`
