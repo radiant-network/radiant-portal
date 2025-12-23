@@ -761,7 +761,14 @@
         "managing_organization": "Organisation resp.",
         "managing_organization_tooltip": "Organisation responsable du dossier du patient",
         "created_on": "Créé le",
-        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
+        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)",
+        "first_name": "Prénom",
+        "last_name": "Nom de famille",
+        "life_status": "Statut vital",
+        "category_code": "Pré/Postnatal",
+        "panel": "Panel",
+        "jhn": "RAMQ",
+        "resolution_status_code": "Résolution"
       }
     },
     "assays": {

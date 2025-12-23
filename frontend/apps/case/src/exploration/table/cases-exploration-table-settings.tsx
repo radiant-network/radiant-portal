@@ -50,6 +50,46 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
     }),
+    // First name
+    columnHelper.accessor(row => row.proband_first_name, {
+      id: 'proband_first_name',
+      cell: info => <>{info.getValue()}</>,
+      header: t('case_exploration.case.headers.first_name'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Last name
+    columnHelper.accessor(row => row.proband_last_name, {
+      id: 'proband_last_name',
+      cell: info => <>{info.getValue()}</>,
+      header: t('case_exploration.case.headers.last_name'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Vital status
+    columnHelper.accessor(row => row.proband_life_status_code, {
+      id: 'proband_life_status_code',
+      cell: info => <>{info.getValue()}</>,
+      header: t('case_exploration.case.headers.life_status'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Pre/Postnatal
+    columnHelper.accessor(row => row.case_category_code, {
+      id: 'case_category_code',
+      cell: info => <>{info.getValue()}</>,
+      header: t('case_exploration.case.headers.category_code'),
+      size: 124,
+      minSize: 40,
+    }),
+    // JHN
+    columnHelper.accessor(row => row.proband_jhn, {
+      id: 'proband_jhn',
+      cell: info => <>{info.getValue()}</>,
+      header: t('case_exploration.case.headers.jhn'),
+      size: 124,
+      minSize: 40,
+    }),
     // Priority
     columnHelper.accessor(row => row.priority_code, {
       id: 'priority_code',
@@ -63,6 +103,14 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       id: 'status_code',
       cell: info => <AssayStatusCell status={info.getValue()} />,
       header: t('case_exploration.case.headers.status_code'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Resolution
+    columnHelper.accessor(row => row.resolution_status_code, {
+      id: 'resolution_status_code',
+      cell: info => <>{info.getValue()}</>,
+      header: t('case_exploration.case.headers.resolution_status_code'),
       size: 124,
       minSize: 40,
     }),
@@ -97,6 +145,14 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       ),
       header: t('case_exploration.case.headers.primary_condition'),
       size: 208,
+      minSize: 40,
+    }),
+    // Panel
+    columnHelper.accessor(row => row.panel_code, {
+      id: 'panel_code',
+      cell: info => <TextTooltipCell tooltipText={info.row.original.panel_name}>{info.getValue()}</TextTooltipCell>,
+      header: t('case_exploration.case.headers.panel'),
+      size: 124,
       minSize: 40,
     }),
     // Req. by
@@ -214,6 +270,36 @@ const defaultSettings = createColumnSettings([
     label: 'case_exploration.case.headers.submitter_patient_id',
   },
   {
+    id: 'proband_first_name',
+    visible: false,
+    label: 'case_exploration.case.headers.first_name',
+    additionalFields: ['proband_first_name'],
+  },
+  {
+    id: 'proband_last_name',
+    visible: false,
+    label: 'case_exploration.case.headers.last_name',
+    additionalFields: ['proband_last_name'],
+  },
+  {
+    id: 'proband_life_status_code',
+    visible: false,
+    label: 'case_exploration.case.headers.life_status',
+    additionalFields: ['proband_life_status_code'],
+  },
+  {
+    id: 'case_category_code',
+    visible: false,
+    label: 'case_exploration.case.headers.category_code',
+    additionalFields: ['case_category_code'],
+  },
+  {
+    id: 'proband_jhn',
+    visible: false,
+    label: 'case_exploration.case.headers.jhn',
+    additionalFields: ['proband_jhn'],
+  },
+  {
     id: 'priority_code',
     visible: true,
     label: 'case_exploration.case.headers.priority_code',
@@ -222,6 +308,12 @@ const defaultSettings = createColumnSettings([
     id: 'status_code',
     visible: true,
     label: 'case_exploration.case.headers.status_code',
+  },
+  {
+    id: 'resolution_status_code',
+    visible: false,
+    label: 'case_exploration.case.headers.resolution_status_code',
+    additionalFields: ['resolution_status_code'],
   },
   {
     id: 'case_type',
@@ -239,6 +331,12 @@ const defaultSettings = createColumnSettings([
     visible: false,
     label: 'case_exploration.case.headers.primary_condition',
     additionalFields: ['primary_condition_id', 'primary_condition_name'],
+  },
+  {
+    id: 'panel_code',
+    visible: false,
+    label: 'case_exploration.case.headers.panel',
+    additionalFields: ['panel_code', 'panel_name'],
   },
   {
     id: 'ordering_organization_code',
