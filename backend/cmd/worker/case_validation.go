@@ -86,6 +86,18 @@ type CaseValidationRecord struct {
 	Documents             map[string]*types.Document
 }
 
+func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, index int) *CaseValidationRecord {
+	return &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{
+			Index: index,
+		},
+		Case:      c,
+		Context:   ctx,
+		Patients:  make(map[string]*types.Patient),
+		Documents: make(map[string]*types.Document),
+	}
+}
+
 func (r *CaseValidationRecord) GetBase() *BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
@@ -190,26 +202,24 @@ func (r *CaseValidationRecord) fetchFromTasks(ctx *BatchValidationContext) error
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchValidationInfos(
-	ctx *BatchValidationContext,
-) error {
+func (r *CaseValidationRecord) fetchValidationInfos() error {
 
-	if err := r.fetchProject(ctx); err != nil {
+	if err := r.fetchProject(r.Context); err != nil {
 		return fmt.Errorf("failed to resolve project: %w", err)
 	}
-	if err := r.fetchAnalysisCatalog(ctx); err != nil {
+	if err := r.fetchAnalysisCatalog(r.Context); err != nil {
 		return fmt.Errorf("failed to resolve analysis catalog: %w", err)
 	}
-	if err := r.fetchOrganizations(ctx); err != nil {
+	if err := r.fetchOrganizations(r.Context); err != nil {
 		return fmt.Errorf("failed to resolve organizations: %w", err)
 	}
-	if err := r.fetchPatients(ctx); err != nil {
+	if err := r.fetchPatients(r.Context); err != nil {
 		return fmt.Errorf("failed to resolve patients: %w", err)
 	}
-	if err := r.fetchFromSequencingExperiments(ctx); err != nil {
+	if err := r.fetchFromSequencingExperiments(r.Context); err != nil {
 		return fmt.Errorf("failed to resolve sequencing experiments: %w", err)
 	}
-	if err := r.fetchFromTasks(ctx); err != nil {
+	if err := r.fetchFromTasks(r.Context); err != nil {
 		return fmt.Errorf("failed to resolve tasks: %w", err)
 	}
 	return nil
@@ -486,7 +496,7 @@ func validateCaseRecord(
 		Context:              ctx,
 	}
 
-	if unexpectedErr := cr.fetchValidationInfos(ctx); unexpectedErr != nil {
+	if unexpectedErr := cr.fetchValidationInfos(); unexpectedErr != nil {
 		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", unexpectedErr)
 	}
 
@@ -524,17 +534,13 @@ func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.
 	}
 }
 
-func getProbandFromPatients(caseRecord *CaseValidationRecord) (*types.Patient, error) {
-	if caseRecord == nil {
-		return nil, nil
-	}
-
-	for _, p := range caseRecord.Case.Patients {
+func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) {
+	for _, p := range r.Case.Patients {
 		if p.RelationToProbandCode == "proband" {
-			if patient, ok := caseRecord.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]; ok {
+			if patient, ok := r.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]; ok {
 				return patient, nil
 			} else {
-				return nil, fmt.Errorf("failed to find proband patient for case %q", caseRecord.Case.SubmitterCaseId)
+				return nil, fmt.Errorf("failed to find proband patient for case %q", r.Case.SubmitterCaseId)
 			}
 		}
 	}
@@ -562,7 +568,7 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		return fmt.Errorf("diagnosis lab ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
 
-	proband, err := getProbandFromPatients(cr)
+	proband, err := cr.getProbandFromPatients()
 	if err != nil {
 		return fmt.Errorf("failed to get proband patient %w", err)
 	}
