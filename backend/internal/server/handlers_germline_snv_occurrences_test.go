@@ -84,6 +84,8 @@ func (m *MockRepository) GetExpandedOccurrence(int, int, int) (*types.ExpandedGe
 		TranscriptId:                     "T001",
 		InterpretationClassificationCode: "LA6668-3",
 		InterpretationClassification:     "pathogenic",
+		Symbol:                           "BRAF",
+		EnsemblGeneId:                    "ENSG00000157764",
 	}, nil
 }
 
@@ -232,6 +234,7 @@ func Test_GetExpandedOccurrenceHandler_withExomiserACMGCounts(t *testing.T) {
 		"cadd_phred":0.1, 
 		"cadd_score":0.1,
 		"chromosome":"1",
+		"ensembl_gene_id": "ENSG00000157764",
 		"exomiser_acmg_classification_counts":{"Benign":2, "Pathogenic":1},
 		"fathmm_pred":"T",
 		"fathmm_score":0.1, 
@@ -254,6 +257,7 @@ func Test_GetExpandedOccurrenceHandler_withExomiserACMGCounts(t *testing.T) {
 		"sift_score":0.1, 
 		"spliceai_ds":0.1, 
 		"spliceai_type":["AG"],
+		"symbol": "BRAF",
 		"transcript_id": "T001",
 		"exomiser_acmg_evidence": null,
 		"exomiser_gene_combined_score": 0
@@ -276,6 +280,7 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 		"cadd_phred":0.1, 
 		"cadd_score":0.1,
 		"chromosome":"1",
+		"ensembl_gene_id":"ENSG00000157764",
 		"fathmm_pred":"T",
 		"fathmm_score":0.1, 
 		"filter":"PASS", 
@@ -297,6 +302,7 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 		"sift_score":0.1, 
 		"spliceai_ds":0.1, 
 		"spliceai_type":["AG"],
+		"symbol": "BRAF",
 		"transcript_id": "T001",
 		"exomiser_acmg_evidence": null,
 		"exomiser_gene_combined_score": 0

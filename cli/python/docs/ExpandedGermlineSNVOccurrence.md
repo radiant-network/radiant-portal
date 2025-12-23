@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **dann_score** | **float** |  | [optional] 
 **dna_change** | **str** |  | [optional] 
 **end** | **int** |  | [optional] 
+**ensembl_gene_id** | **str** |  | [optional] 
 **exomiser_acmg_classification** | **str** |  | [optional] 
 **exomiser_acmg_classification_counts** | **Dict[str, int]** |  | [optional] 
 **exomiser_acmg_evidence** | **List[str]** |  | 

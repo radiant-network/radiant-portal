@@ -1780,6 +1780,12 @@ export interface ExpandedGermlineSNVOccurrence {
      * @type {string}
      * @memberof ExpandedGermlineSNVOccurrence
      */
+    'ensembl_gene_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'exomiser_acmg_classification'?: string;
     /**
      * 

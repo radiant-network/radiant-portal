@@ -915,6 +915,8 @@ components:
           type: string
         end:
           type: integer
+        ensembl_gene_id:
+          type: string
         exomiser_acmg_classification:
           type: string
         exomiser_acmg_classification_counts:

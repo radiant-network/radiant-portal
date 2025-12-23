@@ -261,12 +261,14 @@ func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(caseId int, seq
 	tx = tx.Joins("JOIN germline__snv__consequence c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
 	tx = tx.Joins("JOIN germline__snv__variant v ON o.locus_id=v.locus_id")
 	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id=o.locus_id AND i.sequencing_id = o.seq_id AND i.transcript_id = v.transcript_id AND i.case_id = ?", fmt.Sprintf("%d", caseId))
+	tx = tx.Joins("LEFT JOIN ensembl_gene g ON g.name=v.symbol")
 	tx = tx.Select("c.locus_id, v.hgvsg, v.locus, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, " +
 		"v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, " +
 		"v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, " +
 		"v.pf_wgs, v.gnomad_v3_af, c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, " +
 		"c.dann_score, o.zygosity, o.transmission_mode, o.parental_origin, o.father_calls, o.mother_calls, o.info_qd, o.ad_alt, o.ad_total, o.filter, o.gq," +
-		"o.exomiser_gene_combined_score, o.exomiser_acmg_evidence, o.exomiser_acmg_classification, v.pc_wgs_affected, v.pn_wgs_affected, v.pf_wgs_affected, v.pc_wgs_not_affected, v.pn_wgs_not_affected, v.pf_wgs_not_affected, i.classification as interpretation_classification_code")
+		"o.exomiser_gene_combined_score, o.exomiser_acmg_evidence, o.exomiser_acmg_classification, v.pc_wgs_affected, v.pn_wgs_affected, v.pf_wgs_affected, " +
+		"v.pc_wgs_not_affected, v.pn_wgs_not_affected, v.pf_wgs_not_affected, i.classification as interpretation_classification_code, g.gene_id as ensembl_gene_id")
 
 	var expandedOccurrence ExpandedGermlineSNVOccurrence
 	if err := tx.First(&expandedOccurrence).Error; err != nil {
