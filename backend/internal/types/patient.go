@@ -3,7 +3,7 @@ package types
 import "time"
 
 type Patient struct {
-	ID                     int
+	ID                     int `gorm:"unique;primaryKey;autoIncrement"`
 	SubmitterPatientId     string
 	SubmitterPatientIdType string
 	OrganizationId         int
