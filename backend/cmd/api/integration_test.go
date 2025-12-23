@@ -59,7 +59,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"mondo/autocomplete",
 			"occurrences/germline/snv/1/1/1/expanded",
 			"sequencing/1",
-			"users/preferences",
+			"users/preferences/table_1",
 			"users/sets/1",
 			"variants/germline/1/header",
 			"variants/germline/1/overview",
@@ -86,7 +86,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"occurrences/germline/snv/1/1/aggregate",
 			"occurrences/germline/snv/1/1/statistics",
 			"occurrences/germline/cnv/1/1/list",
-			"users/preferences",
+			"users/preferences/table_1",
 			"variants/germline/1/cases/interpreted",
 			"variants/germline/1/cases/uninterpreted",
 		} {

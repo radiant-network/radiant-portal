@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// JsonMap Generic type to handle arrays of any primitive type
+// JsonMap Generic type to handle maps of any primitive type
 type JsonMap[K comparable, V any] map[K]V
 
 func (ja JsonMap[K, V]) Value() (driver.Value, error) {

@@ -15,11 +15,12 @@ import (
 // @Description Get user preferences
 // @Tags user_preferences
 // @Security bearerauth
+// @Param key path string true "Preference key"
 // @Produce json
 // @Success 200 {object} types.UserPreference
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /users/preferences [get]
+// @Router /users/preferences/{key} [get]
 func GetUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId, err := auth.RetrieveUserIdFromToken(c)
@@ -27,7 +28,8 @@ func GetUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils.Au
 			HandleNotFoundError(c, "user id")
 			return
 		}
-		userPreference, err := repo.GetUserPreferences(*userId)
+		key := c.Param("key")
+		userPreference, err := repo.GetUserPreferences(*userId, key)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -46,6 +48,7 @@ func GetUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils.Au
 // @Description Create or update user preference
 // @Tags user_preferences
 // @Security bearerauth
+// @Param key path string true "Preference key"
 // @Param			message	body		types.UserPreference	true	"User Preference to create or update"
 // @Accept json
 // @Produce json
@@ -53,11 +56,11 @@ func GetUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils.Au
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /users/preferences [post]
+// @Router /users/preferences/{key} [post]
 func UpdateUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body types.UserPreference
+			body types.JsonMap[string, interface{}]
 		)
 
 		// Bind JSON to the struct
@@ -71,7 +74,8 @@ func UpdateUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils
 			HandleNotFoundError(c, "user id")
 			return
 		}
-		userPreference, err := repo.UpdateUserPreferences(*userId, body)
+		key := c.Param("key")
+		userPreference, err := repo.UpdateUserPreferences(*userId, key, body)
 		if err != nil {
 			HandleError(c, err)
 			return

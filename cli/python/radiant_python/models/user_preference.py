@@ -19,7 +19,6 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List
-from radiant_python.models.table_config import TableConfig
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,9 +26,10 @@ class UserPreference(BaseModel):
     """
     UserPreference
     """ # noqa: E501
-    table_display: Dict[str, TableConfig]
+    content: Dict[str, Any]
+    key: StrictStr
     user_id: StrictStr
-    __properties: ClassVar[List[str]] = ["table_display", "user_id"]
+    __properties: ClassVar[List[str]] = ["content", "key", "user_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -70,13 +70,6 @@ class UserPreference(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each value in table_display (dict)
-        _field_dict = {}
-        if self.table_display:
-            for _key_table_display in self.table_display:
-                if self.table_display[_key_table_display]:
-                    _field_dict[_key_table_display] = self.table_display[_key_table_display].to_dict()
-            _dict['table_display'] = _field_dict
         return _dict
 
     @classmethod
@@ -89,12 +82,8 @@ class UserPreference(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "table_display": dict(
-                (_k, TableConfig.from_dict(_v))
-                for _k, _v in obj["table_display"].items()
-            )
-            if obj.get("table_display") is not None
-            else None,
+            "content": obj.get("content"),
+            "key": obj.get("key"),
             "user_id": obj.get("user_id")
         })
         return _obj
