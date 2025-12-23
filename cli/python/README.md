@@ -143,8 +143,8 @@ Class | Method | HTTP request | Description
 *SequencingApi* | [**get_sequencing**](docs/SequencingApi.md#get_sequencing) | **GET** /sequencing/{seq_id} | Get a Sequencing
 *SequencingApi* | [**post_sequencing_experiment_batch**](docs/SequencingApi.md#post_sequencing_experiment_batch) | **POST** /sequencing/batch | Create a new sequencing experiment batch
 *StatusApi* | [**status_get**](docs/StatusApi.md#status_get) | **GET** /status | Get API status
-*UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences | Get user preferences
-*UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences | Create or update user preference
+*UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
+*UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 *UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
 *VariantApi* | [**get_expanded_germline_variant_interpreted_case**](docs/VariantApi.md#get_expanded_germline_variant_interpreted_case) | **GET** /variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id} | Get expanded germline interpreted case for a given locus, sequencing and transcript
 *VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
@@ -183,7 +183,6 @@ Class | Method | HTTP request | Description
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)
- - [ColumnPinningConfig](docs/ColumnPinningConfig.md)
  - [Count](docs/Count.md)
  - [CountBodyWithSqon](docs/CountBodyWithSqon.md)
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
@@ -217,7 +216,6 @@ Class | Method | HTTP request | Description
  - [ObservationTextBatch](docs/ObservationTextBatch.md)
  - [OmimGenePanel](docs/OmimGenePanel.md)
  - [OutputDocumentBatch](docs/OutputDocumentBatch.md)
- - [PaginationConfig](docs/PaginationConfig.md)
  - [PatientBatch](docs/PatientBatch.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)
@@ -234,7 +232,6 @@ Class | Method | HTTP request | Description
  - [SqonContent](docs/SqonContent.md)
  - [Statistics](docs/Statistics.md)
  - [StatisticsBodyWithSqon](docs/StatisticsBodyWithSqon.md)
- - [TableConfig](docs/TableConfig.md)
  - [Term](docs/Term.md)
  - [Transcript](docs/Transcript.md)
  - [UserPreference](docs/UserPreference.md)

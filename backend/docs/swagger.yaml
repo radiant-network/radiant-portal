@@ -708,19 +708,6 @@ components:
       - clinvar_id
       - locus_id
       type: object
-    ColumnPinningConfig:
-      properties:
-        left:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        right:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-      type: object
     Count:
       description: Count represents count result
       properties:
@@ -1483,17 +1470,9 @@ components:
         updated_by_name:
           type: string
       type: object
-    JsonMap-string-bool:
-      additionalProperties:
-        type: boolean
-      type: object
     JsonMap-string-int:
       additionalProperties:
         type: integer
-      type: object
-    JsonMap-string-types_TableConfig:
-      additionalProperties:
-        $ref: '#/components/schemas/TableConfig'
       type: object
     LeafContent:
       properties:
@@ -1619,11 +1598,6 @@ components:
       - name
       - size
       - url
-      type: object
-    PaginationConfig:
-      properties:
-        pageSize:
-          type: integer
       type: object
     PatientBatch:
       properties:
@@ -1939,22 +1913,6 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
-    TableConfig:
-      properties:
-        columnOrder:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        columnPinning:
-          $ref: '#/components/schemas/ColumnPinningConfig'
-        columnSizing:
-          $ref: '#/components/schemas/JsonMap-string-int'
-        columnVisibility:
-          $ref: '#/components/schemas/JsonMap-string-bool'
-        pagination:
-          $ref: '#/components/schemas/PaginationConfig'
-      type: object
     Term:
       properties:
         id:
@@ -2020,12 +1978,15 @@ components:
       type: object
     UserPreference:
       properties:
-        table_display:
-          $ref: '#/components/schemas/JsonMap-string-types_TableConfig'
+        content:
+          type: object
+        key:
+          type: string
         user_id:
           type: string
       required:
-      - table_display
+      - content
+      - key
       - user_id
       type: object
     UserSet:
@@ -4383,10 +4344,17 @@ paths:
       summary: Get API status
       tags:
       - status
-  /users/preferences:
+  /users/preferences/{key}:
     get:
       description: Get user preferences
       operationId: getUserPreferences
+      parameters:
+      - description: Preference key
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -4414,6 +4382,13 @@ paths:
     post:
       description: Create or update user preference
       operationId: postUserPreferences
+      parameters:
+      - description: Preference key
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:

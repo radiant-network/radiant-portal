@@ -159,8 +159,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	usersGroup.GET("/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repoSavedFilters))
 	usersGroup.GET("/saved_filters", server.GetSavedFiltersHandler(repoSavedFilters, auth))
 	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoPostgres.UserSets))
-	usersGroup.GET("/preferences", server.GetUserPreferencesHandler(repoUserPreferences, auth))
-	usersGroup.POST("/preferences", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
+	usersGroup.GET("/preferences/:key", server.GetUserPreferencesHandler(repoUserPreferences, auth))
+	usersGroup.POST("/preferences/:key", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
 
 	variantsGroup := privateRoutes.Group("/variants")
 	variantsGermlineGroup := variantsGroup.Group("/germline")

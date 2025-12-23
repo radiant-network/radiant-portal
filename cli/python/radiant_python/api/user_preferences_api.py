@@ -16,7 +16,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field
+from pydantic import Field, StrictStr
 from typing_extensions import Annotated
 from radiant_python.models.user_preference import UserPreference
 
@@ -41,6 +41,7 @@ class UserPreferencesApi:
     @validate_call
     def get_user_preferences(
         self,
+        key: Annotated[StrictStr, Field(description="Preference key")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -58,6 +59,8 @@ class UserPreferencesApi:
 
         Get user preferences
 
+        :param key: Preference key (required)
+        :type key: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -81,6 +84,7 @@ class UserPreferencesApi:
         """ # noqa: E501
 
         _param = self._get_user_preferences_serialize(
+            key=key,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -106,6 +110,7 @@ class UserPreferencesApi:
     @validate_call
     def get_user_preferences_with_http_info(
         self,
+        key: Annotated[StrictStr, Field(description="Preference key")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -123,6 +128,8 @@ class UserPreferencesApi:
 
         Get user preferences
 
+        :param key: Preference key (required)
+        :type key: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -146,6 +153,7 @@ class UserPreferencesApi:
         """ # noqa: E501
 
         _param = self._get_user_preferences_serialize(
+            key=key,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -171,6 +179,7 @@ class UserPreferencesApi:
     @validate_call
     def get_user_preferences_without_preload_content(
         self,
+        key: Annotated[StrictStr, Field(description="Preference key")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -188,6 +197,8 @@ class UserPreferencesApi:
 
         Get user preferences
 
+        :param key: Preference key (required)
+        :type key: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -211,6 +222,7 @@ class UserPreferencesApi:
         """ # noqa: E501
 
         _param = self._get_user_preferences_serialize(
+            key=key,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -231,6 +243,7 @@ class UserPreferencesApi:
 
     def _get_user_preferences_serialize(
         self,
+        key,
         _request_auth,
         _content_type,
         _headers,
@@ -252,6 +265,8 @@ class UserPreferencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if key is not None:
+            _path_params['key'] = key
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -274,7 +289,7 @@ class UserPreferencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/users/preferences',
+            resource_path='/users/preferences/{key}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -293,6 +308,7 @@ class UserPreferencesApi:
     @validate_call
     def post_user_preferences(
         self,
+        key: Annotated[StrictStr, Field(description="Preference key")],
         user_preference: Annotated[UserPreference, Field(description="User Preference to create or update")],
         _request_timeout: Union[
             None,
@@ -311,6 +327,8 @@ class UserPreferencesApi:
 
         Create or update user preference
 
+        :param key: Preference key (required)
+        :type key: str
         :param user_preference: User Preference to create or update (required)
         :type user_preference: UserPreference
         :param _request_timeout: timeout setting for this request. If one
@@ -336,6 +354,7 @@ class UserPreferencesApi:
         """ # noqa: E501
 
         _param = self._post_user_preferences_serialize(
+            key=key,
             user_preference=user_preference,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -363,6 +382,7 @@ class UserPreferencesApi:
     @validate_call
     def post_user_preferences_with_http_info(
         self,
+        key: Annotated[StrictStr, Field(description="Preference key")],
         user_preference: Annotated[UserPreference, Field(description="User Preference to create or update")],
         _request_timeout: Union[
             None,
@@ -381,6 +401,8 @@ class UserPreferencesApi:
 
         Create or update user preference
 
+        :param key: Preference key (required)
+        :type key: str
         :param user_preference: User Preference to create or update (required)
         :type user_preference: UserPreference
         :param _request_timeout: timeout setting for this request. If one
@@ -406,6 +428,7 @@ class UserPreferencesApi:
         """ # noqa: E501
 
         _param = self._post_user_preferences_serialize(
+            key=key,
             user_preference=user_preference,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -433,6 +456,7 @@ class UserPreferencesApi:
     @validate_call
     def post_user_preferences_without_preload_content(
         self,
+        key: Annotated[StrictStr, Field(description="Preference key")],
         user_preference: Annotated[UserPreference, Field(description="User Preference to create or update")],
         _request_timeout: Union[
             None,
@@ -451,6 +475,8 @@ class UserPreferencesApi:
 
         Create or update user preference
 
+        :param key: Preference key (required)
+        :type key: str
         :param user_preference: User Preference to create or update (required)
         :type user_preference: UserPreference
         :param _request_timeout: timeout setting for this request. If one
@@ -476,6 +502,7 @@ class UserPreferencesApi:
         """ # noqa: E501
 
         _param = self._post_user_preferences_serialize(
+            key=key,
             user_preference=user_preference,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -498,6 +525,7 @@ class UserPreferencesApi:
 
     def _post_user_preferences_serialize(
         self,
+        key,
         user_preference,
         _request_auth,
         _content_type,
@@ -520,6 +548,8 @@ class UserPreferencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if key is not None:
+            _path_params['key'] = key
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -557,7 +587,7 @@ class UserPreferencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/users/preferences',
+            resource_path='/users/preferences/{key}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
