@@ -79,6 +79,19 @@ func (r *CaseValidationRecord) GetResourceType() string {
 	return types.CaseBatchType
 }
 
+func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) {
+	for _, p := range r.Case.Patients {
+		if p.RelationToProbandCode == "proband" {
+			if patient, ok := r.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]; ok {
+				return patient, nil
+			} else {
+				return nil, fmt.Errorf("failed to find proband patient for case %q", r.Case.SubmitterCaseId)
+			}
+		}
+	}
+	return nil, nil
+}
+
 func (r *CaseValidationRecord) fetchProject(ctx *BatchValidationContext) error {
 	p, err := ctx.ProjectRepo.GetProjectByCode(r.Case.ProjectCode)
 	if err != nil {
@@ -198,76 +211,26 @@ func (r *CaseValidationRecord) fetchValidationInfos() error {
 	return nil
 }
 
-func validateCaseBatch(ctx *BatchValidationContext, cases []types.CaseBatch) ([]*CaseValidationRecord, error) {
-	var records []*CaseValidationRecord
-	visited := map[CaseKey]struct{}{}
-
-	for idx, c := range cases {
-		key := CaseKey{
-			ProjectCode:     c.ProjectCode,
-			SubmitterCaseID: c.SubmitterCaseId,
+func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		batchRepo := repository.NewBatchRepository(tx)
+		txCtx := NewStorageContext(db)
+		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, batchRepo)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			return fmt.Errorf("no rows updated when updating case batch %v", batch.ID)
+		}
+		if batch.DryRun || batch.Status != types.BatchStatusSuccess {
+			return nil
 		}
 
-		record, err := validateCaseRecord(ctx, c, idx)
-		if err != nil {
-			return nil, fmt.Errorf("error during case validation: %v", err)
+		if err := persistCaseRecords(txCtx, records); err != nil {
+			return fmt.Errorf("error during case insertion %w", err)
 		}
-
-		validateUniquenessInBatch(record, key, visited, IdenticalCaseInBatchCode, []string{c.ProjectCode, c.SubmitterCaseId})
-		records = append(records, record)
-	}
-	return records, nil
-}
-
-func validateCaseRecord(
-	ctx *BatchValidationContext,
-	c types.CaseBatch,
-	index int,
-) (*CaseValidationRecord, error) {
-	cr := NewCaseValidationRecord(ctx, c, index)
-	if unexpectedErr := cr.fetchValidationInfos(); unexpectedErr != nil {
-		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", unexpectedErr)
-	}
-
-	// TODO: Add field-level validations here
-	return cr, nil
-}
-
-func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
-	payload := []byte(batch.Payload)
-	var caseBatches []types.CaseBatch
-
-	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
-		return
-	}
-
-	records, unexpectedErr := validateCaseBatch(ctx, caseBatches)
-	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
-		return
-	}
-
-	glog.Infof("Case batch %v processed with %d records", batch.ID, len(records))
-
-	err := persistBatchAndCaseRecords(db, batch, records)
-	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
-		return
-	}
-}
-
-func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) {
-	for _, p := range r.Case.Patients {
-		if p.RelationToProbandCode == "proband" {
-			if patient, ok := r.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]; ok {
-				return patient, nil
-			} else {
-				return nil, fmt.Errorf("failed to find proband patient for case %q", r.Case.SubmitterCaseId)
-			}
-		}
-	}
-	return nil, nil
+		return nil
+	})
 }
 
 func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
@@ -337,6 +300,55 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		}
 	}
 
+	return nil
+}
+
+func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+	payload := []byte(batch.Payload)
+	var caseBatches []types.CaseBatch
+
+	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
+		return
+	}
+
+	records, unexpectedErr := validateCaseBatch(ctx, caseBatches)
+	if unexpectedErr != nil {
+		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
+		return
+	}
+
+	glog.Infof("Case batch %v processed with %d records", batch.ID, len(records))
+
+	err := persistBatchAndCaseRecords(db, batch, records)
+	if err != nil {
+		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
+		return
+	}
+}
+
+func persistCaseRecords(
+	ctx *StorageContext,
+	records []*CaseValidationRecord,
+) error {
+	for _, record := range records {
+		if record.Skipped {
+			continue
+		}
+
+		if err := persistCase(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist case for case %q: %w", record.Case.SubmitterCaseId, err)
+		}
+		if err := persistFamily(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist family for case %q: %w", record.Case.SubmitterCaseId, err)
+		}
+		if err := persistObservationCategorical(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist observations for case %q: %w", record.Case.SubmitterCaseId, err)
+		}
+		if err := persistTask(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist tasks for case %q: %w", record.Case.SubmitterCaseId, err)
+		}
+	}
 	return nil
 }
 
@@ -492,49 +504,37 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 	return nil
 }
 
-func persistCaseRecords(
-	ctx *StorageContext,
-	records []*CaseValidationRecord,
-) error {
-	for _, record := range records {
-		if record.Skipped {
-			continue
+func validateCaseBatch(ctx *BatchValidationContext, cases []types.CaseBatch) ([]*CaseValidationRecord, error) {
+	var records []*CaseValidationRecord
+	visited := map[CaseKey]struct{}{}
+
+	for idx, c := range cases {
+		key := CaseKey{
+			ProjectCode:     c.ProjectCode,
+			SubmitterCaseID: c.SubmitterCaseId,
 		}
 
-		if err := persistCase(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist case for case %q: %w", record.Case.SubmitterCaseId, err)
+		record, err := validateCaseRecord(ctx, c, idx)
+		if err != nil {
+			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
-		if err := persistFamily(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist family for case %q: %w", record.Case.SubmitterCaseId, err)
-		}
-		if err := persistObservationCategorical(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist observations for case %q: %w", record.Case.SubmitterCaseId, err)
-		}
-		if err := persistTask(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist tasks for case %q: %w", record.Case.SubmitterCaseId, err)
-		}
+
+		validateUniquenessInBatch(record, key, visited, IdenticalCaseInBatchCode, []string{c.ProjectCode, c.SubmitterCaseId})
+		records = append(records, record)
 	}
-	return nil
+	return records, nil
 }
 
-func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
-	return db.Transaction(func(tx *gorm.DB) error {
-		batchRepo := repository.NewBatchRepository(tx)
-		txCtx := NewStorageContext(db)
-		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, batchRepo)
-		if unexpectedErrUpdate != nil {
-			return unexpectedErrUpdate
-		}
-		if rowsUpdated == 0 {
-			return fmt.Errorf("no rows updated when updating case batch %v", batch.ID)
-		}
-		if batch.DryRun || batch.Status != types.BatchStatusSuccess {
-			return nil
-		}
+func validateCaseRecord(
+	ctx *BatchValidationContext,
+	c types.CaseBatch,
+	index int,
+) (*CaseValidationRecord, error) {
+	cr := NewCaseValidationRecord(ctx, c, index)
+	if unexpectedErr := cr.fetchValidationInfos(); unexpectedErr != nil {
+		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", unexpectedErr)
+	}
 
-		if err := persistCaseRecords(txCtx, records); err != nil {
-			return fmt.Errorf("error during case insertion %w", err)
-		}
-		return nil
-	})
+	// TODO: Add field-level validations here
+	return cr, nil
 }
