@@ -219,12 +219,12 @@ export default function FilterButton({
         {/* value prevent the default selection/hover style of the first element in the command list */}
         <Command className="flex flex-col border-border border-0 border-b-none rounded-b-none" value="">
           <CommandInput
-            placeholder={placeholder || label || 'Search...'}
+            placeholder={placeholder || label || t('common.filters.select_placeholder')}
             leftAddon={<Search size={16} className="text-muted-foreground mr-1" />}
             wrapperClassName="shrink-0 h-10 border-t-0 border-l-0 border-b-1 border-r-0 border-color-border rounded-none"
           />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{t('common.table.no_result')}</CommandEmpty>
             <CommandGroup>
               {optionSnapshot.selectedOptions.map(option => (
                 <CustomCommandItem

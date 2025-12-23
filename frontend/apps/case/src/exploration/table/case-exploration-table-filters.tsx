@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
@@ -25,19 +26,29 @@ type FiltersGroupFormProps = {
 const CRITERIAS = {
   priority_code: { key: 'priority_code', weight: 1, visible: true },
   status_code: { key: 'status_code', weight: 2, visible: true },
-  analysis_catalog_code: { key: 'analysis_catalog_code', weight: 3, visible: true },
+  case_type_code: { key: 'case_type_code', weight: 3, visible: true },
   project_code: { key: 'project_code', visible: false },
+  analysis_catalog_code: { key: 'analysis_catalog_code', visible: false },
   diagnosis_lab_code: { key: 'diagnosis_lab_code', visible: false },
   ordering_organization_code: { key: 'ordering_organization_code', visible: false },
+  panel_code: { key: 'panel_code', visible: false },
+  resolution_status_code: { key: 'resolution_status_code', visible: false },
+  life_status_code: { key: 'life_status_code', visible: false },
+  case_category_code: { key: 'case_category_code', visible: false },
 };
 
 export const FILTER_DEFAULTS = {
   priority_code: [],
   status_code: [],
-  analysis_catalog_code: [],
+  case_type_code: [],
   project_code: [],
+  analysis_catalog_code: [],
   diagnosis_lab_code: [],
   ordering_organization_code: [],
+  panel_code: [],
+  resolution_status_code: [],
+  life_status_code: [],
+  case_category_code: [],
 };
 
 async function fetchFilters(searchCriteria: CaseFiltersInput) {
@@ -83,6 +94,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
         case 'project_code':
         case 'diagnosis_lab_code':
         case 'ordering_organization_code':
+        case 'panel_code':
           return {
             ...baseOption,
             popoverSize: 'lg' as PopoverSize,
@@ -101,6 +113,19 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
             options: sortOptions(apiFilters[key] || []),
             popoverSize: 'lg' as PopoverSize,
             withTooltip: true,
+          };
+        case 'case_type_code':
+          return {
+            ...baseOption,
+            options: sortOptions(apiFilters[key] || []),
+          };
+        case 'life_status_code':
+        case 'case_category_code':
+        case 'resolution_status_code':
+          return {
+            ...baseOption,
+            isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
+            options: sortOptions(apiFilters[key] || []),
           };
         default:
           return baseOption;
