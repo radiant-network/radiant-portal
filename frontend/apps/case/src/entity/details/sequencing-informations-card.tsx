@@ -1,13 +1,11 @@
 import { ComponentProps } from 'react';
 
-import { CaseEntity, SortBody } from '@/api/api';
+import { CaseEntity } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { defaultSettings, getColumns } from './tables/sequencing-table-settings';
-
-const DEFAULT_SORTING: SortBody[] = [];
 
 type AssayInformationsCardProps = ComponentProps<'div'> & {
   data: CaseEntity;
@@ -34,7 +32,7 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
           pagination={{ type: 'hidden' }}
           tableIndexResultPosition="hidden"
           serverOptions={{
-            defaultSorting: DEFAULT_SORTING,
+            defaultSorting: [],
           }}
         />
       </CardContent>

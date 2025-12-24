@@ -4,16 +4,7 @@ import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 
-import {
-  CaseAssay,
-  Count,
-  CountBodyWithSqon,
-  GermlineSNVOccurrence,
-  SavedFilterType,
-  SortBody,
-  SortBodyOrderEnum,
-  Sqon,
-} from '@/api/api';
+import { CaseAssay, Count, CountBodyWithSqon, GermlineSNVOccurrence, SavedFilterType, SortBody, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Card, CardContent } from '@/components/base/shadcn/card';
@@ -39,17 +30,6 @@ import { getVisibleAggregations } from '../utils';
 
 import OccurrencePreviewSheet from './preview/preview-occurrence-sheet';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
-
-const DEFAULT_SORTING = [
-  {
-    field: 'exomiser_gene_combined_score',
-    order: SortBodyOrderEnum.Desc,
-  },
-  {
-    field: 'max_impact_score',
-    order: SortBodyOrderEnum.Desc,
-  },
-];
 
 async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
   const response = await occurrencesApi.countGermlineSNVOccurrences(input.caseId, input.seqId, input.countBody);
@@ -104,7 +84,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
   });
 
   // Variant count Request
-  const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
+  const [sorting, setSorting] = useState<SortBody[]>([]);
   const [open, setOpen] = useState(false);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
 
@@ -342,7 +322,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
                   pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
                   serverOptions={{
                     setAdditionalFields,
-                    defaultSorting: DEFAULT_SORTING,
+                    defaultSorting: [],
                     onSortingChange: setSorting,
                   }}
                   total={fetchOccurrencesCount.data?.count ?? 0}
