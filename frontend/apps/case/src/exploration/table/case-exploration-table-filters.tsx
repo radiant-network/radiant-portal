@@ -34,7 +34,7 @@ const CRITERIAS = {
   ordering_organization_code: { key: 'ordering_organization_code', visible: false },
   panel_code: { key: 'panel_code', visible: false },
   resolution_status_code: { key: 'resolution_status_code', visible: false },
-  life_status_code: { key: 'life_status_code', visible: false },
+  life_status_code: { key: 'proband_life_status_code', visible: false },
   case_category_code: { key: 'case_category_code', visible: false },
 };
 
