@@ -686,14 +686,14 @@
   },
   "case_exploration": {
     "filters_group": {
-      "search_by_id": "Search by ID",
-      "priority_code": "Priority",
-      "status_code": "Status",
       "analysis_catalog_code": "Analysis",
-      "search_placeholder": "Case, sequencing, patient, or MRN",
-      "project_code": "Project",
       "diagnosis_lab": "Diagnostic Lab",
-      "ordering_organization": "Prescribing Institution"
+      "ordering_organization": "Prescribing Institution",
+      "priority_code": "Priority",
+      "project_code": "Project",
+      "search_by_id": "Search by ID",
+      "search_placeholder": "Case, sequencing, patient, or MRN",
+      "status_code": "Status"
     },
     "priority": {
       "asap": "ASAP",
@@ -727,12 +727,17 @@
         "view_variant": "View Variants"
       },
       "filters": {
-        "priority_code": "Priority",
-        "status_code": "Status",
         "analysis_catalog_code": "Analysis",
+        "case_category_code": "Pre/Postnatal",
+        "case_type_code": "Type",
+        "diagnosis_lab_code": "Diagnostic lab",
+        "life_status_code": "Vital Status",
+        "ordering_organization_code": "Prescribing Institution",
+        "panel_code": "Panel",
+        "priority_code": "Priority",
         "project_code": "Project",
-        "diagnosis_lab_code": "Diagnostic Lab",
-        "ordering_organization_code": "Prescribing Institution"
+        "resolution_status_code": "Resolution",
+        "status_code": "Status"
       },
       "headers": {
         "case_id": "Case",
@@ -756,7 +761,14 @@
         "managing_organization": "Managing Org.",
         "managing_organization_tooltip": "Organization managing the patient’s file",
         "created_on": "Created On",
-        "created_on_tooltip": "Date of case creation (yyyy-mm-dd)"
+        "created_on_tooltip": "Date of case creation (yyyy-mm-dd)",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "life_status": "Vital Status",
+        "category_code": "Pre/Postnatal",
+        "panel": "Panel",
+        "jhn": "JHN",
+        "resolution_status_code": "Resolution"
       }
     },
     "assays": {

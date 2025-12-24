@@ -686,14 +686,14 @@
   },
   "case_exploration": {
     "filters_group": {
-      "search_by_id": "Recherche par ID",
-      "priority_code": "Priorité",
-      "status_code": "Statut",
       "analysis_catalog_code": "Analyse",
-      "search_placeholder": "Cas, séquençage, patient ou MRN",
-      "project_code": "Projet",
       "diagnosis_lab": "Laboratoire de diagnostic",
-      "ordering_organization": "Établissement prescripteur"
+      "ordering_organization": "Établissement prescripteur",
+      "priority_code": "Priorité",
+      "project_code": "Projet",
+      "search_by_id": "Recherche par ID",
+      "search_placeholder": "Cas, séquençage, patient ou MRN",
+      "status_code": "Statut"
     },
     "priority": {
       "asap": "ASAP",
@@ -727,12 +727,17 @@
         "view_variant": "Voir variants"
       },
       "filters": {
-        "priority_code": "Priorité",
-        "status_code": "Statut",
         "analysis_catalog_code": "Analyse",
-        "project_code": "Projet",
+        "case_category_code": "Pré/Postnatal",
+        "case_type_code": "Type",
         "diagnosis_lab_code": "Laboratoire de diagnostic",
-        "ordering_organization_code": "Établissement prescripteur"
+        "life_status_code": "Statut vital",
+        "ordering_organization_code": "Établissement prescripteur",
+        "panel_code": "Panel",
+        "priority_code": "Priorité",
+        "project_code": "Projet",
+        "resolution_status_code": "Résolution",
+        "status_code": "Statut"
       },
       "headers": {
         "case_id": "Cas",
@@ -756,7 +761,14 @@
         "managing_organization": "Organisation resp.",
         "managing_organization_tooltip": "Organisation responsable du dossier du patient",
         "created_on": "Créé le",
-        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
+        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)",
+        "first_name": "Prénom",
+        "last_name": "Nom de famille",
+        "life_status": "Statut vital",
+        "category_code": "Pré/Postnatal",
+        "panel": "Panel",
+        "jhn": "RAMQ",
+        "resolution_status_code": "Résolution"
       }
     },
     "assays": {
