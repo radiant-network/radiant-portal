@@ -5,7 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**table_display** | [**Dict[str, TableConfig]**](TableConfig.md) |  | 
+**content** | **object** |  | 
+**key** | **str** |  | 
 **user_id** | **str** |  | 
 
 ## Example

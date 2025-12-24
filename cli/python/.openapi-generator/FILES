@@ -26,7 +26,6 @@ docs/CaseTaskBatch.md
 docs/CasesApi.md
 docs/CasesSearchResponse.md
 docs/ClinvarRCV.md
-docs/ColumnPinningConfig.md
 docs/Count.md
 docs/CountBodyWithSqon.md
 docs/CreateBatchResponse.md
@@ -67,7 +66,6 @@ docs/ObservationTextBatch.md
 docs/OccurrencesApi.md
 docs/OmimGenePanel.md
 docs/OutputDocumentBatch.md
-docs/PaginationConfig.md
 docs/PatientBatch.md
 docs/PatientsApi.md
 docs/PubmedCitation.md
@@ -89,7 +87,6 @@ docs/SqonContent.md
 docs/Statistics.md
 docs/StatisticsBodyWithSqon.md
 docs/StatusApi.md
-docs/TableConfig.md
 docs/Term.md
 docs/Transcript.md
 docs/UserPreference.md
@@ -157,7 +154,6 @@ radiant_python/models/case_task_batch.py
 radiant_python/models/cases_search_response.py
 radiant_python/models/clinvar_rcv.py
 radiant_python/models/cnv_gene_overlap.py
-radiant_python/models/column_pinning_config.py
 radiant_python/models/count.py
 radiant_python/models/count_body_with_sqon.py
 radiant_python/models/create_batch_response.py
@@ -191,7 +187,6 @@ radiant_python/models/observation_categorical_batch.py
 radiant_python/models/observation_text_batch.py
 radiant_python/models/omim_gene_panel.py
 radiant_python/models/output_document_batch.py
-radiant_python/models/pagination_config.py
 radiant_python/models/patient_batch.py
 radiant_python/models/pubmed_citation.py
 radiant_python/models/pubmed_citation_details.py
@@ -208,7 +203,6 @@ radiant_python/models/sqon.py
 radiant_python/models/sqon_content.py
 radiant_python/models/statistics.py
 radiant_python/models/statistics_body_with_sqon.py
-radiant_python/models/table_config.py
 radiant_python/models/term.py
 radiant_python/models/transcript.py
 radiant_python/models/user_preference.py
