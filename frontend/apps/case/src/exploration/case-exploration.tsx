@@ -73,7 +73,6 @@ export default function App() {
                 tableIndexResultPosition="bottom"
                 serverOptions={{
                   setAdditionalFields,
-                  defaultSorting: [],
                   onSortingChange: setSorting,
                 }}
               />

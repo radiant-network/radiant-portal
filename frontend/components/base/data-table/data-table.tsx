@@ -102,7 +102,7 @@ type PaginationSettings = {
 
 type ServerOptions = {
   setAdditionalFields?: (fields: string[]) => void;
-  defaultSorting: SortBody[];
+  defaultSorting?: SortBody[];
   onSortingChange?: (sorting: SortBody[]) => void;
 };
 
@@ -126,7 +126,7 @@ export type TableProps<TData> = {
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
   pagination: PaginationSettings;
-  serverOptions: ServerOptions;
+  serverOptions?: ServerOptions;
 };
 
 export interface BaseColumnSettings {
@@ -563,10 +563,10 @@ function TranstackTable<T>({
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [sorting, setSorting] = useState<SortingState>(
-    serverOptions.defaultSorting.map(serverSorting => ({
+    (serverOptions?.defaultSorting?.map(serverSorting => ({
       id: serverSorting.field,
       desc: serverSorting.order === SortBodyOrderEnum.Desc,
-    })) as SortingState,
+    })) as SortingState) || [],
   );
   const [internalRowSelection, setInternalRowSelection] = useState<Record<string, boolean>>(rowSelection ?? {});
 
@@ -605,7 +605,7 @@ function TranstackTable<T>({
     updateAdditionalField({
       newAddFields: filteredAdditionalFields,
       prevAddFields: lastFilteredAdditionalFields,
-      setAdditionalFields: serverOptions.setAdditionalFields,
+      setAdditionalFields: serverOptions?.setAdditionalFields,
     });
   }, []);
 
@@ -626,7 +626,7 @@ function TranstackTable<T>({
     data,
     enableColumnResizing: true,
     enableRowSelection: true,
-    getSortedRowModel: serverOptions.onSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
+    getSortedRowModel: serverOptions?.onSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -769,9 +769,9 @@ function TranstackTable<T>({
    * Reset pagination at the same time
    */
   useEffect(() => {
-    if (!serverOptions.onSortingChange) return;
+    if (!serverOptions?.onSortingChange) return;
     if (sorting.length === 0) {
-      serverOptions.onSortingChange(serverOptions.defaultSorting);
+      serverOptions.onSortingChange(serverOptions.defaultSorting || []);
     } else {
       serverOptions.onSortingChange(
         sorting.map(s => ({
@@ -861,7 +861,7 @@ function TranstackTable<T>({
                   updateAdditionalField({
                     newAddFields: newAdditionalFields,
                     prevAddFields: lastFilteredAdditionalFields,
-                    setAdditionalFields: serverOptions.setAdditionalFields,
+                    setAdditionalFields: serverOptions?.setAdditionalFields,
                   });
                 }}
                 handleOrderChange={setColumnOrder}
@@ -885,7 +885,7 @@ function TranstackTable<T>({
                     columnVisibility: defaultColumnTableState.columnVisibility,
                     defaultColumnSettings,
                   });
-                  serverOptions.setAdditionalFields?.(allAdditionalFields);
+                  serverOptions?.setAdditionalFields?.(allAdditionalFields);
                 }}
               />
             </>

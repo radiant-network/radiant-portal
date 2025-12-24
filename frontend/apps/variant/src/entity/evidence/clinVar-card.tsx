@@ -79,9 +79,6 @@ function ClinVarCard() {
           pagination={{ type: 'hidden' }}
           total={filteredData.length}
           tableIndexResultPosition="bottom"
-          serverOptions={{
-            defaultSorting: [],
-          }}
         />
       </CardContent>
     </Card>

@@ -106,9 +106,6 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
                 hasError={!!fetchList.error}
                 total={fetchList?.data?.length ?? 0}
                 tableIndexResultPosition="top"
-                serverOptions={{
-                  defaultSorting: [],
-                }}
               />
             </DialogBody>
           </>

@@ -322,7 +322,6 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
                   pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
                   serverOptions={{
                     setAdditionalFields,
-                    defaultSorting: [],
                     onSortingChange: setSorting,
                   }}
                   total={fetchOccurrencesCount.data?.count ?? 0}

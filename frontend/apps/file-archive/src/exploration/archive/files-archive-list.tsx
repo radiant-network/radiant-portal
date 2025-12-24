@@ -65,7 +65,6 @@ function FilesArchiveList() {
       tableIndexResultPosition="bottom"
       serverOptions={{
         setAdditionalFields,
-        defaultSorting: [],
         onSortingChange: setSorting,
       }}
     />

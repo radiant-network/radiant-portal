@@ -114,7 +114,6 @@ function InterpretedCasesTable() {
         subComponent={data => <InterpretedCasesExpand locusId={params.locusId!} data={data} />}
         tableIndexResultPosition="bottom"
         serverOptions={{
-          defaultSorting: [],
           onSortingChange: () => {},
         }}
       />

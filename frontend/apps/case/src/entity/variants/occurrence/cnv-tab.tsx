@@ -300,7 +300,6 @@ function CNVTab({ seqId }: CNVTabProps) {
                   enableFullscreen
                   serverOptions={{
                     setAdditionalFields,
-                    defaultSorting: [],
                     onSortingChange: setSorting,
                   }}
                 />
