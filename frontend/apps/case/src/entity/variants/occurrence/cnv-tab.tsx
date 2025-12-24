@@ -3,15 +3,7 @@ import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 
-import {
-  Count,
-  CountBodyWithSqon,
-  GermlineCNVOccurrence,
-  SavedFilterType,
-  SortBody,
-  SortBodyOrderEnum,
-  Sqon,
-} from '@/api/api';
+import { Count, CountBodyWithSqon, GermlineCNVOccurrence, SavedFilterType, SortBody, Sqon } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Card, CardContent } from '@/components/base/shadcn/card';
@@ -33,13 +25,6 @@ import { queryBuilderRemote } from 'components/cores/query-builder/query-builder
 
 import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/cnv-occurrence-table-settings';
 import { isValidSeqId } from './snv-tab';
-
-const DEFAULT_SORTING = [
-  {
-    field: 'name',
-    order: SortBodyOrderEnum.Asc,
-  },
-];
 
 async function fetchQueryCount(input: CnvOccurrenceCountInput) {
   const response = await occurrencesApi.countGermlineCNVOccurrences(input.caseId, input.seqId, input.countBody);
@@ -86,7 +71,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   });
 
   // Variant count Request
-  const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
+  const [sorting, setSorting] = useState<SortBody[]>([]);
   const [open, setOpen] = useState(false);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
 
@@ -315,7 +300,6 @@ function CNVTab({ seqId }: CNVTabProps) {
                   enableFullscreen
                   serverOptions={{
                     setAdditionalFields,
-                    defaultSorting: DEFAULT_SORTING,
                     onSortingChange: setSorting,
                   }}
                 />

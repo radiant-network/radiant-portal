@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody, SortBodyOrderEnum } from '@/api/api';
+import { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import PageHeader from '@/components/base/page/page-header';
 import { Card, CardContent } from '@/components/base/shadcn/card';
@@ -16,13 +16,6 @@ type CaseListInput = {
   listBodyWithCriteria: ListBodyWithCriteria;
 };
 
-const DEFAULT_SORTING = [
-  {
-    field: 'created_on',
-    order: SortBodyOrderEnum.Asc,
-  },
-];
-
 async function fetchCasesList(input: CaseListInput) {
   const response = await caseApi.searchCases(input.listBodyWithCriteria);
   return response.data;
@@ -30,7 +23,7 @@ async function fetchCasesList(input: CaseListInput) {
 
 export default function App() {
   const { t } = useI18n();
-  const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
+  const [sorting, setSorting] = useState<SortBody[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 20,
@@ -80,7 +73,6 @@ export default function App() {
                 tableIndexResultPosition="bottom"
                 serverOptions={{
                   setAdditionalFields,
-                  defaultSorting: DEFAULT_SORTING,
                   onSortingChange: setSorting,
                 }}
               />

@@ -127,7 +127,6 @@ function UninterpretedCasesTable() {
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
         serverOptions={{
-          defaultSorting: [],
           onSortingChange: () => [],
         }}
       />
