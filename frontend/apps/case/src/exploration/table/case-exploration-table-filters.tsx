@@ -86,12 +86,23 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       };
 
       switch (key) {
+        case 'priority_code':
+          return {
+            ...baseOption,
+            options: getItemPriority(apiFilters[key] || []),
+          };
         case 'status_code':
           return {
             ...baseOption,
             options: sortOptions(getItemStatus(apiFilters[key] || [], t)),
           };
+        case 'case_type_code':
+          return {
+            ...baseOption,
+            options: sortOptions(apiFilters[key] || []),
+          };
         case 'project_code':
+        case 'analysis_catalog_code':
         case 'diagnosis_lab_code':
         case 'ordering_organization_code':
         case 'panel_code':
@@ -101,23 +112,6 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
             isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
             options: sortOptions(apiFilters[key] || []),
             withTooltip: true,
-          };
-        case 'priority_code':
-          return {
-            ...baseOption,
-            options: getItemPriority(apiFilters[key] || []),
-          };
-        case 'analysis_catalog_code':
-          return {
-            ...baseOption,
-            options: sortOptions(apiFilters[key] || []),
-            popoverSize: 'lg' as PopoverSize,
-            withTooltip: true,
-          };
-        case 'case_type_code':
-          return {
-            ...baseOption,
-            options: sortOptions(apiFilters[key] || []),
           };
         case 'life_status_code':
         case 'case_category_code':
