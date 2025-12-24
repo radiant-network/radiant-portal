@@ -14,10 +14,10 @@
 
 import unittest
 
-from radiant_python.models.assay import Assay
+from radiant_python.models.sequencing_experiment_detail import SequencingExperimentDetail
 
-class TestAssay(unittest.TestCase):
-    """Assay unit test stubs"""
+class TestSequencingExperimentDetail(unittest.TestCase):
+    """SequencingExperimentDetail unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,22 +25,23 @@ class TestAssay(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> Assay:
-        """Test Assay
+    def make_instance(self, include_optional) -> SequencingExperimentDetail:
+        """Test SequencingExperimentDetail
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `Assay`
+        # uncomment below to create an instance of `SequencingExperimentDetail`
         """
-        model = Assay()
+        model = SequencingExperimentDetail()
         if include_optional:
-            return Assay(
+            return SequencingExperimentDetail(
                 aliquot = '',
                 capture_kit = '',
                 created_on = '',
                 experimental_strategy_code = '',
                 experimental_strategy_name = '',
                 histology_code = '',
+                patient_id = 56,
                 platform_code = '',
                 run_alias = '',
                 run_date = '',
@@ -58,12 +59,13 @@ class TestAssay(unittest.TestCase):
                 updated_on = ''
             )
         else:
-            return Assay(
+            return SequencingExperimentDetail(
+                patient_id = 56,
         )
         """
 
-    def testAssay(self):
-        """Test Assay"""
+    def testSequencingExperimentDetail(self):
+        """Test SequencingExperimentDetail"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

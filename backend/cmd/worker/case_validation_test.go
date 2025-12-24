@@ -97,6 +97,10 @@ func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(aliquot string
 	return nil, nil
 }
 
+func (m *CaseValidationMockRepo) GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error) {
+	return nil, nil
+}
+
 func Test_GetResourceType_OK(t *testing.T) {
 	record := CaseValidationRecord{}
 	assert.Equal(t, "case", record.GetResourceType())

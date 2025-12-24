@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **analysis_catalog_code** | **str** |  | [optional] 
 **analysis_catalog_name** | **str** |  | [optional] 
-**assays** | [**List[CaseAssay]**](CaseAssay.md) |  | 
 **case_category_code** | **str** |  | 
 **case_category_name** | **str** |  | 
 **case_id** | **int** |  | 
@@ -28,6 +27,7 @@ Name | Type | Description | Notes
 **priority_code** | **str** |  | [optional] 
 **project_code** | **str** |  | [optional] 
 **project_name** | **str** |  | [optional] 
+**sequencing_experiments** | [**List[CaseSequencingExperiment]**](CaseSequencingExperiment.md) |  | 
 **status_code** | **str** |  | 
 **tasks** | [**List[CaseTask]**](CaseTask.md) |  | 
 **updated_on** | **str** |  | 

@@ -18,7 +18,7 @@ type CaseResult = types.CaseResult
 type AutocompleteResult = types.AutocompleteResult
 type CaseFilters = types.CaseFilters
 type CaseEntity = types.CaseEntity
-type CaseAssay = types.CaseAssay
+type CaseSequencingExperiment = types.CaseSequencingExperiment
 type CasePatientClinicalInformation = types.CasePatientClinicalInformation
 type CaseTask = types.CaseTask
 type AnalysisCatalog = types.AnalysisCatalog
@@ -217,11 +217,11 @@ func (r *CasesRepository) GetCaseEntity(caseId int) (*CaseEntity, error) {
 		return nil, fmt.Errorf("error fetching case level data: %w", err)
 	}
 
-	assays, err := r.retrieveCaseAssays(caseId)
+	sequencingExperiments, err := r.retrieveCaseSequencingExperiments(caseId)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching assays data: %w", err)
+		return nil, fmt.Errorf("error fetching sequencing experiments data: %w", err)
 	}
-	caseEntity.Assays = *assays
+	caseEntity.SequencingExperiments = *sequencingExperiments
 
 	members, err := r.retrieveCasePatients(caseId)
 	if err != nil {
@@ -296,8 +296,8 @@ func (r *CasesRepository) retrieveCaseLevelData(caseId int) (*CaseEntity, error)
 	return &caseEntity, nil
 }
 
-func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
-	var assays []CaseAssay
+func (r *CasesRepository) retrieveCaseSequencingExperiments(caseId int) (*[]CaseSequencingExperiment, error) {
+	var sequencingExperiments []CaseSequencingExperiment
 
 	txSeqExp := r.db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias))
 	txSeqExp = utils.JoinCaseHasSeqExpWithSequencingExperiment(txSeqExp)
@@ -307,10 +307,10 @@ func (r *CasesRepository) retrieveCaseAssays(caseId int) (*[]CaseAssay, error) {
 	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc")
-	if err := txSeqExp.Find(&assays).Error; err != nil {
+	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {
 		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
 	}
-	return &assays, nil
+	return &sequencingExperiments, nil
 }
 
 func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinicalInformation, error) {

@@ -18,8 +18,6 @@ model
 
       # ---------------------------- API Authorization ----------------------------
 
-      define assays_reader: member
-
       define cases_reader: member
       define cases_writer: geneticist
 
