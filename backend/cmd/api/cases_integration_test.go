@@ -177,7 +177,7 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 
 func Test_CaseEntityHandler(t *testing.T) {
 	expected := `{
-		"assays":[
+		"sequencing_experiments":[
 			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true}, 
 			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true},
 			{"affected_status_code":"non_affected", "experimental_strategy_code":"wgs", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": false}

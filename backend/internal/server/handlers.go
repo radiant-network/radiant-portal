@@ -1,11 +1,12 @@
 package server
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"net/http"
-	"strconv"
 )
 
 // StatusHandler handles the status endpoint
@@ -56,38 +57,6 @@ func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, userSet)
-	}
-}
-
-// GetSequencing handles retrieving a sequencing by its id
-// @Summary Get a Sequencing
-// @Id getSequencing
-// @Description Retrieve Sequencing data for a given sequence ID
-// @Tags sequencing
-// @Security bearerauth
-// @Param seq_id path string true "Sequence ID"
-// @Produce json
-// @Success 200 {object} types.Sequencing
-// @Failure 404 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Router /sequencing/{seq_id} [get]
-func GetSequencing(repo repository.SequencingDAO) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		seqID, err := strconv.Atoi(c.Param("seq_id"))
-		if err != nil {
-			HandleNotFoundError(c, "seq_id")
-			return
-		}
-		sequencing, err := repo.GetSequencing(seqID)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if sequencing == nil {
-			HandleNotFoundError(c, "sequencing")
-			return
-		}
-		c.JSON(http.StatusOK, sequencing)
 	}
 }
 

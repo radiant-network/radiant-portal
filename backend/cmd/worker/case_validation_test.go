@@ -135,6 +135,10 @@ func createString(length int) string {
 	return result.String()
 }
 
+func (m *CaseValidationMockRepo) GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error) {
+	return nil, nil
+}
+
 func Test_GetResourceType_OK(t *testing.T) {
 	record := CaseValidationRecord{}
 	assert.Equal(t, "case", record.GetResourceType())

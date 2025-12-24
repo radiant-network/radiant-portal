@@ -1,4 +1,4 @@
-# Assay
+# SequencingExperimentDetail
 
 
 ## Properties
@@ -31,19 +31,19 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from radiant_python.models.assay import Assay
+from radiant_python.models.sequencing_experiment_detail import SequencingExperimentDetail
 
 # TODO update the JSON string below
 json = "{}"
-# create an instance of Assay from a JSON string
-assay_instance = Assay.from_json(json)
+# create an instance of SequencingExperimentDetail from a JSON string
+sequencing_experiment_detail_instance = SequencingExperimentDetail.from_json(json)
 # print the JSON string representation of the object
-print(Assay.to_json())
+print(SequencingExperimentDetail.to_json())
 
 # convert the object into a dict
-assay_dict = assay_instance.to_dict()
-# create an instance of Assay from a dict
-assay_from_dict = Assay.from_dict(assay_dict)
+sequencing_experiment_detail_dict = sequencing_experiment_detail_instance.to_dict()
+# create an instance of SequencingExperimentDetail from a dict
+sequencing_experiment_detail_from_dict = SequencingExperimentDetail.from_dict(sequencing_experiment_detail_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
