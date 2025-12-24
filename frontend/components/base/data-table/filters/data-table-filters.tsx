@@ -48,7 +48,7 @@ export function sortOptions(options: IFilterButtonItem[]) {
 export function getSortedCriterias(criterias: Record<string, CriteriaProps>, keys?: string[]): string[] {
   const keysToSort = keys || Object.keys(criterias);
   return keysToSort.sort((a, b) => {
-    const weightA = criterias[a]?.weight || 999; // Les critères sans weight sont mis à la fin
+    const weightA = criterias[a]?.weight || 999; // Criteria without weight are placed at the end
     const weightB = criterias[b]?.weight || 999;
     return weightA - weightB;
   });
