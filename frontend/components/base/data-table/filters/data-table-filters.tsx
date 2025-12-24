@@ -41,10 +41,25 @@ export function sortOptions(options: IFilterButtonItem[]) {
 }
 
 /**
- * A reusable function to get the list of visible criterias
+ * A reusable function to get criterias sorted by weight
+ * @param criterias - Record of criterias with their properties
+ * @param keys - Optional array of keys to sort. If not provided, all keys will be sorted
+ */
+export function getSortedCriterias(criterias: Record<string, CriteriaProps>, keys?: string[]): string[] {
+  const keysToSort = keys || Object.keys(criterias);
+  return keysToSort.sort((a, b) => {
+    const weightA = criterias[a]?.weight || 999; // Les critères sans weight sont mis à la fin
+    const weightB = criterias[b]?.weight || 999;
+    return weightA - weightB;
+  });
+}
+
+/**
+ * A reusable function to get the list of visible criterias sorted by weight
  */
 export function getVisibleFiltersByCriterias(criterias: Record<string, CriteriaProps>): string[] {
-  return Object.keys(criterias).filter(key => criterias[key].visible);
+  const visibleKeys = Object.keys(criterias).filter(key => criterias[key].visible);
+  return getSortedCriterias(criterias, visibleKeys);
 }
 
 /**

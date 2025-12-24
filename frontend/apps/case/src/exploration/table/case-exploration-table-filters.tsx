@@ -5,6 +5,7 @@ import useSWR from 'swr';
 import { CaseFilters, SearchCriterion } from '@/api/api';
 import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
 import DataTableFilters, {
+  getSortedCriterias,
   getVisibleFiltersByCriterias,
   sortOptions,
 } from '@/components/base/data-table/filters/data-table-filters';
@@ -75,7 +76,10 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
   const filterButtons = useMemo(() => {
     if (!apiFilters) return [];
 
-    return Object.keys(apiFilters).map(key => {
+    // Order by weight defined in CRITERIAS
+    const sortedKeys = getSortedCriterias(CRITERIAS).filter(key => key in apiFilters);
+
+    return sortedKeys.map(key => {
       const baseOption: IFilterButton = {
         key,
         label: t(`case_exploration.case.filters.${key}`),
