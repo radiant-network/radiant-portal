@@ -79,7 +79,14 @@ func Test_preFetchValidationInfo_Error(t *testing.T) {
 
 func Test_validateCaseBatch_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
-	mockPatients := PatientsMockRepo{}
+	mockPatients := PatientsMockRepo{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string) (*types.Patient, error) {
+			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" {
+				return &types.Patient{ID: 1, SubmitterPatientId: "PAT-1"}, nil
+			}
+			return nil, nil
+		},
+	}
 	mockObservations := ObservationsMockRepo{}
 	mockOnsets := OnsetsMockRepo{}
 	vr, err := validateCaseBatch([]types.CaseBatch{
@@ -93,8 +100,30 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 			PrimaryConditionValue:      "0001234",
 			PriorityCode:               "routine",
 			CategoryCode:               "postnatal",
-			Patients:                   []*types.CasePatientBatch{},
-			SequencingExperiments:      []*types.CaseSequencingExperimentBatch{},
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					RelationToProbandCode:   "proband",
+					FamilyHistory: []*types.FamilyHistoryBatch{
+						{
+							FamilyMemberCode: "proband",
+							Condition:        "diabetes",
+						},
+					},
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "negative",
+							Note:               "Clinical comment",
+						},
+					},
+				},
+			},
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{},
 		},
 	}, &mockRepo, &mockPatients, &mockObservations, &mockOnsets)
 	assert.NoError(t, err)
@@ -105,7 +134,14 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 
 func Test_validateCaseBatch_Duplicates(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
-	mockPatients := PatientsMockRepo{}
+	mockPatients := PatientsMockRepo{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string) (*types.Patient, error) {
+			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" {
+				return &types.Patient{ID: 1, SubmitterPatientId: "PAT-1"}, nil
+			}
+			return nil, nil
+		},
+	}
 	mockObservations := ObservationsMockRepo{}
 	mockOnsets := OnsetsMockRepo{}
 	vr, err := validateCaseBatch([]types.CaseBatch{
@@ -119,8 +155,14 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 			PrimaryConditionValue:      "0001234",
 			PriorityCode:               "routine",
 			CategoryCode:               "postnatal",
-			Patients:                   []*types.CasePatientBatch{},
-			SequencingExperiments:      []*types.CaseSequencingExperimentBatch{},
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					RelationToProbandCode:   "proband",
+				},
+			},
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{},
 		},
 		{
 			ProjectCode:                "PROJ-1",
@@ -132,8 +174,14 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 			PrimaryConditionValue:      "0001235",
 			PriorityCode:               "routine",
 			CategoryCode:               "postnatal",
-			Patients:                   []*types.CasePatientBatch{},
-			SequencingExperiments:      []*types.CaseSequencingExperimentBatch{},
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					RelationToProbandCode:   "proband",
+				},
+			},
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{},
 		},
 	}, &mockRepo, &mockPatients, &mockObservations, &mockOnsets)
 	assert.NoError(t, err)
@@ -471,7 +519,7 @@ func Test_validateObsCategoricalCode_Invalid(t *testing.T) {
 	validCodes := []string{"phenotype", "condition", "note"}
 	record.validateObsCategoricalCode(0, 0, validCodes)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservationCode, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0].code", record.Errors[0].Path)
 }
@@ -720,7 +768,7 @@ func Test_validateOnsetCode_Invalid(t *testing.T) {
 	validOnsetCodes := []string{"unknown", "childhood", "juvenile"}
 	record.validateOnsetCode(0, 0, validOnsetCodes)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservationCode, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid onset code")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0].onset_code", record.Errors[0].Path)
 }
@@ -966,7 +1014,7 @@ func Test_validateObsTextCode_Invalid(t *testing.T) {
 	validCodes := []string{"note", "phenotype", "condition"}
 	record.validateObsTextCode(0, 0, validCodes)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservationCode, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
 	assert.Equal(t, "case[0].patients[0].observations_text[0].code", record.Errors[0].Path)
 }
@@ -1263,6 +1311,129 @@ func Test_validatePatientInOrg_MultiplePatients(t *testing.T) {
 	assert.Equal(t, "case[0].patients[1]", record.Errors[0].Path)
 }
 
+func Test_validateCasePatients_NoProband(t *testing.T) {
+	mockPatients := &PatientsMockRepo{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string) (*types.Patient, error) {
+			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" {
+				return &types.Patient{ID: 1, SubmitterPatientId: "PAT-1"}, nil
+			}
+			return nil, nil
+		},
+	}
+	mockObservations := &ObservationsMockRepo{}
+	mockOnsets := &OnsetsMockRepo{}
+
+	patients := []*types.CasePatientBatch{
+		{
+			PatientOrganizationCode: "CHUSJ",
+			SubmitterPatientId:      "PAT-1",
+			RelationToProbandCode:   "mother",
+		},
+	}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients:        patients,
+		},
+	}
+
+	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
+	assert.NoError(t, err)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidNumberOfProbands, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "should have exactly 1 proband")
+	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
+}
+
+func Test_validateCasePatients_MultipleProbands(t *testing.T) {
+	mockPatients := &PatientsMockRepo{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string) (*types.Patient, error) {
+			if organizationCode == "CHUSJ" && (submitterPatientId == "PAT-1" || submitterPatientId == "PAT-2") {
+				return &types.Patient{ID: 1, SubmitterPatientId: submitterPatientId}, nil
+			}
+			return nil, nil
+		},
+	}
+	mockObservations := &ObservationsMockRepo{}
+	mockOnsets := &OnsetsMockRepo{}
+
+	patients := []*types.CasePatientBatch{
+		{
+			PatientOrganizationCode: "CHUSJ",
+			SubmitterPatientId:      "PAT-1",
+			RelationToProbandCode:   "proband",
+		},
+		{
+			PatientOrganizationCode: "CHUSJ",
+			SubmitterPatientId:      "PAT-2",
+			RelationToProbandCode:   "proband",
+		},
+	}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients:        patients,
+		},
+	}
+
+	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
+	assert.NoError(t, err)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidNumberOfProbands, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "should have exactly 1 proband")
+	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
+}
+
+func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
+	mockPatients := &PatientsMockRepo{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string) (*types.Patient, error) {
+			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" {
+				return &types.Patient{ID: 1, SubmitterPatientId: "PAT-1"}, nil
+			}
+			return nil, nil
+		},
+	}
+	mockObservations := &ObservationsMockRepo{}
+	mockOnsets := &OnsetsMockRepo{}
+
+	patients := []*types.CasePatientBatch{
+		{
+			PatientOrganizationCode: "CHUSJ",
+			SubmitterPatientId:      "PAT-1",
+			RelationToProbandCode:   "proband",
+		},
+		{
+			PatientOrganizationCode: "CHUSJ",
+			SubmitterPatientId:      "PAT-1",
+			RelationToProbandCode:   "mother",
+		},
+	}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients:        patients,
+		},
+	}
+
+	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
+	assert.NoError(t, err)
+	assert.Len(t, record.Errors, 1) // Only duplicate patient error (still has exactly 1 proband)
+
+	assert.Equal(t, DuplicatePatientInCase, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "Duplicate patient (CHUSJ / PAT-1)")
+	assert.Contains(t, record.Errors[0].Message, "for case 0")
+	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
+}
+
 func Test_validateCasePatients_Valid(t *testing.T) {
 	mockPatients := &PatientsMockRepo{
 		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string) (*types.Patient, error) {
@@ -1282,6 +1453,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 		{
 			PatientOrganizationCode: "CHUSJ",
 			SubmitterPatientId:      "PAT-1",
+			RelationToProbandCode:   "proband",
 			FamilyHistory: []*types.FamilyHistoryBatch{
 				{
 					FamilyMemberCode: "mother",
@@ -1302,6 +1474,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 		{
 			PatientOrganizationCode: "CHUSJ",
 			SubmitterPatientId:      "PAT-2",
+			RelationToProbandCode:   "mother",
 			FamilyHistory: []*types.FamilyHistoryBatch{
 				{
 					FamilyMemberCode: "father",
@@ -1348,6 +1521,7 @@ func Test_validateCasePatients_Invalid(t *testing.T) {
 		{
 			PatientOrganizationCode: "CHUSJ",
 			SubmitterPatientId:      "INVALID-PAT-1",
+			RelationToProbandCode:   "proband",
 			FamilyHistory: []*types.FamilyHistoryBatch{
 				{
 					FamilyMemberCode: "invalid123",
@@ -1368,6 +1542,7 @@ func Test_validateCasePatients_Invalid(t *testing.T) {
 		{
 			PatientOrganizationCode: "CHUSJ",
 			SubmitterPatientId:      "INVALID-PAT-2",
+			RelationToProbandCode:   "proband",
 			FamilyHistory: []*types.FamilyHistoryBatch{
 				{
 					FamilyMemberCode: "father",
@@ -1394,5 +1569,5 @@ func Test_validateCasePatients_Invalid(t *testing.T) {
 
 	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
 	assert.NoError(t, err)
-	assert.Equal(t, 9, len(record.Errors))
+	assert.Equal(t, 10, len(record.Errors))
 }

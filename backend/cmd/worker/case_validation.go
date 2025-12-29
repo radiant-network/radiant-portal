@@ -26,12 +26,19 @@ var TextRegExpCompiled = regexp.MustCompile(TextRegExp)
 
 const (
 	IdenticalCaseInBatchCode = "CASE-001"
+	InvalidNumberOfProbands  = "CASE-007"
+	DuplicatePatientInCase   = "CASE-008"
 )
 
 // Patients error codes
 const (
 	InvalidFieldPatientsCode = "PATIENT-004"
 	PatientNotFoundCode      = "PATIENT-006"
+)
+
+// Observations error codes
+const (
+	InvalidFieldObservationCode = "OBS-001"
 )
 
 type CaseKey struct {
@@ -133,7 +140,7 @@ func (cr *CaseValidationRecord) validateCodeField(code, fieldName, path, codeTyp
 	if !slices.Contains(validCodes, code) {
 		message := cr.formatPatientsErrorMessage(fieldName, patientIndex)
 		msg := fmt.Sprintf("%s %s %q is not a valid %s.", message, codeType, code, codeType)
-		cr.addErrors(msg, InvalidFieldPatientsCode, path)
+		cr.addErrors(msg, InvalidFieldObservationCode, path) // OBS-001
 	}
 }
 
@@ -247,6 +254,8 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int, obser
 	return nil
 }
 
+// Case patient validation
+
 func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients repository.PatientsDAO) error {
 	p := cr.Case.Patients[patientIndex]
 	patient, err := patients.GetPatientByOrgCodeAndSubmitterPatientId(p.PatientOrganizationCode, p.SubmitterPatientId)
@@ -266,13 +275,40 @@ func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients 
 	return nil
 }
 
-// Case patient validation
+func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int, visited map[patientsKey]struct{}) {
+	p := cr.Case.Patients[patientIndex]
+	patientKey := patientsKey{
+		OrganizationCode:   p.PatientOrganizationCode,
+		SubmitterPatientId: p.SubmitterPatientId,
+	}
+	if _, exists := visited[patientKey]; exists {
+		path := fmt.Sprintf("case[%d].patients", cr.Index)
+		message := fmt.Sprintf("Duplicate patient (%s / %s) for case %d.",
+			p.PatientOrganizationCode,
+			p.SubmitterPatientId,
+			cr.Index,
+		)
+		cr.addErrors(message, DuplicatePatientInCase, path)
+	}
+	visited[patientKey] = struct{}{}
+}
 
 func (cr *CaseValidationRecord) validateCasePatients(patientsBatch []*types.CasePatientBatch, patients repository.PatientsDAO, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) error {
+	nbProband := 0
+
+	visitedPatients := map[patientsKey]struct{}{}
+
 	for patientIndex := range patientsBatch {
 		err := cr.validatePatientInOrg(patientIndex, patients)
 		if err != nil {
 			return fmt.Errorf("error validating patient in organization for patient index %d: %v", patientIndex, err)
+		}
+
+		// Validate uniqueness of patients in case
+		cr.validatePatientUniquenessInCase(patientIndex, visitedPatients)
+
+		if patientsBatch[patientIndex].RelationToProbandCode == "proband" {
+			nbProband++
 		}
 
 		// TODO: relation to proband is validated by oneof tag on API side
@@ -292,6 +328,12 @@ func (cr *CaseValidationRecord) validateCasePatients(patientsBatch []*types.Case
 			return fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
 		}
 	}
+
+	if nbProband != 1 {
+		message := fmt.Sprintf("Case %d should have exactly 1 proband.", cr.Index)
+		path := fmt.Sprintf("case[%d].patients", cr.Index)
+		cr.addErrors(message, InvalidNumberOfProbands, path)
+	}
 	return nil
 }
 
@@ -299,7 +341,7 @@ func validateCaseRecord(c types.CaseBatch, index int, projects repository.Projec
 	// FIXME: Not Implemented, will be implemented in follow-up tasks
 	cr := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: index},
-		Case:                 types.CaseBatch{},
+		Case:                 c,
 		ProjectID:            nil,
 		SubmitterCaseID:      "",
 	}
